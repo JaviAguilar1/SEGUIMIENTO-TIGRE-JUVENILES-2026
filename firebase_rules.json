@@ -1,0 +1,24 @@
+{
+  "rules": {
+    "stats": {
+      ".read": true,
+      ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'videoanalista' || root.child('users').child(auth.uid).child('role').val() === 'videoanalista_reserva')"
+    },
+    "plantel": {
+      ".read": "auth != null",
+      ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'videoanalista' || root.child('users').child(auth.uid).child('role').val() === 'videoanalista_reserva')"
+    },
+    "rendimiento": {
+      ".read": "auth != null",
+      ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'videoanalista' || root.child('users').child(auth.uid).child('role').val() === 'videoanalista_reserva')"
+    },
+    "reserva": {
+      ".read": true,
+      ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'videoanalista_reserva')"
+    },
+    "users": {
+      ".read": "auth != null",
+      ".write": "auth != null && root.child('users').child(auth.uid).child('role').val() === 'admin'"
+    }
+  }
+}
