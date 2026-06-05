@@ -1349,8 +1349,8 @@ const FB_CONFIG = {
   messagingSenderId: "213836128045",
   appId:             "1:213836128045:web:6ea572a1090e118f4fbda4"
 };
-const ADMIN_EMAIL    = "javier92aguilar@gmail.com";
-const ADMIN_PASSWORD = "Mateo!1202";
+// Credenciales: ingresalas manualmente en el modal de login
+// No se almacenan en el código por seguridad
 
 // ============================================================
 //  CONSTANTS
@@ -1634,8 +1634,8 @@ function showLoginModal(){
   m.innerHTML=`<div class="modal-box">
     <img class="m-crest" src="${document.getElementById('escudoImg').src}">
     <h2>ACCESO</h2><p>TIGRE JUVENILES — ANÁLISIS</p>
-    <input id="m-email" class="m-input" type="email" placeholder="Email" value="${ADMIN_EMAIL}">
-    <input id="m-pass"  class="m-input" type="password" placeholder="Contraseña" value="${ADMIN_PASSWORD}">
+    <input id="m-email" class="m-input" type="email" placeholder="Email">
+    <input id="m-pass"  class="m-input" type="password" placeholder="Contraseña">
     <button class="m-btn" onclick="doLogin()">INGRESAR</button>
     <button class="m-cancel" onclick="document.getElementById('login-modal').style.display='none'">CANCELAR — SOLO VER</button>
     <div class="m-error" id="m-err">Email o contraseña incorrectos</div>
@@ -2268,7 +2268,27 @@ initFirebase()
     buildPlantelModule();
     buildRendimientoModule();
     applyViewMode();
+    startPublicListener(); // load stats for everyone, auth or not
   });
+
+// Real-time listener for stats — works even without login (public read)
+// This ensures data is always visible regardless of auth state
+function startPublicListener(){
+  if(!fbReady||!db) return;
+  db.ref('stats').on('value', snap=>{
+    const p=snap.val();
+    if(!p) return;
+    CATEGORIES.forEach(cat=>{
+      if(p.results?.[cat]) RIVALS.forEach(r=>{ if(p.results[cat][r.f]) results[cat][r.f]=p.results[cat][r.f]; });
+      if(p.links?.[cat])   RIVALS.forEach(r=>{ if(p.links[cat][r.f]) links[cat][r.f]=p.links[cat][r.f]; });
+      if(p.goleadores?.[cat]) goleadores[cat]=p.goleadores[cat];
+      if(cat==='RESERVA'&&p.rivalData?.['RESERVA']){
+        Object.assign(rivalData['RESERVA'], p.rivalData['RESERVA']);
+      }
+    });
+    refreshActiveModule();
+  });
+}
 
 
 // ============================================================
