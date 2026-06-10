@@ -1505,9 +1505,21 @@ const PREFILLED = {
 const results    = {};
 const links      = {};
 const goleadores = {};
+// ============================================================
+//  RESERVA — Fixture propio (Grupo A · 18 fechas)
+//  17 rivales editables + 1 interzonal (F18)
+// ============================================================
+const RIVALS_RESERVA = [
+  {f:1, r:'',cond:'L'},{f:2, r:'',cond:'V'},{f:3, r:'',cond:'L'},{f:4, r:'',cond:'V'},
+  {f:5, r:'',cond:'L'},{f:6, r:'',cond:'V'},{f:7, r:'',cond:'L'},{f:8, r:'',cond:'V'},
+  {f:9, r:'',cond:'L'},{f:10,r:'',cond:'V'},{f:11,r:'',cond:'L'},{f:12,r:'',cond:'V'},
+  {f:13,r:'',cond:'L'},{f:14,r:'',cond:'V'},{f:15,r:'',cond:'L'},{f:16,r:'',cond:'V'},
+  {f:17,r:'',cond:'L'},{f:18,r:'INTERZONAL', cond:'N'},
+];
+
 // RESERVA custom fixture — rivalData['RESERVA'][fecha] = {rival, cond}
 const rivalData  = { 'RESERVA': {} };
-RIVALS.forEach(r => { rivalData['RESERVA'][r.f] = {rival: r.r, cond: r.c}; }); // goleadores[cat] = [{name, goals, fecha}]
+RIVALS_RESERVA.forEach(r => { rivalData['RESERVA'][r.f] = {rival: r.r, cond: r.cond}; }); // goleadores[cat] = [{name, goals, fecha}]
 let isAdmin      = false;
 let canEdit      = false;
 let currentRole  = 'viewer';
@@ -1520,7 +1532,8 @@ CATEGORIES.forEach(cat => {
   results[cat]    = {};
   links[cat]      = {};
   goleadores[cat] = [];
-  RIVALS.forEach(r => {
+  const fixtureList = cat === 'RESERVA' ? RIVALS_RESERVA : RIVALS;
+  fixtureList.forEach(r => {
     results[cat][r.f] = (PREFILLED[cat]&&PREFILLED[cat][r.f]) ? [...PREFILLED[cat][r.f]] : null;
     links[cat][r.f]   = {};
     LINK_TYPES.forEach(lt => { links[cat][r.f][lt.key] = ''; });
@@ -1544,8 +1557,34 @@ function calcStatsAll(from,to){
   CATEGORIES.forEach(cat=>{const s=calcStats(cat,from,to);pj+=s.pj;pg+=s.pg;pe+=s.pe;pp+=s.pp;gf+=s.gf;gc+=s.gc;});
   return{pj,pg,pe,pp,gf,gc,dg:gf-gc,pts:pg*3+pe};
 }
-function getPeriodos(){ const p=[{label:'TOTAL',from:1,to:35}]; for(let s=1;s<=35;s+=5)p.push({label:`F${s}–F${Math.min(s+4,35)}`,from:s,to:Math.min(s+4,35)}); return p; }
-function getBlocks(){ const b=[]; for(let s=1;s<=35;s+=5)b.push({label:`F${s}–F${Math.min(s+4,35)}`,from:s,to:Math.min(s+4,35)}); return b; }
+function getPeriodos(cat){
+  if(cat==='RESERVA'){
+    // F1-F5, F6-F10, F11-F15, F16-F18
+    return [
+      {label:'TOTAL', from:1,to:18},
+      {label:'F1–F5',  from:1, to:5},
+      {label:'F6–F10', from:6, to:10},
+      {label:'F11–F15',from:11,to:15},
+      {label:'F16–F18',from:16,to:18},
+    ];
+  }
+  const p=[{label:'TOTAL',from:1,to:35}];
+  for(let s=1;s<=35;s+=5)p.push({label:`F${s}–F${Math.min(s+4,35)}`,from:s,to:Math.min(s+4,35)});
+  return p;
+}
+function getBlocks(cat){
+  if(cat==='RESERVA'){
+    return [
+      {label:'F1–F5',  from:1, to:5},
+      {label:'F6–F10', from:6, to:10},
+      {label:'F11–F15',from:11,to:15},
+      {label:'F16–F18',from:16,to:18},
+    ];
+  }
+  const b=[];
+  for(let s=1;s<=35;s+=5)b.push({label:`F${s}–F${Math.min(s+4,35)}`,from:s,to:Math.min(s+4,35)});
+  return b;
+}
 function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 function killChart(id){ const c=Chart.getChart(id); if(c)c.destroy(); }
 function chartDef(){ return{responsive:true,animation:{duration:250},plugins:{legend:{labels:{color:'#5a7099',font:{family:'Barlow Condensed',size:11}}}},scales:{x:{ticks:{color:'#5a7099',font:{family:'Barlow Condensed'}},grid:{color:'rgba(26,45,90,0.4)'}},y:{ticks:{color:'#5a7099',font:{family:'Barlow Condensed'}},grid:{color:'rgba(26,45,90,0.4)'}}}}; }
@@ -1590,6 +1629,9 @@ function initFirebase(){
       fbReady=true;
       firebase.auth().onAuthStateChanged(user=>{
         if(user){
+          // Remove login wall if still present (returning user with active session)
+          const wall = document.getElementById('login-wall');
+          if(wall){ wall.style.transition='opacity .3s'; wall.style.opacity='0'; setTimeout(()=>wall.remove(),300); }
           // Real-time role listener
           db.ref('users/'+user.uid+'/role').on('value', snap=>{
             currentRole = snap.val() || 'viewer';
@@ -1606,8 +1648,9 @@ function initFirebase(){
             const p=snap.val();
             if(!p) return;
             CATEGORIES.forEach(cat=>{
-              if(p.results?.[cat]) RIVALS.forEach(r=>{ if(p.results[cat][r.f]) results[cat][r.f]=p.results[cat][r.f]; });
-              if(p.links?.[cat])   RIVALS.forEach(r=>{ if(p.links[cat][r.f]) links[cat][r.f]=p.links[cat][r.f]; });
+              const fl=cat==='RESERVA'?RIVALS_RESERVA:RIVALS;
+              if(p.results?.[cat]) fl.forEach(r=>{ if(p.results[cat][r.f]) results[cat][r.f]=p.results[cat][r.f]; });
+              if(p.links?.[cat])   fl.forEach(r=>{ if(p.links[cat][r.f]) links[cat][r.f]=p.links[cat][r.f]; });
               if(p.goleadores?.[cat]) goleadores[cat]=p.goleadores[cat];
             });
             refreshActiveModule();
@@ -1678,7 +1721,8 @@ function saveData(){
       payload.results[cat]={};
       payload.links[cat]={};
       payload.goleadores[cat]=goleadores[cat]||[];
-      RIVALS.forEach(r=>{
+      const fl=cat==='RESERVA'?RIVALS_RESERVA:RIVALS;
+      fl.forEach(r=>{
         payload.results[cat][r.f]=results[cat][r.f]||null;
         payload.links[cat][r.f]=links[cat][r.f]||{};
       });
@@ -1713,8 +1757,9 @@ function loadData(){
       const p=snap.val();
       if(p){
         CATEGORIES.forEach(cat=>{
-          if(p.results?.[cat]) RIVALS.forEach(r=>{ if(p.results[cat][r.f]) results[cat][r.f]=p.results[cat][r.f]; });
-          if(p.links?.[cat])   RIVALS.forEach(r=>{ if(p.links[cat][r.f]) links[cat][r.f]=p.links[cat][r.f]; });
+          const fl=cat==='RESERVA'?RIVALS_RESERVA:RIVALS;
+          if(p.results?.[cat]) fl.forEach(r=>{ if(p.results[cat][r.f]) results[cat][r.f]=p.results[cat][r.f]; });
+          if(p.links?.[cat])   fl.forEach(r=>{ if(p.links[cat][r.f]) links[cat][r.f]=p.links[cat][r.f]; });
           if(p.goleadores?.[cat]) goleadores[cat]=p.goleadores[cat];
           // Load RESERVA fixture
           if(cat==='RESERVA'&&p.rivalData?.['RESERVA']){
@@ -1918,12 +1963,13 @@ function renderStatsCat(cat){
 }
 
 function renderStatsGeneral(content){
-  const blocks=getBlocks(), periods=getPeriodos();
+  const blocks=getBlocks('4TA'), periods=getPeriodos('4TA');
   const ptHTML=periods.map((p,i)=>`<div class="ptab${i===0?' active':''}" data-gpidx="${i}">${p.label}</div>`).join('');
 
   // Summary table rows
   let trows=CATEGORIES.map(cat=>{
-    const s=calcStats(cat,1,35);
+    const maxD=cat==='RESERVA'?18:35;
+    const s=calcStats(cat,1,maxD);
     const dgC=s.dg>0?'var(--win)':s.dg<0?'var(--loss)':'var(--muted)';
     const pct=s.pj>0?Math.round(s.pts/(s.pj*3)*100):0;
     return `<tr>
@@ -1984,13 +2030,13 @@ function renderStatsGeneral(content){
     document.getElementById('gen-ptabs').querySelectorAll('.ptab').forEach(t=>t.classList.remove('active'));
     e.target.classList.add('active');
     const idx=parseInt(e.target.dataset.gpidx);
-    const p=getPeriodos()[idx];
+    const p=getPeriodos('4TA')[idx];
     document.getElementById('gen-stats-area').innerHTML=statsHTML(calcStatsAll(p.from,p.to));
   });
   document.getElementById('gen-stats-area').innerHTML=statsHTML(calcStatsAll(1,35));
 
   // Charts
-  const def=chartDef(), blocks2=getBlocks(), labels=blocks2.map(b=>b.label);
+  const def=chartDef(), blocks2=getBlocks('4TA'), labels=blocks2.map(b=>b.label);
   const mkDs=(cat,field)=>({label:cat,data:blocks2.map(b=>calcStats(cat,b.from,b.to)[field]),
     backgroundColor:CAT_COLORS[cat]+'bb',borderColor:CAT_COLORS[cat],borderWidth:1,borderRadius:4,borderSkipped:false});
   const defLeg={...def,plugins:{...def.plugins,legend:{labels:{color:'#5a7099',font:{family:'Barlow Condensed'}}}}};
@@ -2008,7 +2054,7 @@ function renderStatsGeneral(content){
   // Pies per cat
   const gpCat=document.getElementById('gen-pies-cat'); gpCat.innerHTML='';
   CATEGORIES.forEach(cat=>{
-    const s=calcStats(cat,1,35),id=`gpc-${cat}`;
+    const s=calcStats(cat,1,cat==='RESERVA'?18:35),id=`gpc-${cat}`;
     gpCat.insertAdjacentHTML('beforeend',pieMini(id,s,`<span class="dot" style="background:${CAT_COLORS[cat]}"></span>${cat}`));
     setTimeout(()=>drawPie(id,s),0);
   });
@@ -2068,15 +2114,20 @@ function renderTopGoleadores(wrap){
 // ── SINGLE CATEGORY VIEW ──────────────────────────────────────
 function renderStatsSingle(cat, content){
   const isLink=LINK_CATS.includes(cat);
-  const periods=getPeriodos();
+  const isReserva = cat === 'RESERVA';
+  const periods=getPeriodos(cat);
+  const fixtureList = isReserva ? RIVALS_RESERVA : RIVALS;
+  const maxDate = isReserva ? 18 : 35;
   const ptHTML=periods.map((p,i)=>`<div class="ptab${i===0?' active':''}" data-cpidx="${i}" data-cat="${cat}">${p.label}</div>`).join('');
 
   // Table rows
   let rows='';
-  RIVALS.forEach(r=>{
+  fixtureList.forEach(r=>{
     if((r.f-1)%5===0&&r.f>1){
       const span=6+(isLink?LINK_TYPES.length:0);
-      rows+=`<tr class="divider-row"><td colspan="${span}">── BLOQUE F${r.f}–F${Math.min(r.f+4,35)}</td></tr>`;
+      const blockEnd = isReserva ? Math.min(r.f+4,18) : Math.min(r.f+4,35);
+      rows+=`<tr class="divider-row"><td colspan="${span}">── BLOQUE F${r.f}–F${blockEnd}</td></tr>`;
+    }
     }
     const stored=results[cat][r.f];
     const gf=stored?stored[0]:'', gc=stored?stored[1]:'';
@@ -2186,10 +2237,11 @@ function renderStatsSingle(cat, content){
     document.getElementById(`ptabs-${cat}`).querySelectorAll('.ptab').forEach(t=>t.classList.remove('active'));
     e.target.classList.add('active');
     const idx=parseInt(e.target.dataset.cpidx);
-    const p=getPeriodos()[idx];
+    const p=getPeriodos(cat)[idx];
     document.getElementById(`stats-area-${cat}`).innerHTML=statsHTML(calcStats(cat,p.from,p.to));
   });
-  document.getElementById(`stats-area-${cat}`).innerHTML=statsHTML(calcStats(cat,1,35));
+  const totMax = cat==='RESERVA' ? 18 : 35;
+  document.getElementById(`stats-area-${cat}`).innerHTML=statsHTML(calcStats(cat,1,totMax));
   renderCatCharts(cat);
   renderGoleadores(cat);
 }
@@ -2206,7 +2258,7 @@ function attachTableEvents(cat){
       results[cat][f][s]=v;
       if(results[cat][f][0]===null&&results[cat][f][1]===null)results[cat][f]=null;
       rebuildRow(cat,f);
-      document.getElementById(`stats-area-${cat}`).innerHTML=statsHTML(calcStats(cat,1,35));
+      document.getElementById(`stats-area-${cat}`).innerHTML=statsHTML(calcStats(cat,1,cat==='RESERVA'?18:35));
       renderCatCharts(cat);
       saveData();
     }
@@ -2244,7 +2296,9 @@ function rebuildRow(cat,fecha){
 
 // ── CAT CHARTS ────────────────────────────────────────────────
 function renderCatCharts(cat){
-  const blocks=getBlocks(),labels=blocks.map(b=>b.label),col=CAT_COLORS[cat],def=chartDef();
+  const blocks=getBlocks(cat),labels=blocks.map(b=>b.label),col=CAT_COLORS[cat],def=chartDef();
+  const fixtureList = cat==='RESERVA' ? RIVALS_RESERVA : RIVALS;
+  const totMax = cat==='RESERVA' ? 18 : 35;
 
   killChart(`cpts-${cat}`);
   new Chart(document.getElementById(`cpts-${cat}`).getContext('2d'),{type:'bar',
@@ -2261,7 +2315,7 @@ function renderCatCharts(cat){
     ]},options:def});
 
   let dgAcc=[],acc=0,dgL=[];
-  RIVALS.forEach(r=>{const x=results[cat][r.f];if(x){acc+=(x[0]-x[1]);dgAcc.push(acc);dgL.push('F'+r.f);}});
+  fixtureList.forEach(r=>{const x=results[cat][r.f];if(x){acc+=(x[0]-x[1]);dgAcc.push(acc);dgL.push('F'+r.f);}});
   killChart(`cdg-${cat}`);
   new Chart(document.getElementById(`cdg-${cat}`).getContext('2d'),{type:'line',
     data:{labels:dgL,datasets:[{label:'DG Acum.',data:dgAcc,borderColor:col,
@@ -2269,7 +2323,7 @@ function renderCatCharts(cat){
       pointBackgroundColor:dgAcc.map(v=>v>=0?'#22c55e':'#ef4444')}]},
     options:{...def,scales:{...def.scales,y:{...def.scales.y,grid:{color:ctx=>ctx.tick.value===0?'#5a7099':'rgba(26,45,90,0.4)'}}}}});
 
-  const tot=calcStats(cat,1,35);
+  const tot=calcStats(cat,1,totMax);
   killChart(`cpie-${cat}`);
   new Chart(document.getElementById(`cpie-${cat}`).getContext('2d'),{type:'doughnut',
     data:{labels:['Ganados','Empates','Perdidos'],datasets:[{data:[tot.pg,tot.pe,tot.pp],
@@ -2479,14 +2533,6 @@ function doWallLogin(){
     });
 }
 
-// Also remove wall when auth state confirms logged in (e.g. returning user with session)
-firebase.auth().onAuthStateChanged(user=>{
-  if(user){
-    const wall = document.getElementById('login-wall');
-    if(wall){ wall.style.transition='opacity .3s'; wall.style.opacity='0'; setTimeout(()=>wall.remove(),300); }
-  }
-});
-
 initFirebase()
   .then(()=>loadData())
   .catch(e=>{ console.warn('Firebase error:',e); showOfflineBanner(); })
@@ -2507,8 +2553,9 @@ function startPublicListener(){
     const p=snap.val();
     if(!p) return;
     CATEGORIES.forEach(cat=>{
-      if(p.results?.[cat]) RIVALS.forEach(r=>{ if(p.results[cat][r.f]) results[cat][r.f]=p.results[cat][r.f]; });
-      if(p.links?.[cat])   RIVALS.forEach(r=>{ if(p.links[cat][r.f]) links[cat][r.f]=p.links[cat][r.f]; });
+      const fl=cat==='RESERVA'?RIVALS_RESERVA:RIVALS;
+      if(p.results?.[cat]) fl.forEach(r=>{ if(p.results[cat][r.f]) results[cat][r.f]=p.results[cat][r.f]; });
+      if(p.links?.[cat])   fl.forEach(r=>{ if(p.links[cat][r.f]) links[cat][r.f]=p.links[cat][r.f]; });
       if(p.goleadores?.[cat]) goleadores[cat]=p.goleadores[cat];
       if(cat==='RESERVA'&&p.rivalData?.['RESERVA']){
         Object.assign(rivalData['RESERVA'], p.rivalData['RESERVA']);
@@ -3083,7 +3130,7 @@ function renderIndice(){
   const cats=rendCurrentCat==='GENERAL'?CATEGORIES:[rendCurrentCat];
   // Max pts/pj across cats for bar scaling
   const rows=cats.map(cat=>{
-    const s=calcStats(cat,1,35);
+    const s=calcStats(cat,1,cat==='RESERVA'?18:35);
     if(s.pj===0) return{cat,ppp:0,gfpj:0,pctW:0,idx:0};
     const ppp=s.pts/s.pj;
     const gfpj=s.gf/s.pj;
