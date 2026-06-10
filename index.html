@@ -250,6 +250,52 @@ table tr:hover td{background:rgba(26,58,143,0.15);}
 .result-W{background:rgba(34,197,94,.2);color:var(--win);border:1px solid rgba(34,197,94,.35);}
 .result-D{background:rgba(245,158,11,.2);color:var(--draw);border:1px solid rgba(245,158,11,.35);}
 .result-L{background:rgba(239,68,68,.2);color:var(--loss);border:1px solid rgba(239,68,68,.35);}
+
+/* ── MATCH DETAIL PANEL ─────────────────────────────── */
+.match-detail-row td{padding:0!important;border-top:none!important;}
+.match-detail-panel{
+  background:rgba(5,8,15,0.7);border:1px solid rgba(26,45,90,0.6);
+  border-top:2px solid var(--gold2);border-radius:0 0 8px 8px;
+  padding:14px 16px;margin:-1px 0 4px;animation:fadeIn .2s;
+}
+.mdp-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;}
+@media(max-width:700px){.mdp-grid{grid-template-columns:1fr 1fr;}}
+.mdp-section h4{font-family:'Bebas Neue',sans-serif;font-size:11px;letter-spacing:2px;
+  color:var(--gold2);margin-bottom:6px;border-bottom:1px solid rgba(201,162,39,0.2);padding-bottom:3px;}
+.mdp-player{display:flex;align-items:center;gap:6px;padding:3px 0;font-size:11px;
+  font-family:'Barlow Condensed',sans-serif;color:var(--text2);border-bottom:1px solid rgba(26,45,90,0.2);}
+.mdp-num{background:rgba(26,45,90,0.5);border-radius:3px;padding:1px 5px;
+  font-size:10px;color:var(--blue2);font-weight:700;min-width:20px;text-align:center;}
+.mdp-mins{margin-left:auto;font-size:10px;color:var(--muted);white-space:nowrap;}
+.mdp-mins.ok{color:var(--win);}
+.mdp-mins.diff{color:var(--gold);}
+.mdp-cambio{display:flex;align-items:center;gap:6px;font-size:11px;
+  font-family:'Barlow Condensed',sans-serif;padding:3px 0;color:var(--text2);}
+.mdp-cambio-min{background:rgba(192,21,42,0.2);color:var(--loss);border-radius:3px;
+  padding:1px 5px;font-size:10px;font-weight:700;min-width:28px;text-align:center;}
+.mdp-del{background:none;border:none;color:rgba(239,68,68,0.5);cursor:pointer;font-size:12px;margin-left:auto;}
+.mdp-del:hover{color:#ef4444;}
+.mdp-add-form{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-top:8px;}
+.mdp-sel{background:rgba(5,8,15,0.8);border:1px solid var(--border2);border-radius:5px;
+  color:var(--text);font-size:11px;padding:5px 7px;font-family:'Barlow Condensed',sans-serif;flex:1;min-width:110px;}
+.mdp-min-input{background:rgba(5,8,15,0.8);border:1px solid var(--border2);border-radius:5px;
+  color:var(--text);font-size:11px;padding:5px 7px;font-family:'Barlow Condensed',sans-serif;width:56px;}
+.mdp-add-btn{background:rgba(34,197,94,0.15);border:1px solid rgba(34,197,94,0.4);border-radius:5px;
+  color:#22c55e;font-family:'Bebas Neue',sans-serif;font-size:12px;letter-spacing:1px;
+  padding:5px 10px;cursor:pointer;}
+.mdp-add-btn:hover{background:rgba(34,197,94,0.25);}
+.mdp-upload-btn{background:rgba(201,162,39,0.1);border:1px solid rgba(201,162,39,0.3);
+  border-radius:5px;color:var(--gold2);font-family:'Bebas Neue',sans-serif;
+  font-size:11px;letter-spacing:1px;padding:5px 10px;cursor:pointer;white-space:nowrap;}
+.mdp-upload-btn:hover{background:rgba(201,162,39,0.2);}
+.btn-equipo{background:rgba(201,162,39,0.08);border:1px solid rgba(201,162,39,0.25);
+  border-radius:4px;color:var(--gold2);font-size:10px;font-family:'Bebas Neue',sans-serif;
+  letter-spacing:1px;padding:2px 7px;cursor:pointer;white-space:nowrap;}
+.btn-equipo:hover,.btn-equipo.active{background:rgba(201,162,39,0.2);border-color:var(--gold2);}
+.mdp-dur-row{display:flex;align-items:center;gap:8px;margin-bottom:8px;font-size:11px;
+  font-family:'Barlow Condensed',sans-serif;color:var(--muted);}
+.mdp-dur-input{background:rgba(5,8,15,0.8);border:1px solid var(--border2);border-radius:4px;
+  color:var(--text);font-size:11px;padding:3px 6px;width:48px;text-align:center;}
 .link-cell{min-width:76px;max-width:110px;}
 .link-wrap{display:flex;gap:3px;align-items:center;}
 .link-input{flex:1;min-width:0;background:rgba(5,8,15,0.6);border:1px solid rgba(26,45,90,0.5);
@@ -1505,6 +1551,8 @@ const PREFILLED = {
 const results    = {};
 const links      = {};
 const goleadores = {};
+const matchData  = {}; // matchData[cat][fecha] = {titulares, suplentes, cambios, duracion}
+CATEGORIES.forEach(cat => { matchData[cat] = {}; });
 // ============================================================
 //  RESERVA — Fixture propio (Grupo A · 18 fechas)
 //  17 rivales editables + 1 interzonal (F18)
@@ -1652,6 +1700,7 @@ function initFirebase(){
               if(p.results?.[cat]) fl.forEach(r=>{ if(p.results[cat][r.f]) results[cat][r.f]=p.results[cat][r.f]; });
               if(p.links?.[cat])   fl.forEach(r=>{ if(p.links[cat][r.f]) links[cat][r.f]=p.links[cat][r.f]; });
               if(p.goleadores?.[cat]) goleadores[cat]=p.goleadores[cat];
+              if(p.matchData?.[cat]) Object.assign(matchData[cat], p.matchData[cat]);
             });
             refreshActiveModule();
           });
@@ -1716,7 +1765,7 @@ function saveData(){
   if(!fbReady||!db||!canEdit) return;
   clearTimeout(saveTimeout);
   saveTimeout=setTimeout(()=>{
-    const payload={results:{},links:{},goleadores:{},rivalData:rivalData};
+    const payload={results:{},links:{},goleadores:{},rivalData:rivalData,matchData:matchData};
     CATEGORIES.forEach(cat=>{
       payload.results[cat]={};
       payload.links[cat]={};
@@ -1761,6 +1810,8 @@ function loadData(){
           if(p.results?.[cat]) fl.forEach(r=>{ if(p.results[cat][r.f]) results[cat][r.f]=p.results[cat][r.f]; });
           if(p.links?.[cat])   fl.forEach(r=>{ if(p.links[cat][r.f]) links[cat][r.f]=p.links[cat][r.f]; });
           if(p.goleadores?.[cat]) goleadores[cat]=p.goleadores[cat];
+          // Load matchData (lineup + cambios)
+          if(p.matchData?.[cat]) Object.assign(matchData[cat], p.matchData[cat]);
           // Load RESERVA fixture
           if(cat==='RESERVA'&&p.rivalData?.['RESERVA']){
             Object.assign(rivalData['RESERVA'], p.rivalData['RESERVA']);
@@ -1947,7 +1998,16 @@ function selectCatTab(containerId, cat){
 function buildStatsModule(){
   const panel=document.getElementById('panel-stats');
   panel.innerHTML=`
-    <div class="cat-subtabs" id="stats-subtabs"></div>
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;padding:8px 12px 0;border-bottom:1px solid rgba(26,45,90,0.4);margin-bottom:4px">
+      <div class="cat-subtabs" id="stats-subtabs" style="border:none;padding:0;margin:0"></div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <button class="mdp-upload-btn" style="font-size:11px" onclick="document.getElementById('cit-pdf-global').click()">
+          📋 CARGAR CITACIONES PDF
+        </button>
+        <input type="file" id="cit-pdf-global" accept=".pdf" style="display:none"
+          onchange="uploadCitacionPdfGlobal(this.files[0]);this.value=''">
+      </div>
+    </div>
     <div class="main" id="stats-content"></div>`;
   buildCatSubtabs('stats-subtabs', cat=>{
     renderStatsCat(cat);
@@ -2172,7 +2232,10 @@ function renderStatsSingle(cat, content){
         </div></td>`;
       });
     }
-    rows+=`<tr>
+    const hasTeamData = !!(matchData[cat][r.f]?.titulares?.length);
+    const equipoBtn = `<td><button class="btn-equipo${hasTeamData?' active':''}" data-cat="${cat}" data-fecha="${r.f}" title="Ver/editar equipo">👥${hasTeamData?' ✓':''}</button></td>`;
+
+    rows+=`<tr data-cat="${cat}" data-fecha="${r.f}">
       <td class="fecha-num">${r.f}</td>${rivalCell}${condCell}
       <td><div class="score-cell">
         <input class="score-input" type="number" min="0" max="99" value="${gf}"
@@ -2182,7 +2245,12 @@ function renderStatsSingle(cat, content){
           data-cat="${cat}" data-fecha="${r.f}" data-side="1" placeholder="—" ${canEdit?'':'disabled'}>
       </div></td>
       <td>${rb}</td><td style="font-weight:700;color:${ptC}">${pts}</td>
-      ${linkCols}</tr>`;
+      ${linkCols}${equipoBtn}</tr>
+    <tr class="match-detail-row" id="mdr-${cat}-${r.f}" style="display:none">
+      <td colspan="${7+(isLink?LINK_TYPES.length:0)}">
+        <div class="match-detail-panel" id="mdp-${cat}-${r.f}"></div>
+      </td>
+    </tr>`;
   });
 
   // Link headers
@@ -2201,8 +2269,9 @@ function renderStatsSingle(cat, content){
         <tr class="thead-top">
           <th colspan="6" style="background:linear-gradient(135deg,#0a0f1e,#08111f);color:var(--muted);font-size:10px;letter-spacing:2px;">DATOS DEL PARTIDO</th>
           ${linkGH}
+          <th style="background:linear-gradient(135deg,#1a2a10,#0f1a08);color:#86a86a;border-top:2px solid #4a7a3a;font-size:10px;letter-spacing:2px;">👥</th>
         </tr>
-        <tr class="thead-sub"><th>#</th><th>RIVAL</th><th>COND</th><th>RESULTADO</th><th>RES</th><th>PTS</th>${linkSH}</tr>
+        <tr class="thead-sub"><th>#</th><th>RIVAL</th><th>COND</th><th>RESULTADO</th><th>RES</th><th>PTS</th>${linkSH}<th title="Equipo / Alineación">EQUIPO</th></tr>
       </thead>
       <tbody id="tbody-${cat}">${rows}</tbody>
     </table></div>
@@ -2244,10 +2313,392 @@ function renderStatsSingle(cat, content){
   renderGoleadores(cat);
 }
 
+// ============================================================
+//  MATCH DETAIL — EQUIPO / ALINEACIÓN / MINUTOS
+// ============================================================
+
+/** Calculate minutes played for each player in a match */
+function calcMinutosJugados(cat, fecha) {
+  const m = matchData[cat]?.[fecha];
+  if (!m || !m.titulares?.length) return {};
+  const dur = m.duracion || 90;
+  const mins = {};
+  (m.titulares || []).forEach(p => { mins[p.nombre] = dur; });
+  (m.cambios || []).forEach(c => {
+    if (c.sale && mins[c.sale] !== undefined) mins[c.sale] = c.min;
+    if (c.entra) mins[c.entra] = (mins[c.entra] || 0) + (dur - c.min);
+  });
+  return mins;
+}
+
+/** Get GPS minutes for a player in a given match session */
+function getGpsMinutos(cat, fecha, playerName) {
+  const rName = (matchData[cat]?.[fecha]?.rival || '').toUpperCase();
+  const session = gpsSessions.find(s =>
+    s.cat === cat &&
+    (s.match?.includes('F'+fecha) || s.name?.includes('F'+fecha) ||
+     (rName && s.match?.toUpperCase().includes(rName.split(' ')[0])))
+  );
+  if (!session) return null;
+  const pl = (session.players || []).find(p =>
+    p.name?.toLowerCase() === playerName.toLowerCase() ||
+    p.name?.toLowerCase().includes(playerName.split(' ').slice(-1)[0].toLowerCase())
+  );
+  return pl ? pl.min : null;
+}
+
+/** Render the match detail panel for a given cat/fecha */
+function renderMatchPanel(cat, fecha) {
+  const panel = document.getElementById(`mdp-${cat}-${fecha}`);
+  if (!panel) return;
+  const m = matchData[cat]?.[fecha] || {};
+  const titulares = m.titulares || [];
+  const suplentes = m.suplentes || [];
+  const cambios   = m.cambios   || [];
+  const dur       = m.duracion  || 90;
+  const minutos   = calcMinutosJugados(cat, fecha);
+  const hasData   = titulares.length > 0;
+
+  // All players available for selects
+  const allPlayers = [...titulares, ...suplentes].map(p => p.nombre);
+
+  // Build minutes section
+  function playerMinRow(p) {
+    const calc = minutos[p.nombre];
+    const gps  = getGpsMinutos(cat, fecha, p.nombre);
+    let minsHtml = '';
+    if (calc !== undefined) {
+      if (gps !== null) {
+        const diff = Math.abs(calc - gps);
+        const cls  = diff <= 3 ? 'ok' : 'diff';
+        minsHtml = `<span class="mdp-mins ${cls}">${calc}' calc | ${gps}' GPS${diff>3?' ⚠':'  ✓'}</span>`;
+      } else {
+        minsHtml = `<span class="mdp-mins">${calc}'</span>`;
+      }
+    }
+    return `<div class="mdp-player">
+      <span class="mdp-num">${p.num}</span>
+      <span>${esc(p.nombre)}</span>${minsHtml}
+    </div>`;
+  }
+
+  const titHTML = titulares.map(playerMinRow).join('') ||
+    '<div style="color:var(--muted);font-size:11px;font-family:Barlow Condensed,sans-serif">Sin datos</div>';
+
+  const supHTML = suplentes.map(p => {
+    const calc = minutos[p.nombre];
+    const gps  = getGpsMinutos(cat, fecha, p.nombre);
+    let minsHtml = '';
+    if (calc !== undefined && calc > 0) {
+      if (gps !== null) {
+        const diff = Math.abs(calc - gps);
+        const cls  = diff <= 3 ? 'ok' : 'diff';
+        minsHtml = `<span class="mdp-mins ${cls}">${calc}' calc | ${gps}' GPS${diff>3?' ⚠':'  ✓'}</span>`;
+      } else {
+        minsHtml = `<span class="mdp-mins">${calc}'</span>`;
+      }
+    }
+    return `<div class="mdp-player">
+      <span class="mdp-num">${p.num}</span>
+      <span style="${calc?'':'color:var(--muted)'}">${esc(p.nombre)}</span>${minsHtml}
+    </div>`;
+  }).join('') || '<div style="color:var(--muted);font-size:11px;font-family:Barlow Condensed,sans-serif">Sin datos</div>';
+
+  const cambiosHTML = cambios.map((c, idx) =>
+    `<div class="mdp-cambio">
+      <span class="mdp-cambio-min">${c.min}'</span>
+      <span style="color:var(--loss)">▼ ${esc(c.sale)}</span>
+      <span style="color:var(--muted)">→</span>
+      <span style="color:var(--win)">▲ ${esc(c.entra)}</span>
+      ${canEdit ? `<button class="mdp-del" onclick="delCambio('${cat}',${fecha},${idx})">✕</button>` : ''}
+    </div>`
+  ).join('') || '<div style="color:var(--muted);font-size:11px;font-family:Barlow Condensed,sans-serif">Sin cambios</div>';
+
+  const optsSale  = allPlayers.map(n => `<option value="${esc(n)}">${esc(n)}</option>`).join('');
+  const optsEntra = allPlayers.map(n => `<option value="${esc(n)}">${esc(n)}</option>`).join('');
+
+  const addCambioForm = canEdit ? `
+    <div class="mdp-add-form" style="margin-top:8px">
+      <select class="mdp-sel" id="mdp-sale-${cat}-${fecha}"><option value="">Sale…</option>${optsSale}</select>
+      <select class="mdp-sel" id="mdp-entra-${cat}-${fecha}"><option value="">Entra…</option>${optsEntra}</select>
+      <input class="mdp-min-input" type="number" min="1" max="120" placeholder="Min"
+        id="mdp-min-${cat}-${fecha}">
+      <button class="mdp-add-btn" onclick="addCambio('${cat}',${fecha})">+ CAMBIO</button>
+    </div>` : '';
+
+  const durEdit = canEdit
+    ? `<div class="mdp-dur-row">⏱ Duración:
+        <input class="mdp-dur-input" type="number" min="40" max="120" value="${dur}"
+          onchange="setDuracion('${cat}',${fecha},this.value)"> min</div>`
+    : `<div style="color:var(--muted);font-size:11px;font-family:Barlow Condensed,sans-serif;margin-bottom:6px">⏱ ${dur} min</div>`;
+
+  const uploadSection = canEdit ? `
+    <div style="margin-bottom:10px;display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+      <button class="mdp-upload-btn" onclick="document.getElementById('cit-pdf-${cat}-${fecha}').click()">
+        📄 CARGAR PDF CITACIONES
+      </button>
+      <input type="file" id="cit-pdf-${cat}-${fecha}" accept=".pdf" style="display:none"
+        onchange="parseCitacionPdf(this.files[0],'${cat}',${fecha},this)">
+      <span style="font-size:10px;color:var(--muted);font-family:Barlow Condensed,sans-serif">
+        ${hasData ? '✓ Datos cargados' : 'O cargá manualmente abajo'}
+      </span>
+    </div>` : '';
+
+  // Manual add players section (when no PDF)
+  const manualSection = canEdit && !hasData ? `
+    <div style="margin-bottom:8px">
+      <div style="font-size:10px;color:var(--muted);font-family:Barlow Condensed,sans-serif;margin-bottom:4px">
+        TITULARES (separados por coma, formato: "Num Apellido Nombre"):
+      </div>
+      <textarea id="mdp-manual-tit-${cat}-${fecha}" style="width:100%;background:rgba(5,8,15,0.8);border:1px solid var(--border2);border-radius:5px;color:var(--text);font-size:11px;padding:6px;font-family:Barlow Condensed,sans-serif;resize:vertical;min-height:50px;" placeholder="1 Ruiz Santiago, 2 Luongo Alan, 3 Benitez Lautaro…"></textarea>
+      <textarea id="mdp-manual-sup-${cat}-${fecha}" style="width:100%;background:rgba(5,8,15,0.8);border:1px solid var(--border2);border-radius:5px;color:var(--text);font-size:11px;padding:6px;font-family:Barlow Condensed,sans-serif;resize:vertical;min-height:40px;margin-top:4px;" placeholder="12 Petry Uriel, 13 Rojas Josue…"></textarea>
+      <button class="mdp-add-btn" style="margin-top:4px" onclick="saveManualLineup('${cat}',${fecha})">💾 GUARDAR ALINEACIÓN</button>
+    </div>` : '';
+
+  panel.innerHTML = `
+    ${uploadSection}
+    ${manualSection}
+    ${durEdit}
+    <div class="mdp-grid">
+      <div class="mdp-section">
+        <h4>👕 TITULARES (${titulares.length}/11)</h4>
+        ${titHTML}
+      </div>
+      <div class="mdp-section">
+        <h4>🪑 SUPLENTES (${suplentes.length})</h4>
+        ${supHTML}
+      </div>
+      <div class="mdp-section">
+        <h4>🔄 CAMBIOS (${cambios.length})</h4>
+        ${cambiosHTML}
+        ${addCambioForm}
+      </div>
+    </div>`;
+}
+
+function addCambio(cat, fecha) {
+  const sale  = document.getElementById(`mdp-sale-${cat}-${fecha}`)?.value;
+  const entra = document.getElementById(`mdp-entra-${cat}-${fecha}`)?.value;
+  const min   = parseInt(document.getElementById(`mdp-min-${cat}-${fecha}`)?.value);
+  if (!sale || !entra || !min || sale === entra) { showToast('⚠ Completá todos los campos'); return; }
+  if (!matchData[cat]) matchData[cat] = {};
+  if (!matchData[cat][fecha]) matchData[cat][fecha] = {titulares:[],suplentes:[],cambios:[],duracion:90};
+  if (!matchData[cat][fecha].cambios) matchData[cat][fecha].cambios = [];
+  matchData[cat][fecha].cambios.push({min, sale, entra});
+  matchData[cat][fecha].cambios.sort((a,b)=>a.min-b.min);
+  renderMatchPanel(cat, fecha);
+  saveData();
+}
+
+function delCambio(cat, fecha, idx) {
+  if (!matchData[cat]?.[fecha]?.cambios) return;
+  matchData[cat][fecha].cambios.splice(idx, 1);
+  renderMatchPanel(cat, fecha);
+  saveData();
+}
+
+function setDuracion(cat, fecha, val) {
+  if (!matchData[cat]) matchData[cat] = {};
+  if (!matchData[cat][fecha]) matchData[cat][fecha] = {titulares:[],suplentes:[],cambios:[],duracion:90};
+  matchData[cat][fecha].duracion = parseInt(val) || 90;
+  renderMatchPanel(cat, fecha);
+  saveData();
+}
+
+function saveManualLineup(cat, fecha) {
+  const titRaw = document.getElementById(`mdp-manual-tit-${cat}-${fecha}`)?.value || '';
+  const supRaw = document.getElementById(`mdp-manual-sup-${cat}-${fecha}`)?.value || '';
+  function parsePlayers(raw) {
+    return raw.split(',').map(s => s.trim()).filter(Boolean).map(s => {
+      const m = s.match(/^(\d+)\s+(.+)$/);
+      if (m) return {num: parseInt(m[1]), nombre: m[2].trim()};
+      return {num: 0, nombre: s};
+    });
+  }
+  if (!matchData[cat]) matchData[cat] = {};
+  if (!matchData[cat][fecha]) matchData[cat][fecha] = {cambios:[], duracion:90};
+  matchData[cat][fecha].titulares = parsePlayers(titRaw);
+  matchData[cat][fecha].suplentes = parsePlayers(supRaw);
+  renderMatchPanel(cat, fecha);
+  saveData();
+  showToast('✓ Alineación guardada');
+}
+
+function toggleMatchDetail(cat, fecha) {
+  const row = document.getElementById(`mdr-${cat}-${fecha}`);
+  const btn = document.querySelector(`button.btn-equipo[data-cat="${cat}"][data-fecha="${fecha}"]`);
+  if (!row) return;
+  const open = row.style.display !== 'none';
+  row.style.display = open ? 'none' : '';
+  if (btn) btn.classList.toggle('active', !open);
+  if (!open) renderMatchPanel(cat, fecha);
+}
+
+// ── PDF Citation Parser ───────────────────────────────────────
+const CAT_DIV_MAP = {
+  'cuarta':'4TA','quinta':'5TA','sexta':'6TA',
+  'septima':'7MA','séptima':'7MA','septima':'7MA',
+  'octava':'8VA','novena':'9NA'
+};
+
+async function parseCitacionPdf(file, catHint, fechaHint, inputEl) {
+  if (!file) return;
+  if (inputEl) inputEl.value = '';
+  showToast('📄 Procesando citaciones…');
+  try {
+    const arrayBuf = await file.arrayBuffer();
+    const pdf = await pdfjsLib.getDocument({data: arrayBuf}).promise;
+    const results_parsed = {};
+
+    for (let pg = 1; pg <= pdf.numPages; pg++) {
+      const page   = await pdf.getPage(pg);
+      const tc     = await page.getTextContent();
+      const lines  = [];
+      tc.items.forEach(it => {
+        const existing = lines.find(l => Math.abs(l.y - it.transform[5]) < 3);
+        if (existing) existing.tokens.push(it.str);
+        else lines.push({y: it.transform[5], tokens:[it.str]});
+      });
+      lines.sort((a,b)=>b.y-a.y); // top to bottom
+      const pageText = lines.map(l=>l.tokens.join(' ')).join('\n');
+
+      // Detect category from division name
+      let detectedCat = catHint;
+      for (const [key, val] of Object.entries(CAT_DIV_MAP)) {
+        if (pageText.toLowerCase().includes(key)) { detectedCat = val; break; }
+      }
+      if (!detectedCat) continue;
+
+      // Detect fecha from filename or existing hint
+      let fecha = fechaHint;
+
+      // Extract players: look for "N - APELLIDO, Nombre" or "N - APELLIDO\nNombre"
+      const playerRegex = /(\d{1,2})\s*[-–]\s*([A-ZÁÉÍÓÚÑÜ][A-ZÁÉÍÓÚÑÜA-Za-záéíóúñü\s,\.]+?)(?=\s*\d{1,2}\s*[-–]|\s*SUPLENTES|\s*CUERPO|\s*PLANILLA|$)/g;
+      const allText = pageText.replace(/\n/g,' ');
+      const players = [];
+      let match;
+      // Better: scan line by line for player patterns
+      const playerLineRe = /^(\d{1,2})\s*[-–]\s*([A-ZÁÉÍÓÚÑÜ][A-Za-záéíóúÁÉÍÓÚÑÜñü]+)(?:[,\s]+([A-Za-záéíóúÁÉÍÓÚÑÜñü]+))?/;
+      lines.forEach(l => {
+        const txt = l.tokens.join(' ').trim();
+        const m = txt.match(playerLineRe);
+        if (m) {
+          const num    = parseInt(m[1]);
+          const ape    = m[2]?.trim() || '';
+          const nom    = m[3]?.trim() || '';
+          // Also check next-line name (common in PDF field diagrams)
+          const nombre = nom ? `${nom} ${ape}` : ape;
+          if (num >= 1 && num <= 18 && ape.length > 1) {
+            players.push({num, nombre: nombre.trim()});
+          }
+        }
+      });
+
+      // Also scan for "APELLIDO, Nombre" pattern in suplentes section
+      lines.forEach(l => {
+        const txt = l.tokens.join(' ').trim();
+        const m = txt.match(/^(\d{1,2})\s*[-–]\s*([A-ZÁÉÍÓÚÑÜ][A-Za-záéíóúÁÉÍÓÚÑÜñü]+),\s*([A-Za-záéíóúÁÉÍÓÚÑÜñü]+)/);
+        if (m) {
+          const num    = parseInt(m[1]);
+          const ape    = m[2]?.trim() || '';
+          const nom    = m[3]?.trim() || '';
+          const nombre = `${nom} ${ape}`;
+          if (num >= 1 && num <= 18 && !players.find(p=>p.num===num)) {
+            players.push({num, nombre: nombre.trim()});
+          }
+        }
+      });
+
+      // Deduplicate and sort by num
+      const seen = new Set();
+      const unique = players.filter(p => {
+        if (seen.has(p.num)) return false;
+        seen.add(p.num); return true;
+      }).sort((a,b)=>a.num-b.num);
+
+      const titulares = unique.filter(p => p.num >= 1 && p.num <= 11);
+      const suplentes = unique.filter(p => p.num >= 12 && p.num <= 18);
+
+      // Detect rival
+      const rivalMatch = pageText.match(/RIVAL:\s*([A-Za-záéíóúÁÉÍÓÚÑÜñü\s]+?)(?:\s+CONDICIÓN|$)/m);
+      const rival = rivalMatch?.[1]?.trim() || '';
+
+      results_parsed[detectedCat] = {titulares, suplentes, rival};
+    }
+
+    // Ask user to confirm fecha if not provided
+    const catsFound = Object.keys(results_parsed);
+    if (!catsFound.length) { showToast('⚠ No se encontraron datos de citación'); return; }
+
+    // If fechaHint provided, save directly; otherwise prompt
+    if (fechaHint) {
+      catsFound.forEach(cat => {
+        if (!matchData[cat]) matchData[cat] = {};
+        const existing = matchData[cat][fechaHint] || {};
+        matchData[cat][fechaHint] = {
+          ...existing,
+          titulares: results_parsed[cat].titulares,
+          suplentes: results_parsed[cat].suplentes,
+          rival: results_parsed[cat].rival || existing.rival,
+          cambios: existing.cambios || [],
+          duracion: existing.duracion || 90,
+        };
+        const panel = document.getElementById(`mdp-${cat}-${fechaHint}`);
+        if (panel) renderMatchPanel(cat, fechaHint);
+        // Update button state
+        const btn = document.querySelector(`button.btn-equipo[data-cat="${cat}"][data-fecha="${fechaHint}"]`);
+        if (btn) { btn.textContent = '👥 ✓'; btn.classList.add('active'); }
+      });
+      saveData();
+      showToast(`✓ ${catsFound.length} categorías cargadas: ${catsFound.join(', ')}`);
+    } else {
+      // Show confirmation dialog with detected info
+      const summary = catsFound.map(c =>
+        `${c}: ${results_parsed[c].titulares.length} tits, ${results_parsed[c].suplentes.length} sups`
+      ).join('\n');
+      const fechaInput = prompt(`Categorías detectadas:\n${summary}\n\n¿Para qué FECHA cargar estos datos? (número)`);
+      if (!fechaInput) return;
+      const f = parseInt(fechaInput);
+      if (!f || f < 1 || f > 35) { showToast('⚠ Número de fecha inválido'); return; }
+      catsFound.forEach(cat => {
+        if (!matchData[cat]) matchData[cat] = {};
+        const existing = matchData[cat][f] || {};
+        matchData[cat][f] = {
+          ...existing,
+          titulares: results_parsed[cat].titulares,
+          suplentes: results_parsed[cat].suplentes,
+          rival: results_parsed[cat].rival || existing.rival,
+          cambios: existing.cambios || [],
+          duracion: existing.duracion || 90,
+        };
+        const panel = document.getElementById(`mdp-${cat}-${f}`);
+        if (panel) renderMatchPanel(cat, f);
+        const btn = document.querySelector(`button.btn-equipo[data-cat="${cat}"][data-fecha="${f}"]`);
+        if (btn) { btn.textContent = '👥 ✓'; btn.classList.add('active'); }
+      });
+      saveData();
+      showToast(`✓ F${f}: ${catsFound.length} categorías cargadas`);
+    }
+  } catch(e) {
+    console.error('[CITACION PDF]', e);
+    showToast('⚠ Error al procesar el PDF: ' + e.message);
+  }
+}
+
+// Global PDF upload (for loading all cats at once from stats header)
+function uploadCitacionPdfGlobal(file) {
+  parseCitacionPdf(file, null, null, null);
+}
+
 // ── TABLE EVENTS ──────────────────────────────────────────────
 function attachTableEvents(cat){
   const tbody=document.getElementById(`tbody-${cat}`);
   if(!tbody)return;
+  // Equipo button — toggle match detail panel
+  tbody.addEventListener('click',e=>{
+    const btn=e.target.closest('.btn-equipo');
+    if(btn){ toggleMatchDetail(btn.dataset.cat, parseInt(btn.dataset.fecha)); }
+  });
   tbody.addEventListener('change',e=>{
     if(e.target.classList.contains('score-input')){
       const f=parseInt(e.target.dataset.fecha),s=parseInt(e.target.dataset.side);
@@ -2555,6 +3006,7 @@ function startPublicListener(){
       if(p.results?.[cat]) fl.forEach(r=>{ if(p.results[cat][r.f]) results[cat][r.f]=p.results[cat][r.f]; });
       if(p.links?.[cat])   fl.forEach(r=>{ if(p.links[cat][r.f]) links[cat][r.f]=p.links[cat][r.f]; });
       if(p.goleadores?.[cat]) goleadores[cat]=p.goleadores[cat];
+      if(p.matchData?.[cat]) Object.assign(matchData[cat], p.matchData[cat]);
       if(cat==='RESERVA'&&p.rivalData?.['RESERVA']){
         Object.assign(rivalData['RESERVA'], p.rivalData['RESERVA']);
       }
@@ -3517,15 +3969,28 @@ async function extractGpsDataFromPdf(file){
 
   // ── Find start of data after header row ──
   // Look for known column header words to skip them
-  const headerWords = ['Posit','Position','Tot','Dur','Dist','Mts','Metro','Metr','km/h','Spri','Vel','Acc','Dcc','Max','RHIE','PL'];
+  const headerWords = [
+    'Posit','Position','Tot','Dur','Dist','Mts','Metro','Metr',
+    'km/h','m/h','s/s','Spri','Vel','Acc','Dcc','Max','RHIE','PL',
+    'Min','Esfuerzo','Esf','Decel','Bout','Volum','Carga',
+    'ncia','18-21','21-25','+25','m/min','m(18','m(21','m(+2',
+    'DATOS','GENERALES','Promedio','Total','PAGE','Tiempo','Distancia',
+    'Nombre','Jugador','Posición','División','Equipo'
+  ];
   let startIdx = 0;
-  // Skip past header rows (find first numeric sequence after headers)
-  for(let i=0; i<allTokens.length; i++){
-    if(/^\d{2,4}$/.test(allTokens[i]) && i>5){
-      // Check that previous token looks like a position/name, not a header word
-      const prev = allTokens[i-1]||'';
-      if(!headerWords.some(h=>prev.includes(h))){
-        startIdx = Math.max(0, i-3);
+  // Skip past header rows: find first token that is a 2-4 digit number (minutes/distance start)
+  // preceded by something that looks like a name or position, not a header word
+  for(let si=5; si<allTokens.length; si++){
+    const t = allTokens[si];
+    if(/^\d{2,4}$/.test(t)){
+      // Check the few tokens before are NOT all header words
+      const prev3 = allTokens.slice(Math.max(0,si-3), si).join(' ');
+      const isAfterHeader = headerWords.some(h=>prev3.includes(h));
+      if(!isAfterHeader){
+        // Look back to find potential name start
+        let backIdx = si;
+        while(backIdx > 0 && !NUM.test(allTokens[backIdx-1]) && backIdx > si-5) backIdx--;
+        startIdx = Math.max(0, backIdx - 1);
         break;
       }
     }
@@ -3537,12 +4002,25 @@ async function extractGpsDataFromPdf(file){
   const players = [];
   const NUM = /^-?\d+\.?\d*$/;
 
-  // Walk tokens building rows
-  let i = 0;
+  // Helper: a string that looks like a real player name (not a column header fragment)
+  function looksLikePlayerName(n){
+    if(!n || n.length < 3 || n.length > 45) return false;
+    // Contains metric units or header patterns → NOT a name
+    if(/m\/h|km\/h|s\/s|m\/min|Esf|Decel|RHIE|Bout|\d{4,}|18-21|21-25|\+25|Tot |Prom|PAGE|Volum|Esfuerzo|ncia por/.test(n)) return false;
+    // Contains parentheses or slashes without letters → header fragment
+    if(/[()\/]/.test(n) && !/[A-ZÁÉÍÓÚÑ]{2}/.test(n)) return false;
+    // Must have at least one letter sequence of 2+ chars that looks like a name
+    if(!/[A-Za-záéíóúÁÉÍÓÚñÑüÜ]{2}/.test(n)) return false;
+    return true;
+  }
+
+  // Walk tokens building rows — start from startIdx to skip header rows
+  let i = startIdx;
   while(i < allTokens.length){
     const tok = allTokens[i];
-    // Skip pure header/label tokens
-    if(headerWords.some(h=>tok.includes(h)) || tok === 'DATOS GENERALES'){
+    // Skip header/label tokens — column headers from Catapult tables
+    if(headerWords.some(h=>tok.includes(h)) || tok === 'DATOS GENERALES'
+       || /^[()\/\-–]+$/.test(tok) || /^\d+$/.test(tok) && i < startIdx + 3){
       i++; continue;
     }
     // Check if we're at a player name start — it should be followed eventually by numbers
@@ -3578,7 +4056,7 @@ async function extractGpsDataFromPdf(file){
         else if(n === '-' || n === '—'){ nums.push(0); j++; }
         else break;
       }
-      if(nums.length >= 3 && name.length > 1){
+      if(nums.length >= 3 && name.length > 1 && looksLikePlayerName(name)){
         const [min=0,dist=0,mpm=0,m1821=0,m2125=0,m25=0,sprints=0,velmax=0,acc=0,dcc=0,maxAcc=0,maxDec=0,rhie=0,totalPL=0] = nums;
         // Fix: sometimes min and dist are swapped if dist is very large
         const actualMin  = min > 200 ? mpm : min;   // minutes never > 200
