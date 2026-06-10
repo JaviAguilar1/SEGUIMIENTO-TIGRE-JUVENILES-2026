@@ -2128,7 +2128,6 @@ function renderStatsSingle(cat, content){
       const blockEnd = isReserva ? Math.min(r.f+4,18) : Math.min(r.f+4,35);
       rows+=`<tr class="divider-row"><td colspan="${span}">── BLOQUE F${r.f}–F${blockEnd}</td></tr>`;
     }
-    }
     const stored=results[cat][r.f];
     const gf=stored?stored[0]:'', gc=stored?stored[1]:'';
     const res=stored?getResult(stored[0],stored[1]):null;
@@ -2137,7 +2136,6 @@ function renderStatsSingle(cat, content){
     const ptC=res==='W'?'var(--win)':res==='D'?'var(--draw)':res==='L'?'var(--loss)':'var(--muted)';
 
     // RESERVA: use editable rivalData, other cats use fixed RIVALS
-    const isReserva = cat === 'RESERVA';
     const rName = isReserva ? (rivalData['RESERVA'][r.f]?.rival || '') : r.r;
     const rCond = isReserva ? (rivalData['RESERVA'][r.f]?.cond  || 'L') : r.c;
 
