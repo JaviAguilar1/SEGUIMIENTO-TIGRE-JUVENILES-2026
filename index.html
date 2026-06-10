@@ -51,6 +51,14 @@ body{
     radial-gradient(ellipse 70% 35% at 20% 0%,rgba(26,58,143,0.2) 0%,transparent 65%),
     radial-gradient(ellipse 50% 25% at 80% 0%,rgba(192,21,42,0.12) 0%,transparent 60%);
 }
+/* While login wall is present, blur all underlying content */
+body:has(#login-wall) header,
+body:has(#login-wall) .nav-modules,
+body:has(#login-wall) .module-panel,
+body:has(#login-wall) #save-toast,
+body:has(#login-wall) .scroll-top {
+  visibility:hidden;
+}
 
 /* ── HEADER ─────────────────────────────────────────── */
 header {
@@ -1464,7 +1472,6 @@ const LINK_TYPES = [
   {key:'res',label:'Resumen Goles',  icon:'⚽'},
   {key:'ana',label:'Análisis Propio',icon:'📊'},
   {key:'prx',label:'Próximo Rival',  icon:'🔍'},
-  {key:'gps',label:'GPS',            icon:'📡'},
 ];
 const RIVALS = [
   {f:1,r:'IND. RIVADAVIA',c:'L'},{f:2,r:'FERRO',c:'V'},
@@ -1737,7 +1744,6 @@ function showLoginModal(){
     <input id="m-email" class="m-input" type="email" placeholder="Email">
     <input id="m-pass"  class="m-input" type="password" placeholder="Contraseña">
     <button class="m-btn" onclick="doLogin()">INGRESAR</button>
-    <button class="m-cancel" onclick="document.getElementById('login-modal').style.display='none'">CANCELAR — SOLO VER</button>
     <div class="m-error" id="m-err">Email o contraseña incorrectos</div>
   </div>`;
   document.body.appendChild(m);
@@ -1751,7 +1757,12 @@ function doLogin(){
     .then(()=>{ document.getElementById('login-modal').style.display='none'; })
     .catch(()=>{ document.getElementById('m-err').style.display='block'; });
 }
-function doLogout(){ firebase.auth().signOut(); }
+function doLogout(){
+  firebase.auth().signOut().then(()=>{
+    // Rebuild login wall after logout
+    if(!document.getElementById('login-wall')) showLoginModal();
+  });
+}
 
 // ── UI helpers ────────────────────────────────────────────────
 function showToast(msg){
@@ -2359,6 +2370,122 @@ if('serviceWorker' in navigator){
 }
 
 checkPublicMode();
+
+// ── LOGIN WALL — show before any content ─────────────────────
+(function showLoginWall(){
+  // Don't wall off if ?public=1 (shared view — already limited)
+  const params = new URLSearchParams(window.location.search);
+  if(params.get('public')==='1') return;
+
+  // Build and inject the login wall overlay
+  const wall = document.createElement('div');
+  wall.id = 'login-wall';
+  wall.style.cssText = [
+    'position:fixed;inset:0;z-index:9999',
+    'background:linear-gradient(160deg,#05080f 0%,#0a0f1e 40%,#0d1528 100%)',
+    'display:flex;flex-direction:column;align-items:center;justify-content:center',
+    'gap:0'
+  ].join(';');
+
+  wall.innerHTML = `
+    <div style="text-align:center;padding:0 20px;max-width:380px;width:100%">
+      <img id="wall-crest" style="width:72px;height:72px;object-fit:contain;
+        filter:drop-shadow(0 0 18px rgba(192,21,42,0.6));margin-bottom:18px" alt="Tigre">
+      <h1 style="font-family:'Bebas Neue',sans-serif;font-size:32px;letter-spacing:6px;
+        color:#fff;margin-bottom:4px;text-shadow:0 0 30px rgba(192,21,42,0.4)">TIGRE JUVENILES</h1>
+      <p style="font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:3px;
+        color:#5a7099;margin-bottom:32px;text-transform:uppercase">Plataforma de Análisis · Divisiones Inferiores</p>
+
+      <div style="background:rgba(10,15,30,0.8);border:1px solid #1a2d5a;border-radius:14px;
+        padding:28px 24px;box-shadow:0 8px 40px rgba(0,0,0,0.5)">
+        <p style="font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:3px;
+          color:#c9a227;margin-bottom:18px">ACCESO RESTRINGIDO</p>
+
+        <input id="wall-email" type="email" placeholder="Email"
+          style="width:100%;background:rgba(5,8,15,0.8);border:1px solid #1a2d5a;
+          border-radius:8px;color:#d8e4ff;font-size:14px;padding:11px 14px;
+          font-family:'Barlow',sans-serif;outline:none;margin-bottom:10px;
+          box-sizing:border-box;transition:border-color .2s"
+          onfocus="this.style.borderColor='#c9a227'"
+          onblur="this.style.borderColor='#1a2d5a'">
+
+        <input id="wall-pass" type="password" placeholder="Contraseña"
+          style="width:100%;background:rgba(5,8,15,0.8);border:1px solid #1a2d5a;
+          border-radius:8px;color:#d8e4ff;font-size:14px;padding:11px 14px;
+          font-family:'Barlow',sans-serif;outline:none;margin-bottom:16px;
+          box-sizing:border-box;transition:border-color .2s"
+          onfocus="this.style.borderColor='#c9a227'"
+          onblur="this.style.borderColor='#1a2d5a'">
+
+        <button id="wall-btn" onclick="doWallLogin()"
+          style="width:100%;background:linear-gradient(135deg,#c0152a,#e01830);
+          border:none;border-radius:8px;color:#fff;
+          font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:3px;
+          padding:12px;cursor:pointer;transition:opacity .2s;margin-bottom:10px"
+          onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">
+          🔑 INGRESAR
+        </button>
+
+        <div id="wall-err" style="display:none;color:#ef4444;font-family:'Barlow Condensed',sans-serif;
+          font-size:12px;letter-spacing:1px;margin-top:4px">
+          Email o contraseña incorrectos
+        </div>
+        <div id="wall-loading" style="display:none;color:#5a7099;font-family:'Barlow Condensed',sans-serif;
+          font-size:11px;letter-spacing:1px;margin-top:4px">
+          Verificando...
+        </div>
+      </div>
+
+      <p style="font-family:'Barlow Condensed',sans-serif;font-size:10px;
+        letter-spacing:1px;color:#2a3d5a;margin-top:20px">
+        Club Atlético Tigre · Análisis de Divisiones Inferiores
+      </p>
+    </div>`;
+
+  document.body.appendChild(wall);
+
+  // Copy crest once image loads
+  const crestSrc = document.getElementById('escudoImg')?.src;
+  if(crestSrc) document.getElementById('wall-crest').src = crestSrc;
+
+  // Enter key on password field
+  setTimeout(()=>{
+    const passEl = document.getElementById('wall-pass');
+    if(passEl) passEl.addEventListener('keydown', e=>{ if(e.key==='Enter') doWallLogin(); });
+    const emailEl = document.getElementById('wall-email');
+    if(emailEl) emailEl.addEventListener('keydown', e=>{ if(e.key==='Enter') document.getElementById('wall-pass')?.focus(); });
+  }, 100);
+})();
+
+function doWallLogin(){
+  const email = document.getElementById('wall-email')?.value;
+  const pass  = document.getElementById('wall-pass')?.value;
+  const errEl = document.getElementById('wall-err');
+  const loadEl= document.getElementById('wall-loading');
+  const btn   = document.getElementById('wall-btn');
+  if(!email||!pass) return;
+  if(errEl)  errEl.style.display='none';
+  if(loadEl) loadEl.style.display='block';
+  if(btn)    btn.disabled=true;
+  firebase.auth().signInWithEmailAndPassword(email, pass)
+    .then(()=>{
+      const wall = document.getElementById('login-wall');
+      if(wall) wall.style.opacity='0', setTimeout(()=>wall.remove(),300);
+    })
+    .catch(()=>{
+      if(errEl)  errEl.style.display='block';
+      if(loadEl) loadEl.style.display='none';
+      if(btn)    btn.disabled=false;
+    });
+}
+
+// Also remove wall when auth state confirms logged in (e.g. returning user with session)
+firebase.auth().onAuthStateChanged(user=>{
+  if(user){
+    const wall = document.getElementById('login-wall');
+    if(wall){ wall.style.transition='opacity .3s'; wall.style.opacity='0'; setTimeout(()=>wall.remove(),300); }
+  }
+});
 
 initFirebase()
   .then(()=>loadData())
