@@ -1480,6 +1480,9 @@ table.gen-table .cat-cell{font-family:'Bebas Neue',sans-serif;font-size:15px;
 <!-- STATS MODULE -->
 <div class="module-panel active" id="panel-stats" data-mod="stats"></div>
 
+<!-- TABLA LPF MODULE (posiciones oficiales, fuente ligaprofesional.ar) -->
+<div class="module-panel" id="panel-tabla" data-mod="tabla"></div>
+
 <!-- (Plantel, Rendimiento, Análisis GPS, Carga y Semana fueron retirados:
      la plataforma quedó enfocada solo en Estadísticas.) -->
 
@@ -2072,6 +2075,7 @@ function showOfflineBanner(){
 // ============================================================
 const MODULES = [
   {id:'stats',      label:'ESTADÍSTICAS', icon:'📊'},
+  {id:'tabla',      label:'TABLA LPF',    icon:'🏆'},
 ];
 
 function buildNav(){
@@ -3187,12 +3191,96 @@ function doWallLogin(){
     });
 }
 
+// ============================================================
+//  TABLA LPF MODULE  (posiciones oficiales de ligaprofesional.ar)
+//  Los datos vienen de data/tablas.json, actualizado solo por
+//  una GitHub Action (scripts/scrape_tablas.py). Cero carga manual.
+// ============================================================
+const TABLA_CATS = ['4TA','5TA','6TA'];
+let TABLA_DATA = null;
+
+function buildTablaModule(){
+  const panel=document.getElementById('panel-tabla');
+  panel.innerHTML=`
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;padding:8px 12px 0;border-bottom:1px solid rgba(26,45,90,0.4);margin-bottom:4px">
+      <div class="cat-subtabs" id="tabla-subtabs" style="border:none;padding:0;margin:0"></div>
+      <div id="tabla-updated" style="font-family:'Barlow Condensed',sans-serif;font-size:10px;letter-spacing:1px;color:var(--muted)"></div>
+    </div>
+    <div class="main" id="tabla-content"></div>`;
+  // subtabs solo para 4TA/5TA/6TA (sin GENERAL)
+  const wrap=document.getElementById('tabla-subtabs');
+  wrap.innerHTML='';
+  TABLA_CATS.forEach((cat,i)=>{
+    const t=document.createElement('div');
+    t.className='cat-tab'+(i===0?' active':'');
+    t.dataset.cat=cat;
+    t.style.color=CAT_COLORS[cat];
+    t.innerHTML=`<span class="cat-dot" style="background:${CAT_COLORS[cat]}"></span>${cat}`;
+    t.addEventListener('click',()=>{ selectCatTab('tabla-subtabs',cat); renderTablaCat(cat); });
+    wrap.appendChild(t);
+  });
+  loadTablaData().then(()=>renderTablaCat('4TA'));
+}
+
+function loadTablaData(){
+  if(TABLA_DATA) return Promise.resolve(TABLA_DATA);
+  // cache-buster para que el navegador no sirva un JSON viejo tras un update
+  return fetch('data/tablas.json?v='+Date.now())
+    .then(r=>{ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
+    .then(j=>{ TABLA_DATA=j; return j; })
+    .catch(e=>{ console.warn('tablas.json:',e); TABLA_DATA={categorias:{}}; return TABLA_DATA; });
+}
+
+function renderTablaCat(cat){
+  const content=document.getElementById('tabla-content');
+  const upd=document.getElementById('tabla-updated');
+  const filas=(TABLA_DATA&&TABLA_DATA.categorias&&TABLA_DATA.categorias[cat])||[];
+  if(TABLA_DATA&&TABLA_DATA.actualizado){
+    upd.textContent='Actualizado: '+TABLA_DATA.actualizado+' · '+(TABLA_DATA.fuente||'');
+  }
+  if(!filas.length){
+    content.innerHTML=`<div style="padding:40px 16px;text-align:center;color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-size:14px">
+      Todavía no hay datos cargados para <b style="color:${CAT_COLORS[cat]}">${cat}</b>.<br>
+      <span style="font-size:12px">Se completará en la próxima actualización automática.</span></div>`;
+    return;
+  }
+  const rows=filas.map(f=>{
+    const esTigre=/tigre/i.test(f.equipo);
+    const dgC=f.dif>0?'var(--win)':f.dif<0?'var(--loss)':'var(--muted)';
+    return `<tr${esTigre?' style="background:linear-gradient(90deg,rgba(192,21,42,0.18),transparent);font-weight:700"':''}>
+      <td style="color:${esTigre?'var(--gold2)':'var(--muted)'};font-weight:700">${f.pos}°</td>
+      <td class="rival-name"${esTigre?' style="color:var(--gold2);text-align:left"':''}>${f.equipo}</td>
+      <td style="color:var(--gold2);font-weight:700">${f.pts}</td>
+      <td>${f.pj}</td>
+      <td style="color:var(--win)">${f.pg}</td>
+      <td style="color:var(--draw)">${f.pe}</td>
+      <td style="color:var(--loss)">${f.pp}</td>
+      <td style="color:#60a5fa">${f.gf}</td>
+      <td style="color:#f87171">${f.gc}</td>
+      <td style="color:${dgC};font-weight:700">${f.dif>0?'+':''}${f.dif}</td>
+    </tr>`;
+  }).join('');
+  content.innerHTML=`
+    <div class="table-wrap" style="padding:0 12px 20px">
+      <table>
+        <thead>
+          <tr class="thead-sub">
+            <th>Pos</th><th style="text-align:left">Equipo</th><th>Pts</th><th>J</th>
+            <th>G</th><th>E</th><th>P</th><th>GF</th><th>GC</th><th>DIF</th>
+          </tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>`;
+}
+
 initFirebase()
   .then(()=>loadData())
   .catch(e=>{ console.warn('Firebase error:',e); showOfflineBanner(); })
   .finally(()=>{
     buildNav();
     buildStatsModule();
+    buildTablaModule();
     applyViewMode();
     startPublicListener(); // load stats for everyone, auth or not
   });
