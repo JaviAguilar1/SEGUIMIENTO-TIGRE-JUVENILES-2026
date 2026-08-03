@@ -1,5 +1,5 @@
 {
-  "actualizado": "2026-08-03 15:51",
+  "actualizado": "2026-08-03 17:27",
   "fuente": "ligaprofesional.ar (oficial)",
   "categorias": {
     "4TA": [
@@ -163,13 +163,13 @@
         "pos": 14,
         "equipo": "Vélez",
         "pts": 31,
-        "pj": 18,
+        "pj": 19,
         "pg": 9,
         "pe": 4,
-        "pp": 5,
-        "gf": 29,
-        "gc": 12,
-        "dif": 17
+        "pp": 6,
+        "gf": 30,
+        "gc": 14,
+        "dif": 16
       },
       {
         "pos": 15,
@@ -233,6 +233,18 @@
       },
       {
         "pos": 20,
+        "equipo": "Tigre",
+        "pts": 27,
+        "pj": 19,
+        "pg": 8,
+        "pe": 3,
+        "pp": 8,
+        "gf": 29,
+        "gc": 21,
+        "dif": 8
+      },
+      {
+        "pos": 21,
         "equipo": "Colón",
         "pts": 26,
         "pj": 19,
@@ -242,18 +254,6 @@
         "gf": 26,
         "gc": 21,
         "dif": 5
-      },
-      {
-        "pos": 21,
-        "equipo": "Tigre",
-        "pts": 24,
-        "pj": 18,
-        "pg": 7,
-        "pe": 3,
-        "pp": 8,
-        "gf": 27,
-        "gc": 20,
-        "dif": 7
       },
       {
         "pos": 22,
