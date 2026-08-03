@@ -1,5 +1,5 @@
 {
-  "actualizado": "2026-08-03 13:26",
+  "actualizado": "2026-08-03 15:51",
   "fuente": "ligaprofesional.ar (oficial)",
   "categorias": {
     "4TA": [
@@ -451,6 +451,18 @@
       },
       {
         "pos": 2,
+        "equipo": "Vélez",
+        "pts": 45,
+        "pj": 19,
+        "pg": 14,
+        "pe": 3,
+        "pp": 2,
+        "gf": 53,
+        "gc": 17,
+        "dif": 36
+      },
+      {
+        "pos": 3,
         "equipo": "River Plate",
         "pts": 44,
         "pj": 19,
@@ -462,7 +474,7 @@
         "dif": 34
       },
       {
-        "pos": 3,
+        "pos": 4,
         "equipo": "Lanús",
         "pts": 44,
         "pj": 19,
@@ -472,18 +484,6 @@
         "gf": 40,
         "gc": 14,
         "dif": 26
-      },
-      {
-        "pos": 4,
-        "equipo": "Vélez",
-        "pts": 42,
-        "pj": 18,
-        "pg": 13,
-        "pe": 3,
-        "pp": 2,
-        "gf": 51,
-        "gc": 16,
-        "dif": 35
       },
       {
         "pos": 5,
@@ -657,13 +657,13 @@
         "pos": 19,
         "equipo": "Tigre",
         "pts": 25,
-        "pj": 18,
+        "pj": 19,
         "pg": 6,
         "pe": 7,
-        "pp": 5,
-        "gf": 22,
-        "gc": 19,
-        "dif": 3
+        "pp": 6,
+        "gf": 23,
+        "gc": 21,
+        "dif": 2
       },
       {
         "pos": 20,
