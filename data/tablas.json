@@ -1,5 +1,5 @@
 {
-  "actualizado": "2026-08-03 10:41",
+  "actualizado": "2026-08-03 13:26",
   "fuente": "ligaprofesional.ar (oficial)",
   "categorias": {
     "4TA": [
@@ -921,6 +921,18 @@
       },
       {
         "pos": 5,
+        "equipo": "Vélez",
+        "pts": 39,
+        "pj": 19,
+        "pg": 12,
+        "pe": 3,
+        "pp": 4,
+        "gf": 42,
+        "gc": 21,
+        "dif": 21
+      },
+      {
+        "pos": 6,
         "equipo": "Independiente",
         "pts": 38,
         "pj": 19,
@@ -932,7 +944,7 @@
         "dif": 35
       },
       {
-        "pos": 6,
+        "pos": 7,
         "equipo": "Boca Jrs.",
         "pts": 38,
         "pj": 19,
@@ -944,7 +956,7 @@
         "dif": 20
       },
       {
-        "pos": 7,
+        "pos": 8,
         "equipo": "Estudiantes",
         "pts": 38,
         "pj": 19,
@@ -956,7 +968,7 @@
         "dif": 19
       },
       {
-        "pos": 8,
+        "pos": 9,
         "equipo": "Unión",
         "pts": 38,
         "pj": 19,
@@ -968,7 +980,7 @@
         "dif": 18
       },
       {
-        "pos": 9,
+        "pos": 10,
         "equipo": "Banfield",
         "pts": 37,
         "pj": 19,
@@ -978,18 +990,6 @@
         "gf": 37,
         "gc": 20,
         "dif": 17
-      },
-      {
-        "pos": 10,
-        "equipo": "Vélez",
-        "pts": 36,
-        "pj": 18,
-        "pg": 11,
-        "pe": 3,
-        "pp": 4,
-        "gf": 39,
-        "gc": 19,
-        "dif": 20
       },
       {
         "pos": 11,
@@ -1211,13 +1211,13 @@
         "pos": 29,
         "equipo": "Tigre",
         "pts": 18,
-        "pj": 18,
+        "pj": 19,
         "pg": 4,
         "pe": 6,
-        "pp": 8,
-        "gf": 25,
-        "gc": 39,
-        "dif": -14
+        "pp": 9,
+        "gf": 27,
+        "gc": 42,
+        "dif": -15
       },
       {
         "pos": 30,
