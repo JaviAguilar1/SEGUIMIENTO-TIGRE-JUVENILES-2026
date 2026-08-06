@@ -3204,6 +3204,68 @@ const TABLA_COLORS = { 'RESERVA_APE':CAT_COLORS['RESERVA'], 'RESERVA_CLA':CAT_CO
 function tablaColor(cat){ return TABLA_COLORS[cat] || CAT_COLORS[cat] || 'var(--muted)'; }
 let TABLA_DATA = null;
 
+// ── RESERVA (Proyección) — datos FIJOS cargados a mano ───────────────────────
+// La reserva se dibuja con JavaScript en el sitio oficial y no se puede scrapear
+// como las juveniles, así que por ahora se cargan las tablas a mano. Para
+// actualizar: reemplazar los números de cada fila (orden: pos, equipo, pts, pj,
+// pg, pe, pp, gf, gc, dif). El "dif" se recalcula solo, no hace falta tocarlo.
+function _fila(pos,equipo,pts,pj,pg,pe,pp,gf,gc){
+  return {pos,equipo,pts,pj,pg,pe,pp,gf,gc,dif:gf-gc};
+}
+const RESERVA_FIJA = {
+  // Torneo Proyección CLAUSURA 2026 — actualizado a Fecha 3
+  RESERVA_CLA: {
+    actualizado: '2026-08-06 (Fecha 3)',
+    zonas: {
+      'Zona A': [
+        _fila(1,'River',7,3,2,1,0,6,1),
+        _fila(2,'Sarmiento',7,3,2,1,0,3,1),
+        _fila(3,'Gimnasia',5,3,1,2,0,2,0),
+        _fila(4,'San Lorenzo',4,2,1,1,0,3,0),
+        _fila(5,'Rosario Central',4,2,1,1,0,3,1),
+        _fila(6,'Talleres',4,2,1,1,0,1,0),
+        _fila(7,'Godoy Cruz',4,3,1,1,1,3,3),
+        _fila(8,'Argentinos',4,3,1,1,1,2,2),
+        _fila(9,'Atlético Tucumán',4,3,1,1,1,2,2),
+        _fila(10,'Tigre',4,3,1,1,1,3,4),
+        _fila(11,'Banfield',4,3,1,1,1,2,4),
+        _fila(12,'Unión',3,3,0,3,0,1,1),
+        _fila(13,'Gimnasia (Mdz)',3,3,1,0,2,4,5),
+        _fila(14,'Racing',2,3,0,2,1,4,5),
+        _fila(15,'Instituto',1,2,0,1,1,0,1),
+        _fila(16,'Aldosivi',1,3,0,1,2,1,4),
+        _fila(17,'Barracas Central',1,2,0,1,1,1,5),
+        _fila(18,'Vélez Sarsfield',0,2,0,0,2,0,2),
+      ],
+      'Zona B': [
+        _fila(1,'Independiente',9,3,3,0,0,13,2),
+        _fila(2,'Boca',7,3,2,1,0,6,1),
+        _fila(3,'Quilmes',5,3,1,2,0,3,2),
+        _fila(4,'Estudiantes (RC)',5,3,1,2,0,2,1),
+        _fila(5,'Estudiantes',4,2,1,1,0,3,1),
+        _fila(6,'Deportivo Riestra',4,3,1,1,1,4,3),
+        _fila(7,'Atl. Rafaela',4,2,1,1,0,2,1),
+        _fila(8,'Lanús',4,3,1,1,1,2,2),
+        _fila(9,'Ferro',4,3,1,1,1,3,4),
+        _fila(10,'Belgrano',4,3,1,1,1,2,5),
+        _fila(11,"Newell's",3,3,0,3,0,3,3),
+        _fila(12,'Platense',2,2,0,2,0,0,0),
+        _fila(13,'Defensa y Justicia',2,3,0,2,1,3,4),
+        _fila(14,'Colón',2,3,0,2,1,3,5),
+        _fila(15,'San Martín (SJ)',2,3,0,2,1,0,9),
+        _fila(16,'Central Córdoba (SdE)',1,2,0,1,1,0,1),
+        _fila(17,'Huracán',1,3,0,1,2,1,3),
+        _fila(18,'Independiente Riv. (M)',0,3,0,0,3,2,5),
+      ],
+    },
+  },
+  // Torneo Proyección APERTURA 2026 — pendiente de cargar (torneo finalizado:
+  // Racing campeón, River subcampeón). Cuando tengas la tabla final, replicar
+  // el formato de RESERVA_CLA de arriba.
+  RESERVA_APE: null,
+};
+function esReserva(cat){ return cat==='RESERVA_APE' || cat==='RESERVA_CLA'; }
+
 function buildTablaModule(){
   const panel=document.getElementById('panel-tabla');
   panel.innerHTML=`
@@ -3236,7 +3298,58 @@ function loadTablaData(){
     .catch(e=>{ console.warn('tablas.json:',e); TABLA_DATA={categorias:{}}; return TABLA_DATA; });
 }
 
+// Genera las <tr> de una tabla a partir de un array de filas (reutilizable).
+function _filasTabla(filas){
+  return filas.map(f=>{
+    const esTigre=/tigre/i.test(f.equipo);
+    const dgC=f.dif>0?'var(--win)':f.dif<0?'var(--loss)':'var(--muted)';
+    const cel=esTigre?'#fff':'';
+    return `<tr${esTigre?' style="background:rgba(192,21,42,0.42);font-weight:700;box-shadow:inset 4px 0 0 #e0202a"':''}>
+      <td style="color:${esTigre?'#fff':'var(--muted)'};font-weight:700${esTigre?';padding-left:12px':''}">${f.pos}°</td>
+      <td class="rival-name"${esTigre?' style="color:#fff;text-align:left"':''}>${f.equipo}</td>
+      <td style="color:var(--gold2);font-weight:700">${f.pts}</td>
+      <td${esTigre?' style="color:#fff"':''}>${f.pj}</td>
+      <td style="color:${esTigre?'#fff':'var(--win)'}">${f.pg}</td>
+      <td style="color:${esTigre?'#fff':'var(--draw)'}">${f.pe}</td>
+      <td style="color:${esTigre?'#fff':'var(--loss)'}">${f.pp}</td>
+      <td style="color:${esTigre?'#fff':'#60a5fa'}">${f.gf}</td>
+      <td style="color:${esTigre?'#fff':'#f87171'}">${f.gc}</td>
+      <td style="color:${esTigre?'#fff':dgC};font-weight:700">${f.dif>0?'+':''}${f.dif}</td>
+    </tr>`;
+  }).join('');
+}
+function _tablaHTML(filas){
+  return `<table>
+    <thead><tr class="thead-sub">
+      <th>Pos</th><th style="text-align:left">Equipo</th><th>Pts</th><th>J</th>
+      <th>G</th><th>E</th><th>P</th><th>GF</th><th>GC</th><th>DIF</th>
+    </tr></thead>
+    <tbody>${_filasTabla(filas)}</tbody>
+  </table>`;
+}
+
+// Render especial para reserva: datos fijos, una o varias zonas apiladas.
+function renderReserva(cat){
+  const content=document.getElementById('tabla-content');
+  const upd=document.getElementById('tabla-updated');
+  const data=RESERVA_FIJA[cat];
+  if(!data){
+    content.innerHTML=`<div style="padding:40px 16px;text-align:center;color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-size:14px">
+      Todavía no hay datos cargados para <b style="color:${tablaColor(cat)}">${TABLA_LABELS[cat]||cat}</b>.<br>
+      <span style="font-size:12px">El torneo Apertura finalizó (Racing campeón). La tabla se cargará próximamente.</span></div>`;
+    upd.textContent='';
+    return;
+  }
+  upd.textContent='Actualizado: '+data.actualizado+' · ligaprofesional.ar (Proyección)';
+  const bloques=Object.entries(data.zonas).map(([zona,filas])=>`
+    <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;letter-spacing:2px;
+                color:${tablaColor(cat)};font-size:15px;padding:14px 4px 6px;text-transform:uppercase">${zona}</div>
+    ${_tablaHTML(filas)}`).join('');
+  content.innerHTML=`<div class="table-wrap" style="padding:0 12px 20px">${bloques}</div>`;
+}
+
 function renderTablaCat(cat){
+  if(esReserva(cat)) return renderReserva(cat);
   const content=document.getElementById('tabla-content');
   const upd=document.getElementById('tabla-updated');
   const filas=(TABLA_DATA&&TABLA_DATA.categorias&&TABLA_DATA.categorias[cat])||[];
@@ -3249,35 +3362,10 @@ function renderTablaCat(cat){
       <span style="font-size:12px">Se completará en la próxima actualización automática.</span></div>`;
     return;
   }
-  const rows=filas.map(f=>{
-    const esTigre=/tigre/i.test(f.equipo);
-    const dgC=f.dif>0?'var(--win)':f.dif<0?'var(--loss)':'var(--muted)';
-    return `<tr${esTigre?' style="background:linear-gradient(90deg,rgba(192,21,42,0.18),transparent);font-weight:700"':''}>
-      <td style="color:${esTigre?'var(--gold2)':'var(--muted)'};font-weight:700">${f.pos}°</td>
-      <td class="rival-name"${esTigre?' style="color:var(--gold2);text-align:left"':''}>${f.equipo}</td>
-      <td style="color:var(--gold2);font-weight:700">${f.pts}</td>
-      <td>${f.pj}</td>
-      <td style="color:var(--win)">${f.pg}</td>
-      <td style="color:var(--draw)">${f.pe}</td>
-      <td style="color:var(--loss)">${f.pp}</td>
-      <td style="color:#60a5fa">${f.gf}</td>
-      <td style="color:#f87171">${f.gc}</td>
-      <td style="color:${dgC};font-weight:700">${f.dif>0?'+':''}${f.dif}</td>
-    </tr>`;
-  }).join('');
-  content.innerHTML=`
-    <div class="table-wrap" style="padding:0 12px 20px">
-      <table>
-        <thead>
-          <tr class="thead-sub">
-            <th>Pos</th><th style="text-align:left">Equipo</th><th>Pts</th><th>J</th>
-            <th>G</th><th>E</th><th>P</th><th>GF</th><th>GC</th><th>DIF</th>
-          </tr>
-        </thead>
-        <tbody>${rows}</tbody>
-      </table>
-    </div>`;
+  content.innerHTML=`<div class="table-wrap" style="padding:0 12px 20px">${_tablaHTML(filas)}</div>`;
 }
+
+function _renderTablaCat_OLD(){ /* eliminada: reemplazada por renderTablaCat + _tablaHTML */ }
 
 initFirebase()
   .then(()=>loadData())
