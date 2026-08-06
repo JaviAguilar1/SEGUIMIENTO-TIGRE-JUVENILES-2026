@@ -3196,7 +3196,12 @@ function doWallLogin(){
 //  Los datos vienen de data/tablas.json, actualizado solo por
 //  una GitHub Action (scripts/scrape_tablas.py). Cero carga manual.
 // ============================================================
-const TABLA_CATS = ['4TA','5TA','6TA'];
+const TABLA_CATS = ['4TA','5TA','6TA','7MA','8VA','9NA','RESERVA_APE','RESERVA_CLA'];
+// Etiquetas de las subpestañas de TABLA LPF (la reserva se muestra en dos vistas)
+const TABLA_LABELS = { 'RESERVA_APE':'RES. APERTURA', 'RESERVA_CLA':'RES. CLAUSURA' };
+// Color de las subpestañas de reserva (las juveniles ya tienen color en CAT_COLORS)
+const TABLA_COLORS = { 'RESERVA_APE':CAT_COLORS['RESERVA'], 'RESERVA_CLA':CAT_COLORS['RESERVA'] };
+function tablaColor(cat){ return TABLA_COLORS[cat] || CAT_COLORS[cat] || 'var(--muted)'; }
 let TABLA_DATA = null;
 
 function buildTablaModule(){
@@ -3214,12 +3219,12 @@ function buildTablaModule(){
     const t=document.createElement('div');
     t.className='cat-tab'+(i===0?' active':'');
     t.dataset.cat=cat;
-    t.style.color=CAT_COLORS[cat];
-    t.innerHTML=`<span class="cat-dot" style="background:${CAT_COLORS[cat]}"></span>${cat}`;
+    t.style.color=tablaColor(cat);
+    t.innerHTML=`<span class="cat-dot" style="background:${tablaColor(cat)}"></span>${TABLA_LABELS[cat]||cat}`;
     t.addEventListener('click',()=>{ selectCatTab('tabla-subtabs',cat); renderTablaCat(cat); });
     wrap.appendChild(t);
   });
-  loadTablaData().then(()=>renderTablaCat('4TA'));
+  loadTablaData().then(()=>renderTablaCat(TABLA_CATS[0]));
 }
 
 function loadTablaData(){
@@ -3240,7 +3245,7 @@ function renderTablaCat(cat){
   }
   if(!filas.length){
     content.innerHTML=`<div style="padding:40px 16px;text-align:center;color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-size:14px">
-      Todavía no hay datos cargados para <b style="color:${CAT_COLORS[cat]}">${cat}</b>.<br>
+      Todavía no hay datos cargados para <b style="color:${tablaColor(cat)}">${TABLA_LABELS[cat]||cat}</b>.<br>
       <span style="font-size:12px">Se completará en la próxima actualización automática.</span></div>`;
     return;
   }
