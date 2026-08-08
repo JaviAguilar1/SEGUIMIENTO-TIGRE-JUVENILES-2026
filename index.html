@@ -1480,9 +1480,6 @@ table.gen-table .cat-cell{font-family:'Bebas Neue',sans-serif;font-size:15px;
 <!-- STATS MODULE -->
 <div class="module-panel active" id="panel-stats" data-mod="stats"></div>
 
-<!-- TABLA LPF MODULE (posiciones oficiales, fuente ligaprofesional.ar) -->
-<div class="module-panel" id="panel-tabla" data-mod="tabla"></div>
-
 <!-- (Plantel, Rendimiento, Análisis GPS, Carga y Semana fueron retirados:
      la plataforma quedó enfocada solo en Estadísticas.) -->
 
@@ -2075,7 +2072,6 @@ function showOfflineBanner(){
 // ============================================================
 const MODULES = [
   {id:'stats',      label:'ESTADÍSTICAS', icon:'📊'},
-  {id:'tabla',      label:'TABLA LPF',    icon:'🏆'},
 ];
 
 function buildNav(){
@@ -2395,6 +2391,9 @@ function renderStatsSingle(cat, content){
 
     <div class="st"><div class="stbar"></div>GOLEADORES · <span style="color:${CAT_COLORS[cat]}">${cat}</span></div>
     <div id="goleadores-${dataCat}"></div>
+
+    <div class="st"><div class="stbar"></div>🏆 TABLA DE POSICIONES · LPF${isReserva?'':` · <span style="color:${CAT_COLORS[cat]}">${cat}</span>`}</div>
+    <div id="tabla-lpf-${cat}"></div>
   `;
 
   // Semestre switch (solo RESERVA)
@@ -2424,6 +2423,8 @@ function renderStatsSingle(cat, content){
   document.getElementById(`stats-area-${dataCat}`).innerHTML=statsHTML(calcStats(dataCat,1,totMax));
   renderCatCharts(dataCat);
   renderGoleadores(dataCat);
+  if(isReserva) renderTablaReserva(`tabla-lpf-${cat}`);
+  else renderTablaLPF(cat, `tabla-lpf-${cat}`);
 }
 
 // ============================================================
@@ -3127,14 +3128,15 @@ function doWallLogin(){
 }
 
 // ============================================================
-//  TABLA LPF MODULE  (posiciones oficiales de ligaprofesional.ar)
-//  Los datos vienen de data/tablas.json, actualizado solo por
+//  TABLA LPF (posiciones oficiales de ligaprofesional.ar)
+//  Los datos de 4TA-9NA vienen de data/tablas.json, actualizado solo por
 //  una GitHub Action (scripts/scrape_tablas.py). Cero carga manual.
+//  Se muestran incrustadas al final de cada categoría en ESTADÍSTICAS
+//  (ver renderTablaLPF / renderTablaReserva, llamadas desde renderStatsSingle).
 // ============================================================
-const TABLA_CATS = ['4TA','5TA','6TA','7MA','8VA','9NA','RESERVA_APE','RESERVA_CLA'];
-// Etiquetas de las subpestañas de TABLA LPF (la reserva se muestra en dos vistas)
+// Etiquetas de los torneos de Reserva (se muestran dos, apilados)
 const TABLA_LABELS = { 'RESERVA_APE':'RES. APERTURA', 'RESERVA_CLA':'RES. CLAUSURA' };
-// Color de las subpestañas de reserva (las juveniles ya tienen color en CAT_COLORS)
+// Color de cada torneo de reserva (las juveniles ya tienen color en CAT_COLORS)
 const TABLA_COLORS = { 'RESERVA_APE':CAT_COLORS['RESERVA'], 'RESERVA_CLA':CAT_COLORS['RESERVA'] };
 function tablaColor(cat){ return TABLA_COLORS[cat] || CAT_COLORS[cat] || 'var(--muted)'; }
 let TABLA_DATA = null;
@@ -3243,31 +3245,6 @@ const RESERVA_FIJA = {
     },
   },
 };
-function esReserva(cat){ return cat==='RESERVA_APE' || cat==='RESERVA_CLA'; }
-
-function buildTablaModule(){
-  const panel=document.getElementById('panel-tabla');
-  panel.innerHTML=`
-    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;padding:8px 12px 0;border-bottom:1px solid rgba(26,45,90,0.4);margin-bottom:4px">
-      <div class="cat-subtabs" id="tabla-subtabs" style="border:none;padding:0;margin:0"></div>
-      <div id="tabla-updated" style="font-family:'Barlow Condensed',sans-serif;font-size:10px;letter-spacing:1px;color:var(--muted)"></div>
-    </div>
-    <div class="main" id="tabla-content"></div>`;
-  // subtabs solo para 4TA/5TA/6TA (sin GENERAL)
-  const wrap=document.getElementById('tabla-subtabs');
-  wrap.innerHTML='';
-  TABLA_CATS.forEach((cat,i)=>{
-    const t=document.createElement('div');
-    t.className='cat-tab'+(i===0?' active':'');
-    t.dataset.cat=cat;
-    t.style.color=tablaColor(cat);
-    t.innerHTML=`<span class="cat-dot" style="background:${tablaColor(cat)}"></span>${TABLA_LABELS[cat]||cat}`;
-    t.addEventListener('click',()=>{ selectCatTab('tabla-subtabs',cat); renderTablaCat(cat); });
-    wrap.appendChild(t);
-  });
-  loadTablaData().then(()=>renderTablaCat(TABLA_CATS[0]));
-}
-
 function loadTablaData(){
   if(TABLA_DATA) return Promise.resolve(TABLA_DATA);
   // cache-buster para que el navegador no sirva un JSON viejo tras un update
@@ -3307,44 +3284,50 @@ function _tablaHTML(filas){
   </table>`;
 }
 
-// Render especial para reserva: datos fijos, una o varias zonas apiladas.
-function renderReserva(cat){
-  const content=document.getElementById('tabla-content');
-  const upd=document.getElementById('tabla-updated');
-  const data=RESERVA_FIJA[cat];
-  if(!data){
-    content.innerHTML=`<div style="padding:40px 16px;text-align:center;color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-size:14px">
-      Todavía no hay datos cargados para <b style="color:${tablaColor(cat)}">${TABLA_LABELS[cat]||cat}</b>.<br>
-      <span style="font-size:12px">El torneo Apertura finalizó (Racing campeón). La tabla se cargará próximamente.</span></div>`;
-    upd.textContent='';
-    return;
-  }
-  upd.textContent='Actualizado: '+data.actualizado+' · ligaprofesional.ar (Proyección)';
-  const bloques=Object.entries(data.zonas).map(([zona,filas])=>`
-    <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;letter-spacing:2px;
-                color:${tablaColor(cat)};font-size:15px;padding:14px 4px 6px;text-transform:uppercase">${zona}</div>
-    ${_tablaHTML(filas)}`).join('');
-  content.innerHTML=`<div class="table-wrap" style="padding:0 12px 20px">${bloques}</div>`;
+// Tabla LPF de una categoría (4TA-9NA), incrustada al final de su panel
+// en ESTADÍSTICAS (ver renderStatsSingle). containerId es el <div> destino.
+function renderTablaLPF(cat, containerId){
+  const el=document.getElementById(containerId);
+  if(!el) return;
+  loadTablaData().then(()=>{
+    const filas=(TABLA_DATA&&TABLA_DATA.categorias&&TABLA_DATA.categorias[cat])||[];
+    if(!filas.length){
+      el.innerHTML=`<div style="padding:40px 16px;text-align:center;color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-size:14px">
+        Todavía no hay datos cargados para <b style="color:${tablaColor(cat)}">${cat}</b>.<br>
+        <span style="font-size:12px">Se completará en la próxima actualización automática.</span></div>`;
+      return;
+    }
+    const upd=TABLA_DATA&&TABLA_DATA.actualizado
+      ? `Actualizado: ${TABLA_DATA.actualizado} · ${TABLA_DATA.fuente||''}` : '';
+    el.innerHTML=`
+      <div style="font-family:'Barlow Condensed',sans-serif;font-size:10px;letter-spacing:1px;color:var(--muted);padding:0 12px 6px;text-align:right">${upd}</div>
+      <div class="table-wrap" style="padding:0 12px 20px">${_tablaHTML(filas)}</div>`;
+  });
 }
 
-function renderTablaCat(cat){
-  if(esReserva(cat)) return renderReserva(cat);
-  const content=document.getElementById('tabla-content');
-  const upd=document.getElementById('tabla-updated');
-  const filas=(TABLA_DATA&&TABLA_DATA.categorias&&TABLA_DATA.categorias[cat])||[];
-  if(TABLA_DATA&&TABLA_DATA.actualizado){
-    upd.textContent='Actualizado: '+TABLA_DATA.actualizado+' · '+(TABLA_DATA.fuente||'');
-  }
-  if(!filas.length){
-    content.innerHTML=`<div style="padding:40px 16px;text-align:center;color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-size:14px">
-      Todavía no hay datos cargados para <b style="color:${tablaColor(cat)}">${TABLA_LABELS[cat]||cat}</b>.<br>
-      <span style="font-size:12px">Se completará en la próxima actualización automática.</span></div>`;
-    return;
-  }
-  content.innerHTML=`<div class="table-wrap" style="padding:0 12px 20px">${_tablaHTML(filas)}</div>`;
+// Tabla LPF de Reserva (Proyección): datos fijos, ambos torneos apilados,
+// el que está en curso (Clausura) arriba y el anterior (Apertura) debajo.
+function renderTablaReserva(containerId){
+  const el=document.getElementById(containerId);
+  if(!el) return;
+  const orden=['RESERVA_CLA','RESERVA_APE'];
+  el.innerHTML=orden.map(key=>{
+    const data=RESERVA_FIJA[key];
+    const label=TABLA_LABELS[key]||key;
+    if(!data){
+      return `<div style="padding:20px 16px;text-align:center;color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-size:13px">
+        Todavía no hay datos cargados para <b style="color:${tablaColor(key)}">${label}</b>.</div>`;
+    }
+    const bloques=Object.entries(data.zonas).map(([zona,filas])=>`
+      <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;letter-spacing:2px;
+                  color:${tablaColor(key)};font-size:15px;padding:14px 4px 6px;text-transform:uppercase">${zona}</div>
+      ${_tablaHTML(filas)}`).join('');
+    return `
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:15px;letter-spacing:2px;color:${tablaColor(key)};padding:16px 12px 0">${label}</div>
+      <div style="font-family:'Barlow Condensed',sans-serif;font-size:10px;letter-spacing:1px;color:var(--muted);padding:2px 12px 0;text-align:right">Actualizado: ${data.actualizado} · ligaprofesional.ar (Proyección)</div>
+      <div class="table-wrap" style="padding:0 12px 20px">${bloques}</div>`;
+  }).join('');
 }
-
-function _renderTablaCat_OLD(){ /* eliminada: reemplazada por renderTablaCat + _tablaHTML */ }
 
 initFirebase()
   .then(()=>loadData())
@@ -3352,7 +3335,6 @@ initFirebase()
   .finally(()=>{
     buildNav();
     buildStatsModule();
-    buildTablaModule();
     applyViewMode();
     startPublicListener(); // load stats for everyone, auth or not
   });
