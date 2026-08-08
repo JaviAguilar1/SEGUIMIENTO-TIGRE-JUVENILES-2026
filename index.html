@@ -2187,21 +2187,8 @@ function renderStatsGeneral(content){
         <th>PP</th><th>GF</th><th>GC</th><th>DG</th><th>%</th>
       </tr></thead><tbody>${trows}</tbody></table></div>
 
-    <div class="st"><div class="stbar"></div>PUNTOS POR BLOQUE — 4TA A 9NA</div>
-    <div class="chart-card" style="margin-bottom:20px">
-      <h3>COMPARATIVA DE PUNTOS</h3>
-      <canvas id="cgen-pts" height="200"></canvas>
-    </div>
-    <div class="charts-row">
-      <div class="chart-card"><h3>GOLES A FAVOR</h3><canvas id="cgen-gf" height="180"></canvas></div>
-      <div class="chart-card"><h3>GOLES EN CONTRA</h3><canvas id="cgen-gc" height="180"></canvas></div>
-    </div>
-
     <div class="st"><div class="stbar"></div>TORTAS POR CATEGORÍA (TEMPORADA)</div>
     <div class="pies-grid" id="gen-pies-cat"></div>
-
-    <div class="st"><div class="stbar"></div>TORTAS GENERALES POR BLOQUE</div>
-    <div class="pies-grid" id="gen-pies-blk"></div>
 
     <div class="st"><div class="stbar"></div>🏆 TOP GOLEADORES — 4TA A 9NA</div>
     <div id="gen-top-goleadores"></div>
@@ -2218,23 +2205,7 @@ function renderStatsGeneral(content){
   });
   document.getElementById('gen-stats-area').innerHTML=statsHTML(calcStatsAll(1,35));
 
-  // Charts
-  const def=chartDef(), blocks2=getBlocks('4TA'), labels=blocks2.map(b=>b.label);
-  const mkDs=(cat,field)=>({label:cat,data:blocks2.map(b=>calcStats(cat,b.from,b.to)[field]),
-    backgroundColor:CAT_COLORS[cat]+'bb',borderColor:CAT_COLORS[cat],borderWidth:1,borderRadius:4,borderSkipped:false});
-  const defLeg={...def,plugins:{...def.plugins,legend:{labels:{color:'#5a7099',font:{family:'Barlow Condensed'}}}}};
-
-  killChart('cgen-pts');
-  new Chart(document.getElementById('cgen-pts').getContext('2d'),{type:'bar',
-    data:{labels,datasets:GENERAL_CATS.map(c=>mkDs(c,'pts'))},options:defLeg});
-  killChart('cgen-gf');
-  new Chart(document.getElementById('cgen-gf').getContext('2d'),{type:'bar',
-    data:{labels,datasets:GENERAL_CATS.map(c=>mkDs(c,'gf'))},options:defLeg});
-  killChart('cgen-gc');
-  new Chart(document.getElementById('cgen-gc').getContext('2d'),{type:'bar',
-    data:{labels,datasets:GENERAL_CATS.map(c=>({...mkDs(c,'gc'),backgroundColor:CAT_COLORS[c]+'66'}))},options:defLeg});
-
-  // Pies per cat
+  // Pies per cat (tamaño normal)
   const gpCat=document.getElementById('gen-pies-cat'); gpCat.innerHTML='';
   GENERAL_CATS.forEach(cat=>{
     const s=calcStats(cat,1,35),id=`gpc-${cat}`;
@@ -2242,15 +2213,7 @@ function renderStatsGeneral(content){
     setTimeout(()=>drawPie(id,s),0);
   });
 
-  // Pies per block
-  const gpBlk=document.getElementById('gen-pies-blk'); gpBlk.innerHTML='';
-  blocks.forEach(b=>{
-    const s=calcStatsAll(b.from,b.to),id=`gpb-${b.from}`;
-    gpBlk.insertAdjacentHTML('beforeend',pieMini(id,s,b.label+' — 4TA-9NA'));
-    setTimeout(()=>drawPie(id,s),0);
-  });
-
-  // Top 3 goleadores all categories
+  // Top 5 goleadores all categories
   const topWrap = document.getElementById('gen-top-goleadores');
   if(topWrap) renderTopGoleadores(topWrap);
 }
@@ -2266,15 +2229,15 @@ function renderTopGoleadores(wrap){
       all[key].cats[cat] = (all[key].cats[cat]||0) + g.goals;
     });
   });
-  const sorted = Object.values(all).sort((a,b)=>b.goals-a.goals).slice(0,3);
+  const sorted = Object.values(all).sort((a,b)=>b.goals-a.goals).slice(0,5);
 
   if(sorted.length===0){
     wrap.innerHTML='<div style="text-align:center;padding:24px;color:var(--muted);font-family:Barlow Condensed,sans-serif;letter-spacing:1px;font-size:13px">Sin goleadores registrados aún</div>';
     return;
   }
 
-  const medals=['🥇','🥈','🥉'];
-  const colors=['var(--gold2)','#94a3b8','#b45309'];
+  const medals=['🥇','🥈','🥉','4°','5°'];
+  const colors=['var(--gold2)','#94a3b8','#b45309','#5a7099','#5a7099'];
   wrap.innerHTML=`<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;margin-bottom:28px">
     ${sorted.map((g,i)=>{
       const catTags=Object.entries(g.cats).map(([cat,n])=>
@@ -2428,24 +2391,7 @@ function renderStatsSingle(cat, content){
     <div class="periodo-tabs" id="ptabs-${dataCat}">${ptHTML}</div>
     <div id="stats-area-${dataCat}"></div>
 
-    ${isReserva ? `
-    <div class="st"><div class="stbar"></div>RESULTADOS · ${cat} · ${reservaSemestre===2?'2do SEMESTRE':'1er SEMESTRE'}</div>
-    <div class="charts-row">
-      <div class="chart-card"><h3>RESULTADOS TOTALES</h3><canvas id="cpie-${dataCat}" height="200"></canvas></div>
-    </div>
-    ` : `
-    <div class="st"><div class="stbar"></div>GRÁFICOS · ${cat}</div>
-    <div class="charts-row">
-      <div class="chart-card"><h3>PUNTOS POR BLOQUE</h3><canvas id="cpts-${dataCat}" height="200"></canvas></div>
-      <div class="chart-card"><h3>GF / GC POR BLOQUE</h3><canvas id="cgls-${dataCat}" height="200"></canvas></div>
-    </div>
-    <div class="charts-row">
-      <div class="chart-card"><h3>DIFERENCIA DE GOL ACUMULADA</h3><canvas id="cdg-${dataCat}" height="200"></canvas></div>
-      <div class="chart-card"><h3>RESULTADOS TOTALES</h3><canvas id="cpie-${dataCat}" height="200"></canvas></div>
-    </div>
-    <div class="st"><div class="stbar"></div>TORTAS POR BLOQUE · ${cat}</div>
-    <div class="pies-grid" id="piesgrid-${dataCat}"></div>
-    `}
+    ${isReserva ? `` : ``}
 
     <div class="st"><div class="stbar"></div>GOLEADORES · <span style="color:${CAT_COLORS[cat]}">${cat}</span></div>
     <div id="goleadores-${dataCat}"></div>
@@ -2936,20 +2882,9 @@ function renderCatCharts(cat){
   const fixtureList = cat==='RESERVA' ? RIVALS_RESERVA : (cat==='RESERVA_S2' ? RIVALS_RESERVA_S2 : RIVALS);
   const totMax = isRes ? 18 : 35;
 
-  // RESERVA/RESERVA_S2: solo la torta de resultados totales, nada más
-  if(isRes){
-    const tot=calcStats(cat,1,totMax);
-    killChart(`cpie-${cat}`);
-    const pieEl=document.getElementById(`cpie-${cat}`);
-    if(pieEl){
-      new Chart(pieEl.getContext('2d'),{type:'doughnut',
-        data:{labels:['Ganados','Empates','Perdidos'],datasets:[{data:[tot.pg,tot.pe,tot.pp],
-          backgroundColor:['rgba(34,197,94,.82)','rgba(245,158,11,.82)','rgba(192,21,42,.75)'],
-          borderColor:['#22c55e','#f59e0b','#c0152a'],borderWidth:2}]},
-        options:{responsive:true,plugins:{legend:{position:'bottom',labels:{color:'#5a7099',font:{family:'Barlow Condensed'}}}}}});
-    }
-    return;
-  }
+  // RESERVA/RESERVA_S2: sin gráficos. 4TA-9NA: sin gráficos ni tortas por bloque.
+  if(isRes) return;
+  if(!document.getElementById(`cpts-${cat}`)) return;
 
   killChart(`cpts-${cat}`);
   new Chart(document.getElementById(`cpts-${cat}`).getContext('2d'),{type:'bar',
