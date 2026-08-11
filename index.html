@@ -3018,20 +3018,70 @@ function renderGoleadores(cat){
 // ── PLANTEL (roster + estadisticas de temporada, ambos desde futdetail) ──
 function normNombre(s){ return (s||'').trim().toLowerCase(); }
 
+const ROSTER_COLS = [
+  {key:'nombre',              label:'JUGADOR',   type:'text'},
+  {key:'posicion',            label:'POSICIÓN',  type:'text'},
+  {key:'edad',                label:'EDAD',      type:'num'},
+  {key:'convocatorias',       label:'CONV.',     type:'num'},
+  {key:'partidos_titular',    label:'TITULAR',   type:'num'},
+  {key:'minutos_jugados',     label:'MIN.',      type:'num'},
+  {key:'goles',                label:'GOLES',     type:'num'},
+  {key:'asistencias',          label:'ASIST.',    type:'num'},
+  {key:'tarjeta_amarilla',     label:'T.A',       type:'num'},
+  {key:'tarjeta_roja',         label:'T.R',       type:'num'},
+];
+const rosterSortState = {}; // { [cat]: {key, dir} }
+
+function rosterColValue(p, key){
+  if(key==='nombre' || key==='posicion' || key==='edad') return p[key];
+  return (p.stats||{})[key];
+}
+
 function renderRosterCat(cat, content){
   const roster=plantelFutdetail[cat]||[];
   const statsPorNombre={};
   (jugadoresStats[cat]||[]).forEach(j=>{ statsPorNombre[normNombre(j.jugador)]=j; });
 
+  content.innerHTML=`
+    <div class="st" style="margin-top:4px"><div class="stbar"></div>🏆 TABLA DE POSICIONES · LPF${cat==='RESERVA'?'':` · <span style="color:${CAT_COLORS[cat]}">${cat}</span>`}</div>
+    <div id="tabla-lpf-roster-${cat}"></div>
+
+    <div class="st"><div class="stbar"></div>PLANTEL · <span style="color:${CAT_COLORS[cat]}">${cat}</span></div>
+    <div id="roster-table-${cat}"></div>`;
+
+  if(cat==='RESERVA') renderTablaReserva(`tabla-lpf-roster-${cat}`);
+  else renderTablaLPF(cat, `tabla-lpf-roster-${cat}`);
+
   if(roster.length===0){
-    content.innerHTML=`<div style="text-align:center;padding:24px;color:var(--muted);font-family:Barlow Condensed,sans-serif;letter-spacing:1px;font-size:13px">Sin plantel cargado aún</div>`;
+    document.getElementById(`roster-table-${cat}`).innerHTML=
+      `<div style="text-align:center;padding:24px;color:var(--muted);font-family:Barlow Condensed,sans-serif;letter-spacing:1px;font-size:13px">Sin plantel cargado aún</div>`;
     return;
   }
 
   const merged=roster.map(p=>({...p, stats:statsPorNombre[normNombre(p.nombre)]||{}}));
-  merged.sort((a,b)=>(parseInt(b.stats.minutos_jugados)||0)-(parseInt(a.stats.minutos_jugados)||0));
+  if(!rosterSortState[cat]) rosterSortState[cat]={key:'minutos_jugados', dir:-1};
+  renderRosterTable(cat, merged);
+}
 
-  const rows=merged.map(p=>{
+function renderRosterTable(cat, merged){
+  const {key, dir}=rosterSortState[cat];
+  const col=ROSTER_COLS.find(c=>c.key===key);
+  // Comparador siempre en orden ascendente; dir=1 ascendente, dir=-1 descendente.
+  const sorted=[...merged].sort((a,b)=>{
+    const va=rosterColValue(a,key), vb=rosterColValue(b,key);
+    const asc = col.type==='num'
+      ? (parseFloat(va)||0)-(parseFloat(vb)||0)
+      : String(va||'').localeCompare(String(vb||''));
+    return asc*dir;
+  });
+
+  const headHTML=ROSTER_COLS.map(c=>{
+    const active=c.key===key;
+    const arrow=active?(dir===1?' ▲':' ▼'):'';
+    return `<th data-key="${c.key}" style="cursor:pointer;user-select:none;white-space:nowrap">${c.label}${arrow}</th>`;
+  }).join('');
+
+  const rows=sorted.map(p=>{
     const foto=p.foto
       ? `<img src="${esc(p.foto)}" alt="" style="width:32px;height:32px;border-radius:50%;object-fit:cover;vertical-align:middle;margin-right:8px" onerror="this.style.display='none'">`
       : `<span style="display:inline-block;width:32px;height:32px;border-radius:50%;background:var(--surface2);vertical-align:middle;margin-right:8px"></span>`;
@@ -3050,15 +3100,21 @@ function renderRosterCat(cat, content){
     </tr>`;
   }).join('');
 
-  content.innerHTML=`
-    <div class="st" style="margin-top:4px"><div class="stbar"></div>PLANTEL · <span style="color:${CAT_COLORS[cat]}">${cat}</span></div>
-    <div class="table-wrap"><table>
-      <thead><tr>
-        <th>JUGADOR</th><th>POSICIÓN</th><th>EDAD</th><th>CONV.</th><th>TITULAR</th>
-        <th>MIN.</th><th>GOLES</th><th>ASIST.</th><th>T.A</th><th>T.R</th>
-      </tr></thead>
+  const wrap=document.getElementById(`roster-table-${cat}`);
+  wrap.innerHTML=`<div class="table-wrap"><table>
+      <thead><tr>${headHTML}</tr></thead>
       <tbody>${rows}</tbody>
     </table></div>`;
+
+  wrap.querySelectorAll('th[data-key]').forEach(th=>{
+    th.addEventListener('click',()=>{
+      const k=th.dataset.key;
+      const st=rosterSortState[cat];
+      st.dir = (st.key===k) ? -st.dir : -1;
+      st.key = k;
+      renderRosterTable(cat, merged);
+    });
+  });
 }
 
 function buildRosterModule(){
