@@ -2,7 +2,7 @@
 // Cachea el shell de la app para uso offline.
 // Datos dinámicos (Firebase, tablas.json) van siempre a la red.
 
-const CACHE = 'tigre-juveniles-v1';
+const CACHE = 'tigre-juveniles-v2';
 
 // Shell de la app: se precachea en la instalación.
 const APP_SHELL = [
@@ -56,6 +56,22 @@ self.addEventListener('fetch', event => {
 
   if (isDynamic) {
     event.respondWith(fetch(req).catch(() => caches.match(req)));
+    return;
+  }
+
+  // Navegaciones (el documento HTML principal): red primero, para que el
+  // usuario siempre vea la versión nueva. Si no hay conexión, se usa el
+  // caché como respaldo.
+  if (req.mode === 'navigate') {
+    event.respondWith(
+      fetch(req).then(res => {
+        if (res && res.status === 200) {
+          const copy = res.clone();
+          caches.open(CACHE).then(cache => cache.put(req, copy));
+        }
+        return res;
+      }).catch(() => caches.match(req).then(cached => cached || caches.match('./index.html')))
+    );
     return;
   }
 
