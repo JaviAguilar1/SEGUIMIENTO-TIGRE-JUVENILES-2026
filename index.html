@@ -1512,7 +1512,7 @@ const FB_CONFIG = {
 const CATEGORIES = ['4TA','5TA','6TA','7MA','8VA','9NA','RESERVA'];
 // Categorías que entran en el RESUMEN GENERAL (Reserva va aparte, nunca se mezcla)
 const GENERAL_CATS = ['4TA','5TA','6TA','7MA','8VA','9NA'];
-const LINK_CATS  = ['4TA','5TA','6TA','RESERVA'];
+const LINK_CATS  = ['4TA','5TA','6TA','7MA','8VA','9NA','RESERVA'];
 const CAT_COLORS = {
   '4TA':'#f0c040','5TA':'#60a5fa','6TA':'#f87171',
   '7MA':'#f472b6','8VA':'#a78bfa','9NA':'#34d399','RESERVA':'#e8a020'
@@ -1558,7 +1558,8 @@ const links      = {};
 const goleadores = {};
 const matchData  = {}; // matchData[cat][fecha] = {titulares, suplentes, cambios, duracion}
 const gymData    = {}; // gymData[cat] = [{id,date,name,tipo,players:[{name,load,notes}]}]
-CATEGORIES.forEach(cat => { matchData[cat] = {}; gymData[cat] = []; });
+const jugadoresStats = {}; // jugadoresStats[cat] = [{jugador,minutos_jugados,goles,...}] (acumulado temporada, futdetail)
+CATEGORIES.forEach(cat => { matchData[cat] = {}; gymData[cat] = []; jugadoresStats[cat] = []; });
 // ============================================================
 //  RESERVA — Fixture propio (Grupo A · 18 fechas)
 //  17 rivales editables + 1 interzonal (F18)
@@ -1760,6 +1761,7 @@ function initFirebase(){
               if(p.goleadores?.[cat]) goleadores[cat]=p.goleadores[cat];
               if(p.matchData?.[cat]) Object.assign(matchData[cat], p.matchData[cat]);
               if(p.gymData?.[cat])   gymData[cat] = p.gymData[cat];
+              if(p.jugadores?.[cat]) jugadoresStats[cat] = p.jugadores[cat];
               if(cat==='RESERVA'&&p.rivalData?.['RESERVA']) Object.assign(rivalData['RESERVA'], p.rivalData['RESERVA']);
             });
             // RESERVA_S2 (2do semestre)
@@ -1838,11 +1840,12 @@ function saveData(){
   if(!fbReady||!db||!canEdit) return;
   clearTimeout(saveTimeout);
   saveTimeout=setTimeout(()=>{
-    const payload={results:{},links:{},goleadores:{},rivalData:rivalData,matchData:matchData,gymData:gymData};
+    const payload={results:{},links:{},goleadores:{},rivalData:rivalData,matchData:matchData,gymData:gymData,jugadores:{}};
     CATEGORIES.forEach(cat=>{
       payload.results[cat]={};
       payload.links[cat]={};
       payload.goleadores[cat]=goleadores[cat]||[];
+      payload.jugadores[cat]=jugadoresStats[cat]||[];
       const fl=cat==='RESERVA'?RIVALS_RESERVA:RIVALS;
       fl.forEach(r=>{
         payload.results[cat][r.f]=results[cat][r.f]||null;
@@ -1894,6 +1897,7 @@ function loadData(){
           // Load matchData (lineup + cambios)
           if(p.matchData?.[cat]) Object.assign(matchData[cat], p.matchData[cat]);
           if(p.gymData?.[cat])   gymData[cat] = p.gymData[cat];
+          if(p.jugadores?.[cat]) jugadoresStats[cat] = p.jugadores[cat];
           // Load RESERVA fixture
           if(cat==='RESERVA'&&p.rivalData?.['RESERVA']){
             Object.assign(rivalData['RESERVA'], p.rivalData['RESERVA']);
@@ -2392,6 +2396,11 @@ function renderStatsSingle(cat, content){
     <div class="st"><div class="stbar"></div>GOLEADORES · <span style="color:${CAT_COLORS[cat]}">${cat}</span></div>
     <div id="goleadores-${dataCat}"></div>
 
+    ${isReserva ? '' : `
+    <div class="st"><div class="stbar"></div>📋 ESTADÍSTICAS POR JUGADOR · <span style="color:${CAT_COLORS[cat]}">${cat}</span></div>
+    <div id="jugadores-stats-${dataCat}"></div>
+    `}
+
     <div class="st"><div class="stbar"></div>🏆 TABLA DE POSICIONES · LPF${isReserva?'':` · <span style="color:${CAT_COLORS[cat]}">${cat}</span>`}</div>
     <div id="tabla-lpf-${cat}"></div>
   `;
@@ -2423,6 +2432,7 @@ function renderStatsSingle(cat, content){
   document.getElementById(`stats-area-${dataCat}`).innerHTML=statsHTML(calcStats(dataCat,1,totMax));
   renderCatCharts(dataCat);
   renderGoleadores(dataCat);
+  if(!isReserva) renderJugadoresStats(dataCat);
   if(isReserva) renderTablaReserva(`tabla-lpf-${cat}`);
   else renderTablaLPF(cat, `tabla-lpf-${cat}`);
 }
@@ -2977,6 +2987,36 @@ function renderGoleadores(cat){
   </div>`;
 }
 
+// ── ESTADÍSTICAS POR JUGADOR (acumulado temporada, viene de futdetail) ──
+function renderJugadoresStats(cat){
+  const wrap=document.getElementById(`jugadores-stats-${cat}`);
+  if(!wrap)return;
+  const list=jugadoresStats[cat]||[];
+  if(list.length===0){
+    wrap.innerHTML=`<div style="text-align:center;padding:24px;color:var(--muted);font-family:Barlow Condensed,sans-serif;letter-spacing:1px;font-size:13px">Sin estadísticas cargadas aún</div>`;
+    return;
+  }
+  const sorted=[...list].sort((a,b)=>(parseInt(b.minutos_jugados)||0)-(parseInt(a.minutos_jugados)||0));
+  const rows=sorted.map(j=>`<tr>
+    <td class="rival-name">${esc(j.jugador||'—')}</td>
+    <td>${j.convocatorias||0}</td>
+    <td>${j.partidos_titular||0}</td>
+    <td>${j.minutos_jugados||0}</td>
+    <td style="color:#60a5fa;font-weight:700">${j.goles||0}</td>
+    <td>${j.asistencias||0}</td>
+    <td style="color:var(--draw)">${j.tarjeta_amarilla||0}</td>
+    <td style="color:var(--loss)">${j.tarjeta_roja||0}</td>
+    <td>${j.entrenamiento_ausencia||0}</td>
+  </tr>`).join('');
+  wrap.innerHTML=`<div class="table-wrap"><table>
+    <thead><tr>
+      <th>JUGADOR</th><th>CONV.</th><th>TITULAR</th><th>MIN.</th><th>GOLES</th>
+      <th>ASIST.</th><th>T.A</th><th>T.R</th><th>AUS. ENT.</th>
+    </tr></thead>
+    <tbody>${rows}</tbody>
+  </table></div>`;
+}
+
 function addGoleador(cat){
   const nameEl=document.getElementById(`gol-name-${cat}`);
   const fechaEl=document.getElementById(`gol-fecha-${cat}`);
@@ -3353,6 +3393,7 @@ function startPublicListener(){
       if(p.goleadores?.[cat]) goleadores[cat]=p.goleadores[cat];
       if(p.matchData?.[cat]) Object.assign(matchData[cat], p.matchData[cat]);
       if(p.gymData?.[cat])   gymData[cat] = p.gymData[cat];
+      if(p.jugadores?.[cat]) jugadoresStats[cat] = p.jugadores[cat];
       if(cat==='RESERVA'&&p.rivalData?.['RESERVA']){
         Object.assign(rivalData['RESERVA'], p.rivalData['RESERVA']);
       }
