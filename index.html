@@ -1559,6 +1559,7 @@ const goleadores = {};
 const matchData  = {}; // matchData[cat][fecha] = {titulares, suplentes, cambios, duracion}
 const gymData    = {}; // gymData[cat] = [{id,date,name,tipo,players:[{name,load,notes}]}]
 const jugadoresStats = {}; // jugadoresStats[cat] = [{jugador,minutos_jugados,goles,...}] (acumulado temporada, futdetail)
+let chequeoSemanal = {alertas:[]}; // {fecha_revision, alertas:[{categoria,fecha,mi_plataforma,futdetail,lpf_oficial}]}
 CATEGORIES.forEach(cat => { matchData[cat] = {}; gymData[cat] = []; jugadoresStats[cat] = []; });
 // ============================================================
 //  RESERVA — Fixture propio (Grupo A · 18 fechas)
@@ -1771,6 +1772,7 @@ function initFirebase(){
             if(p.goleadores?.[c2]) goleadores[c2]=p.goleadores[c2];
             if(p.matchData?.[c2]) Object.assign(matchData[c2], p.matchData[c2]);
             if(p.rivalData?.[c2]) Object.assign(rivalData[c2], p.rivalData[c2]);
+            if(p.chequeoSemanal) chequeoSemanal = p.chequeoSemanal;
             refreshActiveModule();
             setTimeout(refreshAlerts, 200);
           });
@@ -1840,7 +1842,7 @@ function saveData(){
   if(!fbReady||!db||!canEdit) return;
   clearTimeout(saveTimeout);
   saveTimeout=setTimeout(()=>{
-    const payload={results:{},links:{},goleadores:{},rivalData:rivalData,matchData:matchData,gymData:gymData,jugadores:{}};
+    const payload={results:{},links:{},goleadores:{},rivalData:rivalData,matchData:matchData,gymData:gymData,jugadores:{},chequeoSemanal:chequeoSemanal};
     CATEGORIES.forEach(cat=>{
       payload.results[cat]={};
       payload.links[cat]={};
@@ -1910,6 +1912,7 @@ function loadData(){
         if(p.goleadores?.[c2]) goleadores[c2]=p.goleadores[c2];
         if(p.matchData?.[c2]) Object.assign(matchData[c2], p.matchData[c2]);
         if(p.rivalData?.[c2]) Object.assign(rivalData[c2], p.rivalData[c2]);
+        if(p.chequeoSemanal) chequeoSemanal = p.chequeoSemanal;
       }
       showLoading(false); resolve();
     }).catch(e=>{console.warn('load error:',e);showLoading(false);resolve();});
@@ -2176,7 +2179,27 @@ function renderStatsGeneral(content){
     <td style="color:${tDgC}">${tot.dg>0?'+':''}${tot.dg}</td>
     <td style="color:var(--muted)">${tPct}%</td></tr>`;
 
+  const fmtMarcador=v=>v?`${v[0]}-${v[1]}`:'—';
+  const alertasHTML = (chequeoSemanal.alertas||[]).length===0 ? '' : `
+    <div style="background:linear-gradient(135deg,#3a1208,#1f0a05);border:1px solid var(--loss);
+      border-radius:10px;padding:14px 16px;margin-bottom:20px">
+      <div style="font-family:Bebas Neue,sans-serif;font-size:16px;letter-spacing:1px;color:var(--loss);margin-bottom:8px">
+        ⚠️ CHEQUEO SEMANAL — ${chequeoSemanal.alertas.length} diferencia(s) encontrada(s)
+        ${chequeoSemanal.fecha_revision?`<span style="font-size:11px;color:var(--muted);font-weight:400">(revisado ${esc(chequeoSemanal.fecha_revision)})</span>`:''}
+      </div>
+      <div style="display:flex;flex-direction:column;gap:6px;font-family:Barlow Condensed,sans-serif;font-size:13px">
+        ${chequeoSemanal.alertas.map(a=>`
+          <div>
+            <b style="color:${CAT_COLORS[a.categoria]||'var(--text)'}">${esc(a.categoria)} F${a.fecha}</b> —
+            tu sitio: <b>${fmtMarcador(a.mi_plataforma)}</b> ·
+            futdetail: <b>${fmtMarcador(a.futdetail)}</b> ·
+            LPF oficial: <b>${fmtMarcador(a.lpf_oficial)}</b>
+          </div>`).join('')}
+      </div>
+    </div>`;
+
   content.innerHTML=`
+    ${alertasHTML}
     <div class="st"><div class="stbar"></div>RESUMEN GENERAL</div>
     <div class="periodo-tabs" id="gen-ptabs">${ptHTML}</div>
     <div id="gen-stats-area"></div>
@@ -3398,6 +3421,7 @@ function startPublicListener(){
         Object.assign(rivalData['RESERVA'], p.rivalData['RESERVA']);
       }
     });
+    if(p.chequeoSemanal) chequeoSemanal = p.chequeoSemanal;
     refreshActiveModule();
   });
 }
