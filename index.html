@@ -1563,6 +1563,7 @@ const jugadoresStats = {}; // jugadoresStats[cat] = [{jugador,minutos_jugados,go
 let chequeoSemanal = {alertas:[]}; // {fecha_revision, alertas:[{categoria,fecha,mi_plataforma,futdetail,lpf_oficial}]}
 const plantelFutdetail = {}; // plantelFutdetail[cat] = [{nombre,posicion,edad,altura,peso,pie,valoracion,foto}] (desde futdetail)
 CATEGORIES.forEach(cat => { plantelFutdetail[cat] = []; });
+let chequeoSemanalResueltas = {}; // {"CAT_fecha": true} — alertas ya revisadas, para que no vuelvan a aparecer
 CATEGORIES.forEach(cat => { matchData[cat] = {}; gymData[cat] = []; jugadoresStats[cat] = []; });
 // ============================================================
 //  RESERVA — Fixture propio (Grupo A · 18 fechas)
@@ -1777,6 +1778,7 @@ function initFirebase(){
             if(p.matchData?.[c2]) Object.assign(matchData[c2], p.matchData[c2]);
             if(p.rivalData?.[c2]) Object.assign(rivalData[c2], p.rivalData[c2]);
             if(p.chequeoSemanal) chequeoSemanal = p.chequeoSemanal;
+            if(p.chequeoSemanalResueltas) chequeoSemanalResueltas = p.chequeoSemanalResueltas;
             refreshActiveModule();
             setTimeout(refreshAlerts, 200);
           });
@@ -1846,7 +1848,7 @@ function saveData(){
   if(!fbReady||!db||!canEdit) return;
   clearTimeout(saveTimeout);
   saveTimeout=setTimeout(()=>{
-    const payload={results:{},links:{},goleadores:{},rivalData:rivalData,matchData:matchData,gymData:gymData,jugadores:{},plantel:{},chequeoSemanal:chequeoSemanal};
+    const payload={results:{},links:{},goleadores:{},rivalData:rivalData,matchData:matchData,gymData:gymData,jugadores:{},plantel:{},chequeoSemanal:chequeoSemanal,chequeoSemanalResueltas:chequeoSemanalResueltas};
     CATEGORIES.forEach(cat=>{
       payload.results[cat]={};
       payload.links[cat]={};
@@ -1919,6 +1921,7 @@ function loadData(){
         if(p.matchData?.[c2]) Object.assign(matchData[c2], p.matchData[c2]);
         if(p.rivalData?.[c2]) Object.assign(rivalData[c2], p.rivalData[c2]);
         if(p.chequeoSemanal) chequeoSemanal = p.chequeoSemanal;
+        if(p.chequeoSemanalResueltas) chequeoSemanalResueltas = p.chequeoSemanalResueltas;
       }
       showLoading(false); resolve();
     }).catch(e=>{console.warn('load error:',e);showLoading(false);resolve();});
@@ -2191,20 +2194,27 @@ function renderStatsGeneral(content){
     <td style="color:var(--muted)">${tPct}%</td></tr>`;
 
   const fmtMarcador=v=>v?`${v[0]}-${v[1]}`:'—';
-  const alertasHTML = (chequeoSemanal.alertas||[]).length===0 ? '' : `
+  const alertasPendientes=(chequeoSemanal.alertas||[]).filter(a=>!chequeoSemanalResueltas[`${a.categoria}_${a.fecha}`]);
+  const alertasHTML = alertasPendientes.length===0 ? '' : `
     <div style="background:linear-gradient(135deg,#3a1208,#1f0a05);border:1px solid var(--loss);
       border-radius:10px;padding:14px 16px;margin-bottom:20px">
       <div style="font-family:Bebas Neue,sans-serif;font-size:16px;letter-spacing:1px;color:var(--loss);margin-bottom:8px">
-        ⚠️ CHEQUEO SEMANAL — ${chequeoSemanal.alertas.length} diferencia(s) encontrada(s)
+        ⚠️ CHEQUEO SEMANAL — ${alertasPendientes.length} diferencia(s) encontrada(s)
         ${chequeoSemanal.fecha_revision?`<span style="font-size:11px;color:var(--muted);font-weight:400">(revisado ${esc(chequeoSemanal.fecha_revision)})</span>`:''}
       </div>
       <div style="display:flex;flex-direction:column;gap:6px;font-family:Barlow Condensed,sans-serif;font-size:13px">
-        ${chequeoSemanal.alertas.map(a=>`
-          <div>
-            <b style="color:${CAT_COLORS[a.categoria]||'var(--text)'}">${esc(a.categoria)} F${a.fecha}</b> —
-            tu sitio: <b>${fmtMarcador(a.mi_plataforma)}</b> ·
-            futdetail: <b>${fmtMarcador(a.futdetail)}</b> ·
-            LPF oficial: <b>${fmtMarcador(a.lpf_oficial)}</b>
+        ${alertasPendientes.map(a=>`
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">
+            <div>
+              <b style="color:${CAT_COLORS[a.categoria]||'var(--text)'}">${esc(a.categoria)} F${a.fecha}</b> —
+              tu sitio: <b>${fmtMarcador(a.mi_plataforma)}</b> ·
+              futdetail: <b>${fmtMarcador(a.futdetail)}</b> ·
+              LPF oficial: <b>${fmtMarcador(a.lpf_oficial)}</b>
+            </div>
+            ${canEdit?`<button onclick="resolverAlerta('${esc(a.categoria)}',${a.fecha})"
+              style="background:rgba(255,255,255,0.08);border:1px solid var(--border2);color:var(--text);
+              border-radius:6px;padding:4px 10px;font-family:Barlow Condensed,sans-serif;font-size:11px;
+              letter-spacing:1px;cursor:pointer;white-space:nowrap">✓ RESOLVER</button>`:''}
           </div>`).join('')}
       </div>
     </div>`;
@@ -2226,6 +2236,9 @@ function renderStatsGeneral(content){
 
     <div class="st"><div class="stbar"></div>🏆 TOP GOLEADORES — 4TA A 9NA</div>
     <div id="gen-top-goleadores"></div>
+
+    <div class="st"><div class="stbar"></div>🏆 TABLA GENERAL DE POSICIONES (SUMA 4TA A 9NA)</div>
+    <div id="gen-tabla-general"></div>
   `;
 
   // Period filter
@@ -2250,6 +2263,48 @@ function renderStatsGeneral(content){
   // Top 5 goleadores all categories
   const topWrap = document.getElementById('gen-top-goleadores');
   if(topWrap) renderTopGoleadores(topWrap);
+
+  renderTablaGeneral('gen-tabla-general');
+}
+
+// Suma la tabla de posiciones LPF de 4TA a 9NA por equipo, en una sola tabla.
+function renderTablaGeneral(containerId){
+  const el=document.getElementById(containerId);
+  if(!el) return;
+  loadTablaData().then(()=>{
+    const sumas={};
+    GENERAL_CATS.forEach(cat=>{
+      const filas=(TABLA_DATA&&TABLA_DATA.categorias&&TABLA_DATA.categorias[cat])||[];
+      filas.forEach(f=>{
+        if(!sumas[f.equipo]) sumas[f.equipo]={equipo:f.equipo,pts:0,pj:0,pg:0,pe:0,pp:0,gf:0,gc:0};
+        const s=sumas[f.equipo];
+        s.pts+=f.pts; s.pj+=f.pj; s.pg+=f.pg; s.pe+=f.pe; s.pp+=f.pp; s.gf+=f.gf; s.gc+=f.gc;
+      });
+    });
+    const combinadas=Object.values(sumas).map(s=>({...s, dif:s.gf-s.gc}));
+    if(!combinadas.length){
+      el.innerHTML=`<div style="padding:40px 16px;text-align:center;color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-size:14px">
+        Todavía no hay datos cargados.<br>
+        <span style="font-size:12px">Se completará en la próxima actualización automática.</span></div>`;
+      return;
+    }
+    combinadas.sort((a,b)=> b.pts-a.pts || b.dif-a.dif || b.gf-a.gf);
+    combinadas.forEach((f,i)=>f.pos=i+1);
+    const upd=TABLA_DATA&&TABLA_DATA.actualizado
+      ? `Actualizado: ${TABLA_DATA.actualizado} · ${TABLA_DATA.fuente||''} · suma de 4TA a 9NA` : '';
+    el.innerHTML=`
+      <div style="font-family:'Barlow Condensed',sans-serif;font-size:10px;letter-spacing:1px;color:var(--muted);padding:0 12px 6px;text-align:right">${upd}</div>
+      <div class="table-wrap" style="padding:0 12px 20px">${_tablaHTML(combinadas)}</div>`;
+  });
+}
+
+function resolverAlerta(categoria, fecha){
+  if(!canEdit || !fbReady || !db) return;
+  const key=`${categoria}_${fecha}`;
+  chequeoSemanalResueltas[key]=true;
+  db.ref('stats/chequeoSemanalResueltas/'+key).set(true)
+    .then(()=>{ showToast('✓ ALERTA RESUELTA'); refreshActiveModule(); })
+    .catch(e=>console.warn('resolverAlerta error:',e));
 }
 
 function renderTopGoleadores(wrap){
@@ -3043,14 +3098,8 @@ function renderRosterCat(cat, content){
   (jugadoresStats[cat]||[]).forEach(j=>{ statsPorNombre[normNombre(j.jugador)]=j; });
 
   content.innerHTML=`
-    <div class="st" style="margin-top:4px"><div class="stbar"></div>🏆 TABLA DE POSICIONES · LPF${cat==='RESERVA'?'':` · <span style="color:${CAT_COLORS[cat]}">${cat}</span>`}</div>
-    <div id="tabla-lpf-roster-${cat}"></div>
-
-    <div class="st"><div class="stbar"></div>PLANTEL · <span style="color:${CAT_COLORS[cat]}">${cat}</span></div>
+    <div class="st" style="margin-top:4px"><div class="stbar"></div>PLANTEL · <span style="color:${CAT_COLORS[cat]}">${cat}</span></div>
     <div id="roster-table-${cat}"></div>`;
-
-  if(cat==='RESERVA') renderTablaReserva(`tabla-lpf-roster-${cat}`);
-  else renderTablaLPF(cat, `tabla-lpf-roster-${cat}`);
 
   if(roster.length===0){
     document.getElementById(`roster-table-${cat}`).innerHTML=
@@ -3524,6 +3573,7 @@ function startPublicListener(){
       }
     });
     if(p.chequeoSemanal) chequeoSemanal = p.chequeoSemanal;
+    if(p.chequeoSemanalResueltas) chequeoSemanalResueltas = p.chequeoSemanalResueltas;
     refreshActiveModule();
   });
 }
