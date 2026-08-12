@@ -2308,11 +2308,13 @@ function resolverAlerta(categoria, fecha){
 }
 
 function renderTopGoleadores(wrap){
-  // Flatten all goleadores across all categories
+  // Junta los goleadores de cada categoría, pero SIN mezclar entre categorías:
+  // dos jugadores de distinta categoría con el mismo nombre son personas
+  // distintas, así que la clave incluye la categoría.
   const all = {};
   GENERAL_CATS.forEach(cat=>{
     (goleadores[cat]||[]).forEach(g=>{
-      const key = g.name.trim().toLowerCase();
+      const key = cat + '||' + g.name.trim().toLowerCase();
       if(!all[key]) all[key] = {name:g.name, goals:0, cats:{}};
       all[key].goals += g.goals;
       all[key].cats[cat] = (all[key].cats[cat]||0) + g.goals;
