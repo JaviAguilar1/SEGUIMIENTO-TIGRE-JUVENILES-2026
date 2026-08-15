@@ -208,7 +208,11 @@ def parse_futdetail_partidos(filas):
         except (TypeError, ValueError):
             continue
         localia = str(f.get("localia", "")).strip().upper()
-        rival = (f.get("equipo_rival") or "").strip()
+        # "equipo_rival" es el id numerico del club (la web lo usa para el
+        # <select>); "nombre" es el nombre legible. Nos quedamos con el
+        # nombre, y si por algun motivo viene vacio usamos el id como ultimo
+        # recurso (mejor un numero que nada).
+        rival = (f.get("nombre") or f.get("equipo_rival") or "").strip()
         if localia == "L":
             out[fecha] = {"gf": gl, "gc": gv, "rival": rival}
         elif localia == "V":
