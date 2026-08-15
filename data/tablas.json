@@ -1,5 +1,5 @@
 {
-  "actualizado": "2026-08-15 03:22",
+  "actualizado": "2026-08-15 03:27",
   "fuente": "ligaprofesional.ar (oficial)",
   "fuente_fixture": "sabadogol.com.ar",
   "categorias": {
@@ -3227,612 +3227,612 @@
       "19": {
         "gf": 2,
         "gc": 1,
-        "rival": "277"
+        "rival": "Velez"
       },
       "18": {
         "gf": 0,
         "gc": 0,
-        "rival": "303"
+        "rival": "Gimnasia (M)"
       },
       "17": {
         "gf": 5,
         "gc": 0,
-        "rival": "294"
+        "rival": "Central Cba (SdE)"
       },
       "16": {
         "gf": 1,
         "gc": 1,
-        "rival": "296"
+        "rival": "Gimnasia (LP)"
       },
       "15": {
         "gf": 1,
         "gc": 2,
-        "rival": "281"
+        "rival": "San Lorenzo"
       },
       "14": {
         "gf": 0,
         "gc": 1,
-        "rival": "292"
+        "rival": "Union(Santa Fe)"
       },
       "13": {
         "gf": 0,
         "gc": 2,
-        "rival": "278"
+        "rival": "River Plate"
       },
       "12": {
         "gf": 3,
         "gc": 1,
-        "rival": "305"
+        "rival": "Quilmes"
       },
       "11": {
         "gf": 2,
         "gc": 0,
-        "rival": "329"
+        "rival": "Barracas Central"
       },
       "10": {
         "gf": 2,
         "gc": 2,
-        "rival": "308"
+        "rival": "Estudiantes (RC)"
       },
       "9": {
         "gf": 2,
         "gc": 0,
-        "rival": "282"
+        "rival": "Talleres (C)"
       },
       "8": {
         "gf": 0,
         "gc": 2,
-        "rival": "332"
+        "rival": "Instituto"
       },
       "7": {
         "gf": 0,
         "gc": 1,
-        "rival": "280"
+        "rival": "Argentinos Jrs"
       },
       "6": {
         "gf": 4,
         "gc": 0,
-        "rival": "344"
+        "rival": "Colegiales"
       },
       "5": {
         "gf": 3,
         "gc": 1,
-        "rival": "366"
+        "rival": "Excursionistas"
       },
       "4": {
         "gf": 1,
         "gc": 4,
-        "rival": "277"
+        "rival": "Velez"
       },
       "3": {
         "gf": 0,
         "gc": 2,
-        "rival": "276"
+        "rival": "Boca Juniors"
       },
       "2": {
         "gf": 2,
         "gc": 0,
-        "rival": "373"
+        "rival": "San Martín de Burzaco"
       },
       "1": {
         "gf": 0,
         "gc": 2,
-        "rival": "327"
+        "rival": "Ferro"
       }
     },
     "5TA": {
       "20": {
         "gf": 3,
         "gc": 0,
-        "rival": "291"
+        "rival": "Banfield"
       },
       "19": {
         "gf": 1,
         "gc": 2,
-        "rival": "277"
+        "rival": "Velez"
       },
       "18": {
         "gf": 1,
         "gc": 3,
-        "rival": "303"
+        "rival": "Gimnasia (M)"
       },
       "17": {
         "gf": 3,
         "gc": 0,
-        "rival": "294"
+        "rival": "Central Cba (SdE)"
       },
       "16": {
         "gf": 0,
         "gc": 2,
-        "rival": "296"
+        "rival": "Gimnasia (LP)"
       },
       "15": {
         "gf": 0,
         "gc": 0,
-        "rival": "281"
+        "rival": "San Lorenzo"
       },
       "14": {
         "gf": 1,
         "gc": 1,
-        "rival": "292"
+        "rival": "Union(Santa Fe)"
       },
       "13": {
         "gf": 0,
         "gc": 2,
-        "rival": "278"
+        "rival": "River Plate"
       },
       "12": {
         "gf": 1,
         "gc": 0,
-        "rival": "305"
+        "rival": "Quilmes"
       },
       "11": {
         "gf": 2,
         "gc": 1,
-        "rival": "329"
+        "rival": "Barracas Central"
       },
       "10": {
         "gf": 2,
         "gc": 2,
-        "rival": "308"
+        "rival": "Estudiantes (RC)"
       },
       "9": {
         "gf": 2,
         "gc": 2,
-        "rival": "282"
+        "rival": "Talleres (C)"
       },
       "8": {
         "gf": 2,
         "gc": 0,
-        "rival": "332"
+        "rival": "Instituto"
       },
       "7": {
         "gf": 1,
         "gc": 2,
-        "rival": "280"
+        "rival": "Argentinos Jrs"
       },
       "6": {
         "gf": 4,
         "gc": 0,
-        "rival": "330"
+        "rival": "San Martin (SJ)"
       },
       "3": {
         "gf": 0,
         "gc": 1,
-        "rival": "276"
+        "rival": "Boca Juniors"
       },
       "5": {
         "gf": 1,
         "gc": 1,
-        "rival": "288"
+        "rival": "Newells"
       },
       "4": {
         "gf": 0,
         "gc": 3,
-        "rival": "277"
+        "rival": "Velez"
       },
       "2": {
         "gf": 2,
         "gc": 0,
-        "rival": "373"
+        "rival": "San Martín de Burzaco"
       },
       "1": {
         "gf": 1,
         "gc": 0,
-        "rival": "327"
+        "rival": "Ferro"
       }
     },
     "6TA": {
       "20": {
         "gf": 1,
         "gc": 3,
-        "rival": "291"
+        "rival": "Banfield"
       },
       "19": {
         "gf": 2,
         "gc": 3,
-        "rival": "277"
+        "rival": "Velez"
       },
       "18": {
         "gf": 0,
         "gc": 0,
-        "rival": "303"
+        "rival": "Gimnasia (M)"
       },
       "17": {
         "gf": 1,
         "gc": 1,
-        "rival": "294"
+        "rival": "Central Cba (SdE)"
       },
       "16": {
         "gf": 1,
         "gc": 2,
-        "rival": "296"
+        "rival": "Gimnasia (LP)"
       },
       "15": {
         "gf": 2,
         "gc": 5,
-        "rival": "281"
+        "rival": "San Lorenzo"
       },
       "14": {
         "gf": 1,
         "gc": 4,
-        "rival": "292"
+        "rival": "Union(Santa Fe)"
       },
       "13": {
         "gf": 1,
         "gc": 2,
-        "rival": "278"
+        "rival": "River Plate"
       },
       "12": {
         "gf": 1,
         "gc": 1,
-        "rival": "305"
+        "rival": "Quilmes"
       },
       "11": {
         "gf": 2,
         "gc": 1,
-        "rival": "329"
+        "rival": "Barracas Central"
       },
       "10": {
         "gf": 1,
         "gc": 1,
-        "rival": "308"
+        "rival": "Estudiantes (RC)"
       },
       "9": {
         "gf": 1,
         "gc": 2,
-        "rival": "282"
+        "rival": "Talleres (C)"
       },
       "8": {
         "gf": 2,
         "gc": 1,
-        "rival": "332"
+        "rival": "Instituto"
       },
       "7": {
         "gf": 0,
         "gc": 1,
-        "rival": "307"
+        "rival": "Riestra"
       },
       "6": {
         "gf": 6,
         "gc": 0,
-        "rival": "344"
+        "rival": "Colegiales"
       },
       "3": {
         "gf": 2,
         "gc": 0,
-        "rival": "276"
+        "rival": "Boca Juniors"
       },
       "5": {
         "gf": 4,
         "gc": 0,
-        "rival": "366"
+        "rival": "Excursionistas"
       },
       "4": {
         "gf": 4,
         "gc": 2,
-        "rival": "277"
+        "rival": "Velez"
       },
       "2": {
         "gf": 4,
         "gc": 1,
-        "rival": "373"
+        "rival": "San Martín de Burzaco"
       },
       "1": {
         "gf": 2,
         "gc": 1,
-        "rival": "327"
+        "rival": "Ferro"
       }
     },
     "7MA": {
       "21": {
         "gf": 0,
         "gc": 0,
-        "rival": "279"
+        "rival": "Racing Club"
       },
       "15": {
         "gf": 2,
         "gc": 2,
-        "rival": "281"
+        "rival": "San Lorenzo"
       },
       "20": {
         "gf": 1,
         "gc": 0,
-        "rival": "291"
+        "rival": "Banfield"
       },
       "19": {
         "gf": 1,
         "gc": 3,
-        "rival": "277"
+        "rival": "Velez"
       },
       "1": {
         "gf": 1,
         "gc": 2,
-        "rival": "327"
+        "rival": "Ferro"
       },
       "14": {
         "gf": 2,
         "gc": 3,
-        "rival": "292"
+        "rival": "Union(Santa Fe)"
       },
       "18": {
         "gf": 4,
         "gc": 0,
-        "rival": "303"
+        "rival": "Gimnasia (M)"
       },
       "13": {
         "gf": 1,
         "gc": 4,
-        "rival": "278"
+        "rival": "River Plate"
       },
       "17": {
         "gf": 2,
         "gc": 0,
-        "rival": "294"
+        "rival": "Central Cba (SdE)"
       },
       "12": {
         "gf": 1,
         "gc": 1,
-        "rival": "305"
+        "rival": "Quilmes"
       },
       "16": {
         "gf": 2,
         "gc": 0,
-        "rival": "296"
+        "rival": "Gimnasia (LP)"
       },
       "11": {
         "gf": 0,
         "gc": 0,
-        "rival": "329"
+        "rival": "Barracas Central"
       },
       "10": {
         "gf": 2,
         "gc": 2,
-        "rival": "308"
+        "rival": "Estudiantes (RC)"
       },
       "9": {
         "gf": 2,
         "gc": 4,
-        "rival": "282"
+        "rival": "Talleres (C)"
       },
       "8": {
         "gf": 3,
         "gc": 0,
-        "rival": "332"
+        "rival": "Instituto"
       },
       "7": {
         "gf": 2,
         "gc": 2,
-        "rival": "307"
+        "rival": "Riestra"
       },
       "6": {
         "gf": 6,
         "gc": 1,
-        "rival": "344"
+        "rival": "Colegiales"
       },
       "5": {
         "gf": 6,
         "gc": 2,
-        "rival": "366"
+        "rival": "Excursionistas"
       },
       "4": {
         "gf": 0,
         "gc": 2,
-        "rival": "277"
+        "rival": "Velez"
       },
       "3": {
         "gf": 4,
         "gc": 1,
-        "rival": "276"
+        "rival": "Boca Juniors"
       },
       "2": {
         "gf": 7,
         "gc": 0,
-        "rival": "373"
+        "rival": "San Martín de Burzaco"
       }
     },
     "8VA": {
       "13": {
         "gf": 0,
         "gc": 7,
-        "rival": "278"
+        "rival": "River Plate"
       },
       "19": {
         "gf": 0,
         "gc": 3,
-        "rival": "281"
+        "rival": "San Lorenzo"
       },
       "12": {
         "gf": 3,
         "gc": 1,
-        "rival": "305"
+        "rival": "Quilmes"
       },
       "18": {
         "gf": 1,
         "gc": 1,
-        "rival": "303"
+        "rival": "Gimnasia (M)"
       },
       "11": {
         "gf": 0,
         "gc": 3,
-        "rival": "329"
+        "rival": "Barracas Central"
       },
       "16": {
         "gf": 0,
         "gc": 1,
-        "rival": "296"
+        "rival": "Gimnasia (LP)"
       },
       "17": {
         "gf": 1,
         "gc": 0,
-        "rival": "294"
+        "rival": "Central Cba (SdE)"
       },
       "10": {
         "gf": 1,
         "gc": 1,
-        "rival": "308"
+        "rival": "Estudiantes (RC)"
       },
       "15": {
         "gf": 0,
         "gc": 1,
-        "rival": "281"
+        "rival": "San Lorenzo"
       },
       "9": {
         "gf": 0,
         "gc": 1,
-        "rival": "282"
+        "rival": "Talleres (C)"
       },
       "14": {
         "gf": 3,
         "gc": 1,
-        "rival": "292"
+        "rival": "Union(Santa Fe)"
       },
       "8": {
         "gf": 1,
         "gc": 1,
-        "rival": "332"
+        "rival": "Instituto"
       },
       "7": {
         "gf": 1,
         "gc": 1,
-        "rival": "280"
+        "rival": "Argentinos Jrs"
       },
       "6": {
         "gf": 3,
         "gc": 0,
-        "rival": "330"
+        "rival": "San Martin (SJ)"
       },
       "5": {
         "gf": 1,
         "gc": 0,
-        "rival": "288"
+        "rival": "Newells"
       },
       "4": {
         "gf": 0,
         "gc": 4,
-        "rival": "286"
+        "rival": "Independiente"
       },
       "3": {
         "gf": 0,
         "gc": 2,
-        "rival": "283"
+        "rival": "Lanus"
       },
       "2": {
         "gf": 2,
         "gc": 2,
-        "rival": "327"
+        "rival": "Ferro"
       },
       "1": {
         "gf": 2,
         "gc": 1,
-        "rival": "320"
+        "rival": "Ind Rivadavia"
       }
     },
     "9NA": {
       "21": {
         "gf": 0,
         "gc": 0,
-        "rival": "279"
+        "rival": "Racing Club"
       },
       "15": {
         "gf": 1,
         "gc": 2,
-        "rival": "281"
+        "rival": "San Lorenzo"
       },
       "20": {
         "gf": 1,
         "gc": 5,
-        "rival": "291"
+        "rival": "Banfield"
       },
       "19": {
         "gf": 0,
         "gc": 3,
-        "rival": "277"
+        "rival": "Velez"
       },
       "14": {
         "gf": 1,
         "gc": 1,
-        "rival": "292"
+        "rival": "Union(Santa Fe)"
       },
       "18": {
         "gf": 4,
         "gc": 1,
-        "rival": "303"
+        "rival": "Gimnasia (M)"
       },
       "13": {
         "gf": 0,
         "gc": 2,
-        "rival": "278"
+        "rival": "River Plate"
       },
       "17": {
         "gf": 0,
         "gc": 0,
-        "rival": "294"
+        "rival": "Central Cba (SdE)"
       },
       "12": {
         "gf": 0,
         "gc": 0,
-        "rival": "305"
+        "rival": "Quilmes"
       },
       "16": {
         "gf": 0,
         "gc": 0,
-        "rival": "296"
+        "rival": "Gimnasia (LP)"
       },
       "11": {
         "gf": 1,
         "gc": 3,
-        "rival": "329"
+        "rival": "Barracas Central"
       },
       "10": {
         "gf": 0,
         "gc": 0,
-        "rival": "308"
+        "rival": "Estudiantes (RC)"
       },
       "9": {
         "gf": 1,
         "gc": 1,
-        "rival": "282"
+        "rival": "Talleres (C)"
       },
       "8": {
         "gf": 0,
         "gc": 0,
-        "rival": "332"
+        "rival": "Instituto"
       },
       "7": {
         "gf": 1,
         "gc": 2,
-        "rival": "280"
+        "rival": "Argentinos Jrs"
       },
       "6": {
         "gf": 0,
         "gc": 0,
-        "rival": "330"
+        "rival": "San Martin (SJ)"
       },
       "5": {
         "gf": 0,
         "gc": 3,
-        "rival": "288"
+        "rival": "Newells"
       },
       "4": {
         "gf": 3,
         "gc": 2,
-        "rival": "286"
+        "rival": "Independiente"
       },
       "3": {
         "gf": 2,
         "gc": 1,
-        "rival": "276"
+        "rival": "Boca Juniors"
       },
       "2": {
         "gf": 11,
         "gc": 0,
-        "rival": "373"
+        "rival": "San Martín de Burzaco"
       },
       "1": {
         "gf": 2,
         "gc": 0,
-        "rival": "327"
+        "rival": "Ferro"
       }
     }
   }
