@@ -1,5 +1,5 @@
 {
-  "actualizado": "2026-08-15 18:22",
+  "actualizado": "2026-08-15 18:46",
   "fuente": "ligaprofesional.ar (oficial)",
   "fuente_fixture": "sabadogol.com.ar",
   "categorias": {
@@ -4077,8 +4077,8 @@
     },
     "7MA": {
       "21": {
-        "gf": 0,
-        "gc": 0,
+        "gf": 3,
+        "gc": 3,
         "rival": "Racing Club",
         "partido_url": "",
         "momentos_destacados_url": "",
