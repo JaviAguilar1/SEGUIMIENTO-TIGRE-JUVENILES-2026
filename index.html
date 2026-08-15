@@ -1474,15 +1474,8 @@ table.gen-table .cat-cell{font-family:'Bebas Neue',sans-serif;font-size:15px;
   </div>
 </header>
 
-<!-- MODULE NAV -->
-<nav class="nav-modules" id="navModules"></nav>
-
-<!-- STATS MODULE -->
+<!-- ESTADÍSTICAS (único módulo: la plataforma quedó enfocada solo en esto) -->
 <div class="module-panel active" id="panel-stats" data-mod="stats"></div>
-<div class="module-panel" id="panel-roster" data-mod="roster"></div>
-
-<!-- (Plantel, Rendimiento, Análisis GPS, Carga y Semana fueron retirados:
-     la plataforma quedó enfocada solo en Estadísticas.) -->
 
 <!-- TOAST + SCROLL -->
 <div id="save-toast"></div>
@@ -1514,6 +1507,10 @@ const CATEGORIES = ['4TA','5TA','6TA','7MA','8VA','9NA','RESERVA'];
 // Categorías que entran en el RESUMEN GENERAL (Reserva va aparte, nunca se mezcla)
 const GENERAL_CATS = ['4TA','5TA','6TA','7MA','8VA','9NA'];
 const LINK_CATS  = ['4TA','5TA','6TA','7MA','8VA','9NA','RESERVA'];
+// Categoría activa compartida entre módulos (selector global del header)
+let currentCategoria = null;
+// Cada cuántas fechas se arma un bloque en ESTADÍSTICAS (no aplica a RESERVA)
+let bloqueSize = 5;
 const CAT_COLORS = {
   '4TA':'#f0c040','5TA':'#60a5fa','6TA':'#f87171',
   '7MA':'#f472b6','8VA':'#a78bfa','9NA':'#34d399','RESERVA':'#e8a020'
@@ -1563,7 +1560,6 @@ const jugadoresStats = {}; // jugadoresStats[cat] = [{jugador,minutos_jugados,go
 let chequeoSemanal = {alertas:[]}; // {fecha_revision, alertas:[{categoria,fecha,mi_plataforma,futdetail,lpf_oficial}]}
 const plantelFutdetail = {}; // plantelFutdetail[cat] = [{nombre,posicion,edad,altura,peso,pie,valoracion,foto}] (desde futdetail)
 CATEGORIES.forEach(cat => { plantelFutdetail[cat] = []; });
-let chequeoSemanalResueltas = {}; // {"CAT_fecha": true} — alertas ya revisadas, para que no vuelvan a aparecer
 CATEGORIES.forEach(cat => { matchData[cat] = {}; gymData[cat] = []; jugadoresStats[cat] = []; });
 // ============================================================
 //  RESERVA — Fixture propio (Grupo A · 18 fechas)
@@ -1665,7 +1661,7 @@ function getPeriodos(cat){
     return periods;
   }
   const p=[{label:'TOTAL',from:1,to:35}];
-  for(let s=1;s<=35;s+=5)p.push({label:`F${s}–F${Math.min(s+4,35)}`,from:s,to:Math.min(s+4,35)});
+  for(let s=1;s<=35;s+=bloqueSize)p.push({label:`F${s}–F${Math.min(s+bloqueSize-1,35)}`,from:s,to:Math.min(s+bloqueSize-1,35)});
   return p;
 }
 function getBlocks(cat){
@@ -1677,7 +1673,7 @@ function getBlocks(cat){
     return played.map(f=>({label:`F${f}`, from:f, to:f}));
   }
   const b=[];
-  for(let s=1;s<=35;s+=5)b.push({label:`F${s}–F${Math.min(s+4,35)}`,from:s,to:Math.min(s+4,35)});
+  for(let s=1;s<=35;s+=bloqueSize)b.push({label:`F${s}–F${Math.min(s+bloqueSize-1,35)}`,from:s,to:Math.min(s+bloqueSize-1,35)});
   return b;
 }
 function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
@@ -1778,7 +1774,6 @@ function initFirebase(){
             if(p.matchData?.[c2]) Object.assign(matchData[c2], p.matchData[c2]);
             if(p.rivalData?.[c2]) Object.assign(rivalData[c2], p.rivalData[c2]);
             if(p.chequeoSemanal) chequeoSemanal = p.chequeoSemanal;
-            if(p.chequeoSemanalResueltas) chequeoSemanalResueltas = p.chequeoSemanalResueltas;
             refreshActiveModule();
             setTimeout(refreshAlerts, 200);
           });
@@ -1805,20 +1800,17 @@ function applyViewMode(){
   const resetBtn=document.getElementById('btn-reset');
   if(resetBtn) resetBtn.style.display=isAdmin?'':'none';
 
-  // Filter category tabs for category-specific roles
-  // e.g. role 'cat_4TA' only sees 4TA
+  // Filter categories for category-specific roles
+  // e.g. role 'cat_4TA' only ve 4TA (ni GENERAL ni el resto)
   if(currentRole && currentRole.startsWith('cat_')){
     const allowedCat = currentRole.replace('cat_','').toUpperCase();
-    document.querySelectorAll('.cat-tab[data-cat]').forEach(t=>{
-      // cat_ roles: hide GENERAL and all other categories
-      if(t.dataset.cat === 'GENERAL' || t.dataset.cat !== allowedCat){
-        t.style.display='none';
-      }
-    });
-    // Auto-select their category
-    document.querySelectorAll('.cat-tab[data-cat="'+allowedCat+'"]').forEach(t=>{
-      t.click();
-    });
+    const sel=document.getElementById('stats-cat-select');
+    if(sel){
+      [...sel.options].forEach(o=>{ o.hidden = o.value!==allowedCat; });
+      sel.value=allowedCat;
+      currentCategoria=allowedCat;
+      renderStatsCat(allowedCat);
+    }
   }
 }
 
@@ -1848,7 +1840,7 @@ function saveData(){
   if(!fbReady||!db||!canEdit) return;
   clearTimeout(saveTimeout);
   saveTimeout=setTimeout(()=>{
-    const payload={results:{},links:{},goleadores:{},rivalData:rivalData,matchData:matchData,gymData:gymData,jugadores:{},plantel:{},chequeoSemanal:chequeoSemanal,chequeoSemanalResueltas:chequeoSemanalResueltas};
+    const payload={results:{},links:{},goleadores:{},rivalData:rivalData,matchData:matchData,gymData:gymData,jugadores:{},plantel:{},chequeoSemanal:chequeoSemanal};
     CATEGORIES.forEach(cat=>{
       payload.results[cat]={};
       payload.links[cat]={};
@@ -1921,7 +1913,6 @@ function loadData(){
         if(p.matchData?.[c2]) Object.assign(matchData[c2], p.matchData[c2]);
         if(p.rivalData?.[c2]) Object.assign(rivalData[c2], p.rivalData[c2]);
         if(p.chequeoSemanal) chequeoSemanal = p.chequeoSemanal;
-        if(p.chequeoSemanalResueltas) chequeoSemanalResueltas = p.chequeoSemanalResueltas;
       }
       showLoading(false); resolve();
     }).catch(e=>{console.warn('load error:',e);showLoading(false);resolve();});
@@ -2026,17 +2017,8 @@ function showLoading(on){
 }
 // ── Refresh helpers (called on real-time updates) ────────────
 function refreshActiveModule(){
-  const active=document.querySelector('.module-panel.active');
-  if(!active) return;
-  const mod=active.id;
-  if(mod==='panel-stats'){
-    const activeCat=document.querySelector('#stats-subtabs .cat-tab.active');
-    if(activeCat) renderStatsCat(activeCat.dataset.cat);
-  }
-  if(mod==='panel-roster'){
-    const activeCat=document.querySelector('#roster-subtabs .cat-tab.active');
-    if(activeCat) renderRosterCat(activeCat.dataset.cat, document.getElementById('roster-content'));
-  }
+  const sel=document.getElementById('stats-cat-select');
+  if(sel) renderStatsCat(sel.value);
 }
 function refreshPlantelIfActive(){
   if(document.getElementById('panel-plantel')?.classList.contains('active')) renderPlantel();
@@ -2067,15 +2049,11 @@ function checkPublicMode(){
       'font-family:Barlow Condensed,sans-serif;font-size:12px;letter-spacing:1px;color:var(--muted);';
     b.innerHTML='<span>👁 VISTA PÚBLICA — Solo lectura</span>'+
       '<span style="color:var(--gold2)">TIGRE JUVENILES · DIVISIONES INFERIORES</span>';
-    document.querySelector('.nav-modules').insertAdjacentElement('beforebegin',b);
+    document.getElementById('panel-stats').insertAdjacentElement('beforebegin',b);
     // Hide login button
     setTimeout(()=>{
       const btn=document.getElementById('btn-login');
       if(btn) btn.style.display='none';
-      // Hide PLANTEL and RENDIMIENTO tabs in public mode (only stats visible)
-      document.querySelectorAll('.mod-tab').forEach(t=>{
-        if(t.dataset.mod!=='stats') t.style.display='none';
-      });
     },100);
   }
 }
@@ -2087,29 +2065,6 @@ function showOfflineBanner(){
   document.body.appendChild(b);
 }
 
-// ============================================================
-//  NAV + MODULE SWITCHING
-// ============================================================
-const MODULES = [
-  {id:'stats',      label:'ESTADÍSTICAS', icon:'📊'},
-  {id:'roster',    label:'PLANTEL', icon:'👥'},
-];
-
-function buildNav(){
-  const wrap=document.getElementById('navModules');
-  MODULES.forEach((m,i)=>{
-    const t=document.createElement('div');
-    t.className='mod-tab'+(i===0?' active':'');
-    t.dataset.mod=m.id;
-    t.innerHTML=`<span class="mod-icon">${m.icon}</span>${m.label}`;
-    t.addEventListener('click',()=>{ switchModule(m.id); refreshActiveModule(); });
-    wrap.appendChild(t);
-  });
-}
-function switchModule(id){
-  document.querySelectorAll('.mod-tab').forEach(t=>t.classList.toggle('active',t.dataset.mod===id));
-  document.querySelectorAll('.module-panel').forEach(p=>p.classList.toggle('active',p.dataset.mod===id));
-}
 
 // ============================================================
 //  CAT SUBTABS
@@ -2146,27 +2101,80 @@ function selectCatTab(containerId, cat){
 function buildStatsModule(){
   const panel=document.getElementById('panel-stats');
   panel.innerHTML=`
-    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;padding:8px 12px 0;border-bottom:1px solid rgba(26,45,90,0.4);margin-bottom:4px">
-      <div class="cat-subtabs" id="stats-subtabs" style="border:none;padding:0;margin:0"></div>
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;padding:10px 12px;border-bottom:1px solid rgba(26,45,90,0.4);margin-bottom:4px">
+      <div id="stats-subtabs"></div>
     </div>
     <div class="main" id="stats-content"></div>`;
-  buildCatSubtabs('stats-subtabs', cat=>{
-    renderStatsCat(cat);
-  },'GENERAL');
+  buildStatsCatSelect();
   renderStatsCat('GENERAL');
+}
+
+// Desplegable único para elegir GENERAL o una categoría dentro de ESTADÍSTICAS
+function buildStatsCatSelect(){
+  const opts=['GENERAL',...CATEGORIES].map(cat=>
+    `<option value="${cat}">${cat==='GENERAL'?'⬡ GENERAL':cat}</option>`).join('');
+  document.getElementById('stats-subtabs').innerHTML=`
+    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+      <select id="stats-cat-select" style="background:var(--surface2);border:1px solid var(--border2);
+        color:var(--gold2);font-family:'Barlow Condensed',sans-serif;font-weight:700;letter-spacing:1px;
+        font-size:14px;padding:8px 14px;border-radius:6px;cursor:pointer;outline:none">${opts}</select>
+      <div id="roster-btn-wrap"></div>
+    </div>`;
+  document.getElementById('stats-cat-select').addEventListener('change',e=>{
+    const cat=e.target.value;
+    if(cat!=='GENERAL') currentCategoria=cat;
+    renderStatsCat(cat);
+  });
+}
+function setStatsCat(cat){
+  const sel=document.getElementById('stats-cat-select');
+  if(sel) sel.value=cat;
+}
+
+// Botón "ver datos de jugadores" al lado del selector — solo cuando hay una
+// categoría puntual elegida (en GENERAL no hay plantel que mostrar).
+function updateRosterButton(cat){
+  const wrap=document.getElementById('roster-btn-wrap');
+  if(!wrap) return;
+  if(cat==='GENERAL'){ wrap.innerHTML=''; return; }
+  wrap.innerHTML=`<button onclick="revealRoster('${cat}')"
+    style="background:rgba(26,58,143,0.25);border:1px solid var(--border2);color:var(--gold2);
+    border-radius:6px;padding:8px 14px;font-family:'Barlow Condensed',sans-serif;font-size:13px;
+    letter-spacing:1px;font-weight:700;cursor:pointer;white-space:nowrap">👥 VER DATOS DE JUGADORES</button>`;
+}
+
+// Slider para elegir cada cuántas fechas se arma un bloque (2 a 17, no aplica a RESERVA).
+// idSuffix distingue la instancia (GENERAL vs. vista de categoría) para poder tener
+// más de un slider en la página sin que se pisen los ids.
+function bloqueSliderHTML(idSuffix){
+  return `<div style="display:flex;align-items:center;gap:10px">
+    <span id="bloque-size-label-${idSuffix}" style="font-family:'Barlow Condensed',sans-serif;font-weight:600;
+      letter-spacing:1px;font-size:13px;color:var(--text2);white-space:nowrap">Bloques de ${bloqueSize}</span>
+    <input type="range" id="bloque-size-slider-${idSuffix}" min="2" max="17" step="1" value="${bloqueSize}"
+      style="width:120px;accent-color:var(--gold);cursor:pointer">
+  </div>`;
+}
+function wireBloqueSlider(idSuffix, onCommit){
+  const slider=document.getElementById(`bloque-size-slider-${idSuffix}`);
+  if(!slider) return;
+  slider.addEventListener('input',e=>{
+    document.getElementById(`bloque-size-label-${idSuffix}`).textContent=`Bloques de ${e.target.value}`;
+  });
+  slider.addEventListener('change',e=>{
+    bloqueSize=parseInt(e.target.value);
+    onCommit();
+  });
 }
 
 // ── GENERAL VIEW ─────────────────────────────────────────────
 function renderStatsCat(cat){
   const content=document.getElementById('stats-content');
+  updateRosterButton(cat);
   if(cat==='GENERAL') renderStatsGeneral(content);
   else renderStatsSingle(cat, content);
 }
 
 function renderStatsGeneral(content){
-  const blocks=getBlocks('4TA'), periods=getPeriodos('4TA');
-  const ptHTML=periods.map((p,i)=>`<div class="ptab${i===0?' active':''}" data-gpidx="${i}">${p.label}</div>`).join('');
-
   // Summary table rows
   let trows=GENERAL_CATS.map(cat=>{
     const s=calcStats(cat,1,35);
@@ -2193,37 +2201,8 @@ function renderStatsGeneral(content){
     <td style="color:${tDgC}">${tot.dg>0?'+':''}${tot.dg}</td>
     <td style="color:var(--muted)">${tPct}%</td></tr>`;
 
-  const fmtMarcador=v=>v?`${v[0]}-${v[1]}`:'—';
-  const alertasPendientes=(chequeoSemanal.alertas||[]).filter(a=>!chequeoSemanalResueltas[`${a.categoria}_${a.fecha}`]);
-  const alertasHTML = alertasPendientes.length===0 ? '' : `
-    <div style="background:linear-gradient(135deg,#3a1208,#1f0a05);border:1px solid var(--loss);
-      border-radius:10px;padding:14px 16px;margin-bottom:20px">
-      <div style="font-family:Bebas Neue,sans-serif;font-size:16px;letter-spacing:1px;color:var(--loss);margin-bottom:8px">
-        ⚠️ CHEQUEO SEMANAL — ${alertasPendientes.length} diferencia(s) encontrada(s)
-        ${chequeoSemanal.fecha_revision?`<span style="font-size:11px;color:var(--muted);font-weight:400">(revisado ${esc(chequeoSemanal.fecha_revision)})</span>`:''}
-      </div>
-      <div style="display:flex;flex-direction:column;gap:6px;font-family:Barlow Condensed,sans-serif;font-size:13px">
-        ${alertasPendientes.map(a=>`
-          <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">
-            <div>
-              <b style="color:${CAT_COLORS[a.categoria]||'var(--text)'}">${esc(a.categoria)} F${a.fecha}</b> —
-              tu sitio: <b>${fmtMarcador(a.mi_plataforma)}</b> ·
-              futdetail: <b>${fmtMarcador(a.futdetail)}</b> ·
-              LPF oficial: <b>${fmtMarcador(a.lpf_oficial)}</b>
-            </div>
-            ${canEdit?`<button onclick="resolverAlerta('${esc(a.categoria)}',${a.fecha})"
-              style="background:rgba(255,255,255,0.08);border:1px solid var(--border2);color:var(--text);
-              border-radius:6px;padding:4px 10px;font-family:Barlow Condensed,sans-serif;font-size:11px;
-              letter-spacing:1px;cursor:pointer;white-space:nowrap">✓ RESOLVER</button>`:''}
-          </div>`).join('')}
-      </div>
-    </div>`;
-
   content.innerHTML=`
-    ${alertasHTML}
     <div class="st"><div class="stbar"></div>RESUMEN GENERAL</div>
-    <div class="periodo-tabs" id="gen-ptabs">${ptHTML}</div>
-    <div id="gen-stats-area"></div>
 
     <div class="gen-table-wrap"><table class="gen-table">
       <thead><tr>
@@ -2231,34 +2210,27 @@ function renderStatsGeneral(content){
         <th>PP</th><th>GF</th><th>GC</th><th>DG</th><th>%</th>
       </tr></thead><tbody>${trows}</tbody></table></div>
 
-    <div class="st"><div class="stbar"></div>TORTAS POR CATEGORÍA (TEMPORADA)</div>
-    <div class="pies-grid" id="gen-pies-cat"></div>
+    <div id="gen-posicion"></div>
+
+    <div class="st" style="justify-content:space-between">
+      <span style="display:flex;align-items:center;gap:10px"><div class="stbar"></div>RENDIMIENTO POR BLOQUE DE FECHAS</span>
+      ${bloqueSliderHTML('general')}
+    </div>
+    ${bloqueComparativaHTML(calcStatsAll, '4TA')}
 
     <div class="st"><div class="stbar"></div>🏆 TOP GOLEADORES — 4TA A 9NA</div>
     <div id="gen-top-goleadores"></div>
 
     <div class="st"><div class="stbar"></div>🏆 TABLA GENERAL DE POSICIONES (SUMA 4TA A 9NA)</div>
     <div id="gen-tabla-general"></div>
+
+    <div class="st"><div class="stbar"></div>🔎 CONFIABILIDAD</div>
+    <div id="gen-confiabilidad" style="margin-bottom:20px"></div>
   `;
 
-  // Period filter
-  document.getElementById('gen-ptabs').addEventListener('click',e=>{
-    if(!e.target.classList.contains('ptab'))return;
-    document.getElementById('gen-ptabs').querySelectorAll('.ptab').forEach(t=>t.classList.remove('active'));
-    e.target.classList.add('active');
-    const idx=parseInt(e.target.dataset.gpidx);
-    const p=getPeriodos('4TA')[idx];
-    document.getElementById('gen-stats-area').innerHTML=statsHTML(calcStatsAll(p.from,p.to));
-  });
-  document.getElementById('gen-stats-area').innerHTML=statsHTML(calcStatsAll(1,35));
-
-  // Pies per cat (tamaño normal)
-  const gpCat=document.getElementById('gen-pies-cat'); gpCat.innerHTML='';
-  GENERAL_CATS.forEach(cat=>{
-    const s=calcStats(cat,1,35),id=`gpc-${cat}`;
-    gpCat.insertAdjacentHTML('beforeend',pieMini(id,s,`<span class="dot" style="background:${CAT_COLORS[cat]}"></span>${cat}`));
-    setTimeout(()=>drawPie(id,s),0);
-  });
+  renderConfiabilidad('gen-confiabilidad');
+  renderPosicionGeneral('gen-posicion');
+  wireBloqueSlider('general', ()=>renderStatsCat('GENERAL'));
 
   // Top 5 goleadores all categories
   const topWrap = document.getElementById('gen-top-goleadores');
@@ -2267,11 +2239,9 @@ function renderStatsGeneral(content){
   renderTablaGeneral('gen-tabla-general');
 }
 
-// Suma la tabla de posiciones LPF de 4TA a 9NA por equipo, en una sola tabla.
-function renderTablaGeneral(containerId){
-  const el=document.getElementById(containerId);
-  if(!el) return;
-  loadTablaData().then(()=>{
+// Suma la tabla de posiciones LPF de 4TA a 9NA por equipo, en una sola tabla combinada.
+function getTablaGeneralCombinada(){
+  return loadTablaData().then(()=>{
     const sumas={};
     GENERAL_CATS.forEach(cat=>{
       const filas=(TABLA_DATA&&TABLA_DATA.categorias&&TABLA_DATA.categorias[cat])||[];
@@ -2282,14 +2252,22 @@ function renderTablaGeneral(containerId){
       });
     });
     const combinadas=Object.values(sumas).map(s=>({...s, dif:s.gf-s.gc}));
+    combinadas.sort((a,b)=> b.pts-a.pts || b.dif-a.dif || b.gf-a.gf);
+    combinadas.forEach((f,i)=>f.pos=i+1);
+    return combinadas;
+  });
+}
+
+function renderTablaGeneral(containerId){
+  const el=document.getElementById(containerId);
+  if(!el) return;
+  getTablaGeneralCombinada().then(combinadas=>{
     if(!combinadas.length){
       el.innerHTML=`<div style="padding:40px 16px;text-align:center;color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-size:14px">
         Todavía no hay datos cargados.<br>
         <span style="font-size:12px">Se completará en la próxima actualización automática.</span></div>`;
       return;
     }
-    combinadas.sort((a,b)=> b.pts-a.pts || b.dif-a.dif || b.gf-a.gf);
-    combinadas.forEach((f,i)=>f.pos=i+1);
     const upd=TABLA_DATA&&TABLA_DATA.actualizado
       ? `Actualizado: ${TABLA_DATA.actualizado} · ${TABLA_DATA.fuente||''} · suma de 4TA a 9NA` : '';
     el.innerHTML=`
@@ -2298,14 +2276,217 @@ function renderTablaGeneral(containerId){
   });
 }
 
-function resolverAlerta(categoria, fecha){
-  if(!canEdit || !fbReady || !db) return;
-  const key=`${categoria}_${fecha}`;
-  chequeoSemanalResueltas[key]=true;
-  db.ref('stats/chequeoSemanalResueltas/'+key).set(true)
-    .then(()=>{ showToast('✓ ALERTA RESUELTA'); refreshActiveModule(); })
-    .catch(e=>console.warn('resolverAlerta error:',e));
+// Tarjeta chica con la posición combinada de Tigre (para RESUMEN GENERAL)
+// ============================================================
+//  CONFIABILIDAD (Fase 3): cruza mi planilla vs LPF oficial y
+//  vs futdetail, solo en lo que existe en las dos fuentes.
+//  Catapult (físico) no entra acá, no tiene resultados que cruzar.
+// ============================================================
+// 7MA, 8VA y 9NA quedan afuera de la confiabilidad a pedido de Javi.
+const CONFIABILIDAD_CATS = ['4TA','5TA','6TA'];
+
+function calcConfiabilidad(){
+  // Partido por partido: mi carga (results) vs LIGA (fixture scrapeado de
+  // sabadogol.com.ar) vs futdetail (panel privado del club). Reemplaza al
+  // viejo "chequeo semanal" externo — esto corre solo, sin depender de que
+  // alguien lo cargue a mano. Si futdetail todavía no está configurado, la
+  // comparación sigue funcionando con las dos fuentes que sí haya.
+  const partidoMismatches=[]; // {cat, fecha, mio, liga, fut, rival}
+  CONFIABILIDAD_CATS.forEach(cat=>{
+    const fixtureLiga=(TABLA_DATA&&TABLA_DATA.fixture&&TABLA_DATA.fixture[cat])||{};
+    const fixtureFut=(TABLA_DATA&&TABLA_DATA.fixture_futdetail&&TABLA_DATA.fixture_futdetail[cat])||{};
+    const fechas=new Set([...Object.keys(fixtureLiga), ...Object.keys(fixtureFut)]);
+    fechas.forEach(fechaStr=>{
+      const fecha=parseInt(fechaStr);
+      const liga=fixtureLiga[fechaStr]||null;
+      const fut=fixtureFut[fechaStr]||null;
+      const mio=results[cat]?.[fecha]||null;
+      const mioStr=mio?`${mio[0]}-${mio[1]}`:null;
+      const ligaStr=liga?`${liga.gf}-${liga.gc}`:null;
+      const futStr=fut?`${fut.gf}-${fut.gc}`:null;
+      const presentes=[mioStr,ligaStr,futStr].filter(v=>v!==null);
+      const todosIguales=presentes.every(v=>v===presentes[0]);
+      if(presentes.length>=2 && !todosIguales){
+        partidoMismatches.push({cat, fecha, mio:mioStr||'—', liga:ligaStr||'—', fut:futStr||'—', rival:(liga||fut||{}).rival||''});
+      }
+    });
+  });
+
+  const equipoMismatches=[]; // {cat, campo, mio, lpf}
+  CONFIABILIDAD_CATS.forEach(cat=>{
+    const filas=(TABLA_DATA&&TABLA_DATA.categorias&&TABLA_DATA.categorias[cat])||[];
+    const lpf=filas.find(f=>/tigre/i.test(f.equipo));
+    if(!lpf) return; // todavía sin datos LPF para esta categoría
+    const mio=calcStats(cat,1,35);
+    if(mio.pj!==lpf.pj) equipoMismatches.push({cat, campo:'PJ', mio:mio.pj, lpf:lpf.pj});
+    if(mio.pg!==lpf.pg) equipoMismatches.push({cat, campo:'PG', mio:mio.pg, lpf:lpf.pg});
+    if(mio.gf!==lpf.gf) equipoMismatches.push({cat, campo:'GF', mio:mio.gf, lpf:lpf.gf});
+  });
+
+  const golesMismatches=[]; // {cat, jugador, mio, fut}
+  CONFIABILIDAD_CATS.forEach(cat=>{
+    const misGoles={}, nombreOriginal={};
+    // goleadores guarda "Apellido, Nombre" y futdetail "Apellido Nombre" (sin
+    // coma), y no siempre coinciden en tildes — hay que normalizar sacando
+    // coma y acentos para que crucen bien.
+    const normComparable=s=>(s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'')
+      .replace(/,/g,' ').replace(/\s+/g,' ').trim();
+    (goleadores[cat]||[]).forEach(g=>{
+      const key=normComparable(g.name);
+      misGoles[key]=(misGoles[key]||0)+g.goals;
+      nombreOriginal[key]=nombreOriginal[key]||g.name;
+    });
+    const futGoles={};
+    (jugadoresStats[cat]||[]).forEach(j=>{
+      const key=normComparable(j.jugador);
+      futGoles[key]=parseInt(j.goles)||0;
+      nombreOriginal[key]=nombreOriginal[key]||j.jugador;
+    });
+    new Set([...Object.keys(misGoles), ...Object.keys(futGoles)]).forEach(key=>{
+      const mio=misGoles[key]||0, fut=futGoles[key]||0;
+      if(mio!==fut) golesMismatches.push({cat, jugador:nombreOriginal[key], mio, fut});
+    });
+  });
+
+  return {partidoMismatches, equipoMismatches, golesMismatches};
 }
+
+// Botón "REVISAR" único para toda la sección: fuerza traer la tabla LPF de
+// nuevo (por si se actualizó) y recalcula todo — filas resueltas desaparecen.
+function revisarConfiabilidad(){
+  TABLA_DATA=null;
+  showToast('🔄 REVISANDO...');
+  renderConfiabilidad('gen-confiabilidad');
+}
+
+function renderConfiabilidad(containerId){
+  const el=document.getElementById(containerId);
+  if(!el) return;
+  loadTablaData().then(()=>{
+    const {partidoMismatches, equipoMismatches, golesMismatches}=calcConfiabilidad();
+    const total=partidoMismatches.length+equipoMismatches.length+golesMismatches.length;
+
+    const revisarBtn=`<button onclick="revisarConfiabilidad()"
+      style="background:rgba(255,255,255,0.08);border:1px solid var(--border2);color:var(--text);
+      border-radius:6px;padding:4px 10px;font-family:Barlow Condensed,sans-serif;font-size:11px;
+      letter-spacing:1px;cursor:pointer;white-space:nowrap">🔄 REVISAR</button>`;
+
+    if(total===0){
+      el.innerHTML=`<div style="text-align:center;padding:20px;color:var(--win);
+        font-family:'Barlow Condensed',sans-serif;font-size:13px;letter-spacing:1px">
+        ✓ Todo coincide entre tu planilla, LPF oficial y futdetail
+      </div>`;
+      return;
+    }
+
+    const row=(left,right)=>`
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;
+        background:rgba(192,21,42,0.08);border:1px solid var(--loss);border-radius:8px;padding:8px 14px;margin-bottom:6px">
+        <div>${left}</div>
+        <div style="display:flex;align-items:center;gap:10px;font-family:'Barlow Condensed',sans-serif;font-size:13px">
+          <span>${right}</span>${revisarBtn}
+        </div>
+      </div>`;
+
+    let html=`<div style="font-family:'Barlow Condensed',sans-serif;font-size:12px;letter-spacing:1px;color:var(--loss);margin-bottom:10px">
+      ⚠️ ${total} diferencia(s) encontrada(s)</div>`;
+
+    if(partidoMismatches.length){
+      html+=`<div style="font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:1px;color:var(--muted);margin-bottom:6px">
+        RESULTADOS POR PARTIDO · mi planilla vs LIGA vs futdetail
+      </div>`;
+      html+=partidoMismatches.map(m=>row(
+        `<b style="color:${CAT_COLORS[m.cat]}">${m.cat} F${m.fecha}</b>${m.rival?' vs '+esc(m.rival):''}`,
+        `Mi planilla: <b>${m.mio}</b> · LIGA: <b>${m.liga}</b> · futdetail: <b>${m.fut}</b>`
+      )).join('');
+    }
+
+    if(equipoMismatches.length){
+      html+=`<div style="font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:1px;color:var(--muted);margin:14px 0 6px">
+        EQUIPO · mi planilla vs LPF oficial</div>`;
+      html+=equipoMismatches.map(m=>row(
+        `<b style="color:${CAT_COLORS[m.cat]}">${m.cat}</b> · ${m.campo}`,
+        `Mi planilla: <b>${m.mio}</b> · LPF oficial: <b>${m.lpf}</b>`
+      )).join('');
+    }
+
+    if(golesMismatches.length){
+      html+=`<div style="font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:1px;color:var(--muted);margin:14px 0 6px">
+        GOLES POR JUGADOR · mi carga vs futdetail</div>`;
+      html+=golesMismatches.map(m=>row(
+        `<b style="color:${CAT_COLORS[m.cat]}">${m.cat}</b> · ${esc(m.jugador)}`,
+        `Mi carga: <b>${m.mio}</b> · futdetail: <b>${m.fut}</b>`
+      )).join('');
+    }
+
+    el.innerHTML=html;
+  });
+}
+
+function renderPosicionGeneral(containerId){
+  const el=document.getElementById(containerId);
+  if(!el) return;
+  getTablaGeneralCombinada().then(combinadas=>{
+    const mia=combinadas.find(f=>/tigre/i.test(f.equipo));
+    if(!mia){ el.innerHTML=''; return; }
+    el.innerHTML=`
+      <div style="display:inline-flex;align-items:center;gap:16px;background:var(--surface2);
+        border:1px solid var(--gold);border-radius:10px;padding:14px 22px;margin-bottom:20px">
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:38px;color:var(--gold2);line-height:1">${mia.pos}°</div>
+        <div>
+          <div style="font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:1px;color:var(--text2)">POSICIÓN EN LA TABLA GENERAL</div>
+          <div style="font-family:'Barlow Condensed',sans-serif;font-size:13px;color:var(--muted)"><b style="color:var(--text)">${mia.pos}°</b> de ${combinadas.length} equipos</div>
+        </div>
+      </div>`;
+  });
+}
+
+// Tabla comparativa: una fila por bloque de fechas (según bloqueSize), con el
+// acumulado de todas las categorías (4TA a 9NA), más una fila de total temporada.
+// calcFn(from,to) da las stats de ese rango — calcStatsAll para GENERAL, o
+// calcStats(dataCat,from,to) para una categoría puntual. periodsCat define de
+// qué categoría se sacan los bloques (da igual el valor salvo para RESERVA).
+function bloqueComparativaHTML(calcFn, periodsCat){
+  const isReserva = periodsCat==='RESERVA'||periodsCat==='RESERVA_S2';
+  const totMax = isReserva ? 18 : 35;
+  const periods=getPeriodos(periodsCat).filter(p=>p.label!=='TOTAL');
+  const filas=periods.map(p=>({label:p.label, s:calcFn(p.from,p.to)})).filter(f=>f.s.pj>0);
+  const ultimoLabel=filas.length?filas[filas.length-1].label:null;
+
+  if(!filas.length){
+    return `<div style="text-align:center;padding:20px;color:var(--muted);
+      font-family:'Barlow Condensed',sans-serif;font-size:13px">Todavía no se jugaron partidos</div>`;
+  }
+
+  const rowsHTML=filas.map(f=>{
+    const dgC=f.s.dg>0?'var(--win)':f.s.dg<0?'var(--loss)':'var(--muted)';
+    const destacado=f.label===ultimoLabel;
+    return `<tr${destacado?' style="outline:2px solid var(--gold);outline-offset:-2px"':''}>
+      <td class="cat-cell">${f.label}</td>
+      <td style="color:var(--gold2);font-weight:700">${f.s.pts}</td><td>${f.s.pj}</td>
+      <td style="color:var(--win)">${f.s.pg}</td><td style="color:var(--draw)">${f.s.pe}</td>
+      <td style="color:var(--loss)">${f.s.pp}</td><td style="color:#60a5fa">${f.s.gf}</td>
+      <td style="color:#f87171">${f.s.gc}</td>
+      <td style="color:${dgC};font-weight:700">${f.s.dg>0?'+':''}${f.s.dg}</td></tr>`;
+  }).join('');
+
+  const tot=calcFn(1,totMax);
+  const tDgC=tot.dg>0?'var(--win)':tot.dg<0?'var(--loss)':'var(--muted)';
+  const totRow=`<tr style="background:rgba(192,21,42,0.1);font-weight:700;">
+    <td class="cat-cell" style="color:var(--gold2)">TOTAL TEMPORADA</td>
+    <td style="color:var(--gold2)">${tot.pts}</td><td>${tot.pj}</td>
+    <td style="color:var(--win)">${tot.pg}</td><td style="color:var(--draw)">${tot.pe}</td>
+    <td style="color:var(--loss)">${tot.pp}</td><td style="color:#60a5fa">${tot.gf}</td>
+    <td style="color:#f87171">${tot.gc}</td>
+    <td style="color:${tDgC}">${tot.dg>0?'+':''}${tot.dg}</td></tr>`;
+
+  return `<div class="gen-table-wrap"><table class="gen-table">
+    <thead><tr>
+      <th>BLOQUE</th><th>PTS</th><th>PJ</th><th>PG</th><th>PE</th>
+      <th>PP</th><th>GF</th><th>GC</th><th>DG</th>
+    </tr></thead><tbody>${rowsHTML}${totRow}</tbody></table></div>`;
+}
+
 
 function renderTopGoleadores(wrap){
   // Junta los goleadores de cada categoría, pero SIN mezclar entre categorías:
@@ -2359,10 +2540,8 @@ function renderStatsSingle(cat, content){
     : (LINK_CATS.includes(cat) ? LINK_TYPES : []);
   const isLink = activeLinks.length > 0;
   const showEquipo = false;   // botón/panel de equipo retirado de todas las categorías
-  const periods=getPeriodos(dataCat);
   const fixtureList = isReserva ? (reservaSemestre===2 ? RIVALS_RESERVA_S2 : RIVALS_RESERVA) : RIVALS;
   const maxDate = isReserva ? 18 : 35;
-  const ptHTML=periods.map((p,i)=>`<div class="ptab${i===0?' active':''}" data-cpidx="${i}" data-cat="${dataCat}">${p.label}</div>`).join('');
 
   // Selector de semestre (solo RESERVA)
   const semestreSelector = isReserva ? `
@@ -2383,9 +2562,9 @@ function renderStatsSingle(cat, content){
   let rows='';
   fixtureList.forEach(r=>{
     // No block dividers for RESERVA (18 matches, no need to split)
-    if(!isReserva && (r.f-1)%5===0 && r.f>1){
+    if(!isReserva && (r.f-1)%bloqueSize===0 && r.f>1){
       const span=6+(isLink?activeLinks.length:0)+(showEquipo?1:0);
-      rows+=`<tr class="divider-row"><td colspan="${span}">── BLOQUE F${r.f}–F${Math.min(r.f+4,35)}</td></tr>`;
+      rows+=`<tr class="divider-row"><td colspan="${span}">── BLOQUE F${r.f}–F${Math.min(r.f+bloqueSize-1,35)}</td></tr>`;
     }
     const stored=results[dataCat][r.f];
     const gf=stored?stored[0]:'', gc=stored?stored[1]:'';
@@ -2454,6 +2633,18 @@ function renderStatsSingle(cat, content){
     </tr>`:''}`;
   });
 
+  // Selectores "comparar fechas" (2 o 3 fechas sueltas, no necesariamente seguidas)
+  let fechaOptsHTML='<option value="">— Fecha —</option>';
+  for(let f=1;f<=maxDate;f++){
+    const rName = isReserva ? (rivalData[dataCat][f]?.rival || '') : (RIVALS.find(x=>x.f===f)?.r || '');
+    fechaOptsHTML+=`<option value="${f}">F${f}${rName?` - ${esc(rName)}`:''}</option>`;
+  }
+  const compararSelectsHTML=[0,1,2].map(i=>
+    `<select class="comp-fecha-select" data-slot="${i}"
+      style="background:var(--surface2);border:1px solid var(--border2);color:var(--text);
+      font-family:'Barlow Condensed',sans-serif;font-weight:600;letter-spacing:1px;font-size:13px;
+      padding:7px 12px;border-radius:6px;cursor:pointer;outline:none">${fechaOptsHTML}</select>`).join('');
+
   // Link headers
   let linkGH='', linkSH='';
   if(isLink){
@@ -2462,7 +2653,8 @@ function renderStatsSingle(cat, content){
   }
 
   content.innerHTML=`
-    <div class="st" style="margin-top:4px"><div class="stbar"></div>
+    <div class="st" style="margin-top:4px">
+      <div class="stbar"></div>
       RESULTADOS · <span style="color:${CAT_COLORS[cat]}">${cat}</span>${isReserva?` · <span style="color:var(--gold)">${reservaSemestre===2?'2do SEMESTRE':'1er SEMESTRE'}</span>`:''}
     </div>
     ${semestreSelector}
@@ -2478,11 +2670,19 @@ function renderStatsSingle(cat, content){
       <tbody id="tbody-${dataCat}">${rows}</tbody>
     </table></div>
 
-    <div class="st"><div class="stbar"></div>ESTADÍSTICAS · ${cat}</div>
-    <div class="periodo-tabs" id="ptabs-${dataCat}">${ptHTML}</div>
-    <div id="stats-area-${dataCat}"></div>
+    <div id="roster-content" style="margin-bottom:20px"></div>
 
-    ${isReserva ? `` : ``}
+    <div class="st"><div class="stbar"></div>🔍 COMPARAR FECHAS</div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px" id="comp-fechas-selects-${dataCat}">
+      ${compararSelectsHTML}
+    </div>
+    <div id="comp-fechas-result-${dataCat}" style="margin-bottom:20px"></div>
+
+    <div class="st" style="justify-content:space-between">
+      <span style="display:flex;align-items:center;gap:10px"><div class="stbar"></div>RENDIMIENTO POR BLOQUE DE FECHAS</span>
+      ${isReserva?'':bloqueSliderHTML('cat')}
+    </div>
+    <div id="bloque-cat-${dataCat}"></div>
 
     <div class="st"><div class="stbar"></div>GOLEADORES · <span style="color:${CAT_COLORS[cat]}">${cat}</span></div>
     <div id="goleadores-${dataCat}"></div>
@@ -2505,21 +2705,62 @@ function renderStatsSingle(cat, content){
 
   // Events
   attachTableEvents(dataCat);
-  // Period filter
-  document.getElementById(`ptabs-${dataCat}`).addEventListener('click',e=>{
-    if(!e.target.classList.contains('ptab'))return;
-    document.getElementById(`ptabs-${dataCat}`).querySelectorAll('.ptab').forEach(t=>t.classList.remove('active'));
-    e.target.classList.add('active');
-    const idx=parseInt(e.target.dataset.cpidx);
-    const p=getPeriodos(dataCat)[idx];
-    document.getElementById(`stats-area-${dataCat}`).innerHTML=statsHTML(calcStats(dataCat,p.from,p.to));
-  });
-  const totMax = isReserva ? 18 : 35;
-  document.getElementById(`stats-area-${dataCat}`).innerHTML=statsHTML(calcStats(dataCat,1,totMax));
-  renderCatCharts(dataCat);
+  if(!isReserva) wireBloqueSlider('cat', ()=>renderStatsSingle(cat, content));
+  document.getElementById(`bloque-cat-${dataCat}`).innerHTML=
+    bloqueComparativaHTML((from,to)=>calcStats(dataCat,from,to), dataCat);
+  openRosterCat(cat);
   renderGoleadores(dataCat);
   if(isReserva) renderTablaReserva(`tabla-lpf-${cat}`);
   else renderTablaLPF(cat, `tabla-lpf-${cat}`);
+
+  // Comparar fechas sueltas
+  document.querySelectorAll(`#comp-fechas-selects-${dataCat} .comp-fecha-select`).forEach(sel=>{
+    sel.addEventListener('change',()=>renderCompararFechas(cat, dataCat, isReserva));
+  });
+  renderCompararFechas(cat, dataCat, isReserva);
+}
+
+function renderCompararFechas(cat, dataCat, isReserva){
+  const container=document.getElementById(`comp-fechas-result-${dataCat}`);
+  if(!container) return;
+  const selects=[...document.querySelectorAll(`#comp-fechas-selects-${dataCat} .comp-fecha-select`)];
+  const fechas=[...new Set(selects.map(s=>s.value).filter(v=>v!==''))].map(Number).sort((a,b)=>a-b);
+  if(fechas.length<2){
+    container.innerHTML=`<div style="text-align:center;padding:20px;color:var(--muted);
+      font-family:'Barlow Condensed',sans-serif;font-size:13px;letter-spacing:1px">
+      Elegí 2 o 3 fechas arriba para comparar
+    </div>`;
+    return;
+  }
+  const cardsHTML=fechas.map(f=>{
+    const stored=results[dataCat][f];
+    const gf=stored?stored[0]:null, gc=stored?stored[1]:null;
+    const res=stored?getResult(gf,gc):null;
+    const pts=res==='W'?3:res==='D'?1:res==='L'?0:null;
+    const ptC=res==='W'?'var(--win)':res==='D'?'var(--draw)':res==='L'?'var(--loss)':'var(--muted)';
+    let rName,rCond;
+    if(isReserva){
+      rName=rivalData[dataCat][f]?.rival || '—';
+      rCond=rivalData[dataCat][f]?.cond || 'L';
+    }else{
+      const fixture=RIVALS.find(x=>x.f===f);
+      rName=fixture?fixture.r:'—';
+      rCond=fixture?fixture.c:'L';
+    }
+    return `<div style="background:var(--surface2);border:1px solid var(--border);
+      border-top:3px solid ${CAT_COLORS[cat]};border-radius:10px;padding:14px 16px;min-width:150px;flex:1">
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:1px;color:${CAT_COLORS[cat]};margin-bottom:6px">FECHA ${f}</div>
+      <div style="font-family:'Barlow Condensed',sans-serif;font-size:13px;color:var(--text2);margin-bottom:8px">
+        ${esc(rName)} <span class="cond-badge cond-${rCond}" style="margin-left:4px">${rCond==='L'?'LOCAL':'VISIT.'}</span>
+      </div>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:26px;margin-bottom:8px">${gf!==null?`${gf} - ${gc}`:'—'}</div>
+      <div style="display:flex;align-items:center;gap:10px;font-family:'Barlow Condensed',sans-serif;font-size:12px">
+        <span style="color:${ptC};font-weight:700">${pts!==null?pts+' PTS':'—'}</span>
+        ${res?`<span class="result-badge result-${res}">${res}</span>`:''}
+      </div>
+    </div>`;
+  }).join('');
+  container.innerHTML=`<div style="display:flex;gap:12px;flex-wrap:wrap">${cardsHTML}</div>`;
 }
 
 // ============================================================
@@ -2935,8 +3176,8 @@ function attachTableEvents(cat){
       results[cat][f][s]=v;
       if(results[cat][f][0]===null&&results[cat][f][1]===null)results[cat][f]=null;
       rebuildRow(cat,f);
-      document.getElementById(`stats-area-${cat}`).innerHTML=statsHTML(calcStats(cat,1,(cat==='RESERVA'||cat==='RESERVA_S2')?18:35));
-      renderCatCharts(cat);
+      const bloqueEl=document.getElementById(`bloque-cat-${cat}`);
+      if(bloqueEl) bloqueEl.innerHTML=bloqueComparativaHTML((from,to)=>calcStats(cat,from,to), cat);
       saveData();
     }
     if(e.target.classList.contains('link-input')){
@@ -2968,59 +3209,6 @@ function rebuildRow(cat,fecha){
     tr.children[5].textContent=pts;
     tr.children[5].style.color=res==='W'?'var(--win)':res==='D'?'var(--draw)':res==='L'?'var(--loss)':'var(--muted)';
     tr.children[5].style.fontWeight='700';
-  });
-}
-
-// ── CAT CHARTS ────────────────────────────────────────────────
-function renderCatCharts(cat){
-  const isRes = (cat==='RESERVA'||cat==='RESERVA_S2');
-  const blocks=getBlocks(cat),labels=blocks.map(b=>b.label),col=CAT_COLORS[isRes?'RESERVA':cat],def=chartDef();
-  const fixtureList = cat==='RESERVA' ? RIVALS_RESERVA : (cat==='RESERVA_S2' ? RIVALS_RESERVA_S2 : RIVALS);
-  const totMax = isRes ? 18 : 35;
-
-  // RESERVA/RESERVA_S2: sin gráficos. 4TA-9NA: sin gráficos ni tortas por bloque.
-  if(isRes) return;
-  if(!document.getElementById(`cpts-${cat}`)) return;
-
-  killChart(`cpts-${cat}`);
-  new Chart(document.getElementById(`cpts-${cat}`).getContext('2d'),{type:'bar',
-    data:{labels,datasets:[{label:'Puntos',
-      data:blocks.map(b=>calcStats(cat,b.from,b.to).pts),
-      backgroundColor:blocks.map(b=>{const v=calcStats(cat,b.from,b.to).pts;return v>=9?'rgba(34,197,94,.75)':v>=5?'rgba(201,162,39,.75)':'rgba(192,21,42,.65)';}),
-      borderRadius:5,borderSkipped:false}]},options:def});
-
-  killChart(`cgls-${cat}`);
-  new Chart(document.getElementById(`cgls-${cat}`).getContext('2d'),{type:'bar',
-    data:{labels,datasets:[
-      {label:'GF',data:blocks.map(b=>calcStats(cat,b.from,b.to).gf),backgroundColor:'rgba(36,80,192,.7)',borderRadius:4},
-      {label:'GC',data:blocks.map(b=>calcStats(cat,b.from,b.to).gc),backgroundColor:'rgba(192,21,42,.55)',borderRadius:4}
-    ]},options:def});
-
-  let dgAcc=[],acc=0,dgL=[];
-  fixtureList.forEach(r=>{const x=results[cat][r.f];if(x){acc+=(x[0]-x[1]);dgAcc.push(acc);dgL.push('F'+r.f);}});
-  killChart(`cdg-${cat}`);
-  new Chart(document.getElementById(`cdg-${cat}`).getContext('2d'),{type:'line',
-    data:{labels:dgL,datasets:[{label:'DG Acum.',data:dgAcc,borderColor:col,
-      backgroundColor:col+'22',fill:true,tension:.3,pointRadius:3,
-      pointBackgroundColor:dgAcc.map(v=>v>=0?'#22c55e':'#ef4444')}]},
-    options:{...def,scales:{...def.scales,y:{...def.scales.y,grid:{color:ctx=>ctx.tick.value===0?'#5a7099':'rgba(26,45,90,0.4)'}}}}});
-
-  const tot=calcStats(cat,1,totMax);
-  killChart(`cpie-${cat}`);
-  new Chart(document.getElementById(`cpie-${cat}`).getContext('2d'),{type:'doughnut',
-    data:{labels:['Ganados','Empates','Perdidos'],datasets:[{data:[tot.pg,tot.pe,tot.pp],
-      backgroundColor:['rgba(34,197,94,.82)','rgba(245,158,11,.82)','rgba(192,21,42,.75)'],
-      borderColor:['#22c55e','#f59e0b','#c0152a'],borderWidth:2}]},
-    options:{responsive:true,plugins:{legend:{position:'bottom',labels:{color:'#5a7099',font:{family:'Barlow Condensed'}}}}}});
-
-  // Block pies
-  const grid=document.getElementById(`piesgrid-${cat}`);
-  if(!grid)return;
-  grid.innerHTML='';
-  blocks.forEach(b=>{
-    const s=calcStats(cat,b.from,b.to),id=`pb-${cat}-${b.from}`;
-    grid.insertAdjacentHTML('beforeend',pieMini(id,s,b.label));
-    setTimeout(()=>drawPie(id,s),0);
   });
 }
 
@@ -3100,7 +3288,7 @@ function renderRosterCat(cat, content){
   (jugadoresStats[cat]||[]).forEach(j=>{ statsPorNombre[normNombre(j.jugador)]=j; });
 
   content.innerHTML=`
-    <div class="st" style="margin-top:4px"><div class="stbar"></div>PLANTEL · <span style="color:${CAT_COLORS[cat]}">${cat}</span></div>
+    <div class="st" style="margin-top:4px"><div class="stbar"></div>PLANTEL</div>
     <div id="roster-table-${cat}"></div>`;
 
   if(roster.length===0){
@@ -3112,6 +3300,67 @@ function renderRosterCat(cat, content){
   const merged=roster.map(p=>({...p, stats:statsPorNombre[normNombre(p.nombre)]||{}}));
   if(!rosterSortState[cat]) rosterSortState[cat]={key:'minutos_jugados', dir:-1};
   renderRosterTable(cat, merged);
+
+  content.insertAdjacentHTML('beforeend', buildComparativaJugadoresHTML(cat, merged));
+  document.querySelectorAll(`#comp-jug-selects-${cat} .comp-jug-select`).forEach(sel=>{
+    sel.addEventListener('change',()=>renderComparativaJugadores(cat, merged));
+  });
+  renderComparativaJugadores(cat, merged);
+}
+
+// Selectores de 2-3 jugadores para comparar (tabla, una fila por métrica)
+function buildComparativaJugadoresHTML(cat, merged){
+  const opts='<option value="">— Jugador —</option>'+
+    merged.map(p=>`<option value="${esc(p.nombre)}">${esc(p.nombre)}</option>`).join('');
+  const selStyle=`background:var(--surface2);border:1px solid var(--border2);color:var(--text);
+    font-family:'Barlow Condensed',sans-serif;font-weight:600;letter-spacing:1px;font-size:13px;
+    padding:7px 12px;border-radius:6px;cursor:pointer;outline:none`;
+  const selectsHTML=[0,1,2].map(i=>
+    `<select class="comp-jug-select" data-slot="${i}" style="${selStyle}">${opts}</select>`).join('');
+  return `
+    <div class="st"><div class="stbar"></div>⚖️ COMPARAR JUGADORES</div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px" id="comp-jug-selects-${cat}">
+      ${selectsHTML}
+    </div>
+    <div id="comp-jug-result-${cat}" style="margin-bottom:20px"></div>`;
+}
+
+function renderComparativaJugadores(cat, merged){
+  const container=document.getElementById(`comp-jug-result-${cat}`);
+  if(!container) return;
+  const selects=[...document.querySelectorAll(`#comp-jug-selects-${cat} .comp-jug-select`)];
+  const nombres=[...new Set(selects.map(s=>s.value).filter(v=>v!==''))];
+  if(nombres.length<2){
+    container.innerHTML=`<div style="text-align:center;padding:20px;color:var(--muted);
+      font-family:'Barlow Condensed',sans-serif;font-size:13px">Elegí 2 o 3 jugadores arriba para comparar</div>`;
+    return;
+  }
+  const players=nombres.map(n=>merged.find(p=>p.nombre===n)).filter(Boolean);
+  const metricRows=[
+    {label:'Posición',      get:p=>p.posicion||'—',                       num:false},
+    {label:'Edad',          get:p=>p.edad||'—',                           num:false},
+    {label:'Convocatorias', get:p=>parseInt(p.stats.convocatorias)||0,    num:true},
+    {label:'Titular',       get:p=>parseInt(p.stats.partidos_titular)||0, num:true},
+    {label:'Minutos',       get:p=>parseInt(p.stats.minutos_jugados)||0,  num:true},
+    {label:'Goles',         get:p=>parseInt(p.stats.goles)||0,            num:true},
+    {label:'Asistencias',   get:p=>parseInt(p.stats.asistencias)||0,      num:true},
+    {label:'Amarillas',     get:p=>parseInt(p.stats.tarjeta_amarilla)||0, num:true},
+    {label:'Rojas',         get:p=>parseInt(p.stats.tarjeta_roja)||0,     num:true},
+  ];
+  const headHTML=players.map(p=>`<th style="text-align:center">${esc(p.nombre)}</th>`).join('');
+  const rowsHTML=metricRows.map(m=>{
+    const vals=players.map(p=>m.get(p));
+    const max=m.num?Math.max(...vals):null;
+    const cells=vals.map(v=>{
+      const destacado=m.num && v===max && max>0;
+      return `<td style="text-align:center${destacado?';font-weight:700;color:var(--gold2)':''}">${v}</td>`;
+    }).join('');
+    return `<tr><td style="color:var(--muted)">${m.label}</td>${cells}</tr>`;
+  }).join('');
+  container.innerHTML=`<div class="table-wrap"><table>
+    <thead><tr><th></th>${headHTML}</tr></thead>
+    <tbody>${rowsHTML}</tbody>
+  </table></div>`;
 }
 
 function renderRosterTable(cat, merged){
@@ -3168,27 +3417,19 @@ function renderRosterTable(cat, merged){
   });
 }
 
-function buildRosterModule(){
-  const panel=document.getElementById('panel-roster');
-  panel.innerHTML=`
-    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;padding:8px 12px 0;border-bottom:1px solid rgba(26,45,90,0.4);margin-bottom:4px">
-      <div class="cat-subtabs" id="roster-subtabs" style="border:none;padding:0;margin:0"></div>
-    </div>
-    <div class="main" id="roster-content"></div>`;
-  const wrap=document.getElementById('roster-subtabs');
-  CATEGORIES.forEach((cat,i)=>{
-    const t=document.createElement('div');
-    t.className='cat-tab'+(i===0?' active':'');
-    t.dataset.cat=cat;
-    t.style.color=CAT_COLORS[cat];
-    t.innerHTML=`<span class="cat-dot" style="background:${CAT_COLORS[cat]}"></span>${cat}`;
-    t.addEventListener('click',()=>{
-      wrap.querySelectorAll('.cat-tab').forEach(x=>x.classList.toggle('active',x===t));
-      renderRosterCat(cat, document.getElementById('roster-content'));
-    });
-    wrap.appendChild(t);
-  });
-  renderRosterCat(CATEGORIES[0], document.getElementById('roster-content'));
+// Vista de PLANTEL escondida detrás del botón que está junto al selector de
+// categoría: no se carga hasta que el usuario la pide explícitamente.
+const rosterRevealed = {}; // { [cat]: true } una vez que tocaste "ver datos de jugadores"
+function openRosterCat(cat){
+  const el=document.getElementById('roster-content');
+  if(!el) return;
+  if(rosterRevealed[cat]) renderRosterCat(cat, el);
+  else el.innerHTML='';
+}
+function revealRoster(cat){
+  rosterRevealed[cat]=true;
+  const el=document.getElementById('roster-content');
+  if(el) renderRosterCat(cat, el);
 }
 
 function addGoleador(cat){
@@ -3547,9 +3788,7 @@ initFirebase()
   .then(()=>loadData())
   .catch(e=>{ console.warn('Firebase error:',e); showOfflineBanner(); })
   .finally(()=>{
-    buildNav();
     buildStatsModule();
-    buildRosterModule();
     applyViewMode();
     startPublicListener(); // load stats for everyone, auth or not
   });
@@ -3575,7 +3814,6 @@ function startPublicListener(){
       }
     });
     if(p.chequeoSemanal) chequeoSemanal = p.chequeoSemanal;
-    if(p.chequeoSemanalResueltas) chequeoSemanalResueltas = p.chequeoSemanalResueltas;
     refreshActiveModule();
   });
 }

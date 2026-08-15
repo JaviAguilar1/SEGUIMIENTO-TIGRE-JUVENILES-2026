@@ -14,10 +14,13 @@ existente (asi la app sigue mostrando el ultimo dato bueno).
 """
 
 import json
+import os
 import re
 import sys
 import datetime
 import urllib.request
+import urllib.parse
+import http.cookiejar
 
 # Categoria en la app  ->  slug de la URL oficial
 # 4TA-9NA usan el parser estandar (la <table> viene embebida en el HTML).
@@ -45,6 +48,25 @@ HEADERS = {
     "User-Agent": "Mozilla/5.0 (compatible; TigreJuvenilesBot/1.0; +github-actions)"
 }
 
+# Resultado por fecha de Tigre (partido por partido): fuente sabadogol.com.ar.
+# La LPF oficial no sirve esto en HTML plano (lo carga con JS via un widget de
+# terceros que no se puede scrapear simple), pero sabadogol.com.ar muestra el
+# mismo fixture en una tabla comun. FIXTURE_URL recibe por POST el anio (a),
+# la categoria (c=6 es "Juveniles LPF") y el torneo puntual (t), que ya viene
+# separado por division (a diferencia de "d", que es redundante con "t" pero
+# lo mandamos igual porque el form original lo espera).
+FIXTURE_URL = "https://sabadogol.com.ar/fixture.php"
+FIXTURE_ANIO = "3"     # 2026
+FIXTURE_CAT = "6"      # Juveniles LPF
+FIXTURE_TORNEOS = {
+    "4TA": ("3", "5"),
+    "5TA": ("4", "9"),
+    "6TA": ("5", "10"),
+    "7MA": ("6", "11"),
+    "8VA": ("7", "12"),
+    "9NA": ("8", "13"),
+}
+
 # Nombre oficial en la web  ->  como queremos mostrarlo (normalizamos "Tigre")
 def norm_equipo(nombre: str) -> str:
     return nombre.strip()
@@ -54,6 +76,145 @@ def fetch(url: str) -> str:
     req = urllib.request.Request(url, headers=HEADERS)
     with urllib.request.urlopen(req, timeout=30) as resp:
         return resp.read().decode("utf-8", errors="replace")
+
+
+def fetch_post(url: str, data: dict) -> str:
+    body = urllib.parse.urlencode(data).encode()
+    headers = dict(HEADERS)
+    headers["Content-Type"] = "application/x-www-form-urlencoded"
+    req = urllib.request.Request(url, data=body, headers=headers)
+    with urllib.request.urlopen(req, timeout=30) as resp:
+        return resp.read().decode("utf-8", errors="replace")
+
+
+def _quitar_tags(s: str) -> str:
+    return re.sub(r"<[^>]+>", "", s).strip()
+
+
+def parse_fixture_cat(html: str):
+    """
+    Extrae, de una respuesta de sabadogol.com.ar/fixture.php, los partidos de
+    TIGRE fecha por fecha. La pagina trae las 35 fechas en una sola respuesta
+    (pestanas que ya vienen todas armadas en el HTML), cada una precedida por
+    un comentario "<!-- N -->" con el numero de fecha.
+    Devuelve dict {fecha:int -> {"gf":int,"gc":int,"rival":str}}.
+    Partidos todavia no jugados (sin marcador "N - N") se omiten.
+    """
+    partes = re.split(r"<!--\s*(\d+)\s*-->", html)
+    out = {}
+    # partes[0] es lo anterior a la primera fecha; despues alterna numero/bloque
+    for i in range(1, len(partes), 2):
+        try:
+            fecha = int(partes[i])
+        except ValueError:
+            continue
+        bloque = partes[i + 1]
+        m = re.search(r'<table class="table">(.*?)</table>', bloque, re.DOTALL)
+        if not m:
+            continue
+        filas = re.findall(
+            r'<tr>\s*<td class="text-end[^"]*"[^>]*>(.*?)</td>\s*'
+            r'<td[^>]*><div[^>]*>([^<]*)</div></td>\s*'
+            r'<td class="text-start[^"]*"[^>]*>(.*?)</td>\s*</tr>',
+            m.group(1), re.DOTALL)
+        for local_raw, marcador, visitante_raw in filas:
+            local = _quitar_tags(local_raw)
+            visitante = _quitar_tags(visitante_raw)
+            es_local = "TIGRE" in local.upper()
+            es_visitante = "TIGRE" in visitante.upper()
+            if not (es_local or es_visitante):
+                continue
+            gm = re.match(r"^\s*(\d+)\s*-\s*(\d+)\s*$", marcador.strip())
+            if not gm:
+                continue  # todavia no jugado
+            g1, g2 = int(gm.group(1)), int(gm.group(2))
+            if es_local:
+                out[fecha] = {"gf": g1, "gc": g2, "rival": visitante}
+            else:
+                out[fecha] = {"gf": g2, "gc": g1, "rival": local}
+    return out
+
+
+# ── futdetail (panel privado del club) ──────────────────────────────────
+# Login clasico por formulario (usuario/password -> cookie de sesion PHP).
+# Las credenciales viven en GitHub Secrets (FUTDETAIL_USER, FUTDETAIL_PASS)
+# y llegan aca como variables de entorno; nunca se escriben en el codigo.
+# El listado de partidos (con goles_local/goles_visitante ya incluidos) se
+# pide a "partidos_consulta_procesos.php" por POST, autenticado con esa
+# misma sesion. Si faltan las credenciales, esta parte simplemente se
+# saltea (no rompe el resto del scraper).
+FUTDETAIL_BASE = "https://futdetail.com.ar/futdetail_web_tigre/"
+FUTDETAIL_LOGIN_URL = FUTDETAIL_BASE + "login.php"
+FUTDETAIL_PARTIDOS_URL = FUTDETAIL_BASE + "partidos_consulta_procesos.php"
+FUTDETAIL_TEMPORADA_ID = "3"  # 2026, mismo criterio que el desplegable del panel
+FUTDETAIL_DIVISIONES = {
+    "4TA": "3",
+    "5TA": "4",
+    "6TA": "5",
+    "7MA": "6",
+    "8VA": "7",
+    "9NA": "8",
+}
+
+
+def futdetail_login(usuario: str, password: str):
+    """Inicia sesion en futdetail y devuelve un opener con la cookie ya
+    seteada. Lanza RuntimeError si el usuario/password son invalidos."""
+    cj = http.cookiejar.CookieJar()
+    opener = urllib.request.build_opener(urllib.request.HTTPCookieProcessor(cj))
+    opener.open(urllib.request.Request(FUTDETAIL_LOGIN_URL, headers=HEADERS), timeout=30)
+    body = urllib.parse.urlencode({
+        "usuario": usuario, "password": password, "password_nueva": "",
+    }).encode()
+    headers = dict(HEADERS)
+    headers["Content-Type"] = "application/x-www-form-urlencoded"
+    resp = opener.open(urllib.request.Request(FUTDETAIL_LOGIN_URL, data=body, headers=headers), timeout=30)
+    texto = resp.read().decode("utf-8", errors="replace")
+    if "invalido" in texto.lower():
+        raise RuntimeError("usuario/password de futdetail invalidos")
+    return opener
+
+
+def fetch_futdetail_partidos(opener, id_division: str):
+    """Pide el listado de partidos de una division ya logueado. Devuelve
+    la lista cruda tal cual la sirve el endpoint (lista de dicts)."""
+    body = urllib.parse.urlencode({
+        "opcion": "4", "id_division": id_division, "temporada_id": FUTDETAIL_TEMPORADA_ID,
+    }).encode()
+    headers = dict(HEADERS)
+    headers["Content-Type"] = "application/x-www-form-urlencoded"
+    resp = opener.open(urllib.request.Request(FUTDETAIL_PARTIDOS_URL, data=body, headers=headers), timeout=30)
+    return json.loads(resp.read().decode("utf-8", errors="replace"))
+
+
+def parse_futdetail_partidos(filas):
+    """
+    Convierte la lista cruda de partidos_consulta_procesos.php en
+    {fecha:int -> {"gf":int,"gc":int,"rival":str}}. "localia" dice si Tigre
+    jugo de local (L) o visitante (V), y con eso se sabe cual gol es cual.
+    Partidos sin resultado cargado (todavia no jugados) se omiten.
+    """
+    out = {}
+    for f in filas:
+        try:
+            fecha = int(str(f.get("fecha_nro", "")).strip())
+        except (TypeError, ValueError):
+            continue
+        gl, gv = f.get("goles_local"), f.get("goles_visitante")
+        if gl in (None, "", "None") or gv in (None, "", "None"):
+            continue  # sin resultado cargado todavia
+        try:
+            gl, gv = int(gl), int(gv)
+        except (TypeError, ValueError):
+            continue
+        localia = str(f.get("localia", "")).strip().upper()
+        rival = (f.get("equipo_rival") or "").strip()
+        if localia == "L":
+            out[fecha] = {"gf": gl, "gc": gv, "rival": rival}
+        elif localia == "V":
+            out[fecha] = {"gf": gv, "gc": gl, "rival": rival}
+        # localia distinto de L/V: no deberia pasar, se ignora la fila
+    return out
 
 
 def parse_tabla(html: str):
@@ -200,6 +361,7 @@ def main():
         .astimezone(datetime.timezone(datetime.timedelta(hours=-3)))
         .strftime("%Y-%m-%d %H:%M"),
         "fuente": "ligaprofesional.ar (oficial)",
+        "fuente_fixture": "sabadogol.com.ar",
         "categorias": {},
     }
     errores = []
@@ -225,6 +387,48 @@ def main():
             errores.append(f"{cat}: {e}")
             print(f"[ERROR] {cat}: {e}", file=sys.stderr)
 
+    # Resultados de Tigre partido por partido (4TA-9NA), fuente sabadogol.com.ar.
+    # Independiente de la tabla de posiciones: si esto falla, no afecta lo de arriba.
+    resultado["fixture"] = {}
+    for cat, (d, t) in FIXTURE_TORNEOS.items():
+        try:
+            html = fetch_post(FIXTURE_URL, {"a": FIXTURE_ANIO, "c": FIXTURE_CAT, "d": d, "t": t})
+            partidos = parse_fixture_cat(html)
+            if not partidos:
+                raise ValueError("no se encontro ningun partido de Tigre")
+            resultado["fixture"][cat] = partidos
+            print(f"[OK] fixture {cat}: {len(partidos)} fechas")
+        except Exception as e:  # noqa
+            errores.append(f"fixture {cat}: {e}")
+            print(f"[ERROR] fixture {cat}: {e}", file=sys.stderr)
+
+    # Resultados de Tigre partido por partido segun futdetail (panel privado).
+    # Necesita FUTDETAIL_USER / FUTDETAIL_PASS como variables de entorno (las
+    # pone la GitHub Action desde los secrets del repo). Si no estan seteadas
+    # -todavia no se configuraron, o se corre local sin ellas- se saltea
+    # entero sin marcar error: es una fuente opcional, no bloquea nada.
+    usuario_fd = os.environ.get("FUTDETAIL_USER")
+    password_fd = os.environ.get("FUTDETAIL_PASS")
+    if usuario_fd and password_fd:
+        resultado["fixture_futdetail"] = {}
+        try:
+            opener_fd = futdetail_login(usuario_fd, password_fd)
+            print("[OK] futdetail: login correcto")
+            for cat, id_division in FUTDETAIL_DIVISIONES.items():
+                try:
+                    filas = fetch_futdetail_partidos(opener_fd, id_division)
+                    partidos = parse_futdetail_partidos(filas)
+                    resultado["fixture_futdetail"][cat] = partidos
+                    print(f"[OK] futdetail {cat}: {len(partidos)} fechas")
+                except Exception as e:  # noqa
+                    errores.append(f"futdetail {cat}: {e}")
+                    print(f"[ERROR] futdetail {cat}: {e}", file=sys.stderr)
+        except Exception as e:  # noqa
+            errores.append(f"futdetail login: {e}")
+            print(f"[ERROR] futdetail login: {e}", file=sys.stderr)
+    else:
+        print("[AVISO] FUTDETAIL_USER/FUTDETAIL_PASS no configurados, se omite futdetail")
+
     # Salvaguarda: si Apertura y Clausura de reserva salieron IDENTICAS, es casi
     # seguro que ambas paginas comparten el mismo iframe de DataFactory y no se
     # estan diferenciando. Avisar fuerte (en log y en el JSON) para revisarlo,
@@ -242,7 +446,6 @@ def main():
         print("Ninguna categoria pudo procesarse. No se sobrescribe el JSON.", file=sys.stderr)
         sys.exit(1)
 
-    import os
     os.makedirs("data", exist_ok=True)
     with open(OUT_PATH, "w", encoding="utf-8") as f:
         json.dump(resultado, f, ensure_ascii=False, indent=2)

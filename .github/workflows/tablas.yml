@@ -23,6 +23,9 @@ jobs:
           python-version: "3.12"
 
       - name: Ejecutar scraper
+        env:
+          FUTDETAIL_USER: ${{ secrets.FUTDETAIL_USER }}
+          FUTDETAIL_PASS: ${{ secrets.FUTDETAIL_PASS }}
         run: python scripts/scrape_tablas.py
 
       - name: Commit y push si hubo cambios
