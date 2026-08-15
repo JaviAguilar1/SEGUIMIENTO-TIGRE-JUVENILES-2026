@@ -3,8 +3,8 @@ name: Actualizar tablas LPF
 # Corre solo, sin intervencion manual.
 on:
   schedule:
-    # Una vez por hora, todos los dias (al minuto 0 de cada hora, UTC)
-    - cron: "0 * * * *"
+    # Cada 30 minutos, todos los dias (UTC)
+    - cron: "*/30 * * * *"
   workflow_dispatch: {}   # boton "Run workflow" por si queres forzar una actualizacion
 
 permissions:
