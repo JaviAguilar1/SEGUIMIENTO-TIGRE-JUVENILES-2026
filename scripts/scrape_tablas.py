@@ -220,6 +220,7 @@ def parse_futdetail_partidos(filas):
             "partido_url": (f.get("partido_url") or "").strip(),
             "momentos_destacados_url": (f.get("momentos_detacados_url") or "").strip(),
             "analisis_url": (f.get("analisis_url") or "").strip(),
+            "rival_url": (f.get("rival_url") or "").strip(),
             "informe_partido": (f.get("informe_partido") or "").strip(),
             "pelota_parada_url": (f.get("pelota_parada_url") or "").strip(),
             "gps_url": (f.get("gps_url") or "").strip(),

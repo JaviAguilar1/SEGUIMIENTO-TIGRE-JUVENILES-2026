@@ -1562,6 +1562,9 @@ let chequeoSemanal = {alertas:[]}; // {fecha_revision, alertas:[{categoria,fecha
 // Tabla de equivalencias: dos nombres distintos que son la misma persona real
 // (ver regla de emparejamiento de jugadores). Se arma a mano desde Confiabilidad.
 let aliasJugadores = {};
+// recordatoriosOmitidos["cat_fecha_key"] = true — recordatorios de "link sin
+// cargar" que ya descartaste a propósito, para que no vuelvan a aparecer.
+let recordatoriosOmitidos = {};
 const plantelFutdetail = {}; // plantelFutdetail[cat] = [{nombre,posicion,edad,altura,peso,pie,valoracion,foto}] (desde futdetail)
 CATEGORIES.forEach(cat => { plantelFutdetail[cat] = []; });
 CATEGORIES.forEach(cat => { matchData[cat] = {}; gymData[cat] = []; jugadoresStats[cat] = []; });
@@ -1779,6 +1782,7 @@ function initFirebase(){
             if(p.rivalData?.[c2]) Object.assign(rivalData[c2], p.rivalData[c2]);
             if(p.chequeoSemanal) chequeoSemanal = p.chequeoSemanal;
             if(p.aliasJugadores) aliasJugadores = p.aliasJugadores;
+            if(p.recordatoriosOmitidos) recordatoriosOmitidos = p.recordatoriosOmitidos;
             refreshActiveModule();
             setTimeout(refreshAlerts, 200);
           });
@@ -1845,7 +1849,7 @@ function saveData(){
   if(!fbReady||!db||!canEdit) return;
   clearTimeout(saveTimeout);
   saveTimeout=setTimeout(()=>{
-    const payload={results:{},links:{},goleadores:{},rivalData:rivalData,matchData:matchData,gymData:gymData,jugadores:{},plantel:{},chequeoSemanal:chequeoSemanal,aliasJugadores:aliasJugadores};
+    const payload={results:{},links:{},goleadores:{},rivalData:rivalData,matchData:matchData,gymData:gymData,jugadores:{},plantel:{},chequeoSemanal:chequeoSemanal,aliasJugadores:aliasJugadores,recordatoriosOmitidos:recordatoriosOmitidos};
     CATEGORIES.forEach(cat=>{
       payload.results[cat]={};
       payload.links[cat]={};
@@ -1919,6 +1923,7 @@ function loadData(){
         if(p.rivalData?.[c2]) Object.assign(rivalData[c2], p.rivalData[c2]);
         if(p.chequeoSemanal) chequeoSemanal = p.chequeoSemanal;
         if(p.aliasJugadores) aliasJugadores = p.aliasJugadores;
+        if(p.recordatoriosOmitidos) recordatoriosOmitidos = p.recordatoriosOmitidos;
       }
       showLoading(false); resolve();
     }).catch(e=>{console.warn('load error:',e);showLoading(false);resolve();});
@@ -2386,7 +2391,40 @@ function calcConfiabilidad(){
     });
   });
 
-  return {partidoMismatches, equipoMismatches, golesMismatches};
+  // Links: mi carga (links) vs futdetail, para los 4 tipos que cruzan
+  // (Partido, Resumen Goles, Análisis Propio, Próximo Rival ← Análisis
+  // Rival de futdetail). Si los dos tienen algo cargado pero distinto, es
+  // una diferencia real. Si a un partido ya jugado (con otra fecha posterior
+  // también jugada, o sea que ya pasó al menos una semana) no le cargaste
+  // NINGÚN link de ese tipo en ningún lado, es un recordatorio — se puede
+  // omitir para siempre porque a veces es a propósito.
+  const linkMismatches=[]; // {cat, fecha, key, label, mio, fut}
+  const recordatorios=[]; // {cat, fecha, key, label, dismissKey}
+  CONFIABILIDAD_CATS.forEach(cat=>{
+    const fixtureLiga=(TABLA_DATA&&TABLA_DATA.fixture&&TABLA_DATA.fixture[cat])||{};
+    const fixtureFut=(TABLA_DATA&&TABLA_DATA.fixture_futdetail&&TABLA_DATA.fixture_futdetail[cat])||{};
+    const fechasJugadas=new Set([
+      ...Object.keys(results[cat]||{}).filter(f=>results[cat][f]).map(Number),
+      ...Object.keys(fixtureLiga).map(Number),
+      ...Object.keys(fixtureFut).map(Number),
+    ]);
+    fechasJugadas.forEach(fecha=>{
+      const hayFechaPosteriorJugada=[...fechasJugadas].some(f=>f>fecha);
+      Object.entries(LINK_KEYS_DESDE_FUTDETAIL).forEach(([key,campo])=>{
+        const label=LINK_TYPES.find(lt=>lt.key===key)?.label||key;
+        const mio=(links[cat]?.[fecha]?.[key]||'').trim();
+        const fut=((fixtureFut[fecha]||{})[campo]||'').trim();
+        if(mio && fut && mio!==fut){
+          linkMismatches.push({cat, fecha, key, label, mio, fut});
+        }else if(!mio && !fut && hayFechaPosteriorJugada){
+          const dismissKey=`${cat}_${fecha}_${key}`;
+          if(!recordatoriosOmitidos[dismissKey]) recordatorios.push({cat, fecha, key, label, dismissKey});
+        }
+      });
+    });
+  });
+
+  return {partidoMismatches, equipoMismatches, golesMismatches, linkMismatches, recordatorios};
 }
 
 // Botón "REVISAR" único para toda la sección: fuerza traer la tabla LPF de
@@ -2416,19 +2454,30 @@ function guardarAliasJugadores(){
     .catch(e=>console.warn('guardarAliasJugadores error:',e));
 }
 
+// Descarta para siempre un recordatorio de "link sin cargar" puntual
+// (a veces es a propósito no cargar todos).
+function omitirRecordatorio(dismissKey){
+  if(!canEdit) return;
+  recordatoriosOmitidos[dismissKey]=true;
+  if(fbReady && db) db.ref('stats/recordatoriosOmitidos').set(recordatoriosOmitidos)
+    .catch(e=>console.warn('omitirRecordatorio error:',e));
+  showToast('👍 OMITIDO');
+  renderConfiabilidad('gen-confiabilidad');
+}
+
 function renderConfiabilidad(containerId){
   const el=document.getElementById(containerId);
   if(!el) return;
   loadTablaData().then(()=>{
-    const {partidoMismatches, equipoMismatches, golesMismatches}=calcConfiabilidad();
-    const total=partidoMismatches.length+equipoMismatches.length+golesMismatches.length;
+    const {partidoMismatches, equipoMismatches, golesMismatches, linkMismatches, recordatorios}=calcConfiabilidad();
+    const total=partidoMismatches.length+equipoMismatches.length+golesMismatches.length+linkMismatches.length;
 
     const revisarBtn=`<button onclick="revisarConfiabilidad()"
       style="background:rgba(255,255,255,0.08);border:1px solid var(--border2);color:var(--text);
       border-radius:6px;padding:4px 10px;font-family:Barlow Condensed,sans-serif;font-size:11px;
       letter-spacing:1px;cursor:pointer;white-space:nowrap">🔄 REVISAR</button>`;
 
-    if(total===0){
+    if(total===0 && recordatorios.length===0){
       el.innerHTML=`<div style="text-align:center;padding:20px;color:var(--win);
         font-family:'Barlow Condensed',sans-serif;font-size:13px;letter-spacing:1px">
         ✓ Todo coincide entre tu planilla, LPF oficial y futdetail
@@ -2444,9 +2493,21 @@ function renderConfiabilidad(containerId){
           <span>${right}</span>${revisarBtn}
         </div>
       </div>`;
+    const rowRecordatorio=(left,dismissKey)=>`
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;
+        background:rgba(245,158,11,0.08);border:1px solid var(--draw);border-radius:8px;padding:8px 14px;margin-bottom:6px">
+        <div>${left}</div>
+        <div style="display:flex;align-items:center;gap:10px;font-family:'Barlow Condensed',sans-serif;font-size:13px">
+          <span style="color:var(--muted)">Sin cargar</span>
+          ${canEdit?`<button onclick="omitirRecordatorio('${esc(dismissKey)}')"
+            style="background:rgba(255,255,255,0.08);border:1px solid var(--border2);color:var(--text);
+            border-radius:6px;padding:4px 10px;font-family:Barlow Condensed,sans-serif;font-size:11px;
+            letter-spacing:1px;cursor:pointer;white-space:nowrap">👍 OMITIR</button>`:''}
+        </div>
+      </div>`;
 
-    let html=`<div style="font-family:'Barlow Condensed',sans-serif;font-size:12px;letter-spacing:1px;color:var(--loss);margin-bottom:10px">
-      ⚠️ ${total} diferencia(s) encontrada(s)</div>`;
+    let html=total>0 ? `<div style="font-family:'Barlow Condensed',sans-serif;font-size:12px;letter-spacing:1px;color:var(--loss);margin-bottom:10px">
+      ⚠️ ${total} diferencia(s) encontrada(s)</div>` : '';
 
     if(partidoMismatches.length){
       html+=`<div style="font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:1px;color:var(--muted);margin-bottom:6px">
@@ -2496,6 +2557,25 @@ function renderConfiabilidad(containerId){
           `Mi carga: <b>${m.mio}</b> · futdetail: <b>${m.fut}</b>${vincularHTML}`
         );
       }).join('');
+    }
+
+    if(linkMismatches.length){
+      html+=`<div style="font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:1px;color:var(--muted);margin:14px 0 6px">
+        LINKS · mi carga vs futdetail</div>`;
+      html+=linkMismatches.map(m=>row(
+        `<b style="color:${CAT_COLORS[m.cat]}">${m.cat} F${m.fecha}</b> · ${esc(m.label)}`,
+        `Mi carga: <a href="${esc(m.mio)}" target="_blank" rel="noopener" style="color:var(--gold2)">ver</a> ·
+         futdetail: <a href="${esc(m.fut)}" target="_blank" rel="noopener" style="color:var(--gold2)">ver</a>`
+      )).join('');
+    }
+
+    if(recordatorios.length){
+      html+=`<div style="font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:1px;color:var(--muted);margin:14px 0 6px">
+        RECORDATORIOS · links sin cargar (${recordatorios.length})</div>`;
+      html+=recordatorios.map(m=>rowRecordatorio(
+        `<b style="color:${CAT_COLORS[m.cat]}">${m.cat} F${m.fecha}</b> · ${esc(m.label)}`,
+        m.dismissKey
+      )).join('');
     }
 
     el.innerHTML=html;
@@ -3808,7 +3888,7 @@ function aplicarCorreccionesTablaLPF(data){
 // Si un link (Partido / Resumen Goles / Análisis Propio) está vacío en tu
 // carga manual, se completa solo con lo que ya haya en futdetail. Si vos ya
 // cargaste algo, no se toca.
-const LINK_KEYS_DESDE_FUTDETAIL = {par:'partido_url', res:'momentos_destacados_url', ana:'analisis_url'};
+const LINK_KEYS_DESDE_FUTDETAIL = {par:'partido_url', res:'momentos_destacados_url', ana:'analisis_url', prx:'rival_url'};
 function completarLinksDesdeFutdetail(data){
   const fixtureFut=data && data.fixture_futdetail;
   if(!fixtureFut) return;
@@ -3960,6 +4040,7 @@ function startPublicListener(){
     });
     if(p.chequeoSemanal) chequeoSemanal = p.chequeoSemanal;
     if(p.aliasJugadores) aliasJugadores = p.aliasJugadores;
+    if(p.recordatoriosOmitidos) recordatoriosOmitidos = p.recordatoriosOmitidos;
     refreshActiveModule();
   });
 }
