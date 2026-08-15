@@ -2042,8 +2042,16 @@ function refreshActiveModule(){
 function refreshPlantelIfActive(){
   if(document.getElementById('panel-plantel')?.classList.contains('active')) renderPlantel();
 }
+// Tarjetas/lesiones ahora viven dentro de PLANTEL de cada categoría (no en
+// un panel propio) — si alguien más las edita mientras estás mirando esa
+// pestaña, esto las refresca en el momento sin perder qué tenías
+// desplegado/colapsado en el resto de la pantalla.
 function refreshRendimientoIfActive(){
-  if(document.getElementById('panel-rendimiento')?.classList.contains('active')) renderRendimiento();
+  if(catActiveTab!=='plantel') return;
+  const cat=document.getElementById('stats-cat-select')?.value;
+  if(!cat || cat==='GENERAL') return;
+  renderTarjetasSection(cat);
+  renderLesionesSection(cat);
 }
 
 // ── Public share link ─────────────────────────────────────────
@@ -2275,6 +2283,8 @@ function renderStatsGeneral(content){
 
     <div id="gen-posicion"></div>
 
+    ${buildRendimientoStatsHTML('rend-gen', GENERAL_CATS)}
+
     <div class="st" style="justify-content:space-between">
       <span style="display:flex;align-items:center;gap:10px"><div class="stbar"></div>RENDIMIENTO POR BLOQUE DE FECHAS</span>
       ${bloqueSliderHTML('general')}
@@ -2287,6 +2297,11 @@ function renderStatsGeneral(content){
     <div class="st"><div class="stbar"></div>🏆 TABLA GENERAL DE POSICIONES (SUMA 4TA A 9NA)</div>
     <div id="gen-tabla-general"></div>
 
+    ${seccionTitulo('citaciones', '📋 CITACIONES')}
+    <div id="sec-citaciones"${seccionEstiloInicial('citaciones')}>
+      ${buildPDFSection()}
+    </div>
+
     <div class="st"><div class="stbar"></div>🔎 CONFIABILIDAD</div>
     <div id="gen-confiabilidad" style="margin-bottom:20px"></div>
   `;
@@ -2294,6 +2309,7 @@ function renderStatsGeneral(content){
   renderConfiabilidad('gen-confiabilidad');
   renderPosicionGeneral('gen-posicion');
   wireBloqueSlider('general', ()=>renderStatsCat('GENERAL'));
+  renderChecklist();
 
   // Top 5 goleadores all categories
   const topWrap = document.getElementById('gen-top-goleadores');
@@ -2903,6 +2919,8 @@ function renderStatsSingle(cat, content){
       </table></div>
     </div>
 
+    ${isReserva?'':buildRendimientoStatsHTML('rend-'+cat, [cat])}
+
     ${seccionTitulo('comparar-'+dataCat, '🔍 COMPARAR FECHAS')}
     <div id="sec-comparar-${dataCat}"${seccionEstiloInicial('comparar-'+dataCat)}>
       <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px" id="comp-fechas-selects-${dataCat}">
@@ -2960,6 +2978,7 @@ function renderStatsSingle(cat, content){
 function renderPlantelTab(cat, tabEl){
   tabEl.innerHTML = `
     <div id="roster-content-${cat}"></div>
+    ${buildTarjetasLesionesHTML(cat)}
     <div id="gps-plantel-${cat}" style="margin-top:8px"></div>
   `;
   renderRosterCat(cat, document.getElementById(`roster-content-${cat}`));
@@ -4878,111 +4897,19 @@ function loadRendimiento(payload){
   });
 }
 
-// ── Build module ──────────────────────────────────────────────
-function buildRendimientoModule(){
-  const panel=document.getElementById('panel-rendimiento');
-  panel.innerHTML=`
-    <div class="cat-subtabs" id="rend-subtabs"></div>
-    <div class="main" id="rend-content"></div>`;
-  buildCatSubtabs('rend-subtabs',cat=>{
-    rendCurrentCat=cat; renderRendimiento();
-  },'GENERAL');
-  rendCurrentCat='GENERAL';
-  renderRendimiento();
-}
-
-let rendCurrentCat='GENERAL';
-
-// ── Main render ───────────────────────────────────────────────
-function renderRendimiento(){
-  const content=document.getElementById('rend-content');
-  if(!content) return;
-
-  const alertas=getAllAlertas();
-  const alertasHTML=alertas.length?`
-    <div class="alertas-banner">
-      <h3>⚠ ALERTAS DE TARJETAS (${AMARILLAS_ALERTA}+ amarillas)</h3>
-      ${alertas.map(a=>`<div class="alerta-item">
-        <span class="ai-cat" style="background:${CAT_COLORS[a.cat]}22;color:${CAT_COLORS[a.cat]}">${a.cat}</span>
-        <span style="font-weight:700">${esc(a.name)}</span>
-        <span style="color:var(--draw)">🟨 ${a.amarillas}</span>
-        ${a.rojas>0?`<span style="color:var(--loss)">🟥 ${a.rojas}</span>`:''}
-        <span style="color:var(--muted)">— RIESGO SUSPENSIÓN</span>
-      </div>`).join('')}
-    </div>`:'';
-
-  content.innerHTML=`
-    ${alertasHTML}
-    <div class="st" style="margin-top:4px"><div class="stbar"></div>FORMA RECIENTE (ÚLTIMOS 5)</div>
-    <div class="forma-grid" id="rend-forma"></div>
-
-    <div class="st"><div class="stbar"></div>LOCAL VS VISITANTE</div>
-    <div class="lvv-grid" id="rend-lvv"></div>
-
-    <div class="st"><div class="stbar"></div>ÍNDICE DE RENDIMIENTO</div>
-    <div class="indice-table-wrap"><table class="indice-table">
-      <thead><tr>
-        <th>CAT.</th><th style="text-align:left;padding-left:12px">MÉTRICAS</th>
-        <th>PTS/PJ</th><th>GF/PJ</th><th>% VICTORIAS</th><th>ÍNDICE</th>
-      </tr></thead>
-      <tbody id="rend-indice"></tbody>
-    </table></div>
-
-    <div class="st"><div class="stbar"></div>TARJETAS POR CATEGORÍA</div>
-    <div class="tarjetas-grid" id="rend-tarjetas"></div>
-
-    <div class="st"><div class="stbar"></div>LESIONES</div>
-    ${canEdit?`<div class="add-lesion-form" id="lesion-form">
-      <div>
-        <label>Jugador</label>
-        <input id="les-name" placeholder="Nombre…" autocomplete="off">
-      </div>
-      <div>
-        <label>Tipo de lesión</label>
-        <select id="les-tipo">
-          <option value="">— Tipo —</option>
-          <option>Muscular</option><option>Ligamentaria</option><option>Ósea</option>
-          <option>Articular</option><option>Contusión</option><option>Otra</option>
-        </select>
-      </div>
-      <div>
-        <label>Categoría <span style="opacity:.6">(autodetectada)</span></label>
-        <select id="les-cat">
-          ${CATEGORIES.map(c=>`<option value="${c}" ${rendCurrentCat===c||rendCurrentCat==='GENERAL'&&c==='4TA'?'selected':''}>${c}</option>`).join('')}
-        </select>
-      </div>
-      <div>
-        <label>Fecha (DD/MM)</label>
-        <input id="les-fecha" placeholder="01/01" style="max-width:90px">
-      </div>
-      <button class="btn-add-lesion" onclick="addLesion()">+ LESIÓN</button>
-    </div>`:''}
-    <div class="lesiones-list" id="rend-lesiones"></div>
-
-    <div class="st"><div class="stbar"></div>PDF CITACIONES</div>
-    ${buildPDFSection()}
-  `;
-
-  renderForma();
-  renderLVV();
-  renderIndice();
-  renderTarjetas();
-  renderLesiones();
-}
-
-// ── FORMA RECIENTE ────────────────────────────────────────────
-function renderForma(){
-  const wrap=document.getElementById('rend-forma');
-  if(!wrap) return;
-  const cats=rendCurrentCat==='GENERAL'?CATEGORIES:[rendCurrentCat];
-  wrap.innerHTML=cats.map(cat=>{
-    // Get last 5 played results
+// ── FORMA RECIENTE, LOCAL/VISITANTE, ÍNDICE — funciones puras, reciben
+// las categorías a mostrar explícitas (GENERAL manda todas, cada
+// categoría manda solo la suya) en vez de depender de una navegación
+// propia del módulo (que ya no existe — antes tenía su propio selector
+// GENERAL/categoría, separado del de ESTADÍSTICAS).
+function buildFormaHTML(cats){
+  return cats.map(cat=>{
     const played=RIVALS.filter(r=>results[cat][r.f]).reverse().slice(0,5).reverse();
     const badges=Array(5).fill(null).map((_,i)=>{
       const r=played[played.length-5+i];
       if(!r) return `<div class="forma-badge empty">—</div>`;
       const res=getResult(results[cat][r.f][0],results[cat][r.f][1]);
-      return `<div class="forma-badge ${res}" title="${r.r}">${res}</div>`;
+      return `<div class="forma-badge ${res}" title="${esc(r.r)}">${res}</div>`;
     });
     const pts5=played.reduce((s,r)=>{const x=getResult(results[cat][r.f][0],results[cat][r.f][1]);return s+(x==='W'?3:x==='D'?1:0);},0);
     return `<div class="forma-card">
@@ -4996,12 +4923,8 @@ function renderForma(){
   }).join('');
 }
 
-// ── LOCAL VS VISITANTE ────────────────────────────────────────
-function renderLVV(){
-  const wrap=document.getElementById('rend-lvv');
-  if(!wrap) return;
-  const cats=rendCurrentCat==='GENERAL'?CATEGORIES:[rendCurrentCat];
-  wrap.innerHTML=cats.map(cat=>{
+function buildLVVHTML(cats){
+  return cats.map(cat=>{
     const local=RIVALS.filter(r=>r.c==='L'&&results[cat][r.f]);
     const visit=RIVALS.filter(r=>r.c==='V'&&results[cat][r.f]);
     const calcLVV=list=>{
@@ -5029,24 +4952,18 @@ function renderLVV(){
   }).join('');
 }
 
-// ── ÍNDICE DE RENDIMIENTO ─────────────────────────────────────
-function renderIndice(){
-  const tbody=document.getElementById('rend-indice');
-  if(!tbody) return;
-  const cats=rendCurrentCat==='GENERAL'?CATEGORIES:[rendCurrentCat];
-  // Max pts/pj across cats for bar scaling
+function buildIndiceRowsHTML(cats){
   const rows=cats.map(cat=>{
     const s=calcStats(cat,1,cat==='RESERVA'?18:35);
     if(s.pj===0) return{cat,ppp:0,gfpj:0,pctW:0,idx:0};
     const ppp=s.pts/s.pj;
     const gfpj=s.gf/s.pj;
     const pctW=Math.round(s.pg/s.pj*100);
-    // Index 0-100: weighted combo
     const idx=Math.round(Math.min(100,(ppp/3*50)+(pctW/100*30)+(Math.min(gfpj,4)/4*20)));
     return{cat,ppp:ppp.toFixed(2),gfpj:gfpj.toFixed(2),pctW,idx};
   });
   const maxIdx=Math.max(...rows.map(r=>r.idx),1);
-  tbody.innerHTML=rows.map(r=>`<tr>
+  return rows.map(r=>`<tr>
     <td style="font-family:Bebas Neue,sans-serif;font-size:15px;letter-spacing:1px;color:${CAT_COLORS[r.cat]}">${r.cat}</td>
     <td class="indice-bar-wrap"><div class="indice-bar" style="width:${Math.round(r.idx/maxIdx*100)}%"></div></td>
     <td style="color:var(--gold2);font-family:Bebas Neue,sans-serif;font-size:15px">${r.ppp}</td>
@@ -5056,40 +4973,67 @@ function renderIndice(){
   </tr>`).join('');
 }
 
-// ── TARJETAS ──────────────────────────────────────────────────
-function renderTarjetas(){
-  const wrap=document.getElementById('rend-tarjetas');
-  if(!wrap) return;
-  const cats=rendCurrentCat==='GENERAL'?CATEGORIES:[rendCurrentCat];
-  wrap.innerHTML=cats.map(cat=>{
-    const list=(tarjetas[cat]||[]).sort((a,b)=>b.amarillas-a.amarillas);
-    const rows=list.length?list.map(p=>`<div class="tarjeta-row">
-      <div class="tarjeta-name">${esc(p.name)}</div>
-      <div class="tarjeta-counts">
-        ${p.amarillas>=AMARILLAS_ALERTA?'<span class="tc-alert">⚠ ALERTA</span>':''}
-        <span class="tc-amarilla">🟨 ${p.amarillas}</span>
-        <span class="tc-roja">🟥 ${p.rojas}</span>
-      </div>
-      ${canEdit?`<div class="tc-tarj-btns">
-        <button class="btn-add-am" onclick="modTarjeta('${cat}','${p.id}','am',1)" title="+🟨">+</button>
-        <button class="btn-sub-am" onclick="modTarjeta('${cat}','${p.id}','am',-1)" title="-🟨">−</button>
-        <button class="btn-add-ro" onclick="modTarjeta('${cat}','${p.id}','ro',1)" title="+🟥">+</button>
-        <button class="btn-sub-ro" onclick="modTarjeta('${cat}','${p.id}','ro',-1)" title="-🟥">−</button>
-      </div>`:''}
-    </div>`).join(''):`<div style="padding:14px;text-align:center;color:var(--muted);font-size:12px;font-family:Barlow Condensed,sans-serif">Sin registros</div>`;
-    return `<div class="tarjetas-cat-card">
-      <div class="tc-header">
-        <h3 style="color:${CAT_COLORS[cat]}">${cat}</h3>
-        <span style="font-size:11px;color:var(--muted);font-family:Barlow Condensed,sans-serif">${list.length} jugadores</span>
-      </div>
-      ${rows}
-      ${canEdit?`<div class="tarjetas-add-row">
-        <input placeholder="Agregar jugador…" id="tj-inp-${cat}" autocomplete="off"
-          onkeydown="if(event.key==='Enter')addTarjetaPlayer('${cat}')">
-        <button class="btn-add-tarjeta" onclick="addTarjetaPlayer('${cat}')">+ AGREGAR</button>
-      </div>`:''}
+// Bloque completo (forma + LVV + índice), listo para insertar donde haga
+// falta — GENERAL (todas las categorías) o dentro de RESULTADOS de una
+// categoría puntual (solo esa). idPrefix distingue las secciones
+// desplegables entre instancias (ej. "rend-gen" vs "rend-4TA").
+function buildRendimientoStatsHTML(idPrefix, cats){
+  return `
+    ${seccionTitulo(idPrefix+'-forma', 'FORMA RECIENTE (ÚLTIMOS 5)')}
+    <div id="sec-${idPrefix}-forma"${seccionEstiloInicial(idPrefix+'-forma')}>
+      <div class="forma-grid">${buildFormaHTML(cats)}</div>
+    </div>
+
+    ${seccionTitulo(idPrefix+'-lvv', 'LOCAL VS VISITANTE')}
+    <div id="sec-${idPrefix}-lvv"${seccionEstiloInicial(idPrefix+'-lvv')}>
+      <div class="lvv-grid">${buildLVVHTML(cats)}</div>
+    </div>
+
+    ${seccionTitulo(idPrefix+'-indice', 'ÍNDICE DE RENDIMIENTO')}
+    <div id="sec-${idPrefix}-indice"${seccionEstiloInicial(idPrefix+'-indice')}>
+      <div class="indice-table-wrap"><table class="indice-table">
+        <thead><tr>
+          <th>CAT.</th><th style="text-align:left;padding-left:12px">MÉTRICAS</th>
+          <th>PTS/PJ</th><th>GF/PJ</th><th>% VICTORIAS</th><th>ÍNDICE</th>
+        </tr></thead>
+        <tbody>${buildIndiceRowsHTML(cats)}</tbody>
+      </table></div>
     </div>`;
-  }).join('');
+}
+
+// ── TARJETAS ──────────────────────────────────────────────────
+// Igual que forma/LVV/índice: cat explícita en vez de rendCurrentCat.
+// Las alertas globales (3+ amarillas) ya se muestran en el header
+// (refreshAlerts/#alert-pills, siempre visible sin importar qué pantalla
+// estés mirando), así que acá no hace falta repetir ese banner.
+function buildTarjetasHTML(cat){
+  const list=(tarjetas[cat]||[]).sort((a,b)=>b.amarillas-a.amarillas);
+  const rows=list.length?list.map(p=>`<div class="tarjeta-row">
+    <div class="tarjeta-name">${esc(p.name)}</div>
+    <div class="tarjeta-counts">
+      ${p.amarillas>=AMARILLAS_ALERTA?'<span class="tc-alert">⚠ ALERTA</span>':''}
+      <span class="tc-amarilla">🟨 ${p.amarillas}</span>
+      <span class="tc-roja">🟥 ${p.rojas}</span>
+    </div>
+    ${canEdit?`<div class="tc-tarj-btns">
+      <button class="btn-add-am" onclick="modTarjeta('${cat}','${p.id}','am',1)" title="+🟨">+</button>
+      <button class="btn-sub-am" onclick="modTarjeta('${cat}','${p.id}','am',-1)" title="-🟨">−</button>
+      <button class="btn-add-ro" onclick="modTarjeta('${cat}','${p.id}','ro',1)" title="+🟥">+</button>
+      <button class="btn-sub-ro" onclick="modTarjeta('${cat}','${p.id}','ro',-1)" title="-🟥">−</button>
+    </div>`:''}
+  </div>`).join(''):`<div style="padding:14px;text-align:center;color:var(--muted);font-size:12px;font-family:Barlow Condensed,sans-serif">Sin registros</div>`;
+  return `<div class="tarjetas-cat-card">
+    ${rows}
+    ${canEdit?`<div class="tarjetas-add-row">
+      <input placeholder="Agregar jugador…" id="tj-inp-${cat}" autocomplete="off"
+        onkeydown="if(event.key==='Enter')addTarjetaPlayer('${cat}')">
+      <button class="btn-add-tarjeta" onclick="addTarjetaPlayer('${cat}')">+ AGREGAR</button>
+    </div>`:''}
+  </div>`;
+}
+function renderTarjetasSection(cat){
+  const wrap=document.getElementById(`rend-tarjetas-${cat}`);
+  if(wrap) wrap.innerHTML=buildTarjetasHTML(cat);
 }
 
 function addTarjetaPlayer(cat){
@@ -5102,7 +5046,8 @@ function addTarjetaPlayer(cat){
   tarjetas[cat].push({id:'t_'+Date.now(),name,amarillas:0,rojas:0});
   inp.value='';
   saveRendimiento();
-  renderTarjetas();
+  renderTarjetasSection(cat);
+  refreshAlerts();
 }
 
 function modTarjeta(cat,id,type,delta){
@@ -5111,14 +5056,8 @@ function modTarjeta(cat,id,type,delta){
   if(type==='am') p.amarillas=Math.max(0,p.amarillas+delta);
   else            p.rojas=Math.max(0,p.rojas+delta);
   saveRendimiento();
-  renderTarjetas();
-  // Re-render alertas
-  const alertas=getAllAlertas();
-  const banner=document.querySelector('.alertas-banner');
-  if(banner){
-    if(alertas.length===0) banner.remove();
-    else banner.querySelector('h3').textContent=`⚠ ALERTAS DE TARJETAS (${AMARILLAS_ALERTA}+ amarillas)`;
-  }
+  renderTarjetasSection(cat);
+  refreshAlerts();
 }
 
 function getAllAlertas(){
@@ -5132,46 +5071,82 @@ function getAllAlertas(){
 }
 
 // ── LESIONES ──────────────────────────────────────────────────
-function renderLesiones(){
-  const wrap=document.getElementById('rend-lesiones');
-  if(!wrap) return;
-  const cats=rendCurrentCat==='GENERAL'?CATEGORIES:[rendCurrentCat];
-  const all=cats.flatMap(cat=>(lesiones[cat]||[]).map(l=>({...l,_cat:cat})));
+// La fecha se carga como "DD/MM" sin año (ver formulario) — dársela tal
+// cual a `new Date(...)` es ambiguo y da resultados absurdos (miles de
+// días). Se arma la fecha a mano asumiendo el año actual.
+function parseFechaLesionDDMM(s){
+  const m=(s||'').match(/^(\d{1,2})\/(\d{1,2})$/);
+  return m ? new Date(new Date().getFullYear(), parseInt(m[2])-1, parseInt(m[1])) : null;
+}
+// Igual criterio: una categoría explícita, sin el label de categoría
+// dentro de cada fila (ya es implícito — estás parado en esa categoría).
+function buildLesionesHTML(cat){
+  const all=lesiones[cat]||[];
   if(all.length===0){
-    wrap.innerHTML=`<div style="text-align:center;padding:30px;color:var(--muted);font-family:Barlow Condensed,sans-serif;font-size:13px;letter-spacing:1px">Sin lesiones registradas ✓</div>`;
-    return;
+    return `<div style="text-align:center;padding:30px;color:var(--muted);font-family:Barlow Condensed,sans-serif;font-size:13px;letter-spacing:1px">Sin lesiones registradas ✓</div>`;
   }
-  // Sort: active first
   const sorted=[...all.filter(l=>l.estado==='activa'),...all.filter(l=>l.estado!=='activa')];
-  wrap.innerHTML=sorted.map(l=>{
+  return sorted.map(l=>{
     const hist=(l.historial||[]);
     const histHTML=hist.length?'<br><small style="color:var(--muted)">📋 '+hist.map(h=>(h.inicio||'?')+' → '+(h.fin||'?')+(h.diasBaja?' ('+h.diasBaja+'d)':'')).join(' | ')+'</small>':'';
-    const dias=l.estado==='activa'&&l.fecha?Math.max(0,Math.round((Date.now()-new Date(l.fecha))/86400000)):0;
+    const fechaLesion=parseFechaLesionDDMM(l.fecha);
+    const dias=l.estado==='activa'&&fechaLesion?Math.max(0,Math.round((Date.now()-fechaLesion)/86400000)):0;
     const diasHTML=dias>0?'<span style="font-size:10px;color:var(--gold2);font-family:Barlow Condensed,sans-serif;margin-left:6px">'+dias+'d</span>':'';
     return `<div class="lesion-item${l.estado==='recuperado'?' recovered':''}">`+
     `<div class="li-icon">${l.estado==='recuperado'?'✅':'🚨'}</div>`+
     `<div class="li-body">`+
-      `<div class="li-name">${esc(l.name)} <span style="font-size:11px;color:${CAT_COLORS[l._cat]};font-family:Bebas Neue,sans-serif;letter-spacing:1px;margin-left:6px">${l._cat}</span>${diasHTML}</div>`+
-      `<div class="li-detail">${l.tipo||'Lesión'} · ${l.fecha||'—'}${histHTML}</div>`+
+      `<div class="li-name">${esc(l.name)}${diasHTML}</div>`+
+      `<div class="li-detail">${esc(l.tipo||'Lesión')} · ${esc(l.fecha||'—')}${histHTML}</div>`+
     `</div>`+
     `<span class="lesion-badge ${l.estado==='recuperado'?'recovered':'active'}">${l.estado==='recuperado'?'RECUPERADO':'EN RECUPERACIÓN'}</span>`+
-    `${canEdit?`<button class="btn-lesion-toggle" onclick="toggleLesion('${l._cat}','${l.id}')">${l.estado==='recuperado'?'↩ ACTIVA':'✓ RECUPERADO'}</button>`
-    +`<button class="btn-del-lesion" onclick="delLesion('${l._cat}','${l.id}')" title="Eliminar">✕</button>`:''}`+
+    `${canEdit?`<button class="btn-lesion-toggle" onclick="toggleLesion('${cat}','${l.id}')">${l.estado==='recuperado'?'↩ ACTIVA':'✓ RECUPERADO'}</button>`
+    +`<button class="btn-del-lesion" onclick="delLesion('${cat}','${l.id}')" title="Eliminar">✕</button>`:''}`+
     `</div>`;
   }).join('');
 }
+function renderLesionesSection(cat){
+  const wrap=document.getElementById(`rend-lesiones-${cat}`);
+  if(wrap) wrap.innerHTML=buildLesionesHTML(cat);
+}
 
-function addLesion(){
-  const name=document.getElementById('les-name')?.value.trim();
-  const tipo=document.getElementById('les-tipo')?.value;
-  const cat=document.getElementById('les-cat')?.value||'4TA';
-  const fecha=document.getElementById('les-fecha')?.value.trim();
-  if(!name){document.getElementById('les-name').style.borderColor='var(--red)';setTimeout(()=>{const e=document.getElementById('les-name');if(e)e.style.borderColor='';},1500);return;}
+function buildLesionAddFormHTML(cat){
+  if(!canEdit) return '';
+  return `<div class="add-lesion-form" id="lesion-form-${cat}">
+    <div>
+      <label>Jugador</label>
+      <input id="les-name-${cat}" placeholder="Nombre…" autocomplete="off">
+    </div>
+    <div>
+      <label>Tipo de lesión</label>
+      <select id="les-tipo-${cat}">
+        <option value="">— Tipo —</option>
+        <option>Muscular</option><option>Ligamentaria</option><option>Ósea</option>
+        <option>Articular</option><option>Contusión</option><option>Otra</option>
+      </select>
+    </div>
+    <div>
+      <label>Fecha (DD/MM)</label>
+      <input id="les-fecha-${cat}" placeholder="01/01" style="max-width:90px">
+    </div>
+    <button class="btn-add-lesion" onclick="addLesion('${cat}')">+ LESIÓN</button>
+  </div>`;
+}
+
+function addLesion(cat){
+  const nameEl=document.getElementById(`les-name-${cat}`);
+  const tipoEl=document.getElementById(`les-tipo-${cat}`);
+  const fechaEl=document.getElementById(`les-fecha-${cat}`);
+  const name=nameEl?.value.trim();
+  const tipo=tipoEl?.value;
+  const fecha=fechaEl?.value.trim();
+  if(!name){ if(nameEl){nameEl.style.borderColor='var(--red)';setTimeout(()=>{nameEl.style.borderColor='';},1500);} return; }
   if(!lesiones[cat])lesiones[cat]=[];
   lesiones[cat].push({id:'l_'+Date.now(),name,tipo,fecha,estado:'activa'});
-  document.getElementById('les-name').value='';
-  document.getElementById('les-fecha').value='';
-  saveRendimiento(); renderLesiones();
+  if(nameEl) nameEl.value='';
+  if(fechaEl) fechaEl.value='';
+  saveRendimiento();
+  renderLesionesSection(cat);
+  refreshAlerts();
 }
 
 function toggleLesion(cat,id){
@@ -5187,14 +5162,31 @@ function toggleLesion(cat,id){
     saveRendimiento();
   }
   refreshAlerts();
-  renderLesiones();
+  renderLesionesSection(cat);
 }
 
 function delLesion(cat,id){
   confirmAction('¿Eliminar este registro de lesión?', ()=>{
     lesiones[cat]=(lesiones[cat]||[]).filter(x=>x.id!==id);
-    saveRendimiento(); renderLesiones();
+    saveRendimiento();
+    renderLesionesSection(cat);
+    refreshAlerts();
   }, 'ELIMINAR');
+}
+
+// Bloque completo (tarjetas + lesiones) para insertar dentro de PLANTEL.
+function buildTarjetasLesionesHTML(cat){
+  return `
+    ${seccionTitulo('tarjetas-'+cat, `TARJETAS · <span style="color:${CAT_COLORS[cat]}">${cat}</span>`)}
+    <div id="sec-tarjetas-${cat}"${seccionEstiloInicial('tarjetas-'+cat)}>
+      <div id="rend-tarjetas-${cat}">${buildTarjetasHTML(cat)}</div>
+    </div>
+
+    ${seccionTitulo('lesiones-'+cat, `LESIONES · <span style="color:${CAT_COLORS[cat]}">${cat}</span>`)}
+    <div id="sec-lesiones-${cat}"${seccionEstiloInicial('lesiones-'+cat)}>
+      ${buildLesionAddFormHTML(cat)}
+      <div id="rend-lesiones-${cat}">${buildLesionesHTML(cat)}</div>
+    </div>`;
 }
 
 // ── PDF CITACIONES ────────────────────────────────────────────
@@ -5225,13 +5217,16 @@ function buildPDFSection(){
 
 function renderChecklist(){
   const cat=document.getElementById('pdf-cat')?.value||'4TA';
-  const list=players[cat]||[];
+  // plantelFutdetail (el roster real, scrapeado de futdetail) — antes esto
+  // leía "players[cat]", del módulo PLANTEL viejo con fichas manuales que
+  // se sacó a propósito en Fase 1 y no tiene forma de cargarse hoy.
+  const list=plantelFutdetail[cat]||[];
   const wrap=document.getElementById('pdf-checklist');
   if(!wrap) return;
-  if(list.length===0){wrap.innerHTML=`<div style="color:var(--muted);font-size:12px;padding:10px;font-family:Barlow Condensed,sans-serif">No hay jugadores en ${cat}. Agregá jugadores en el módulo PLANTEL.</div>`;return;}
-  wrap.innerHTML=list.map(p=>`<div class="check-player selected" onclick="toggleCheckPlayer(this)" data-pid="${p.id}">
+  if(list.length===0){wrap.innerHTML=`<div style="color:var(--muted);font-size:12px;padding:10px;font-family:Barlow Condensed,sans-serif">Todavía no hay plantel cargado para ${cat}.</div>`;return;}
+  wrap.innerHTML=list.map(p=>`<div class="check-player selected" onclick="toggleCheckPlayer(this)">
     <input type="checkbox" checked onclick="event.stopPropagation()">
-    <span>${esc(p.name)}</span>
+    <span>${esc(p.nombre)}</span>
   </div>`).join('');
 }
 
@@ -7298,12 +7293,13 @@ function resolveInjuryWithHistory(cat, id, endDate){
   lez.estado = 'recuperado';
   lez.fechaFin = endDate || new Date().toISOString().slice(0,10);
   if(!lez.historial) lez.historial = [];
+  const fechaLesion=parseFechaLesionDDMM(lez.fecha);
   lez.historial.push({
     tipo: lez.tipo || lez.tipo_lesion || '—',
     nota: lez.nota||'',
     inicio: lez.fecha || lez.fechaInicio || '—',
     fin: lez.fechaFin,
-    diasBaja: lez.fecha ? Math.round((new Date(lez.fechaFin)-new Date(lez.fecha))/(1000*60*60*24)) : '—'
+    diasBaja: fechaLesion ? Math.round((new Date(lez.fechaFin)-fechaLesion)/(1000*60*60*24)) : '—'
   });
   saveRendimiento();
   refreshAlerts();

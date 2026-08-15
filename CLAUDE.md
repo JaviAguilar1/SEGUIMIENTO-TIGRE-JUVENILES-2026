@@ -154,17 +154,10 @@ cerca de la línea 4915) están escritas con estilos en línea propios (sin
 `var(--...)`, porque la ventana del PDF es un documento HTML aparte que no
 hereda el CSS de la app) — mismo criterio que ya usaba `generarPDF()`.
 
-**Descubrimiento durante Fase 5 (relevante para cualquier fase futura):** el
-módulo "RENDIMIENTO" (`buildRendimientoModule()`, `renderRendimiento()` —
-forma reciente, local/visitante, índice de rendimiento, tarjetas, lesiones,
-y ahí también vivía el `generarPDF()` de Citaciones) apunta a
-`panel-rendimiento`, que **no existe en el HTML** y nunca se construye
-(`buildRendimientoModule()` no se llama desde ningún lado) — está huérfano
-exactamente igual que el módulo GPS. No se tocó ni se arregló en esta fase
-(no era parte del pedido); si en algún momento se quiere recuperar ese
-módulo (alertas de tarjetas, lesiones, forma reciente, local/visitante),
-hay que engancharlo a la navegación desde cero, igual que se evaluó para
-GPS en la Fase 6.
+**Descubrimiento durante Fase 5, recuperado el 2026-08-15 (ver más abajo):**
+el módulo "RENDIMIENTO" apuntaba a `panel-rendimiento`, que no existía en
+el HTML — estaba huérfano igual que el módulo GPS. Ya no: se repartió su
+contenido dentro de la navegación que sí está viva (ver más abajo).
 
 **Fase 6 — Rendimiento físico / Catapult (COMPLETA):** PLANTEL dejó de estar
 escondido detrás del botón "VER DATOS DE JUGADORES" y pasó a ser una
@@ -228,6 +221,51 @@ de verdad no matchean con nadie del plantel. Una vez vinculado,
 `gpsAliasedName(cat, nombre)` se usa en toda la UI de comparativas para
 que las dos fuentes se traten como la misma persona.
 
+**Módulo RENDIMIENTO recuperado (COMPLETA, 2026-08-15):** en vez de darle
+un panel propio (que hubiera significado un sistema de navegación paralelo
+al que ya existe), su contenido se repartió en la navegación actual, según
+qué es cada cosa:
+- **Forma reciente (últimos 5), Local vs Visitante, Índice de rendimiento**
+  (`buildFormaHTML`/`buildLVVHTML`/`buildIndiceRowsHTML`, combinadas en
+  `buildRendimientoStatsHTML(idPrefix, cats)`) — son estadísticas de
+  **equipo**, derivadas de `results[cat]` (no hace falta cargar nada nuevo):
+  aparecen en GENERAL (las 6 categorías juntas) y dentro de RESULTADOS de
+  cada categoría (solo la suya). No se muestran para RESERVA — el cálculo
+  original siempre usa el fixture de 4TA-9NA (`RIVALS`, 35 fechas), nunca
+  `RIVALS_RESERVA`, así que para Reserva daría fechas y rivales mal; eso ya
+  venía así en el módulo original, no es algo nuevo.
+- **Tarjetas y Lesiones** (`buildTarjetasHTML`/`buildLesionesHTML`, más
+  formulario para cargar) — son de **jugador**, así que se movieron a
+  PLANTEL de cada categoría, junto al resto de lo individual. Siguen
+  guardándose en `rendimiento` (`saveRendimiento()`/`loadRendimiento()`, ya
+  estaba bien conectado, no hizo falta tocar el guardado).
+- **Citaciones** (`generarPDF()`, planilla de convocados con firma) — no es
+  ni de equipo ni de una categoría en particular (tiene su propio selector
+  de categoría adentro), así que quedó como herramienta única dentro de
+  GENERAL. Se adaptó `renderChecklist()` para leer nombres de
+  `plantelFutdetail[cat]` en vez de `players[cat]` — esa era la lista de
+  jugadores del módulo PLANTEL viejo con fichas manuales (foto, DNI,
+  domicilio) que se sacó a propósito en Fase 1 y no tiene forma de
+  cargarse hoy; sin este cambio, Citaciones iba a mostrar siempre "sin
+  jugadores".
+- Las alertas de tarjetas (3+ amarillas) ya se ven en el header
+  (`#alert-pills`/`refreshAlerts()`, que además de tarjetas ya avisaba de
+  lesiones activas y sobrecarga de GPS) — no se repitió ese banner adentro
+  de PLANTEL para no duplicar la misma info dos veces.
+- Bug de cálculo encontrado y corregido de paso: la fecha de una lesión se
+  carga como "DD/MM" sin año, y dársela cruda a `new Date(...)` daba
+  resultados absurdos (miles de días) — ahora se arma la fecha a mano con
+  el año actual (`parseFechaLesionDDMM`).
+
+**Otros dos módulos huérfanos encontrados de paso (sin tocar, quedan para
+decidir después):**
+- **"CARGA DE ENTRENAMIENTO" / gimnasio** (`buildCargaModule()`, apunta a
+  `panel-carga` — no existe en el HTML, mismo patrón que los anteriores).
+  Usa `gymData[cat]` para cargar sesiones de gimnasio.
+- **"SEMANA" / vista semanal** (`buildSemanaModule()`, apunta a
+  `panel-semana` — tampoco existe). Trae un botón "📄 REPORTE"
+  (`exportWeeklyReport`) que parece cruzar varias fuentes en un resumen
+  semanal.
+
 **Pendiente / a futuro:**
-- (Opcional, sin decidir) Recuperar el módulo RENDIMIENTO huérfano — ver
-  "Descubrimiento durante Fase 5" arriba.
+- Decidir si conviene recuperar CARGA (gimnasio) y/o SEMANA — ver arriba.
