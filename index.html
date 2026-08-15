@@ -1562,6 +1562,12 @@ let chequeoSemanal = {alertas:[]}; // {fecha_revision, alertas:[{categoria,fecha
 // Tabla de equivalencias: dos nombres distintos que son la misma persona real
 // (ver regla de emparejamiento de jugadores). Se arma a mano desde Confiabilidad.
 let aliasJugadores = {};
+// aliasJugadoresGps[cat] = { "nombre normalizado desde el PDF de Catapult":
+// "nombre tal cual figura en el plantel" } — mismo mecanismo que
+// aliasJugadores pero para la tercera fuente de nombres (GPS), que se
+// arma a mano desde PLANTEL cuando un jugador de una sesión GPS no
+// coincide con nadie del plantel.
+let aliasJugadoresGps = {};
 // recordatoriosOmitidos["cat_fecha_key"] = true — recordatorios de "link sin
 // cargar" que ya descartaste a propósito, para que no vuelvan a aparecer.
 let recordatoriosOmitidos = {};
@@ -1782,6 +1788,7 @@ function initFirebase(){
             if(p.rivalData?.[c2]) Object.assign(rivalData[c2], p.rivalData[c2]);
             if(p.chequeoSemanal) chequeoSemanal = p.chequeoSemanal;
             if(p.aliasJugadores) aliasJugadores = p.aliasJugadores;
+            if(p.aliasJugadoresGps) aliasJugadoresGps = p.aliasJugadoresGps;
             if(p.recordatoriosOmitidos) recordatoriosOmitidos = p.recordatoriosOmitidos;
             refreshActiveModule();
             setTimeout(refreshAlerts, 200);
@@ -1849,7 +1856,7 @@ function saveData(){
   if(!fbReady||!db||!canEdit) return;
   clearTimeout(saveTimeout);
   saveTimeout=setTimeout(()=>{
-    const payload={results:{},links:{},goleadores:{},rivalData:rivalData,matchData:matchData,gymData:gymData,jugadores:{},plantel:{},chequeoSemanal:chequeoSemanal,aliasJugadores:aliasJugadores,recordatoriosOmitidos:recordatoriosOmitidos};
+    const payload={results:{},links:{},goleadores:{},rivalData:rivalData,matchData:matchData,gymData:gymData,jugadores:{},plantel:{},chequeoSemanal:chequeoSemanal,aliasJugadores:aliasJugadores,aliasJugadoresGps:aliasJugadoresGps,recordatoriosOmitidos:recordatoriosOmitidos};
     CATEGORIES.forEach(cat=>{
       payload.results[cat]={};
       payload.links[cat]={};
@@ -1923,6 +1930,7 @@ function loadData(){
         if(p.rivalData?.[c2]) Object.assign(rivalData[c2], p.rivalData[c2]);
         if(p.chequeoSemanal) chequeoSemanal = p.chequeoSemanal;
         if(p.aliasJugadores) aliasJugadores = p.aliasJugadores;
+        if(p.aliasJugadoresGps) aliasJugadoresGps = p.aliasJugadoresGps;
         if(p.recordatoriosOmitidos) recordatoriosOmitidos = p.recordatoriosOmitidos;
       }
       showLoading(false); resolve();
@@ -2988,11 +2996,13 @@ let gpsPendingUpload = null; // { cat, extracted } — sesión ya parseada, espe
 
 function renderGpsPlantelSection(cat, container){
   const sessions = gpsSessions.filter(s=>s.cat===cat).sort((a,b)=>gpsParseDateDMY(b.date)-gpsParseDateDMY(a.date));
+  const orphans = gpsOrphanNames(cat, sessions);
   container.innerHTML = `
     ${seccionTitulo('gps-'+cat, '📡 RENDIMIENTO FÍSICO · CATAPULT')}
     <div id="sec-gps-${cat}"${seccionEstiloInicial('gps-'+cat)}>
       ${canEdit?gpsUploadZoneHTML(cat):''}
       <div id="gps-sessions-list-${cat}">${gpsSessionsListHTML(sessions)}</div>
+      <div id="gps-orphans-${cat}">${gpsOrphansHTML(cat, orphans)}</div>
       <div id="gps-comparativas-${cat}" style="margin-top:8px"></div>
     </div>
   `;
@@ -3007,7 +3017,73 @@ function renderGpsPlantelSection(cat, container){
       }, 'ELIMINAR');
     });
   });
+  container.querySelectorAll('.btn-gps-vincular').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      const sel=document.getElementById(btn.dataset.sel);
+      vincularJugadorGps(cat, btn.dataset.orphan, sel.value, container);
+    });
+  });
   renderGpsComparativas(cat, sessions, document.getElementById(`gps-comparativas-${cat}`));
+}
+
+// ── Vinculación de nombres huérfanos entre GPS (Catapult) y el plantel ────
+// Mismo mecanismo que aliasJugadores en Confiabilidad, para la tercera
+// fuente de nombres: si un jugador de una sesión GPS no coincide con nadie
+// del plantel (por typo, apellido compuesto, orden de nombre distinto),
+// se puede vincular a mano y queda para siempre.
+function gpsAliasedName(cat, rawName){
+  const key=normNombreOrdenIndependiente(rawName);
+  const mapped=aliasJugadoresGps[cat] && aliasJugadoresGps[cat][key];
+  return mapped || rawName;
+}
+function gpsOrphanNames(cat, sessions){
+  const roster=new Set((plantelFutdetail[cat]||[]).map(p=>normNombreOrdenIndependiente(p.nombre)));
+  if(!roster.size) return []; // sin plantel cargado no hay con qué comparar
+  const seen=new Set(), orphans=[];
+  sessions.forEach(s=>(s.players||[]).forEach(p=>{
+    const aliasKey=normNombreOrdenIndependiente(gpsAliasedName(cat, p.name));
+    if(roster.has(aliasKey)) return;
+    const rawKey=normNombreOrdenIndependiente(p.name);
+    if(seen.has(rawKey)) return;
+    seen.add(rawKey);
+    orphans.push(p.name);
+  }));
+  return orphans;
+}
+function gpsOrphansHTML(cat, orphans){
+  if(!orphans.length) return '';
+  const roster=(plantelFutdetail[cat]||[]).map(p=>p.nombre).slice().sort();
+  const rosterOpts='<option value="">— Es el mismo que… —</option>'+roster.map(n=>`<option value="${esc(n)}">${esc(n)}</option>`).join('');
+  return `<div style="background:rgba(245,158,11,0.08);border:1px solid var(--draw);border-radius:8px;padding:10px 14px;margin-bottom:14px">
+    <div style="font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:1px;color:var(--draw);margin-bottom:6px">
+      ⚠ ${orphans.length} nombre(s) de las sesiones GPS no coinciden con el plantel — puede ser el mismo jugador escrito distinto
+    </div>
+    ${orphans.map(n=>{
+      const selId=('vincgps-'+cat+'-'+n).replace(/[^a-zA-Z0-9-]/g,'_');
+      return `<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:4px 0;font-family:'Barlow Condensed',sans-serif;font-size:13px">
+        <span>${esc(n)}</span>
+        ${canEdit?`<select id="${selId}" style="background:var(--surface2);border:1px solid var(--border2);color:var(--text);
+          font-family:'Barlow Condensed',sans-serif;font-size:11px;padding:3px 6px;border-radius:4px">${rosterOpts}</select>
+        <button data-orphan="${esc(n)}" data-sel="${selId}" class="btn-gps-vincular"
+          style="background:rgba(26,58,143,0.25);border:1px solid var(--border2);color:var(--gold2);
+          border-radius:6px;padding:4px 8px;font-family:Barlow Condensed,sans-serif;font-size:11px;
+          letter-spacing:1px;cursor:pointer;white-space:nowrap">🔗 Vincular</button>`:''}
+      </div>`;
+    }).join('')}
+  </div>`;
+}
+function vincularJugadorGps(cat, nombreGps, nombreElegido, container){
+  if(!canEdit || !nombreElegido) return;
+  aliasJugadoresGps[cat]=aliasJugadoresGps[cat]||{};
+  aliasJugadoresGps[cat][normNombreOrdenIndependiente(nombreGps)]=nombreElegido;
+  guardarAliasJugadoresGps();
+  showToast('🔗 VINCULADO');
+  renderGpsPlantelSection(cat, container);
+}
+function guardarAliasJugadoresGps(){
+  if(!fbReady||!db||!canEdit) return;
+  db.ref('stats/aliasJugadoresGps').set(aliasJugadoresGps)
+    .catch(e=>console.warn('guardarAliasJugadoresGps error:',e));
 }
 
 function gpsUploadZoneHTML(cat){
@@ -3132,7 +3208,7 @@ function gpsSessionsListHTML(sessions){
 function renderGpsComparativas(cat, sessions, container){
   if(!container) return;
   if(sessions.length<2){ container.innerHTML=''; return; }
-  const allPlayerNames=[...new Set(sessions.flatMap(s=>(s.players||[]).map(p=>p.name)))].sort();
+  const allPlayerNames=[...new Set(sessions.flatMap(s=>(s.players||[]).map(p=>gpsAliasedName(cat,p.name))))].sort();
   const playerOpts='<option value="">— Jugador —</option>'+allPlayerNames.map(n=>`<option value="${esc(n)}">${esc(n)}</option>`).join('');
   const sessionOpts='<option value="">— Sesión —</option>'+sessions.map(s=>`<option value="${esc(s.id)}">${esc(s.date||'')} · ${esc(s.nombre||(s.type==='partido'?'Partido':'Entrenamiento'))}</option>`).join('');
 
@@ -3172,7 +3248,7 @@ function gpsCmpFechasOnJugadorChange(cat){
   const wrap=document.getElementById(`gpsCmpFechasSelects-${cat}`);
   const resultEl=document.getElementById(`gpsCmpFechasResult-${cat}`);
   if(!jugador){ wrap.innerHTML=''; resultEl.innerHTML=''; return; }
-  const sessions=gpsSessions.filter(s=>s.cat===cat && (s.players||[]).some(p=>p.name===jugador))
+  const sessions=gpsSessions.filter(s=>s.cat===cat && (s.players||[]).some(p=>gpsAliasedName(cat,p.name)===jugador))
     .sort((a,b)=>gpsParseDateDMY(a.date)-gpsParseDateDMY(b.date));
   const opts='<option value="">— Sesión —</option>'+sessions.map(s=>`<option value="${esc(s.id)}">${esc(s.date||'')} · ${esc(s.nombre||'')}</option>`).join('');
   wrap.innerHTML=[0,1,2].map(i=>`<select class="gps-cmp-fecha-select" data-slot="${i}" style="${GPS_SELECT_STYLE}">${opts}</select>`).join('');
@@ -3190,7 +3266,7 @@ function gpsRenderCmpFechas(cat, jugador){
   const sessions=ids.map(id=>gpsSessions.find(s=>s.id===id)).filter(Boolean).sort((a,b)=>gpsParseDateDMY(a.date)-gpsParseDateDMY(b.date));
   const head=sessions.map(s=>`<th style="text-align:center">${esc(s.date||'')}<br><span style="font-weight:400;font-size:10px;color:var(--muted)">${esc(s.nombre||'')}</span></th>`).join('');
   const rows=gpsCompareRowsHTML(sessions, (s,key)=>{
-    const p=(s.players||[]).find(x=>x.name===jugador);
+    const p=(s.players||[]).find(x=>gpsAliasedName(cat,x.name)===jugador);
     return p ? p[key] : 0;
   });
   resultEl.innerHTML=`<div class="table-wrap"><table><thead><tr><th></th>${head}</tr></thead><tbody>${rows}</tbody></table></div>`;
@@ -3202,8 +3278,8 @@ function gpsCmpJugOnSesionChange(cat){
   const resultEl=document.getElementById(`gpsCmpJugResult-${cat}`);
   if(!sesionId){ wrap.innerHTML=''; resultEl.innerHTML=''; return; }
   const session=gpsSessions.find(s=>s.id===sesionId);
-  const players=(session?.players||[]);
-  const opts='<option value="">— Jugador —</option>'+players.map(p=>`<option value="${esc(p.name)}">${esc(p.name)}</option>`).join('');
+  const nombres=[...new Set((session?.players||[]).map(p=>gpsAliasedName(cat,p.name)))];
+  const opts='<option value="">— Jugador —</option>'+nombres.map(n=>`<option value="${esc(n)}">${esc(n)}</option>`).join('');
   wrap.innerHTML=[0,1,2].map(i=>`<select class="gps-cmp-jug-select" data-slot="${i}" style="${GPS_SELECT_STYLE}">${opts}</select>`).join('');
   wrap.querySelectorAll('.gps-cmp-jug-select').forEach(sel=>sel.addEventListener('change',()=>gpsRenderCmpJugadores(cat, sesionId)));
   resultEl.innerHTML='';
@@ -3217,8 +3293,8 @@ function gpsRenderCmpJugadores(cat, sesionId){
     return;
   }
   const session=gpsSessions.find(s=>s.id===sesionId);
-  const players=names.map(n=>(session?.players||[]).find(p=>p.name===n)).filter(Boolean);
-  const head=players.map(p=>`<th style="text-align:center">${esc(p.name)}</th>`).join('');
+  const players=names.map(n=>(session?.players||[]).find(p=>gpsAliasedName(cat,p.name)===n)).filter(Boolean);
+  const head=names.map(n=>`<th style="text-align:center">${esc(n)}</th>`).join('');
   const rows=gpsCompareRowsHTML(players, (p,key)=>p[key]);
   resultEl.innerHTML=`<div class="table-wrap"><table><thead><tr><th></th>${head}</tr></thead><tbody>${rows}</tbody></table></div>`;
 }
@@ -4388,6 +4464,7 @@ function startPublicListener(){
     });
     if(p.chequeoSemanal) chequeoSemanal = p.chequeoSemanal;
     if(p.aliasJugadores) aliasJugadores = p.aliasJugadores;
+    if(p.aliasJugadoresGps) aliasJugadoresGps = p.aliasJugadoresGps;
     if(p.recordatoriosOmitidos) recordatoriosOmitidos = p.recordatoriosOmitidos;
     refreshActiveModule();
   });

@@ -216,12 +216,18 @@ todo lo nuevo de rendimiento físico:
   cargada". Solo 4TA/5TA/6TA (mismo alcance que el resto de Confiabilidad),
   solo partidos (no entrenamientos).
 
+**Vinculación de nombres GPS ↔ plantel (COMPLETA, agregada 2026-08-15):**
+mismo mecanismo que `aliasJugadores` de Confiabilidad, pero para la tercera
+fuente de nombres (`aliasJugadoresGps[cat]`, `db.ref('stats/aliasJugadoresGps')`).
+Antes de mostrar un jugador de GPS como "sin vincular" ya se prueba el
+match por palabras ordenadas alfabéticamente (`normNombreOrdenIndependiente`
+— así "Santiago Ruiz" de Catapult ya empareja solo con "Ruiz Santiago" del
+plantel, sin hacer falta vincular nada a mano); el aviso de "🔗 Vincular"
+(dentro de PLANTEL, dentro de la sección GPS) solo aparece para nombres que
+de verdad no matchean con nadie del plantel. Una vez vinculado,
+`gpsAliasedName(cat, nombre)` se usa en toda la UI de comparativas para
+que las dos fuentes se traten como la misma persona.
+
 **Pendiente / a futuro:**
-- No hay todavía un mecanismo de "vincular jugador" para GPS como el que
-  existe en Confiabilidad (`aliasJugadores`) — si el nombre que trae
-  Catapult no coincide exacto con el del plantel, en las comparativas
-  aparece como un nombre suelto en vez de fusionarse con su ficha. La
-  detección de categoría sí avisa del problema general, pero no hay forma
-  de corregir un jugador puntual a mano todavía.
 - (Opcional, sin decidir) Recuperar el módulo RENDIMIENTO huérfano — ver
   "Descubrimiento durante Fase 5" arriba.
