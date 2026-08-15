@@ -2036,6 +2036,11 @@ function showLoading(on){
 }
 // ── Refresh helpers (called on real-time updates) ────────────
 function refreshActiveModule(){
+  // Si hay una carga de GPS parseada esperando que confirmes el nombre/fecha
+  // antes de guardar, no la pises con un re-render disparado por un cambio
+  // de Firebase de OTRA parte de la app (otro admin editando un resultado,
+  // por ejemplo) — perderías el PDF ya procesado sin ningún aviso.
+  if(gpsPendingUpload) return;
   const sel=document.getElementById('stats-cat-select');
   if(sel) renderStatsCat(sel.value);
 }
@@ -2658,12 +2663,23 @@ function renderPosicionGeneral(containerId){
 // calcFn(from,to) da las stats de ese rango — calcStatsAll para GENERAL, o
 // calcStats(dataCat,from,to) para una categoría puntual. periodsCat define de
 // qué categoría se sacan los bloques (da igual el valor salvo para RESERVA).
-function bloqueComparativaHTML(calcFn, periodsCat){
+// Calcula las filas de "rendimiento por bloque de fechas" (dato puro, sin
+// HTML) — la usan tanto la tabla en pantalla (bloqueComparativaHTML) como
+// la del PDF exportado (pdfSectionBloque), así una corrección al cálculo
+// de períodos, al filtro de "todavía no jugó", o a cuál bloque marcar como
+// el más reciente, llega a los dos lugares a la vez en vez de a uno solo.
+function calcBloqueFilas(calcFn, periodsCat){
   const isReserva = periodsCat==='RESERVA'||periodsCat==='RESERVA_S2';
   const totMax = isReserva ? 18 : 35;
   const periods=getPeriodos(periodsCat).filter(p=>p.label!=='TOTAL');
   const filas=periods.map(p=>({label:p.label, s:calcFn(p.from,p.to)})).filter(f=>f.s.pj>0);
   const ultimoLabel=filas.length?filas[filas.length-1].label:null;
+  filas.forEach(f=>{ f.destacado = f.label===ultimoLabel; });
+  return { filas, tot: calcFn(1,totMax) };
+}
+
+function bloqueComparativaHTML(calcFn, periodsCat){
+  const { filas, tot } = calcBloqueFilas(calcFn, periodsCat);
 
   if(!filas.length){
     return `<div style="text-align:center;padding:20px;color:var(--muted);
@@ -2672,8 +2688,7 @@ function bloqueComparativaHTML(calcFn, periodsCat){
 
   const rowsHTML=filas.map(f=>{
     const dgC=f.s.dg>0?'var(--win)':f.s.dg<0?'var(--loss)':'var(--muted)';
-    const destacado=f.label===ultimoLabel;
-    return `<tr${destacado?' style="outline:2px solid var(--gold);outline-offset:-2px"':''}>
+    return `<tr${f.destacado?' style="outline:2px solid var(--gold);outline-offset:-2px"':''}>
       <td class="cat-cell">${f.label}</td>
       <td style="color:var(--gold2);font-weight:700">${f.s.pts}</td><td>${f.s.pj}</td>
       <td style="color:var(--win)">${f.s.pg}</td><td style="color:var(--draw)">${f.s.pe}</td>
@@ -2682,7 +2697,6 @@ function bloqueComparativaHTML(calcFn, periodsCat){
       <td style="color:${dgC};font-weight:700">${f.s.dg>0?'+':''}${f.s.dg}</td></tr>`;
   }).join('');
 
-  const tot=calcFn(1,totMax);
   const tDgC=tot.dg>0?'var(--win)':tot.dg<0?'var(--loss)':'var(--muted)';
   const totRow=`<tr style="background:rgba(192,21,42,0.1);font-weight:700;">
     <td class="cat-cell" style="color:var(--gold2)">TOTAL TEMPORADA</td>
@@ -3159,7 +3173,17 @@ function gpsConfirmHTML(cat, extracted){
     ${warn}
     <div style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:10px;font-family:'Barlow Condensed',sans-serif">
       <div><div style="font-size:10px;color:var(--muted);letter-spacing:1px">TIPO</div><div style="font-weight:700">${extracted.type==='partido'?'⚽ Partido':'🏃 Entrenamiento'}</div></div>
-      <div><div style="font-size:10px;color:var(--muted);letter-spacing:1px">FECHA</div><div style="font-weight:700">${esc(extracted.date||'—')}${extracted.fecha?` · F${extracted.fecha}`:''}</div></div>
+      <div><div style="font-size:10px;color:var(--muted);letter-spacing:1px">FECHA</div>
+        ${extracted.type==='partido'
+          ? `<div style="display:flex;align-items:center;gap:4px;font-weight:700">
+              <span>${esc(extracted.date||'—')} · F</span>
+              <input type="number" id="gpsFechaInput-${cat}" min="1" max="35" value="${extracted.fecha||''}"
+                title="Corregí el número de fecha si no se detectó bien"
+                style="width:44px;background:rgba(5,8,15,0.8);border:1px solid var(--border2);
+                border-radius:4px;color:var(--text);padding:3px 4px;font-family:'Barlow',sans-serif;font-size:13px;outline:none">
+            </div>`
+          : `<div style="font-weight:700">${esc(extracted.date||'—')}</div>`}
+      </div>
       <div><div style="font-size:10px;color:var(--muted);letter-spacing:1px">JUGADORES</div><div style="font-weight:700">${extracted.players.length}</div></div>
     </div>
     <label style="font-size:11px;color:var(--muted);font-family:'Barlow Condensed',sans-serif">Nombre de la sesión</label>
@@ -3183,11 +3207,13 @@ function wireGpsConfirm(cat){
   if(okBtn) okBtn.addEventListener('click', async ()=>{
     if(!gpsPendingUpload) return;
     const {extracted}=gpsPendingUpload;
+    const fechaInput=document.getElementById(`gpsFechaInput-${cat}`);
+    const fecha = fechaInput ? (parseInt(fechaInput.value)||null) : extracted.fecha;
     const id = (fbReady&&db) ? db.ref('gps/sessions').push().key : ('gps_'+Date.now());
     const session = {
       id, cat, type: extracted.type,
       nombre: (nombreInput?.value||'').trim() || extracted.nombre || '',
-      fecha: extracted.fecha, date: extracted.date,
+      fecha, date: extracted.date,
       ejercicios: extracted.ejercicios,
       players: extracted.players,
       totalRow: extracted.totalRow, promRow: extracted.promRow
@@ -4378,11 +4404,23 @@ function loadTablaData(){
 }
 
 // Genera las <tr> de una tabla a partir de un array de filas (reutilizable).
+// Enriquece cada fila de la tabla de posiciones con los datos derivados que
+// necesita cualquier render (pantalla o PDF) — separado del maquillaje
+// visual de cada uno, así un cambio al criterio ("qué cuenta como Tigre",
+// el signo de la diferencia de gol) llega a los dos lugares a la vez.
+function enriquecerFilasTabla(filas){
+  return filas.map(f=>({
+    ...f,
+    esTigre: /tigre/i.test(f.equipo),
+    difTono: f.dif>0?'win':f.dif<0?'loss':'muted'
+  }));
+}
+
 function _filasTabla(filas){
-  return filas.map(f=>{
-    const esTigre=/tigre/i.test(f.equipo);
-    const dgC=f.dif>0?'var(--win)':f.dif<0?'var(--loss)':'var(--muted)';
-    const cel=esTigre?'#fff':'';
+  const TONO={win:'var(--win)', loss:'var(--loss)', muted:'var(--muted)'};
+  return enriquecerFilasTabla(filas).map(f=>{
+    const esTigre=f.esTigre;
+    const dgC=TONO[f.difTono];
     return `<tr${esTigre?' style="background:rgba(192,21,42,0.42);font-weight:700;box-shadow:inset 4px 0 0 #e0202a"':''}>
       <td style="color:${esTigre?'#fff':'var(--muted)'};font-weight:700${esTigre?';padding-left:12px':''}">${f.pos}°</td>
       <td class="rival-name"${esTigre?' style="color:#fff;text-align:left"':''}>${f.equipo}</td>
@@ -5076,7 +5114,14 @@ function getAllAlertas(){
 // días). Se arma la fecha a mano asumiendo el año actual.
 function parseFechaLesionDDMM(s){
   const m=(s||'').match(/^(\d{1,2})\/(\d{1,2})$/);
-  return m ? new Date(new Date().getFullYear(), parseInt(m[2])-1, parseInt(m[1])) : null;
+  if(!m) return null;
+  const hoy=new Date();
+  let d=new Date(hoy.getFullYear(), parseInt(m[2])-1, parseInt(m[1]));
+  // Una lesión siempre se carga sobre algo que ya pasó — si con el año
+  // actual da una fecha futura (ej. lesión de diciembre cargada/vista en
+  // enero siguiente), es del año anterior.
+  if(d>hoy) d=new Date(hoy.getFullYear()-1, parseInt(m[2])-1, parseInt(m[1]));
+  return d;
 }
 // Igual criterio: una categoría explícita, sin el label de categoría
 // dentro de cada fila (ya es implícito — estás parado en esa categoría).
@@ -5350,10 +5395,10 @@ function abrirVentanaPDF(titulo, seccionesHTML){
 }
 
 function pdfTablaLPFHtml(filas){
-  const rows=filas.map(f=>{
-    const esTigre=/tigre/i.test(f.equipo);
-    const dgC=f.dif>0?'#16a34a':f.dif<0?'#dc2626':'#888';
-    return `<tr${esTigre?' class="tigre-row"':''}>
+  const TONO={win:'#16a34a', loss:'#dc2626', muted:'#888'};
+  const rows=enriquecerFilasTabla(filas).map(f=>{
+    const dgC=TONO[f.difTono];
+    return `<tr${f.esTigre?' class="tigre-row"':''}>
       <td>${f.pos}°</td><td>${esc(f.equipo)}</td>
       <td style="font-weight:700">${f.pts}</td><td>${f.pj}</td>
       <td style="color:#16a34a">${f.pg}</td><td style="color:#ca8a04">${f.pe}</td>
@@ -5433,10 +5478,8 @@ function pdfSectionGoleadores(dataCat){
     <table><thead><tr><th>#</th><th>Jugador</th><th>Goles</th></tr></thead><tbody>${rows}</tbody></table>`;
 }
 
-function pdfSectionBloque(calcFn, periodsCat, isReserva){
-  const totMax=isReserva?18:35;
-  const periods=getPeriodos(periodsCat).filter(p=>p.label!=='TOTAL');
-  const filas=periods.map(p=>({label:p.label,s:calcFn(p.from,p.to)})).filter(f=>f.s.pj>0);
+function pdfSectionBloque(calcFn, periodsCat){
+  const { filas, tot } = calcBloqueFilas(calcFn, periodsCat);
   let rows='';
   if(!filas.length){
     rows=`<tr><td colspan="9" style="color:#999;padding:16px;text-align:center">Todavía no se jugaron partidos</td></tr>`;
@@ -5448,7 +5491,6 @@ function pdfSectionBloque(calcFn, periodsCat, isReserva){
         <td style="color:#2563eb">${f.s.gf}</td><td style="color:#dc2626">${f.s.gc}</td>
         <td style="color:${dgC};font-weight:700">${f.s.dg>0?'+':''}${f.s.dg}</td></tr>`;
     }).join('');
-    const tot=calcFn(1,totMax);
     const tDgC=tot.dg>0?'#16a34a':tot.dg<0?'#dc2626':'#888';
     rows+=`<tr class="tigre-row"><td>TOTAL TEMPORADA</td><td style="font-weight:700">${tot.pts}</td><td>${tot.pj}</td>
       <td style="color:#16a34a">${tot.pg}</td><td style="color:#ca8a04">${tot.pe}</td><td style="color:#dc2626">${tot.pp}</td>
@@ -5527,7 +5569,7 @@ async function generarPDFCategoria(cat){
   if(checked.includes('resultados')) sections+=pdfSectionResultados(cat, dataCat, isReserva, rivalList);
   if(checked.includes('tablalpf'))   sections+=await pdfSectionTablaLPF(cat, isReserva);
   if(checked.includes('goleadores')) sections+=pdfSectionGoleadores(dataCat);
-  if(checked.includes('bloque'))     sections+=pdfSectionBloque((from,to)=>calcStats(dataCat,from,to), dataCat, isReserva);
+  if(checked.includes('bloque'))     sections+=pdfSectionBloque((from,to)=>calcStats(dataCat,from,to), dataCat);
   if(checked.includes('jugadores'))  sections+=pdfSectionJugadores(cat);
 
   abrirVentanaPDF(`${cat} — Estadísticas`, sections);
@@ -5585,7 +5627,7 @@ function generarPDFGeneral(){
     <table><thead><tr><th>Cat</th><th>Pts</th><th>PJ</th><th>PG</th><th>PE</th><th>PP</th>
     <th>GF</th><th>GC</th><th>DG</th><th>%</th></tr></thead><tbody>${trows}</tbody></table>`;
 
-  const bloqueHTML=pdfSectionBloque(calcStatsAll, '4TA', false);
+  const bloqueHTML=pdfSectionBloque(calcStatsAll, '4TA');
 
   abrirVentanaPDF('Resumen general', resumenHTML + bloqueHTML);
 }
@@ -5598,11 +5640,7 @@ setTimeout(()=>{ const el=document.getElementById('pdf-cat'); if(el) renderCheck
 // ============================================================
 
 // GPS State
-let gpsSessions = []; // [{id, name, cat, type, date, players:[{name,pos,min,dist,mpm,m1821,m2125,m25,sprints,velmax,acc,dcc,maxAcc,maxDec,rhie,totalPL}]}]
-let gpsView = 'sessions'; // 'sessions' | 'detail' | 'player'
-let gpsDetailId = null;
-let gpsPlayerName = null;
-let gpsCatFilter = 'ALL';
+let gpsSessions = []; // [{id, cat, type, nombre, fecha, date, ejercicios, players:[{name,pos,min,dist,mpm,m1821,m2125,m25,sprints,velmax,acc,dcc,maxAcc,maxDec,rhie,totalPL,accB2,extra}]}]
 
 // --- FIREBASE GPS LOAD/SAVE ---
 // Cada sesión vive en su propio nodo gps/sessions/{id} — antes se
@@ -5633,21 +5671,23 @@ function deleteGpsSession(id){
 // Object.values() funciona igual si "sessions" quedó como array viejo
 // ({sessions:[...]})  o como objeto nuevo ({sessions:{id1:{...},id2:{...}}})
 // — no hace falta migrar nada a mano, las sesiones viejas se siguen leyendo.
-function loadGpsData(snap){
-  const d=snap.val();
-  gpsSessions = (d&&d.sessions) ? Object.values(d.sessions) : [];
-  renderGpsModule();
-}
-
-// Real-time GPS listener
+// Real-time GPS listener — mantiene gpsSessions al día con lo que suba
+// cualquier otro admin, y refresca la sección de PLANTEL si es lo que
+// se está mirando ahora mismo (sin pisar una carga a medio confirmar).
 function setupGpsListener(){
   if(!fbReady||!db) return;
   db.ref('gps/sessions').on('value', snap=>{
     const d=snap.val();
     gpsSessions = d ? Object.values(d) : [];
-    const panel=document.getElementById('panel-gps');
-    if(panel&&panel.classList.contains('active')) renderGpsModule();
+    refreshGpsPlantelIfActive();
   });
+}
+function refreshGpsPlantelIfActive(){
+  if(catActiveTab!=='plantel' || gpsPendingUpload) return;
+  const cat=document.getElementById('stats-cat-select')?.value;
+  if(!cat || cat==='GENERAL') return;
+  const container=document.getElementById(`gps-plantel-${cat}`);
+  if(container) renderGpsPlantelSection(cat, container);
 }
 
 // --- AI EXTRACTION via Claude API ---
@@ -5863,6 +5903,23 @@ function gpsHeaderRegionRows(rows, dataStartIdx){
   return rows.slice(start, dataStartIdx);
 }
 
+// Umbral de distancia (en px) para "esto pertenece a esta columna". Nunca
+// baja de `base` (el valor ya probado contra los 19 PDF reales de Catapult
+// usados para calibrar el parser) — achicarlo podría cambiar qué columna se
+// queda con un fragmento ambiguo en esos PDF ya verificados, y eso no está
+// vuelto a testear. Solo puede agrandarse, y nada más si el espaciado real
+// entre columnas de ESTE pdf da lugar a eso (más ancho que lo normal) — así
+// un informe futuro de Catapult con menos columnas repartidas en la misma
+// hoja (columnas más separadas entre sí) no pierde datos por quedar
+// "demasiado lejos" de un umbral pensado para columnas más juntas.
+function gpsColThreshold(colXs, base){
+  if(colXs.length<2) return base;
+  const sorted=[...colXs].sort((a,b)=>a-b);
+  let minGap=Infinity;
+  for(let i=1;i<sorted.length;i++) minGap=Math.min(minGap, sorted[i]-sorted[i-1]);
+  return Math.max(base, minGap*0.4);
+}
+
 // Arma la lista de "field key" por columna, en el mismo orden izquierda→derecha
 // que van a venir los números de cada fila de jugador. Agrupa el texto de
 // encabezado por cercanía en x a cada columna (usando la primera fila de datos
@@ -5871,6 +5928,7 @@ function gpsBuildFieldMap(rows, dataStartIdx, colXs){
   if(!colXs.length) return [];
   const headerRows = gpsHeaderRegionRows(rows, dataStartIdx);
   const buckets = colXs.map(()=>[]);
+  const umbral = gpsColThreshold(colXs, 25);
   headerRows.forEach(r=>{
     r.items.forEach(it=>{
       // OJO: no descartar números acá — rangos como "18-21"/"21-25" a veces
@@ -5885,7 +5943,7 @@ function gpsBuildFieldMap(rows, dataStartIdx, colXs){
       if(/^posit|^ion$/i.test(it.str.trim())) return;
       let bestI=-1, bestD=Infinity;
       colXs.forEach((cx,i)=>{ const d=Math.abs(cx-it.x); if(d<bestD){ bestD=d; bestI=i; } });
-      if(bestD < 25) buckets[bestI].push(it.str);
+      if(bestD < umbral) buckets[bestI].push(it.str);
     });
   });
   // Sin espacio entre fragmentos: muchos vienen cortados a mitad de palabra
@@ -5906,10 +5964,11 @@ function gpsAssignNumsToColumns(numsWithX, colXs){
   const values = new Array(colXs.length).fill(null);
   const filled = new Array(colXs.length).fill(false);
   const extra = [];
+  const umbral = gpsColThreshold(colXs, 20);
   numsWithX.forEach(o=>{
     let bestI=-1, bestD=Infinity;
     colXs.forEach((cx,i)=>{ const d=Math.abs(cx-o.x); if(d<bestD){ bestD=d; bestI=i; } });
-    if(bestI>=0 && bestD<20 && !filled[bestI]){ filled[bestI]=true; values[bestI]=o.num; }
+    if(bestI>=0 && bestD<umbral && !filled[bestI]){ filled[bestI]=true; values[bestI]=o.num; }
     else extra.push(o.num);
   });
   return { values, extra };
@@ -6090,735 +6149,6 @@ async function extractGpsDataFromPdf(file){
   return { type, nombre, cat, catMatchRate: matchRate, fecha, date, ejercicios, players, teamTotals, totalRow, promRow };
 }
 
-// --- RENDER GPS MODULE ---
-function renderGpsModule(){
-  const panel = document.getElementById('panel-gps');
-  if(!panel) return;
-  panel.innerHTML = buildGpsHtml();
-  attachGpsEvents();
-}
-
-function buildGpsHtml(){
-  const subtabs = [
-    {id:'sessions', label:'📋 SESIONES'},
-    {id:'partido',  label:'⚽ POR PARTIDO'},
-    {id:'semanal',  label:'📊 SEMANAL'},
-    {id:'jugador',  label:'👤 JUGADOR'},
-    {id:'alertas',  label:'⚠ ALERTAS'},
-  ];
-
-  let html = `<div class="module-content">
-  <div class="st"><div class="stbar"></div>ANÁLISIS GPS · CATAPULT</div>
-  <div class="gps-subtabs">`;
-  subtabs.forEach(s=>{
-    html += `<button class="gps-subtab${gpsView===s.id?' active':''}" data-gpsview="${s.id}">${s.label}</button>`;
-  });
-  html += `</div>`;
-
-  // Upload section (only for editors)
-  if(canEdit){
-    html += buildGpsUploadSection();
-  }
-
-  // View content
-  if(gpsView==='sessions') html += buildGpsSessionsView();
-  else if(gpsView==='partido') html += buildGpsPartidoView();
-  else if(gpsView==='semanal') html += buildGpsSemanalView();
-  else if(gpsView==='jugador') html += buildGpsJugadorView();
-  else if(gpsView==='alertas') html += buildGpsAlertasView();
-
-  html += `</div>`;
-  return html;
-}
-
-function buildGpsUploadSection(){
-  return `
-  <div class="gps-upload-zone" id="gpsDropZone">
-    <div class="uz-icon">📡</div>
-    <h3>CARGAR SESIÓN GPS</h3>
-    <p>Arrastrá un PDF de Catapult o hacé clic para seleccionar</p>
-    <input type="file" id="gpsPdfInput" accept=".pdf" style="display:none">
-  </div>
-  <div class="gps-upload-form">
-    <div>
-      <label>Categoría <span style="opacity:.6">(autodetectada)</span></label>
-      <select id="gpsUploadCat">
-        ${CATEGORIES.map(c=>`<option value="${c}">${c}</option>`).join('')}
-      </select>
-    </div>
-    <div>
-      <label>Tipo <span style="opacity:.6">(autodetectado)</span></label>
-      <select id="gpsUploadType">
-        <option value="partido">Partido</option>
-        <option value="entrenamiento">Entrenamiento</option>
-      </select>
-    </div>
-    <div>
-      <label>Nombre de la sesión (opcional — se detecta del PDF)</label>
-      <input type="text" id="gpsUploadName" placeholder="Ej: F13 vs River · o nombre del ejercicio">
-    </div>
-    <div>
-      <button class="btn-gps-upload" id="btnGpsProcess" disabled>⚡ PROCESAR</button>
-    </div>
-  </div>
-  <div class="gps-extract-progress" id="gpsProgress">
-    <div class="ep-title">EXTRAYENDO CON IA...</div>
-    <div class="ep-bar"><div class="ep-bar-fill" id="epBarFill" style="width:0%"></div></div>
-    <p id="epStatus">Leyendo PDF con Claude AI...</p>
-  </div>`;
-}
-
-function buildGpsSessionsView(){
-  if(!gpsSessions||gpsSessions.length===0){
-    return `<div class="gps-empty-state">
-      <div class="es-icon">📡</div>
-      <h3>SIN SESIONES GPS</h3>
-      <p>Subí un PDF de Catapult para empezar a cargar datos de partido o entrenamiento</p>
-    </div>`;
-  }
-
-  // Cat filter
-  const cats = ['ALL',...new Set(gpsSessions.map(s=>s.cat))];
-  let html = `<div class="gps-cat-filter">`;
-  cats.forEach(c=>{
-    const clr = c==='ALL' ? '#c9a227' : (CAT_COLORS[c]||'#c9a227');
-    html += `<button class="gps-cat-filter-btn${gpsCatFilter===c?' active':''}" 
-      data-catfilter="${c}" 
-      style="${gpsCatFilter===c?'background:'+clr+';border-color:'+clr+';':''}">${c==='ALL'?'TODAS':c}</button>`;
-  });
-  html += `</div>`;
-
-  const filtered = gpsCatFilter==='ALL' ? gpsSessions : gpsSessions.filter(s=>s.cat===gpsCatFilter);
-  // Sort by date desc
-  const sorted = [...filtered].sort((a,b)=>new Date(b.date||0)-new Date(a.date||0));
-
-  html += `<div class="gps-sessions-list">`;
-  sorted.forEach(s=>{
-    const icon = s.type==='partido' ? '⚽' : '🏃';
-    const pCount = s.players ? s.players.filter(p=>p.name!=='Total'&&p.name!=='Promedio').length : 0;
-    const avgDist = s.players ? Math.round(s.players.filter(p=>p.name!=='Total'&&p.name!=='Promedio').reduce((a,p)=>a+(p.dist||0),0)/Math.max(pCount,1)) : 0;
-    const clr = CAT_COLORS[s.cat]||'#c9a227';
-    html += `<div class="gps-session-card ${s.type}" data-sessionid="${s.id}">
-      <div class="sc-icon">${icon}</div>
-      <div class="sc-body">
-        <div class="sc-name">${s.name||'Sesión sin nombre'}</div>
-        <div class="sc-meta">${s.date||''} ${s.division?'· '+s.division:''}</div>
-        <div class="sc-badges">
-          <span class="sc-badge cat" style="color:${clr};border-color:${clr}40;background:${clr}18">${s.cat}</span>
-          <span class="sc-badge type-${s.type==='partido'?'partido':'ent'}">${s.type==='partido'?'PARTIDO':'ENTRENAMIENTO'}</span>
-          <span class="sc-badge players">${pCount} jugadores · ~${avgDist.toLocaleString()} m prom</span>
-        </div>
-      </div>
-      ${canEdit?`<button class="sc-delete" data-delid="${s.id}" title="Eliminar sesión">🗑</button>`:''}
-    </div>`;
-  });
-  html += `</div>`;
-  return html;
-}
-
-function buildGpsPartidoView(){
-  const partidos = gpsSessions.filter(s=>s.type==='partido').sort((a,b)=>new Date(b.date||0)-new Date(a.date||0));
-  if(partidos.length===0){
-    return `<div class="gps-empty-state"><div class="es-icon">⚽</div><h3>SIN PARTIDOS CARGADOS</h3><p>Subí PDFs de partidos para ver los datos</p></div>`;
-  }
-
-  if(gpsDetailId){
-    const s = gpsSessions.find(x=>x.id===gpsDetailId);
-    if(s) return buildSessionDetail(s);
-  }
-
-  let html = `<p class="gps-section-title">PARTIDOS CARGADOS</p>`;
-  partidos.forEach(s=>{
-    html += buildSessionMiniCard(s);
-  });
-  return html;
-}
-
-function buildGpsSemanalView(){
-  // Group entrenamiento sessions by week
-  const sessions = [...gpsSessions].sort((a,b)=>new Date(a.date||0)-new Date(b.date||0));
-  if(sessions.length===0){
-    return `<div class="gps-empty-state"><div class="es-icon">📊</div><h3>SIN DATOS SEMANALES</h3><p>Cargá sesiones de entrenamiento para ver la carga semanal</p></div>`;
-  }
-
-  // Build week groups by ISO week
-  const byWeek = {};
-  sessions.forEach(s=>{
-    if(!s.date) return;
-    const [d,m,y] = (s.date).split('/');
-    const dt = new Date(`${y}-${m}-${d}`);
-    const weekKey = getISOWeek(dt);
-    if(!byWeek[weekKey]) byWeek[weekKey] = {sessions:[], label:weekKey};
-    byWeek[weekKey].sessions.push(s);
-  });
-
-  const weeks = Object.values(byWeek).slice(-8); // last 8 weeks
-  if(weeks.length===0) return `<div class="gps-empty-state"><div class="es-icon">📅</div><h3>SIN SEMANAS</h3><p>No hay suficientes datos para mostrar</p></div>`;
-
-  let html = `<p class="gps-section-title">RESUMEN SEMANAL — ÚLTIMAS ${weeks.length} SEMANAS</p>
-  <div class="gps-weekly-summary">`;
-
-  weeks.forEach(w=>{
-    const allP = w.sessions.flatMap(s=>(s.players||[]).filter(p=>p.name!=='Total'&&p.name!=='Promedio'));
-    const nSes = w.sessions.length;
-    const totalDist = allP.reduce((a,p)=>a+(p.dist||0),0);
-    const avgMpm = allP.length>0?(allP.reduce((a,p)=>a+(p.mpm||0),0)/allP.length):0;
-    const totalSprints = allP.reduce((a,p)=>a+(p.sprints||0),0);
-    const tipos = [...new Set(w.sessions.map(s=>s.type))];
-    html += `<div class="gps-week-card">
-      <div class="wc-title">SEM. ${w.label}</div>
-      <div class="wc-metric"><span class="wm-label">Sesiones</span><span class="wm-val">${nSes}</span></div>
-      <div class="wc-metric"><span class="wm-label">Dist. Total Equipo</span><span class="wm-val" style="font-size:14px">${(totalDist/1000).toFixed(1)} km</span></div>
-      <div class="wc-metric"><span class="wm-label">Prom. m/min</span><span class="wm-val">${avgMpm.toFixed(1)}</span></div>
-      <div class="wc-metric"><span class="wm-label">Sprints totales</span><span class="wm-val">${totalSprints}</span></div>
-      <div style="margin-top:8px;display:flex;gap:4px;flex-wrap:wrap">${tipos.map(t=>`<span class="sc-badge type-${t==='partido'?'partido':'ent'}">${t==='partido'?'PARTIDO':'ENT.'}</span>`).join('')}</div>
-    </div>`;
-  });
-  html += `</div>`;
-  return html;
-}
-
-function buildGpsJugadorView(){
-  // Get all unique player names
-  const allNames = [...new Set(
-    gpsSessions.flatMap(s=>(s.players||[]).map(p=>p.name).filter(n=>n&&n!=='Total'&&n!=='Promedio'))
-  )].sort();
-
-  if(allNames.length===0){
-    return `<div class="gps-empty-state"><div class="es-icon">👤</div><h3>SIN JUGADORES</h3><p>Cargá sesiones GPS para ver los perfiles de jugadores</p></div>`;
-  }
-
-  let html = `<p class="gps-section-title">FICHA DE JUGADOR</p>
-  <select class="gps-player-select" id="gpsPlayerSelect">
-    <option value="">— Seleccioná un jugador —</option>
-    ${allNames.map(n=>`<option value="${n}" ${n===gpsPlayerName?'selected':''}>${n}</option>`).join('')}
-  </select>`;
-
-  if(gpsPlayerName){
-    html += buildPlayerProfile(gpsPlayerName);
-  }
-  return html;
-}
-
-function buildGpsAlertasView(){
-  const alerts = computeGpsAlerts();
-  if(alerts.length===0){
-    return `<div class="gps-empty-state"><div class="es-icon">✅</div><h3>SIN ALERTAS</h3><p>No hay alertas de carga activas. ¡Todo bajo control!</p></div>`;
-  }
-  let html = `<p class="gps-section-title">ALERTAS DE CARGA · ${alerts.length} ACTIVA${alerts.length!==1?'S':''}</p>
-  <div class="gps-alerts-panel">`;
-  alerts.forEach(a=>{
-    html += `<div class="gps-alert-item ${a.type}">
-      <div class="ai-icon">${a.icon}</div>
-      <div class="ai-body">
-        <div class="ai-title">${a.title}</div>
-        <div class="ai-desc">${a.desc}</div>
-      </div>
-    </div>`;
-  });
-  html += `</div>`;
-  return html;
-}
-
-function buildSessionDetail(s){
-  const players = (s.players||[]).filter(p=>p.name!=='Total'&&p.name!=='Promedio');
-  const total = (s.players||[]).find(p=>p.name==='Total');
-  const prom  = (s.players||[]).find(p=>p.name==='Promedio');
-
-  // Sort by dist desc
-  const sorted = [...players].sort((a,b)=>(b.dist||0)-(a.dist||0));
-
-  const clr = CAT_COLORS[s.cat]||'#c9a227';
-  let html = `<button class="btn-sd-back" id="btnGpsBack">← VOLVER</button>
-  <div class="gps-session-detail" style="margin-top:14px">
-    <div class="sd-header">
-      <div>
-        <div class="sd-title">${s.name||'Sesión GPS'}</div>
-        <div class="sd-meta">${s.date||''} · <span style="color:${clr}">${s.cat}</span> · ${s.type==='partido'?'PARTIDO':'ENTRENAMIENTO'}
-        ${s.division?' · '+s.division:''}</div>
-      </div>
-    </div>`;
-
-  // Team summary boxes
-  if(total){
-    html += `<div class="gps-metrics-grid">
-      <div class="gps-metric-box"><div class="mb-val">${((total.dist||0)/1000).toFixed(1)}</div><div class="mb-unit">km</div><div class="mb-label">Dist. Total</div></div>
-      <div class="gps-metric-box"><div class="mb-val">${prom?(prom.mpm||0).toFixed(1):'—'}</div><div class="mb-unit">m/min</div><div class="mb-label">Prom. Equipo</div></div>
-      <div class="gps-metric-box"><div class="mb-val">${total.sprints||0}</div><div class="mb-unit">sprints</div><div class="mb-label">Total +25km/h</div></div>
-      <div class="gps-metric-box"><div class="mb-val">${total.velmax||0}</div><div class="mb-unit">km/h</div><div class="mb-label">Vel. Max</div></div>
-      <div class="gps-metric-box"><div class="mb-val">${total.acc||0}</div><div class="mb-unit">acc</div><div class="mb-label">Acel. +3m/s²</div></div>
-      <div class="gps-metric-box"><div class="mb-val">${total.dcc||0}</div><div class="mb-unit">dcc</div><div class="mb-label">Desacel. +3m/s²</div></div>
-      <div class="gps-metric-box"><div class="mb-val">${total.rhie||0}</div><div class="mb-unit">RHIE</div><div class="mb-label">Tot. Bouts</div></div>
-      <div class="gps-metric-box"><div class="mb-val">${players.length}</div><div class="mb-unit">jug</div><div class="mb-label">Con datos</div></div>
-    </div>`;
-  }
-
-  // Players table
-  html += `<div class="gps-preview-table-wrap">
-  <table class="gps-players-table">
-    <thead><tr>
-      <th>#</th><th>Jugador</th><th>Pos</th><th>Min</th>
-      <th>Dist (m)</th><th>m/min</th><th>18-21</th><th>21-25</th><th>+25</th>
-      <th>Sprints</th><th>Vel Max</th><th>Acc</th><th>Dcc</th><th>RHIE</th>
-    </tr></thead>
-    <tbody>`;
-
-  sorted.forEach((p,i)=>{
-    const rc = i===0?'rank-1':i===1?'rank-2':i===2?'rank-3':'';
-    const medal = i===0?'🥇 ':i===1?'🥈 ':i===2?'🥉 ':'';
-    html += `<tr>
-      <td class="${rc}">${i+1}</td>
-      <td class="${rc}" style="cursor:pointer;color:var(--gold2)" data-playerclick="${p.name}">${medal}${p.name}</td>
-      <td>${p.pos||'—'}</td>
-      <td>${p.min||0}</td>
-      <td class="${rc}">${(p.dist||0).toLocaleString()}</td>
-      <td>${(p.mpm||0).toFixed(1)}</td>
-      <td>${p.m1821||0}</td>
-      <td>${p.m2125||0}</td>
-      <td>${p.m25||0}</td>
-      <td>${p.sprints||0}</td>
-      <td>${p.velmax||0}</td>
-      <td>${p.acc||0}</td>
-      <td>${p.dcc||0}</td>
-      <td>${p.rhie||0}</td>
-    </tr>`;
-  });
-  html += `</tbody></table></div></div>`;
-  return html;
-}
-
-function buildSessionMiniCard(s){
-  const icon = s.type==='partido'?'⚽':'🏃';
-  const pCount = s.players ? s.players.filter(p=>p.name!=='Total'&&p.name!=='Promedio').length : 0;
-  const clr = CAT_COLORS[s.cat]||'#c9a227';
-  return `<div class="gps-session-card ${s.type}" data-sessionid="${s.id}">
-    <div class="sc-icon">${icon}</div>
-    <div class="sc-body">
-      <div class="sc-name">${s.name||'Sesión'}</div>
-      <div class="sc-meta">${s.date||''}</div>
-      <div class="sc-badges">
-        <span class="sc-badge cat" style="color:${clr};border-color:${clr}40;background:${clr}18">${s.cat}</span>
-        <span class="sc-badge players">${pCount} jugadores</span>
-      </div>
-    </div>
-  </div>`;
-}
-
-function buildPlayerProfile(playerName){
-  const sessions = gpsSessions.filter(s=>(s.players||[]).some(p=>p.name===playerName));
-  if(sessions.length===0) return `<p style="color:var(--muted);font-size:12px;font-family:Barlow Condensed,sans-serif">Sin sesiones para este jugador</p>`;
-
-  const partidos = sessions.filter(s=>s.type==='partido').sort((a,b)=>new Date(a.date||0)-new Date(b.date||0));
-  const entrenamientos = sessions.filter(s=>s.type==='entrenamiento').sort((a,b)=>new Date(a.date||0)-new Date(b.date||0));
-
-  const initials = playerName.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
-  // Get player's pos from last session
-  const lastSes = [...sessions].sort((a,b)=>new Date(b.date||0)-new Date(a.date||0))[0];
-  const lastP = (lastSes.players||[]).find(p=>p.name===playerName);
-
-  let html = `<div class="gps-player-profile">
-    <div class="pp-header">
-      <div class="pp-avatar">${initials}</div>
-      <div>
-        <div class="pp-name">${playerName}</div>
-        <div class="pp-pos">${lastP?.pos||'—'} · ${sessions.length} sesión${sessions.length!==1?'es':''} con datos GPS</div>
-      </div>
-    </div>`;
-
-  // Summary stats across all sessions
-  const allPlayerData = sessions.flatMap(s=>(s.players||[]).filter(p=>p.name===playerName));
-  const avgDist = allPlayerData.reduce((a,p)=>a+(p.dist||0),0)/allPlayerData.length;
-  const avgMpm  = allPlayerData.reduce((a,p)=>a+(p.mpm||0),0)/allPlayerData.length;
-  const maxVel  = Math.max(...allPlayerData.map(p=>p.velmax||0));
-  const totalSprints = allPlayerData.reduce((a,p)=>a+(p.sprints||0),0);
-  const avgRhie = allPlayerData.reduce((a,p)=>a+(p.rhie||0),0)/allPlayerData.length;
-
-  html += `<div class="gps-metrics-grid">
-    <div class="gps-metric-box"><div class="mb-val">${Math.round(avgDist).toLocaleString()}</div><div class="mb-unit">m</div><div class="mb-label">Dist. Promedio</div></div>
-    <div class="gps-metric-box"><div class="mb-val">${avgMpm.toFixed(1)}</div><div class="mb-unit">m/min</div><div class="mb-label">Prom. Intensidad</div></div>
-    <div class="gps-metric-box"><div class="mb-val">${maxVel}</div><div class="mb-unit">km/h</div><div class="mb-label">Vel. Máx. Histórica</div></div>
-    <div class="gps-metric-box"><div class="mb-val">${totalSprints}</div><div class="mb-unit">sprints</div><div class="mb-label">Total Sprints</div></div>
-    <div class="gps-metric-box"><div class="mb-val">${avgRhie.toFixed(0)}</div><div class="mb-unit">RHIE</div><div class="mb-label">Prom. RHIE</div></div>
-    <div class="gps-metric-box"><div class="mb-val">${partidos.length}</div><div class="mb-unit">partidos</div><div class="mb-label">Con datos GPS</div></div>
-  </div>`;
-
-  // Trend chart for partidos
-  if(partidos.length>1){
-    html += `<div class="gps-section-title" style="font-size:13px">EVOLUCIÓN DE DISTANCIA · PARTIDOS</div>
-    <canvas class="gps-trend-chart" id="gpsTrendCanvas" style="max-height:180px"></canvas>`;
-  }
-
-  // History table
-  html += `<div class="gps-section-title" style="font-size:13px">HISTORIAL DE SESIONES</div>
-  <div class="gps-preview-table-wrap">
-  <table class="gps-players-table">
-    <thead><tr><th>Sesión</th><th>Tipo</th><th>Cat</th><th>Min</th><th>Dist</th><th>m/min</th><th>Sprints</th><th>Vel Max</th><th>Acc</th><th>Dcc</th><th>RHIE</th></tr></thead>
-    <tbody>`;
-
-  const sortedSessions = [...sessions].sort((a,b)=>new Date(a.date||0)-new Date(b.date||0));
-  sortedSessions.forEach(s=>{
-    const p = (s.players||[]).find(x=>x.name===playerName);
-    if(!p) return;
-    const clr = CAT_COLORS[s.cat]||'#c9a227';
-    html += `<tr>
-      <td style="max-width:160px;overflow:hidden;text-overflow:ellipsis">${s.date||''} ${s.name||''}</td>
-      <td><span class="sc-badge type-${s.type==='partido'?'partido':'ent'}" style="font-size:9px">${s.type==='partido'?'P':'E'}</span></td>
-      <td style="color:${clr}">${s.cat}</td>
-      <td>${p.min||0}</td>
-      <td>${(p.dist||0).toLocaleString()}</td>
-      <td>${(p.mpm||0).toFixed(1)}</td>
-      <td>${p.sprints||0}</td>
-      <td>${p.velmax||0}</td>
-      <td>${p.acc||0}</td>
-      <td>${p.dcc||0}</td>
-      <td>${p.rhie||0}</td>
-    </tr>`;
-  });
-  html += `</tbody></table></div></div>`;
-  return html;
-}
-
-function computeGpsAlerts(){
-  const alerts = [];
-  // Get last 2 weeks of sessions for each player
-  const allNames = [...new Set(
-    gpsSessions.flatMap(s=>(s.players||[]).map(p=>p.name).filter(n=>n&&n!=='Total'&&n!=='Promedio'))
-  )];
-
-  allNames.forEach(name=>{
-    const playerSessions = gpsSessions
-      .filter(s=>(s.players||[]).some(p=>p.name===name))
-      .sort((a,b)=>new Date(b.date||0)-new Date(a.date||0));
-
-    if(playerSessions.length<2) return;
-
-    const [last, prev] = playerSessions;
-    const lastP = (last.players||[]).find(p=>p.name===name);
-    const prevP = (prev.players||[]).find(p=>p.name===name);
-    if(!lastP||!prevP) return;
-
-    // Average across all sessions
-    const allP = playerSessions.flatMap(s=>(s.players||[]).filter(p=>p.name===name));
-    const avgMpm = allP.reduce((a,p)=>a+(p.mpm||0),0)/allP.length;
-
-    // Check m/min drop
-    if(lastP.mpm && prevP.mpm && lastP.min>60){
-      const drop = (prevP.mpm - lastP.mpm) / prevP.mpm;
-      if(drop > 0.15){
-        alerts.push({
-          type:'caida', icon:'📉',
-          title:`${name} — Caída de intensidad`,
-          desc:`m/min: ${prevP.mpm.toFixed(1)} → ${lastP.mpm.toFixed(1)} (−${(drop*100).toFixed(0)}%) entre ${prev.name||prev.date} y ${last.name||last.date}`
-        });
-      }
-    }
-
-    // Sobrecarga: last session mpm >20% above personal average
-    if(lastP.mpm && avgMpm>0){
-      const overshoot = (lastP.mpm - avgMpm) / avgMpm;
-      if(overshoot > 0.20){
-        alerts.push({
-          type:'sobrecarga', icon:'🔴',
-          title:`${name} — SOBRECARGA`,
-          desc:`m/min en ${last.name||last.date}: ${lastP.mpm.toFixed(1)} vs promedio personal ${avgMpm.toFixed(1)} (+${(overshoot*100).toFixed(0)}%)`
-        });
-      }
-    }
-
-    // Subcarga: last session mpm >20% below average  
-    if(lastP.mpm && avgMpm>0 && lastP.min>60){
-      const undershoot = (avgMpm - lastP.mpm) / avgMpm;
-      if(undershoot > 0.20){
-        alerts.push({
-          type:'subcarga', icon:'🟡',
-          title:`${name} — Subcarga`,
-          desc:`m/min en ${last.name||last.date}: ${lastP.mpm.toFixed(1)} vs promedio personal ${avgMpm.toFixed(1)} (−${(undershoot*100).toFixed(0)}%)`
-        });
-      }
-    }
-  });
-
-  return alerts;
-}
-
-function getISOWeek(date){
-  const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
-  const dayNum = d.getUTCDay()||7;
-  d.setUTCDate(d.getUTCDate()+4-dayNum);
-  const yearStart = new Date(Date.UTC(d.getUTCFullYear(),0,1));
-  const wn = Math.ceil((((d-yearStart)/86400000)+1)/7);
-  return `${d.getUTCFullYear()}-W${String(wn).padStart(2,'0')}`;
-}
-
-// --- ATTACH GPS EVENTS ---
-function attachGpsEvents(){
-  // Sub-tab navigation
-  document.querySelectorAll('.gps-subtab').forEach(btn=>{
-    btn.addEventListener('click',()=>{
-      gpsView = btn.dataset.gpsview;
-      gpsDetailId = null;
-      renderGpsModule();
-    });
-  });
-
-  // Cat filter
-  document.querySelectorAll('.gps-cat-filter-btn').forEach(btn=>{
-    btn.addEventListener('click',()=>{
-      gpsCatFilter = btn.dataset.catfilter;
-      renderGpsModule();
-    });
-  });
-
-  // Session card click → show detail
-  document.querySelectorAll('.gps-session-card[data-sessionid]').forEach(card=>{
-    card.addEventListener('click',(e)=>{
-      if(e.target.classList.contains('sc-delete')) return;
-      gpsDetailId = card.dataset.sessionid;
-      renderGpsModule();
-    });
-  });
-
-  // Delete session
-  document.querySelectorAll('.sc-delete[data-delid]').forEach(btn=>{
-    btn.addEventListener('click',(e)=>{
-      e.stopPropagation();
-      const delId = btn.dataset.delid;
-      confirmAction('¿Eliminar esta sesión GPS?', ()=>{
-        gpsSessions = gpsSessions.filter(s=>s.id!==delId);
-        deleteGpsSession(delId);
-        renderGpsModule();
-      }, 'ELIMINAR');
-    });
-  });
-
-  // Back button in detail
-  const backBtn = document.getElementById('btnGpsBack');
-  if(backBtn) backBtn.addEventListener('click',()=>{ gpsDetailId=null; renderGpsModule(); });
-
-  // Player name click in table
-  document.querySelectorAll('[data-playerclick]').forEach(el=>{
-    el.addEventListener('click',()=>{
-      gpsPlayerName = el.dataset.playerclick;
-      gpsView = 'jugador';
-      renderGpsModule();
-    });
-  });
-
-  // Player select in jugador view
-  const playerSel = document.getElementById('gpsPlayerSelect');
-  if(playerSel){
-    playerSel.addEventListener('change',()=>{
-      gpsPlayerName = playerSel.value || null;
-      renderGpsModule();
-    });
-  }
-
-  // Upload zone
-  if(!canEdit) return;
-  const dropZone = document.getElementById('gpsDropZone');
-  const fileInput = document.getElementById('gpsPdfInput');
-  const btnProcess = document.getElementById('btnGpsProcess');
-
-  if(!dropZone||!fileInput||!btnProcess) return;
-
-  dropZone.addEventListener('click',()=>fileInput.click());
-  fileInput.addEventListener('change',()=>{
-    if(fileInput.files.length>0){
-      document.querySelector('.gps-upload-zone p').textContent = `✓ ${fileInput.files[0].name}`;
-      dropZone.style.borderColor='var(--win)';
-      btnProcess.disabled = false;
-    }
-  });
-  dropZone.addEventListener('dragover',(e)=>{ e.preventDefault(); dropZone.classList.add('drag-over'); });
-  dropZone.addEventListener('dragleave',()=>dropZone.classList.remove('drag-over'));
-  dropZone.addEventListener('drop',(e)=>{
-    e.preventDefault(); dropZone.classList.remove('drag-over');
-    const f = e.dataTransfer.files[0];
-    if(f&&f.type==='application/pdf'){
-      // Use DataTransfer to set files, then trigger change
-      const dt = new DataTransfer();
-      dt.items.add(f);
-      fileInput.files = dt.files;
-      fileInput.dispatchEvent(new Event('change'));
-    }
-  });
-
-  btnProcess.addEventListener('click', processGpsPdf);
-
-  // Auto-detect type and name from filename
-  fileInput.addEventListener('change',()=>{
-    if(!fileInput.files.length) return;
-    const fname = fileInput.files[0].name.replace(/\.pdf$/i,'');
-    document.querySelector('.gps-upload-zone p').textContent = `✓ ${fileInput.files[0].name}`;
-    dropZone.style.borderColor='var(--win)';
-    btnProcess.disabled = false;
-
-    // Auto-fill session name if empty
-    const nameInput = document.getElementById('gpsUploadName');
-    if(nameInput && !nameInput.value.trim()) nameInput.value = fname;
-
-    // Auto-set type: if filename contains MD-, PF, FIS, GIM, RECUP → Entrenamiento
-    const typeSelect = document.getElementById('gpsUploadType');
-    if(typeSelect){
-      const isTraining = /MD[-–+]?\d|[\-_](PF|FIS|GIM|RECUP|POTENCIA|TAE|AERO|ANT|PRE|ENT)/i.test(fname);
-      const isMatch    = /F\d+[\-_\s]|vs[\-_\s]|partido|match/i.test(fname);
-      if(isTraining) typeSelect.value = 'entrenamiento';
-      else if(isMatch) typeSelect.value = 'partido';
-    }
-
-    // Auto-set category from filename: 5ta, 4TA, etc.
-    const catSelect = document.getElementById('gpsUploadCat');
-    if(catSelect){
-      const catMap = {'4ta':'4TA','4TA':'4TA','5ta':'5TA','5TA':'5TA',
-                      '6ta':'6TA','6TA':'6TA','7ma':'7MA','7MA':'7MA',
-                      '8va':'8VA','8VA':'8VA','9na':'9NA','9NA':'9NA','reserva':'RESERVA'};
-      for(const [key,val] of Object.entries(catMap)){
-        if(fname.toLowerCase().includes(key.toLowerCase())){
-          catSelect.value = val; break;
-        }
-      }
-    }
-  });
-
-  // Draw trend chart if present
-  drawGpsTrendChart();
-}
-
-async function processGpsPdf(){
-  const file = document.getElementById('gpsPdfInput').files[0];
-  if(!file) return;
-  const cat = document.getElementById('gpsUploadCat').value;
-  const type = document.getElementById('gpsUploadType').value;
-  const customName = document.getElementById('gpsUploadName').value.trim();
-
-  const progress = document.getElementById('gpsProgress');
-  const fill = document.getElementById('epBarFill');
-  const status = document.getElementById('epStatus');
-  const btn = document.getElementById('btnGpsProcess');
-
-  progress.style.display='block';
-  btn.disabled=true;
-  status.style.color='';
-  fill.style.width='10%';
-  status.textContent='Cargando PDF.js...';
-
-  try {
-    fill.style.width='25%';
-    status.textContent='Leyendo PDF...';
-
-    const extracted = await extractGpsDataFromPdf(file);
-
-    // Autodetección: el parser manda; los selects quedan como override manual.
-    const detType = extracted.type || type;
-    let detCat = cat;
-    if(extracted.division && CATEGORIES.includes(extracted.division)) detCat = extracted.division;
-
-    fill.style.width='80%';
-    status.textContent='Procesando ' + (extracted.players||[]).length + ' jugadores...';
-
-    const sessionId = (fbReady&&db) ? db.ref('gps/sessions').push().key : ('gps_'+Date.now());
-    const newSession = {
-      id: sessionId,
-      name: customName || extracted.match || file.name.replace(/\.pdf$/i,''),
-      cat: detCat,
-      type: detType,
-      date: extracted.date || new Date().toLocaleDateString('es-AR'),
-      division: extracted.division || '',
-      players: [...(extracted.players||[])],
-      teamTotals: extracted.teamTotals || {}
-    };
-    if(extracted.totalRow) newSession.players.push({...extracted.totalRow, name:'Total'});
-    if(extracted.promRow)  newSession.players.push({...extracted.promRow,  name:'Promedio'});
-
-    gpsSessions.push(newSession);
-    fill.style.width='100%';
-    status.textContent='\u00a1Listo! ' + (extracted.players||[]).length + ' jugadores.';
-
-    await new Promise(r=>setTimeout(r,900));
-    progress.style.display='none';
-
-    saveGpsSession(newSession);
-    gpsView='sessions';
-    gpsDetailId=sessionId;
-    renderGpsModule();
-    showToast('\u2713 SESI\u00d3N GPS CARGADA \u2014 ' + (extracted.players||[]).length + ' jugadores');
-
-  } catch(err){
-    console.error('[GPS] Error completo:', err);
-    btn.disabled=false;
-    const errMsg = err.message || String(err);
-    showToast('\u26a0 Error: ' + errMsg.slice(0,120));
-    const statusEl = document.getElementById('epStatus');
-    if(statusEl){
-      statusEl.textContent = '\u26a0 ' + errMsg;
-      statusEl.style.color = '#ef4444';
-    }
-    fill.style.width='0%';
-  }
-}
-
-function drawGpsTrendChart(){
-  const canvas = document.getElementById('gpsTrendCanvas');
-  if(!canvas||!gpsPlayerName) return;
-  const partidos = gpsSessions
-    .filter(s=>s.type==='partido'&&(s.players||[]).some(p=>p.name===gpsPlayerName))
-    .sort((a,b)=>new Date(a.date||0)-new Date(b.date||0));
-  if(partidos.length<2) return;
-
-  const labels = partidos.map(s=>s.name||s.date||'');
-  const distData = partidos.map(s=>{
-    const p = (s.players||[]).find(x=>x.name===gpsPlayerName);
-    return p ? (p.dist||0) : 0;
-  });
-  const mpmData = partidos.map(s=>{
-    const p = (s.players||[]).find(x=>x.name===gpsPlayerName);
-    return p ? (p.mpm||0) : 0;
-  });
-
-  // Simple canvas chart
-  const ctx = canvas.getContext('2d');
-  const W = canvas.offsetWidth; const H = canvas.offsetHeight||180;
-  canvas.width=W; canvas.height=H;
-
-  const pad={top:20,right:20,bot:40,left:60};
-  const cW=W-pad.left-pad.right;
-  const cH=H-pad.top-pad.bot;
-  const n=distData.length;
-  const maxD=Math.max(...distData)*1.1;
-
-  ctx.clearRect(0,0,W,H);
-  ctx.fillStyle='rgba(5,8,15,0.4)';
-  ctx.fillRect(0,0,W,H);
-
-  // Grid lines
-  ctx.strokeStyle='rgba(26,45,90,0.5)';ctx.lineWidth=1;
-  for(let i=0;i<=4;i++){
-    const y=pad.top+cH*(1-i/4);
-    ctx.beginPath();ctx.moveTo(pad.left,y);ctx.lineTo(pad.left+cW,y);ctx.stroke();
-    ctx.fillStyle='rgba(90,112,153,0.8)';ctx.font='9px Barlow Condensed';ctx.textAlign='right';
-    ctx.fillText(Math.round(maxD*i/4).toLocaleString(),pad.left-4,y+3);
-  }
-
-  // Bars
-  const bw=Math.min(30,cW/n-8);
-  distData.forEach((d,i)=>{
-    const x=pad.left+i*(cW/n)+cW/n/2-bw/2;
-    const bh=d/maxD*cH;
-    const y=pad.top+cH-bh;
-    const avg=distData.reduce((a,v)=>a+v,0)/n;
-    ctx.fillStyle=d>avg*1.1?'rgba(34,197,94,0.7)':d<avg*0.9?'rgba(239,68,68,0.7)':'rgba(240,192,64,0.7)';
-    ctx.beginPath();ctx.roundRect?ctx.roundRect(x,y,bw,bh,3):ctx.rect(x,y,bw,bh);
-    ctx.fill();
-  });
-
-  // Labels
-  ctx.fillStyle='rgba(90,112,153,0.9)';ctx.font='9px Barlow Condensed';ctx.textAlign='center';
-  distData.forEach((d,i)=>{
-    const x=pad.left+i*(cW/n)+cW/n/2;
-    const shortLabel=labels[i].length>12?labels[i].slice(0,12)+'…':labels[i];
-    ctx.fillText(shortLabel,x,H-4);
-  });
-}
 
 // Call setupGpsListener after Firebase init
 setTimeout(()=>{ if(typeof fbReady!=='undefined'&&fbReady&&db) setupGpsListener(); },3000);
@@ -7098,22 +6428,28 @@ function refreshAlerts(){
   wrap.innerHTML = '';
   const pills = [];
 
-  // 1. Yellow card warnings (2+ amarillas)
-  let amarillaCount = 0;
+  // 1. Yellow card warnings (mismo umbral que el resto de la app,
+  // AMARILLAS_ALERTA) — el tooltip lista nombre+categoría de cada uno,
+  // ya que el banner con esa lista se sacó al recuperar RENDIMIENTO.
+  const amarillaNames = [];
   CATEGORIES.forEach(cat=>{
     (tarjetas[cat]||[]).forEach(p=>{
-      if(p.amarillas >= 2) amarillaCount++;
+      if(p.amarillas >= AMARILLAS_ALERTA) amarillaNames.push(`${p.name} (${cat})`);
     });
   });
-  if(amarillaCount > 0) pills.push({
-    icon:'🟨', text: `${amarillaCount} en alerta`, color:'rgba(245,158,11,0.25)', border:'rgba(245,158,11,0.5)', title:'Jugadores con 2+ amarillas'
+  if(amarillaNames.length) pills.push({
+    icon:'🟨', text: `${amarillaNames.length} en alerta`, color:'rgba(245,158,11,0.25)', border:'rgba(245,158,11,0.5)',
+    title:`${AMARILLAS_ALERTA}+ amarillas — riesgo suspensión:\n`+amarillaNames.join('\n')
   });
 
-  // 2. Active injuries
-  let injCount = 0;
-  CATEGORIES.forEach(cat=>{ injCount += (lesiones[cat]||[]).filter(l=>l.estado==='activa').length; });
-  if(injCount > 0) pills.push({
-    icon:'🩹', text: `${injCount} lesionado${injCount>1?'s':''}`, color:'rgba(239,68,68,0.2)', border:'rgba(239,68,68,0.45)', title:'Jugadores con lesión activa'
+  // 2. Active injuries — mismo criterio, nombres en el tooltip.
+  const injNames = [];
+  CATEGORIES.forEach(cat=>{
+    (lesiones[cat]||[]).filter(l=>l.estado==='activa').forEach(l=>injNames.push(`${l.name} (${cat})`));
+  });
+  if(injNames.length) pills.push({
+    icon:'🩹', text: `${injNames.length} lesionado${injNames.length>1?'s':''}`, color:'rgba(239,68,68,0.2)', border:'rgba(239,68,68,0.45)',
+    title:'Lesión activa:\n'+injNames.join('\n')
   });
 
   // 3. GPS overload: any player >20% above their cat average in the last session

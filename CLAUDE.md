@@ -12,7 +12,7 @@
 App de una sola página (`index.html`) para seguimiento de las inferiores de
 Tigre. Se viene mejorando en fases (ver los archivos de "Pegada" en
 `C:\Users\Javier\Desktop\files\` para el plan completo). Progreso al 2026-08-15
-(actualizado el mismo día tras cerrar Fase 6):
+(actualizado el mismo día tras cerrar Fase 7):
 
 **Fase 1 — Estructura (COMPLETA):** se sacó la pantalla de Inicio y la solapa
 PLANTEL. La app arranca directo en ESTADÍSTICAS → GENERAL. Selector de
@@ -255,7 +255,8 @@ qué es cada cosa:
 - Bug de cálculo encontrado y corregido de paso: la fecha de una lesión se
   carga como "DD/MM" sin año, y dársela cruda a `new Date(...)` daba
   resultados absurdos (miles de días) — ahora se arma la fecha a mano con
-  el año actual (`parseFechaLesionDDMM`).
+  el año actual (`parseFechaLesionDDMM`). Ver Fase 7 más abajo por un ajuste
+  posterior a esta misma función (cruce de fin de año).
 
 **Otros dos módulos huérfanos encontrados de paso (sin tocar, quedan para
 decidir después):**
@@ -266,6 +267,67 @@ decidir después):**
   `panel-semana` — tampoco existe). Trae un botón "📄 REPORTE"
   (`exportWeeklyReport`) que parece cruzar varias fuentes en un resumen
   semanal.
+
+**Fase 7 — Revisión de código y ajustes (COMPLETA, 2026-08-15):** después de
+cerrar la Fase 6, se hizo una revisión completa de todo lo tocado en la
+sesión (8 ángulos de revisión en paralelo — correctitud, reuso,
+simplificación, eficiencia, altitud, convenciones — con verificación
+posterior de cada hallazgo). De 10 hallazgos, 2 se corrigieron ya durante la
+revisión misma; los otros 8 se resolvieron después, a pedido explícito del
+usuario ("HACE TODO LO QUE PUEDAS"):
+1. **Carga de GPS pendiente que se perdía por re-render:** si mientras el
+   usuario tenía abierto el panel de confirmación de una carga de GPS
+   llegaba una actualización de Firebase (de cualquier cosa, no solo GPS),
+   `refreshActiveModule()` volvía a dibujar toda la pantalla y se perdía la
+   confirmación a medio hacer. Ahora hay una bandera `gpsPendingUpload` que
+   frena ese re-render mientras el panel está abierto.
+2. **Fecha editable en la confirmación de carga de GPS:** para una sesión de
+   tipo partido, la fecha que trae el PDF ahora se puede corregir a mano
+   antes de guardar (`gpsFechaInput-${cat}`) — antes quedaba fija con lo que
+   hubiera detectado el parser, sin forma de arreglar un error de lectura.
+3. **Fecha de lesión, cruce de fin de año:** `parseFechaLesionDDMM` arma la
+   fecha con el año actual, pero si la lesión fue en diciembre y hoy ya es
+   enero del año siguiente, esa cuenta daba una fecha "futura" — ahora, si
+   la fecha calculada con el año actual queda después de hoy, se usa el año
+   anterior.
+4. **Módulo GPS viejo eliminado:** el primer intento de módulo GPS (antes de
+   esta sesión, ~730 líneas: `renderGpsModule`, `buildGpsUploadSection`,
+   `processGpsPdf`, etc.) apuntaba a `panel-gps`, que nunca existió en el
+   HTML — quedó completamente inalcanzable en cuanto se armó el sistema
+   nuevo (dentro de PLANTEL). Se borró en vez de mantenerlo: ya estaba
+   superado del todo, parchearlo hubiera sido esfuerzo tirado.
+5. **Nombres en las alertas del header:** los avisos de "🟨 X en alerta" y
+   "🩹 X lesionado(s)" en `#alert-pills` solo decían la cantidad — ahora el
+   tooltip (mantener el mouse encima) lista los nombres y la categoría de
+   cada uno.
+6. **Cálculo compartido entre pantalla y PDF exportado:** "Rendimiento por
+   bloque de fechas" y la tabla de posiciones LPF tenían el cálculo
+   duplicado entre la versión de pantalla y la versión del PDF exportado —
+   riesgo de que una corrección futura se aplicara en un lado y no en el
+   otro. Ahora `calcBloqueFilas()` y `enriquecerFilasTabla()` calculan el
+   dato una sola vez y cada versión (pantalla con `var(--...)`, PDF con
+   colores fijos) solo se encarga de pintarlo.
+7. **Aviso si el filtro de competencia del scraper deja de matchear:** el
+   filtro `"torneo lpf"` agregado para el bug de futdetail (ver más arriba)
+   ahora imprime un `[WARN]` si llegaron partidos crudos de futdetail pero
+   ninguno pasó el filtro — para enterarse rápido si el día de mañana
+   futdetail cambia el nombre de la competencia, en vez de quedarse con
+   0 fechas en silencio.
+8. **Umbral de columna del parser de GPS, derivado del espaciado real:** el
+   mapeo de columnas por cercanía en X (`gpsBuildFieldMap`/
+   `gpsAssignNumsToColumns`) usaba una distancia fija (25px/20px) para
+   decidir qué tan lejos puede estar un fragmento de texto o un número de su
+   columna. Ahora `gpsColThreshold()` agranda ese umbral si el espaciado
+   real entre columnas de un PDF puntual es más ancho de lo normal — pero
+   **nunca lo achica** por debajo del valor ya probado, así los 19 PDF
+   reales usados para calibrar el parser (`C:\Users\Javier\Desktop\GPS\`)
+   siguen dando exactamente el mismo resultado (verificado matemáticamente:
+   el espaciado mínimo real medido en esos 19 PDF, 21-31px, siempre queda
+   por debajo del umbral fijo, así que `gpsColThreshold` elige el valor
+   viejo en los 19 casos). Solo entra en juego si en el futuro Catapult
+   manda un reporte con menos columnas repartidas en la misma hoja
+   (columnas más separadas) — antes ese caso podía perder datos por
+   "quedar demasiado lejos" de un umbral pensado para columnas más juntas.
 
 **Pendiente / a futuro:**
 - Decidir si conviene recuperar CARGA (gimnasio) y/o SEMANA — ver arriba.

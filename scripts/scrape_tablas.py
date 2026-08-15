@@ -451,6 +451,17 @@ def main():
                     partidos = parse_futdetail_partidos(filas)
                     resultado["fixture_futdetail"][cat] = partidos
                     print(f"[OK] futdetail {cat}: {len(partidos)} fechas")
+                    if filas and not partidos:
+                        # Filas si vino, pero el filtro de competencia (ver
+                        # parse_futdetail_partidos) descarto todo -- probable
+                        # que futdetail haya renombrado "Torneo LPF". Aviso
+                        # fuerte para no fallar en silencio como paso antes.
+                        print(
+                            f"[WARN] futdetail {cat}: {len(filas)} partidos recibidos pero "
+                            "0 pasaron el filtro de competencia 'Torneo LPF' -- revisar si "
+                            "futdetail cambio el campo competencia_descripcion",
+                            file=sys.stderr,
+                        )
                 except Exception as e:  # noqa
                     errores.append(f"futdetail {cat}: {e}")
                     print(f"[ERROR] futdetail {cat}: {e}", file=sys.stderr)
