@@ -23,15 +23,35 @@ tabla (no se hizo comparativa entre categorías, se descartó a pedido
 expreso — "puede generar malestar").
 
 **Fase 3 — Confiabilidad (COMPLETA):** sección "🔎 CONFIABILIDAD" al final de
-GENERAL, con 3 cruces automáticos (solo 4TA/5TA/6TA — 7MA/8VA/9NA quedan
+GENERAL, con 5 cruces automáticos (solo 4TA/5TA/6TA — 7MA/8VA/9NA quedan
 afuera a pedido):
 1. Resultados por partido: mi planilla (`results`) vs LIGA vs futdetail.
 2. Equipo: PJ/PG/GF de mi planilla vs tabla oficial LPF.
 3. Goles por jugador: mi carga (`goleadores`) vs futdetail (`jugadoresStats`).
-Cada diferencia tiene un botón "🔄 REVISAR" que recalcula en vivo (no hay
-sistema de "marcar como resuelto" persistente, se reemplazó por esto).
-Además hay una excepción manual para un error conocido de la LPF que nunca
-va a corregirse (`CONFIABILIDAD_EXCEPCIONES_EQUIPO`, 6TA/GF).
+4. Links: mi carga (`links`) vs futdetail, para Partido/Resumen Goles/
+   Análisis Propio/Próximo Rival (los 4 tipos que futdetail también tiene —
+   ver `LINK_KEYS_DESDE_FUTDETAIL`; "Citaciones" no tiene equivalente ahí).
+5. Recordatorios: partido ya jugado (con otra fecha posterior también
+   jugada, así no hace falta fecha de calendario) sin ningún link cargado
+   en ningún lado → recordatorio con botón "👍 OMITIR" que lo descarta para
+   siempre en Firebase (`recordatoriosOmitidos`) — a propósito no se
+   recalcula solo como el resto, porque a veces no cargar un link es
+   intencional.
+Los primeros 4 tienen un botón "🔄 REVISAR" que recalcula en vivo (no hay
+sistema de "marcar como resuelto" persistente salvo para recordatorios).
+Además hay una corrección manual para un error conocido de la LPF que nunca
+va a corregirse (`CORRECCIONES_TABLA_LPF`, 6TA/GF) — se aplica sobre el
+espejo crudo de la LPF (`TABLA_DATA.categorias`) apenas se descarga, así
+se ve bien en todos lados (tabla por categoría, combinada, Confiabilidad).
+
+**Auto-completado de links desde futdetail:** si un link (Partido/Resumen/
+Análisis Propio/Próximo Rival) está vacío en tu carga manual, se completa
+solo con lo que ya haya en futdetail (`completarLinksDesdeFutdetail`); si
+ya cargaste algo, no se toca.
+
+**Secciones desplegables:** dentro de cada categoría, RESULTADOS, COMPARAR
+FECHAS, RENDIMIENTO POR BLOQUE, GOLEADORES y TABLA DE POSICIONES LPF se
+colapsan tocando el título (`seccionTitulo`/`toggleSeccion`).
 
 **Tabla de equivalencias de jugadores (dentro de Confiabilidad, COMPLETA):**
 cuando un jugador aparece "huérfano" (nombre distinto en mi carga vs
@@ -54,10 +74,11 @@ hora vía `.github/workflows/tablas.yml`, sin intervención manual):
   Login clásico por formulario + cookie de sesión PHP (nada de navegador
   headless, mucho más simple que LPF). Las credenciales viven en GitHub
   Secrets (`FUTDETAIL_USER`, `FUTDETAIL_PASS`) — nunca en el código. El
-  listado de partidos (con goles ya incluidos) sale de
-  `partidos_consulta_procesos.php` por POST, autenticado con la sesión.
-  Si los secrets no están configurados, esta parte se saltea sola sin
-  romper el resto.
+  listado de partidos (con goles y links ya incluidos — partido, resumen,
+  análisis propio, análisis rival, informe PDF, pelota parada, gps, charla
+  DT, arenga) sale de `partidos_consulta_procesos.php` por POST, autenticado
+  con la sesión. Si los secrets no están configurados, esta parte se
+  saltea sola sin romper el resto.
 - Todo lo de arriba se junta en un solo `data/tablas.json` con las claves
   `categorias` (tabla LPF), `fixture` (LIGA) y `fixture_futdetail`.
 
