@@ -1,0 +1,6 @@
+# Config local de Claude Code (por máquina, no del proyecto)
+.claude/
+
+# Cache de Python
+__pycache__/
+*.pyc
