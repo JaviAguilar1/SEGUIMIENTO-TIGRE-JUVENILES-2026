@@ -1,5 +1,5 @@
 {
-  "actualizado": "2026-08-15 03:39",
+  "actualizado": "2026-08-15 04:31",
   "fuente": "ligaprofesional.ar (oficial)",
   "fuente_fixture": "sabadogol.com.ar",
   "categorias": {
@@ -3227,612 +3227,1572 @@
       "19": {
         "gf": 2,
         "gc": 1,
-        "rival": "Velez"
+        "rival": "Velez",
+        "partido_url": "https://youtu.be/KdZWnsSfftM",
+        "momentos_destacados_url": "https://youtu.be/LNDaR63fkIw",
+        "analisis_url": "https://youtu.be/ZuarWa9N3PQ",
+        "informe_partido": "",
+        "pelota_parada_url": "",
+        "gps_url": "",
+        "charla_dt": "",
+        "arenga_jugadores_url": ""
       },
       "18": {
         "gf": 0,
         "gc": 0,
-        "rival": "Gimnasia (M)"
+        "rival": "Gimnasia (M)",
+        "partido_url": "https://youtu.be/agsDL5huTwk",
+        "momentos_destacados_url": "",
+        "analisis_url": "https://youtu.be/_mTIkJBdlNw",
+        "informe_partido": "",
+        "pelota_parada_url": "",
+        "gps_url": "",
+        "charla_dt": "",
+        "arenga_jugadores_url": ""
       },
       "17": {
         "gf": 5,
         "gc": 0,
-        "rival": "Central Cba (SdE)"
+        "rival": "Central Cba (SdE)",
+        "partido_url": "https://youtu.be/8Yb084AU_7k",
+        "momentos_destacados_url": "https://youtu.be/L0bJ52MTzdI",
+        "analisis_url": "https://youtu.be/FnX338MZWQY",
+        "informe_partido": "",
+        "pelota_parada_url": "",
+        "gps_url": "",
+        "charla_dt": "",
+        "arenga_jugadores_url": ""
       },
       "16": {
         "gf": 1,
         "gc": 1,
-        "rival": "Gimnasia (LP)"
+        "rival": "Gimnasia (LP)",
+        "partido_url": "https://youtu.be/h32o6MBirpo",
+        "momentos_destacados_url": "https://youtu.be/EzOvMv4m7kY",
+        "analisis_url": "https://youtu.be/HupNXri1kXw",
+        "informe_partido": "",
+        "pelota_parada_url": "",
+        "gps_url": "",
+        "charla_dt": "",
+        "arenga_jugadores_url": ""
       },
       "15": {
         "gf": 1,
         "gc": 2,
-        "rival": "San Lorenzo"
+        "rival": "San Lorenzo",
+        "partido_url": "https://youtu.be/6fDodMBMprI",
+        "momentos_destacados_url": "https://youtu.be/d8C_M2EIScE",
+        "analisis_url": "",
+        "informe_partido": "",
+        "pelota_parada_url": "",
+        "gps_url": "",
+        "charla_dt": "",
+        "arenga_jugadores_url": ""
       },
       "14": {
         "gf": 0,
         "gc": 1,
-        "rival": "Union(Santa Fe)"
+        "rival": "Union(Santa Fe)",
+        "partido_url": "https://youtu.be/K-akUsFm5Zg",
+        "momentos_destacados_url": "https://youtu.be/SPMmF2Eg0d0",
+        "analisis_url": "https://youtu.be/cQydGKJiWDQ",
+        "informe_partido": "",
+        "pelota_parada_url": "",
+        "gps_url": "",
+        "charla_dt": "",
+        "arenga_jugadores_url": ""
       },
       "13": {
         "gf": 0,
         "gc": 2,
-        "rival": "River Plate"
+        "rival": "River Plate",
+        "partido_url": "https://youtu.be/APAjuB5oJWM",
+        "momentos_destacados_url": "https://youtu.be/9PdgqQTFx0I",
+        "analisis_url": "https://youtu.be/pup9JIVRjA8",
+        "informe_partido": "",
+        "pelota_parada_url": "",
+        "gps_url": "",
+        "charla_dt": "",
+        "arenga_jugadores_url": ""
       },
       "12": {
         "gf": 3,
         "gc": 1,
-        "rival": "Quilmes"
+        "rival": "Quilmes",
+        "partido_url": "https://youtu.be/gx0c1SB97PU",
+        "momentos_destacados_url": "https://youtu.be/tEXmti7PKCw",
+        "analisis_url": "https://youtu.be/Fmzp4k7VqQk",
+        "informe_partido": "",
+        "pelota_parada_url": "",
+        "gps_url": "",
+        "charla_dt": "",
+        "arenga_jugadores_url": ""
       },
       "11": {
         "gf": 2,
         "gc": 0,
-        "rival": "Barracas Central"
+        "rival": "Barracas Central",
+        "partido_url": "https://youtu.be/3cG-RtC8LXc",
+        "momentos_destacados_url": "https://youtu.be/GgYKdKmrqF4",
+        "analisis_url": "https://youtu.be/LfRDlZufuJ0",
+        "informe_partido": "",
+        "pelota_parada_url": "",
+        "gps_url": "",
+        "charla_dt": "",
+        "arenga_jugadores_url": ""
       },
       "10": {
         "gf": 2,
         "gc": 2,
-        "rival": "Estudiantes (RC)"
+        "rival": "Estudiantes (RC)",
+        "partido_url": "https://youtu.be/G5zibSLBmes",
+        "momentos_destacados_url": "https://youtu.be/bWHh1WVBap8",
+        "analisis_url": "",
+        "informe_partido": "",
+        "pelota_parada_url": "",
+        "gps_url": "",
+        "charla_dt": "",
+        "arenga_jugadores_url": ""
       },
       "9": {
         "gf": 2,
         "gc": 0,
-        "rival": "Talleres (C)"
+        "rival": "Talleres (C)",
+        "partido_url": "https://youtu.be/ltmpuqdYL7o",
+        "momentos_destacados_url": "https://www.youtube.com/watch?v=EG4nc6hjeA4",
+        "analisis_url": "https://www.youtube.com/watch?v=WChR3yOREqM",
+        "informe_partido": "",
+        "pelota_parada_url": "",
+        "gps_url": "",
+        "charla_dt": "",
+        "arenga_jugadores_url": ""
       },
       "8": {
         "gf": 0,
         "gc": 2,
-        "rival": "Instituto"
+        "rival": "Instituto",
+        "partido_url": "https://youtu.be/KTn79bTKkRU",
+        "momentos_destacados_url": "https://www.youtube.com/watch?v=fl4ubEstI1M",
+        "analisis_url": "https://www.youtube.com/watch?v=BxKjPWQTAac",
+        "informe_partido": "",
+        "pelota_parada_url": "",
+        "gps_url": "",
+        "charla_dt": "",
+        "arenga_jugadores_url": ""
       },
       "7": {
         "gf": 0,
         "gc": 1,
-        "rival": "Argentinos Jrs"
+        "rival": "Argentinos Jrs",
+        "partido_url": "https://youtu.be/ZwXz4CpV9v4",
+        "momentos_destacados_url": "https://youtu.be/amXUd6zMLqc",
+        "analisis_url": "https://youtu.be/qVP0owHawKc",
+        "informe_partido": "",
+        "pelota_parada_url": "",
+        "gps_url": "",
+        "charla_dt": "",
+        "arenga_jugadores_url": ""
       },
       "6": {
         "gf": 4,
         "gc": 0,
-        "rival": "Colegiales"
+        "rival": "Colegiales",
+        "partido_url": "",
+        "momentos_destacados_url": "",
+        "analisis_url": "",
+        "informe_partido": "",
+        "pelota_parada_url": "",
+        "gps_url": "",
+        "charla_dt": "",
+        "arenga_jugadores_url": ""
       },
       "5": {
         "gf": 3,
         "gc": 1,
-        "rival": "Excursionistas"
+        "rival": "Excursionistas",
+        "partido_url": "",
+        "momentos_destacados_url": "",
+        "analisis_url": "",
+        "informe_partido": "",
+        "pelota_parada_url": "",
+        "gps_url": "",
+        "charla_dt": "",
+        "arenga_jugadores_url": ""
       },
       "4": {
         "gf": 1,
         "gc": 4,
-        "rival": "Velez"
+        "rival": "Velez",
+        "partido_url": "https://youtu.be/Cb2ZBUL8EHY",
+        "momentos_destacados_url": "https://youtu.be/LC-2GLr8LZY",
+        "analisis_url": "",
+        "informe_partido": "",
+        "pelota_parada_url": "",
+        "gps_url": "",
+        "charla_dt": "",
+        "arenga_jugadores_url": ""
       },
       "3": {
         "gf": 0,
         "gc": 2,
-        "rival": "Boca Juniors"
+        "rival": "Boca Juniors",
+        "partido_url": "https://youtu.be/q4VI23zeZTw",
+        "momentos_destacados_url": "https://youtu.be/XXY42AkcwLA",
+        "analisis_url": "",
+        "informe_partido": "",
+        "pelota_parada_url": "",
+        "gps_url": "",
+        "charla_dt": "",
+        "arenga_jugadores_url": ""
       },
       "2": {
         "gf": 2,
         "gc": 0,
-        "rival": "San Martín de Burzaco"
+        "rival": "San Martín de Burzaco",
+        "partido_url": "https://youtu.be/yFbRJSFo4gE",
+        "momentos_destacados_url": "https://youtu.be/s3rSs8RtVYc",
+        "analisis_url": "",
+        "informe_partido": "",
+        "pelota_parada_url": "",
+        "gps_url": "",
+        "charla_dt": "",
+        "arenga_jugadores_url": ""
       },
       "1": {
         "gf": 0,
         "gc": 2,
-        "rival": "Ferro"
+        "rival": "Ferro",
+        "partido_url": "https://youtu.be/9UXm1SgxQsg",
+        "momentos_destacados_url": "https://youtu.be/nG9RGGwNe-Q",
+        "analisis_url": "",
+        "informe_partido": "",
+        "pelota_parada_url": "",
+        "gps_url": "",
+        "charla_dt": "",
+        "arenga_jugadores_url": ""
       }
     },
     "5TA": {
       "20": {
         "gf": 3,
         "gc": 0,
-        "rival": "Banfield"
+        "rival": "Banfield",
+        "partido_url": "https://youtu.be/R6kct1AH2fE",
+        "momentos_destacados_url": "https://youtu.be/xXCeh8SulBY",
+        "analisis_url": "https://youtu.be/Fcgj2JeyJas",
+        "informe_partido": "",
+        "pelota_parada_url": "",
+        "gps_url": "",
+        "charla_dt": "",
+        "arenga_jugadores_url": ""
       },
       "19": {
         "gf": 1,
         "gc": 2,
-        "rival": "Velez"
+        "rival": "Velez",
+        "partido_url": "https://youtu.be/20FESmVtMfo",
+        "momentos_destacados_url": "https://youtu.be/pOzHzyYYkWo",
+        "analisis_url": "https://youtu.be/P4ziCY7hIBw",
+        "informe_partido": "",
+        "pelota_parada_url": "",
+        "gps_url": "",
+        "charla_dt": "",
+        "arenga_jugadores_url": ""
       },
       "18": {
         "gf": 1,
         "gc": 3,
-        "rival": "Gimnasia (M)"
+        "rival": "Gimnasia (M)",
+        "partido_url": "https://youtu.be/QrKr46s-MM8",
+        "momentos_destacados_url": "https://youtu.be/_vKWOlvPgsQ",
+        "analisis_url": "https://youtu.be/HwTobVwWWiU",
+        "informe_partido": "",
+        "pelota_parada_url": "",
+        "gps_url": "",
+        "charla_dt": "",
+        "arenga_jugadores_url": ""
       },
       "17": {
         "gf": 3,
         "gc": 0,
-        "rival": "Central Cba (SdE)"
+        "rival": "Central Cba (SdE)",
+        "partido_url": "https://youtu.be/FDBLyWFX9eg",
+        "momentos_destacados_url": "https://youtu.be/0n_tteFYRfQ",
+        "analisis_url": "https://youtu.be/r_PwocSlNBg",
+        "informe_partido": "",
+        "pelota_parada_url": "",
+        "gps_url": "",
+        "charla_dt": "",
+        "arenga_jugadores_url": ""
       },
       "16": {
         "gf": 0,
         "gc": 2,
-        "rival": "Gimnasia (LP)"
+        "rival": "Gimnasia (LP)",
+        "partido_url": "https://youtu.be/Vja5pBjpX8A",
+        "momentos_destacados_url": "https://youtu.be/6g2Bg_5kZhc",
+        "analisis_url": "https://youtu.be/hRI1Sz0Tjnw",
+        "informe_partido": "",
+        "pelota_parada_url": "",
+        "gps_url": "",
+        "charla_dt": "",
+        "arenga_jugadores_url": ""
       },
       "15": {
         "gf": 0,
         "gc": 0,
-        "rival": "San Lorenzo"
+        "rival": "San Lorenzo",
+        "partido_url": "https://youtu.be/V7KBBkkXX7M",
+        "momentos_destacados_url": "",
+        "analisis_url": "https://youtu.be/u7NzEz8eG9Y",
+        "informe_partido": "",
+        "pelota_parada_url": "",
+        "gps_url": "",
+        "charla_dt": "",
+        "arenga_jugadores_url": ""
       },
       "14": {
         "gf": 1,
         "gc": 1,
-        "rival": "Union(Santa Fe)"
+        "rival": "Union(Santa Fe)",
+        "partido_url": "https://youtu.be/6Y1KuCscM1k",
+        "momentos_destacados_url": "https://youtu.be/RtcxRC3i2q4",
+        "analisis_url": "https://youtu.be/kHZ75hQgY7o",
+        "informe_partido": "",
+        "pelota_parada_url": "",
+        "gps_url": "",
+        "charla_dt": "",
+        "arenga_jugadores_url": ""
       },
       "13": {
         "gf": 0,
         "gc": 2,
-        "rival": "River Plate"
+        "rival": "River Plate",
+        "partido_url": "https://youtu.be/y9QsV-b9HoA",
+        "momentos_destacados_url": "https://youtu.be/lDjHcFN82BA",
+        "analisis_url": "https://youtu.be/VQf9HZxw6Uk",
+        "informe_partido": "",
+        "pelota_parada_url": "",
+        "gps_url": "",
+        "charla_dt": "",
+        "arenga_jugadores_url": ""
       },
       "12": {
         "gf": 1,
         "gc": 0,
-        "rival": "Quilmes"
+        "rival": "Quilmes",
+        "partido_url": "https://youtu.be/7k2ijnedjpI",
+        "momentos_destacados_url": "https://youtu.be/tEXmti7PKCw",
+        "analisis_url": "https://youtu.be/ugaeKOjVvEw",
+        "informe_partido": "",
+        "pelota_parada_url": "",
+        "gps_url": "",
+        "charla_dt": "",
+        "arenga_jugadores_url": ""
       },
       "11": {
         "gf": 2,
         "gc": 1,
-        "rival": "Barracas Central"
+        "rival": "Barracas Central",
+        "partido_url": "https://youtu.be/GTZa5CDucOI",
+        "momentos_destacados_url": "https://youtu.be/cyx07mV9grE",
+        "analisis_url": "https://youtu.be/_xAlT-upsbk",
+        "informe_partido": "",
+        "pelota_parada_url": "",
+        "gps_url": "",
+        "charla_dt": "",
+        "arenga_jugadores_url": ""
       },
       "10": {
         "gf": 2,
         "gc": 2,
-        "rival": "Estudiantes (RC)"
+        "rival": "Estudiantes (RC)",
+        "partido_url": "https://youtu.be/7kTopaVxvMM",
+        "momentos_destacados_url": "https://youtu.be/LGAeamUEwKc",
+        "analisis_url": "https://youtu.be/HENy08idfBo",
+        "informe_partido": "",
+        "pelota_parada_url": "",
+        "gps_url": "",
+        "charla_dt": "",
+        "arenga_jugadores_url": ""
       },
       "9": {
         "gf": 2,
         "gc": 2,
-        "rival": "Talleres (C)"
+        "rival": "Talleres (C)",
+        "partido_url": "https://www.youtube.com/watch?v=GDSR9MEMuAE",
+        "momentos_destacados_url": "https://www.youtube.com/watch?v=S562xoKyBNc",
+        "analisis_url": "https://www.youtube.com/watch?v=eo-ntc0TUUc",
+        "informe_partido": "",
+        "pelota_parada_url": "",
+        "gps_url": "",
+        "charla_dt": "",
+        "arenga_jugadores_url": ""
       },
       "8": {
         "gf": 2,
         "gc": 0,
-        "rival": "Instituto"
+        "rival": "Instituto",
+        "partido_url": "https://www.youtube.com/watch?v=b2jcsx5f-jk",
+        "momentos_destacados_url": "https://www.youtube.com/watch?v=xDE6rhY88Jo",
+        "analisis_url": "https://www.youtube.com/watch?v=lA_YIjPByJM",
+        "informe_partido": "",
+        "pelota_parada_url": "",
+        "gps_url": "",
+        "charla_dt": "",
+        "arenga_jugadores_url": ""
       },
       "7": {
         "gf": 1,
         "gc": 2,
-        "rival": "Argentinos Jrs"
+        "rival": "Argentinos Jrs",
+        "partido_url": "https://www.youtube.com/watch?v=zuojsK5SQsk",
+        "momentos_destacados_url": "https://www.youtube.com/watch?v=ULUxIsGnBok",
+        "analisis_url": "https://www.youtube.com/watch?v=0ur_jpNiCF4",
+        "informe_partido": "",
+        "pelota_parada_url": "",
+        "gps_url": "",
+        "charla_dt": "",
+        "arenga_jugadores_url": ""
       },
       "6": {
         "gf": 4,
         "gc": 0,
-        "rival": "San Martin (SJ)"
+        "rival": "San Martin (SJ)",
+        "partido_url": "https://www.youtube.com/watch?v=ecFeKPMYcdA",
+        "momentos_destacados_url": "https://www.youtube.com/watch?v=Du-12X0D8fE",
+        "analisis_url": "",
+        "informe_partido": "",
+        "pelota_parada_url": "",
+        "gps_url": "",
+        "charla_dt": "",
+        "arenga_jugadores_url": ""
       },
       "3": {
         "gf": 0,
         "gc": 1,
-        "rival": "Boca Juniors"
+        "rival": "Boca Juniors",
+        "partido_url": "https://youtu.be/m6y1rytXsnI",
+        "momentos_destacados_url": "https://youtu.be/XXY42AkcwLA",
+        "analisis_url": "",
+        "informe_partido": "",
+        "pelota_parada_url": "",
+        "gps_url": "",
+        "charla_dt": "",
+        "arenga_jugadores_url": ""
       },
       "5": {
         "gf": 1,
         "gc": 1,
-        "rival": "Newells"
+        "rival": "Newells",
+        "partido_url": "https://youtu.be/EXVSkU6yII0",
+        "momentos_destacados_url": "https://youtu.be/-7Aq05Rw5iY",
+        "analisis_url": "https://youtu.be/FX9JmApwM8M",
+        "informe_partido": "",
+        "pelota_parada_url": "",
+        "gps_url": "",
+        "charla_dt": "",
+        "arenga_jugadores_url": ""
       },
       "4": {
         "gf": 0,
         "gc": 3,
-        "rival": "Velez"
+        "rival": "Velez",
+        "partido_url": "https://youtu.be/hjvYN5nd20o",
+        "momentos_destacados_url": "https://youtu.be/LC-2GLr8LZY",
+        "analisis_url": "",
+        "informe_partido": "",
+        "pelota_parada_url": "",
+        "gps_url": "",
+        "charla_dt": "",
+        "arenga_jugadores_url": ""
       },
       "2": {
         "gf": 2,
         "gc": 0,
-        "rival": "San Martín de Burzaco"
+        "rival": "San Martín de Burzaco",
+        "partido_url": "",
+        "momentos_destacados_url": "",
+        "analisis_url": "",
+        "informe_partido": "",
+        "pelota_parada_url": "",
+        "gps_url": "",
+        "charla_dt": "",
+        "arenga_jugadores_url": ""
       },
       "1": {
         "gf": 1,
         "gc": 0,
-        "rival": "Ferro"
+        "rival": "Ferro",
+        "partido_url": "https://youtu.be/Fxbkv8pyQMo",
+        "momentos_destacados_url": "https://youtu.be/nG9RGGwNe-Q",
+        "analisis_url": "",
+        "informe_partido": "",
+        "pelota_parada_url": "",
+        "gps_url": "",
+        "charla_dt": "",
+        "arenga_jugadores_url": ""
       }
     },
     "6TA": {
       "20": {
         "gf": 1,
         "gc": 3,
-        "rival": "Banfield"
+        "rival": "Banfield",
+        "partido_url": "",
+        "momentos_destacados_url": "",
+        "analisis_url": "",
+        "informe_partido": "",
+        "pelota_parada_url": "",
+        "gps_url": "",
+        "charla_dt": "",
+        "arenga_jugadores_url": ""
       },
       "19": {
         "gf": 2,
         "gc": 3,
-        "rival": "Velez"
+        "rival": "Velez",
+        "partido_url": "",
+        "momentos_destacados_url": "",
+        "analisis_url": "",
+        "informe_partido": "",
+        "pelota_parada_url": "",
+        "gps_url": "",
+        "charla_dt": "",
+        "arenga_jugadores_url": ""
       },
       "18": {
         "gf": 0,
         "gc": 0,
-        "rival": "Gimnasia (M)"
+        "rival": "Gimnasia (M)",
+        "partido_url": "https://youtu.be/SNrEubHGEMk",
+        "momentos_destacados_url": "",
+        "analisis_url": "",
+        "informe_partido": "",
+        "pelota_parada_url": "",
+        "gps_url": "",
+        "charla_dt": "",
+        "arenga_jugadores_url": ""
       },
       "17": {
         "gf": 1,
         "gc": 1,
-        "rival": "Central Cba (SdE)"
+        "rival": "Central Cba (SdE)",
+        "partido_url": "https://youtu.be/Sc0Y35H4jrw",
+        "momentos_destacados_url": "https://youtu.be/SNrEubHGEMk",
+        "analisis_url": "",
+        "informe_partido": "",
+        "pelota_parada_url": "",
+        "gps_url": "",
+        "charla_dt": "",
+        "arenga_jugadores_url": ""
       },
       "16": {
         "gf": 1,
         "gc": 2,
-        "rival": "Gimnasia (LP)"
+        "rival": "Gimnasia (LP)",
+        "partido_url": "",
+        "momentos_destacados_url": "",
+        "analisis_url": "",
+        "informe_partido": "",
+        "pelota_parada_url": "",
+        "gps_url": "",
+        "charla_dt": "",
+        "arenga_jugadores_url": ""
       },
       "15": {
         "gf": 2,
         "gc": 5,
-        "rival": "San Lorenzo"
+        "rival": "San Lorenzo",
+        "partido_url": "https://youtu.be/rcp1Wzgmiio",
+        "momentos_destacados_url": "https://youtu.be/j4b5-3-dHJY",
+        "analisis_url": "",
+        "informe_partido": "",
+        "pelota_parada_url": "",
+        "gps_url": "",
+        "charla_dt": "",
+        "arenga_jugadores_url": ""
       },
       "14": {
         "gf": 1,
         "gc": 4,
-        "rival": "Union(Santa Fe)"
+        "rival": "Union(Santa Fe)",
+        "partido_url": "https://youtu.be/TcljmOxtokk",
+        "momentos_destacados_url": "https://youtu.be/-yTB4wiwNw0",
+        "analisis_url": "https://youtu.be/u3Swtm12V3o",
+        "informe_partido": "",
+        "pelota_parada_url": "",
+        "gps_url": "",
+        "charla_dt": "",
+        "arenga_jugadores_url": ""
       },
       "13": {
         "gf": 1,
         "gc": 2,
-        "rival": "River Plate"
+        "rival": "River Plate",
+        "partido_url": "https://youtu.be/MOxxj0Dmxf0",
+        "momentos_destacados_url": "https://youtu.be/raeuNYGF5zY",
+        "analisis_url": "https://youtu.be/ziRbKO2Hfr8",
+        "informe_partido": "",
+        "pelota_parada_url": "",
+        "gps_url": "",
+        "charla_dt": "",
+        "arenga_jugadores_url": ""
       },
       "12": {
         "gf": 1,
         "gc": 1,
-        "rival": "Quilmes"
+        "rival": "Quilmes",
+        "partido_url": "https://youtu.be/4LUH9EWHMS4",
+        "momentos_destacados_url": "https://youtu.be/tEXmti7PKCw",
+        "analisis_url": "https://youtu.be/Ik46sE6YCKc",
+        "informe_partido": "",
+        "pelota_parada_url": "",
+        "gps_url": "",
+        "charla_dt": "",
+        "arenga_jugadores_url": ""
       },
       "11": {
         "gf": 2,
         "gc": 1,
-        "rival": "Barracas Central"
+        "rival": "Barracas Central",
+        "partido_url": "https://youtu.be/tuzNKfc6avc",
+        "momentos_destacados_url": "https://youtu.be/kiQ9PbxnhHA",
+        "analisis_url": "https://youtu.be/br6-Zg9i_nE",
+        "informe_partido": "",
+        "pelota_parada_url": "",
+        "gps_url": "",
+        "charla_dt": "",
+        "arenga_jugadores_url": ""
       },
       "10": {
         "gf": 1,
         "gc": 1,
-        "rival": "Estudiantes (RC)"
+        "rival": "Estudiantes (RC)",
+        "partido_url": "https://youtu.be/h4vD9Fr-Wwo",
+        "momentos_destacados_url": "https://youtu.be/cqg4b-VnV-A",
+        "analisis_url": "",
+        "informe_partido": "",
+        "pelota_parada_url": "",
+        "gps_url": "",
+        "charla_dt": "",
+        "arenga_jugadores_url": ""
       },
       "9": {
         "gf": 1,
         "gc": 2,
-        "rival": "Talleres (C)"
+        "rival": "Talleres (C)",
+        "partido_url": "https://www.youtube.com/watch?v=-fBwUCVY-1o",
+        "momentos_destacados_url": "https://www.youtube.com/watch?v=0PmguFEl1o4",
+        "analisis_url": "https://www.youtube.com/watch?v=OGbAGp2UOo4",
+        "informe_partido": "",
+        "pelota_parada_url": "",
+        "gps_url": "",
+        "charla_dt": "",
+        "arenga_jugadores_url": ""
       },
       "8": {
         "gf": 2,
         "gc": 1,
-        "rival": "Instituto"
+        "rival": "Instituto",
+        "partido_url": "https://www.youtube.com/watch?v=rq0yno2WIIY",
+        "momentos_destacados_url": "https://www.youtube.com/watch?v=s_HwgKtBGI8",
+        "analisis_url": "",
+        "informe_partido": "",
+        "pelota_parada_url": "",
+        "gps_url": "https://drive.google.com/file/d/1j6mFmC7M6SGUgBFDqwA_pYySf8Fg_BTh/view?usp=drive_link",
+        "charla_dt": "",
+        "arenga_jugadores_url": ""
       },
       "7": {
         "gf": 0,
         "gc": 1,
-        "rival": "Riestra"
+        "rival": "Riestra",
+        "partido_url": "",
+        "momentos_destacados_url": "",
+        "analisis_url": "",
+        "informe_partido": "",
+        "pelota_parada_url": "",
+        "gps_url": "",
+        "charla_dt": "",
+        "arenga_jugadores_url": ""
       },
       "6": {
         "gf": 6,
         "gc": 0,
-        "rival": "Colegiales"
+        "rival": "Colegiales",
+        "partido_url": "",
+        "momentos_destacados_url": "",
+        "analisis_url": "",
+        "informe_partido": "",
+        "pelota_parada_url": "",
+        "gps_url": "",
+        "charla_dt": "",
+        "arenga_jugadores_url": ""
       },
       "3": {
         "gf": 2,
         "gc": 0,
-        "rival": "Boca Juniors"
+        "rival": "Boca Juniors",
+        "partido_url": "",
+        "momentos_destacados_url": "",
+        "analisis_url": "",
+        "informe_partido": "",
+        "pelota_parada_url": "",
+        "gps_url": "",
+        "charla_dt": "",
+        "arenga_jugadores_url": ""
       },
       "5": {
         "gf": 4,
         "gc": 0,
-        "rival": "Excursionistas"
+        "rival": "Excursionistas",
+        "partido_url": "",
+        "momentos_destacados_url": "",
+        "analisis_url": "",
+        "informe_partido": "",
+        "pelota_parada_url": "",
+        "gps_url": "",
+        "charla_dt": "",
+        "arenga_jugadores_url": ""
       },
       "4": {
         "gf": 4,
         "gc": 2,
-        "rival": "Velez"
+        "rival": "Velez",
+        "partido_url": "",
+        "momentos_destacados_url": "",
+        "analisis_url": "",
+        "informe_partido": "",
+        "pelota_parada_url": "",
+        "gps_url": "",
+        "charla_dt": "",
+        "arenga_jugadores_url": ""
       },
       "2": {
         "gf": 4,
         "gc": 1,
-        "rival": "San Martín de Burzaco"
+        "rival": "San Martín de Burzaco",
+        "partido_url": "",
+        "momentos_destacados_url": "",
+        "analisis_url": "",
+        "informe_partido": "",
+        "pelota_parada_url": "",
+        "gps_url": "",
+        "charla_dt": "",
+        "arenga_jugadores_url": ""
       },
       "1": {
         "gf": 2,
         "gc": 1,
-        "rival": "Ferro"
+        "rival": "Ferro",
+        "partido_url": "",
+        "momentos_destacados_url": "",
+        "analisis_url": "",
+        "informe_partido": "",
+        "pelota_parada_url": "",
+        "gps_url": "",
+        "charla_dt": "",
+        "arenga_jugadores_url": ""
       }
     },
     "7MA": {
       "21": {
         "gf": 0,
         "gc": 0,
-        "rival": "Racing Club"
+        "rival": "Racing Club",
+        "partido_url": "",
+        "momentos_destacados_url": "",
+        "analisis_url": "",
+        "informe_partido": "",
+        "pelota_parada_url": "",
+        "gps_url": "",
+        "charla_dt": "",
+        "arenga_jugadores_url": ""
       },
       "15": {
         "gf": 2,
         "gc": 2,
-        "rival": "San Lorenzo"
+        "rival": "San Lorenzo",
+        "partido_url": "https://youtu.be/ayH1qloiF3c",
+        "momentos_destacados_url": "",
+        "analisis_url": "",
+        "informe_partido": "",
+        "pelota_parada_url": "",
+        "gps_url": "",
+        "charla_dt": "",
+        "arenga_jugadores_url": ""
       },
       "20": {
         "gf": 1,
         "gc": 0,
-        "rival": "Banfield"
+        "rival": "Banfield",
+        "partido_url": "",
+        "momentos_destacados_url": "",
+        "analisis_url": "",
+        "informe_partido": "",
+        "pelota_parada_url": "",
+        "gps_url": "",
+        "charla_dt": "",
+        "arenga_jugadores_url": ""
       },
       "19": {
         "gf": 1,
         "gc": 3,
-        "rival": "Velez"
+        "rival": "Velez",
+        "partido_url": "",
+        "momentos_destacados_url": "",
+        "analisis_url": "",
+        "informe_partido": "",
+        "pelota_parada_url": "",
+        "gps_url": "",
+        "charla_dt": "",
+        "arenga_jugadores_url": ""
       },
       "1": {
         "gf": 1,
         "gc": 2,
-        "rival": "Ferro"
+        "rival": "Ferro",
+        "partido_url": "",
+        "momentos_destacados_url": "",
+        "analisis_url": "",
+        "informe_partido": "",
+        "pelota_parada_url": "",
+        "gps_url": "",
+        "charla_dt": "",
+        "arenga_jugadores_url": ""
       },
       "14": {
         "gf": 2,
         "gc": 3,
-        "rival": "Union(Santa Fe)"
+        "rival": "Union(Santa Fe)",
+        "partido_url": "https://youtu.be/B8rvcjA5Pac",
+        "momentos_destacados_url": "",
+        "analisis_url": "",
+        "informe_partido": "",
+        "pelota_parada_url": "",
+        "gps_url": "",
+        "charla_dt": "",
+        "arenga_jugadores_url": ""
       },
       "18": {
         "gf": 4,
         "gc": 0,
-        "rival": "Gimnasia (M)"
+        "rival": "Gimnasia (M)",
+        "partido_url": "",
+        "momentos_destacados_url": "",
+        "analisis_url": "",
+        "informe_partido": "",
+        "pelota_parada_url": "",
+        "gps_url": "",
+        "charla_dt": "",
+        "arenga_jugadores_url": ""
       },
       "13": {
         "gf": 1,
         "gc": 4,
-        "rival": "River Plate"
+        "rival": "River Plate",
+        "partido_url": "https://youtu.be/FfZ9cJEyMS0",
+        "momentos_destacados_url": "",
+        "analisis_url": "https://youtu.be/puXlE0eIkY4",
+        "informe_partido": "",
+        "pelota_parada_url": "",
+        "gps_url": "",
+        "charla_dt": "",
+        "arenga_jugadores_url": ""
       },
       "17": {
         "gf": 2,
         "gc": 0,
-        "rival": "Central Cba (SdE)"
+        "rival": "Central Cba (SdE)",
+        "partido_url": "",
+        "momentos_destacados_url": "",
+        "analisis_url": "",
+        "informe_partido": "",
+        "pelota_parada_url": "",
+        "gps_url": "",
+        "charla_dt": "",
+        "arenga_jugadores_url": ""
       },
       "12": {
         "gf": 1,
         "gc": 1,
-        "rival": "Quilmes"
+        "rival": "Quilmes",
+        "partido_url": "https://youtu.be/O0hrR-AbPKI",
+        "momentos_destacados_url": "",
+        "analisis_url": "",
+        "informe_partido": "",
+        "pelota_parada_url": "",
+        "gps_url": "",
+        "charla_dt": "",
+        "arenga_jugadores_url": ""
       },
       "16": {
         "gf": 2,
         "gc": 0,
-        "rival": "Gimnasia (LP)"
+        "rival": "Gimnasia (LP)",
+        "partido_url": "",
+        "momentos_destacados_url": "",
+        "analisis_url": "",
+        "informe_partido": "",
+        "pelota_parada_url": "",
+        "gps_url": "",
+        "charla_dt": "",
+        "arenga_jugadores_url": ""
       },
       "11": {
         "gf": 0,
         "gc": 0,
-        "rival": "Barracas Central"
+        "rival": "Barracas Central",
+        "partido_url": "https://youtu.be/EINPWdIRE0g",
+        "momentos_destacados_url": "",
+        "analisis_url": "",
+        "informe_partido": "",
+        "pelota_parada_url": "",
+        "gps_url": "",
+        "charla_dt": "",
+        "arenga_jugadores_url": ""
       },
       "10": {
         "gf": 2,
         "gc": 2,
-        "rival": "Estudiantes (RC)"
+        "rival": "Estudiantes (RC)",
+        "partido_url": "https://youtu.be/zgag5izkXB4",
+        "momentos_destacados_url": "",
+        "analisis_url": "",
+        "informe_partido": "",
+        "pelota_parada_url": "",
+        "gps_url": "",
+        "charla_dt": "",
+        "arenga_jugadores_url": ""
       },
       "9": {
         "gf": 2,
         "gc": 4,
-        "rival": "Talleres (C)"
+        "rival": "Talleres (C)",
+        "partido_url": "https://youtu.be/OX9KWIwHOvM",
+        "momentos_destacados_url": "",
+        "analisis_url": "https://youtu.be/fAsnlPl5Zlw",
+        "informe_partido": "",
+        "pelota_parada_url": "",
+        "gps_url": "",
+        "charla_dt": "",
+        "arenga_jugadores_url": ""
       },
       "8": {
         "gf": 3,
         "gc": 0,
-        "rival": "Instituto"
+        "rival": "Instituto",
+        "partido_url": "https://youtu.be/OeUMFK8K8Ds?si=4fdQBLNblK-9XkJS",
+        "momentos_destacados_url": "",
+        "analisis_url": "",
+        "informe_partido": "",
+        "pelota_parada_url": "",
+        "gps_url": "",
+        "charla_dt": "",
+        "arenga_jugadores_url": ""
       },
       "7": {
         "gf": 2,
         "gc": 2,
-        "rival": "Riestra"
+        "rival": "Riestra",
+        "partido_url": "",
+        "momentos_destacados_url": "",
+        "analisis_url": "",
+        "informe_partido": "",
+        "pelota_parada_url": "",
+        "gps_url": "",
+        "charla_dt": "",
+        "arenga_jugadores_url": ""
       },
       "6": {
         "gf": 6,
         "gc": 1,
-        "rival": "Colegiales"
+        "rival": "Colegiales",
+        "partido_url": "",
+        "momentos_destacados_url": "",
+        "analisis_url": "",
+        "informe_partido": "",
+        "pelota_parada_url": "",
+        "gps_url": "",
+        "charla_dt": "",
+        "arenga_jugadores_url": ""
       },
       "5": {
         "gf": 6,
         "gc": 2,
-        "rival": "Excursionistas"
+        "rival": "Excursionistas",
+        "partido_url": "",
+        "momentos_destacados_url": "",
+        "analisis_url": "",
+        "informe_partido": "",
+        "pelota_parada_url": "",
+        "gps_url": "",
+        "charla_dt": "",
+        "arenga_jugadores_url": ""
       },
       "4": {
         "gf": 0,
         "gc": 2,
-        "rival": "Velez"
+        "rival": "Velez",
+        "partido_url": "",
+        "momentos_destacados_url": "",
+        "analisis_url": "",
+        "informe_partido": "",
+        "pelota_parada_url": "",
+        "gps_url": "",
+        "charla_dt": "",
+        "arenga_jugadores_url": ""
       },
       "3": {
         "gf": 4,
         "gc": 1,
-        "rival": "Boca Juniors"
+        "rival": "Boca Juniors",
+        "partido_url": "",
+        "momentos_destacados_url": "",
+        "analisis_url": "",
+        "informe_partido": "",
+        "pelota_parada_url": "",
+        "gps_url": "",
+        "charla_dt": "",
+        "arenga_jugadores_url": ""
       },
       "2": {
         "gf": 7,
         "gc": 0,
-        "rival": "San Martín de Burzaco"
+        "rival": "San Martín de Burzaco",
+        "partido_url": "",
+        "momentos_destacados_url": "",
+        "analisis_url": "",
+        "informe_partido": "",
+        "pelota_parada_url": "",
+        "gps_url": "",
+        "charla_dt": "",
+        "arenga_jugadores_url": ""
       }
     },
     "8VA": {
       "13": {
         "gf": 0,
         "gc": 7,
-        "rival": "River Plate"
+        "rival": "River Plate",
+        "partido_url": "",
+        "momentos_destacados_url": "",
+        "analisis_url": "",
+        "informe_partido": "",
+        "pelota_parada_url": "",
+        "gps_url": "",
+        "charla_dt": "",
+        "arenga_jugadores_url": ""
       },
       "19": {
         "gf": 0,
         "gc": 3,
-        "rival": "San Lorenzo"
+        "rival": "San Lorenzo",
+        "partido_url": "",
+        "momentos_destacados_url": "",
+        "analisis_url": "",
+        "informe_partido": "",
+        "pelota_parada_url": "",
+        "gps_url": "",
+        "charla_dt": "",
+        "arenga_jugadores_url": ""
       },
       "12": {
         "gf": 3,
         "gc": 1,
-        "rival": "Quilmes"
+        "rival": "Quilmes",
+        "partido_url": "",
+        "momentos_destacados_url": "",
+        "analisis_url": "",
+        "informe_partido": "",
+        "pelota_parada_url": "",
+        "gps_url": "",
+        "charla_dt": "",
+        "arenga_jugadores_url": ""
       },
       "18": {
         "gf": 1,
         "gc": 1,
-        "rival": "Gimnasia (M)"
+        "rival": "Gimnasia (M)",
+        "partido_url": "",
+        "momentos_destacados_url": "",
+        "analisis_url": "",
+        "informe_partido": "",
+        "pelota_parada_url": "",
+        "gps_url": "",
+        "charla_dt": "",
+        "arenga_jugadores_url": ""
       },
       "11": {
         "gf": 0,
         "gc": 3,
-        "rival": "Barracas Central"
+        "rival": "Barracas Central",
+        "partido_url": "",
+        "momentos_destacados_url": "",
+        "analisis_url": "",
+        "informe_partido": "",
+        "pelota_parada_url": "",
+        "gps_url": "",
+        "charla_dt": "",
+        "arenga_jugadores_url": ""
       },
       "16": {
         "gf": 0,
         "gc": 1,
-        "rival": "Gimnasia (LP)"
+        "rival": "Gimnasia (LP)",
+        "partido_url": "",
+        "momentos_destacados_url": "",
+        "analisis_url": "",
+        "informe_partido": "",
+        "pelota_parada_url": "",
+        "gps_url": "",
+        "charla_dt": "",
+        "arenga_jugadores_url": ""
       },
       "17": {
         "gf": 1,
         "gc": 0,
-        "rival": "Central Cba (SdE)"
+        "rival": "Central Cba (SdE)",
+        "partido_url": "",
+        "momentos_destacados_url": "",
+        "analisis_url": "",
+        "informe_partido": "",
+        "pelota_parada_url": "",
+        "gps_url": "",
+        "charla_dt": "",
+        "arenga_jugadores_url": ""
       },
       "10": {
         "gf": 1,
         "gc": 1,
-        "rival": "Estudiantes (RC)"
+        "rival": "Estudiantes (RC)",
+        "partido_url": "",
+        "momentos_destacados_url": "",
+        "analisis_url": "",
+        "informe_partido": "",
+        "pelota_parada_url": "",
+        "gps_url": "",
+        "charla_dt": "",
+        "arenga_jugadores_url": ""
       },
       "15": {
         "gf": 0,
         "gc": 1,
-        "rival": "San Lorenzo"
+        "rival": "San Lorenzo",
+        "partido_url": "",
+        "momentos_destacados_url": "",
+        "analisis_url": "",
+        "informe_partido": "",
+        "pelota_parada_url": "",
+        "gps_url": "",
+        "charla_dt": "",
+        "arenga_jugadores_url": ""
       },
       "9": {
         "gf": 0,
         "gc": 1,
-        "rival": "Talleres (C)"
+        "rival": "Talleres (C)",
+        "partido_url": "",
+        "momentos_destacados_url": "",
+        "analisis_url": "",
+        "informe_partido": "",
+        "pelota_parada_url": "",
+        "gps_url": "",
+        "charla_dt": "",
+        "arenga_jugadores_url": ""
       },
       "14": {
         "gf": 3,
         "gc": 1,
-        "rival": "Union(Santa Fe)"
+        "rival": "Union(Santa Fe)",
+        "partido_url": "https://youtu.be/dY6Hq9W9_R4",
+        "momentos_destacados_url": "",
+        "analisis_url": "",
+        "informe_partido": "",
+        "pelota_parada_url": "",
+        "gps_url": "",
+        "charla_dt": "",
+        "arenga_jugadores_url": ""
       },
       "8": {
         "gf": 1,
         "gc": 1,
-        "rival": "Instituto"
+        "rival": "Instituto",
+        "partido_url": "",
+        "momentos_destacados_url": "",
+        "analisis_url": "",
+        "informe_partido": "",
+        "pelota_parada_url": "",
+        "gps_url": "",
+        "charla_dt": "",
+        "arenga_jugadores_url": ""
       },
       "7": {
         "gf": 1,
         "gc": 1,
-        "rival": "Argentinos Jrs"
+        "rival": "Argentinos Jrs",
+        "partido_url": "",
+        "momentos_destacados_url": "",
+        "analisis_url": "",
+        "informe_partido": "",
+        "pelota_parada_url": "",
+        "gps_url": "",
+        "charla_dt": "",
+        "arenga_jugadores_url": ""
       },
       "6": {
         "gf": 3,
         "gc": 0,
-        "rival": "San Martin (SJ)"
+        "rival": "San Martin (SJ)",
+        "partido_url": "",
+        "momentos_destacados_url": "",
+        "analisis_url": "",
+        "informe_partido": "",
+        "pelota_parada_url": "",
+        "gps_url": "",
+        "charla_dt": "",
+        "arenga_jugadores_url": ""
       },
       "5": {
         "gf": 1,
         "gc": 0,
-        "rival": "Newells"
+        "rival": "Newells",
+        "partido_url": "",
+        "momentos_destacados_url": "",
+        "analisis_url": "",
+        "informe_partido": "",
+        "pelota_parada_url": "",
+        "gps_url": "",
+        "charla_dt": "",
+        "arenga_jugadores_url": ""
       },
       "4": {
         "gf": 0,
         "gc": 4,
-        "rival": "Independiente"
+        "rival": "Independiente",
+        "partido_url": "https://youtu.be/mGEMRKToM1E",
+        "momentos_destacados_url": "",
+        "analisis_url": "https://youtu.be/iXPKoN5-xbQ",
+        "informe_partido": "",
+        "pelota_parada_url": "",
+        "gps_url": "",
+        "charla_dt": "",
+        "arenga_jugadores_url": ""
       },
       "3": {
         "gf": 0,
         "gc": 2,
-        "rival": "Lanus"
+        "rival": "Lanus",
+        "partido_url": "https://youtu.be/-NnaJ2hmOLs",
+        "momentos_destacados_url": "",
+        "analisis_url": "",
+        "informe_partido": "",
+        "pelota_parada_url": "",
+        "gps_url": "",
+        "charla_dt": "",
+        "arenga_jugadores_url": ""
       },
       "2": {
         "gf": 2,
         "gc": 2,
-        "rival": "Ferro"
+        "rival": "Ferro",
+        "partido_url": "",
+        "momentos_destacados_url": "",
+        "analisis_url": "",
+        "informe_partido": "",
+        "pelota_parada_url": "",
+        "gps_url": "",
+        "charla_dt": "",
+        "arenga_jugadores_url": ""
       },
       "1": {
         "gf": 2,
         "gc": 1,
-        "rival": "Ind Rivadavia"
+        "rival": "Ind Rivadavia",
+        "partido_url": "https://youtu.be/BfrrMHjYl74?si=BUaM2oCrgpXyUmqP",
+        "momentos_destacados_url": "",
+        "analisis_url": "https://youtu.be/puafPMdgkEc",
+        "informe_partido": "",
+        "pelota_parada_url": "",
+        "gps_url": "",
+        "charla_dt": "",
+        "arenga_jugadores_url": ""
       }
     },
     "9NA": {
       "21": {
         "gf": 0,
         "gc": 0,
-        "rival": "Racing Club"
+        "rival": "Racing Club",
+        "partido_url": "",
+        "momentos_destacados_url": "",
+        "analisis_url": "",
+        "informe_partido": "",
+        "pelota_parada_url": "",
+        "gps_url": "",
+        "charla_dt": "",
+        "arenga_jugadores_url": ""
       },
       "15": {
         "gf": 1,
         "gc": 2,
-        "rival": "San Lorenzo"
+        "rival": "San Lorenzo",
+        "partido_url": "https://youtu.be/iB4eqPQoBF8",
+        "momentos_destacados_url": "",
+        "analisis_url": "",
+        "informe_partido": "",
+        "pelota_parada_url": "",
+        "gps_url": "",
+        "charla_dt": "",
+        "arenga_jugadores_url": ""
       },
       "20": {
         "gf": 1,
         "gc": 5,
-        "rival": "Banfield"
+        "rival": "Banfield",
+        "partido_url": "",
+        "momentos_destacados_url": "",
+        "analisis_url": "",
+        "informe_partido": "",
+        "pelota_parada_url": "",
+        "gps_url": "",
+        "charla_dt": "",
+        "arenga_jugadores_url": ""
       },
       "19": {
         "gf": 0,
         "gc": 3,
-        "rival": "Velez"
+        "rival": "Velez",
+        "partido_url": "",
+        "momentos_destacados_url": "",
+        "analisis_url": "",
+        "informe_partido": "",
+        "pelota_parada_url": "",
+        "gps_url": "",
+        "charla_dt": "",
+        "arenga_jugadores_url": ""
       },
       "14": {
         "gf": 1,
         "gc": 1,
-        "rival": "Union(Santa Fe)"
+        "rival": "Union(Santa Fe)",
+        "partido_url": "https://youtu.be/BJjDrPWeufw",
+        "momentos_destacados_url": "",
+        "analisis_url": "",
+        "informe_partido": "",
+        "pelota_parada_url": "",
+        "gps_url": "",
+        "charla_dt": "",
+        "arenga_jugadores_url": ""
       },
       "18": {
         "gf": 4,
         "gc": 1,
-        "rival": "Gimnasia (M)"
+        "rival": "Gimnasia (M)",
+        "partido_url": "",
+        "momentos_destacados_url": "",
+        "analisis_url": "",
+        "informe_partido": "",
+        "pelota_parada_url": "",
+        "gps_url": "",
+        "charla_dt": "",
+        "arenga_jugadores_url": ""
       },
       "13": {
         "gf": 0,
         "gc": 2,
-        "rival": "River Plate"
+        "rival": "River Plate",
+        "partido_url": "",
+        "momentos_destacados_url": "",
+        "analisis_url": "",
+        "informe_partido": "",
+        "pelota_parada_url": "",
+        "gps_url": "",
+        "charla_dt": "",
+        "arenga_jugadores_url": ""
       },
       "17": {
         "gf": 0,
         "gc": 0,
-        "rival": "Central Cba (SdE)"
+        "rival": "Central Cba (SdE)",
+        "partido_url": "",
+        "momentos_destacados_url": "",
+        "analisis_url": "",
+        "informe_partido": "",
+        "pelota_parada_url": "",
+        "gps_url": "",
+        "charla_dt": "",
+        "arenga_jugadores_url": ""
       },
       "12": {
         "gf": 0,
         "gc": 0,
-        "rival": "Quilmes"
+        "rival": "Quilmes",
+        "partido_url": "",
+        "momentos_destacados_url": "",
+        "analisis_url": "",
+        "informe_partido": "",
+        "pelota_parada_url": "",
+        "gps_url": "",
+        "charla_dt": "",
+        "arenga_jugadores_url": ""
       },
       "16": {
         "gf": 0,
         "gc": 0,
-        "rival": "Gimnasia (LP)"
+        "rival": "Gimnasia (LP)",
+        "partido_url": "",
+        "momentos_destacados_url": "",
+        "analisis_url": "",
+        "informe_partido": "",
+        "pelota_parada_url": "",
+        "gps_url": "",
+        "charla_dt": "",
+        "arenga_jugadores_url": ""
       },
       "11": {
         "gf": 1,
         "gc": 3,
-        "rival": "Barracas Central"
+        "rival": "Barracas Central",
+        "partido_url": "https://youtu.be/ISZEc24y76w?si=hIVy6ZdQQ673pUHb",
+        "momentos_destacados_url": "",
+        "analisis_url": "",
+        "informe_partido": "",
+        "pelota_parada_url": "",
+        "gps_url": "",
+        "charla_dt": "",
+        "arenga_jugadores_url": ""
       },
       "10": {
         "gf": 0,
         "gc": 0,
-        "rival": "Estudiantes (RC)"
+        "rival": "Estudiantes (RC)",
+        "partido_url": "https://youtu.be/b0SbdjnP8IM",
+        "momentos_destacados_url": "",
+        "analisis_url": "",
+        "informe_partido": "",
+        "pelota_parada_url": "",
+        "gps_url": "",
+        "charla_dt": "",
+        "arenga_jugadores_url": ""
       },
       "9": {
         "gf": 1,
         "gc": 1,
-        "rival": "Talleres (C)"
+        "rival": "Talleres (C)",
+        "partido_url": "https://youtu.be/nUNKX4EQbfU",
+        "momentos_destacados_url": "",
+        "analisis_url": "",
+        "informe_partido": "",
+        "pelota_parada_url": "",
+        "gps_url": "",
+        "charla_dt": "",
+        "arenga_jugadores_url": ""
       },
       "8": {
         "gf": 0,
         "gc": 0,
-        "rival": "Instituto"
+        "rival": "Instituto",
+        "partido_url": "https://youtu.be/FQ-bsGD57N4",
+        "momentos_destacados_url": "",
+        "analisis_url": "https://youtu.be/BIHKi_cvL2E",
+        "informe_partido": "",
+        "pelota_parada_url": "",
+        "gps_url": "",
+        "charla_dt": "",
+        "arenga_jugadores_url": ""
       },
       "7": {
         "gf": 1,
         "gc": 2,
-        "rival": "Argentinos Jrs"
+        "rival": "Argentinos Jrs",
+        "partido_url": "",
+        "momentos_destacados_url": "",
+        "analisis_url": "",
+        "informe_partido": "",
+        "pelota_parada_url": "",
+        "gps_url": "",
+        "charla_dt": "",
+        "arenga_jugadores_url": ""
       },
       "6": {
         "gf": 0,
         "gc": 0,
-        "rival": "San Martin (SJ)"
+        "rival": "San Martin (SJ)",
+        "partido_url": "https://youtu.be/joDEXbBOOcc",
+        "momentos_destacados_url": "",
+        "analisis_url": "https://youtu.be/TGUMSfX6cvE",
+        "informe_partido": "",
+        "pelota_parada_url": "",
+        "gps_url": "",
+        "charla_dt": "",
+        "arenga_jugadores_url": ""
       },
       "5": {
         "gf": 0,
         "gc": 3,
-        "rival": "Newells"
+        "rival": "Newells",
+        "partido_url": "https://youtu.be/zFvfjNBdGMQ?si=5LHOXCF0IVuavbne",
+        "momentos_destacados_url": "",
+        "analisis_url": "",
+        "informe_partido": "",
+        "pelota_parada_url": "",
+        "gps_url": "",
+        "charla_dt": "",
+        "arenga_jugadores_url": ""
       },
       "4": {
         "gf": 3,
         "gc": 2,
-        "rival": "Independiente"
+        "rival": "Independiente",
+        "partido_url": "https://youtu.be/0tjfjwdGP2Q",
+        "momentos_destacados_url": "",
+        "analisis_url": "https://youtu.be/iXPKoN5-xbQ",
+        "informe_partido": "",
+        "pelota_parada_url": "",
+        "gps_url": "",
+        "charla_dt": "",
+        "arenga_jugadores_url": ""
       },
       "3": {
         "gf": 2,
         "gc": 1,
-        "rival": "Boca Juniors"
+        "rival": "Boca Juniors",
+        "partido_url": "",
+        "momentos_destacados_url": "",
+        "analisis_url": "",
+        "informe_partido": "",
+        "pelota_parada_url": "",
+        "gps_url": "",
+        "charla_dt": "",
+        "arenga_jugadores_url": ""
       },
       "2": {
         "gf": 11,
         "gc": 0,
-        "rival": "San Martín de Burzaco"
+        "rival": "San Martín de Burzaco",
+        "partido_url": "",
+        "momentos_destacados_url": "",
+        "analisis_url": "",
+        "informe_partido": "",
+        "pelota_parada_url": "",
+        "gps_url": "",
+        "charla_dt": "",
+        "arenga_jugadores_url": ""
       },
       "1": {
         "gf": 2,
         "gc": 0,
-        "rival": "Ferro"
+        "rival": "Ferro",
+        "partido_url": "",
+        "momentos_destacados_url": "",
+        "analisis_url": "",
+        "informe_partido": "",
+        "pelota_parada_url": "",
+        "gps_url": "",
+        "charla_dt": "",
+        "arenga_jugadores_url": ""
       }
     }
   }
