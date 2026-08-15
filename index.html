@@ -2172,6 +2172,30 @@ function wireBloqueSlider(idSuffix, onCommit){
   });
 }
 
+// ── SECCIONES DESPLEGABLES (dentro de la vista de categoría) ──────
+// Título clickeable con flechita; el contenido de abajo se muestra/oculta.
+// Si el título tiene controles propios (ej. el slider de bloque), un click
+// ahí no tiene que colapsar la sección — por eso toggleSeccion ignora los
+// clicks que vienen de un control interactivo.
+function seccionTitulo(idSeccion, tituloHTML, extraHTML=''){
+  return `<div class="st" style="cursor:pointer;justify-content:space-between" onclick="toggleSeccion('${idSeccion}',event)">
+    <span style="display:flex;align-items:center;gap:10px"><div class="stbar"></div>${tituloHTML}</span>
+    <span style="display:flex;align-items:center;gap:10px">
+      ${extraHTML}
+      <span id="chev-${idSeccion}" style="font-size:11px;color:var(--muted);display:inline-block;transition:transform .2s">▼</span>
+    </span>
+  </div>`;
+}
+function toggleSeccion(idSeccion, event){
+  if(event && event.target.closest('input,select,button,a,textarea')) return;
+  const cont=document.getElementById('sec-'+idSeccion);
+  const chev=document.getElementById('chev-'+idSeccion);
+  if(!cont) return;
+  const seOculta=cont.style.display!=='none';
+  cont.style.display=seOculta?'none':'';
+  if(chev) chev.style.transform=seOculta?'rotate(-90deg)':'none';
+}
+
 // ── GENERAL VIEW ─────────────────────────────────────────────
 function renderStatsCat(cat){
   const content=document.getElementById('stats-content');
@@ -2291,13 +2315,6 @@ function renderTablaGeneral(containerId){
 // 7MA, 8VA y 9NA quedan afuera de la confiabilidad a pedido de Javi.
 const CONFIABILIDAD_CATS = ['4TA','5TA','6TA'];
 
-// Diferencias reales y ya revisadas que la LPF nunca va a corregir (quedó
-// mal cargado de su lado, confirmado contra otra fuente) — se excluyen para
-// no marcarlas cada vez. Si algún día la LPF lo arregla, sacar la entrada.
-const CONFIABILIDAD_EXCEPCIONES_EQUIPO = [
-  {cat:'6TA', campo:'GF', motivo:'LPF omitió un gol de Tigre vs River (F13); sabadogol sí lo tiene. Confirmado 2026-08-15.'},
-];
-
 function calcConfiabilidad(){
   // Partido por partido: mi carga (results) vs LIGA (fixture scrapeado de
   // sabadogol.com.ar) vs futdetail (panel privado del club). Reemplaza al
@@ -2335,8 +2352,6 @@ function calcConfiabilidad(){
     if(mio.pg!==lpf.pg) equipoMismatches.push({cat, campo:'PG', mio:mio.pg, lpf:lpf.pg});
     if(mio.gf!==lpf.gf) equipoMismatches.push({cat, campo:'GF', mio:mio.gf, lpf:lpf.gf});
   });
-  const equipoMismatchesFiltrados=equipoMismatches.filter(m=>
-    !CONFIABILIDAD_EXCEPCIONES_EQUIPO.some(e=>e.cat===m.cat && e.campo===m.campo));
 
   const golesMismatches=[]; // {cat, jugador, mio, fut, key, soloEn}
   CONFIABILIDAD_CATS.forEach(cat=>{
@@ -2371,7 +2386,7 @@ function calcConfiabilidad(){
     });
   });
 
-  return {partidoMismatches, equipoMismatches:equipoMismatchesFiltrados, golesMismatches};
+  return {partidoMismatches, equipoMismatches, golesMismatches};
 }
 
 // Botón "REVISAR" único para toda la sección: fuerza traer la tabla LPF de
@@ -2717,42 +2732,47 @@ function renderStatsSingle(cat, content){
   }
 
   content.innerHTML=`
-    <div class="st" style="margin-top:4px">
-      <div class="stbar"></div>
-      RESULTADOS · <span style="color:${CAT_COLORS[cat]}">${cat}</span>${isReserva?` · <span style="color:var(--gold)">${reservaSemestre===2?'2do SEMESTRE':'1er SEMESTRE'}</span>`:''}
+    ${seccionTitulo('resultados-'+dataCat,
+      `RESULTADOS · <span style="color:${CAT_COLORS[cat]}">${cat}</span>${isReserva?` · <span style="color:var(--gold)">${reservaSemestre===2?'2do SEMESTRE':'1er SEMESTRE'}</span>`:''}`)}
+    <div id="sec-resultados-${dataCat}">
+      ${semestreSelector}
+      <div class="table-wrap"><table>
+        <thead>
+          <tr class="thead-top">
+            <th colspan="6" style="background:linear-gradient(135deg,#0a0f1e,#08111f);color:var(--muted);font-size:10px;letter-spacing:2px;">DATOS DEL PARTIDO</th>
+            ${linkGH}
+            ${showEquipo?`<th style="background:linear-gradient(135deg,#1a2a10,#0f1a08);color:#86a86a;border-top:2px solid #4a7a3a;font-size:10px;letter-spacing:2px;">👥</th>`:''}
+          </tr>
+          <tr class="thead-sub"><th>#</th><th>RIVAL</th><th>COND</th><th>RESULTADO</th><th>RES</th><th>PTS</th>${linkSH}${showEquipo?`<th title="Equipo / Alineación">EQUIPO</th>`:''}</tr>
+        </thead>
+        <tbody id="tbody-${dataCat}">${rows}</tbody>
+      </table></div>
     </div>
-    ${semestreSelector}
-    <div class="table-wrap"><table>
-      <thead>
-        <tr class="thead-top">
-          <th colspan="6" style="background:linear-gradient(135deg,#0a0f1e,#08111f);color:var(--muted);font-size:10px;letter-spacing:2px;">DATOS DEL PARTIDO</th>
-          ${linkGH}
-          ${showEquipo?`<th style="background:linear-gradient(135deg,#1a2a10,#0f1a08);color:#86a86a;border-top:2px solid #4a7a3a;font-size:10px;letter-spacing:2px;">👥</th>`:''}
-        </tr>
-        <tr class="thead-sub"><th>#</th><th>RIVAL</th><th>COND</th><th>RESULTADO</th><th>RES</th><th>PTS</th>${linkSH}${showEquipo?`<th title="Equipo / Alineación">EQUIPO</th>`:''}</tr>
-      </thead>
-      <tbody id="tbody-${dataCat}">${rows}</tbody>
-    </table></div>
 
     <div id="roster-content" style="margin-bottom:20px"></div>
 
-    <div class="st"><div class="stbar"></div>🔍 COMPARAR FECHAS</div>
-    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px" id="comp-fechas-selects-${dataCat}">
-      ${compararSelectsHTML}
+    ${seccionTitulo('comparar-'+dataCat, '🔍 COMPARAR FECHAS')}
+    <div id="sec-comparar-${dataCat}">
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px" id="comp-fechas-selects-${dataCat}">
+        ${compararSelectsHTML}
+      </div>
+      <div id="comp-fechas-result-${dataCat}" style="margin-bottom:20px"></div>
     </div>
-    <div id="comp-fechas-result-${dataCat}" style="margin-bottom:20px"></div>
 
-    <div class="st" style="justify-content:space-between">
-      <span style="display:flex;align-items:center;gap:10px"><div class="stbar"></div>RENDIMIENTO POR BLOQUE DE FECHAS</span>
-      ${isReserva?'':bloqueSliderHTML('cat')}
+    ${seccionTitulo('bloque-'+dataCat, 'RENDIMIENTO POR BLOQUE DE FECHAS', isReserva?'':bloqueSliderHTML('cat'))}
+    <div id="sec-bloque-${dataCat}">
+      <div id="bloque-cat-${dataCat}"></div>
     </div>
-    <div id="bloque-cat-${dataCat}"></div>
 
-    <div class="st"><div class="stbar"></div>GOLEADORES · <span style="color:${CAT_COLORS[cat]}">${cat}</span></div>
-    <div id="goleadores-${dataCat}"></div>
+    ${seccionTitulo('goleadores-'+dataCat, `GOLEADORES · <span style="color:${CAT_COLORS[cat]}">${cat}</span>`)}
+    <div id="sec-goleadores-${dataCat}">
+      <div id="goleadores-${dataCat}"></div>
+    </div>
 
-    <div class="st"><div class="stbar"></div>🏆 TABLA DE POSICIONES · LPF${isReserva?'':` · <span style="color:${CAT_COLORS[cat]}">${cat}</span>`}</div>
-    <div id="tabla-lpf-${cat}"></div>
+    ${seccionTitulo('tablalpf-'+cat, `🏆 TABLA DE POSICIONES · LPF${isReserva?'':` · <span style="color:${CAT_COLORS[cat]}">${cat}</span>`}`)}
+    <div id="sec-tablalpf-${cat}">
+      <div id="tabla-lpf-${cat}"></div>
+    </div>
   `;
 
   // Semestre switch (solo RESERVA)
@@ -3764,12 +3784,73 @@ const RESERVA_FIJA = {
     },
   },
 };
+// Correcciones manuales a la tabla de posiciones de la LPF: casos puntuales
+// donde confirmamos (contra otra fuente) que la LPF tiene mal su propio
+// dato y es muy improbable que lo corrijan. Se aplica SOLO sobre el espejo
+// crudo de la LPF (TABLA_DATA.categorias) — no toca "results"/calcStats,
+// que ya está bien porque sale de tu propia planilla.
+const CORRECCIONES_TABLA_LPF = [
+  {cat:'6TA', gf:1, dif:1, motivo:'LPF omitió un gol de Tigre vs River (F13); sabadogol sí lo tiene. Confirmado 2026-08-15.'},
+];
+function aplicarCorreccionesTablaLPF(data){
+  if(!data || !data.categorias) return data;
+  CORRECCIONES_TABLA_LPF.forEach(c=>{
+    const fila=(data.categorias[c.cat]||[]).find(f=>/tigre/i.test(f.equipo));
+    if(!fila) return;
+    if(c.gf)  fila.gf  += c.gf;
+    if(c.gc)  fila.gc  += c.gc;
+    if(c.dif) fila.dif += c.dif;
+    if(c.pts) fila.pts += c.pts;
+  });
+  return data;
+}
+
+// Si un link (Partido / Resumen Goles / Análisis Propio) está vacío en tu
+// carga manual, se completa solo con lo que ya haya en futdetail. Si vos ya
+// cargaste algo, no se toca.
+const LINK_KEYS_DESDE_FUTDETAIL = {par:'partido_url', res:'momentos_destacados_url', ana:'analisis_url'};
+function completarLinksDesdeFutdetail(data){
+  const fixtureFut=data && data.fixture_futdetail;
+  if(!fixtureFut) return;
+  Object.keys(fixtureFut).forEach(cat=>{
+    Object.keys(fixtureFut[cat]).forEach(fechaStr=>{
+      const fecha=parseInt(fechaStr);
+      const partido=fixtureFut[cat][fechaStr];
+      if(!links[cat] || !links[cat][fecha]) return;
+      Object.entries(LINK_KEYS_DESDE_FUTDETAIL).forEach(([key, campo])=>{
+        const actual=(links[cat][fecha][key]||'').trim();
+        const desdeFutdetail=(partido[campo]||'').trim();
+        if(!actual && desdeFutdetail) links[cat][fecha][key]=desdeFutdetail;
+      });
+    });
+  });
+}
+// La tabla de resultados puede haberse dibujado antes de que esto termine
+// de cargar (es una llamada async aparte) — sincroniza los inputs que
+// hayan quedado vacíos en pantalla con lo que se acaba de completar.
+function sincronizarLinksVaciosEnPantalla(){
+  document.querySelectorAll('.link-input').forEach(inp=>{
+    if(inp.value.trim()) return;
+    const dataCat=inp.dataset.cat, fecha=parseInt(inp.dataset.fecha), key=inp.dataset.lkey;
+    const val=(links[dataCat]?.[fecha]?.[key]||'').trim();
+    if(!val) return;
+    inp.value=val;
+    const btn=inp.parentElement.querySelector('.link-btn');
+    if(btn){ btn.href=val; btn.classList.remove('empty'); }
+  });
+}
+
 function loadTablaData(){
   if(TABLA_DATA) return Promise.resolve(TABLA_DATA);
   // cache-buster para que el navegador no sirva un JSON viejo tras un update
   return fetch('data/tablas.json?v='+Date.now())
     .then(r=>{ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
-    .then(j=>{ TABLA_DATA=j; return j; })
+    .then(j=>{
+      TABLA_DATA=aplicarCorreccionesTablaLPF(j);
+      completarLinksDesdeFutdetail(TABLA_DATA);
+      sincronizarLinksVaciosEnPantalla();
+      return TABLA_DATA;
+    })
     .catch(e=>{ console.warn('tablas.json:',e); TABLA_DATA={categorias:{}}; return TABLA_DATA; });
 }
 

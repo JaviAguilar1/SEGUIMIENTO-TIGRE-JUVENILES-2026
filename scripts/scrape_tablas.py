@@ -190,9 +190,12 @@ def fetch_futdetail_partidos(opener, id_division: str):
 def parse_futdetail_partidos(filas):
     """
     Convierte la lista cruda de partidos_consulta_procesos.php en
-    {fecha:int -> {"gf":int,"gc":int,"rival":str}}. "localia" dice si Tigre
-    jugo de local (L) o visitante (V), y con eso se sabe cual gol es cual.
-    Partidos sin resultado cargado (todavia no jugados) se omiten.
+    {fecha:int -> {"gf":int,"gc":int,"rival":str, ...links...}}. "localia"
+    dice si Tigre jugo de local (L) o visitante (V), y con eso se sabe cual
+    gol es cual. Partidos sin resultado cargado (todavia no jugados) se
+    omiten. De paso se traen los links que ya haya cargados (video del
+    partido, resumen, analisis propio, informe, pelota parada, gps, charla
+    DT, arenga) para no tener que cargarlos a mano dos veces.
     """
     out = {}
     for f in filas:
@@ -213,10 +216,20 @@ def parse_futdetail_partidos(filas):
         # nombre, y si por algun motivo viene vacio usamos el id como ultimo
         # recurso (mejor un numero que nada).
         rival = (f.get("nombre") or f.get("equipo_rival") or "").strip()
+        links = {
+            "partido_url": (f.get("partido_url") or "").strip(),
+            "momentos_destacados_url": (f.get("momentos_detacados_url") or "").strip(),
+            "analisis_url": (f.get("analisis_url") or "").strip(),
+            "informe_partido": (f.get("informe_partido") or "").strip(),
+            "pelota_parada_url": (f.get("pelota_parada_url") or "").strip(),
+            "gps_url": (f.get("gps_url") or "").strip(),
+            "charla_dt": (f.get("charla_dt") or "").strip(),
+            "arenga_jugadores_url": (f.get("arenga_jugadores_url") or "").strip(),
+        }
         if localia == "L":
-            out[fecha] = {"gf": gl, "gc": gv, "rival": rival}
+            out[fecha] = {"gf": gl, "gc": gv, "rival": rival, **links}
         elif localia == "V":
-            out[fecha] = {"gf": gv, "gc": gl, "rival": rival}
+            out[fecha] = {"gf": gv, "gc": gl, "rival": rival, **links}
         # localia distinto de L/V: no deberia pasar, se ignora la fila
     return out
 
