@@ -1,5 +1,5 @@
 {
-  "actualizado": "2026-08-15 11:49",
+  "actualizado": "2026-08-15 12:22",
   "fuente": "ligaprofesional.ar (oficial)",
   "fuente_fixture": "sabadogol.com.ar",
   "categorias": {
@@ -2709,6 +2709,11 @@
         "gf": 2,
         "gc": 1,
         "rival": "BANFIELD"
+      },
+      "21": {
+        "gf": 2,
+        "gc": 1,
+        "rival": "RACING"
       }
     },
     "5TA": {
@@ -3015,6 +3020,11 @@
         "gf": 1,
         "gc": 0,
         "rival": "BANFIELD"
+      },
+      "21": {
+        "gf": 3,
+        "gc": 3,
+        "rival": "RACING"
       }
     },
     "8VA": {
