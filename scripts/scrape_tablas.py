@@ -196,9 +196,22 @@ def parse_futdetail_partidos(filas):
     omiten. De paso se traen los links que ya haya cargados (video del
     partido, resumen, analisis propio, informe, pelota parada, gps, charla
     DT, arenga) para no tener que cargarlos a mano dos veces.
+
+    IMPORTANTE: futdetail numera "fecha_nro" por separado dentro de CADA
+    competencia -- la fecha 1 de "Torneo LPF" y la fecha 1 de "Amistosos"
+    son partidos distintos que comparten numero. Sin filtrar por
+    competencia, los amistosos pisaban las fechas reales del torneo
+    (confirmado con datos reales: fechas 1-5 de 4TA traian rivales que ni
+    juegan la LPF, ej. "Excursionistas", "San Martin de Burzaco" -- eran
+    amistosos, no el torneo). El campo crudo se llama
+    "competencia_descripcion" (confirmado inspeccionando la respuesta real
+    del endpoint).
     """
     out = {}
     for f in filas:
+        competencia = str(f.get("competencia_descripcion", "")).strip().lower()
+        if competencia != "torneo lpf":
+            continue  # amistosos u otra competencia -- no es el torneo que seguimos
         try:
             fecha = int(str(f.get("fecha_nro", "")).strip())
         except (TypeError, ValueError):

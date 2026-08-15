@@ -3,13 +3,16 @@
 - Responder siempre en español (Argentina), tratando de "vos".
 - Explicar los pasos de forma simple: el usuario está aprendiendo, así que evitar jerga sin explicarla.
 - Antes de tocar código, mostrar el plan de lo que se va a hacer y pedir confirmación antes de aplicarlo.
+- Usar la skill `superpowers` para features grandes o con varias partes (planificar,
+  detectar riesgos y definir criterios antes de construir) — formaliza la regla de
+  arriba, no la reemplaza.
 
 # Estado del proyecto
 
 App de una sola página (`index.html`) para seguimiento de las inferiores de
 Tigre. Se viene mejorando en fases (ver los archivos de "Pegada" en
 `C:\Users\Javier\Desktop\files\` para el plan completo). Progreso al 2026-08-15
-(actualizado el mismo día tras cerrar Fase 4 y arrancar Fase 5):
+(actualizado el mismo día tras cerrar Fase 6):
 
 **Fase 1 — Estructura (COMPLETA):** se sacó la pantalla de Inicio y la solapa
 PLANTEL. La app arranca directo en ESTADÍSTICAS → GENERAL. Selector de
@@ -51,8 +54,12 @@ solo con lo que ya haya en futdetail (`completarLinksDesdeFutdetail`); si
 ya cargaste algo, no se toca.
 
 **Secciones desplegables:** dentro de cada categoría, RESULTADOS, COMPARAR
-FECHAS, RENDIMIENTO POR BLOQUE, GOLEADORES y TABLA DE POSICIONES LPF se
-colapsan tocando el título (`seccionTitulo`/`toggleSeccion`).
+FECHAS, RENDIMIENTO POR BLOQUE, GOLEADORES y TABLA DE POSICIONES LPF (y,
+desde Fase 6, las de PLANTEL/GPS) se colapsan tocando el título
+(`seccionTitulo`/`toggleSeccion`). **Arrancan cerradas por defecto**
+(`seccionColapsada`, agregado 2026-08-15) — el estado se guarda por
+sección y sobrevive a los re-renders (mover el slider de bloque, cambiar
+de semestre, etc. no las vuelve a cerrar si ya las abriste).
 
 **Tabla de equivalencias de jugadores (dentro de Confiabilidad, COMPLETA):**
 cuando un jugador aparece "huérfano" (nombre distinto en mi carga vs
@@ -80,6 +87,20 @@ hora vía `.github/workflows/tablas.yml`, sin intervención manual):
   DT, arenga) sale de `partidos_consulta_procesos.php` por POST, autenticado
   con la sesión. Si los secrets no están configurados, esta parte se
   saltea sola sin romper el resto.
+  - **Bug corregido (2026-08-15):** futdetail numera "fecha_nro" por
+    separado dentro de cada competencia — la fecha 1 de "Torneo LPF" y la
+    fecha 1 de "Amistosos" son partidos distintos que comparten número, y
+    `parse_futdetail_partidos` no filtraba por competencia, así que los
+    amistosos pisaban las fechas reales del torneo (confirmado con datos
+    reales: 4TA F1-F5 traían rivales que ni juegan la LPF —
+    "Excursionistas", "San Martín de Burzaco" — eran amistosos). Se
+    inspeccionó la respuesta cruda del endpoint (con el usuario, vía
+    DevTools) y se confirmó el campo `competencia_descripcion` — ahora se
+    descarta cualquier fila que no diga exactamente `"Torneo LPF"`. Esto
+    **no se corrige solo en la app**: hace falta que corra el scraper de
+    nuevo (automático cada 30 min, o "🔄 Actualizar datos" → "Run workflow"
+    en GitHub Actions) para que `data/tablas.json` se regenere con el
+    filtro nuevo.
 - Todo lo de arriba se junta en un solo `data/tablas.json` con las claves
   `categorias` (tabla LPF), `fixture` (LIGA) y `fixture_futdetail`.
 
@@ -105,31 +126,102 @@ eso cambia en el futuro, retomarlo (quedó diseñado: refresco targeted de
 `sincronizarLinksVaciosEnPantalla`, sin tocar RESULTADOS/GOLEADORES, y
 saltando el ciclo si hay un input enfocado).
 
-**Fase 5 — Export PDF (EN CURSO, pausada 2026-08-15 antes de definir
-secciones):** ya existe en el código un generador de PDF reutilizable para
-"Citaciones" (planilla de convocados a un partido, botón "⬇ GENERAR PDF",
-función `generarPDF()` ~línea 4848): arma una ventana nueva con HTML
-formateado (escudo vía `ESCUDO_B64`, header rojo/azul del club, tablas) y
-llama a `window.print()` en el `onload`, para que el usuario elija "Guardar
-como PDF" desde el diálogo de impresión — sin librerías externas. La idea es
-reusar el mismo patrón para exportar datos de ESTADÍSTICAS (no solo
-Citaciones). Ya definido con el usuario:
-- Alcance: **por categoría** (como Citaciones — elegís una categoría y
-  exportás sus secciones), no un export combinado de GENERAL.
-- Falta definir: qué secciones exactas entran (candidatas charladas:
-  Resultados por fecha, Tabla de posiciones LPF, Goleadores, Rendimiento por
-  bloque de fechas) — quedó sin cerrar, retomar preguntando eso antes de
-  tocar código.
+**Fase 5 — Export PDF (COMPLETA):** reusa el patrón de `generarPDF()`
+(ventana nueva con HTML propio, escudo vía `ESCUDO_B64`, `window.print()` en
+el `onload`, sin librerías externas) en tres modos nuevos, todos enganchados
+en el panel de ESTADÍSTICAS que sí está vivo hoy (`buildStatsCatSelect` /
+`renderStatsCat` / `renderRosterTable`):
+1. **Exportar por categoría** — botón "⬇ EXPORTAR PDF" al lado del selector
+   (cuando hay una categoría elegida, no en GENERAL). Abre un modal
+   (`abrirExportCategoria`) con checkboxes para tildar qué secciones entran:
+   Resultados por fecha, Tabla de posiciones LPF, Goleadores, Rendimiento
+   por bloque de fechas, Datos de jugadores. Genera con
+   `generarPDFCategoria()`; soporta RESERVA (semestres, tabla LPF con las
+   dos zonas Clausura/Apertura) igual que el resto de la app.
+2. **Ficha individual de jugador** — botón "📄" en cada fila de la tabla de
+   PLANTEL (ahora es una pestaña propia, ver Fase 6), `exportFichaJugador()`:
+   ficha fija con categoría, posición, edad, convocatorias, titular,
+   minutos, goles, asistencias y tarjetas.
+3. **Exportar GENERAL** — botón "⬇ EXPORTAR GENERAL" al lado del selector
+   cuando está en GENERAL, `generarPDFGeneral()`: resumen general (tabla
+   comparativa de las 6 categorías) + rendimiento por bloque acumulado,
+   secciones fijas sin checkbox (revierte a propósito la decisión anterior
+   de "no exportar GENERAL" — el usuario lo pidió después de ver el resto
+   del plan armado).
 
-**Descubrimiento relevante para Fase 6:** el código ya tiene un módulo GPS
-arrancado (no expuesto en la navegación actual): `gpsSessions`,
-`saveGpsData()`, `db.ref('gps')`, etc. (~línea 4916 en adelante). Es
-anterior a las fases de esta sesión y no está integrado a la UI de hoy —
-antes de "empezar de cero" la Fase 6, revisar ese módulo para ver qué ya
-sirve y qué hay que rehacer.
+Todas las secciones (`pdfSection*` + `pdfTablaLPFHtml` + `abrirVentanaPDF`,
+cerca de la línea 4915) están escritas con estilos en línea propios (sin
+`var(--...)`, porque la ventana del PDF es un documento HTML aparte que no
+hereda el CSS de la app) — mismo criterio que ya usaba `generarPDF()`.
 
-**Pendiente:**
-- Fase 5 — Export PDF (ver arriba, falta cerrar qué secciones exportar).
-- Fase 6 — Catapult (datos físicos/GPS). Capa aparte, nunca se cruza con
-  resultados. Ver regla de emparejamiento de jugadores en la Pegada 1, y el
-  módulo GPS ya existente mencionado arriba.
+**Descubrimiento durante Fase 5 (relevante para cualquier fase futura):** el
+módulo "RENDIMIENTO" (`buildRendimientoModule()`, `renderRendimiento()` —
+forma reciente, local/visitante, índice de rendimiento, tarjetas, lesiones,
+y ahí también vivía el `generarPDF()` de Citaciones) apunta a
+`panel-rendimiento`, que **no existe en el HTML** y nunca se construye
+(`buildRendimientoModule()` no se llama desde ningún lado) — está huérfano
+exactamente igual que el módulo GPS. No se tocó ni se arregló en esta fase
+(no era parte del pedido); si en algún momento se quiere recuperar ese
+módulo (alertas de tarjetas, lesiones, forma reciente, local/visitante),
+hay que engancharlo a la navegación desde cero, igual que se evaluó para
+GPS en la Fase 6.
+
+**Fase 6 — Rendimiento físico / Catapult (COMPLETA):** PLANTEL dejó de estar
+escondido detrás del botón "VER DATOS DE JUGADORES" y pasó a ser una
+sub-pestaña propia dentro de cada categoría, junto a RESULTADOS
+(`catActiveTab`, `buildCatTabsHTML()`, `renderPlantelTab()` — la elección de
+pestaña es compartida entre categorías, no por categoría). PLANTEL reúne:
+roster + "⚖️ Comparar jugadores" (ya existían, se mudaron ahí sin cambios) +
+todo lo nuevo de rendimiento físico:
+
+- **Parser de PDF de Catapult OpenField, rehecho de cero**
+  (`extractGpsDataFromPdf` y sus helpers `gpsFindSummaryPage`/
+  `gpsBuildFieldMap`/`gpsAssignNumsToColumns`/`gpsDetectCategoria`/etc.,
+  buscar "GPS MODULE" en `index.html`). Reemplaza al parser viejo que mapeaba
+  columnas por posición fija (rompía apenas cambiaba el set de columnas del
+  export). Detecta por **contenido**, no por nombre de archivo, entre 3
+  formatos reales de Catapult:
+  1. Entrenamiento ("Datos"): varios bloques por ejercicio + página resumen
+     final con una fila por jugador — se guardan los números de la página
+     resumen y, si están, los nombres de ejercicio como lista de contexto
+     (`session.ejercicios`).
+  2. Partido: página "DATOS GENERALES" con una fila por jugador.
+  3. Solo gráficos (sin tabla de datos, sin importar el nombre del archivo)
+     → se rechaza con un mensaje claro en vez de guardar basura.
+  El mapeo de columnas es por **nombre de encabezado** (agrupando texto por
+  cercanía en X a cada columna numérica), confirmado necesario con 19 PDF
+  reales del club: las columnas exportadas no son siempre las mismas (un
+  informe de partido puede traer Max Acc/Max Decel/Player Load y otro no).
+  La categoría se detecta por el texto del PDF y se valida cruzando nombres
+  de jugadores contra el plantel ya cargado — ojo que Catapult exporta
+  "Nombre Apellido" y el plantel guarda "Apellido Nombre" (`gpsDetectCategoria`
+  compara con las palabras ordenadas alfabéticamente, no el string tal cual).
+  Si la categoría detectada no coincide bien, se avisa en el panel de carga
+  pero nunca se cambia sola — lo confirma el usuario.
+- **Guardado en Firebase:** pasó de `gps.set({sessions:[...]})` (reescribía
+  TODO en cada carga, riesgo de pisarse entre dos personas) a
+  `gps/sessions/{id}` con `push()` — `saveGpsSession()`/`deleteGpsSession()`.
+  Compatible con datos viejos si los hubiera (`Object.values()` funciona
+  igual con el array viejo o el objeto nuevo).
+- **Carga desde la app:** zona de upload dentro de PLANTEL (solo si
+  `canEdit`), con panel de confirmación antes de guardar (nombre de sesión
+  editable, aviso de categoría dudosa como se explicó arriba).
+- **Comparativas de rendimiento físico:** por un jugador entre 2-3 fechas, y
+  entre 2-3 jugadores de una misma sesión — mismo patrón visual (selectores
+  + tabla con el máximo destacado en dorado) que ya usan "comparar fechas" y
+  "comparar jugadores" en el resto de la app.
+- **Recordatorio de GPS sin cargar en Confiabilidad:** mismo mecanismo que
+  los recordatorios de links (Fase 3, punto 5) — mismo `dismissKey`, mismo
+  botón "👍 OMITIR" — para "partido ya jugado sin sesión GPS de tipo partido
+  cargada". Solo 4TA/5TA/6TA (mismo alcance que el resto de Confiabilidad),
+  solo partidos (no entrenamientos).
+
+**Pendiente / a futuro:**
+- No hay todavía un mecanismo de "vincular jugador" para GPS como el que
+  existe en Confiabilidad (`aliasJugadores`) — si el nombre que trae
+  Catapult no coincide exacto con el del plantel, en las comparativas
+  aparece como un nombre suelto en vez de fusionarse con su ficha. La
+  detección de categoría sí avisa del problema general, pero no hay forma
+  de corregir un jugador puntual a mano todavía.
+- (Opcional, sin decidir) Recuperar el módulo RENDIMIENTO huérfano — ver
+  "Descubrimiento durante Fase 5" arriba.
