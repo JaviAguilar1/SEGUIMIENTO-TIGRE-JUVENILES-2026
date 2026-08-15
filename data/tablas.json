@@ -1,6 +1,7 @@
 {
-  "actualizado": "2026-08-15 02:25",
+  "actualizado": "2026-08-15 03:22",
   "fuente": "ligaprofesional.ar (oficial)",
+  "fuente_fixture": "sabadogol.com.ar",
   "categorias": {
     "4TA": [
       {
@@ -2606,5 +2607,1233 @@
         "dif": -33
       }
     ]
+  },
+  "fixture": {
+    "4TA": {
+      "1": {
+        "gf": 1,
+        "gc": 0,
+        "rival": "INDEPENDIENTE RIV"
+      },
+      "2": {
+        "gf": 0,
+        "gc": 1,
+        "rival": "FERRO C.O."
+      },
+      "3": {
+        "gf": 2,
+        "gc": 4,
+        "rival": "LANÚS"
+      },
+      "4": {
+        "gf": 2,
+        "gc": 3,
+        "rival": "INDEPENDIENTE"
+      },
+      "5": {
+        "gf": 2,
+        "gc": 0,
+        "rival": "NEWELL'S"
+      },
+      "6": {
+        "gf": 4,
+        "gc": 0,
+        "rival": "SAN MARTIN SJ."
+      },
+      "7": {
+        "gf": 0,
+        "gc": 1,
+        "rival": "ARGENTINOS JRS"
+      },
+      "8": {
+        "gf": 0,
+        "gc": 2,
+        "rival": "INSTITUTO"
+      },
+      "9": {
+        "gf": 2,
+        "gc": 0,
+        "rival": "TALLERES CBA"
+      },
+      "10": {
+        "gf": 2,
+        "gc": 2,
+        "rival": "ESTUDIANTES RIO CUARTO"
+      },
+      "11": {
+        "gf": 2,
+        "gc": 0,
+        "rival": "BARRACAS CTRAL"
+      },
+      "12": {
+        "gf": 3,
+        "gc": 1,
+        "rival": "QUILMES"
+      },
+      "13": {
+        "gf": 0,
+        "gc": 2,
+        "rival": "RIVER PLATE"
+      },
+      "14": {
+        "gf": 0,
+        "gc": 1,
+        "rival": "UNION"
+      },
+      "15": {
+        "gf": 1,
+        "gc": 2,
+        "rival": "SAN LORENZO"
+      },
+      "16": {
+        "gf": 1,
+        "gc": 1,
+        "rival": "GIMNASIA LP"
+      },
+      "17": {
+        "gf": 5,
+        "gc": 0,
+        "rival": "CTRAL CORDOBA SE"
+      },
+      "18": {
+        "gf": 0,
+        "gc": 0,
+        "rival": "GIM. y ESGRIMA MZA"
+      },
+      "19": {
+        "gf": 2,
+        "gc": 1,
+        "rival": "VELEZ SARSFIELD"
+      },
+      "20": {
+        "gf": 2,
+        "gc": 1,
+        "rival": "BANFIELD"
+      }
+    },
+    "5TA": {
+      "1": {
+        "gf": 2,
+        "gc": 0,
+        "rival": "INDEPENDIENTE RIV"
+      },
+      "2": {
+        "gf": 0,
+        "gc": 0,
+        "rival": "FERRO C.O."
+      },
+      "3": {
+        "gf": 0,
+        "gc": 3,
+        "rival": "LANÚS"
+      },
+      "4": {
+        "gf": 0,
+        "gc": 0,
+        "rival": "INDEPENDIENTE"
+      },
+      "5": {
+        "gf": 1,
+        "gc": 1,
+        "rival": "NEWELL'S"
+      },
+      "6": {
+        "gf": 4,
+        "gc": 0,
+        "rival": "SAN MARTIN SJ."
+      },
+      "7": {
+        "gf": 1,
+        "gc": 2,
+        "rival": "ARGENTINOS JRS"
+      },
+      "8": {
+        "gf": 2,
+        "gc": 0,
+        "rival": "INSTITUTO"
+      },
+      "9": {
+        "gf": 2,
+        "gc": 2,
+        "rival": "TALLERES CBA"
+      },
+      "10": {
+        "gf": 2,
+        "gc": 2,
+        "rival": "ESTUDIANTES RIO CUARTO"
+      },
+      "11": {
+        "gf": 2,
+        "gc": 1,
+        "rival": "BARRACAS CTRAL"
+      },
+      "12": {
+        "gf": 1,
+        "gc": 0,
+        "rival": "QUILMES"
+      },
+      "13": {
+        "gf": 0,
+        "gc": 2,
+        "rival": "RIVER PLATE"
+      },
+      "14": {
+        "gf": 1,
+        "gc": 1,
+        "rival": "UNION"
+      },
+      "15": {
+        "gf": 0,
+        "gc": 0,
+        "rival": "SAN LORENZO"
+      },
+      "16": {
+        "gf": 0,
+        "gc": 2,
+        "rival": "GIMNASIA LP"
+      },
+      "17": {
+        "gf": 3,
+        "gc": 0,
+        "rival": "CTRAL CORDOBA SE"
+      },
+      "18": {
+        "gf": 1,
+        "gc": 3,
+        "rival": "GIM. y ESGRIMA MZA"
+      },
+      "19": {
+        "gf": 1,
+        "gc": 2,
+        "rival": "VELEZ SARSFIELD"
+      },
+      "20": {
+        "gf": 3,
+        "gc": 0,
+        "rival": "BANFIELD"
+      }
+    },
+    "6TA": {
+      "1": {
+        "gf": 3,
+        "gc": 1,
+        "rival": "INDEPENDIENTE RIV"
+      },
+      "2": {
+        "gf": 1,
+        "gc": 1,
+        "rival": "FERRO C.O."
+      },
+      "3": {
+        "gf": 0,
+        "gc": 7,
+        "rival": "LANÚS"
+      },
+      "4": {
+        "gf": 1,
+        "gc": 3,
+        "rival": "INDEPENDIENTE"
+      },
+      "5": {
+        "gf": 3,
+        "gc": 1,
+        "rival": "NEWELL'S"
+      },
+      "6": {
+        "gf": 4,
+        "gc": 4,
+        "rival": "SAN MARTIN SJ."
+      },
+      "7": {
+        "gf": 1,
+        "gc": 2,
+        "rival": "ARGENTINOS JRS"
+      },
+      "8": {
+        "gf": 2,
+        "gc": 1,
+        "rival": "INSTITUTO"
+      },
+      "9": {
+        "gf": 1,
+        "gc": 2,
+        "rival": "TALLERES CBA"
+      },
+      "10": {
+        "gf": 1,
+        "gc": 1,
+        "rival": "ESTUDIANTES RIO CUARTO"
+      },
+      "11": {
+        "gf": 2,
+        "gc": 1,
+        "rival": "BARRACAS CTRAL"
+      },
+      "12": {
+        "gf": 1,
+        "gc": 1,
+        "rival": "QUILMES"
+      },
+      "13": {
+        "gf": 1,
+        "gc": 2,
+        "rival": "RIVER PLATE"
+      },
+      "14": {
+        "gf": 1,
+        "gc": 4,
+        "rival": "UNION"
+      },
+      "15": {
+        "gf": 2,
+        "gc": 5,
+        "rival": "SAN LORENZO"
+      },
+      "16": {
+        "gf": 1,
+        "gc": 2,
+        "rival": "GIMNASIA LP"
+      },
+      "17": {
+        "gf": 1,
+        "gc": 1,
+        "rival": "CTRAL CORDOBA SE"
+      },
+      "18": {
+        "gf": 0,
+        "gc": 0,
+        "rival": "GIM. y ESGRIMA MZA"
+      },
+      "19": {
+        "gf": 2,
+        "gc": 3,
+        "rival": "VELEZ SARSFIELD"
+      },
+      "20": {
+        "gf": 1,
+        "gc": 3,
+        "rival": "BANFIELD"
+      }
+    },
+    "7MA": {
+      "1": {
+        "gf": 3,
+        "gc": 3,
+        "rival": "INDEPENDIENTE RIV"
+      },
+      "2": {
+        "gf": 3,
+        "gc": 1,
+        "rival": "FERRO C.O."
+      },
+      "3": {
+        "gf": 4,
+        "gc": 4,
+        "rival": "LANÚS"
+      },
+      "4": {
+        "gf": 1,
+        "gc": 2,
+        "rival": "INDEPENDIENTE"
+      },
+      "5": {
+        "gf": 2,
+        "gc": 0,
+        "rival": "NEWELL'S"
+      },
+      "6": {
+        "gf": 3,
+        "gc": 0,
+        "rival": "SAN MARTIN SJ."
+      },
+      "7": {
+        "gf": 2,
+        "gc": 3,
+        "rival": "ARGENTINOS JRS"
+      },
+      "8": {
+        "gf": 3,
+        "gc": 0,
+        "rival": "INSTITUTO"
+      },
+      "9": {
+        "gf": 2,
+        "gc": 4,
+        "rival": "TALLERES CBA"
+      },
+      "10": {
+        "gf": 2,
+        "gc": 2,
+        "rival": "ESTUDIANTES RIO CUARTO"
+      },
+      "11": {
+        "gf": 0,
+        "gc": 0,
+        "rival": "BARRACAS CTRAL"
+      },
+      "12": {
+        "gf": 1,
+        "gc": 1,
+        "rival": "QUILMES"
+      },
+      "13": {
+        "gf": 1,
+        "gc": 4,
+        "rival": "RIVER PLATE"
+      },
+      "14": {
+        "gf": 2,
+        "gc": 3,
+        "rival": "UNION"
+      },
+      "15": {
+        "gf": 2,
+        "gc": 2,
+        "rival": "SAN LORENZO"
+      },
+      "16": {
+        "gf": 2,
+        "gc": 0,
+        "rival": "GIMNASIA LP"
+      },
+      "17": {
+        "gf": 2,
+        "gc": 0,
+        "rival": "CTRAL CORDOBA SE"
+      },
+      "18": {
+        "gf": 4,
+        "gc": 0,
+        "rival": "GIM. y ESGRIMA MZA"
+      },
+      "19": {
+        "gf": 1,
+        "gc": 3,
+        "rival": "VELEZ SARSFIELD"
+      },
+      "20": {
+        "gf": 1,
+        "gc": 0,
+        "rival": "BANFIELD"
+      }
+    },
+    "8VA": {
+      "1": {
+        "gf": 2,
+        "gc": 1,
+        "rival": "INDEPENDIENTE RIV"
+      },
+      "2": {
+        "gf": 2,
+        "gc": 2,
+        "rival": "FERRO C.O."
+      },
+      "3": {
+        "gf": 0,
+        "gc": 2,
+        "rival": "LANÚS"
+      },
+      "4": {
+        "gf": 0,
+        "gc": 4,
+        "rival": "INDEPENDIENTE"
+      },
+      "5": {
+        "gf": 1,
+        "gc": 0,
+        "rival": "NEWELL'S"
+      },
+      "6": {
+        "gf": 3,
+        "gc": 0,
+        "rival": "SAN MARTIN SJ."
+      },
+      "7": {
+        "gf": 1,
+        "gc": 1,
+        "rival": "ARGENTINOS JRS"
+      },
+      "8": {
+        "gf": 1,
+        "gc": 1,
+        "rival": "INSTITUTO"
+      },
+      "9": {
+        "gf": 0,
+        "gc": 1,
+        "rival": "TALLERES CBA"
+      },
+      "10": {
+        "gf": 1,
+        "gc": 1,
+        "rival": "ESTUDIANTES RIO CUARTO"
+      },
+      "11": {
+        "gf": 0,
+        "gc": 3,
+        "rival": "BARRACAS CTRAL"
+      },
+      "12": {
+        "gf": 3,
+        "gc": 1,
+        "rival": "QUILMES"
+      },
+      "13": {
+        "gf": 0,
+        "gc": 7,
+        "rival": "RIVER PLATE"
+      },
+      "14": {
+        "gf": 3,
+        "gc": 1,
+        "rival": "UNION"
+      },
+      "15": {
+        "gf": 0,
+        "gc": 1,
+        "rival": "SAN LORENZO"
+      },
+      "16": {
+        "gf": 0,
+        "gc": 1,
+        "rival": "GIMNASIA LP"
+      },
+      "17": {
+        "gf": 1,
+        "gc": 0,
+        "rival": "CTRAL CORDOBA SE"
+      },
+      "18": {
+        "gf": 1,
+        "gc": 1,
+        "rival": "GIM. y ESGRIMA MZA"
+      },
+      "19": {
+        "gf": 0,
+        "gc": 0,
+        "rival": "VELEZ SARSFIELD"
+      },
+      "20": {
+        "gf": 0,
+        "gc": 1,
+        "rival": "BANFIELD"
+      }
+    },
+    "9NA": {
+      "1": {
+        "gf": 2,
+        "gc": 3,
+        "rival": "INDEPENDIENTE RIV"
+      },
+      "2": {
+        "gf": 1,
+        "gc": 2,
+        "rival": "FERRO C.O."
+      },
+      "3": {
+        "gf": 0,
+        "gc": 4,
+        "rival": "LANÚS"
+      },
+      "4": {
+        "gf": 3,
+        "gc": 2,
+        "rival": "INDEPENDIENTE"
+      },
+      "5": {
+        "gf": 0,
+        "gc": 3,
+        "rival": "NEWELL'S"
+      },
+      "6": {
+        "gf": 2,
+        "gc": 2,
+        "rival": "SAN MARTIN SJ."
+      },
+      "7": {
+        "gf": 1,
+        "gc": 2,
+        "rival": "ARGENTINOS JRS"
+      },
+      "8": {
+        "gf": 0,
+        "gc": 0,
+        "rival": "INSTITUTO"
+      },
+      "9": {
+        "gf": 1,
+        "gc": 1,
+        "rival": "TALLERES CBA"
+      },
+      "10": {
+        "gf": 0,
+        "gc": 0,
+        "rival": "ESTUDIANTES RIO CUARTO"
+      },
+      "11": {
+        "gf": 1,
+        "gc": 3,
+        "rival": "BARRACAS CTRAL"
+      },
+      "12": {
+        "gf": 2,
+        "gc": 0,
+        "rival": "QUILMES"
+      },
+      "13": {
+        "gf": 0,
+        "gc": 2,
+        "rival": "RIVER PLATE"
+      },
+      "14": {
+        "gf": 1,
+        "gc": 1,
+        "rival": "UNION"
+      },
+      "15": {
+        "gf": 1,
+        "gc": 2,
+        "rival": "SAN LORENZO"
+      },
+      "16": {
+        "gf": 0,
+        "gc": 0,
+        "rival": "GIMNASIA LP"
+      },
+      "17": {
+        "gf": 0,
+        "gc": 0,
+        "rival": "CTRAL CORDOBA SE"
+      },
+      "18": {
+        "gf": 4,
+        "gc": 1,
+        "rival": "GIM. y ESGRIMA MZA"
+      },
+      "19": {
+        "gf": 0,
+        "gc": 3,
+        "rival": "VELEZ SARSFIELD"
+      },
+      "20": {
+        "gf": 1,
+        "gc": 5,
+        "rival": "BANFIELD"
+      }
+    }
+  },
+  "fixture_futdetail": {
+    "4TA": {
+      "19": {
+        "gf": 2,
+        "gc": 1,
+        "rival": "277"
+      },
+      "18": {
+        "gf": 0,
+        "gc": 0,
+        "rival": "303"
+      },
+      "17": {
+        "gf": 5,
+        "gc": 0,
+        "rival": "294"
+      },
+      "16": {
+        "gf": 1,
+        "gc": 1,
+        "rival": "296"
+      },
+      "15": {
+        "gf": 1,
+        "gc": 2,
+        "rival": "281"
+      },
+      "14": {
+        "gf": 0,
+        "gc": 1,
+        "rival": "292"
+      },
+      "13": {
+        "gf": 0,
+        "gc": 2,
+        "rival": "278"
+      },
+      "12": {
+        "gf": 3,
+        "gc": 1,
+        "rival": "305"
+      },
+      "11": {
+        "gf": 2,
+        "gc": 0,
+        "rival": "329"
+      },
+      "10": {
+        "gf": 2,
+        "gc": 2,
+        "rival": "308"
+      },
+      "9": {
+        "gf": 2,
+        "gc": 0,
+        "rival": "282"
+      },
+      "8": {
+        "gf": 0,
+        "gc": 2,
+        "rival": "332"
+      },
+      "7": {
+        "gf": 0,
+        "gc": 1,
+        "rival": "280"
+      },
+      "6": {
+        "gf": 4,
+        "gc": 0,
+        "rival": "344"
+      },
+      "5": {
+        "gf": 3,
+        "gc": 1,
+        "rival": "366"
+      },
+      "4": {
+        "gf": 1,
+        "gc": 4,
+        "rival": "277"
+      },
+      "3": {
+        "gf": 0,
+        "gc": 2,
+        "rival": "276"
+      },
+      "2": {
+        "gf": 2,
+        "gc": 0,
+        "rival": "373"
+      },
+      "1": {
+        "gf": 0,
+        "gc": 2,
+        "rival": "327"
+      }
+    },
+    "5TA": {
+      "20": {
+        "gf": 3,
+        "gc": 0,
+        "rival": "291"
+      },
+      "19": {
+        "gf": 1,
+        "gc": 2,
+        "rival": "277"
+      },
+      "18": {
+        "gf": 1,
+        "gc": 3,
+        "rival": "303"
+      },
+      "17": {
+        "gf": 3,
+        "gc": 0,
+        "rival": "294"
+      },
+      "16": {
+        "gf": 0,
+        "gc": 2,
+        "rival": "296"
+      },
+      "15": {
+        "gf": 0,
+        "gc": 0,
+        "rival": "281"
+      },
+      "14": {
+        "gf": 1,
+        "gc": 1,
+        "rival": "292"
+      },
+      "13": {
+        "gf": 0,
+        "gc": 2,
+        "rival": "278"
+      },
+      "12": {
+        "gf": 1,
+        "gc": 0,
+        "rival": "305"
+      },
+      "11": {
+        "gf": 2,
+        "gc": 1,
+        "rival": "329"
+      },
+      "10": {
+        "gf": 2,
+        "gc": 2,
+        "rival": "308"
+      },
+      "9": {
+        "gf": 2,
+        "gc": 2,
+        "rival": "282"
+      },
+      "8": {
+        "gf": 2,
+        "gc": 0,
+        "rival": "332"
+      },
+      "7": {
+        "gf": 1,
+        "gc": 2,
+        "rival": "280"
+      },
+      "6": {
+        "gf": 4,
+        "gc": 0,
+        "rival": "330"
+      },
+      "3": {
+        "gf": 0,
+        "gc": 1,
+        "rival": "276"
+      },
+      "5": {
+        "gf": 1,
+        "gc": 1,
+        "rival": "288"
+      },
+      "4": {
+        "gf": 0,
+        "gc": 3,
+        "rival": "277"
+      },
+      "2": {
+        "gf": 2,
+        "gc": 0,
+        "rival": "373"
+      },
+      "1": {
+        "gf": 1,
+        "gc": 0,
+        "rival": "327"
+      }
+    },
+    "6TA": {
+      "20": {
+        "gf": 1,
+        "gc": 3,
+        "rival": "291"
+      },
+      "19": {
+        "gf": 2,
+        "gc": 3,
+        "rival": "277"
+      },
+      "18": {
+        "gf": 0,
+        "gc": 0,
+        "rival": "303"
+      },
+      "17": {
+        "gf": 1,
+        "gc": 1,
+        "rival": "294"
+      },
+      "16": {
+        "gf": 1,
+        "gc": 2,
+        "rival": "296"
+      },
+      "15": {
+        "gf": 2,
+        "gc": 5,
+        "rival": "281"
+      },
+      "14": {
+        "gf": 1,
+        "gc": 4,
+        "rival": "292"
+      },
+      "13": {
+        "gf": 1,
+        "gc": 2,
+        "rival": "278"
+      },
+      "12": {
+        "gf": 1,
+        "gc": 1,
+        "rival": "305"
+      },
+      "11": {
+        "gf": 2,
+        "gc": 1,
+        "rival": "329"
+      },
+      "10": {
+        "gf": 1,
+        "gc": 1,
+        "rival": "308"
+      },
+      "9": {
+        "gf": 1,
+        "gc": 2,
+        "rival": "282"
+      },
+      "8": {
+        "gf": 2,
+        "gc": 1,
+        "rival": "332"
+      },
+      "7": {
+        "gf": 0,
+        "gc": 1,
+        "rival": "307"
+      },
+      "6": {
+        "gf": 6,
+        "gc": 0,
+        "rival": "344"
+      },
+      "3": {
+        "gf": 2,
+        "gc": 0,
+        "rival": "276"
+      },
+      "5": {
+        "gf": 4,
+        "gc": 0,
+        "rival": "366"
+      },
+      "4": {
+        "gf": 4,
+        "gc": 2,
+        "rival": "277"
+      },
+      "2": {
+        "gf": 4,
+        "gc": 1,
+        "rival": "373"
+      },
+      "1": {
+        "gf": 2,
+        "gc": 1,
+        "rival": "327"
+      }
+    },
+    "7MA": {
+      "21": {
+        "gf": 0,
+        "gc": 0,
+        "rival": "279"
+      },
+      "15": {
+        "gf": 2,
+        "gc": 2,
+        "rival": "281"
+      },
+      "20": {
+        "gf": 1,
+        "gc": 0,
+        "rival": "291"
+      },
+      "19": {
+        "gf": 1,
+        "gc": 3,
+        "rival": "277"
+      },
+      "1": {
+        "gf": 1,
+        "gc": 2,
+        "rival": "327"
+      },
+      "14": {
+        "gf": 2,
+        "gc": 3,
+        "rival": "292"
+      },
+      "18": {
+        "gf": 4,
+        "gc": 0,
+        "rival": "303"
+      },
+      "13": {
+        "gf": 1,
+        "gc": 4,
+        "rival": "278"
+      },
+      "17": {
+        "gf": 2,
+        "gc": 0,
+        "rival": "294"
+      },
+      "12": {
+        "gf": 1,
+        "gc": 1,
+        "rival": "305"
+      },
+      "16": {
+        "gf": 2,
+        "gc": 0,
+        "rival": "296"
+      },
+      "11": {
+        "gf": 0,
+        "gc": 0,
+        "rival": "329"
+      },
+      "10": {
+        "gf": 2,
+        "gc": 2,
+        "rival": "308"
+      },
+      "9": {
+        "gf": 2,
+        "gc": 4,
+        "rival": "282"
+      },
+      "8": {
+        "gf": 3,
+        "gc": 0,
+        "rival": "332"
+      },
+      "7": {
+        "gf": 2,
+        "gc": 2,
+        "rival": "307"
+      },
+      "6": {
+        "gf": 6,
+        "gc": 1,
+        "rival": "344"
+      },
+      "5": {
+        "gf": 6,
+        "gc": 2,
+        "rival": "366"
+      },
+      "4": {
+        "gf": 0,
+        "gc": 2,
+        "rival": "277"
+      },
+      "3": {
+        "gf": 4,
+        "gc": 1,
+        "rival": "276"
+      },
+      "2": {
+        "gf": 7,
+        "gc": 0,
+        "rival": "373"
+      }
+    },
+    "8VA": {
+      "13": {
+        "gf": 0,
+        "gc": 7,
+        "rival": "278"
+      },
+      "19": {
+        "gf": 0,
+        "gc": 3,
+        "rival": "281"
+      },
+      "12": {
+        "gf": 3,
+        "gc": 1,
+        "rival": "305"
+      },
+      "18": {
+        "gf": 1,
+        "gc": 1,
+        "rival": "303"
+      },
+      "11": {
+        "gf": 0,
+        "gc": 3,
+        "rival": "329"
+      },
+      "16": {
+        "gf": 0,
+        "gc": 1,
+        "rival": "296"
+      },
+      "17": {
+        "gf": 1,
+        "gc": 0,
+        "rival": "294"
+      },
+      "10": {
+        "gf": 1,
+        "gc": 1,
+        "rival": "308"
+      },
+      "15": {
+        "gf": 0,
+        "gc": 1,
+        "rival": "281"
+      },
+      "9": {
+        "gf": 0,
+        "gc": 1,
+        "rival": "282"
+      },
+      "14": {
+        "gf": 3,
+        "gc": 1,
+        "rival": "292"
+      },
+      "8": {
+        "gf": 1,
+        "gc": 1,
+        "rival": "332"
+      },
+      "7": {
+        "gf": 1,
+        "gc": 1,
+        "rival": "280"
+      },
+      "6": {
+        "gf": 3,
+        "gc": 0,
+        "rival": "330"
+      },
+      "5": {
+        "gf": 1,
+        "gc": 0,
+        "rival": "288"
+      },
+      "4": {
+        "gf": 0,
+        "gc": 4,
+        "rival": "286"
+      },
+      "3": {
+        "gf": 0,
+        "gc": 2,
+        "rival": "283"
+      },
+      "2": {
+        "gf": 2,
+        "gc": 2,
+        "rival": "327"
+      },
+      "1": {
+        "gf": 2,
+        "gc": 1,
+        "rival": "320"
+      }
+    },
+    "9NA": {
+      "21": {
+        "gf": 0,
+        "gc": 0,
+        "rival": "279"
+      },
+      "15": {
+        "gf": 1,
+        "gc": 2,
+        "rival": "281"
+      },
+      "20": {
+        "gf": 1,
+        "gc": 5,
+        "rival": "291"
+      },
+      "19": {
+        "gf": 0,
+        "gc": 3,
+        "rival": "277"
+      },
+      "14": {
+        "gf": 1,
+        "gc": 1,
+        "rival": "292"
+      },
+      "18": {
+        "gf": 4,
+        "gc": 1,
+        "rival": "303"
+      },
+      "13": {
+        "gf": 0,
+        "gc": 2,
+        "rival": "278"
+      },
+      "17": {
+        "gf": 0,
+        "gc": 0,
+        "rival": "294"
+      },
+      "12": {
+        "gf": 0,
+        "gc": 0,
+        "rival": "305"
+      },
+      "16": {
+        "gf": 0,
+        "gc": 0,
+        "rival": "296"
+      },
+      "11": {
+        "gf": 1,
+        "gc": 3,
+        "rival": "329"
+      },
+      "10": {
+        "gf": 0,
+        "gc": 0,
+        "rival": "308"
+      },
+      "9": {
+        "gf": 1,
+        "gc": 1,
+        "rival": "282"
+      },
+      "8": {
+        "gf": 0,
+        "gc": 0,
+        "rival": "332"
+      },
+      "7": {
+        "gf": 1,
+        "gc": 2,
+        "rival": "280"
+      },
+      "6": {
+        "gf": 0,
+        "gc": 0,
+        "rival": "330"
+      },
+      "5": {
+        "gf": 0,
+        "gc": 3,
+        "rival": "288"
+      },
+      "4": {
+        "gf": 3,
+        "gc": 2,
+        "rival": "286"
+      },
+      "3": {
+        "gf": 2,
+        "gc": 1,
+        "rival": "276"
+      },
+      "2": {
+        "gf": 11,
+        "gc": 0,
+        "rival": "373"
+      },
+      "1": {
+        "gf": 2,
+        "gc": 0,
+        "rival": "327"
+      }
+    }
   }
 }
