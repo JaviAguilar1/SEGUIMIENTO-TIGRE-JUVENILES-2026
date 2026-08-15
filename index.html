@@ -1558,6 +1558,10 @@ const matchData  = {}; // matchData[cat][fecha] = {titulares, suplentes, cambios
 const gymData    = {}; // gymData[cat] = [{id,date,name,tipo,players:[{name,load,notes}]}]
 const jugadoresStats = {}; // jugadoresStats[cat] = [{jugador,minutos_jugados,goles,...}] (acumulado temporada, futdetail)
 let chequeoSemanal = {alertas:[]}; // {fecha_revision, alertas:[{categoria,fecha,mi_plataforma,futdetail,lpf_oficial}]}
+// aliasJugadores[cat] = { "nombre normalizado en futdetail": "nombre normalizado en goleadores" }
+// Tabla de equivalencias: dos nombres distintos que son la misma persona real
+// (ver regla de emparejamiento de jugadores). Se arma a mano desde Confiabilidad.
+let aliasJugadores = {};
 const plantelFutdetail = {}; // plantelFutdetail[cat] = [{nombre,posicion,edad,altura,peso,pie,valoracion,foto}] (desde futdetail)
 CATEGORIES.forEach(cat => { plantelFutdetail[cat] = []; });
 CATEGORIES.forEach(cat => { matchData[cat] = {}; gymData[cat] = []; jugadoresStats[cat] = []; });
@@ -1774,6 +1778,7 @@ function initFirebase(){
             if(p.matchData?.[c2]) Object.assign(matchData[c2], p.matchData[c2]);
             if(p.rivalData?.[c2]) Object.assign(rivalData[c2], p.rivalData[c2]);
             if(p.chequeoSemanal) chequeoSemanal = p.chequeoSemanal;
+            if(p.aliasJugadores) aliasJugadores = p.aliasJugadores;
             refreshActiveModule();
             setTimeout(refreshAlerts, 200);
           });
@@ -1840,7 +1845,7 @@ function saveData(){
   if(!fbReady||!db||!canEdit) return;
   clearTimeout(saveTimeout);
   saveTimeout=setTimeout(()=>{
-    const payload={results:{},links:{},goleadores:{},rivalData:rivalData,matchData:matchData,gymData:gymData,jugadores:{},plantel:{},chequeoSemanal:chequeoSemanal};
+    const payload={results:{},links:{},goleadores:{},rivalData:rivalData,matchData:matchData,gymData:gymData,jugadores:{},plantel:{},chequeoSemanal:chequeoSemanal,aliasJugadores:aliasJugadores};
     CATEGORIES.forEach(cat=>{
       payload.results[cat]={};
       payload.links[cat]={};
@@ -1913,6 +1918,7 @@ function loadData(){
         if(p.matchData?.[c2]) Object.assign(matchData[c2], p.matchData[c2]);
         if(p.rivalData?.[c2]) Object.assign(rivalData[c2], p.rivalData[c2]);
         if(p.chequeoSemanal) chequeoSemanal = p.chequeoSemanal;
+        if(p.aliasJugadores) aliasJugadores = p.aliasJugadores;
       }
       showLoading(false); resolve();
     }).catch(e=>{console.warn('load error:',e);showLoading(false);resolve();});
@@ -2332,7 +2338,7 @@ function calcConfiabilidad(){
   const equipoMismatchesFiltrados=equipoMismatches.filter(m=>
     !CONFIABILIDAD_EXCEPCIONES_EQUIPO.some(e=>e.cat===m.cat && e.campo===m.campo));
 
-  const golesMismatches=[]; // {cat, jugador, mio, fut}
+  const golesMismatches=[]; // {cat, jugador, mio, fut, key, soloEn}
   CONFIABILIDAD_CATS.forEach(cat=>{
     const misGoles={}, nombreOriginal={};
     // goleadores guarda "Apellido, Nombre" y futdetail "Apellido Nombre" (sin
@@ -2345,15 +2351,23 @@ function calcConfiabilidad(){
       misGoles[key]=(misGoles[key]||0)+g.goals;
       nombreOriginal[key]=nombreOriginal[key]||g.name;
     });
+    // Tabla de equivalencias: si un nombre de futdetail está vinculado a un
+    // nombre de "mi carga", se suma bajo esa misma clave en vez de aparecer
+    // como una persona aparte.
+    const alias=aliasJugadores[cat]||{};
     const futGoles={};
     (jugadoresStats[cat]||[]).forEach(j=>{
-      const key=normComparable(j.jugador);
-      futGoles[key]=parseInt(j.goles)||0;
+      const keyOriginal=normComparable(j.jugador);
+      const key=alias[keyOriginal]||keyOriginal;
+      futGoles[key]=(futGoles[key]||0)+(parseInt(j.goles)||0);
       nombreOriginal[key]=nombreOriginal[key]||j.jugador;
     });
     new Set([...Object.keys(misGoles), ...Object.keys(futGoles)]).forEach(key=>{
       const mio=misGoles[key]||0, fut=futGoles[key]||0;
-      if(mio!==fut) golesMismatches.push({cat, jugador:nombreOriginal[key], mio, fut});
+      if(mio!==fut){
+        const soloEn = !(key in misGoles) ? 'futdetail' : !(key in futGoles) ? 'mia' : 'ambas';
+        golesMismatches.push({cat, jugador:nombreOriginal[key], mio, fut, key, soloEn});
+      }
     });
   });
 
@@ -2366,6 +2380,25 @@ function revisarConfiabilidad(){
   TABLA_DATA=null;
   showToast('🔄 REVISANDO...');
   renderConfiabilidad('gen-confiabilidad');
+}
+
+// Tabla de equivalencias de jugadores: vincula un nombre "huérfano" (que
+// solo aparece en una fuente) con el que elegiste del lado opuesto, para
+// que de ahora en más se sumen como la misma persona.
+function vincularJugador(cat, keyEstaFila, soloEnEstaFila, keyElegida){
+  if(!canEdit || !keyElegida) return;
+  const keyFut = soloEnEstaFila==='futdetail' ? keyEstaFila : keyElegida;
+  const keyMia = soloEnEstaFila==='mia' ? keyEstaFila : keyElegida;
+  aliasJugadores[cat]=aliasJugadores[cat]||{};
+  aliasJugadores[cat][keyFut]=keyMia;
+  guardarAliasJugadores();
+  showToast('🔗 VINCULADO');
+  renderConfiabilidad('gen-confiabilidad');
+}
+function guardarAliasJugadores(){
+  if(!fbReady||!db||!canEdit) return;
+  db.ref('stats/aliasJugadores').set(aliasJugadores)
+    .catch(e=>console.warn('guardarAliasJugadores error:',e));
 }
 
 function renderConfiabilidad(containerId){
@@ -2422,10 +2455,32 @@ function renderConfiabilidad(containerId){
     if(golesMismatches.length){
       html+=`<div style="font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:1px;color:var(--muted);margin:14px 0 6px">
         GOLES POR JUGADOR · mi carga vs futdetail</div>`;
-      html+=golesMismatches.map(m=>row(
-        `<b style="color:${CAT_COLORS[m.cat]}">${m.cat}</b> · ${esc(m.jugador)}`,
-        `Mi carga: <b>${m.mio}</b> · futdetail: <b>${m.fut}</b>`
-      )).join('');
+      html+=golesMismatches.map(m=>{
+        let vincularHTML='';
+        // Si aparece solo de un lado, puede ser el mismo jugador escrito
+        // distinto en la otra fuente — ofrecer vincularlo con un candidato
+        // del lado opuesto en la misma categoría.
+        if(canEdit && (m.soloEn==='mia' || m.soloEn==='futdetail')){
+          const candidatos=golesMismatches.filter(x=>x.cat===m.cat && x.soloEn!=='ambas' && x.soloEn!==m.soloEn);
+          if(candidatos.length){
+            const selId=('vinc-'+m.cat+'-'+m.key).replace(/[^a-zA-Z0-9-]/g,'_');
+            const opts=candidatos.map(c=>`<option value="${esc(c.key)}">${esc(c.jugador)}</option>`).join('');
+            vincularHTML=`
+              <select id="${selId}" style="background:var(--surface2);border:1px solid var(--border2);color:var(--text);
+                font-family:'Barlow Condensed',sans-serif;font-size:11px;padding:3px 6px;border-radius:4px;margin-left:8px">
+                <option value="">— Es el mismo que… —</option>${opts}
+              </select>
+              <button onclick="vincularJugador('${esc(m.cat)}','${esc(m.key)}','${m.soloEn}',document.getElementById('${selId}').value)"
+                style="background:rgba(26,58,143,0.25);border:1px solid var(--border2);color:var(--gold2);
+                border-radius:6px;padding:4px 8px;font-family:Barlow Condensed,sans-serif;font-size:11px;
+                letter-spacing:1px;cursor:pointer;white-space:nowrap;margin-left:4px">🔗 Vincular</button>`;
+          }
+        }
+        return row(
+          `<b style="color:${CAT_COLORS[m.cat]}">${m.cat}</b> · ${esc(m.jugador)}`,
+          `Mi carga: <b>${m.mio}</b> · futdetail: <b>${m.fut}</b>${vincularHTML}`
+        );
+      }).join('');
     }
 
     el.innerHTML=html;
@@ -3823,6 +3878,7 @@ function startPublicListener(){
       }
     });
     if(p.chequeoSemanal) chequeoSemanal = p.chequeoSemanal;
+    if(p.aliasJugadores) aliasJugadores = p.aliasJugadores;
     refreshActiveModule();
   });
 }
