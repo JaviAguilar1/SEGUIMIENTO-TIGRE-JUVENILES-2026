@@ -5985,7 +5985,13 @@ function normNombreOrdenIndependiente(s){
 function gpsDetectCategoria(allText, extractedNames){
   const catRe = new RegExp('\\b(' + CATEGORIES.filter(c=>c!=='RESERVA').join('|') + ')\\b', 'i');
   const m = allText.match(catRe);
-  const cat = m ? m[1].toUpperCase() : null;
+  let cat = m ? m[1].toUpperCase() : null;
+  if(!cat){
+    // Catapult a veces tipea "4TQ" en vez de "4TA" (typo conocido, ya lo
+    // manejaba el parser viejo) — probar esa variante antes de rendirse.
+    const typo = allText.match(/\b([4-6])\s*T[AQ]\b/i);
+    if(typo) cat = typo[1]+'TA';
+  }
   if(!cat) return { cat:null, matchRate:null };
   const roster = new Set((plantelFutdetail[cat]||[]).map(p=>normNombreOrdenIndependiente(p.nombre)));
   if(!roster.size || !extractedNames.length) return { cat, matchRate:null };
@@ -6032,7 +6038,9 @@ async function extractGpsDataFromPdf(file){
   const colXs = gpsNumsWithX(best.rows[best.dataStart].items).map(o=>o.x);
   const fieldKeys = gpsBuildFieldMap(best.rows, best.dataStart, colXs);
 
-  const SUMMARY = /^(Total|Promedio|Prom|Average)/i;
+  // Exacto (no solo "empieza con") — si no, un jugador real como
+  // "Maximiliano Cortes" matchea el prefijo "Max" y se descarta por error.
+  const SUMMARY = /^(Total|Promedio|Prom|Min|Max|Average)\s*$/i;
   const players = [];
   let totalRow=null, promRow=null;
 
