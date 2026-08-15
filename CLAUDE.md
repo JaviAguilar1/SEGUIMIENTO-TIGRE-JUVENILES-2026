@@ -329,5 +329,52 @@ usuario ("HACE TODO LO QUE PUEDAS"):
    (columnas más separadas) — antes ese caso podía perder datos por
    "quedar demasiado lejos" de un umbral pensado para columnas más juntas.
 
+**Backup automático de Firebase (COMPLETO, 2026-08-15):**
+`scripts/backup_firebase.py`, corre una vez por día vía
+`.github/workflows/backup.yml` (cron 6am UTC / 3am Argentina, más botón
+"Run workflow" para forzarlo). Antes no existía ninguna copia de respaldo
+de los datos de la temporada — vivían solo en Firebase.
+- Guarda un JSON por día en `data/backups/backup-YYYY-MM-DD.json` y borra
+  los más viejos que los últimos 30 (`BACKUPS_A_CONSERVAR`), para que el
+  repo no crezca sin límite.
+- **Probé en vivo los 4 nodos que lee la app** (`stats`, `plantel`,
+  `rendimiento`, `gps`, los mismos que lee `loadData()`) pidiéndolos sin
+  login: solo `stats` respondió 200 (resultados, goleadores, links,
+  aliasJugadores, etc. — todo lo que guarda `saveData()` bajo ese nodo).
+  `plantel`, `rendimiento` y `gps` dieron 401 — necesitan sesión. Esto
+  coincide con `startPublicListener()` (línea ~4504: "load stats for
+  everyone, auth or not") — la lectura pública es a propósito, pero
+  **solo para `stats`**, no para los otros tres como decía un comentario
+  viejo cerca de `showLoginWall()` que ya no refleja el diseño real.
+  Por hoy, el script respalda `stats` sin necesitar nada de vos.
+- **Para que también respalde `plantel`/`rendimiento`/`gps`** (roster,
+  tarjetas, lesiones, sesiones GPS) hace falta un usuario de Firebase
+  dedicado (rol "viewer" alcanza, no necesita poder editar nada) — crealo
+  en Firebase Console y cargá su email/contraseña como secrets de GitHub
+  `FIREBASE_BACKUP_EMAIL` / `FIREBASE_BACKUP_PASS`. El script ya sabe
+  usarlos si están (mismo patrón que `FUTDETAIL_USER`/`PASS`); si no
+  están, sigue funcionando igual, solo que respalda menos.
+
+**Reglas de seguridad de Firebase — pendiente de revisar en la consola:**
+lo de arriba fue probar desde AFUERA qué se puede leer sin loguearse — no
+pude ver las reglas reales (viven en Firebase Console, no en este repo,
+y no tengo acceso). Dos cosas que valdría la pena que confirmes ahí vos
+mismo cuando tengas un rato:
+1. Que la escritura a `stats`/`plantel`/`rendimiento`/`gps` esté
+   condicionada al rol del usuario (`admin`/`videoanalista`/
+   `videoanalista_reserva`, ver `canEdit` en `index.html`) y no solo a
+   "estar logueado" — si cualquier cuenta logueada puede escribir, un rol
+   "viewer" mal puesto también podría editar datos.
+2. Que `users/{uid}/role` (de donde la app lee qué rol tenés) no sea
+   editable desde el navegador por el usuario dueño de esa cuenta — los
+   roles se asignan a mano por vos desde la consola; si ese nodo quedara
+   escribible, alguien con una cuenta común podría asignarse `admin` a
+   sí mismo con una request directa, sin pasar por la app.
+No toqué nada de esto porque cambiar reglas de seguridad de un sistema en
+producción no es algo que deba hacer sin que lo veas y lo confirmes vos.
+
 **Pendiente / a futuro:**
 - Decidir si conviene recuperar CARGA (gimnasio) y/o SEMANA — ver arriba.
+- Revisar las reglas de Firebase en la consola (ver arriba).
+- Si te interesa respaldar también plantel/rendimiento/gps, crear el
+  usuario "viewer" dedicado y cargar los secrets (ver arriba).
