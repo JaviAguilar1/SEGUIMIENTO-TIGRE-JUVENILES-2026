@@ -2285,6 +2285,13 @@ function renderTablaGeneral(containerId){
 // 7MA, 8VA y 9NA quedan afuera de la confiabilidad a pedido de Javi.
 const CONFIABILIDAD_CATS = ['4TA','5TA','6TA'];
 
+// Diferencias reales y ya revisadas que la LPF nunca va a corregir (quedó
+// mal cargado de su lado, confirmado contra otra fuente) — se excluyen para
+// no marcarlas cada vez. Si algún día la LPF lo arregla, sacar la entrada.
+const CONFIABILIDAD_EXCEPCIONES_EQUIPO = [
+  {cat:'6TA', campo:'GF', motivo:'LPF omitió un gol de Tigre vs River (F13); sabadogol sí lo tiene. Confirmado 2026-08-15.'},
+];
+
 function calcConfiabilidad(){
   // Partido por partido: mi carga (results) vs LIGA (fixture scrapeado de
   // sabadogol.com.ar) vs futdetail (panel privado del club). Reemplaza al
@@ -2322,6 +2329,8 @@ function calcConfiabilidad(){
     if(mio.pg!==lpf.pg) equipoMismatches.push({cat, campo:'PG', mio:mio.pg, lpf:lpf.pg});
     if(mio.gf!==lpf.gf) equipoMismatches.push({cat, campo:'GF', mio:mio.gf, lpf:lpf.gf});
   });
+  const equipoMismatchesFiltrados=equipoMismatches.filter(m=>
+    !CONFIABILIDAD_EXCEPCIONES_EQUIPO.some(e=>e.cat===m.cat && e.campo===m.campo));
 
   const golesMismatches=[]; // {cat, jugador, mio, fut}
   CONFIABILIDAD_CATS.forEach(cat=>{
@@ -2348,7 +2357,7 @@ function calcConfiabilidad(){
     });
   });
 
-  return {partidoMismatches, equipoMismatches, golesMismatches};
+  return {partidoMismatches, equipoMismatches:equipoMismatchesFiltrados, golesMismatches};
 }
 
 // Botón "REVISAR" único para toda la sección: fuerza traer la tabla LPF de
