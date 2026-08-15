@@ -30,6 +30,16 @@ afuera a pedido):
 3. Goles por jugador: mi carga (`goleadores`) vs futdetail (`jugadoresStats`).
 Cada diferencia tiene un botón "🔄 REVISAR" que recalcula en vivo (no hay
 sistema de "marcar como resuelto" persistente, se reemplazó por esto).
+Además hay una excepción manual para un error conocido de la LPF que nunca
+va a corregirse (`CONFIABILIDAD_EXCEPCIONES_EQUIPO`, 6TA/GF).
+
+**Tabla de equivalencias de jugadores (dentro de Confiabilidad, COMPLETA):**
+cuando un jugador aparece "huérfano" (nombre distinto en mi carga vs
+futdetail — errores de tipeo, apellidos compuestos), se puede vincular a
+mano con un botón "🔗 Vincular" al lado de la diferencia. Queda guardado en
+Firebase (`aliasJugadores`, por categoría) para siempre. Adelanta la regla
+de emparejamiento de jugadores pensada para Catapult (Pegada 1) — cuando
+llegue esa fase, revisar si conviene reusar este mismo mecanismo.
 
 **Fuentes de datos automatizadas** (`scripts/scrape_tablas.py`, corre cada
 hora vía `.github/workflows/tablas.yml`, sin intervención manual):
