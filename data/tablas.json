@@ -1,5 +1,5 @@
 {
-  "actualizado": "2026-08-16 11:49",
+  "actualizado": "2026-08-16 12:22",
   "fuente": "ligaprofesional.ar (oficial)",
   "fuente_fixture": "sabadogol.com.ar",
   "categorias": {
@@ -1308,18 +1308,6 @@
     "7MA": [
       {
         "pos": 1,
-        "equipo": "Argentinos Jrs.",
-        "pts": 50,
-        "pj": 21,
-        "pg": 16,
-        "pe": 2,
-        "pp": 3,
-        "gf": 50,
-        "gc": 18,
-        "dif": 32
-      },
-      {
-        "pos": 2,
         "equipo": "River Plate",
         "pts": 50,
         "pj": 21,
@@ -1329,6 +1317,18 @@
         "gf": 64,
         "gc": 19,
         "dif": 45
+      },
+      {
+        "pos": 2,
+        "equipo": "Argentinos Jrs.",
+        "pts": 50,
+        "pj": 21,
+        "pg": 16,
+        "pe": 2,
+        "pp": 3,
+        "gf": 50,
+        "gc": 18,
+        "dif": 32
       },
       {
         "pos": 3,
@@ -1356,18 +1356,6 @@
       },
       {
         "pos": 5,
-        "equipo": "Boca Jrs.",
-        "pts": 41,
-        "pj": 21,
-        "pg": 13,
-        "pe": 2,
-        "pp": 6,
-        "gf": 46,
-        "gc": 22,
-        "dif": 24
-      },
-      {
-        "pos": 6,
         "equipo": "Newell's",
         "pts": 44,
         "pj": 21,
@@ -1379,7 +1367,7 @@
         "dif": 22
       },
       {
-        "pos": 7,
+        "pos": 6,
         "equipo": "Vélez",
         "pts": 43,
         "pj": 21,
@@ -1391,19 +1379,19 @@
         "dif": 22
       },
       {
-        "pos": 8,
-        "equipo": "Godoy Cruz",
+        "pos": 7,
+        "equipo": "Boca Jrs.",
         "pts": 41,
         "pj": 21,
-        "pg": 12,
-        "pe": 5,
-        "pp": 4,
-        "gf": 35,
-        "gc": 18,
-        "dif": 17
+        "pg": 13,
+        "pe": 2,
+        "pp": 6,
+        "gf": 46,
+        "gc": 22,
+        "dif": 24
       },
       {
-        "pos": 9,
+        "pos": 8,
         "equipo": "Lanús",
         "pts": 41,
         "pj": 21,
@@ -1413,6 +1401,18 @@
         "gf": 45,
         "gc": 22,
         "dif": 23
+      },
+      {
+        "pos": 9,
+        "equipo": "Godoy Cruz",
+        "pts": 41,
+        "pj": 21,
+        "pg": 12,
+        "pe": 5,
+        "pp": 4,
+        "gf": 35,
+        "gc": 18,
+        "dif": 17
       },
       {
         "pos": 10,
@@ -1428,42 +1428,6 @@
       },
       {
         "pos": 11,
-        "equipo": "Defensa y Justicia",
-        "pts": 35,
-        "pj": 21,
-        "pg": 10,
-        "pe": 5,
-        "pp": 6,
-        "gf": 30,
-        "gc": 26,
-        "dif": 4
-      },
-      {
-        "pos": 12,
-        "equipo": "San Lorenzo",
-        "pts": 33,
-        "pj": 21,
-        "pg": 8,
-        "pe": 9,
-        "pp": 4,
-        "gf": 34,
-        "gc": 22,
-        "dif": 12
-      },
-      {
-        "pos": 13,
-        "equipo": "Belgrano",
-        "pts": 33,
-        "pj": 21,
-        "pg": 9,
-        "pe": 6,
-        "pp": 6,
-        "gf": 44,
-        "gc": 35,
-        "dif": 9
-      },
-      {
-        "pos": 14,
         "equipo": "Platense",
         "pts": 36,
         "pj": 21,
@@ -1475,19 +1439,43 @@
         "dif": 8
       },
       {
-        "pos": 15,
-        "equipo": "Tigre",
-        "pts": 31,
+        "pos": 12,
+        "equipo": "Defensa y Justicia",
+        "pts": 35,
+        "pj": 21,
+        "pg": 10,
+        "pe": 5,
+        "pp": 6,
+        "gf": 30,
+        "gc": 26,
+        "dif": 4
+      },
+      {
+        "pos": 13,
+        "equipo": "San Lorenzo",
+        "pts": 33,
         "pj": 21,
         "pg": 8,
-        "pe": 7,
+        "pe": 9,
+        "pp": 4,
+        "gf": 34,
+        "gc": 22,
+        "dif": 12
+      },
+      {
+        "pos": 14,
+        "equipo": "Belgrano",
+        "pts": 33,
+        "pj": 21,
+        "pg": 9,
+        "pe": 6,
         "pp": 6,
         "gf": 44,
         "gc": 35,
         "dif": 9
       },
       {
-        "pos": 16,
+        "pos": 15,
         "equipo": "Gimnasia LP",
         "pts": 32,
         "pj": 21,
@@ -1497,6 +1485,18 @@
         "gf": 36,
         "gc": 32,
         "dif": 4
+      },
+      {
+        "pos": 16,
+        "equipo": "Tigre",
+        "pts": 31,
+        "pj": 21,
+        "pg": 8,
+        "pe": 7,
+        "pp": 6,
+        "gf": 44,
+        "gc": 35,
+        "dif": 9
       },
       {
         "pos": 17,
@@ -1536,54 +1536,6 @@
       },
       {
         "pos": 20,
-        "equipo": "Independiente",
-        "pts": 26,
-        "pj": 21,
-        "pg": 8,
-        "pe": 2,
-        "pp": 11,
-        "gf": 23,
-        "gc": 32,
-        "dif": -9
-      },
-      {
-        "pos": 21,
-        "equipo": "Atlético Tucumán",
-        "pts": 24,
-        "pj": 21,
-        "pg": 6,
-        "pe": 6,
-        "pp": 9,
-        "gf": 31,
-        "gc": 29,
-        "dif": 2
-      },
-      {
-        "pos": 22,
-        "equipo": "Central Córdoba",
-        "pts": 24,
-        "pj": 21,
-        "pg": 6,
-        "pe": 6,
-        "pp": 9,
-        "gf": 24,
-        "gc": 35,
-        "dif": -11
-      },
-      {
-        "pos": 23,
-        "equipo": "Colón",
-        "pts": 23,
-        "pj": 21,
-        "pg": 6,
-        "pe": 5,
-        "pp": 10,
-        "gf": 22,
-        "gc": 27,
-        "dif": -5
-      },
-      {
-        "pos": 24,
         "equipo": "Instituto",
         "pts": 26,
         "pj": 21,
@@ -1595,7 +1547,19 @@
         "dif": -1
       },
       {
-        "pos": 25,
+        "pos": 21,
+        "equipo": "Independiente",
+        "pts": 26,
+        "pj": 21,
+        "pg": 8,
+        "pe": 2,
+        "pp": 11,
+        "gf": 23,
+        "gc": 32,
+        "dif": -9
+      },
+      {
+        "pos": 22,
         "equipo": "Aldosivi",
         "pts": 26,
         "pj": 21,
@@ -1607,7 +1571,7 @@
         "dif": -9
       },
       {
-        "pos": 26,
+        "pos": 23,
         "equipo": "Unión",
         "pts": 25,
         "pj": 21,
@@ -1617,6 +1581,42 @@
         "gf": 30,
         "gc": 39,
         "dif": -9
+      },
+      {
+        "pos": 24,
+        "equipo": "Atlético Tucumán",
+        "pts": 24,
+        "pj": 21,
+        "pg": 6,
+        "pe": 6,
+        "pp": 9,
+        "gf": 31,
+        "gc": 29,
+        "dif": 2
+      },
+      {
+        "pos": 25,
+        "equipo": "Central Córdoba",
+        "pts": 24,
+        "pj": 21,
+        "pg": 6,
+        "pe": 6,
+        "pp": 9,
+        "gf": 24,
+        "gc": 35,
+        "dif": -11
+      },
+      {
+        "pos": 26,
+        "equipo": "Colón",
+        "pts": 23,
+        "pj": 21,
+        "pg": 6,
+        "pe": 5,
+        "pp": 10,
+        "gf": 22,
+        "gc": 27,
+        "dif": -5
       },
       {
         "pos": 27,
@@ -1632,18 +1632,6 @@
       },
       {
         "pos": 28,
-        "equipo": "Estudiantes RC",
-        "pts": 21,
-        "pj": 21,
-        "pg": 5,
-        "pe": 6,
-        "pp": 10,
-        "gf": 18,
-        "gc": 41,
-        "dif": -23
-      },
-      {
-        "pos": 29,
         "equipo": "Banfield",
         "pts": 22,
         "pj": 21,
@@ -1655,19 +1643,19 @@
         "dif": -13
       },
       {
-        "pos": 30,
-        "equipo": "Quilmes",
-        "pts": 19,
+        "pos": 29,
+        "equipo": "Estudiantes RC",
+        "pts": 21,
         "pj": 21,
-        "pg": 4,
-        "pe": 7,
+        "pg": 5,
+        "pe": 6,
         "pp": 10,
-        "gf": 24,
-        "gc": 48,
-        "dif": -24
+        "gf": 18,
+        "gc": 41,
+        "dif": -23
       },
       {
-        "pos": 31,
+        "pos": 30,
         "equipo": "Sarmiento",
         "pts": 20,
         "pj": 21,
@@ -1679,19 +1667,19 @@
         "dif": -11
       },
       {
-        "pos": 32,
-        "equipo": "Indepte. Rivadavia",
-        "pts": 16,
+        "pos": 31,
+        "equipo": "Quilmes",
+        "pts": 19,
         "pj": 21,
         "pg": 4,
-        "pe": 4,
-        "pp": 13,
-        "gf": 21,
-        "gc": 52,
-        "dif": -31
+        "pe": 7,
+        "pp": 10,
+        "gf": 24,
+        "gc": 48,
+        "dif": -24
       },
       {
-        "pos": 33,
+        "pos": 32,
         "equipo": "Atlético Rafaela",
         "pts": 18,
         "pj": 21,
@@ -1701,6 +1689,18 @@
         "gf": 22,
         "gc": 49,
         "dif": -27
+      },
+      {
+        "pos": 33,
+        "equipo": "Indepte. Rivadavia",
+        "pts": 16,
+        "pj": 21,
+        "pg": 4,
+        "pe": 4,
+        "pp": 13,
+        "gf": 21,
+        "gc": 52,
+        "dif": -31
       },
       {
         "pos": 34,
@@ -2923,6 +2923,11 @@
         "gf": 1,
         "gc": 3,
         "rival": "BANFIELD"
+      },
+      "21": {
+        "gf": 1,
+        "gc": 5,
+        "rival": "RACING"
       }
     },
     "7MA": {
@@ -3239,6 +3244,11 @@
         "gf": 1,
         "gc": 5,
         "rival": "BANFIELD"
+      },
+      "21": {
+        "gf": 1,
+        "gc": 2,
+        "rival": "RACING"
       }
     }
   },
