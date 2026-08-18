@@ -1344,6 +1344,7 @@ table.gen-table .cat-cell{font-family:'Bebas Neue',sans-serif;font-size:15px;
   .pdf-form { grid-template-columns: 1fr 1fr; }
   .pdf-form .btn-gen-pdf { grid-column: 1/-1; }
   .lvv-grid,.tarjetas-grid,.forma-grid { grid-template-columns: 1fr; }
+  .jug-layout { grid-template-columns: 1fr !important; }
 }
 
 /* ═══════════════════════════════════════════════════════════
@@ -2995,12 +2996,198 @@ function renderStatsSingle(cat, content){
 // rendimiento físico (Catapult, nuevo).
 function renderPlantelTab(cat, tabEl){
   tabEl.innerHTML = `
-    <div id="roster-content-${cat}"></div>
+    <div id="jugadores-view-${cat}"></div>
+
+    ${seccionTitulo('roster-tabla-'+cat, `📋 TABLA DE PLANTEL · <span style="color:${CAT_COLORS[cat]}">${cat}</span>`)}
+    <div id="sec-roster-tabla-${cat}"${seccionEstiloInicial('roster-tabla-'+cat)}>
+      <div id="roster-content-${cat}"></div>
+    </div>
+
     ${buildTarjetasLesionesHTML(cat)}
     <div id="gps-plantel-${cat}" style="margin-top:8px"></div>
   `;
+  renderJugadoresView(cat, document.getElementById(`jugadores-view-${cat}`));
   renderRosterCat(cat, document.getElementById(`roster-content-${cat}`));
   renderGpsPlantelSection(cat, document.getElementById(`gps-plantel-${cat}`));
+}
+
+// ============================================================
+//  JUGADORES — vista al estilo BL GPS Performance: lista de jugadores por
+//  posición (con buscador) a la izquierda, perfil individual a la derecha.
+//  El perfil combina lo que tenemos: datos del plantel (futdetail), estadísticas
+//  de la temporada, perfil físico GPS (máx/prom + evolución) y tarjetas/lesiones.
+// ============================================================
+let gpsJugadorSel = {}; // cat -> nombre seleccionado
+
+// Color por línea (la que va entre paréntesis en la posición: ARQ/DEF/VOL/DEL).
+function jugPosColor(posicion){
+  const m=(posicion||'').match(/\((ARQ|DEF|VOL|DEL)\)/i);
+  const line=m?m[1].toUpperCase():'';
+  return {ARQ:'#f0c040', DEF:'#3b82f6', VOL:'#16a34a', DEL:'#dc2626'}[line] || '#5a7099';
+}
+function jugIniciales(nombre){
+  const p=(nombre||'').trim().split(/\s+/);
+  return ((p[0]||'').charAt(0)+(p[1]||'').charAt(0)).toUpperCase() || '?';
+}
+function buildMergedRoster(cat){
+  const roster=plantelFutdetail[cat]||[];
+  const statsPorNombre={};
+  (jugadoresStats[cat]||[]).forEach(j=>{ statsPorNombre[normNombre(j.jugador)]=j; });
+  return roster.map(p=>({...p, stats:statsPorNombre[normNombre(p.nombre)]||{}}));
+}
+
+function renderJugadoresView(cat, container){
+  if(!container) return;
+  const merged=buildMergedRoster(cat);
+  if(!merged.length){
+    container.innerHTML=`<div class="st"><div class="stbar"></div>👥 JUGADORES</div>
+      <div style="text-align:center;padding:24px;color:var(--muted);font-family:Barlow Condensed,sans-serif;letter-spacing:1px;font-size:13px">Sin plantel cargado aún</div>`;
+    return;
+  }
+  container.innerHTML=`<div class="st"><div class="stbar"></div>👥 JUGADORES</div>
+    <div class="jug-layout" style="display:grid;grid-template-columns:minmax(220px,300px) 1fr;gap:14px;align-items:start">
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden">
+        <div style="padding:10px 12px;border-bottom:1px solid var(--border)">
+          <input type="text" id="jugSearch-${cat}" placeholder="🔍 Buscar jugador…" oninput="jugadorFiltrar('${cat}')"
+            style="width:100%;background:rgba(5,8,15,0.7);border:1px solid var(--border2);color:var(--text);border-radius:6px;padding:7px 10px;font-family:'Barlow',sans-serif;font-size:13px;outline:none;box-sizing:border-box">
+        </div>
+        <div id="jugList-${cat}" style="max-height:560px;overflow-y:auto">${jugadoresListHTML(cat, merged)}</div>
+      </div>
+      <div id="jugMain-${cat}" style="min-width:0"></div>
+    </div>`;
+  renderJugadorPerfil(cat);
+}
+
+function jugadoresListHTML(cat, merged){
+  // Agrupar por posición (nombre completo), ordenando por minutos jugados desc
+  const groups={};
+  merged.forEach(p=>{ const k=p.posicion||'—'; (groups[k]=groups[k]||[]).push(p); });
+  const sel=gpsJugadorSel[cat];
+  return Object.keys(groups).sort().map(pos=>{
+    const color=jugPosColor(pos);
+    const items=groups[pos].sort((a,b)=>(parseInt(b.stats.minutos_jugados)||0)-(parseInt(a.stats.minutos_jugados)||0)).map(p=>{
+      const nRec=gpsJugadorPartidoRecords(cat, p.nombre).length;
+      const on=p.nombre===sel;
+      return `<div class="jug-item" data-nombre="${esc((p.nombre||'').toLowerCase())}" onclick="selJugador('${cat}',this.dataset.full)" data-full="${esc(p.nombre)}" data-color="${color}"
+        style="display:flex;align-items:center;gap:9px;padding:8px 12px;cursor:pointer;border-left:3px solid ${on?color:'transparent'};background:${on?'rgba(240,192,64,0.06)':'transparent'}">
+        <div style="width:30px;height:30px;border-radius:50%;background:${color};display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:13px;color:#0a0f1e;flex-shrink:0">${jugIniciales(p.nombre)}</div>
+        <div style="min-width:0">
+          <div style="font-family:'Barlow Condensed',sans-serif;font-size:13px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(p.nombre)}</div>
+          <div style="font-size:10px;color:var(--muted)">${nRec} registro${nRec!==1?'s':''} GPS</div>
+        </div>
+      </div>`;
+    }).join('');
+    return `<div class="jug-pos-group">
+      <div style="padding:6px 12px;font-family:'Barlow Condensed',sans-serif;font-size:10px;letter-spacing:1px;color:${color};background:rgba(5,8,15,0.4);border-bottom:1px solid var(--border)">${esc(pos)}</div>
+      ${items}
+    </div>`;
+  }).join('');
+}
+
+function jugadorFiltrar(cat){
+  const q=(document.getElementById(`jugSearch-${cat}`).value||'').toLowerCase();
+  const list=document.getElementById(`jugList-${cat}`);
+  if(!list) return;
+  list.querySelectorAll('.jug-item').forEach(el=>{
+    el.style.display=el.dataset.nombre.includes(q)?'':'none';
+  });
+  list.querySelectorAll('.jug-pos-group').forEach(g=>{
+    const any=[...g.querySelectorAll('.jug-item')].some(i=>i.style.display!=='none');
+    g.style.display=any?'':'none';
+  });
+}
+
+function selJugador(cat, nombre){
+  gpsJugadorSel[cat]=nombre;
+  const list=document.getElementById(`jugList-${cat}`);
+  if(list) list.querySelectorAll('.jug-item').forEach(el=>{
+    const on=el.dataset.full===nombre;
+    el.style.borderLeftColor=on?(el.dataset.color||'var(--gold)'):'transparent';
+    el.style.background=on?'rgba(240,192,64,0.06)':'transparent';
+  });
+  renderJugadorPerfil(cat);
+}
+
+function renderJugadorPerfil(cat){
+  const main=document.getElementById(`jugMain-${cat}`);
+  if(!main) return;
+  const nombre=gpsJugadorSel[cat];
+  const merged=buildMergedRoster(cat);
+  const p=merged.find(x=>x.nombre===nombre);
+  if(!p){
+    main.innerHTML=`<div style="border:2px dashed var(--border2);border-radius:10px;padding:40px 20px;text-align:center;color:var(--muted);font-family:'Barlow Condensed',sans-serif">
+      <div style="font-size:34px;margin-bottom:8px">👤</div>
+      <div style="font-size:15px;color:var(--text2)">Seleccioná un jugador</div>
+      <div style="font-size:12px;margin-top:4px">Elegí un jugador de la lista para ver su perfil completo.</div>
+    </div>`;
+    return;
+  }
+  const color=jugPosColor(p.posicion);
+  const s=p.stats||{};
+  const gpsRecords=gpsJugadorPartidoRecords(cat, nombre);
+  const nRec=gpsRecords.length;
+
+  // Máximos GPS (dist / vel / +25 / sprints) sobre partidos
+  const maxDe=key=>{ const vals=gpsRecords.map(r=>GPS_METRIC_BY_KEY[key]?.get(r)).filter(v=>v!=null&&v>0); return vals.length?Math.max(...vals):null; };
+  const fvHero=v=>v==null?'—':(Number.isInteger(v)?v.toLocaleString('es-AR'):(+v).toFixed(1));
+  const heroStats=[['dist','Dist máx'],['velmax','Vel máx'],['m25','+25 máx'],['sprints','Sprints máx']]
+    .map(([k,l])=>`<div style="text-align:center"><div style="font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--gold2);line-height:1">${fvHero(maxDe(k))}</div><div style="font-size:9px;color:var(--muted);letter-spacing:.5px;text-transform:uppercase;font-family:'Barlow Condensed',sans-serif">${l}</div></div>`).join('');
+
+  // Estadísticas de temporada (futdetail)
+  const seasonTiles=[
+    ['Convocatorias', s.convocatorias||0], ['Titular', s.partidos_titular||0],
+    ['Minutos', s.minutos_jugados||0], ['Goles', s.goles||0, '#60a5fa'],
+    ['Asistencias', s.asistencias||0], ['🟨', s.tarjeta_amarilla||0, 'var(--draw)'],
+    ['🟥', s.tarjeta_roja||0, 'var(--loss)']
+  ].map(([l,v,col])=>`<div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:9px 6px;text-align:center">
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:20px;color:${col||'var(--text)'};line-height:1">${v}</div>
+      <div style="font-size:9px;color:var(--muted);letter-spacing:.5px;text-transform:uppercase;font-family:'Barlow Condensed',sans-serif;margin-top:2px">${l}</div>
+    </div>`).join('');
+
+  // Tabla máx/prom GPS por métrica (visible)
+  let gpsTablaHTML='';
+  if(nRec){
+    const rows=gpsVisibleMetrics().map(m=>{
+      const vals=gpsRecords.map(r=>m.get(r)).filter(v=>v!=null&&v>0);
+      if(!vals.length) return '';
+      const mx=Math.max(...vals), av=+(vals.reduce((a,b)=>a+b,0)/vals.length).toFixed(2);
+      return `<tr><td style="color:var(--muted)">${m.label} <span style="font-size:9px;opacity:.7">(${m.unit})</span></td>
+        <td style="text-align:center;color:var(--gold2);font-weight:700">${mx}</td>
+        <td style="text-align:center">${av}</td></tr>`;
+    }).filter(Boolean).join('');
+    gpsTablaHTML=`<div style="margin-top:16px">
+      <div class="st" style="margin-bottom:8px"><div class="stbar"></div>PERFIL FÍSICO · ${nRec} PARTIDO${nRec!==1?'S':''}</div>
+      <div class="table-wrap"><table><thead><tr><th></th><th style="text-align:center">Máx.</th><th style="text-align:center">Prom.</th></tr></thead><tbody>${rows}</tbody></table></div>
+      ${gpsEvolucionHTML(cat, p.posicion, nombre)}
+    </div>`;
+  } else {
+    gpsTablaHTML=`<div style="margin-top:16px;text-align:center;padding:18px;color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-size:12px;border:1px dashed var(--border2);border-radius:8px">Sin datos GPS de partido para este jugador.</div>`;
+  }
+
+  // Tarjetas / lesiones del jugador
+  const tj=(tarjetas[cat]||[]).find(x=>x.name.toLowerCase()===nombre.toLowerCase());
+  const les=(lesiones[cat]||[]).filter(x=>x.name.toLowerCase()===nombre.toLowerCase());
+  let tlHTML='';
+  if((tj && (tj.amarillas||tj.rojas)) || les.length){
+    const tjTxt=tj&&(tj.amarillas||tj.rojas)?`<span style="margin-right:12px">🟨 ${tj.amarillas||0} · 🟥 ${tj.rojas||0}</span>`:'';
+    const lesTxt=les.map(l=>`<span style="display:inline-block;background:${l.estado==='activa'?'rgba(220,38,38,0.15)':'rgba(90,112,153,0.15)'};border:1px solid ${l.estado==='activa'?'var(--loss)':'var(--border2)'};border-radius:5px;padding:2px 8px;margin:2px 4px 2px 0;font-size:11px">🩹 ${esc(l.tipo)} · ${esc(l.fecha)} ${l.estado==='activa'?'(activa)':'(recuperado)'}</span>`).join('');
+    tlHTML=`<div style="margin-top:14px;font-family:'Barlow Condensed',sans-serif;font-size:12px;color:var(--text2)">${tjTxt}${lesTxt}</div>`;
+  }
+
+  main.innerHTML=`
+    <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;background:var(--surface);border:1px solid var(--border);border-top:3px solid ${color};border-radius:10px;padding:16px">
+      <div style="width:56px;height:56px;border-radius:50%;background:${color};display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:24px;color:#0a0f1e;flex-shrink:0">${jugIniciales(nombre)}</div>
+      <div style="flex:1;min-width:140px">
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:1px;color:var(--text);line-height:1">${esc(nombre)}</div>
+        <div style="font-family:'Barlow Condensed',sans-serif;font-size:13px;color:var(--muted)">${esc(p.posicion||'—')}${p.edad?` · ${p.edad} años`:''} · ${nRec} registro${nRec!==1?'s':''} GPS</div>
+        <button onclick="exportFichaJugador('${cat}', this.dataset.n)" data-n="${esc(nombre)}" style="margin-top:8px;background:linear-gradient(135deg,var(--red),#8a0f1e);border:none;border-radius:6px;color:#fff;font-family:'Barlow Condensed',sans-serif;font-size:12px;letter-spacing:1px;padding:6px 14px;cursor:pointer">📄 Exportar ficha</button>
+      </div>
+      <div style="display:flex;gap:16px;flex-wrap:wrap">${heroStats}</div>
+    </div>
+    ${tlHTML}
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(84px,1fr));gap:7px;margin-top:14px">${seasonTiles}</div>
+    ${gpsTablaHTML}
+  `;
 }
 
 // ============================================================
@@ -4717,9 +4904,7 @@ function renderRosterCat(cat, content){
   const statsPorNombre={};
   (jugadoresStats[cat]||[]).forEach(j=>{ statsPorNombre[normNombre(j.jugador)]=j; });
 
-  content.innerHTML=`
-    <div class="st" style="margin-top:4px"><div class="stbar"></div>PLANTEL</div>
-    <div id="roster-table-${cat}"></div>`;
+  content.innerHTML=`<div id="roster-table-${cat}"></div>`;
 
   if(roster.length===0){
     document.getElementById(`roster-table-${cat}`).innerHTML=

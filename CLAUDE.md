@@ -518,25 +518,23 @@ sesiones en Firebase, ya no hace falta revisarlas.
   ("Cristian Lezcano" / "Josue Rojas"); en cuanto el plantel los incluya, se
   podrán vincular como cualquier otro huérfano.
 
-**Rediseño de PLANTEL al estilo BL GPS Performance (EN CURSO, iniciado 2026-08-18):**
+**Rediseño de PLANTEL al estilo BL GPS Performance (COMPLETO, 2026-08-18):**
 a pedido expreso del usuario ("la idea es hacerlo lo mas parecido o
-exactamente igual al index... de BL GPS Performance"), se decidió llevar
-TODA la pestaña PLANTEL (no solo GPS) a la estructura/funcionalidad de esa
-app de referencia — manteniendo siempre el tema oscuro/dorado propio (nunca
-el fondo claro/azul de BL). Dado el tamaño (el módulo "Perfil" de BL solo ya
-tiene miles de líneas: 3 pestañas con gráficos, 2 pantallas de
-configuración, arrastrar-para-reordenar; más la reorganización de
-"Jugadores" con lista/buscador/perfil individual), se dividió en fases con
-checkpoint entre cada una en vez de intentarlo todo junto:
+exactamente igual al index... de BL GPS Performance"), se llevó TODA la
+pestaña PLANTEL (no solo GPS) a la estructura/funcionalidad de esa app de
+referencia — manteniendo siempre el tema oscuro/dorado propio (nunca el
+fondo claro/azul de BL). Dado el tamaño (el módulo "Perfil" de BL solo ya
+tiene miles de líneas), se dividió en 5 fases con checkpoint entre cada una,
+**todas completas**:
 1. Sparkline de tendencia en "Perfil de posición" — **COMPLETA**.
-2. "Por fecha" — comparar todos los jugadores de una posición en UNA
-   métrica a lo largo de varias fechas (gráfico de barras).
-3. "Informe de partido" — resumen visual de un partido puntual, todo el
-   equipo.
-4. Config de Métricas + Bandas + arrastrar para reordenar.
-5. Reorganizar PLANTEL al estilo "Jugadores" de BL (lista con buscador por
-   posición + perfil individual al click) — el cambio más grande, toca la
-   estructura general de la pestaña.
+2. "Por fecha" — comparar jugadores de una posición por métrica y fecha
+   (bandas +85/60-84/-60 min) — **COMPLETA**.
+3. "Informe de partido" — resumen visual de un partido, todo el equipo
+   (KPIs + gráficos Chart.js) — **COMPLETA**.
+4. Config de métricas (reordenar/ocultar/renombrar) — **COMPLETA** (bandas
+   quedaron afuera: nuestras zonas de Catapult son fijas, ver Fase 4).
+5. Reorganizar PLANTEL al estilo "Jugadores" de BL — **COMPLETA** (ver
+   abajo).
 
 **Fase 1 — Sparkline de tendencia (COMPLETA, 2026-08-18):** dentro de
 "🧬 Jugador vs. perfil de su posición" (PLANTEL → GPS), debajo de la tabla
@@ -697,10 +695,40 @@ mismo patrón que `aliasJugadoresGps`.
   fecha a 15 chips; el informe sigue con 8 KPIs y 7 gráficos intactos. Sin
   errores de consola.
 
+**Fase 5 — PLANTEL al estilo "Jugadores" de BL (COMPLETA, 2026-08-18):**
+`renderPlantelTab` ahora arranca con una sección "👥 JUGADORES"
+(`renderJugadoresView`) de dos columnas — a la izquierda, lista de jugadores
+agrupados por posición con buscador (`jugadoresListHTML`/`jugadorFiltrar`);
+a la derecha, el perfil individual (`renderJugadorPerfil`) al hacer click
+(`selJugador`, estado en `gpsJugadorSel[cat]`). Debajo, todo lo que ya estaba
+quedó como secciones colapsables (a pedido del usuario, "Jugadores arriba, lo
+demás abajo"): la tabla de roster se envolvió en un colapsable "📋 TABLA DE
+PLANTEL" (se le sacó su header interno "PLANTEL" para no duplicar), y siguen
+tarjetas/lesiones y toda la sección GPS de equipo.
+- **El perfil individual combina** (decisión del usuario "Resumen + Evolución
+  GPS", sin las sub-pestañas de microciclos de BL que no aplican a nuestros
+  datos): *hero* con avatar de iniciales coloreado por línea
+  (`jugPosColor`: ARQ dorado / DEF azul / VOL verde / DEL rojo) + máximos GPS
+  (dist/vel/+25/sprints) + botón "📄 Exportar ficha" (reusa
+  `exportFichaJugador`); tarjetas/lesiones del jugador; tiles de estadísticas
+  de temporada de futdetail (convocatorias, titular, minutos, goles,
+  asistencias, amarillas, rojas); tabla máx/prom de GPS por métrica
+  (respeta `gpsVisibleMetrics`, o sea la config de Fase 4); y la grilla de
+  evolución (`gpsEvolucionHTML`, reusada — la misma de Fase 1).
+- **`buildMergedRoster(cat)`** extrae el cruce roster+stats (antes vivía
+  inline en `renderRosterCat`) para compartirlo entre la lista, el perfil y
+  la tabla de roster.
+- Layout responsive: `.jug-layout` es grid de 2 columnas en desktop y pasa a
+  1 columna en móvil (regla agregada al media query existente).
+- Probado en la app real (roster público de 4ta, 38 jugadores, 15 grupos de
+  posición) + GPS falso inyectado: la lista agrupa/filtra/resalta bien, el
+  perfil arma hero+máximos+stats+tabla GPS (16 métricas)+16 sparklines de
+  evolución sin NaN, el buscador filtra por nombre ocultando grupos vacíos,
+  la tabla de roster colapsable sigue con sus 38 filas y "comparar
+  jugadores", y el layout colapsa a 1 columna en móvil. Sin errores de
+  consola.
+
 **Pendiente / a futuro:**
-- Fase 5 del rediseño de PLANTEL: reorganizar PLANTEL al estilo "Jugadores"
-  de BL (lista con buscador por posición + perfil individual al click). Es
-  el cambio más grande, toca la estructura general de la pestaña.
 - Decidir si "Citaciones" vuelve a algún lado de la app o se descarta del
   todo (por ahora el código sigue ahí, sin usar — ver arriba).
 - Si futdetail sigue sin traer a Josué Rojas / Cristian Lezcano dentro del
