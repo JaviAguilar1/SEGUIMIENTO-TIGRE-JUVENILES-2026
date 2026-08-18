@@ -4774,7 +4774,12 @@ function attachTableEvents(cat){
       if(results[cat][f][0]===null&&results[cat][f][1]===null)results[cat][f]=null;
       rebuildRow(cat,f);
       const bloqueEl=document.getElementById(`bloque-cat-${cat}`);
-      if(bloqueEl) bloqueEl.innerHTML=bloqueComparativaHTML((from,to)=>calcStats(cat,from,to), cat);
+      if(bloqueEl){
+        const isReservaCat=cat==='RESERVA'||cat==='RESERVA_S2';
+        bloqueEl.innerHTML = isReservaCat
+          ? bloqueComparativaHTML((from,to)=>calcStats(cat,from,to), cat)
+          : buildRendimientoGeneralHTML((from,to)=>calcStats(cat,from,to), cat, [cat]);
+      }
       saveData();
     }
     if(e.target.classList.contains('link-input')){
@@ -5850,26 +5855,35 @@ function lvvSplit(cats, from, to){
 // % victorias, GF/PJ, GC/PJ y los puntos de local y de visitante. Reemplaza
 // al viejo "Local vs Visitante" (solo último bloque) + "Índice de
 // rendimiento" (índice compuesto 0-100, sacado a pedido).
+// Una fila por bloque (+ TOTAL): PTS/PJ/PG/PE/PP/GF/GC/DG (como una tabla de
+// posiciones normal, "el cuadro") y, separado por una línea dorada más
+// gruesa después de DG, Local/Visitante (puntos + G-E-P de cada condición)
+// y % de partidos ganados.
 function buildResumenPorBloqueHTML(calcFn, periodsCat, cats){
   const { filas, tot } = calcBloqueFilas(calcFn, periodsCat);
-  if(!filas.length) return '';
+  if(!filas.length){
+    return `<div style="text-align:center;padding:20px;color:var(--muted);
+      font-family:'Barlow Condensed',sans-serif;font-size:13px">Todavía no se jugaron partidos</div>`;
+  }
   const isReserva = periodsCat==='RESERVA'||periodsCat==='RESERVA_S2';
+  const DIV='border-right:3px solid rgba(240,192,64,0.4)';
   const cell=(v,col)=>`<td style="text-align:center;color:${col}">${v}</td>`;
   const lvvCell=(s)=>`<td style="text-align:center"><div style="font-weight:700;color:var(--gold2)">${s.pts}</div><div style="font-size:9px;color:var(--muted)">${s.pg}-${s.pe}-${s.pp}</div></td>`;
   const buildRow=(label, s, from, to, extraStyle)=>{
     if(s.pj===0) return '';
-    const ppp=(s.pts/s.pj).toFixed(2);
+    const dgC=s.dg>0?'var(--win)':s.dg<0?'var(--loss)':'var(--muted)';
     const pctW=Math.round(s.pg/s.pj*100)+'%';
-    const gfpj=(s.gf/s.pj).toFixed(2);
-    const gcpj=(s.gc/s.pj).toFixed(2);
     const lvv=lvvSplit(cats, from, to);
     return `<tr${extraStyle||''}>
       <td class="cat-cell">${label}</td>
-      ${cell(ppp,'var(--gold2)')}
-      ${cell(pctW,'var(--win)')}
-      ${cell(gfpj,'#60a5fa')}
-      ${cell(gcpj,'#f87171')}
+      ${cell(s.pts,'var(--gold2)')}
+      <td style="text-align:center">${s.pj}</td>
+      ${cell(s.pg,'var(--win)')}${cell(s.pe,'var(--draw)')}${cell(s.pp,'var(--loss)')}
+      ${cell(s.gf,'#60a5fa')}
+      ${cell(s.gc,'#f87171')}
+      <td style="text-align:center;color:${dgC};font-weight:700;${DIV}">${s.dg>0?'+':''}${s.dg}</td>
       ${lvvCell(lvv.L)}${lvvCell(lvv.V)}
+      ${cell(pctW,'var(--win)')}
     </tr>`;
   };
   const rowsHTML=filas.map(f=>buildRow(f.label, f.s, f.from, f.to,
@@ -5878,23 +5892,19 @@ function buildResumenPorBloqueHTML(calcFn, periodsCat, cats){
   return `<div class="st" style="margin-top:16px"><div class="stbar"></div>RESUMEN POR BLOQUE</div>
     <div class="gen-table-wrap"><table class="gen-table">
       <thead><tr>
-        <th>BLOQUE</th><th>PTS/PJ</th><th>% VICT</th><th>GF/PJ</th><th>GC/PJ</th>
-        <th>🏠 LOCAL</th><th>✈ VISIT</th>
+        <th>BLOQUE</th><th>PTS</th><th>PJ</th><th>PG</th><th>PE</th><th>PP</th><th>GF</th><th>GC</th>
+        <th style="${DIV}">DG</th>
+        <th>🏠 LOCAL</th><th>✈ VISIT</th><th>%</th>
       </tr></thead>
       <tbody>${rowsHTML}${totRow}</tbody>
     </table></div>
     <div style="font-family:'Barlow Condensed',sans-serif;font-size:11px;color:var(--muted);margin-top:4px">
-      Local / Visitante: puntos y G-E-P de cada condición${cats.length>1?' (las categorías menores 7ma/8va/9na juegan al revés que las mayores, ya contemplado)':''}.
+      Local / Visitante: puntos y G-E-P de cada condición${cats.length>1?' (las categorías menores 7ma/8va/9na juegan al revés que las mayores, ya contemplado)':''}. % = partidos ganados.
     </div>`;
 }
 
-// Sección completa: tabla por bloque (goles) + resumen por bloque
-// (rendimiento + local/visitante).
 function buildRendimientoGeneralHTML(calcFn, periodsCat, cats){
-  const tablaHTML=bloqueComparativaHTML(calcFn, periodsCat);
-  const { filas }=calcBloqueFilas(calcFn, periodsCat);
-  if(!filas.length) return tablaHTML;
-  return `${tablaHTML}${buildResumenPorBloqueHTML(calcFn, periodsCat, cats)}`;
+  return buildResumenPorBloqueHTML(calcFn, periodsCat, cats);
 }
 
 // ── TARJETAS ──────────────────────────────────────────────────

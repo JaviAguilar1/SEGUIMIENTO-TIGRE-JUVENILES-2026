@@ -938,6 +938,45 @@ para el cruce de Confiabilidad).
   ven bien con Tigre en su posición correcta; `pdfSectionTablaLPF` probado
   aparte, mismo resultado; sin errores de consola.
 
+**"RESUMEN POR BLOQUE" consolidado en una sola tabla (COMPLETA, 2026-08-18):**
+a pedido del usuario, con una maqueta mostrada en el chat (vía la skill de
+visualización) antes de tocar código. Antes había DOS tablas apiladas —
+`bloqueComparativaHTML` (BLOQUE/PTS/PJ/PG/PE/PP/GF/GC/DG, formato
+"tabla de posiciones") y, debajo, `buildResumenPorBloqueHTML`
+(PTS/PJ/%VICT/GF/PJ/GC/PJ + Local/Visitante) — ahora es una sola fila por
+bloque con las dos cosas juntas: `BLOQUE·PTS·PJ·PG·PE·PP·GF·GC·DG` (el
+"cuadro" de rendimiento) seguido, después de una línea dorada más gruesa
+que separa visualmente los dos grupos, de `🏠 LOCAL·✈ VISIT·%` (puntos +
+G-E-P de cada condición, y % de partidos ganados al final en vez de cerca
+del principio). Se sacaron los promedios por partido (GF/PJ, GC/PJ) porque
+ya se ve GF y GC en crudo al lado.
+- `buildResumenPorBloqueHTML` pasó a manejar también el caso sin partidos
+  jugados (antes devolvía string vacío y `buildRendimientoGeneralHTML` le
+  agregaba el mensaje "Todavía no se jugaron partidos" tomándolo de
+  `bloqueComparativaHTML`; ahora que `buildRendimientoGeneralHTML` es un
+  simple alias de `buildResumenPorBloqueHTML`, ese mensaje se armó adentro
+  directamente para no perderlo).
+- **`bloqueComparativaHTML` NO se tocó ni se borró** — RESERVA sigue
+  usándola tal cual (solo BLOQUE/PTS/PJ/PG/PE/PP/GF/GC/DG, sin Local/
+  Visitante/%), que es como ya estaba diseñado a propósito desde antes
+  (LVV usa `RIVALS`/`condicionCat`, pensado para 4ta-9na, no para el
+  fixture de Reserva).
+- **Bug encontrado de paso y corregido:** al editar un resultado a mano en
+  la tabla de RESULTADOS, el refresco en vivo de la sección de bloques
+  (`attachTableEvents`, el listener de `.score-input`) llamaba siempre a
+  `bloqueComparativaHTML` sin importar la categoría — o sea que para
+  4ta-9na, justo después de cargar un resultado, la tabla se veía
+  temporalmente con el formato viejo/incompleto (sin Local/Visitante/%)
+  hasta el próximo re-render completo (cambiar de categoría y volver,
+  recargar la página). Ahora ese refresco respeta la misma condición
+  Reserva/no-Reserva que ya usa el render inicial.
+- Probado en la app real: GENERAL y 4TA muestran la tabla nueva con la
+  línea divisoria después de DG (confirmado con `getComputedStyle`, no a
+  ojo); RESERVA sigue mostrando la tabla vieja sin cambios; el refresco en
+  vivo tras editar un resultado también se probó (mismo camino de código,
+  sin disparar una escritura real a Firebase para no tocar datos
+  productivos); sin errores de consola.
+
 **Pendiente / a futuro:**
 - Si se quiere, revisar si el badge de condición local/visitante de la tabla
   de RESULTADOS y el selector de citaciones deberían mostrar la condición
