@@ -5882,8 +5882,8 @@ function buildResumenPorBloqueHTML(calcFn, periodsCat, cats){
       ${cell(s.gf,'#60a5fa')}
       ${cell(s.gc,'#f87171')}
       <td style="text-align:center;color:${dgC};font-weight:700;${DIV}">${s.dg>0?'+':''}${s.dg}</td>
-      ${lvvCell(lvv.L)}${lvvCell(lvv.V)}
       ${cell(pctW,'var(--win)')}
+      ${lvvCell(lvv.L)}${lvvCell(lvv.V)}
     </tr>`;
   };
   const rowsHTML=filas.map(f=>buildRow(f.label, f.s, f.from, f.to,
@@ -5894,7 +5894,7 @@ function buildResumenPorBloqueHTML(calcFn, periodsCat, cats){
       <thead><tr>
         <th>BLOQUE</th><th>PTS</th><th>PJ</th><th>PG</th><th>PE</th><th>PP</th><th>GF</th><th>GC</th>
         <th style="${DIV}">DG</th>
-        <th>🏠 LOCAL</th><th>✈ VISIT</th><th>%</th>
+        <th>%</th><th>🏠 LOCAL</th><th>✈ VISIT</th>
       </tr></thead>
       <tbody>${rowsHTML}${totRow}</tbody>
     </table></div>
