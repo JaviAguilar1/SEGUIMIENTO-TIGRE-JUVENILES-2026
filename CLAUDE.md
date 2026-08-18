@@ -373,8 +373,248 @@ mismo cuando tengas un rato:
 No toqué nada de esto porque cambiar reglas de seguridad de un sistema en
 producción no es algo que deba hacer sin que lo veas y lo confirmes vos.
 
+**Perfil de posición GPS (COMPLETO, 2026-08-17):** ampliación de las
+comparativas de GPS dentro de PLANTEL, inspirada en una app aparte del
+usuario ("BL GPS Performance.html", con su propio Firebase — no relacionada
+con Tigre) que pidió expresamente usar como referencia de diseño y de
+catálogo de métricas, pero **sin conectarse a ese otro Firebase**: todo
+sigue guardándose y calculándose con los datos propios de este proyecto.
+- **Catálogo ampliado a 16 métricas** (antes 7): `GPS_COMPARE_METRICS`
+  (cerca de la línea 3009) ahora define cada métrica como
+  `{key, label, unit, get(p)}` en vez de solo `{key, label}` — el `get`
+  permite métricas calculadas (HSR/min, Sprints+25/min, Acel/min, dividiendo
+  por los minutos jugados) además de las crudas que ya traía el parser de
+  PDF de Catapult desde Fase 6 (dist, mpm, m1821, m2125, m25, sprints,
+  velmax, acc, dcc, accB2, rhie, totalPL) — **no hizo falta tocar el parser
+  de PDF para nada de esto**, ya capturaba casi todo. `gpsCompareRowsHTML`
+  se adaptó para recibir el jugador crudo (`getPlayer(item)`) y aplicarle
+  `m.get(...)`, en vez de leer `p[key]` directo — así las comparativas que
+  ya existían (entre fechas, entre jugadores) ganaron las métricas nuevas
+  gratis, sin duplicar código.
+- **Nueva comparativa "🧬 JUGADOR VS. PERFIL DE SU POSICIÓN"** dentro de
+  cada categoría (mismo bloque colapsable que el resto): elegís una
+  posición (sale de `plantelFutdetail[cat].posicion`, que ya carga
+  futdetail) y opcionalmente un jugador de esa posición, y se arma una
+  tabla con "Prom./Máx. de la posición" vs "Prom./Máx. del jugador" para
+  cada una de las 16 métricas, con el mismo criterio visual que el resto
+  de la app (mejor valor destacado en dorado, comparando promedio-con-
+  promedio y máximo-con-máximo, nunca cruzado).
+- **El "perfil de la posición" se calcula en vivo**, no se guarda nada
+  nuevo en Firebase: junta todos los registros de jugadores de sesiones
+  GPS de tipo **partido** (sin entrenamientos, mismo criterio que usa la
+  app de referencia — "máximos y promedios de competencia") cuya posición
+  en el plantel coincide, cruzando el alias GPS↔plantel que ya existía
+  (`gpsAliasedName`) para que un typo de Catapult no deje a nadie afuera.
+  A propósito **no hay pantalla de configuración manual de bandas** — en la
+  app de referencia eso es para las zonas de velocidad del sistema GPS
+  (18-21, 21-25, +25 km/h), no un benchmark por posición; el perfil real
+  por posición ahí también sale calculado, no tipeado a mano.
+- La sección solo aparece si la categoría tiene al menos una posición
+  cargada en el plantel (si no, no se muestra, no rompe nada) y solo si ya
+  hay 2+ sesiones GPS cargadas (mismo gate que las otras comparativas de
+  ese bloque).
+- Probado con datos falsos inyectados por consola (sin escribir nada en
+  Firebase) para confirmar que el cálculo de promedio/máximo y el
+  resaltado en dorado dan los números correctos antes de dar esto por
+  cerrado.
+- **Quedó afuera a propósito** (para no sobrecargar este primer corte): el
+  gráfico de tendencia tipo sparkline que tiene la app de referencia por
+  cada métrica. Si el resto se usa y gusta, se puede sumar después.
+
+**Carga histórica de GPS 4TA + arreglos del parser (COMPLETO, 2026-08-18):**
+se migraron a Firebase los datos reales de Catapult que ya estaban cargados
+en "BL GPS Performance.html" (32 jugadores, partidos de competencia de 4ta),
+más el informe del partido vs Racing (fecha 21) que se subió a Drive.
+- **Bug de Firebase encontrado y corregido por el usuario:** las reglas de
+  seguridad de Realtime Database no tenían ninguna entrada para `"gps"`
+  (sí para `stats`/`plantel`/`rendimiento`/`reserva`/`users`) — quedó
+  afuera cuando se armó Fase 6 y nadie lo notó porque nunca se había
+  intentado escribir ahí desde una cuenta real hasta ahora. Sin esa
+  entrada, Firebase deniega todo por defecto: ni admin podía guardar una
+  sesión GPS. Yo detecté el problema probando escrituras mínimas (`db.ref
+  ('gps/__test').set(...)`, comparando contra `stats`/`plantel` que sí
+  andaban) pero **no toqué las reglas** — eso lo hizo el usuario en la
+  consola de Firebase, agregando a `"gps"` el mismo criterio de
+  `.read`/`.write` que ya tenía `"plantel"`/`"rendimiento"`.
+- **32 jugadores → 13 fechas de partido (F1, F2, F6, F7, F8, F10-F17)**
+  extraídos del `const PLAYERS = {...}` embebido en el HTML de la otra app
+  (es JSON real, con métricas ya separadas en `training`/`match`). Se
+  cruzaron los rivales de cada fecha contra `RIVALS` (el fixture propio de
+  4ta) para confirmar que es la misma data real del equipo, no de otro
+  lado.
+  - **Fechas sin calendario real:** BL solo guarda "FECHA N", no fecha de
+    calendario. Se cruzó contra los PDF ya subidos a Drive (que sí traen
+    fecha) y se confirmó que el equipo jugó exactamente cada 7 días entre
+    F5 (11/4) y F12 (30/5) — eso da fecha exacta para F6/F7/F8 (quedan
+    *entre* dos anclas reales) y una estimación razonable para F1/F2
+    (extrapolando hacia atrás). Para F13-F17 no hay ancla real después de
+    F12 hasta Racing (F21, 13/8) y la cuenta no cierra prolija (indica un
+    parate a mitad de camino que no se puede reconstruir a ciegas) — a
+    pedido del usuario se cargaron igual con la misma estimación semanal,
+    marcadas `"(fecha estimada)"` en el nombre de la sesión para poder
+    corregirlas el día que aparezca la fecha real.
+  - **8 nombres de BL sin match directo al plantel** (van a aparecer como
+    huérfanos para vincular a mano, mismo mecanismo de siempre): la
+    mayoría son typos evidentes (`Alan Luengo`→`Luongo`, `Yair Hillaret`→
+    `Hillairet`, etc.); **dos quedaron sin resolver a propósito**
+    (`Josue Rojas` y `Cristian Lezcano` no tienen un apellido claro en el
+    plantel actual — no se inventó el vínculo).
+- **Partido vs Racing:** se bajó el PDF de Drive y se pasó por
+  `extractGpsDataFromPdf` (el parser real de la app, no un script aparte),
+  lo que destapó dos bugs reales del parser con este informe puntual
+  (`index.html`, cerca de la línea 5973 y 6100):
+  1. **`gpsFindSummaryPage` exigía ver la palabra "Position" en la página**
+     para aceptarla como la página de datos — este informe no trae columna
+     de posición y se descartaba entero aunque tuviera 14 filas de jugador
+     válidas. Ahora también alcanza con "Datos Generales".
+  2. **Duración en formato "01:39:30" (h:mm:ss)** en vez de minutos
+     decimales: el separador de dígitos pegados a texto (pensado para
+     casos como "Izquierdo109") la partía en 3 números sueltos (1, 39, 30),
+     corriendo mal la asignación de columnas de toda la fila. Ahora
+     `gpsNumsWithX` reconoce el patrón `h:mm:ss` y lo convierte a un solo
+     valor en minutos antes de repartir columnas.
+  - Con esos dos arreglos, el mapeo por nombre de encabezado (`gpsBuildFieldMap`)
+    igual no reconoció bien "Dist"/"Mts x Min"/"Vel Max"/"Acc"/"Dcc" en este
+    informe puntual (encabezados envueltos de forma distinta a los 19 PDF
+    ya calibrados) — en vez de tocar esa lógica general (riesgo de romper
+    los PDF que ya andan bien), se reconstruyeron esas 5 columnas a mano
+    para esta sesión usando el orden de columnas ya confirmado cruzando
+    dos jugadores contra el texto crudo del PDF, sin cambiar código del
+    parser para esa parte.
+- **Bug de fondo encontrado en `gpsAliasedName` (arreglado):** la
+  vinculación automática por nombre en otro orden ("Agustin Luna" de
+  Catapult == "Luna Agustin" del plantel) solo se usaba para decidir si
+  avisar de "huérfano" (`gpsOrphanNames`) — las comparativas individuales
+  (comparar fechas, perfil de posición) seguían comparando el nombre crudo
+  tal cual contra el jugador elegido y no encontraban nada para ningún
+  jugador con el nombre en orden distinto al del plantel. Esto ya afectaba
+  a cualquier PDF cargado antes, no es nuevo de esta carga — simplemente
+  nunca se había notado porque no había casos de nombre en orden distinto
+  hasta ahora. `gpsAliasedName` ahora prueba el mismo match por palabras
+  ordenadas alfabéticamente antes de rendirse, así el nombre canónico del
+  plantel se usa en forma consistente en todos lados.
+- Verificado en la app real (con la carga ya en Firebase, sin datos de
+  prueba): "Perfil de posición" para Lateral derecho (DEF) da promedios y
+  máximos con sentido, y comparar a Luna Agustín contra su posición ya
+  muestra sus propios números en vez de "—".
+
+**Fechas de F1-F17 confirmadas y huérfanos identificados (2026-08-18):**
+el usuario acercó el fixture oficial 2026 de la LPF (PDF) y el reglamento del
+torneo. Cruzando el fixture contra las 10 sesiones que habían quedado
+marcadas "(fecha estimada)" (F1, F2, F6, F7, F8, F13-F17): **las 10 dieron
+exactas** — ni un día de diferencia con lo estimado por interpolación
+semanal. Se sacó la etiqueta "(fecha estimada)" del nombre de esas 10
+sesiones en Firebase, ya no hace falta revisarlas.
+- El reglamento también confirma que 4ta juega 90 minutos por partido —
+  coincide con la duración real que traían los PDF de Catapult, sin
+  sorpresas.
+- Sobre los dos huérfanos sin resolver (Josue Rojas / Cristian Lezcano): el
+  usuario confirmó que son jugadores reales y distintos de "Rojas Elías" /
+  "Lezcano Alan" — sus nombres completos son **Josué Elías Rojas** y
+  **Cristian Lionel Lezcano**. Verificado que hoy no figuran en
+  `plantelFutdetail['4TA']` (el scrapeo automático de futdetail) — por eso
+  la pantalla de "vincular" no los puede ofrecer todavía, no es un bug.
+  Quedan guardados en `gps/sessions` con su nombre tal cual vino de BL
+  ("Cristian Lezcano" / "Josue Rojas"); en cuanto el plantel los incluya, se
+  podrán vincular como cualquier otro huérfano.
+
+**Rediseño de PLANTEL al estilo BL GPS Performance (EN CURSO, iniciado 2026-08-18):**
+a pedido expreso del usuario ("la idea es hacerlo lo mas parecido o
+exactamente igual al index... de BL GPS Performance"), se decidió llevar
+TODA la pestaña PLANTEL (no solo GPS) a la estructura/funcionalidad de esa
+app de referencia — manteniendo siempre el tema oscuro/dorado propio (nunca
+el fondo claro/azul de BL). Dado el tamaño (el módulo "Perfil" de BL solo ya
+tiene miles de líneas: 3 pestañas con gráficos, 2 pantallas de
+configuración, arrastrar-para-reordenar; más la reorganización de
+"Jugadores" con lista/buscador/perfil individual), se dividió en fases con
+checkpoint entre cada una en vez de intentarlo todo junto:
+1. Sparkline de tendencia en "Perfil de posición" — **COMPLETA**.
+2. "Por fecha" — comparar todos los jugadores de una posición en UNA
+   métrica a lo largo de varias fechas (gráfico de barras).
+3. "Informe de partido" — resumen visual de un partido puntual, todo el
+   equipo.
+4. Config de Métricas + Bandas + arrastrar para reordenar.
+5. Reorganizar PLANTEL al estilo "Jugadores" de BL (lista con buscador por
+   posición + perfil individual al click) — el cambio más grande, toca la
+   estructura general de la pestaña.
+
+**Fase 1 — Sparkline de tendencia (COMPLETA, 2026-08-18):** dentro de
+"🧬 Jugador vs. perfil de su posición" (PLANTEL → GPS), debajo de la tabla
+ahora se arma una grilla "📈 EVOLUCIÓN POR FECHA" con un mini-gráfico SVG
+propio por cada una de las 16 métricas (sin librerías externas, mismo
+patrón visual que BL: área rellena + línea de promedio punteada + puntos
+con tooltip al pasar el mouse), pintado con los colores de esta app
+(`var(--gold2)`) en vez del azul de BL.
+- Si hay un jugador elegido, la evolución es SU propio valor por fecha; si
+  no hay jugador (solo posición), es el promedio de todos los que jugaron
+  esa posición en cada fecha — mismo criterio que el comportamiento por
+  defecto de BL.
+- El tooltip de cada punto muestra fecha, rival y valor
+  (`gpsRivalLabel(cat, fecha)`, cruzando `RIVALS` para 4TA-9NA o
+  `rivalData` para RESERVA — mismo patrón que ya usa
+  `renderCompararFechas`).
+- Se necesitó separar `gpsPosicionRecords`/`gpsJugadorPartidoRecords` (que
+  ya existían, devuelven solo el jugador) de dos nuevas
+  `...ConSesion` (devuelven `{session, player}`) para poder agrupar por
+  fecha y ordenar cronológicamente — las versiones viejas ahora son un
+  simple `.map(r=>r.player)` de las nuevas, sin duplicar lógica ni romper
+  a quien ya las usaba.
+- Probado en la app real (con los datos ya cargados de 4ta) en los dos
+  modos — con Luna Agustín elegido y solo con la posición — sin errores de
+  consola ni valores `NaN`.
+
+**Reorganización de RENDIMIENTO en GENERAL y por categoría (COMPLETA,
+2026-08-18):** a pedido del usuario, se sacó "Forma reciente (últimos 5)"
+del todo y se fusionaron "Local vs Visitante" e "Índice de rendimiento"
+dentro de la tabla "Rendimiento por bloque de fechas" (sin su propio
+título, solo los datos) — antes eran 3 secciones aparte y LVV/índice se
+calculaban sobre toda la temporada; ahora se calculan sobre el ÚLTIMO
+bloque jugado (el mismo que la tabla ya resalta en dorado), así que
+cambian solos al mover el slider de tamaño de bloque en vez de quedar
+fijos en "últimos 5".
+- **GENERAL:** la sección pasó a llamarse "RENDIMIENTO GENERAL"; el
+  índice ahora es una sola fila "TOTAL" combinando las 6 categorías (antes
+  eran 6 filas, una por categoría) y LVV es un solo combinado de las 6 en
+  vez de 6 tarjetas separadas. Se sacó también la sección "CITACIONES" de
+  GENERAL (a pedido — "eso afuera también"). No se borró la funcionalidad
+  (`buildPDFSection`/`renderChecklist`/`generarPDF`, la planilla de
+  citaciones con firma), solo el punto de entrada en la pantalla — quedó
+  sin usar por ahora, disponible si se decide dónde ponerla después.
+- **Por categoría:** la sección pasó a llamarse solo "RENDIMIENTO" y el
+  orden de las secciones dentro de RESULTADOS quedó: Resultados →
+  Rendimiento → Comparar fechas → Goleadores → Tabla de posiciones (antes
+  Forma/LVV/Índice iba justo después de Resultados y el bloque de fechas
+  estaba más abajo, después de Comparar fechas — ahora están fusionados en
+  un solo lugar). RESERVA sigue mostrando solo la tabla de bloques (sin
+  slider, sin LVV/índice) — no tenía Forma/LVV/Índice antes tampoco, no es
+  un cambio nuevo para esa categoría.
+- Las 4 funciones viejas (`buildFormaHTML`, `buildLVVHTML`,
+  `buildIndiceRowsHTML`, `buildRendimientoStatsHTML`) se borraron —
+  quedaban sin ningún llamador después del cambio, mismo criterio que el
+  módulo GPS viejo en Fase 7 (no dejar código muerto). Las reemplazan
+  `buildLVVTotalHTML`, `buildIndiceTotalRowHTML` y
+  `buildRendimientoGeneralHTML`. `calcBloqueFilas` ahora también guarda
+  `from`/`to` de cada bloque (antes solo el label) — hacía falta para saber
+  el rango de fechas exacto del último bloque jugado.
+- Probado en la app real: GENERAL con el índice/LVV combinados, 4TA con su
+  propio total, RESERVA sin romperse, y el slider de bloque cambiando el
+  LVV/índice en vivo (probado moviendo a bloques de 7).
+
 **Pendiente / a futuro:**
+- Fases 2 a 5 del rediseño de PLANTEL (ver arriba) — seguir con la fase 2
+  ("Por fecha") cuando el usuario lo pida.
+- Decidir si "Citaciones" vuelve a algún lado de la app o se descarta del
+  todo (por ahora el código sigue ahí, sin usar — ver arriba).
+- Si futdetail sigue sin traer a Josué Rojas / Cristian Lezcano dentro del
+  plantel de 4ta, confirmar con el club si corresponde revisar la carga en
+  futdetail (no es algo que se arregle desde acá).
+- Si en algún momento aparece un PDF de partido con el mismo problema de
+  encabezados que el de Racing (Dist/Mts x Min/Vel Max/Acc/Dcc sin
+  reconocer), vale la pena revisar `gpsBuildFieldMap` en serio en vez de
+  reconstruir a mano — por ahora fue un caso único.
 - Decidir si conviene recuperar CARGA (gimnasio) y/o SEMANA — ver arriba.
-- Revisar las reglas de Firebase en la consola (ver arriba).
+- Ya se encontró y arregló el hueco de `"gps"` en las reglas de Firebase;
+  igual vale la pena que el usuario chequee alguna vez si hay otro nodo con
+  el mismo problema (algo agregado a la app sin agregar su regla).
 - Si te interesa respaldar también plantel/rendimiento/gps, crear el
   usuario "viewer" dedicado y cargar los secrets (ver arriba).

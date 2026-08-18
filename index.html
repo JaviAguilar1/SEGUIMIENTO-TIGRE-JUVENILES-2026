@@ -2288,24 +2288,16 @@ function renderStatsGeneral(content){
 
     <div id="gen-posicion"></div>
 
-    ${buildRendimientoStatsHTML('rend-gen', GENERAL_CATS)}
-
-    <div class="st" style="justify-content:space-between">
-      <span style="display:flex;align-items:center;gap:10px"><div class="stbar"></div>RENDIMIENTO POR BLOQUE DE FECHAS</span>
-      ${bloqueSliderHTML('general')}
+    ${seccionTitulo('rendgen-general', 'RENDIMIENTO GENERAL', bloqueSliderHTML('general'))}
+    <div id="sec-rendgen-general"${seccionEstiloInicial('rendgen-general')}>
+      ${buildRendimientoGeneralHTML(calcStatsAll, '4TA', GENERAL_CATS)}
     </div>
-    ${bloqueComparativaHTML(calcStatsAll, '4TA')}
 
     <div class="st"><div class="stbar"></div>🏆 TOP GOLEADORES — 4TA A 9NA</div>
     <div id="gen-top-goleadores"></div>
 
     <div class="st"><div class="stbar"></div>🏆 TABLA GENERAL DE POSICIONES (SUMA 4TA A 9NA)</div>
     <div id="gen-tabla-general"></div>
-
-    ${seccionTitulo('citaciones', '📋 CITACIONES')}
-    <div id="sec-citaciones"${seccionEstiloInicial('citaciones')}>
-      ${buildPDFSection()}
-    </div>
 
     <div class="st"><div class="stbar"></div>🔎 CONFIABILIDAD</div>
     <div id="gen-confiabilidad" style="margin-bottom:20px"></div>
@@ -2314,7 +2306,6 @@ function renderStatsGeneral(content){
   renderConfiabilidad('gen-confiabilidad');
   renderPosicionGeneral('gen-posicion');
   wireBloqueSlider('general', ()=>renderStatsCat('GENERAL'));
-  renderChecklist();
 
   // Top 5 goleadores all categories
   const topWrap = document.getElementById('gen-top-goleadores');
@@ -2672,7 +2663,7 @@ function calcBloqueFilas(calcFn, periodsCat){
   const isReserva = periodsCat==='RESERVA'||periodsCat==='RESERVA_S2';
   const totMax = isReserva ? 18 : 35;
   const periods=getPeriodos(periodsCat).filter(p=>p.label!=='TOTAL');
-  const filas=periods.map(p=>({label:p.label, s:calcFn(p.from,p.to)})).filter(f=>f.s.pj>0);
+  const filas=periods.map(p=>({label:p.label, from:p.from, to:p.to, s:calcFn(p.from,p.to)})).filter(f=>f.s.pj>0);
   const ultimoLabel=filas.length?filas[filas.length-1].label:null;
   filas.forEach(f=>{ f.destacado = f.label===ultimoLabel; });
   return { filas, tot: calcFn(1,totMax) };
@@ -2933,7 +2924,10 @@ function renderStatsSingle(cat, content){
       </table></div>
     </div>
 
-    ${isReserva?'':buildRendimientoStatsHTML('rend-'+cat, [cat])}
+    ${seccionTitulo('rendcat-'+dataCat, 'RENDIMIENTO', isReserva?'':bloqueSliderHTML('cat'))}
+    <div id="sec-rendcat-${dataCat}"${seccionEstiloInicial('rendcat-'+dataCat)}>
+      <div id="bloque-cat-${dataCat}"></div>
+    </div>
 
     ${seccionTitulo('comparar-'+dataCat, '🔍 COMPARAR FECHAS')}
     <div id="sec-comparar-${dataCat}"${seccionEstiloInicial('comparar-'+dataCat)}>
@@ -2941,11 +2935,6 @@ function renderStatsSingle(cat, content){
         ${compararSelectsHTML}
       </div>
       <div id="comp-fechas-result-${dataCat}" style="margin-bottom:20px"></div>
-    </div>
-
-    ${seccionTitulo('bloque-'+dataCat, 'RENDIMIENTO POR BLOQUE DE FECHAS', isReserva?'':bloqueSliderHTML('cat'))}
-    <div id="sec-bloque-${dataCat}"${seccionEstiloInicial('bloque-'+dataCat)}>
-      <div id="bloque-cat-${dataCat}"></div>
     </div>
 
     ${seccionTitulo('goleadores-'+dataCat, `GOLEADORES · <span style="color:${CAT_COLORS[cat]}">${cat}</span>`)}
@@ -2974,8 +2963,9 @@ function renderStatsSingle(cat, content){
   // Events
   attachTableEvents(dataCat);
   if(!isReserva) wireBloqueSlider('cat', ()=>renderStatsSingle(cat, content));
-  document.getElementById(`bloque-cat-${dataCat}`).innerHTML=
-    bloqueComparativaHTML((from,to)=>calcStats(dataCat,from,to), dataCat);
+  document.getElementById(`bloque-cat-${dataCat}`).innerHTML= isReserva
+    ? bloqueComparativaHTML((from,to)=>calcStats(dataCat,from,to), dataCat)
+    : buildRendimientoGeneralHTML((from,to)=>calcStats(dataCat,from,to), dataCat, [cat]);
   renderGoleadores(dataCat);
   if(isReserva) renderTablaReserva(`tabla-lpf-${cat}`);
   else renderTablaLPF(cat, `tabla-lpf-${cat}`);
@@ -3006,14 +2996,29 @@ const GPS_SELECT_STYLE = `background:var(--surface2);border:1px solid var(--bord
   font-family:'Barlow Condensed',sans-serif;font-weight:600;letter-spacing:1px;font-size:13px;
   padding:7px 12px;border-radius:6px;cursor:pointer;outline:none`;
 
+// Catálogo de métricas para las comparativas de GPS — mismas 15 métricas que
+// usa "BL GPS Performance" (más "Minutos", que ya teníamos). Los campos base
+// (dist, mpm, m1821, m2125, m25, sprints, velmax, acc, dcc, accB2, rhie,
+// totalPL) ya los captura el parser de PDF de Catapult (Fase 6); las "/min"
+// se calculan acá dividiendo por los minutos jugados — no hace falta tocar
+// el parser para nada de esto.
 const GPS_COMPARE_METRICS = [
-  {key:'min',     label:'Minutos'},
-  {key:'dist',    label:'Distancia (m)'},
-  {key:'mpm',     label:'Mts / min'},
-  {key:'sprints', label:'Sprints +25km/h'},
-  {key:'velmax',  label:'Vel. máx (km/h)'},
-  {key:'acc',     label:'Aceleraciones'},
-  {key:'dcc',     label:'Desaceleraciones'},
+  {key:'min',     label:'Minutos',            unit:'min',   get:p=>p.min},
+  {key:'dist',    label:'Distancia',          unit:'m',     get:p=>p.dist},
+  {key:'mpm',     label:'Mts / min',          unit:'m/min', get:p=>p.mpm},
+  {key:'m1821',   label:'18-21 km/h',         unit:'m',     get:p=>p.m1821},
+  {key:'m2125',   label:'HSR 21-25',          unit:'m',     get:p=>p.m2125},
+  {key:'hsrmin',  label:'HSR / min',          unit:'m/min', get:p=>(p.m2125!=null && p.min)?+(p.m2125/p.min).toFixed(2):null},
+  {key:'m25',     label:'Sprints +25',        unit:'m',     get:p=>p.m25},
+  {key:'sprmin',  label:'Sprints +25 / min',  unit:'m/min', get:p=>(p.m25!=null && p.min)?+(p.m25/p.min).toFixed(2):null},
+  {key:'sprints', label:'Cant. sprints',      unit:'#',     get:p=>p.sprints},
+  {key:'velmax',  label:'Vel. máx',           unit:'km/h',  get:p=>p.velmax},
+  {key:'acc',     label:'Aceleraciones +3',   unit:'#',     get:p=>p.acc},
+  {key:'accmin',  label:'Acel. / min',        unit:'#/min', get:p=>(p.acc!=null && p.min)?+(p.acc/p.min).toFixed(2):null},
+  {key:'dcc',     label:'Desaceleraciones +3',unit:'#',     get:p=>p.dcc},
+  {key:'accB2',   label:'Acel. 2-3',          unit:'#',     get:p=>p.accB2},
+  {key:'rhie',    label:'RHIE',               unit:'#',     get:p=>p.rhie},
+  {key:'totalPL', label:'Player Load',        unit:'AU',    get:p=>p.totalPL},
 ];
 
 // Fechas guardadas como texto "d/m/aaaa" (sin ceros a la izquierda) — para
@@ -3067,7 +3072,15 @@ function renderGpsPlantelSection(cat, container){
 function gpsAliasedName(cat, rawName){
   const key=normNombreOrdenIndependiente(rawName);
   const mapped=aliasJugadoresGps[cat] && aliasJugadoresGps[cat][key];
-  return mapped || rawName;
+  if(mapped) return mapped;
+  // Sin alias manual: probar el mismo match automático por palabras ordenadas
+  // alfabéticamente que ya usa gpsOrphanNames para no pedir "Vincular" cuando
+  // no hace falta (ej. "Agustin Luna" de Catapult == "Luna Agustin" del
+  // plantel) — antes esto solo evitaba el aviso de huérfano, pero las
+  // comparativas seguían comparando el nombre crudo tal cual y no
+  // encontraban nada para estos jugadores.
+  const rosterMatch=(plantelFutdetail[cat]||[]).find(p=>normNombreOrdenIndependiente(p.nombre)===key);
+  return rosterMatch ? rosterMatch.nombre : rawName;
 }
 function gpsOrphanNames(cat, sessions){
   const roster=new Set((plantelFutdetail[cat]||[]).map(p=>normNombreOrdenIndependiente(p.nombre)));
@@ -3256,6 +3269,8 @@ function renderGpsComparativas(cat, sessions, container){
   const allPlayerNames=[...new Set(sessions.flatMap(s=>(s.players||[]).map(p=>gpsAliasedName(cat,p.name))))].sort();
   const playerOpts='<option value="">— Jugador —</option>'+allPlayerNames.map(n=>`<option value="${esc(n)}">${esc(n)}</option>`).join('');
   const sessionOpts='<option value="">— Sesión —</option>'+sessions.map(s=>`<option value="${esc(s.id)}">${esc(s.date||'')} · ${esc(s.nombre||(s.type==='partido'?'Partido':'Entrenamiento'))}</option>`).join('');
+  const posiciones=[...new Set((plantelFutdetail[cat]||[]).map(p=>p.posicion).filter(Boolean))].sort();
+  const posOpts=posiciones.map(pos=>`<option value="${esc(pos)}">${esc(pos)}</option>`).join('');
 
   container.innerHTML=`
     ${seccionTitulo('gps-cmp-fechas-'+cat, '⚖️ RENDIMIENTO DE UN JUGADOR ENTRE FECHAS')}
@@ -3271,20 +3286,42 @@ function renderGpsComparativas(cat, sessions, container){
       <div id="gpsCmpJugSelects-${cat}" style="display:flex;gap:10px;flex-wrap:wrap;margin:10px 0"></div>
       <div id="gpsCmpJugResult-${cat}" style="margin-bottom:10px"></div>
     </div>
+
+    ${posiciones.length ? `
+    ${seccionTitulo('gps-cmp-pos-'+cat, '🧬 JUGADOR VS. PERFIL DE SU POSICIÓN')}
+    <div id="sec-gps-cmp-pos-${cat}"${seccionEstiloInicial('gps-cmp-pos-'+cat)}>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px">
+        <select id="gpsPosSel-${cat}" style="${GPS_SELECT_STYLE}">${posOpts}</select>
+        <select id="gpsPosJugadorSel-${cat}" style="${GPS_SELECT_STYLE}"></select>
+      </div>
+      <div id="gpsPosResult-${cat}"></div>
+    </div>` : ''}
   `;
   document.getElementById(`gpsCmpJugadorSel-${cat}`).addEventListener('change',()=>gpsCmpFechasOnJugadorChange(cat));
   document.getElementById(`gpsCmpSesionSel-${cat}`).addEventListener('change',()=>gpsCmpJugOnSesionChange(cat));
+  if(posiciones.length){
+    document.getElementById(`gpsPosSel-${cat}`).addEventListener('change',()=>gpsPosOnPosicionChange(cat));
+    document.getElementById(`gpsPosJugadorSel-${cat}`).addEventListener('change',()=>gpsRenderPerfilPosicion(cat));
+    gpsPosOnPosicionChange(cat);
+  }
 }
 
-function gpsCompareRowsHTML(items, getMetricVal){
+// getPlayer(item) debe devolver el registro crudo del jugador (con dist, mpm,
+// m2125, min, etc. — lo que guarda el parser de PDF) para esa columna, o
+// null/undefined si esa columna no tiene dato para ese jugador.
+function gpsCompareRowsHTML(items, getPlayer){
   return GPS_COMPARE_METRICS.map(m=>{
-    const vals=items.map(it=>getMetricVal(it,m.key)||0);
+    const vals=items.map(it=>{
+      const p=getPlayer(it);
+      const v=p?m.get(p):null;
+      return (v==null)?0:v;
+    });
     const max=Math.max(...vals);
     const cells=vals.map(v=>{
       const destacado=v===max && max>0;
       return `<td style="text-align:center${destacado?';font-weight:700;color:var(--gold2)':''}">${v}</td>`;
     }).join('');
-    return `<tr><td style="color:var(--muted)">${m.label}</td>${cells}</tr>`;
+    return `<tr><td style="color:var(--muted)">${m.label} <span style="font-size:10px;opacity:.7">(${m.unit})</span></td>${cells}</tr>`;
   }).join('');
 }
 
@@ -3310,10 +3347,7 @@ function gpsRenderCmpFechas(cat, jugador){
   }
   const sessions=ids.map(id=>gpsSessions.find(s=>s.id===id)).filter(Boolean).sort((a,b)=>gpsParseDateDMY(a.date)-gpsParseDateDMY(b.date));
   const head=sessions.map(s=>`<th style="text-align:center">${esc(s.date||'')}<br><span style="font-weight:400;font-size:10px;color:var(--muted)">${esc(s.nombre||'')}</span></th>`).join('');
-  const rows=gpsCompareRowsHTML(sessions, (s,key)=>{
-    const p=(s.players||[]).find(x=>gpsAliasedName(cat,x.name)===jugador);
-    return p ? p[key] : 0;
-  });
+  const rows=gpsCompareRowsHTML(sessions, s=>(s.players||[]).find(x=>gpsAliasedName(cat,x.name)===jugador));
   resultEl.innerHTML=`<div class="table-wrap"><table><thead><tr><th></th>${head}</tr></thead><tbody>${rows}</tbody></table></div>`;
 }
 
@@ -3340,8 +3374,190 @@ function gpsRenderCmpJugadores(cat, sesionId){
   const session=gpsSessions.find(s=>s.id===sesionId);
   const players=names.map(n=>(session?.players||[]).find(p=>gpsAliasedName(cat,p.name)===n)).filter(Boolean);
   const head=names.map(n=>`<th style="text-align:center">${esc(n)}</th>`).join('');
-  const rows=gpsCompareRowsHTML(players, (p,key)=>p[key]);
+  const rows=gpsCompareRowsHTML(players, p=>p);
   resultEl.innerHTML=`<div class="table-wrap"><table><thead><tr><th></th>${head}</tr></thead><tbody>${rows}</tbody></table></div>`;
+}
+
+// ============================================================
+//  PERFIL DE POSICIÓN — perfil histórico calculado en vivo a partir de las
+//  sesiones GPS de tipo "partido" (sin entrenamientos, igual criterio que
+//  usa BL GPS Performance para su "perfil de la posición"). No se guarda
+//  nada nuevo en Firebase: se recalcula solo con lo que ya está cargado.
+// ============================================================
+function gpsPosOnPosicionChange(cat){
+  const posicion=document.getElementById(`gpsPosSel-${cat}`).value;
+  const jugSel=document.getElementById(`gpsPosJugadorSel-${cat}`);
+  const nombres=(plantelFutdetail[cat]||[]).filter(p=>p.posicion===posicion).map(p=>p.nombre).sort();
+  jugSel.innerHTML='<option value="">— Jugador (opcional) —</option>'+nombres.map(n=>`<option value="${esc(n)}">${esc(n)}</option>`).join('');
+  gpsRenderPerfilPosicion(cat);
+}
+
+// Todos los registros de partidos de jugadores cuya posición en el plantel
+// coincide con "posicion", cruzando el alias GPS↔plantel para que un typo
+// de Catapult no deje afuera a nadie.
+function gpsPosicionRecordsConSesion(cat, posicion){
+  const nombres=new Set((plantelFutdetail[cat]||[]).filter(p=>p.posicion===posicion).map(p=>normNombreOrdenIndependiente(p.nombre)));
+  if(!nombres.size) return [];
+  const out=[];
+  gpsSessions.filter(s=>s.cat===cat && s.type==='partido').forEach(s=>{
+    (s.players||[]).forEach(p=>{
+      if(nombres.has(normNombreOrdenIndependiente(gpsAliasedName(cat,p.name)))) out.push({session:s, player:p});
+    });
+  });
+  return out;
+}
+function gpsPosicionRecords(cat, posicion){
+  return gpsPosicionRecordsConSesion(cat, posicion).map(r=>r.player);
+}
+function gpsJugadorPartidoRecordsConSesion(cat, jugador){
+  if(!jugador) return [];
+  const out=[];
+  gpsSessions.filter(s=>s.cat===cat && s.type==='partido').forEach(s=>{
+    const p=(s.players||[]).find(x=>gpsAliasedName(cat,x.name)===jugador);
+    if(p) out.push({session:s, player:p});
+  });
+  return out;
+}
+function gpsJugadorPartidoRecords(cat, jugador){
+  return gpsJugadorPartidoRecordsConSesion(cat, jugador).map(r=>r.player);
+}
+
+// Rival de una fecha — mismo criterio que usa renderCompararFechas: RESERVA
+// tiene su propio fixture (rivalData), 4TA-9NA usan el RIVALS fijo de 35 fechas.
+function gpsRivalLabel(cat, fecha){
+  if(fecha==null) return null;
+  if(cat==='RESERVA'){
+    const rd=(typeof rivalData!=='undefined' && rivalData[cat]) ? rivalData[cat][fecha] : null;
+    return rd ? rd.rival : null;
+  }
+  const fx=RIVALS.find(x=>x.f===fecha);
+  return fx ? fx.r : null;
+}
+
+// Agrupa los registros por fecha (promedio o máximo si hay más de un
+// jugador ese día, ej. varios de la misma posición) y ordena cronológicamente
+// — la serie de puntos que después dibuja el sparkline.
+function gpsTrendPoints(cat, recordsConSesion, metric, aggregate){
+  const byFecha=new Map();
+  recordsConSesion.forEach(r=>{
+    const v=metric.get(r.player);
+    if(v==null || r.session.fecha==null) return;
+    const f=r.session.fecha;
+    if(!byFecha.has(f)) byFecha.set(f, {vals:[], session:r.session});
+    byFecha.get(f).vals.push(v);
+  });
+  const entries=[...byFecha.entries()].sort((a,b)=>gpsParseDateDMY(a[1].session.date)-gpsParseDateDMY(b[1].session.date));
+  return entries.map(([f,{vals,session}])=>{
+    const value=aggregate==='max' ? Math.max(...vals) : +(vals.reduce((a,b)=>a+b,0)/vals.length).toFixed(2);
+    const rival=gpsRivalLabel(cat,f);
+    return {value, tooltip:`F${f} · ${session.date||''}${rival?' vs '+rival:''}: ${value}`};
+  });
+}
+
+// Mini-gráfico de tendencia en SVG puro (sin librerías) — mismo patrón visual
+// que "BL GPS Performance" (área rellena + línea de promedio punteada +
+// puntos con tooltip), pintado con los colores de esta app en vez de azul.
+function gpsSparklineSVG(points, idSuffix){
+  if(points.length<2) return '';
+  const W=300, H=44, PAD=4;
+  const vals=points.map(p=>p.value);
+  const min=Math.min(...vals), max=Math.max(...vals);
+  const range=(max-min)||1;
+  const stepX=(W-2*PAD)/(points.length-1);
+  const coords=points.map((p,i)=>{
+    const x=PAD+i*stepX;
+    const y=H-PAD-((p.value-min)/range)*(H-2*PAD);
+    return [x,y];
+  });
+  const linePath=coords.map(([x,y],i)=>`${i===0?'M':'L'}${x.toFixed(1)},${y.toFixed(1)}`).join(' ');
+  const areaPath=`${linePath} L${coords[coords.length-1][0].toFixed(1)},${H} L${coords[0][0].toFixed(1)},${H} Z`;
+  const avg=vals.reduce((a,b)=>a+b,0)/vals.length;
+  const avgY=H-PAD-((avg-min)/range)*(H-2*PAD);
+  const gid='spk_'+(idSuffix||'').replace(/[^a-zA-Z0-9_-]/g,'_');
+  const circles=points.map((p,i)=>{
+    const [x,y]=coords[i];
+    return `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="3" fill="var(--gold2)" stroke="#0a0f1e" stroke-width="1.2"><title>${esc(p.tooltip)}</title></circle>`;
+  }).join('');
+  return `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" style="width:100%;height:40px;display:block">
+    <defs><linearGradient id="${gid}" x1="0" x2="0" y1="0" y2="1">
+      <stop offset="0%" stop-color="rgba(240,192,64,.20)"/>
+      <stop offset="100%" stop-color="rgba(240,192,64,0)"/>
+    </linearGradient></defs>
+    <path d="${areaPath}" fill="url(#${gid})"/>
+    <line x1="${PAD}" y1="${avgY.toFixed(1)}" x2="${W-PAD}" y2="${avgY.toFixed(1)}" stroke="var(--muted)" stroke-width="1" stroke-dasharray="4,3"/>
+    <path d="${linePath}" fill="none" stroke="var(--gold2)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    ${circles}
+  </svg>`;
+}
+
+// Grilla de mini-gráficos, uno por métrica — del jugador elegido si hay uno
+// (su propio valor por fecha), o si no, el promedio de la posición por
+// fecha (igual criterio que la vista por defecto de BL GPS Performance).
+function gpsEvolucionHTML(cat, posicion, jugador){
+  const recs = jugador ? gpsJugadorPartidoRecordsConSesion(cat, jugador) : gpsPosicionRecordsConSesion(cat, posicion);
+  const aggregate = jugador ? null : 'avg';
+  const titulo = jugador ? esc(jugador) : `Promedio · ${esc(posicion)}`;
+  const blocks=GPS_COMPARE_METRICS.map(m=>{
+    const points=gpsTrendPoints(cat, recs, m, aggregate);
+    if(points.length<2) return '';
+    return `<div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px 10px">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px">
+        <span style="font-family:'Barlow Condensed',sans-serif;font-size:11px;color:var(--text2);font-weight:600">${m.label}</span>
+        <span style="font-size:9px;color:var(--muted)">${m.unit}</span>
+      </div>
+      ${gpsSparklineSVG(points, cat+'_'+(jugador||posicion)+'_'+m.key)}
+    </div>`;
+  }).filter(Boolean).join('');
+  if(!blocks) return '';
+  return `<div style="margin-top:14px">
+    <div style="font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:1px;color:var(--muted);margin-bottom:8px">📈 EVOLUCIÓN POR FECHA · ${titulo}</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px">${blocks}</div>
+  </div>`;
+}
+function gpsAvgMax(vals){
+  if(!vals.length) return {avg:null, max:null};
+  return {avg:+(vals.reduce((a,b)=>a+b,0)/vals.length).toFixed(2), max:Math.max(...vals)};
+}
+function gpsRenderPerfilPosicion(cat){
+  const resultEl=document.getElementById(`gpsPosResult-${cat}`);
+  if(!resultEl) return;
+  const posicion=document.getElementById(`gpsPosSel-${cat}`).value;
+  const jugador=document.getElementById(`gpsPosJugadorSel-${cat}`).value;
+  const posRecords=gpsPosicionRecords(cat, posicion);
+  const jugRecords=gpsJugadorPartidoRecords(cat, jugador);
+  const cols=[
+    {label:`${esc(posicion)} · Prom.`, records:posRecords, agg:'avg'},
+    {label:`${esc(posicion)} · Máx.`,  records:posRecords, agg:'max'},
+  ];
+  if(jugador){
+    cols.push({label:`${esc(jugador)} · Prom.`, records:jugRecords, agg:'avg'});
+    cols.push({label:`${esc(jugador)} · Máx.`,  records:jugRecords, agg:'max'});
+  }
+  const head=cols.map(c=>`<th style="text-align:center">${c.label}</th>`).join('');
+  const rows=GPS_COMPARE_METRICS.map(m=>{
+    const raw=cols.map(c=>{
+      const vals=c.records.map(p=>m.get(p)).filter(v=>v!=null && v>0);
+      const {avg,max}=gpsAvgMax(vals);
+      return c.agg==='avg'?avg:max;
+    });
+    const cells=raw.map((v,i)=>{
+      // Destacado en dorado solo cuando el jugador iguala o supera a su
+      // posición, comparando promedio-con-promedio y máximo-con-máximo
+      // (no tiene sentido comparar un promedio contra un máximo).
+      let destacado=false;
+      if(jugador){
+        if(i===2 && raw[0]!=null && v!=null && v>=raw[0]) destacado=true;
+        if(i===3 && raw[1]!=null && v!=null && v>=raw[1]) destacado=true;
+      }
+      return `<td style="text-align:center${destacado?';font-weight:700;color:var(--gold2)':''}">${v==null?'—':v}</td>`;
+    }).join('');
+    return `<tr><td style="color:var(--muted)">${m.label} <span style="font-size:10px;opacity:.7">(${m.unit})</span></td>${cells}</tr>`;
+  }).join('');
+  resultEl.innerHTML=`<div class="table-wrap"><table><thead><tr><th></th>${head}</tr></thead><tbody>${rows}</tbody></table></div>
+    <div style="font-family:'Barlow Condensed',sans-serif;font-size:11px;color:var(--muted);margin-top:6px">
+      Solo se cuentan partidos (no entrenamientos) para el perfil histórico de la posición.
+    </div>
+    ${gpsEvolucionHTML(cat, posicion, jugador)}`;
 }
 
 function renderCompararFechas(cat, dataCat, isReserva){
@@ -4935,108 +5151,87 @@ function loadRendimiento(payload){
   });
 }
 
-// ── FORMA RECIENTE, LOCAL/VISITANTE, ÍNDICE — funciones puras, reciben
-// las categorías a mostrar explícitas (GENERAL manda todas, cada
-// categoría manda solo la suya) en vez de depender de una navegación
-// propia del módulo (que ya no existe — antes tenía su propio selector
-// GENERAL/categoría, separado del de ESTADÍSTICAS).
-function buildFormaHTML(cats){
-  return cats.map(cat=>{
-    const played=RIVALS.filter(r=>results[cat][r.f]).reverse().slice(0,5).reverse();
-    const badges=Array(5).fill(null).map((_,i)=>{
-      const r=played[played.length-5+i];
-      if(!r) return `<div class="forma-badge empty">—</div>`;
-      const res=getResult(results[cat][r.f][0],results[cat][r.f][1]);
-      return `<div class="forma-badge ${res}" title="${esc(r.r)}">${res}</div>`;
+// ── RENDIMIENTO (bloque de fechas + local/visitante + índice) ──────────
+// Antes "Forma reciente" (últimos 5 fijo), "Local vs Visitante" e "Índice
+// de rendimiento" vivían aparte, con su propio título cada uno, y LVV/
+// índice se calculaban sobre TODA la temporada. Ahora quedan adentro de la
+// misma sección que la tabla "por bloque de fechas" (sin subtítulo propio,
+// solo los datos) y usan el ÚLTIMO bloque jugado — el mismo que la tabla ya
+// resalta en dorado — así que cambian solos con el slider de tamaño de
+// bloque en vez de quedar fijos en "últimos 5".
+// cats: una o varias categorías — varias (vista GENERAL) se combinan en un
+// solo total; una sola (vista de categoría) es directamente esa.
+function buildLVVTotalHTML(cats, from, to){
+  let pgL=0,peL=0,ppL=0,gfL=0,gcL=0,pgV=0,peV=0,ppV=0,gfV=0,gcV=0;
+  cats.forEach(cat=>{
+    RIVALS.filter(r=>r.f>=from && r.f<=to && results[cat][r.f]).forEach(r=>{
+      const res=results[cat][r.f];
+      const x=getResult(res[0],res[1]);
+      if(r.c==='L'){ if(x==='W')pgL++; else if(x==='D')peL++; else ppL++; gfL+=res[0]; gcL+=res[1]; }
+      else { if(x==='W')pgV++; else if(x==='D')peV++; else ppV++; gfV+=res[0]; gcV+=res[1]; }
     });
-    const pts5=played.reduce((s,r)=>{const x=getResult(results[cat][r.f][0],results[cat][r.f][1]);return s+(x==='W'?3:x==='D'?1:0);},0);
-    return `<div class="forma-card">
-      <div class="fc-header">
-        <h3 style="color:${CAT_COLORS[cat]}">${cat}</h3>
-        <span style="font-family:Barlow Condensed,sans-serif;font-size:11px;color:var(--muted);letter-spacing:1px">ÚLTIMOS ${played.length}</span>
-      </div>
-      <div class="forma-badges">${badges.join('')}</div>
-      <div class="forma-pts">Puntos obtenidos: <span>${pts5}</span> / ${played.length*3}</div>
-    </div>`;
-  }).join('');
-}
-
-function buildLVVHTML(cats){
-  return cats.map(cat=>{
-    const local=RIVALS.filter(r=>r.c==='L'&&results[cat][r.f]);
-    const visit=RIVALS.filter(r=>r.c==='V'&&results[cat][r.f]);
-    const calcLVV=list=>{
-      let pg=0,pe=0,pp=0,gf=0,gc=0;
-      list.forEach(r=>{const x=getResult(results[cat][r.f][0],results[cat][r.f][1]);if(x==='W')pg++;else if(x==='D')pe++;else pp++;gf+=results[cat][r.f][0];gc+=results[cat][r.f][1];});
-      const pj=list.length,pts=pg*3+pe;
-      return{pj,pg,pe,pp,gf,gc,pts};
-    };
-    const l=calcLVV(local),v=calcLVV(visit);
-    const half=(side,s)=>`<div class="lvv-half">
-      <div class="lvv-label">${side}</div>
-      <div class="lvv-pts-big">${s.pts}</div>
-      <div class="lvv-sub">pts en ${s.pj} partidos</div>
-      <div class="lvv-stats-mini" style="margin-top:8px">
-        <span style="color:var(--win)">${s.pg}G</span>
-        <span style="color:var(--draw)">${s.pe}E</span>
-        <span style="color:var(--loss)">${s.pp}P</span>
-      </div>
-      <div style="font-family:Barlow Condensed,sans-serif;font-size:11px;color:var(--muted);margin-top:4px">${s.gf} GF · ${s.gc} GC</div>
-    </div>`;
-    return `<div class="lvv-card">
-      <div class="lv-header"><span style="color:${CAT_COLORS[cat]}">${cat}</span><span style="font-size:12px;opacity:.7">LOCAL vs VISITANTE</span></div>
-      <div class="lvv-row">${half('🏠 LOCAL',l)}${half('✈ VISITANTE',v)}</div>
-    </div>`;
-  }).join('');
-}
-
-function buildIndiceRowsHTML(cats){
-  const rows=cats.map(cat=>{
-    const s=calcStats(cat,1,cat==='RESERVA'?18:35);
-    if(s.pj===0) return{cat,ppp:0,gfpj:0,pctW:0,idx:0};
-    const ppp=s.pts/s.pj;
-    const gfpj=s.gf/s.pj;
-    const pctW=Math.round(s.pg/s.pj*100);
-    const idx=Math.round(Math.min(100,(ppp/3*50)+(pctW/100*30)+(Math.min(gfpj,4)/4*20)));
-    return{cat,ppp:ppp.toFixed(2),gfpj:gfpj.toFixed(2),pctW,idx};
   });
-  const maxIdx=Math.max(...rows.map(r=>r.idx),1);
-  return rows.map(r=>`<tr>
-    <td style="font-family:Bebas Neue,sans-serif;font-size:15px;letter-spacing:1px;color:${CAT_COLORS[r.cat]}">${r.cat}</td>
-    <td class="indice-bar-wrap"><div class="indice-bar" style="width:${Math.round(r.idx/maxIdx*100)}%"></div></td>
-    <td style="color:var(--gold2);font-family:Bebas Neue,sans-serif;font-size:15px">${r.ppp}</td>
-    <td style="color:#60a5fa;font-family:Bebas Neue,sans-serif;font-size:15px">${r.gfpj}</td>
-    <td style="color:var(--win);font-family:Bebas Neue,sans-serif;font-size:15px">${r.pctW}%</td>
-    <td class="indice-score" style="color:${r.idx>=70?'var(--win)':r.idx>=45?'var(--draw)':'var(--loss)'}">${r.idx}</td>
-  </tr>`).join('');
+  const l={pj:pgL+peL+ppL, pg:pgL, pe:peL, pp:ppL, gf:gfL, gc:gcL, pts:pgL*3+peL};
+  const v={pj:pgV+peV+ppV, pg:pgV, pe:peV, pp:ppV, gf:gfV, gc:gcV, pts:pgV*3+peV};
+  const half=(side,s)=>`<div class="lvv-half">
+    <div class="lvv-label">${side}</div>
+    <div class="lvv-pts-big">${s.pts}</div>
+    <div class="lvv-sub">pts en ${s.pj} partidos</div>
+    <div class="lvv-stats-mini" style="margin-top:8px">
+      <span style="color:var(--win)">${s.pg}G</span>
+      <span style="color:var(--draw)">${s.pe}E</span>
+      <span style="color:var(--loss)">${s.pp}P</span>
+    </div>
+    <div style="font-family:Barlow Condensed,sans-serif;font-size:11px;color:var(--muted);margin-top:4px">${s.gf} GF · ${s.gc} GC</div>
+  </div>`;
+  return `<div class="lvv-card">
+    <div class="lvv-row">${half('🏠 LOCAL',l)}${half('✈ VISITANTE',v)}</div>
+  </div>`;
 }
 
-// Bloque completo (forma + LVV + índice), listo para insertar donde haga
-// falta — GENERAL (todas las categorías) o dentro de RESULTADOS de una
-// categoría puntual (solo esa). idPrefix distingue las secciones
-// desplegables entre instancias (ej. "rend-gen" vs "rend-4TA").
-function buildRendimientoStatsHTML(idPrefix, cats){
-  return `
-    ${seccionTitulo(idPrefix+'-forma', 'FORMA RECIENTE (ÚLTIMOS 5)')}
-    <div id="sec-${idPrefix}-forma"${seccionEstiloInicial(idPrefix+'-forma')}>
-      <div class="forma-grid">${buildFormaHTML(cats)}</div>
-    </div>
+function buildIndiceTotalRowHTML(cats, from, to){
+  let s;
+  if(cats.length>1){
+    s={pj:0,pg:0,pe:0,pp:0,gf:0,gc:0,pts:0};
+    cats.forEach(cat=>{
+      const c=calcStats(cat,from,to);
+      s.pj+=c.pj; s.pg+=c.pg; s.pe+=c.pe; s.pp+=c.pp; s.gf+=c.gf; s.gc+=c.gc; s.pts+=c.pts;
+    });
+  } else {
+    s=calcStats(cats[0],from,to);
+  }
+  if(s.pj===0) return `<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:14px">Sin partidos en este bloque</td></tr>`;
+  const ppp=s.pts/s.pj, gfpj=s.gf/s.pj;
+  const pctW=Math.round(s.pg/s.pj*100);
+  const idx=Math.round(Math.min(100,(ppp/3*50)+(pctW/100*30)+(Math.min(gfpj,4)/4*20)));
+  const label=cats.length>1?'TOTAL':cats[0];
+  const color=cats.length>1?'var(--gold2)':CAT_COLORS[cats[0]];
+  return `<tr>
+    <td style="font-family:Bebas Neue,sans-serif;font-size:15px;letter-spacing:1px;color:${color}">${label}</td>
+    <td class="indice-bar-wrap"><div class="indice-bar" style="width:${Math.min(idx,100)}%"></div></td>
+    <td style="color:var(--gold2);font-family:Bebas Neue,sans-serif;font-size:15px">${ppp.toFixed(2)}</td>
+    <td style="color:#60a5fa;font-family:Bebas Neue,sans-serif;font-size:15px">${gfpj.toFixed(2)}</td>
+    <td style="color:var(--win);font-family:Bebas Neue,sans-serif;font-size:15px">${pctW}%</td>
+    <td class="indice-score" style="color:${idx>=70?'var(--win)':idx>=45?'var(--draw)':'var(--loss)'}">${idx}</td>
+  </tr>`;
+}
 
-    ${seccionTitulo(idPrefix+'-lvv', 'LOCAL VS VISITANTE')}
-    <div id="sec-${idPrefix}-lvv"${seccionEstiloInicial(idPrefix+'-lvv')}>
-      <div class="lvv-grid">${buildLVVHTML(cats)}</div>
-    </div>
-
-    ${seccionTitulo(idPrefix+'-indice', 'ÍNDICE DE RENDIMIENTO')}
-    <div id="sec-${idPrefix}-indice"${seccionEstiloInicial(idPrefix+'-indice')}>
-      <div class="indice-table-wrap"><table class="indice-table">
-        <thead><tr>
-          <th>CAT.</th><th style="text-align:left;padding-left:12px">MÉTRICAS</th>
-          <th>PTS/PJ</th><th>GF/PJ</th><th>% VICTORIAS</th><th>ÍNDICE</th>
-        </tr></thead>
-        <tbody>${buildIndiceRowsHTML(cats)}</tbody>
-      </table></div>
-    </div>`;
+// Sección completa: tabla por bloque + (si hubo algún bloque jugado) local/
+// visitante e índice del último bloque, sin librería aparte.
+function buildRendimientoGeneralHTML(calcFn, periodsCat, cats){
+  const tablaHTML=bloqueComparativaHTML(calcFn, periodsCat);
+  const { filas }=calcBloqueFilas(calcFn, periodsCat);
+  const ultimo=filas.length?filas[filas.length-1]:null;
+  if(!ultimo) return tablaHTML;
+  return `${tablaHTML}
+    <div class="lvv-grid" style="margin-top:14px">${buildLVVTotalHTML(cats, ultimo.from, ultimo.to)}</div>
+    <div class="indice-table-wrap" style="margin-top:14px"><table class="indice-table">
+      <thead><tr>
+        <th>CAT.</th><th style="text-align:left;padding-left:12px">MÉTRICAS</th>
+        <th>PTS/PJ</th><th>GF/PJ</th><th>% VICTORIAS</th><th>ÍNDICE</th>
+      </tr></thead>
+      <tbody>${buildIndiceTotalRowHTML(cats, ultimo.from, ultimo.to)}</tbody>
+    </table></div>`;
 }
 
 // ── TARJETAS ──────────────────────────────────────────────────
@@ -5860,6 +6055,16 @@ function gpsNumsWithX(items){
       out.push({ num: parseFloat(whole.replace(',', '.')), x: it.x });
       return;
     }
+    // Duración tipo "01:39:30" (h:mm:ss) — algunos informes de partido de
+    // Catapult traen así el "Tot Dur" en vez de minutos decimales. Sin este
+    // caso, el separador de dígitos pegados a texto (de más abajo, pensado
+    // para "Izquierdo109") la parte en 3 números sueltos (1, 39, 30) y corre
+    // mal todas las columnas siguientes de la fila.
+    const hms = whole.match(/^(\d{1,2}):(\d{2}):(\d{2})$/);
+    if(hms){
+      out.push({ num: (+hms[1])*60 + (+hms[2]) + (+hms[3])/60, x: it.x });
+      return;
+    }
     const parts = whole.match(/-?\d+(?:[.,]\d+)?|[^\d-]+/g) || [];
     let cx = it.x;
     const span = it.w / Math.max(whole.length, 1);
@@ -5990,7 +6195,11 @@ function gpsFindSummaryPage(pages){
       if(p && !p.isHeader && p.name && /[A-Za-zÁÉÍÓÚÑáéíóúñ]/.test(p.name) && p.nums.length>=8) count++;
     }
     const pageText = rows.flatMap(r=>r.items.map(it=>it.str)).join(' ');
-    if(!/posit/i.test(pageText)) return; // sin columna Position → no es la página resumen
+    // Normalmente la página resumen trae columna "Position", pero hay informes
+    // reales de Catapult (confirmado con un PDF real de partido) que no la
+    // incluyen — "Datos Generales" alcanza igual como señal de que es la página
+    // correcta, sobre todo si ya encontró filas de jugador válidas (count>0).
+    if(!/posit/i.test(pageText) && !/datos\s+generales/i.test(pageText)) return;
     if(!best || count>best.count) best={pageIndex, dataStart, count, rows, pageText};
   });
   return best;
