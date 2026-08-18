@@ -761,10 +761,103 @@ confirmó el patrón para todo el torneo.
   154, coincide con el total); slider y RESERVA sin romperse; sin errores de
   consola.
 
+**Citaciones — vista automática desde PDF (COMPLETA, 2026-08-18):** el ícono
+📋 por fecha (columna "CITACIONES" de la tabla de RESULTADOS) dejó de ser un
+link pegado a mano y ahora abre una ficha de solo lectura
+(`abrirCitacionView(cat, fecha)`) con la citación real del club para esa
+fecha — a pedido del usuario ("la idea seria entrar a 4ta y al clic en el
+boton de citacion, poder ver solo la de 4ta"), sacada de los PDF que sube a
+la carpeta de Drive "PLANILLAS DE CITACIÓN" (uno por fecha, con las 6
+categorías como páginas separadas).
+- **Se sacó el campo de link manual** para 'cit' (a pedido — "sacarlo, solo
+  la vista automática"); los otros tipos de link (Partido/Resumen/Análisis/
+  Próximo Rival) siguen igual que antes.
+- **El ícono se habilita solo si ya hay datos** (`matchData[cat][fecha]`
+  con titulares cargados) — si no, queda deshabilitado sin acción. Al
+  tocarlo, `abrirCitacionView` arma un modal con rival, condición (local/
+  visitante, reusando `condicionCat` de la Fase de LVV — ya contempla que
+  7ma/8va/9na juegan invertido) y las listas de titulares/suplentes con
+  número de camiseta.
+- **Motor de extracción reusado, no reescrito:** `parseCitacionPdf` ya
+  existía (de un intento viejo de seguimiento de partido en vivo,
+  `showEquipo=false`, nunca habilitado) — lee el PDF con pdf.js agrupando
+  texto por posición (Y para filas, X para orden dentro de la fila), sin
+  OCR (los PDF de esta carpeta sí tienen capa de texto real, confirmado
+  antes de reusar el parser). Se encontraron y arreglaron dos bugs reales
+  al probarlo contra PDF reales de la carpeta:
+  1. **Bug de pdf.js "juntando" dos jugadores de la misma fila en un solo
+     bloque de texto:** cuando dos titulares están a la misma altura en el
+     campo (ej. una línea de 4 defensores), pdf.js a veces entrega
+     "2 - GOMEZ 6 - IBAÑEZ" como UN SOLO item de texto en vez de dos. El
+     código buscaba el token que *empieza con* las primeras 3 letras del
+     apellido (`startsWith`) para ubicar la posición X del segundo
+     jugador — pero el bloque entero empieza con el número de camiseta,
+     no con el apellido, así que la búsqueda fallaba siempre para el
+     segundo (y siguientes) jugador de la fila, y caía a "el primer token
+     de la línea" — pisando su posición con la del primer jugador y
+     asignándole por error el nombre de pila de ESE. Esto pasaba en gran
+     parte de las fechas y afectaba entre 2 y 8 de los 11 titulares por
+     categoría (confirmado midiendo antes/después: bajó de picos de 70%
+     mal a un promedio de 13-14%). Cambiar `startsWith` por `includes`
+     resuelve los dos casos (token separado o junto) sin tocar nada más.
+  2. **Campo "rival" roto por apóstrofes:** el regex que busca el texto
+     después de "RIVAL:" no incluía el apóstrofe/acento suelto (´) en su
+     lista de caracteres permitidos, así que para rivales como
+     "Newell´s Old Boys" la búsqueda fallaba entera y caía a un regex de
+     respaldo que agarra las primeras dos palabras-con-mayúscula que
+     encuentra en toda la página — terminando en nombres de jugadores en
+     vez del rival real. Se agregaron `'´'` a los caracteres permitidos.
+  - Igual que con las citaciones se mantiene la validación ya diseñada:
+    cada nombre extraído se cruza contra `plantelFutdetail[cat]` y si no
+    matchea a nadie del plantel real se marca `warn:true` (⚠️ en el modal,
+    con tooltip) — a pedido del usuario esto se muestra tal cual salió del
+    PDF, nunca se oculta ni se bloquea. Después del arreglo de arriba, el
+    warning restante (13-14% titulares/suplentes, más alto en 9na ~25%) se
+    revisó a mano en varios casos y son mayormente jugadores reales que
+    todavía no están en el scrapeo de futdetail para esa categoría (mismo
+    patrón ya conocido de Josué Rojas/Cristian Lezcano en 4ta), no errores
+    de lectura — el sistema de warning está haciendo lo que tiene que
+    hacer: avisar para que se revise a ojo, sin bloquear nada.
+- **Carga histórica:** se procesaron las 19 fechas con PDF disponible en la
+  carpeta de Drive (F3 a F21; F1/F2 no tienen planilla subida) para las 6
+  categorías, guardado directo en Firebase (`matchData`, vía `saveData()`
+  dentro del mismo `parseCitacionPdf`).
+- **Excepción — Fecha 3 vs Lanús se jugó en dos canchas (COMPLETA,
+  2026-08-18):** había dos PDF de esa fecha (28/03 "Local" normal, y 15/04
+  "Local (Hacoaj)") — al principio los interpreté como un amistoso
+  descartable (mismo patrón que "1PLANILLA HACOAJ.pdf", ya excluido del
+  lote), pero el usuario aclaró que es el MISMO partido: el primer tiempo
+  se jugó en el predio Nito San Andrés y, cortado por algún motivo, el
+  segundo tiempo se completó en Hacoaj — de ahí las dos planillas oficiales
+  para una sola fecha. A pedido del usuario ("hacé una excepción y
+  organizalo como te parezca") se resolvió sin rediseñar el modelo de
+  datos general (es un caso único, no algo para lo que valga la pena
+  preparar el resto de la app):
+  - `parseCitacionPdf` suma un 5º parámetro opcional `segundoTiempoDe`
+    (nombre de la cancha); si viene, en vez de pisar `titulares`/
+    `suplentes`/`rival` de esa fecha como siempre, guarda los datos
+    aparte en `matchData[cat][fecha].segundoTiempo = {venue, titulares,
+    suplentes}` — el resto de la fecha (primer tiempo) queda intacto.
+  - `abrirCitacionView` muestra el bloque normal como "⏱️ PRIMER TIEMPO ·
+    NITO SAN ANDRÉS" (con rival/condición arriba como siempre) y, solo si
+    existe `segundoTiempo`, agrega debajo un segundo bloque separado
+    "⏱️ SEGUNDO TIEMPO · {cancha}" con su propia lista de titulares y
+    suplentes — en las demás fechas (sin segundo tiempo) el modal se ve
+    exactamente igual que antes, sin ningún rótulo de "primer tiempo".
+  - Verificado en la app real: el segundo tiempo de 4ta muestra cambios
+    reales respecto al primero (3-GONZALEZ→BENITEZ, 7-LUNA→FIGUEREDO,
+    8-NAVONI→FREDES, 10-ORDOÑEZ→PANNONI, 11-FIGUEREDO→LESZCZUK) — consistente
+    con una planilla re-presentada después de los cambios del entretiempo,
+    confirma que la explicación del usuario encaja con los datos reales.
+- Probado en la app real (con los datos ya en Firebase): F3 4ta muestra
+  "Lanús · LOCAL" con los 11 titulares reales del primer tiempo y Josué
+  Rojas marcado ⚠️ (caso ya conocido), más el bloque de segundo tiempo
+  descripto arriba; F21 9na muestra "Racing Club · VISITANTE" (condición
+  invertida correctamente para categoría menor) con varios ⚠️ de jugadores
+  reales sin match en futdetail; el ícono aparece deshabilitado en fechas
+  sin datos (F1, F2) y habilitado en el resto.
+
 **Pendiente / a futuro:**
-- **Citaciones** (sacada de GENERAL): el usuario dijo que la retomamos
-  después de terminar el rediseño de PLANTEL. El código sigue ahí sin usar
-  (`buildPDFSection`/`renderChecklist`/`generarPDF`).
 - Si se quiere, revisar si el badge de condición local/visitante de la tabla
   de RESULTADOS y el selector de citaciones deberían mostrar la condición
   correcta por categoría (hoy usan la cruda de RIVALS, o sea la de las

@@ -2744,9 +2744,21 @@ function renderStatsSingle(cat, content){
           </select></td>`
       : `<td><span class="cond-badge cond-${rCond}">${rCond==='L'?'LOCAL':'VISIT.'}</span></td>`;
 
+    const hasTeamData = !!(matchData[dataCat][r.f]?.titulares?.length);
     let linkCols='';
     if(isLink){
       activeLinks.forEach(lt=>{
+        if(lt.key==='cit'){
+          // Citaciones: no hay campo para pegar link a mano — el ícono abre
+          // la ficha ya procesada (extraída del PDF real) si existe, o queda
+          // vacío si esa fecha todavía no se cargó.
+          linkCols+=`<td class="link-cell" style="text-align:center">
+            <button class="link-btn${hasTeamData?'':' empty'}" title="${lt.label}"
+              ${hasTeamData?`onclick="abrirCitacionView('${dataCat}',${r.f})"`:'disabled'}
+              style="background:none;border:none;cursor:${hasTeamData?'pointer':'default'};font-size:15px;padding:2px 6px">${lt.icon}</button>
+          </td>`;
+          return;
+        }
         const val=links[dataCat][r.f][lt.key]||'',has=val.trim()!=='';
         linkCols+=`<td class="link-cell"><div class="link-wrap">
           <input class="link-input" type="url" value="${esc(val)}" placeholder="${lt.label}…"
@@ -2756,7 +2768,6 @@ function renderStatsSingle(cat, content){
         </div></td>`;
       });
     }
-    const hasTeamData = !!(matchData[dataCat][r.f]?.titulares?.length);
     const equipoBtn = showEquipo
       ? `<td><button class="btn-equipo${hasTeamData?' active':''}" data-cat="${dataCat}" data-fecha="${r.f}" title="Ver/editar equipo">👥${hasTeamData?' ✓':''}</button></td>`
       : '';
@@ -4500,12 +4511,13 @@ const CAT_DIV_MAP = {
   'octava':'8VA','novena':'9NA'
 };
 
-async function parseCitacionPdf(file, catHint, fechaHint, inputEl) {
+async function parseCitacionPdf(file, catHint, fechaHint, inputEl, segundoTiempoDe) {
   const titleCase = s => String(s).toLowerCase().replace(/(^|\s|')([a-záéíóúñ])/g, (m,p,c)=>p+c.toUpperCase());
   if (!file) return;
   if (inputEl) inputEl.value = '';
   showToast('📄 Procesando citaciones…');
   try {
+    const pdfjsLib = await getPdfjsLib();
     const arrayBuf = await file.arrayBuffer();
     const pdf = await pdfjsLib.getDocument({data: arrayBuf}).promise;
     const results_parsed = {};
@@ -4536,7 +4548,7 @@ async function parseCitacionPdf(file, catHint, fechaHint, inputEl) {
 
       // Rival
       const rivalMatch =
-        pageText.match(/RIVAL[:\s]*\n?\s*([A-Za-záéíóúÁÉÍÓÚÑñ][A-Za-záéíóúÁÉÍÓÚÑñ .]+?)(?:\s*(?:Local|Visitante|CONDICIÓN))/i) ||
+        pageText.match(/RIVAL[:\s]*\n?\s*([A-Za-záéíóúÁÉÍÓÚÑñ][A-Za-záéíóúÁÉÍÓÚÑñ .'´’]+?)(?:\s*(?:Local|Visitante|CONDICIÓN))/i) ||
         pageText.match(/\b(River Plate|Boca Juniors|Racing Club|Independiente|San Lorenzo|Barracas Central|[A-Z][a-záéíóú]+\s+[A-Z][a-záéíóú]+)\b/);
       const rival = (rivalMatch?.[1] || rivalMatch?.[0] || '').trim();
 
@@ -4567,7 +4579,14 @@ async function parseCitacionPdf(file, catHint, fechaHint, inputEl) {
           if (num < 1 || num > 11 || titMap[num]) continue;
           const ape   = m[2].trim();
           const first = ape.split(' ')[0];
-          const anchTok = l.toks.find(t => t.s.toUpperCase().startsWith(first.slice(0,3))) || l.toks[0];
+          // pdf.js a veces junta "N - APELLIDO" de dos jugadores de la misma
+          // fila en un solo token de texto — ese token entero empieza con el
+          // número de camiseta, no con el apellido, así que buscar con
+          // startsWith() fallaba y todos caían al primer token de la línea
+          // (pisando la posición del segundo jugador con la del primero).
+          // includes() encuentra el token correcto tanto si viene junto como
+          // si viene separado.
+          const anchTok = l.toks.find(t => t.s.toUpperCase().includes(first.slice(0,3).toUpperCase())) || l.toks[0];
           const ax = anchTok.x;
           let best=null, bestd=1e9;
           nameCands.forEach(c => {
@@ -4581,7 +4600,14 @@ async function parseCitacionPdf(file, catHint, fechaHint, inputEl) {
       });
       const titulares = Object.keys(titMap).map(Number).sort((a,b)=>a-b).map(n=>titMap[n]);
 
-      results_parsed[detectedCat] = {titulares, suplentes, rival};
+      // El texto de un PDF real puede salir incompleto o cruzado con otro
+      // jugador (nombre justo debajo del dorsal, por posición, no siempre da
+      // con el correcto) — se marca con warn:true todo lo que no matchea con
+      // nadie del plantel real, en vez de mostrarlo como si fuera seguro.
+      const rosterNorm = new Set((plantelFutdetail[detectedCat]||[]).map(p=>normNombreOrdenIndependiente(p.nombre)));
+      const tagWarn = arr => arr.map(p=>({...p, warn: rosterNorm.size>0 && !rosterNorm.has(normNombreOrdenIndependiente(p.nombre))}));
+
+      results_parsed[detectedCat] = {titulares: tagWarn(titulares), suplentes: tagWarn(suplentes), rival};
     }
 
     // Ask user to confirm fecha if not provided
@@ -4595,14 +4621,29 @@ async function parseCitacionPdf(file, catHint, fechaHint, inputEl) {
       catsFound.forEach(cat => {
         if (!matchData[cat]) matchData[cat] = {};
         const existing = matchData[cat][fechaHint] || {};
-        matchData[cat][fechaHint] = {
-          ...existing,
-          titulares: results_parsed[cat].titulares,
-          suplentes: results_parsed[cat].suplentes,
-          rival: results_parsed[cat].rival || existing.rival,
-          cambios: existing.cambios || [],
-          duracion: existing.duracion || 90,
-        };
+        // Caso excepcional: un partido se jugó en dos canchas distintas (se
+        // cortó a mitad y siguió en otro predio) — hay dos planillas reales
+        // para la misma fecha. En vez de pisar la primera, la segunda se
+        // guarda aparte con su cancha, y el modal de citación muestra ambas.
+        if (segundoTiempoDe) {
+          matchData[cat][fechaHint] = {
+            ...existing,
+            segundoTiempo: {
+              venue: segundoTiempoDe,
+              titulares: results_parsed[cat].titulares,
+              suplentes: results_parsed[cat].suplentes,
+            },
+          };
+        } else {
+          matchData[cat][fechaHint] = {
+            ...existing,
+            titulares: results_parsed[cat].titulares,
+            suplentes: results_parsed[cat].suplentes,
+            rival: results_parsed[cat].rival || existing.rival,
+            cambios: existing.cambios || [],
+            duracion: existing.duracion || 90,
+          };
+        }
         const panel = document.getElementById(`mdp-${cat}-${fechaHint}`);
         if (panel) renderMatchPanel(cat, fechaHint);
         // Update button state
@@ -4666,6 +4707,53 @@ async function parseCitacionPdf(file, catHint, fechaHint, inputEl) {
 // Global PDF upload (for loading all cats at once from stats header)
 function uploadCitacionPdfGlobal(file) {
   parseCitacionPdf(file, null, null, null);
+}
+
+// ── VISTA DE CITACIÓN (solo lectura) ───────────────────────────
+// Reemplaza al viejo campo "pegar un link a mano": si esa fecha ya se
+// procesó (matchData[cat][fecha] tiene titulares), el ícono 📋 de la tabla
+// abre esta ficha en vez de un link. condicionCat ya contempla que las
+// categorías menores (7ma/8va/9na) juegan al revés que las mayores.
+function abrirCitacionView(cat, fecha){
+  const d = matchData[cat]?.[fecha];
+  if(!d || !d.titulares?.length) return;
+  const cond = condicionCat(cat, fecha);
+  const condTxt = cond==='L' ? 'LOCAL' : cond==='V' ? 'VISITANTE' : '';
+  const hayWarn = d.titulares.some(p=>p.warn) || d.suplentes.some(p=>p.warn);
+  const playerRow = p => `<div style="display:flex;align-items:center;gap:8px;padding:5px 8px;background:var(--surface2);border-radius:6px;margin-bottom:4px">
+    <span style="font-family:'Bebas Neue',sans-serif;font-size:15px;color:var(--gold2);min-width:22px;text-align:center">${p.num||'—'}</span>
+    <span style="font-family:'Barlow Condensed',sans-serif;font-size:13px;color:var(--text)">${esc(p.nombre)}</span>
+    ${p.warn?'<span title="No coincide con nadie del plantel — revisar contra el PDF original" style="margin-left:auto;font-size:13px">⚠️</span>':''}
+  </div>`;
+  const ov=document.createElement('div');
+  ov.style.cssText='position:fixed;inset:0;z-index:10001;background:rgba(5,8,15,0.88);display:flex;align-items:center;justify-content:center;padding:16px';
+  ov.innerHTML=`<div style="background:#0a0f1e;border:1px solid #1a2d5a;border-radius:12px;max-width:420px;width:100%;max-height:90vh;overflow-y:auto;padding:20px 22px">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px">
+      <div>
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:1px;color:var(--gold2)">📋 CITACIÓN · F${fecha}</div>
+        <div style="font-family:'Barlow Condensed',sans-serif;font-size:13px;color:var(--text2)">${esc(d.rival||'—')}${condTxt?` · <span class="cond-badge cond-${cond}">${condTxt}</span>`:''}</div>
+      </div>
+      <button id="cit-view-close" style="background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;line-height:1">✕</button>
+    </div>
+    ${hayWarn?`<div style="font-size:11px;color:var(--draw);font-family:'Barlow Condensed',sans-serif;margin:8px 0">⚠️ Los nombres marcados no coinciden con el plantel — puede haber salido incompleto o cruzado al leer el PDF, revisá contra el original si hace falta.</div>`:''}
+    ${d.segundoTiempo?`<div style="font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:1px;color:var(--gold2);margin-top:10px">⏱️ PRIMER TIEMPO · NITO SAN ANDRÉS</div>`:''}
+    <div style="font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:1px;color:var(--muted);margin:14px 0 6px">TITULARES (${d.titulares.length})</div>
+    ${d.titulares.map(playerRow).join('')}
+    <div style="font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:1px;color:var(--muted);margin:14px 0 6px">SUPLENTES (${d.suplentes.length})</div>
+    ${d.suplentes.map(playerRow).join('')}
+    ${d.segundoTiempo?`
+    <div style="border-top:1px solid #1a2d5a;margin:16px 0"></div>
+    <div style="font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:1px;color:var(--gold2)">⏱️ SEGUNDO TIEMPO · ${esc(d.segundoTiempo.venue)}</div>
+    <div style="font-size:11px;color:var(--muted);font-family:'Barlow Condensed',sans-serif;margin-bottom:6px">El partido se cortó y siguió en otra cancha — esta es la planilla que se volvió a presentar ahí.</div>
+    <div style="font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:1px;color:var(--muted);margin:10px 0 6px">TITULARES (${d.segundoTiempo.titulares.length})</div>
+    ${d.segundoTiempo.titulares.map(playerRow).join('')}
+    <div style="font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:1px;color:var(--muted);margin:14px 0 6px">SUPLENTES (${d.segundoTiempo.suplentes.length})</div>
+    ${d.segundoTiempo.suplentes.map(playerRow).join('')}
+    `:''}
+  </div>`;
+  ov.addEventListener('click',e=>{ if(e.target===ov) ov.remove(); });
+  document.body.appendChild(ov);
+  ov.querySelector('#cit-view-close').addEventListener('click',()=>ov.remove());
 }
 
 // ── TABLE EVENTS ──────────────────────────────────────────────
