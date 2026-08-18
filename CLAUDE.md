@@ -825,14 +825,20 @@ categorías como páginas separadas).
 - **Excepción — Fecha 3 vs Lanús se jugó en dos canchas (COMPLETA,
   2026-08-18):** había dos PDF de esa fecha (28/03 "Local" normal, y 15/04
   "Local (Hacoaj)") — al principio los interpreté como un amistoso
-  descartable (mismo patrón que "1PLANILLA HACOAJ.pdf", ya excluido del
-  lote), pero el usuario aclaró que es el MISMO partido: el primer tiempo
-  se jugó en el predio Nito San Andrés y, cortado por algún motivo, el
-  segundo tiempo se completó en Hacoaj — de ahí las dos planillas oficiales
-  para una sola fecha. A pedido del usuario ("hacé una excepción y
-  organizalo como te parezca") se resolvió sin rediseñar el modelo de
-  datos general (es un caso único, no algo para lo que valga la pena
-  preparar el resto de la app):
+  descartable, pero el usuario aclaró que es el MISMO partido: el primer
+  tiempo se jugó en el predio Nito San Andrés y, cortado por algún motivo,
+  el segundo tiempo se completó en Hacoaj — de ahí las dos planillas
+  oficiales para una sola fecha. Confirmado además al revisar
+  "1PLANILLA HACOAJ.pdf" (el otro archivo de la carpeta, excluido del lote
+  por no tener formato de planilla de citación): es la lista de
+  delegación (staff + los 54 jugadores de 4TA/5TA/6TA con DNI) para ese
+  mismo traslado a Hacoaj del 15/04 — no un amistoso aparte como se pensó
+  en un primer momento, simplemente no aporta nada nuevo para
+  `matchData` porque no tiene titulares/suplentes por partido. A pedido
+  del usuario ("hacé una excepción y organizalo como te parezca") la
+  Fecha 3 se resolvió sin rediseñar el modelo de datos general (es un
+  caso único, no algo para lo que valga la pena preparar el resto de la
+  app):
   - `parseCitacionPdf` suma un 5º parámetro opcional `segundoTiempoDe`
     (nombre de la cancha); si viene, en vez de pisar `titulares`/
     `suplentes`/`rival` de esa fecha como siempre, guarda los datos
