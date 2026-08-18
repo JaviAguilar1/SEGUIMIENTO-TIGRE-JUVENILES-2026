@@ -600,9 +600,68 @@ fijos en "últimos 5".
   propio total, RESERVA sin romperse, y el slider de bloque cambiando el
   LVV/índice en vivo (probado moviendo a bloques de 7).
 
+**Fases 2 y 3 del rediseño de PLANTEL — "Por fecha" e "Informe de partido"
+(COMPLETAS, 2026-08-18):** se hicieron las dos juntas, a pedido del usuario
+("hacelo tal cual lo hace BL"). Antes de codear se leyó a fondo cómo BL
+construye esas vistas para reproducir la semántica exacta, no asumirla.
+Descubrimiento clave: las "bandas" +85/60-84/-60 min de BL agrupan a los
+jugadores de una posición por los minutos que jugó CADA UNO y toman el
+máximo de cada grupo (`getBand`/`integrateFecha` en BL) — eso SÍ se puede
+reproducir con nuestros datos porque cada registro por jugador ya trae los
+minutos. Las dos vistas son solo lectura (no guardan nada), reusan
+`GPS_COMPARE_METRICS`, viven dentro de PLANTEL → GPS como secciones
+colapsables nuevas, y usan Chart.js (que ya estaba cargado, con el helper
+`killChart`).
+
+- **📅 POR FECHA** (`gpsRenderPorFecha` y helpers): posición propia
+  (dropdown) + chips de las 16 métricas + pills de fechas (Todas / cada
+  partido con su rival). Arranca en "Distancia" (`GPS_DEFAULT_MET_IDX`),
+  no en "Minutos" (que sería raro porque las bandas ya son por minutos).
+  - 1 fecha elegida → tarjeta con "% del máx histórico" y "Ref. histórica"
+    de la posición para la métrica, grilla con TODAS las métricas (mejor
+    valor de esa fecha) y desglose de la métrica elegida por banda de
+    minutos (+85/60-84/-60, barras animadas con % vs promedio histórico) —
+    calcado de `renderOneFecha` de BL.
+  - Varias fechas → tabla métrica × (fecha × 3 bandas), como
+    `renderMultiFechas` de BL. Default "Todas" (igual que BL); con 14
+    fechas la tabla es ancha pero scrollea dentro de `.table-wrap`.
+  - `gpsBandasPosFecha` reproduce gt85/r6084/lt60 al vuelo; `gpsHistPos`
+    da máx/prom histórico (mejor de cada fecha, solo 60+ min, igual que el
+    "summary" de BL).
+- **📋 INFORME DE PARTIDO** (`gpsRenderInforme` y helpers): la "foto" de un
+  partido para todo el equipo — calcado de `renderInformePartido` de BL.
+  Selector de partido (fecha + rival, más reciente primero) + filtro de
+  posición + filtro de minutos (Todos/+85/60-84/-60). Tarjetas KPI con
+  promedio y rango mín-máx del equipo (calculados solo con los de 60+ min,
+  con aviso de a cuántos dejó afuera, igual que BL). Debajo, 7 gráficos de
+  barras por jugador (Chart.js, ordenados de mayor a menor por su métrica,
+  con línea opcional en eje secundario): Distancia+mts/min, 18-21+mts/min,
+  HSR+Sprints+HSR/min, Top speed+sprints, Acel+Desac, Player Load (solo si
+  el PDF lo trae — los datos de 4ta que vienen de BL no tienen PL, así que
+  hoy no aparece), y Minutos. Se usaron los colores de serie de BL (leen
+  bien sobre fondo oscuro) con grilla/ejes en el tono de la app.
+- **Detalle técnico — canvas + secciones colapsadas:** los gráficos son
+  `<canvas>`; si se dibujan con la sección colapsada quedan a tamaño 0.
+  `toggleSeccion` ahora detecta cuando se ABRE la sección del informe
+  (`gps-informe-<cat>`) y re-renderiza para que Chart.js los mida bien.
+- **Diferencia de fidelidad a propósito:** las etiquetas de valor siempre
+  visibles sobre cada barra que tiene BL (plugin `ipValueLabels`, pensado
+  para el PDF impreso sobre fondo blanco) se dejaron afuera — en pantalla
+  oscura se usa el tooltip de Chart.js (hover muestra nombre completo +
+  valor). Si se quiere, se puede sumar un plugin de etiquetas claras
+  después.
+- Probado en la app real con los datos de 4ta: Por fecha (tabla multi y
+  tarjeta de 1 fecha con bandas y % histórico), Informe (KPIs, 6 gráficos
+  con 13-14 barras según el partido, filtros de posición y minutos, cambio
+  de fecha) — sin errores de consola ni NaN. Los "GPS save error:
+  PERMISSION_DENIED" que aparecen en la consola son historia retenida del
+  primer intento de carga masiva (antes de arreglar las reglas), no de este
+  código, que es solo lectura.
+
 **Pendiente / a futuro:**
-- Fases 2 a 5 del rediseño de PLANTEL (ver arriba) — seguir con la fase 2
-  ("Por fecha") cuando el usuario lo pida.
+- Fases 4 y 5 del rediseño de PLANTEL (ver arriba): (4) config de métricas
+  + bandas + arrastrar para reordenar; (5) reorganizar PLANTEL al estilo
+  "Jugadores" de BL (lista con buscador por posición + perfil individual).
 - Decidir si "Citaciones" vuelve a algún lado de la app o se descarta del
   todo (por ahora el código sigue ahí, sin usar — ver arriba).
 - Si futdetail sigue sin traer a Josué Rojas / Cristian Lezcano dentro del

@@ -2240,6 +2240,11 @@ function toggleSeccion(idSeccion, event){
   cont.style.display=seOculta?'none':'';
   if(chev) chev.style.transform=seOculta?'rotate(-90deg)':'none';
   seccionColapsada[idSeccion]=seOculta;
+  // Los gráficos del "Informe de partido" son <canvas>: si se dibujaron con
+  // la sección colapsada quedan a tamaño 0. Al abrirla, re-renderizar para
+  // que Chart.js los mida bien.
+  const ipm=(!seOculta) && idSeccion.match(/^gps-informe-(.+)$/);
+  if(ipm && typeof gpsRenderInforme==='function') setTimeout(()=>gpsRenderInforme(ipm[1]),30);
 }
 
 // ── GENERAL VIEW ─────────────────────────────────────────────
@@ -3295,6 +3300,29 @@ function renderGpsComparativas(cat, sessions, container){
         <select id="gpsPosJugadorSel-${cat}" style="${GPS_SELECT_STYLE}"></select>
       </div>
       <div id="gpsPosResult-${cat}"></div>
+    </div>
+
+    ${seccionTitulo('gps-porfecha-'+cat, '📅 POR FECHA')}
+    <div id="sec-gps-porfecha-${cat}"${seccionEstiloInicial('gps-porfecha-'+cat)}>
+      <select id="gpsPFPosSel-${cat}" style="${GPS_SELECT_STYLE}">${posOpts}</select>
+      <div id="gpsPFBody-${cat}" style="margin-top:12px"></div>
+    </div>` : ''}
+
+    ${sessions.some(s=>s.type==='partido') ? `
+    ${seccionTitulo('gps-informe-'+cat, '📋 INFORME DE PARTIDO')}
+    <div id="sec-gps-informe-${cat}"${seccionEstiloInicial('gps-informe-'+cat)}>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">
+        <select id="gpsIPFecha-${cat}" style="${GPS_SELECT_STYLE}"></select>
+        <select id="gpsIPPos-${cat}" style="${GPS_SELECT_STYLE}"></select>
+        <select id="gpsIPMin-${cat}" style="${GPS_SELECT_STYLE}">
+          <option value="all">Todos los minutos</option>
+          <option value="85">+85 min</option>
+          <option value="60">60-84 min</option>
+          <option value="menos">−60 min</option>
+        </select>
+      </div>
+      <div id="gpsIPKpis-${cat}" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px;margin-bottom:16px"></div>
+      <div id="gpsIPBody-${cat}"></div>
     </div>` : ''}
   `;
   document.getElementById(`gpsCmpJugadorSel-${cat}`).addEventListener('change',()=>gpsCmpFechasOnJugadorChange(cat));
@@ -3303,6 +3331,14 @@ function renderGpsComparativas(cat, sessions, container){
     document.getElementById(`gpsPosSel-${cat}`).addEventListener('change',()=>gpsPosOnPosicionChange(cat));
     document.getElementById(`gpsPosJugadorSel-${cat}`).addEventListener('change',()=>gpsRenderPerfilPosicion(cat));
     gpsPosOnPosicionChange(cat);
+    document.getElementById(`gpsPFPosSel-${cat}`).addEventListener('change',()=>gpsPFOnPosChange(cat));
+    gpsPFOnPosChange(cat);
+  }
+  if(sessions.some(s=>s.type==='partido')){
+    document.getElementById(`gpsIPFecha-${cat}`).addEventListener('change',()=>gpsRenderInforme(cat));
+    document.getElementById(`gpsIPPos-${cat}`).addEventListener('change',()=>gpsRenderInforme(cat));
+    document.getElementById(`gpsIPMin-${cat}`).addEventListener('change',()=>gpsRenderInforme(cat));
+    gpsInitInforme(cat);
   }
 }
 
@@ -3558,6 +3594,365 @@ function gpsRenderPerfilPosicion(cat){
       Solo se cuentan partidos (no entrenamientos) para el perfil histórico de la posición.
     </div>
     ${gpsEvolucionHTML(cat, posicion, jugador)}`;
+}
+
+// ============================================================
+//  POR FECHA — igual que BL GPS Performance: para una posición, cada fecha
+//  se parte en bandas por minutos jugados de cada jugador (+85 / 60-84 / -60)
+//  y se toma el máximo de cada banda. "best" = mejor de las bandas de 60+ min.
+//  1 fecha → tarjeta con % del máx histórico + grilla de todas las métricas +
+//  desglose por banda de la métrica elegida. Varias fechas → tabla
+//  métrica × (fecha × 3 bandas). Reproduce el modelo de BL con nuestros
+//  registros por jugador (que ya traen los minutos).
+// ============================================================
+const gpsPorFechaState = {}; // cat -> {pos, metIdx, fechas:Set}
+
+function gpsBanda(min){ return min>=86?'gt85':min>=60?'r6084':'lt60'; }
+function gpsBandasPosFecha(cat, posicion, session, metric){
+  const nombres=new Set((plantelFutdetail[cat]||[]).filter(p=>p.posicion===posicion).map(p=>normNombreOrdenIndependiente(p.nombre)));
+  const bands={gt85:[], r6084:[], lt60:[]};
+  (session.players||[]).forEach(p=>{
+    if(!nombres.has(normNombreOrdenIndependiente(gpsAliasedName(cat,p.name)))) return;
+    const v=metric.get(p);
+    if(v==null || v<=0) return;
+    bands[gpsBanda(p.min||0)].push(v);
+  });
+  const out={};
+  ['gt85','r6084','lt60'].forEach(bk=>{ if(bands[bk].length) out[bk]=+Math.max(...bands[bk]).toFixed(2); });
+  const b6=[]; if(out.gt85!=null) b6.push(out.gt85); if(out.r6084!=null) b6.push(out.r6084);
+  if(b6.length) out.best=Math.max(...b6);
+  return out;
+}
+function gpsHistPos(cat, posicion, metric){
+  const bests=[];
+  gpsSessions.filter(s=>s.cat===cat && s.type==='partido').forEach(s=>{
+    const b=gpsBandasPosFecha(cat, posicion, s, metric);
+    if(b.best!=null) bests.push(b.best);
+  });
+  if(!bests.length) return {max:0, avg:0};
+  return {max:Math.max(...bests), avg:+(bests.reduce((a,b)=>a+b,0)/bests.length).toFixed(2)};
+}
+function gpsSesionesDePos(cat, posicion){
+  const nombres=new Set((plantelFutdetail[cat]||[]).filter(p=>p.posicion===posicion).map(p=>normNombreOrdenIndependiente(p.nombre)));
+  return gpsSessions.filter(s=>s.cat===cat && s.type==='partido' &&
+    (s.players||[]).some(p=>nombres.has(normNombreOrdenIndependiente(gpsAliasedName(cat,p.name)))))
+    .sort((a,b)=>gpsParseDateDMY(a.date)-gpsParseDateDMY(b.date));
+}
+
+// Índice de "Distancia" en GPS_COMPARE_METRICS — métrica por defecto de
+// "Por fecha" (igual que BL, que abre en Dist. Total; Minutos como default
+// sería raro porque las bandas ya son por minutos jugados).
+const GPS_DEFAULT_MET_IDX = Math.max(0, GPS_COMPARE_METRICS.findIndex(m=>m.key==='dist'));
+function gpsPFOnPosChange(cat){
+  const pos=document.getElementById(`gpsPFPosSel-${cat}`).value;
+  const prev=gpsPorFechaState[cat];
+  gpsPorFechaState[cat]={pos, metIdx:(prev?prev.metIdx:GPS_DEFAULT_MET_IDX), fechas:new Set(['ALL'])};
+  gpsRenderPorFecha(cat);
+}
+function gpsPFSelMet(cat, i){ gpsPorFechaState[cat].metIdx=i; gpsRenderPorFecha(cat); }
+function gpsPFTogF(cat, id){
+  const st=gpsPorFechaState[cat];
+  if(id==='ALL'){ st.fechas=new Set(['ALL']); }
+  else { st.fechas.delete('ALL'); st.fechas.has(id)?st.fechas.delete(id):st.fechas.add(id); if(!st.fechas.size) st.fechas=new Set(['ALL']); }
+  gpsRenderPorFecha(cat);
+}
+
+function gpsRenderPorFecha(cat){
+  const body=document.getElementById(`gpsPFBody-${cat}`);
+  if(!body) return;
+  const st=gpsPorFechaState[cat];
+  const pos=st.pos;
+  const sessions=gpsSesionesDePos(cat, pos);
+  if(!sessions.length){
+    body.innerHTML=`<div style="text-align:center;padding:16px;color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-size:13px">Sin partidos con datos para ${esc(pos)}.</div>`;
+    return;
+  }
+  const metric=GPS_COMPARE_METRICS[st.metIdx];
+
+  const chips=GPS_COMPARE_METRICS.map((m,i)=>{
+    const on=i===st.metIdx;
+    return `<button onclick="gpsPFSelMet('${cat}',${i})" style="font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:600;padding:4px 11px;border-radius:14px;cursor:pointer;white-space:nowrap;
+      border:1px solid ${on?'var(--gold)':'var(--border2)'};background:${on?'linear-gradient(135deg,#3a2a08,#1a1206)':'transparent'};color:${on?'var(--gold2)':'var(--muted)'}">${m.label}</button>`;
+  }).join('');
+
+  const pill=(id,label,on)=>`<button onclick="gpsPFTogF('${cat}','${id}')" style="font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:600;padding:4px 11px;border-radius:6px;cursor:pointer;white-space:nowrap;
+    border:1px solid ${on?'var(--gold)':'var(--border2)'};background:${on?'rgba(240,192,64,0.12)':'transparent'};color:${on?'var(--gold2)':'var(--muted)'}">${label}</button>`;
+  const pillsHTML=pill('ALL','Todas',st.fechas.has('ALL'))+sessions.map(s=>{
+    const on=!st.fechas.has('ALL')&&st.fechas.has(s.id);
+    const rival=gpsRivalLabel(cat,s.fecha);
+    return pill(s.id, `F${s.fecha}${rival?` <span style="opacity:.6;font-size:9px">${esc(rival)}</span>`:''}`, on);
+  }).join('');
+
+  const active=st.fechas.has('ALL')?sessions:sessions.filter(s=>st.fechas.has(s.id));
+
+  let h=`<div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:12px">
+      <span style="font-family:'Barlow Condensed',sans-serif;font-size:10px;letter-spacing:1px;color:var(--muted);align-self:center;margin-right:4px">MÉTRICA</span>${chips}</div>
+    <div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:14px">
+      <span style="font-family:'Barlow Condensed',sans-serif;font-size:10px;letter-spacing:1px;color:var(--muted);align-self:center;margin-right:4px">FECHA</span>${pillsHTML}</div>`;
+
+  h += (active.length===1) ? gpsPFOneFecha(cat,pos,active[0],metric) : gpsPFMultiFechas(cat,pos,active);
+  body.innerHTML=h;
+  setTimeout(()=>body.querySelectorAll('.gps-band-fill').forEach(b=>{ b.style.width=b.dataset.w+'%'; }),50);
+}
+
+function gpsPFOneFecha(cat,pos,session,metric){
+  const b=gpsBandasPosFecha(cat,pos,session,metric);
+  const hist=gpsHistPos(cat,pos,metric);
+  const fechaBest=(b.best!=null)?b.best:null;
+  const pct=(hist.max>0 && fechaBest!=null)?Math.round(fechaBest/hist.max*100):null;
+  const pctColor=pct==null?'var(--muted)':pct>=100?'var(--win)':pct>=80?'var(--draw)':'var(--loss)';
+  const rival=gpsRivalLabel(cat,session.fecha);
+
+  let tags='';
+  if(pct!=null) tags+=`<span style="font-size:10px;font-family:'Barlow Condensed',sans-serif;padding:3px 9px;border-radius:12px;border:1px solid ${pctColor};color:${pctColor}">${pct}% del máx. histórico</span>`;
+  if(hist.avg>0) tags+=`<span style="font-size:10px;font-family:'Barlow Condensed',sans-serif;padding:3px 9px;border-radius:12px;border:1px solid var(--border2);color:var(--muted)">Ref. histórica: ${hist.avg} ${metric.unit}</span>`;
+
+  const miniTiles=GPS_COMPARE_METRICS.map((m,i)=>{
+    const bb=gpsBandasPosFecha(cat,pos,session,m);
+    const val=(bb.best!=null)?bb.best:'—';
+    const sel=i===gpsPorFechaState[cat].metIdx;
+    return `<div style="background:var(--surface2);border:1px solid ${sel?'var(--gold)':'var(--border)'};border-radius:7px;padding:7px 9px;text-align:center">
+      <div style="font-family:'Barlow Condensed',sans-serif;font-size:10px;color:var(--muted);line-height:1.1;margin-bottom:3px">${m.label}</div>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:18px;color:${sel?'var(--gold2)':'var(--text)'};line-height:1">${val}</div>
+      <div style="font-size:9px;color:var(--muted)">${m.unit}</div>
+    </div>`;
+  }).join('');
+
+  let bandHTML='';
+  const bmax=Math.max(b.gt85||0,b.r6084||0,b.lt60||0);
+  if(bmax>0){
+    const rows=[['gt85','+85 min','var(--win)'],['r6084','60-84 min','var(--draw)'],['lt60','−60 min','var(--loss)']].map(([bk,bl,col])=>{
+      if(b[bk]==null) return '';
+      const w=bmax>0?Math.round(b[bk]/bmax*100):0;
+      const ref=hist.avg>0?`<span style="font-size:10px;color:var(--muted);font-family:'Barlow Condensed',sans-serif;margin-left:6px">${Math.round(b[bk]/hist.avg*100)}% hist</span>`:'';
+      return `<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+        <span style="font-family:'Barlow Condensed',sans-serif;font-size:11px;color:${col};width:64px;flex-shrink:0">${bl}</span>
+        <div style="flex:1;height:14px;background:rgba(5,8,15,0.6);border-radius:4px;overflow:hidden">
+          <div class="gps-band-fill" data-w="${w}" style="width:0%;height:100%;background:${col};transition:width .5s"></div>
+        </div>
+        <span style="font-family:'Bebas Neue',sans-serif;font-size:14px;color:var(--text);width:52px;text-align:right">${b[bk]}</span>${ref}
+      </div>`;
+    }).join('');
+    bandHTML=`<div style="margin-top:14px">
+      <div style="font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:1px;color:var(--muted);margin-bottom:8px">${metric.label} POR TIEMPO DE JUEGO</div>
+      ${rows}
+    </div>`;
+  }
+
+  return `<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px 16px">
+    <div style="font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:1px;color:var(--gold2);margin-bottom:6px">FECHA ${session.fecha||'—'}${rival?` · ${esc(rival)}`:''}</div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px">${tags||'<span style="font-size:11px;color:var(--muted);font-family:Barlow Condensed,sans-serif">Sin registros de esta posición en esta fecha</span>'}</div>
+    <div style="font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:1px;color:var(--muted);margin-bottom:8px">TODAS LAS MÉTRICAS</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(90px,1fr));gap:7px">${miniTiles}</div>
+    ${bandHTML}
+  </div>`;
+}
+
+function gpsPFMultiFechas(cat,pos,active){
+  if(!active.length) return `<div style="text-align:center;padding:16px;color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-size:13px">Elegí al menos una fecha.</div>`;
+  const selMetIdx=gpsPorFechaState[cat].metIdx;
+  const head1=active.map(s=>`<th colspan="3" style="text-align:center;border-left:2px solid var(--border2)">F${s.fecha}</th>`).join('');
+  const head2=active.map(s=>{
+    const rival=gpsRivalLabel(cat,s.fecha)||'';
+    return `<th colspan="3" style="text-align:center;font-weight:400;font-size:10px;color:var(--muted);border-left:2px solid var(--border2)">${esc(rival)}</th>`;
+  }).join('');
+  const head3=active.map(()=>`<th style="text-align:center;font-size:9px;border-left:2px solid var(--border2);color:var(--win)">+85'</th><th style="text-align:center;font-size:9px;color:var(--draw)">60-84'</th><th style="text-align:center;font-size:9px;color:var(--loss)">-60'</th>`).join('');
+
+  const rows=GPS_COMPARE_METRICS.map((m,i)=>{
+    const sel=i===selMetIdx;
+    const cells=active.map(s=>{
+      const b=gpsBandasPosFecha(cat,pos,s,m);
+      const c=(v,col)=>`<td style="text-align:center;${v!=null?`color:${col}`:'color:var(--muted)'}">${v!=null?v:'—'}</td>`;
+      return `<td style="text-align:center;border-left:2px solid var(--border2);${b.gt85!=null?'color:var(--win)':'color:var(--muted)'}">${b.gt85!=null?b.gt85:'—'}</td>${c(b.r6084,'var(--draw)')}${c(b.lt60,'var(--loss)')}`;
+    }).join('');
+    return `<tr><td style="${sel?'color:var(--gold2);font-weight:700':'color:var(--muted)'}">${m.label} <span style="font-size:9px;opacity:.7">(${m.unit})</span></td>${cells}</tr>`;
+  }).join('');
+
+  return `<div class="table-wrap"><table>
+    <thead>
+      <tr><th rowspan="3"></th>${head1}</tr>
+      <tr>${head2}</tr>
+      <tr>${head3}</tr>
+    </thead>
+    <tbody>${rows}</tbody>
+  </table></div>
+  <div style="font-family:'Barlow Condensed',sans-serif;font-size:11px;color:var(--muted);margin-top:6px">
+    Cada valor es el máximo de los jugadores de ${esc(pos)} según los minutos que jugaron ese partido.
+  </div>`;
+}
+
+// ============================================================
+//  INFORME DE PARTIDO — igual que BL: la "foto" de un partido para todo el
+//  equipo. KPIs promedio (calculados con los de 60+ min) + gráficos de barras
+//  por jugador (Chart.js). Filtros por posición y por minutos jugados.
+// ============================================================
+const gpsInformeState = {}; // cat -> {sessionId, pos, min}
+const GPS_IP_M = key => GPS_COMPARE_METRICS.find(m=>m.key===key);
+
+function gpsInformeSesiones(cat){
+  return gpsSessions.filter(s=>s.cat===cat && s.type==='partido')
+    .sort((a,b)=>gpsParseDateDMY(b.date)-gpsParseDateDMY(a.date));
+}
+function gpsInformeJugadores(cat, session){
+  const posByName={};
+  (plantelFutdetail[cat]||[]).forEach(p=>{ posByName[normNombreOrdenIndependiente(p.nombre)]=p.posicion||'—'; });
+  return (session.players||[]).map(p=>{
+    const canon=gpsAliasedName(cat,p.name);
+    return {nombre:canon, pos:posByName[normNombreOrdenIndependiente(canon)]||'—', min:p.min||0, rec:p};
+  });
+}
+function gpsIPProm(jugs, metric){
+  const vals=jugs.map(j=>metric.get(j.rec)).filter(v=>v!=null && v>0);
+  if(!vals.length) return null;
+  return vals.reduce((a,b)=>a+b,0)/vals.length;
+}
+function gpsIPRango(jugs, metric){
+  const vals=jugs.map(j=>metric.get(j.rec)).filter(v=>v!=null && v>0);
+  if(!vals.length) return null;
+  return {min:Math.min(...vals), max:Math.max(...vals)};
+}
+function gpsIPFmt(v, dec){
+  if(v==null) return '—';
+  return dec ? (+v).toFixed(dec) : Math.round(v).toLocaleString('es-AR');
+}
+
+function gpsInitInforme(cat){
+  const sesiones=gpsInformeSesiones(cat);
+  const selF=document.getElementById(`gpsIPFecha-${cat}`);
+  selF.innerHTML=sesiones.map(s=>{
+    const rival=gpsRivalLabel(cat,s.fecha);
+    return `<option value="${esc(s.id)}">${esc(s.date||'')}${s.fecha?` · F${s.fecha}`:''}${rival?` · vs ${esc(rival)}`:''}</option>`;
+  }).join('');
+  gpsInformeState[cat]={sessionId:(sesiones[0]?sesiones[0].id:''), pos:'__all__', min:'all'};
+  gpsRenderInforme(cat);
+}
+
+function gpsRenderInforme(cat){
+  const selF=document.getElementById(`gpsIPFecha-${cat}`);
+  const selP=document.getElementById(`gpsIPPos-${cat}`);
+  const selM=document.getElementById(`gpsIPMin-${cat}`);
+  const kpis=document.getElementById(`gpsIPKpis-${cat}`);
+  const body=document.getElementById(`gpsIPBody-${cat}`);
+  if(!selF||!kpis||!body) return;
+
+  const sessionId=selF.value;
+  const session=gpsSessions.find(s=>s.id===sessionId);
+  if(!session){ kpis.innerHTML=''; body.innerHTML=''; return; }
+
+  let jugs=gpsInformeJugadores(cat, session);
+
+  // Poblar posiciones presentes (conservando la elección previa si sigue válida)
+  const poss=[...new Set(jugs.map(j=>j.pos).filter(p=>p&&p!=='—'))].sort();
+  const prevP=selP.value||'__all__';
+  selP.innerHTML='<option value="__all__">Todas las posiciones</option>'+poss.map(p=>`<option value="${esc(p)}">${esc(p)}</option>`).join('');
+  if(prevP==='__all__'||poss.includes(prevP)) selP.value=prevP;
+
+  const fPos=selP.value, fMin=selM.value;
+  if(fPos&&fPos!=='__all__') jugs=jugs.filter(j=>j.pos===fPos);
+  if(fMin==='85') jugs=jugs.filter(j=>j.min>=85);
+  else if(fMin==='60') jugs=jugs.filter(j=>j.min>=60&&j.min<85);
+  else if(fMin==='menos') jugs=jugs.filter(j=>j.min<60);
+
+  if(!jugs.length){
+    kpis.innerHTML='';
+    body.innerHTML='<div style="text-align:center;padding:30px 20px;color:var(--muted);font-family:Barlow Condensed,sans-serif;font-size:13px;border:2px dashed var(--border2);border-radius:8px">Ningún jugador cumple los filtros elegidos.</div>';
+    return;
+  }
+
+  // Promedio/rango: solo jugadores de 60+ min (salvo que el filtro sea "-60")
+  const jugsProm=(fMin==='menos')?jugs:jugs.filter(j=>j.min>=60);
+  const base=jugsProm.length?jugsProm:jugs;
+  const kpiDefs=[
+    ['Jugadores', jugs.length, 0, null],
+    ['Distancia prom.', gpsIPProm(base,GPS_IP_M('dist')), 0, gpsIPRango(base,GPS_IP_M('dist'))],
+    ['Mts/min prom.', gpsIPProm(base,GPS_IP_M('mpm')), 1, gpsIPRango(base,GPS_IP_M('mpm'))],
+    ['HSR 21-25 prom.', gpsIPProm(base,GPS_IP_M('m2125')), 0, gpsIPRango(base,GPS_IP_M('m2125'))],
+    ['Sprints prom.', gpsIPProm(base,GPS_IP_M('sprints')), 1, gpsIPRango(base,GPS_IP_M('sprints'))],
+    ['Acel +3 prom.', gpsIPProm(base,GPS_IP_M('acc')), 1, gpsIPRango(base,GPS_IP_M('acc'))],
+    ['Desac +3 prom.', gpsIPProm(base,GPS_IP_M('dcc')), 1, gpsIPRango(base,GPS_IP_M('dcc'))],
+    ['Vel. máx.', Math.max(...jugs.map(j=>GPS_IP_M('velmax').get(j.rec)||0))||null, 1, gpsIPRango(base,GPS_IP_M('velmax'))],
+  ];
+  kpis.innerHTML=kpiDefs.map(([lab,val,dec,rg])=>`
+    <div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 12px">
+      <div style="font-size:9px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin-bottom:4px;font-family:'Barlow Condensed',sans-serif">${lab}</div>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--gold2);line-height:1">${gpsIPFmt(val,dec)}</div>
+      ${rg?`<div style="font-size:9px;color:var(--muted);margin-top:3px;font-family:'Barlow Condensed',sans-serif">${gpsIPFmt(rg.min,dec)} – ${gpsIPFmt(rg.max,dec)}</div>`:'<div style="height:12px"></div>'}
+    </div>`).join('');
+  const nExcl=jugs.length-jugsProm.length;
+  if(nExcl>0 && fMin!=='menos'){
+    kpis.innerHTML+=`<div style="grid-column:1/-1;font-size:10px;color:var(--muted);font-family:'Barlow Condensed',sans-serif">Promedio y rango con los ${jugsProm.length} jugadores de 60+ min (se excluyen ${nExcl} que jugaron menos).</div>`;
+  }
+
+  const hayPL=jugs.some(j=>{ const v=GPS_IP_M('totalPL').get(j.rec); return v!=null && v>0; });
+  const leyenda=items=>`<div style="display:flex;gap:14px;margin-bottom:8px;font-size:11px;color:var(--muted);flex-wrap:wrap;font-family:'Barlow Condensed',sans-serif">${
+    items.map(([tipo,color,txt])=>tipo==='bar'
+      ? `<span style="display:flex;align-items:center;gap:5px"><span style="width:11px;height:11px;border-radius:2px;background:${color}"></span>${txt}</span>`
+      : `<span style="display:flex;align-items:center;gap:5px"><span style="width:15px;height:2px;background:${color}"></span>${txt}</span>`).join('')}</div>`;
+  const bloque=(titulo,leg,id,alto)=>`
+    <div style="margin-bottom:4px;font-size:12px;font-weight:600;color:var(--text);font-family:'Barlow Condensed',sans-serif;letter-spacing:.5px">${titulo}</div>
+    ${leg}
+    <div style="position:relative;width:100%;height:${alto||320}px;margin-bottom:24px"><canvas id="${id}-${cat}"></canvas></div>`;
+
+  body.innerHTML=
+    bloque('Distancia total y m/min', leyenda([['bar','#3b82f6','Distancia (m)'],['line','#1baf7a','Mts/min']]),'gpsip-g1')+
+    bloque('18-21 km/h y m/min', leyenda([['bar','#378add','18-21 km/h (m)'],['line','#1baf7a','Mts/min']]),'gpsip-g1b')+
+    bloque('HSR 21-25, Sprints +25 y HSR/min', leyenda([['bar','#3b82f6','HSR 21-25 (m)'],['bar','#eda100','Sprints +25 (m)'],['line','#e34948','HSR/min']]),'gpsip-g2')+
+    bloque('Top speed y cantidad de sprints', leyenda([['bar','#1baf7a','Top speed (km/h)'],['line','#8b5cf6','Cant. sprints']]),'gpsip-g3')+
+    bloque('Aceleraciones y desaceleraciones +3', leyenda([['bar','#8b5cf6','Acel +3'],['bar','#e87ba4','Desac +3']]),'gpsip-g4')+
+    (hayPL?bloque('Player load', leyenda([['bar','#d85a30','Player load']]),'gpsip-g5',260):'')+
+    bloque('Minutos jugados', leyenda([['bar','#3b82f6','Minutos']]),'gpsip-g6',240);
+
+  setTimeout(()=>{
+    gpsIPChart(`gpsip-g1-${cat}`, jugs, 'dist', [{key:'dist',color:'#3b82f6'}], {key:'mpm',color:'#1baf7a'});
+    gpsIPChart(`gpsip-g1b-${cat}`, jugs, 'm1821', [{key:'m1821',color:'#378add'}], {key:'mpm',color:'#1baf7a'});
+    gpsIPChart(`gpsip-g2-${cat}`, jugs, 'm2125', [{key:'m2125',color:'#3b82f6'},{key:'m25',color:'#eda100'}], {key:'hsrmin',color:'#e34948'});
+    gpsIPChart(`gpsip-g3-${cat}`, jugs, 'velmax', [{key:'velmax',color:'#1baf7a'}], {key:'sprints',color:'#8b5cf6'});
+    gpsIPChart(`gpsip-g4-${cat}`, jugs, 'acc', [{key:'acc',color:'#8b5cf6'},{key:'dcc',color:'#e87ba4'}], null);
+    if(hayPL) gpsIPChart(`gpsip-g5-${cat}`, jugs, 'totalPL', [{key:'totalPL',color:'#d85a30'}], null);
+    gpsIPChart(`gpsip-g6-${cat}`, jugs, 'min', [{key:'min',color:'#3b82f6'}], null);
+  },60);
+}
+
+// Un gráfico de barras por jugador (ordenado por la métrica de la barra
+// principal, de mayor a menor), con una línea opcional en eje secundario.
+// Etiqueta del eje = apellido, con inicial del nombre si hay apellidos repetidos.
+function gpsIPEtiqueta(jugs){
+  const cuenta={};
+  jugs.forEach(j=>{ const ap=(j.nombre.trim().split(/\s+/)[0]||j.nombre); cuenta[ap]=(cuenta[ap]||0)+1; });
+  return j=>{
+    const partes=j.nombre.trim().split(/\s+/);
+    const ap=partes[0]||j.nombre;
+    return (cuenta[ap]>1 && partes.length>1) ? ap+' '+partes[partes.length-1].charAt(0)+'.' : ap;
+  };
+}
+function gpsIPChart(canvasId, jugs, ordenKey, barras, linea){
+  const cv=document.getElementById(canvasId);
+  if(!cv || typeof Chart==='undefined') return;
+  killChart(canvasId);
+  const val=(j,key)=>key==='min'?(j.min||0):(GPS_IP_M(key).get(j.rec)||0);
+  const ord=[...jugs].sort((a,b)=>val(b,ordenKey)-val(a,ordenKey));
+  const etiq=gpsIPEtiqueta(ord);
+  const labels=ord.map(etiq);
+  const muted='#5a7099', grid='rgba(26,45,90,0.4)';
+  const datasets=barras.map(b=>({ data:ord.map(j=>val(j,b.key)), backgroundColor:b.color, borderRadius:4, order:2, yAxisID:'y' }));
+  if(linea){
+    datasets.push({ type:'line', data:ord.map(j=>{ const v=val(j,linea.key); return v>0?v:null; }),
+      borderColor:linea.color, borderWidth:2, pointRadius:3, pointBackgroundColor:linea.color, tension:0.1, order:0, yAxisID:'y1', spanGaps:true });
+  }
+  const scales={
+    x:{ ticks:{color:muted,font:{size:9,family:'Barlow Condensed'},maxRotation:60,minRotation:45,autoSkip:false}, grid:{display:false} },
+    y:{ ticks:{color:muted,font:{size:10}}, grid:{color:grid}, beginAtZero:true, grace:'10%' }
+  };
+  if(linea) scales.y1={ position:'right', ticks:{color:muted,font:{size:10}}, grid:{display:false}, beginAtZero:false, grace:'22%' };
+  new Chart(cv,{
+    type:'bar',
+    data:{labels,datasets},
+    options:{
+      responsive:true, maintainAspectRatio:false, animation:false,
+      plugins:{ legend:{display:false}, tooltip:{ callbacks:{ title:it=>ord[it[0].dataIndex].nombre } } },
+      scales
+    }
+  });
 }
 
 function renderCompararFechas(cat, dataCat, isReserva){
