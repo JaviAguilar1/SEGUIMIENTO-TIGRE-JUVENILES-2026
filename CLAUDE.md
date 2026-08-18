@@ -661,10 +661,46 @@ colapsables nuevas, y usan Chart.js (que ya estaba cargado, con el helper
   primer intento de carga masiva (antes de arreglar las reglas), no de este
   código, que es solo lectura.
 
+**Fase 4 — Configuración de métricas (COMPLETA, 2026-08-18):** botón
+"⚙️ Configurar métricas" (solo `canEdit`) arriba de las comparativas de GPS,
+abre un modal para **reordenar arrastrando + mostrar/ocultar + renombrar** las
+16 métricas. Se guarda en Firebase bajo `stats/gpsMetricCfg`
+(`{order:[keys], hidden:[keys], labels:{key:"..."}}`) — compartido como el
+resto de `stats`, se carga en los 3 puntos donde ya se cargaba
+`aliasJugadoresGps` (carga inicial, listener en vivo, listener público) y se
+suma al payload de `saveData` + tiene su `guardarGpsMetricCfg()` targeted,
+mismo patrón que `aliasJugadoresGps`.
+- **`gpsVisibleMetrics()`** es la lista efectiva (orden aplicado, ocultas
+  sacadas, label renombrada — devuelve copias con `{...m, label}` que
+  conservan la función `get`). Reemplazó a `GPS_COMPARE_METRICS.map(...)` en
+  las 4 vistas de "lista de métricas": comparativas
+  (`gpsCompareRowsHTML`), perfil de posición, evolución (`gpsEvolucionHTML`)
+  y "por fecha" (chips + grilla + tabla multi). **NO** toca los KPIs ni los
+  gráficos del Informe de partido — esos usan métricas fijas por diseño
+  (`GPS_IP_M`, master list), así que ocultar/renombrar no los cambia (el
+  gráfico "Minutos jugados" sigue estando aunque ocultes "Minutos" de la
+  lista).
+- **Por fecha pasó de guardar índice (`metIdx`) a clave (`metKey`)** — si no,
+  reordenar u ocultar métricas movía la selección. Default sigue siendo
+  Distancia (`'dist'`); si la métrica elegida se oculta, cae a la primera
+  visible.
+- **Bandas quedaron afuera a propósito:** BL configura los umbrales de las
+  zonas de velocidad (18-21/21-25/+25 km/h) porque cada GPS usa zonas
+  distintas, pero nuestros datos vienen de Catapult con esas zonas ya fijas
+  y pre-sumadas (columnas `m1821`/`m2125`/`m25`) — no tenemos el trazo crudo
+  de velocidad, así que cambiar un umbral no re-agruparía nada. Lo único que
+  haría es renombrar etiquetas, que ya lo cubre el renombre de métricas.
+- Probado con datos falsos inyectados por consola (sin login, no persiste):
+  `gpsVisibleMetrics` aplica orden/ocultar/renombrar y conserva `get`; el
+  modal abre 16 filas con drag/checkbox/input; guardar arma el cfg correcto;
+  perfil de posición pasa a 15 filas con "dist" renombrado y primero; por
+  fecha a 15 chips; el informe sigue con 8 KPIs y 7 gráficos intactos. Sin
+  errores de consola.
+
 **Pendiente / a futuro:**
-- Fases 4 y 5 del rediseño de PLANTEL (ver arriba): (4) config de métricas
-  + bandas + arrastrar para reordenar; (5) reorganizar PLANTEL al estilo
-  "Jugadores" de BL (lista con buscador por posición + perfil individual).
+- Fase 5 del rediseño de PLANTEL: reorganizar PLANTEL al estilo "Jugadores"
+  de BL (lista con buscador por posición + perfil individual al click). Es
+  el cambio más grande, toca la estructura general de la pestaña.
 - Decidir si "Citaciones" vuelve a algún lado de la app o se descarta del
   todo (por ahora el código sigue ahí, sin usar — ver arriba).
 - Si futdetail sigue sin traer a Josué Rojas / Cristian Lezcano dentro del

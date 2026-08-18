@@ -1568,6 +1568,13 @@ let aliasJugadores = {};
 // arma a mano desde PLANTEL cuando un jugador de una sesión GPS no
 // coincide con nadie del plantel.
 let aliasJugadoresGps = {};
+// gpsMetricCfg = configuración de las métricas de GPS (compartida, como el
+// resto de stats): { order:[keys...], hidden:[keys...], labels:{key:"..."} }.
+// Reordenar / mostrar-ocultar / renombrar las 16 métricas de las comparativas
+// de GPS. Solo afecta las vistas de "lista de métricas" (comparativas, perfil
+// de posición, evolución, por fecha); NO los KPIs ni los gráficos del Informe
+// de partido, que usan métricas fijas por diseño.
+let gpsMetricCfg = { order:[], hidden:[], labels:{} };
 // recordatoriosOmitidos["cat_fecha_key"] = true — recordatorios de "link sin
 // cargar" que ya descartaste a propósito, para que no vuelvan a aparecer.
 let recordatoriosOmitidos = {};
@@ -1789,6 +1796,7 @@ function initFirebase(){
             if(p.chequeoSemanal) chequeoSemanal = p.chequeoSemanal;
             if(p.aliasJugadores) aliasJugadores = p.aliasJugadores;
             if(p.aliasJugadoresGps) aliasJugadoresGps = p.aliasJugadoresGps;
+            if(p.gpsMetricCfg) gpsMetricCfg = p.gpsMetricCfg;
             if(p.recordatoriosOmitidos) recordatoriosOmitidos = p.recordatoriosOmitidos;
             refreshActiveModule();
             setTimeout(refreshAlerts, 200);
@@ -1856,7 +1864,7 @@ function saveData(){
   if(!fbReady||!db||!canEdit) return;
   clearTimeout(saveTimeout);
   saveTimeout=setTimeout(()=>{
-    const payload={results:{},links:{},goleadores:{},rivalData:rivalData,matchData:matchData,gymData:gymData,jugadores:{},plantel:{},chequeoSemanal:chequeoSemanal,aliasJugadores:aliasJugadores,aliasJugadoresGps:aliasJugadoresGps,recordatoriosOmitidos:recordatoriosOmitidos};
+    const payload={results:{},links:{},goleadores:{},rivalData:rivalData,matchData:matchData,gymData:gymData,jugadores:{},plantel:{},chequeoSemanal:chequeoSemanal,aliasJugadores:aliasJugadores,aliasJugadoresGps:aliasJugadoresGps,gpsMetricCfg:gpsMetricCfg,recordatoriosOmitidos:recordatoriosOmitidos};
     CATEGORIES.forEach(cat=>{
       payload.results[cat]={};
       payload.links[cat]={};
@@ -1931,6 +1939,7 @@ function loadData(){
         if(p.chequeoSemanal) chequeoSemanal = p.chequeoSemanal;
         if(p.aliasJugadores) aliasJugadores = p.aliasJugadores;
         if(p.aliasJugadoresGps) aliasJugadoresGps = p.aliasJugadoresGps;
+        if(p.gpsMetricCfg) gpsMetricCfg = p.gpsMetricCfg;
         if(p.recordatoriosOmitidos) recordatoriosOmitidos = p.recordatoriosOmitidos;
       }
       showLoading(false); resolve();
@@ -3025,6 +3034,113 @@ const GPS_COMPARE_METRICS = [
   {key:'rhie',    label:'RHIE',               unit:'#',     get:p=>p.rhie},
   {key:'totalPL', label:'Player Load',        unit:'AU',    get:p=>p.totalPL},
 ];
+const GPS_METRIC_BY_KEY = Object.fromEntries(GPS_COMPARE_METRICS.map(m=>[m.key, m]));
+
+// Lista efectiva de métricas para las vistas de "lista de métricas" (comparativas,
+// perfil de posición, evolución, por fecha), aplicando gpsMetricCfg: primero el
+// orden guardado (las que no estén, quedan al final en el orden original),
+// después se sacan las ocultas y se aplica el renombre. Devuelve copias con la
+// label efectiva (el resto de props, incluida get, se conservan).
+function gpsVisibleMetrics(){
+  const cfg=gpsMetricCfg||{};
+  const hidden=new Set(cfg.hidden||[]);
+  const order=Array.isArray(cfg.order)?cfg.order:[];
+  const labels=cfg.labels||{};
+  const seen=new Set();
+  const ordered=[];
+  order.forEach(k=>{ if(GPS_METRIC_BY_KEY[k] && !seen.has(k)){ ordered.push(GPS_METRIC_BY_KEY[k]); seen.add(k); } });
+  GPS_COMPARE_METRICS.forEach(m=>{ if(!seen.has(m.key)) ordered.push(m); });
+  return ordered.filter(m=>!hidden.has(m.key)).map(m=>({...m, label:labels[m.key]||m.label}));
+}
+function guardarGpsMetricCfg(){
+  if(!fbReady||!db||!canEdit) return;
+  db.ref('stats/gpsMetricCfg').set(gpsMetricCfg)
+    .catch(e=>console.warn('guardarGpsMetricCfg error:',e));
+}
+
+// Las 16 métricas en el orden efectivo (incluye las ocultas, con su flag),
+// para la pantalla de configuración.
+function gpsFullMetricOrder(){
+  const cfg=gpsMetricCfg||{};
+  const hidden=new Set(cfg.hidden||[]);
+  const order=Array.isArray(cfg.order)?cfg.order:[];
+  const labels=cfg.labels||{};
+  const seen=new Set(); const out=[];
+  order.forEach(k=>{ if(GPS_METRIC_BY_KEY[k] && !seen.has(k)){ out.push(GPS_METRIC_BY_KEY[k]); seen.add(k); } });
+  GPS_COMPARE_METRICS.forEach(m=>{ if(!seen.has(m.key)) out.push(m); });
+  return out.map(m=>({ key:m.key, def:m.label, unit:m.unit, label:labels[m.key]||'', visible:!hidden.has(m.key) }));
+}
+
+// Modal de configuración: arrastrar para reordenar, destildar para ocultar,
+// escribir para renombrar. Guarda en Firebase (stats/gpsMetricCfg) y re-renderiza.
+function abrirConfigMetricasGps(cat){
+  if(!canEdit) return;
+  const work=gpsFullMetricOrder();
+  let dragIdx=null;
+  const ov=document.createElement('div');
+  ov.style.cssText='position:fixed;inset:0;z-index:10001;background:rgba(5,8,15,0.88);display:flex;align-items:center;justify-content:center;padding:16px';
+  ov.innerHTML=`<div style="background:#0a0f1e;border:1px solid #1a2d5a;border-radius:12px;max-width:520px;width:100%;max-height:90vh;overflow-y:auto;padding:20px 22px">
+    <div style="font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:1px;color:var(--gold2);margin-bottom:4px">⚙️ CONFIGURAR MÉTRICAS</div>
+    <div style="font-family:'Barlow Condensed',sans-serif;font-size:12px;color:var(--muted);margin-bottom:16px;line-height:1.4">
+      Arrastrá ⠿ para reordenar · destildá para ocultar · escribí para renombrar. Se aplica a las comparativas, perfil de posición, evolución y "por fecha" (no a los gráficos del informe).
+    </div>
+    <div id="gpsCfgList" style="display:flex;flex-direction:column;gap:5px;margin-bottom:16px"></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:space-between;align-items:center">
+      <button id="gpsCfgReset" style="background:none;border:1px solid var(--border2);color:var(--muted);border-radius:6px;padding:8px 14px;font-family:'Barlow Condensed',sans-serif;font-size:12px;cursor:pointer">↺ Restablecer</button>
+      <div style="display:flex;gap:8px">
+        <button id="gpsCfgCancel" style="background:none;border:1px solid var(--border2);color:var(--muted);border-radius:6px;padding:8px 16px;font-family:'Barlow Condensed',sans-serif;font-size:13px;cursor:pointer">Cancelar</button>
+        <button id="gpsCfgSave" style="background:linear-gradient(135deg,var(--red),#8a0f1e);border:none;border-radius:6px;color:#fff;font-family:'Bebas Neue',sans-serif;font-size:15px;letter-spacing:2px;padding:8px 20px;cursor:pointer">✓ GUARDAR</button>
+      </div>
+    </div>
+  </div>`;
+  document.body.appendChild(ov);
+  const listEl=ov.querySelector('#gpsCfgList');
+
+  function renderRows(){
+    listEl.innerHTML=work.map((w,i)=>`<div class="gps-cfg-row" draggable="true" data-i="${i}"
+      style="display:flex;align-items:center;gap:8px;background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:7px 9px">
+      <span style="cursor:grab;color:var(--muted);font-size:15px;user-select:none">⠿</span>
+      <input type="checkbox" class="gps-cfg-vis" data-i="${i}" ${w.visible?'checked':''} style="cursor:pointer;accent-color:var(--gold)">
+      <input type="text" class="gps-cfg-lbl" data-i="${i}" value="${esc(w.label)}" placeholder="${esc(w.def)}"
+        style="flex:1;min-width:0;background:rgba(5,8,15,0.8);border:1px solid var(--border2);color:var(--text);border-radius:5px;padding:5px 8px;font-family:'Barlow',sans-serif;font-size:13px;outline:none">
+      <span style="font-family:'Barlow Condensed',sans-serif;font-size:10px;color:var(--muted);white-space:nowrap">${esc(w.def)} · ${esc(w.unit)}</span>
+    </div>`).join('');
+    listEl.querySelectorAll('.gps-cfg-vis').forEach(cb=>cb.addEventListener('change',e=>{ work[+e.target.dataset.i].visible=e.target.checked; }));
+    listEl.querySelectorAll('.gps-cfg-lbl').forEach(tx=>tx.addEventListener('input',e=>{ work[+e.target.dataset.i].label=e.target.value; }));
+    listEl.querySelectorAll('.gps-cfg-row').forEach(row=>{
+      row.addEventListener('dragstart',e=>{ dragIdx=+row.dataset.i; e.dataTransfer.effectAllowed='move'; row.style.opacity='0.4'; });
+      row.addEventListener('dragend',()=>{ row.style.opacity='1'; });
+      row.addEventListener('dragover',e=>{ e.preventDefault(); });
+      row.addEventListener('drop',e=>{
+        e.preventDefault();
+        const to=+row.dataset.i;
+        if(dragIdx==null||dragIdx===to) return;
+        const [m]=work.splice(dragIdx,1); work.splice(to,0,m); dragIdx=null;
+        renderRows();
+      });
+    });
+  }
+  renderRows();
+
+  const close=()=>ov.remove();
+  const reRender=()=>{ close(); const c=document.getElementById('gps-plantel-'+cat); if(c) renderGpsPlantelSection(cat,c); };
+  ov.addEventListener('click',e=>{ if(e.target===ov) close(); });
+  ov.querySelector('#gpsCfgCancel').addEventListener('click',close);
+  ov.querySelector('#gpsCfgReset').addEventListener('click',()=>{
+    gpsMetricCfg={order:[],hidden:[],labels:{}};
+    guardarGpsMetricCfg(); reRender();
+    showToast('↺ MÉTRICAS RESTABLECIDAS');
+  });
+  ov.querySelector('#gpsCfgSave').addEventListener('click',()=>{
+    const hidden=work.filter(w=>!w.visible).map(w=>w.key);
+    if(hidden.length>=GPS_COMPARE_METRICS.length){ showToast('⚠ DEJÁ AL MENOS UNA MÉTRICA VISIBLE'); return; }
+    const labels={};
+    work.forEach(w=>{ const t=(w.label||'').trim(); if(t && t!==w.def) labels[w.key]=t; });
+    gpsMetricCfg={ order:work.map(w=>w.key), hidden, labels };
+    guardarGpsMetricCfg(); reRender();
+    showToast('✓ MÉTRICAS ACTUALIZADAS');
+  });
+}
 
 // Fechas guardadas como texto "d/m/aaaa" (sin ceros a la izquierda) — para
 // ordenar sesiones cronológicamente hace falta convertirlas a algo comparable.
@@ -3278,6 +3394,11 @@ function renderGpsComparativas(cat, sessions, container){
   const posOpts=posiciones.map(pos=>`<option value="${esc(pos)}">${esc(pos)}</option>`).join('');
 
   container.innerHTML=`
+    ${canEdit?`<div style="display:flex;justify-content:flex-end;margin-bottom:6px">
+      <button onclick="abrirConfigMetricasGps('${cat}')" style="background:rgba(26,58,143,0.25);border:1px solid var(--border2);color:var(--gold2);
+        border-radius:6px;padding:5px 12px;font-family:'Barlow Condensed',sans-serif;font-size:12px;letter-spacing:1px;cursor:pointer">⚙️ Configurar métricas</button>
+    </div>`:''}
+
     ${seccionTitulo('gps-cmp-fechas-'+cat, '⚖️ RENDIMIENTO DE UN JUGADOR ENTRE FECHAS')}
     <div id="sec-gps-cmp-fechas-${cat}"${seccionEstiloInicial('gps-cmp-fechas-'+cat)}>
       <select id="gpsCmpJugadorSel-${cat}" style="${GPS_SELECT_STYLE}">${playerOpts}</select>
@@ -3346,7 +3467,7 @@ function renderGpsComparativas(cat, sessions, container){
 // m2125, min, etc. — lo que guarda el parser de PDF) para esa columna, o
 // null/undefined si esa columna no tiene dato para ese jugador.
 function gpsCompareRowsHTML(items, getPlayer){
-  return GPS_COMPARE_METRICS.map(m=>{
+  return gpsVisibleMetrics().map(m=>{
     const vals=items.map(it=>{
       const p=getPlayer(it);
       const v=p?m.get(p):null;
@@ -3533,7 +3654,7 @@ function gpsEvolucionHTML(cat, posicion, jugador){
   const recs = jugador ? gpsJugadorPartidoRecordsConSesion(cat, jugador) : gpsPosicionRecordsConSesion(cat, posicion);
   const aggregate = jugador ? null : 'avg';
   const titulo = jugador ? esc(jugador) : `Promedio · ${esc(posicion)}`;
-  const blocks=GPS_COMPARE_METRICS.map(m=>{
+  const blocks=gpsVisibleMetrics().map(m=>{
     const points=gpsTrendPoints(cat, recs, m, aggregate);
     if(points.length<2) return '';
     return `<div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px 10px">
@@ -3570,7 +3691,7 @@ function gpsRenderPerfilPosicion(cat){
     cols.push({label:`${esc(jugador)} · Máx.`,  records:jugRecords, agg:'max'});
   }
   const head=cols.map(c=>`<th style="text-align:center">${c.label}</th>`).join('');
-  const rows=GPS_COMPARE_METRICS.map(m=>{
+  const rows=gpsVisibleMetrics().map(m=>{
     const raw=cols.map(c=>{
       const vals=c.records.map(p=>m.get(p)).filter(v=>v!=null && v>0);
       const {avg,max}=gpsAvgMax(vals);
@@ -3639,17 +3760,17 @@ function gpsSesionesDePos(cat, posicion){
     .sort((a,b)=>gpsParseDateDMY(a.date)-gpsParseDateDMY(b.date));
 }
 
-// Índice de "Distancia" en GPS_COMPARE_METRICS — métrica por defecto de
-// "Por fecha" (igual que BL, que abre en Dist. Total; Minutos como default
-// sería raro porque las bandas ya son por minutos jugados).
-const GPS_DEFAULT_MET_IDX = Math.max(0, GPS_COMPARE_METRICS.findIndex(m=>m.key==='dist'));
+// Métrica por defecto de "Por fecha": Distancia (igual que BL, que abre en
+// Dist. Total; Minutos como default sería raro porque las bandas ya son por
+// minutos jugados). Se guarda por CLAVE, no por índice, para que reordenar u
+// ocultar métricas (config) no cambie la selección.
 function gpsPFOnPosChange(cat){
   const pos=document.getElementById(`gpsPFPosSel-${cat}`).value;
   const prev=gpsPorFechaState[cat];
-  gpsPorFechaState[cat]={pos, metIdx:(prev?prev.metIdx:GPS_DEFAULT_MET_IDX), fechas:new Set(['ALL'])};
+  gpsPorFechaState[cat]={pos, metKey:(prev?prev.metKey:'dist'), fechas:new Set(['ALL'])};
   gpsRenderPorFecha(cat);
 }
-function gpsPFSelMet(cat, i){ gpsPorFechaState[cat].metIdx=i; gpsRenderPorFecha(cat); }
+function gpsPFSelMet(cat, key){ gpsPorFechaState[cat].metKey=key; gpsRenderPorFecha(cat); }
 function gpsPFTogF(cat, id){
   const st=gpsPorFechaState[cat];
   if(id==='ALL'){ st.fechas=new Set(['ALL']); }
@@ -3667,11 +3788,14 @@ function gpsRenderPorFecha(cat){
     body.innerHTML=`<div style="text-align:center;padding:16px;color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-size:13px">Sin partidos con datos para ${esc(pos)}.</div>`;
     return;
   }
-  const metric=GPS_COMPARE_METRICS[st.metIdx];
+  const visibles=gpsVisibleMetrics();
+  let metric=visibles.find(m=>m.key===st.metKey) || visibles[0];
+  if(!metric){ body.innerHTML='<div style="padding:12px;color:var(--muted);font-family:Barlow Condensed,sans-serif;font-size:12px">No hay métricas visibles (revisá la configuración de métricas).</div>'; return; }
+  st.metKey=metric.key;
 
-  const chips=GPS_COMPARE_METRICS.map((m,i)=>{
-    const on=i===st.metIdx;
-    return `<button onclick="gpsPFSelMet('${cat}',${i})" style="font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:600;padding:4px 11px;border-radius:14px;cursor:pointer;white-space:nowrap;
+  const chips=visibles.map(m=>{
+    const on=m.key===st.metKey;
+    return `<button onclick="gpsPFSelMet('${cat}','${m.key}')" style="font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:600;padding:4px 11px;border-radius:14px;cursor:pointer;white-space:nowrap;
       border:1px solid ${on?'var(--gold)':'var(--border2)'};background:${on?'linear-gradient(135deg,#3a2a08,#1a1206)':'transparent'};color:${on?'var(--gold2)':'var(--muted)'}">${m.label}</button>`;
   }).join('');
 
@@ -3707,10 +3831,10 @@ function gpsPFOneFecha(cat,pos,session,metric){
   if(pct!=null) tags+=`<span style="font-size:10px;font-family:'Barlow Condensed',sans-serif;padding:3px 9px;border-radius:12px;border:1px solid ${pctColor};color:${pctColor}">${pct}% del máx. histórico</span>`;
   if(hist.avg>0) tags+=`<span style="font-size:10px;font-family:'Barlow Condensed',sans-serif;padding:3px 9px;border-radius:12px;border:1px solid var(--border2);color:var(--muted)">Ref. histórica: ${hist.avg} ${metric.unit}</span>`;
 
-  const miniTiles=GPS_COMPARE_METRICS.map((m,i)=>{
+  const miniTiles=gpsVisibleMetrics().map(m=>{
     const bb=gpsBandasPosFecha(cat,pos,session,m);
     const val=(bb.best!=null)?bb.best:'—';
-    const sel=i===gpsPorFechaState[cat].metIdx;
+    const sel=m.key===gpsPorFechaState[cat].metKey;
     return `<div style="background:var(--surface2);border:1px solid ${sel?'var(--gold)':'var(--border)'};border-radius:7px;padding:7px 9px;text-align:center">
       <div style="font-family:'Barlow Condensed',sans-serif;font-size:10px;color:var(--muted);line-height:1.1;margin-bottom:3px">${m.label}</div>
       <div style="font-family:'Bebas Neue',sans-serif;font-size:18px;color:${sel?'var(--gold2)':'var(--text)'};line-height:1">${val}</div>
@@ -3750,7 +3874,7 @@ function gpsPFOneFecha(cat,pos,session,metric){
 
 function gpsPFMultiFechas(cat,pos,active){
   if(!active.length) return `<div style="text-align:center;padding:16px;color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-size:13px">Elegí al menos una fecha.</div>`;
-  const selMetIdx=gpsPorFechaState[cat].metIdx;
+  const selMetKey=gpsPorFechaState[cat].metKey;
   const head1=active.map(s=>`<th colspan="3" style="text-align:center;border-left:2px solid var(--border2)">F${s.fecha}</th>`).join('');
   const head2=active.map(s=>{
     const rival=gpsRivalLabel(cat,s.fecha)||'';
@@ -3758,8 +3882,8 @@ function gpsPFMultiFechas(cat,pos,active){
   }).join('');
   const head3=active.map(()=>`<th style="text-align:center;font-size:9px;border-left:2px solid var(--border2);color:var(--win)">+85'</th><th style="text-align:center;font-size:9px;color:var(--draw)">60-84'</th><th style="text-align:center;font-size:9px;color:var(--loss)">-60'</th>`).join('');
 
-  const rows=GPS_COMPARE_METRICS.map((m,i)=>{
-    const sel=i===selMetIdx;
+  const rows=gpsVisibleMetrics().map(m=>{
+    const sel=m.key===selMetKey;
     const cells=active.map(s=>{
       const b=gpsBandasPosFecha(cat,pos,s,m);
       const c=(v,col)=>`<td style="text-align:center;${v!=null?`color:${col}`:'color:var(--muted)'}">${v!=null?v:'—'}</td>`;
@@ -5204,6 +5328,7 @@ function startPublicListener(){
     if(p.chequeoSemanal) chequeoSemanal = p.chequeoSemanal;
     if(p.aliasJugadores) aliasJugadores = p.aliasJugadores;
     if(p.aliasJugadoresGps) aliasJugadoresGps = p.aliasJugadoresGps;
+    if(p.gpsMetricCfg) gpsMetricCfg = p.gpsMetricCfg;
     if(p.recordatoriosOmitidos) recordatoriosOmitidos = p.recordatoriosOmitidos;
     refreshActiveModule();
   });
