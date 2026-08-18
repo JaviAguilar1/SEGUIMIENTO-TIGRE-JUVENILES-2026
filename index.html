@@ -5176,116 +5176,12 @@ function doWallLogin(){
 //  (ver renderTablaLPF / renderTablaReserva, llamadas desde renderStatsSingle).
 // ============================================================
 // Etiquetas de los torneos de Reserva (se muestran dos, apilados)
-const TABLA_LABELS = { 'RESERVA_APE':'RES. APERTURA', 'RESERVA_CLA':'RES. CLAUSURA' };
+const TABLA_LABELS = { 'RESERVA_APE':'PROYECCIÓN APERTURA', 'RESERVA_CLA':'PROYECCIÓN CLAUSURA' };
 // Color de cada torneo de reserva (las juveniles ya tienen color en CAT_COLORS)
 const TABLA_COLORS = { 'RESERVA_APE':CAT_COLORS['RESERVA'], 'RESERVA_CLA':CAT_COLORS['RESERVA'] };
 function tablaColor(cat){ return TABLA_COLORS[cat] || CAT_COLORS[cat] || 'var(--muted)'; }
 let TABLA_DATA = null;
 
-// ── RESERVA (Proyección) — datos FIJOS cargados a mano ───────────────────────
-// La reserva se dibuja con JavaScript en el sitio oficial y no se puede scrapear
-// como las juveniles, así que por ahora se cargan las tablas a mano. Para
-// actualizar: reemplazar los números de cada fila (orden: pos, equipo, pts, pj,
-// pg, pe, pp, gf, gc, dif). El "dif" se recalcula solo, no hace falta tocarlo.
-function _fila(pos,equipo,pts,pj,pg,pe,pp,gf,gc){
-  return {pos,equipo,pts,pj,pg,pe,pp,gf,gc,dif:gf-gc};
-}
-const RESERVA_FIJA = {
-  // Torneo Proyección CLAUSURA 2026 — actualizado a Fecha 3
-  RESERVA_CLA: {
-    actualizado: '2026-08-06 (Fecha 3)',
-    zonas: {
-      'Zona A': [
-        _fila(1,'River',7,3,2,1,0,6,1),
-        _fila(2,'Sarmiento',7,3,2,1,0,3,1),
-        _fila(3,'Gimnasia',5,3,1,2,0,2,0),
-        _fila(4,'San Lorenzo',4,2,1,1,0,3,0),
-        _fila(5,'Rosario Central',4,2,1,1,0,3,1),
-        _fila(6,'Talleres',4,2,1,1,0,1,0),
-        _fila(7,'Godoy Cruz',4,3,1,1,1,3,3),
-        _fila(8,'Argentinos',4,3,1,1,1,2,2),
-        _fila(9,'Atlético Tucumán',4,3,1,1,1,2,2),
-        _fila(10,'Tigre',4,3,1,1,1,3,4),
-        _fila(11,'Banfield',4,3,1,1,1,2,4),
-        _fila(12,'Unión',3,3,0,3,0,1,1),
-        _fila(13,'Gimnasia (Mdz)',3,3,1,0,2,4,5),
-        _fila(14,'Racing',2,3,0,2,1,4,5),
-        _fila(15,'Instituto',1,2,0,1,1,0,1),
-        _fila(16,'Aldosivi',1,3,0,1,2,1,4),
-        _fila(17,'Barracas Central',1,2,0,1,1,1,5),
-        _fila(18,'Vélez Sarsfield',0,2,0,0,2,0,2),
-      ],
-      'Zona B': [
-        _fila(1,'Independiente',9,3,3,0,0,13,2),
-        _fila(2,'Boca',7,3,2,1,0,6,1),
-        _fila(3,'Quilmes',5,3,1,2,0,3,2),
-        _fila(4,'Estudiantes (RC)',5,3,1,2,0,2,1),
-        _fila(5,'Estudiantes',4,2,1,1,0,3,1),
-        _fila(6,'Deportivo Riestra',4,3,1,1,1,4,3),
-        _fila(7,'Atl. Rafaela',4,2,1,1,0,2,1),
-        _fila(8,'Lanús',4,3,1,1,1,2,2),
-        _fila(9,'Ferro',4,3,1,1,1,3,4),
-        _fila(10,'Belgrano',4,3,1,1,1,2,5),
-        _fila(11,"Newell's",3,3,0,3,0,3,3),
-        _fila(12,'Platense',2,2,0,2,0,0,0),
-        _fila(13,'Defensa y Justicia',2,3,0,2,1,3,4),
-        _fila(14,'Colón',2,3,0,2,1,3,5),
-        _fila(15,'San Martín (SJ)',2,3,0,2,1,0,9),
-        _fila(16,'Central Córdoba (SdE)',1,2,0,1,1,0,1),
-        _fila(17,'Huracán',1,3,0,1,2,1,3),
-        _fila(18,'Independiente Riv. (M)',0,3,0,0,3,2,5),
-      ],
-    },
-  },
-  // Torneo Proyección APERTURA 2026 — tabla final de la fase de zonas (18 fechas).
-  // Reconstruida desde el fixture completo de canchallena. Racing fue campeón del
-  // torneo (playoffs); esta es la tabla de la fase regular. Tigre: 17º Zona A.
-  RESERVA_APE: {
-    actualizado: 'Torneo finalizado · Racing campeón (fase de zonas, 18 fechas)',
-    zonas: {
-      'Zona A': [
-        _fila(1,'Vélez',44,18,14,2,2,40,11),
-        _fila(2,'River Plate',31,18,9,4,5,24,17),
-        _fila(3,'Racing',30,18,8,6,4,27,23),
-        _fila(4,'Atlético Tucumán',30,18,9,3,6,26,24),
-        _fila(5,'Unión',29,18,7,8,3,23,19),
-        _fila(6,'Argentinos',28,18,7,7,4,24,18),
-        _fila(7,'Talleres',26,18,7,5,6,27,21),
-        _fila(8,'Rosario Central',26,18,7,5,6,25,22),
-        _fila(9,'Instituto',24,18,5,9,4,20,21),
-        _fila(10,'San Lorenzo',24,18,6,6,6,22,24),
-        _fila(11,'Gimnasia LP',23,18,6,5,7,19,17),
-        _fila(12,'Gimnasia (Mza)',23,18,6,5,7,16,19),
-        _fila(13,'Banfield',23,18,6,5,7,14,18),
-        _fila(14,'Aldosivi',18,18,5,3,10,17,28),
-        _fila(15,'Barracas Central',17,18,4,5,9,10,24),
-        _fila(16,'Sarmiento',16,18,4,4,10,16,26),
-        _fila(17,'Tigre',16,18,4,4,10,15,25),
-        _fila(18,'Godoy Cruz',15,18,4,3,11,20,30),
-      ],
-      'Zona B': [
-        _fila(1,'Boca',36,18,11,3,4,33,11),
-        _fila(2,'Independiente',36,18,11,3,4,36,16),
-        _fila(3,'Lanús',35,18,11,2,5,39,24),
-        _fila(4,"Newell's",34,18,10,4,4,26,16),
-        _fila(5,'Quilmes',33,18,10,3,5,20,12),
-        _fila(6,'Defensa y Justicia',32,18,9,5,4,38,24),
-        _fila(7,'Estudiantes',28,18,8,4,6,25,16),
-        _fila(8,'Belgrano',27,18,8,3,7,27,29),
-        _fila(9,'Huracán',26,18,7,5,6,23,17),
-        _fila(10,'Platense',26,18,7,5,6,17,20),
-        _fila(11,'Deportivo Riestra',25,18,7,4,7,25,18),
-        _fila(12,'Independiente Riv. (M)',24,18,7,3,8,23,23),
-        _fila(13,'Ferro',22,18,6,4,8,20,23),
-        _fila(14,'Central Córdoba (SdE)',19,18,5,4,9,21,33),
-        _fila(15,'Colón',18,18,5,3,10,15,23),
-        _fila(16,'Atl. Rafaela',12,18,3,3,12,21,36),
-        _fila(17,'Estudiantes (RC)',11,18,2,5,11,9,32),
-        _fila(18,'San Martín (SJ)',8,18,2,2,14,16,59),
-      ],
-    },
-  },
-};
 // Correcciones manuales a la tabla de posiciones de la LPF: casos puntuales
 // donde confirmamos (contra otra fuente) que la LPF tiene mal su propio
 // dato y es muy improbable que lo corrijan. Se aplica SOLO sobre el espejo
@@ -5439,26 +5335,35 @@ function renderTablaLPF(cat, containerId){
 
 // Tabla LPF de Reserva (Proyección): datos fijos, ambos torneos apilados,
 // el que está en curso (Clausura) arriba y el anterior (Apertura) debajo.
+// Tabla LPF de Reserva (Proyección): datos automáticos (scraper), misma
+// fuente que ya usa el fixture de las juveniles — sabadogol.com.ar, porque
+// la LPF oficial ya no sirve una tabla estática para Reserva (todo lo
+// renderiza un widget de Opta por JS). Se muestran las dos zonas de cada
+// torneo (la de Tigre y la otra), igual que antes.
 function renderTablaReserva(containerId){
   const el=document.getElementById(containerId);
   if(!el) return;
-  const orden=['RESERVA_CLA','RESERVA_APE'];
-  el.innerHTML=orden.map(key=>{
-    const data=RESERVA_FIJA[key];
-    const label=TABLA_LABELS[key]||key;
-    if(!data){
-      return `<div style="padding:20px 16px;text-align:center;color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-size:13px">
-        Todavía no hay datos cargados para <b style="color:${tablaColor(key)}">${label}</b>.</div>`;
-    }
-    const bloques=Object.entries(data.zonas).map(([zona,filas])=>`
-      <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;letter-spacing:2px;
-                  color:${tablaColor(key)};font-size:15px;padding:14px 4px 6px;text-transform:uppercase">${zona}</div>
-      ${_tablaHTML(filas)}`).join('');
-    return `
-      <div style="font-family:'Bebas Neue',sans-serif;font-size:15px;letter-spacing:2px;color:${tablaColor(key)};padding:16px 12px 0">${label}</div>
-      <div style="font-family:'Barlow Condensed',sans-serif;font-size:10px;letter-spacing:1px;color:var(--muted);padding:2px 12px 0;text-align:right">Actualizado: ${data.actualizado} · ligaprofesional.ar (Proyección)</div>
-      <div class="table-wrap" style="padding:0 12px 20px">${bloques}</div>`;
-  }).join('');
+  loadTablaData().then(()=>{
+    const orden=['RESERVA_CLA','RESERVA_APE'];
+    const upd=TABLA_DATA&&TABLA_DATA.actualizado
+      ? `Actualizado: ${TABLA_DATA.actualizado} · sabadogol.com.ar` : '';
+    el.innerHTML=orden.map(key=>{
+      const data=(TABLA_DATA&&TABLA_DATA.categorias&&TABLA_DATA.categorias[key])||null;
+      const label=TABLA_LABELS[key]||key;
+      if(!data||!data.zonas||!Object.keys(data.zonas).length){
+        return `<div style="padding:20px 16px;text-align:center;color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-size:13px">
+          Todavía no hay datos cargados para <b style="color:${tablaColor(key)}">${label}</b>.<br>
+          <span style="font-size:12px">Se completará en la próxima actualización automática.</span></div>`;
+      }
+      const bloques=Object.entries(data.zonas).map(([zona,filas])=>`
+        <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;letter-spacing:2px;
+                    color:${tablaColor(key)};font-size:15px;padding:14px 4px 6px;text-transform:uppercase">${esc(zona)}</div>
+        ${_tablaHTML(filas)}`).join('');
+      return `
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:15px;letter-spacing:2px;color:${tablaColor(key)};padding:16px 12px 0">${label}</div>
+        <div class="table-wrap" style="padding:0 12px 20px">${bloques}</div>`;
+    }).join('') + `<div style="font-family:'Barlow Condensed',sans-serif;font-size:10px;letter-spacing:1px;color:var(--muted);padding:0 12px 6px;text-align:right">${upd}</div>`;
+  });
 }
 
 initFirebase()
@@ -6391,13 +6296,14 @@ function pdfSectionResultados(cat, dataCat, isReserva, rivalList){
 }
 
 async function pdfSectionTablaLPF(cat, isReserva){
+  await loadTablaData();
   if(isReserva){
     const orden=['RESERVA_CLA','RESERVA_APE'];
     let html='';
     orden.forEach(key=>{
-      const data=RESERVA_FIJA[key];
+      const data=(TABLA_DATA&&TABLA_DATA.categorias&&TABLA_DATA.categorias[key])||null;
       const label=TABLA_LABELS[key]||key;
-      if(!data) return;
+      if(!data||!data.zonas) return;
       html+=`<div class="section-title">Tabla LPF — ${esc(label)}</div>`;
       Object.entries(data.zonas).forEach(([zona,filas])=>{
         html+=`<div style="font-weight:700;letter-spacing:1px;color:#0a1a4a;margin:6px 0 4px;
@@ -6406,7 +6312,6 @@ async function pdfSectionTablaLPF(cat, isReserva){
     });
     return html || `<div class="section-title">Tabla de posiciones LPF</div><p style="color:#999">Sin datos cargados</p>`;
   }
-  await loadTablaData();
   const filas=(TABLA_DATA&&TABLA_DATA.categorias&&TABLA_DATA.categorias[cat])||[];
   if(!filas.length) return `<div class="section-title">Tabla de posiciones LPF</div><p style="color:#999">Sin datos cargados todavía</p>`;
   return `<div class="section-title">Tabla de posiciones LPF</div>${pdfTablaLPFHtml(filas)}`;

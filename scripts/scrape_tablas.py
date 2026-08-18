@@ -34,12 +34,18 @@ FUENTES = {
 }
 
 # Reserva ("Proyeccion" en la web oficial). A diferencia de las juveniles,
-# estas paginas NO traen la <table> embebida: la tabla se carga desde un
-# iframe externo de DataFactory. Por eso tienen su propio parser (parse_reserva).
-# Dos torneos por semestre -> dos vistas separadas en la app.
-FUENTES_RESERVA = {
-    "RESERVA_APE": "https://www.ligaprofesional.ar/proyeccion-apertura-2026/",
-    "RESERVA_CLA": "https://www.ligaprofesional.ar/proyeccion-clausura-2026/",
+# estas paginas ya NO traen ninguna <table> embebida (confirmado 2026-08-18):
+# todo se dibuja con un <opta-widget> por JS, ni siquiera hay un iframe de
+# DataFactory como antes. Por eso la tabla de posiciones de Reserva sale de
+# sabadogol.com.ar (parse_reserva_tabla), la misma fuente que ya se usa para
+# el fixture partido a partido de las juveniles -- el mismo POST a
+# fixture.php trae, ademas del fixture, las tablas de posiciones de las dos
+# zonas del torneo. "c" identifica el torneo (dos por temporada: Apertura y
+# Clausura); "t" no afecta la respuesta (probado con varios valores, siempre
+# devuelve el mismo contenido), asi que se manda un valor fijo cualquiera.
+FIXTURE_RESERVA_C = {
+    "RESERVA_APE": "2",   # Proyeccion Apertura
+    "RESERVA_CLA": "26",  # Proyeccion Clausura
 }
 
 OUT_PATH = "data/tablas.json"
@@ -338,52 +344,69 @@ def _filas_desde_tabla_html(tabla_html: str):
     return out
 
 
-def parse_reserva(html: str):
+def _filas_posiciones_sin_dif(tabla_html: str):
+    """Como _filas_desde_tabla_html, pero para el formato de sabadogol.com.ar
+    (Reserva): 9 columnas, POS/EQUIPO/PTS/PJ/G/E/P/GF/GC, sin columna DIF
+    (se calcula GF-GC)."""
+    filas = re.findall(r"<tr\b[^>]*>(.*?)</tr>", tabla_html, re.IGNORECASE | re.DOTALL)
+    out = []
+    for fila in filas:
+        celdas = re.findall(r"<t[dh]\b[^>]*>(.*?)</t[dh]>", fila, re.IGNORECASE | re.DOTALL)
+        celdas = [re.sub(r"<[^>]+>", "", c).replace("&nbsp;", " ").strip() for c in celdas]
+        if len(celdas) < 9:
+            continue
+        pos_raw = celdas[0].replace("°", "").strip()
+        if not re.match(r"^\d+$", pos_raw):
+            continue
+        equipo = norm_equipo(celdas[1])
+        if not equipo:
+            continue
+        try:
+            gf, gc = int(celdas[7]), int(celdas[8])
+            out.append({
+                "pos": int(pos_raw), "equipo": equipo,
+                "pts": int(celdas[2]), "pj": int(celdas[3]),
+                "pg": int(celdas[4]), "pe": int(celdas[5]), "pp": int(celdas[6]),
+                "gf": gf, "gc": gc, "dif": gf - gc,
+            })
+        except (ValueError, IndexError):
+            continue
+    return out
+
+
+def parse_reserva_tabla(html: str):
     """
-    Extrae la tabla de posiciones de una pagina de Proyeccion (Reserva).
-    La pagina oficial NO trae la <table> embebida: incrusta un iframe de
-    DataFactory con page=posiciones. Estrategia, en orden:
-      1) Si por algun motivo hay una <table> embebida, usarla (reusa parse_tabla).
-      2) Buscar la URL del iframe/enlace de DataFactory (page=posiciones),
-         fetchearla y parsear la <table> que sirve DataFactory.
-    Lanza ValueError si no logra ninguna fila.
+    Extrae la tabla de posiciones de Reserva (Proyeccion) desde la misma
+    respuesta de sabadogol.com.ar/fixture.php que ya sirve el fixture
+    partido a partido -- esa pagina trae, ademas de los resultados por
+    fecha, una <table> por zona del torneo con "POSICIONES" como primera
+    fila (confirmado con la pagina real: son las dos secciones colapsables
+    "COPA PROYECCION. Zona A."/"Zona B.").
+    Para saber a que zona pertenece cada tabla se busca, en el HTML crudo,
+    cual de las dos etiquetas "Zona A"/"Zona B" aparece mas cerca ANTES de
+    esa tabla (confirmado: la etiqueta precede a su tabla correspondiente).
+    Devuelve {"Zona A": [filas], "Zona B": [filas]} -- puede faltar una
+    zona si el torneo todavia no la tiene armada. Lanza ValueError si no
+    encuentra ninguna tabla de posiciones.
     """
-    # 1) intento directo por si la pagina ya trae la tabla
-    try:
-        return parse_tabla(html)
-    except ValueError:
-        pass
-
-    # 2) ubicar la URL de DataFactory con page=posiciones
-    m = re.search(
-        r"https?://[^\"'\s]*datafactory[^\"'\s]*?page=posiciones[^\"'\s]*",
-        html, re.IGNORECASE)
-    if not m:
-        # a veces el orden de los params varia: aceptar cualquier URL de
-        # datafactory del canal reserva y forzar page=posiciones
-        m2 = re.search(
-            r"https?://[^\"'\s]*datafactory[^\"'\s]*?channel=deportes\.futbol\.reserva[^\"'\s]*",
-            html, re.IGNORECASE)
-        if not m2:
-            raise ValueError("No se encontro el iframe de DataFactory (posiciones)")
-        base = m2.group(0).replace("&amp;", "&")
-        url_df = re.sub(r"page=\w+", "page=posiciones", base)
-        if "page=posiciones" not in url_df:
-            url_df = base + ("&" if "?" in base else "?") + "page=posiciones"
-    else:
-        url_df = m.group(0).replace("&amp;", "&")
-
-    df_html = fetch(url_df)
-
-    # DataFactory sirve la tabla como <table>; reusar el mismo parser tolerante.
-    mtab = re.search(r"<table\b[^>]*>(.*?)</table>", df_html, re.IGNORECASE | re.DOTALL)
-    if mtab:
-        filas = _filas_desde_tabla_html(mtab.group(1))
+    zonas = {}
+    for m in re.finditer(r"<table\b[^>]*>(.*?)</table>", html, re.IGNORECASE | re.DOTALL):
+        body = m.group(1)
+        filas_raw = re.findall(r"<tr\b[^>]*>(.*?)</tr>", body, re.IGNORECASE | re.DOTALL)
+        if not filas_raw:
+            continue
+        primera = re.sub(r"<[^>]+>", "", filas_raw[0]).strip().upper()
+        if primera != "POSICIONES":
+            continue
+        antes = html[:m.start()]
+        pos_a, pos_b = antes.rfind("Zona A"), antes.rfind("Zona B")
+        zona = "Zona A" if pos_a > pos_b else "Zona B"
+        filas = _filas_posiciones_sin_dif(body)
         if filas:
-            return filas
-    raise ValueError(
-        "Se ubico el iframe de DataFactory pero no se pudo parsear la tabla "
-        "(puede requerir el endpoint JSON del feed)")
+            zonas[zona] = filas
+    if not zonas:
+        raise ValueError("No se encontro ninguna tabla de posiciones (fila 'POSICIONES')")
+    return zonas
 
 
 def main():
@@ -406,14 +429,15 @@ def main():
             errores.append(f"{cat}: {e}")
             print(f"[ERROR] {cat}: {e}", file=sys.stderr)
 
-    # Reserva (Proyeccion): parser propio (iframe DataFactory). Que falle una
-    # de estas NO debe afectar a las juveniles: se captura por separado.
-    for cat, url in FUENTES_RESERVA.items():
+    # Reserva (Proyeccion): tabla de posiciones desde sabadogol.com.ar (ver
+    # parse_reserva_tabla). Que falle una de estas NO debe afectar a las
+    # juveniles: se captura por separado.
+    for cat, c_val in FIXTURE_RESERVA_C.items():
         try:
-            html = fetch(url)
-            filas = parse_reserva(html)
-            resultado["categorias"][cat] = filas
-            print(f"[OK] {cat}: {len(filas)} equipos")
+            html = fetch_post(FIXTURE_URL, {"a": FIXTURE_ANIO, "c": c_val, "d": "", "t": "2"})
+            zonas = parse_reserva_tabla(html)
+            resultado["categorias"][cat] = {"zonas": zonas}
+            print(f"[OK] {cat}: {', '.join(f'{z} ({len(f)} equipos)' for z, f in zonas.items())}")
         except Exception as e:  # noqa
             errores.append(f"{cat}: {e}")
             print(f"[ERROR] {cat}: {e}", file=sys.stderr)
@@ -471,17 +495,19 @@ def main():
     else:
         print("[AVISO] FUTDETAIL_USER/FUTDETAIL_PASS no configurados, se omite futdetail")
 
-    # Salvaguarda: si Apertura y Clausura de reserva salieron IDENTICAS, es casi
-    # seguro que ambas paginas comparten el mismo iframe de DataFactory y no se
-    # estan diferenciando. Avisar fuerte (en log y en el JSON) para revisarlo,
-    # en vez de mostrar datos duplicados en las dos pestanas sin que se note.
-    ape = resultado["categorias"].get("RESERVA_APE")
-    cla = resultado["categorias"].get("RESERVA_CLA")
-    if ape and cla and ape == cla:
-        aviso = ("RESERVA_APE y RESERVA_CLA salieron identicas: la fuente "
-                 "probablemente no diferencia los torneos por URL. Revisar el iframe.")
-        print(f"[AVISO] {aviso}", file=sys.stderr)
-        resultado["avisos"] = resultado.get("avisos", []) + [aviso]
+    # Salvaguarda: si Zona A y Zona B de un mismo torneo de reserva salieron
+    # IDENTICAS, es casi seguro que la deteccion de zona por posicion de la
+    # etiqueta "Zona A"/"Zona B" en el HTML fallo (ver parse_reserva_tabla) y
+    # las dos tablas terminaron con el mismo contenido. Avisar fuerte en vez
+    # de mostrar datos duplicados sin que se note.
+    for cat in ("RESERVA_APE", "RESERVA_CLA"):
+        zonas = (resultado["categorias"].get(cat) or {}).get("zonas", {})
+        za, zb = zonas.get("Zona A"), zonas.get("Zona B")
+        if za and zb and za == zb:
+            aviso = (f"{cat}: Zona A y Zona B salieron identicas -- la deteccion de "
+                      "zona por posicion de etiqueta probablemente fallo. Revisar parse_reserva_tabla.")
+            print(f"[AVISO] {aviso}", file=sys.stderr)
+            resultado["avisos"] = resultado.get("avisos", []) + [aviso]
 
     # Si NINGUNA categoria salio bien, no pisamos el JSON anterior.
     if not resultado["categorias"]:

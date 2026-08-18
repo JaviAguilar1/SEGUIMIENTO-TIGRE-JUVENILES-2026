@@ -863,6 +863,81 @@ categorías como páginas separadas).
   reales sin match en futdetail; el ícono aparece deshabilitado en fechas
   sin datos (F1, F2) y habilitado en el resto.
 
+**Tabla de posiciones de RESERVA — automatizada (COMPLETA, 2026-08-18):**
+a pedido del usuario ("Reserva, tiene que traer los datos automaticos, ahora
+podes traer de la liga y de sabadogol"). Hasta ahora la tabla de RESERVA
+(Proyección) era la única que se cargaba a mano en todo el proyecto —una
+constante `RESERVA_FIJA` en `index.html`, con un comentario explicando cómo
+reemplazar los números fecha a fecha— y estaba parada en la Fecha 3 (12 días
+desactualizada). El resto (RESULTADOS de RESERVA, con `RIVALS_RESERVA`
+hardcodeado y resultados tipeados a mano) sigue igual que siempre: eso no es
+un bug, es el mismo patrón manual que usan también 4ta-9na para sus
+resultados (el fixture automático ahí tampoco autocompleta nada, solo se usa
+para el cruce de Confiabilidad).
+- **Se investigó por qué el scraper ya tenía código para Reserva
+  (`FUENTES_RESERVA`/`parse_reserva`) pero nunca funcionaba:** las páginas
+  oficiales de Proyección (`ligaprofesional.ar/proyeccion-apertura-2026/` y
+  `-clausura-2026/`) dejaron de tener una `<table>` embebida o siquiera un
+  iframe de DataFactory —confirmado con curl: 0 `<table>`, 3
+  `<opta-widget>`— y pasaron a dibujarse enteras con un widget de Opta por
+  JS, igual que ya le pasaba al fixture partido a partido de las juveniles.
+  El scraper fallaba en silencio (try/except por categoría) y por eso
+  `TABLA_DATA.categorias` nunca tenía `RESERVA_APE`/`RESERVA_CLA` — pero
+  además, aunque hubiera funcionado, **el frontend ni siquiera lo leía**:
+  `renderTablaReserva()` apuntaba directo a `RESERVA_FIJA`, nunca a
+  `TABLA_DATA` (a diferencia de `renderTablaLPF()`, que sí es 100%
+  dinámica para 4ta-9na). Hacían falta los dos arreglos, no solo uno.
+- **Nueva fuente: sabadogol.com.ar**, la misma que ya se usa para el fixture
+  de las juveniles. El mismo POST a `fixture.php` (con `c=2` para Proyección
+  Apertura, `c=26` para Clausura) que ya devuelve el fixture partido a
+  partido de Tigre, TAMBIÉN trae, entre sus ~37 `<table>`, dos tablas de
+  posiciones (una por zona del torneo) con "POSICIONES" como primera fila —
+  confirmado con datos reales que coinciden exacto con lo que ya estaba
+  cargado a mano (Vélez 1º con 44 pts, Tigre 17º con 16 pts en la Apertura).
+  `parse_reserva_tabla()` (scripts/scrape_tablas.py) identifica la zona de
+  cada tabla buscando cuál etiqueta "Zona A"/"Zona B" aparece más cerca
+  ANTES de esa tabla en el HTML (confirmado en la página real con captura
+  del usuario: son los encabezados colapsables "COPA PROYECCION. Zona A."/
+  "Zona B." — Tigre juega en Zona A). El parámetro `t` de sabadogol no
+  filtra nada para Proyección (probado con 3 valores distintos, siempre
+  devuelve el mismo contenido completo), así que se manda fijo.
+- **`TABLA_DATA.categorias.RESERVA_APE`/`.RESERVA_CLA` cambia de forma:**
+  en vez de la lista plana `[{pos,equipo,...}]` que usan 4ta-9na, ahora es
+  `{zonas: {"Zona A":[...], "Zona B":[...]}}` — mismo shape que ya tenía
+  `RESERVA_FIJA`, elegido a propósito para que el cambio en el frontend sea
+  mínimo (misma estructura, distinta fuente).
+- **`RESERVA_FIJA` y su helper `_fila()` se borraron enteros** (a pedido
+  del usuario: "Borrarla" en vez de dejarla de respaldo) — Reserva queda
+  100% automática, sin nada para mantener a mano nunca más.
+  `renderTablaReserva()` se reescribió para leer de `TABLA_DATA` (mismo
+  patrón que `renderTablaLPF`, con `loadTablaData()` primero) y
+  `pdfSectionTablaLPF(cat, isReserva)` (usada por el PDF exportado) se
+  actualizó igual, para que pantalla y PDF salgan siempre del mismo dato.
+- **Nombres actualizados:** "RES. APERTURA"/"RES. CLAUSURA" pasó a
+  "PROYECCIÓN APERTURA"/"PROYECCIÓN CLAUSURA" (`TABLA_LABELS`), como se
+  llama la competencia en la fuente real, confirmado por el usuario.
+- **Salvaguarda nueva:** si Zona A y Zona B de un mismo torneo salieran
+  idénticas, es señal de que la detección de zona por posición de etiqueta
+  falló — se agregó el mismo tipo de aviso fuerte que ya existía (antes
+  comparaba Apertura completa contra Clausura completa, lo cual con la
+  fuente nueva ya no tiene sentido porque son datos siempre distintos entre
+  sí aunque todo funcione bien).
+- **No se tocó:** el fixture partido a partido de Reserva (`RIVALS_RESERVA`/
+  `RIVALS_RESERVA_S2`) y los resultados cargados a mano en
+  `results['RESERVA']`/`['RESERVA_S2']` siguen exactamente igual — el
+  pedido era sobre la tabla de posiciones, no sobre eso. Sabadogol también
+  tiene el fixture partido a partido de Reserva accesible (se confirmó
+  Apertura con 18 fechas reales y Clausura con 3), pero no se agregó a
+  `TABLA_DATA.fixture` porque hoy no hay ningún consumidor para eso (a
+  diferencia de 4ta-9na, donde el fixture alimenta el cruce de
+  Confiabilidad) — queda como posible mejora futura si alguna vez se
+  extiende Confiabilidad a Reserva.
+- Probado: script corrido en vivo (`[OK] RESERVA_APE: Zona A (18 equipos),
+  Zona B (18 equipos)`, ídem Clausura, sin avisos de zonas duplicadas);
+  verificado en la app real que las cuatro tablas (2 torneos × 2 zonas) se
+  ven bien con Tigre en su posición correcta; `pdfSectionTablaLPF` probado
+  aparte, mismo resultado; sin errores de consola.
+
 **Pendiente / a futuro:**
 - Si se quiere, revisar si el badge de condición local/visitante de la tabla
   de RESULTADOS y el selector de citaciones deberían mostrar la condición
