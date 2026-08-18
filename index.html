@@ -3925,6 +3925,75 @@ function gpsIPEtiqueta(jugs){
     return (cuenta[ap]>1 && partes.length>1) ? ap+' '+partes[partes.length-1].charAt(0)+'.' : ap;
   };
 }
+// Formato del número sobre la barra: entero con separador de miles; decimal
+// si es un valor chico (ej. mts/min, vel máx). Mismo criterio que BL.
+function gpsFmtBarNum(v){
+  if(v==null) return '';
+  if(Math.abs(v)<10 && !Number.isInteger(v)) return String(Math.round(v*10)/10);
+  return Math.round(v).toLocaleString('es-AR');
+}
+// Plugin: valor siempre visible sobre cada barra y sobre cada punto de la
+// línea (patrón de BL, adaptado a fondo oscuro: caja oscura + texto claro).
+// El número de la barra se dibuja vertical cuando hay muchas barras finas.
+const gpsBarLabelsPlugin = {
+  id:'gpsBarLabels',
+  afterDatasetsDraw(chart){
+    const {ctx}=chart;
+    const nBars=chart.data.labels.length;
+    const vertical=nBars>8;
+    chart.data.datasets.forEach((ds,i)=>{
+      if(ds.type==='line') return;
+      const meta=chart.getDatasetMeta(i);
+      if(meta.hidden) return;
+      ctx.save(); ctx.font='700 10px monospace';
+      meta.data.forEach((bar,j)=>{
+        const v=ds.data[j];
+        if(v==null||v===0) return;
+        const txt=gpsFmtBarNum(v);
+        const alto=Math.abs(bar.base-bar.y);
+        const ancho=bar.width||12;
+        const w=ctx.measureText(txt).width;
+        if(ancho<11) return;
+        if(vertical){
+          if(alto<w+14) return;
+          const cy=bar.base-w/2-8;
+          ctx.save();
+          ctx.fillStyle='rgba(5,8,15,.85)';
+          ctx.fillRect(bar.x-7, cy-w/2-3, 14, w+6);
+          ctx.translate(bar.x, cy); ctx.rotate(-Math.PI/2);
+          ctx.textAlign='center'; ctx.textBaseline='middle';
+          ctx.fillStyle='#e8edf5'; ctx.fillText(txt,0,0);
+          ctx.restore();
+        } else {
+          if(alto<22||w+8>ancho) return;
+          const cy=bar.base-12;
+          ctx.fillStyle='rgba(5,8,15,.85)';
+          ctx.fillRect(bar.x-w/2-4, cy-7, w+8, 14);
+          ctx.textAlign='center'; ctx.textBaseline='middle';
+          ctx.fillStyle='#e8edf5'; ctx.fillText(txt, bar.x, cy);
+        }
+      });
+      ctx.restore();
+    });
+    chart.data.datasets.forEach((ds,i)=>{
+      if(ds.type!=='line') return;
+      const meta=chart.getDatasetMeta(i);
+      if(meta.hidden) return;
+      ctx.save(); ctx.font='700 10px monospace';
+      ctx.textAlign='center'; ctx.textBaseline='bottom';
+      meta.data.forEach((pt,j)=>{
+        const v=ds.data[j];
+        if(v==null) return;
+        const txt=String(Math.round(v*10)/10);
+        const w=ctx.measureText(txt).width;
+        ctx.fillStyle='rgba(5,8,15,.85)';
+        ctx.fillRect(pt.x-w/2-3, pt.y-20, w+6, 14);
+        ctx.fillStyle=ds.borderColor; ctx.fillText(txt, pt.x, pt.y-8);
+      });
+      ctx.restore();
+    });
+  }
+};
 function gpsIPChart(canvasId, jugs, ordenKey, barras, linea){
   const cv=document.getElementById(canvasId);
   if(!cv || typeof Chart==='undefined') return;
@@ -3949,9 +4018,11 @@ function gpsIPChart(canvasId, jugs, ordenKey, barras, linea){
     data:{labels,datasets},
     options:{
       responsive:true, maintainAspectRatio:false, animation:false,
+      layout:{ padding:{ top:26 } },
       plugins:{ legend:{display:false}, tooltip:{ callbacks:{ title:it=>ord[it[0].dataIndex].nombre } } },
       scales
-    }
+    },
+    plugins:[gpsBarLabelsPlugin]
   });
 }
 

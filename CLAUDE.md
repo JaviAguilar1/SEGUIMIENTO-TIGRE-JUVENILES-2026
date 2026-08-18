@@ -644,12 +644,15 @@ colapsables nuevas, y usan Chart.js (que ya estaba cargado, con el helper
   `<canvas>`; si se dibujan con la sección colapsada quedan a tamaño 0.
   `toggleSeccion` ahora detecta cuando se ABRE la sección del informe
   (`gps-informe-<cat>`) y re-renderiza para que Chart.js los mida bien.
-- **Diferencia de fidelidad a propósito:** las etiquetas de valor siempre
-  visibles sobre cada barra que tiene BL (plugin `ipValueLabels`, pensado
-  para el PDF impreso sobre fondo blanco) se dejaron afuera — en pantalla
-  oscura se usa el tooltip de Chart.js (hover muestra nombre completo +
-  valor). Si se quiere, se puede sumar un plugin de etiquetas claras
-  después.
+- **Etiquetas de valor siempre visibles (agregadas 2026-08-18 a pedido):**
+  `gpsBarLabelsPlugin` porta el plugin `ipValueLabels` de BL pero para fondo
+  oscuro (caja `rgba(5,8,15,.85)` + texto claro en vez de caja blanca +
+  texto negro). Dibuja el valor sobre cada barra (vertical cuando hay muchas
+  barras finas, >8) y sobre cada punto de la línea. Formato con
+  `gpsFmtBarNum` (entero con separador de miles; decimal si el valor es
+  chico, ej. mts/min o vel máx). Se sumó `layout.padding.top:26` para que
+  las etiquetas de la línea no se corten arriba. El tooltip de Chart.js
+  (hover → nombre completo + valor) sigue estando además.
 - Probado en la app real con los datos de 4ta: Por fecha (tabla multi y
   tarjeta de 1 fecha con bandas y % histórico), Informe (KPIs, 6 gráficos
   con 13-14 barras según el partido, filtros de posición y minutos, cambio
