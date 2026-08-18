@@ -728,9 +728,47 @@ tarjetas/lesiones y toda la sección GPS de equipo.
   jugadores", y el layout colapsa a 1 columna en móvil. Sin errores de
   consola.
 
+**Bug de local/visitante corregido + "Resumen por bloque" (COMPLETO, 2026-08-18):**
+el usuario notó que en GENERAL, el último bloque daba 8 pts de local y 0 de
+visitante, cuando era 6 y 2. Causa: `buildLVVTotalHTML` usaba la condición
+cruda de `RIVALS` (que es la de 4ta/5ta/6ta) para las 6 categorías, pero las
+menores (7ma/8va/9na) juegan **siempre al revés** — el fixture oficial de la
+LPF las pone en la columna espejo (cuando las mayores son local, las menores
+son visitante). El usuario lo cruzó contra liga/futdetail/sabadogol y
+confirmó el patrón para todo el torneo.
+- **`condicionCat(cat, fecha)`** devuelve la condición correcta: mayores =
+  `RIVALS[f].c`, menores (`CATS_MENORES` = 7MA/8VA/9NA) = invertida. Corrige
+  tanto el LVV combinado de GENERAL como las vistas por categoría de las
+  menores (que también estaban invertidas). **Ojo:** la condición cruda de
+  `RIVALS` sigue usándose en otros lados (badge de la tabla de RESULTADOS,
+  selector de fecha del PDF de citaciones) — ahí muestra la condición de las
+  mayores; el usuario solo pidió arreglar el LVV, no se tocó el resto.
+- **`lvvSplit(cats, from, to)`** reparte los partidos en local/visitante con
+  esa condición correcta, devolviendo pts + G/E/P + goles de cada lado.
+- **Se reemplazó** el viejo "Local vs Visitante" (tarjetas, solo último
+  bloque) + "Índice de rendimiento" (con columnas MÉTRICAS/bar e ÍNDICE
+  compuesto 0-100) por una sola tabla **"RESUMEN POR BLOQUE"**
+  (`buildResumenPorBloqueHTML`): una fila por bloque (+ TOTAL) con Pts/PJ,
+  % victorias, GF/PJ, GC/PJ, y los puntos de Local y Visitante (con G-E-P
+  abajo en chico). A pedido del usuario se sacaron "métricas" e "índice"; se
+  sumaron GF/PJ y GC/PJ. Cambia con el slider de tamaño de bloque como el
+  resto. RESERVA sigue mostrando solo la tabla de bloques (no usa esto).
+- Se borraron `buildLVVTotalHTML` y `buildIndiceTotalRowHTML` (sin
+  llamadores) y el CSS muerto asociado (`.lvv-*`, `.indice-*`).
+- Verificado con datos reales (públicos): último bloque F21-F25 da 6 pts
+  local (2-0-1) / 2 visit (0-2-1); 7MA F21 (3-3) cuenta como visitante, 4TA
+  F21 (2-1) como local; el TOTAL de temporada da 93 local / 61 visit (suma
+  154, coincide con el total); slider y RESERVA sin romperse; sin errores de
+  consola.
+
 **Pendiente / a futuro:**
-- Decidir si "Citaciones" vuelve a algún lado de la app o se descarta del
-  todo (por ahora el código sigue ahí, sin usar — ver arriba).
+- **Citaciones** (sacada de GENERAL): el usuario dijo que la retomamos
+  después de terminar el rediseño de PLANTEL. El código sigue ahí sin usar
+  (`buildPDFSection`/`renderChecklist`/`generarPDF`).
+- Si se quiere, revisar si el badge de condición local/visitante de la tabla
+  de RESULTADOS y el selector de citaciones deberían mostrar la condición
+  correcta por categoría (hoy usan la cruda de RIVALS, o sea la de las
+  mayores) — el usuario solo pidió arreglar el LVV por ahora.
 - Si futdetail sigue sin traer a Josué Rojas / Cristian Lezcano dentro del
   plantel de 4ta, confirmar con el club si corresponde revisar la carga en
   futdetail (no es algo que se arregle desde acá).

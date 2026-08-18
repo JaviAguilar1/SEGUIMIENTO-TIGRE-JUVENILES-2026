@@ -852,114 +852,6 @@ table.gen-table .cat-cell{font-family:'Bebas Neue',sans-serif;font-size:15px;
 }
 .forma-pts span { color: var(--gold2); font-weight: 700; }
 
-/* ── LOCAL VS VISITANTE ─────────────────────────────── */
-.lvv-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px,1fr));
-  gap: 14px;
-  margin-bottom: 24px;
-}
-.lvv-card {
-  background: linear-gradient(135deg, var(--surface2), var(--surface));
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  overflow: hidden;
-}
-.lvv-card .lv-header {
-  background: linear-gradient(135deg, var(--red), #6a0d1b);
-  padding: 10px 16px;
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: 15px;
-  letter-spacing: 2px;
-  color: white;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-.lvv-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1px;
-  background: var(--border);
-}
-.lvv-half {
-  background: var(--surface2);
-  padding: 14px;
-  text-align: center;
-}
-.lvv-half .lvv-label {
-  font-family: 'Barlow Condensed', sans-serif;
-  font-size: 10px;
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  color: var(--muted);
-  margin-bottom: 8px;
-}
-.lvv-stats-mini {
-  display: flex;
-  justify-content: center;
-  gap: 8px;
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: 14px;
-}
-.lvv-pts-big {
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: 32px;
-  color: var(--gold2);
-  line-height: 1;
-  margin-bottom: 4px;
-}
-.lvv-sub {
-  font-family: 'Barlow Condensed', sans-serif;
-  font-size: 11px;
-  color: var(--muted);
-}
-
-/* ── ÍNDICE DE RENDIMIENTO ──────────────────────────── */
-.indice-table-wrap {
-  overflow-x: auto;
-  margin-bottom: 24px;
-  border-radius: 10px;
-  border: 1px solid var(--border);
-}
-.indice-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 12px;
-}
-.indice-table thead th {
-  background: linear-gradient(180deg, var(--red), #8a0f1e);
-  color: white;
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: 13px;
-  letter-spacing: 1.5px;
-  padding: 9px 12px;
-  text-align: center;
-  border-right: 1px solid rgba(255,255,255,.1);
-  white-space: nowrap;
-}
-.indice-table tbody td {
-  padding: 7px 10px;
-  border-bottom: 1px solid var(--border);
-  border-right: 1px solid rgba(26,45,90,.3);
-  text-align: center;
-  vertical-align: middle;
-}
-.indice-table tbody tr:nth-child(even) td { background: rgba(10,15,30,.4); }
-.indice-table tbody tr:hover td { background: rgba(26,58,143,.15); }
-.indice-name { text-align: left !important; font-family: 'Barlow Condensed', sans-serif; font-weight: 600; font-size: 13px; min-width: 140px; }
-.indice-bar-wrap { min-width: 80px; }
-.indice-bar {
-  height: 6px;
-  border-radius: 3px;
-  background: linear-gradient(90deg, var(--blue2), var(--gold2));
-  transition: width .4s;
-}
-.indice-score {
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: 16px;
-}
-
 /* ── LESIONES ───────────────────────────────────────── */
 .lesiones-toolbar {
   display: flex;
@@ -1343,7 +1235,7 @@ table.gen-table .cat-cell{font-family:'Bebas Neue',sans-serif;font-size:15px;
   .add-lesion-form { grid-template-columns: 1fr 1fr; }
   .pdf-form { grid-template-columns: 1fr 1fr; }
   .pdf-form .btn-gen-pdf { grid-column: 1/-1; }
-  .lvv-grid,.tarjetas-grid,.forma-grid { grid-template-columns: 1fr; }
+  .tarjetas-grid,.forma-grid { grid-template-columns: 1fr; }
   .jug-layout { grid-template-columns: 1fr !important; }
 }
 
@@ -5927,87 +5819,89 @@ function loadRendimiento(payload){
   });
 }
 
-// ── RENDIMIENTO (bloque de fechas + local/visitante + índice) ──────────
-// Antes "Forma reciente" (últimos 5 fijo), "Local vs Visitante" e "Índice
-// de rendimiento" vivían aparte, con su propio título cada uno, y LVV/
-// índice se calculaban sobre TODA la temporada. Ahora quedan adentro de la
-// misma sección que la tabla "por bloque de fechas" (sin subtítulo propio,
-// solo los datos) y usan el ÚLTIMO bloque jugado — el mismo que la tabla ya
-// resalta en dorado — así que cambian solos con el slider de tamaño de
-// bloque en vez de quedar fijos en "últimos 5".
-// cats: una o varias categorías — varias (vista GENERAL) se combinan en un
-// solo total; una sola (vista de categoría) es directamente esa.
-function buildLVVTotalHTML(cats, from, to){
-  let pgL=0,peL=0,ppL=0,gfL=0,gcL=0,pgV=0,peV=0,ppV=0,gfV=0,gcV=0;
+// ── RENDIMIENTO (tabla por bloque de goles + resumen por bloque) ──────────
+// La condición LOCAL/VISITANTE de RIVALS es la de 4ta/5ta/6ta. Las menores
+// (7ma/8va/9na) juegan siempre al revés (el fixture oficial las pone en la
+// columna espejo: cuando las mayores son local, las menores son visitante).
+// Por eso el LVV combinado hay que calcularlo con la condición correcta POR
+// categoría, no la cruda de RIVALS (si no, las 3 menores se cuentan como
+// local y da, ej. en F21, 8-0 en vez de 6-2).
+const CATS_MENORES = new Set(['7MA','8VA','9NA']);
+function condicionCat(cat, fecha){
+  const base = RIVALS.find(x=>x.f===fecha)?.c;
+  if(!base) return null;
+  return CATS_MENORES.has(cat) ? (base==='L'?'V':'L') : base;
+}
+// Reparte los partidos de varias categorías (un rango de fechas) en local /
+// visitante con la condición correcta por categoría. Devuelve pts + G/E/P +
+// goles de cada lado.
+function lvvSplit(cats, from, to){
+  const L={pg:0,pe:0,pp:0,gf:0,gc:0}, V={pg:0,pe:0,pp:0,gf:0,gc:0};
   cats.forEach(cat=>{
-    RIVALS.filter(r=>r.f>=from && r.f<=to && results[cat][r.f]).forEach(r=>{
-      const res=results[cat][r.f];
+    for(let f=from; f<=to; f++){
+      const res=results[cat]?.[f];
+      if(!res) continue;
+      const cond=condicionCat(cat,f);
+      if(!cond) continue;
       const x=getResult(res[0],res[1]);
-      if(r.c==='L'){ if(x==='W')pgL++; else if(x==='D')peL++; else ppL++; gfL+=res[0]; gcL+=res[1]; }
-      else { if(x==='W')pgV++; else if(x==='D')peV++; else ppV++; gfV+=res[0]; gcV+=res[1]; }
-    });
+      const b = cond==='L'?L:V;
+      if(x==='W')b.pg++; else if(x==='D')b.pe++; else b.pp++;
+      b.gf+=res[0]; b.gc+=res[1];
+    }
   });
-  const l={pj:pgL+peL+ppL, pg:pgL, pe:peL, pp:ppL, gf:gfL, gc:gcL, pts:pgL*3+peL};
-  const v={pj:pgV+peV+ppV, pg:pgV, pe:peV, pp:ppV, gf:gfV, gc:gcV, pts:pgV*3+peV};
-  const half=(side,s)=>`<div class="lvv-half">
-    <div class="lvv-label">${side}</div>
-    <div class="lvv-pts-big">${s.pts}</div>
-    <div class="lvv-sub">pts en ${s.pj} partidos</div>
-    <div class="lvv-stats-mini" style="margin-top:8px">
-      <span style="color:var(--win)">${s.pg}G</span>
-      <span style="color:var(--draw)">${s.pe}E</span>
-      <span style="color:var(--loss)">${s.pp}P</span>
-    </div>
-    <div style="font-family:Barlow Condensed,sans-serif;font-size:11px;color:var(--muted);margin-top:4px">${s.gf} GF · ${s.gc} GC</div>
-  </div>`;
-  return `<div class="lvv-card">
-    <div class="lvv-row">${half('🏠 LOCAL',l)}${half('✈ VISITANTE',v)}</div>
-  </div>`;
+  const pts=b=>b.pg*3+b.pe, pj=b=>b.pg+b.pe+b.pp;
+  return { L:{...L, pts:pts(L), pj:pj(L)}, V:{...V, pts:pts(V), pj:pj(V)} };
 }
 
-function buildIndiceTotalRowHTML(cats, from, to){
-  let s;
-  if(cats.length>1){
-    s={pj:0,pg:0,pe:0,pp:0,gf:0,gc:0,pts:0};
-    cats.forEach(cat=>{
-      const c=calcStats(cat,from,to);
-      s.pj+=c.pj; s.pg+=c.pg; s.pe+=c.pe; s.pp+=c.pp; s.gf+=c.gf; s.gc+=c.gc; s.pts+=c.pts;
-    });
-  } else {
-    s=calcStats(cats[0],from,to);
-  }
-  if(s.pj===0) return `<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:14px">Sin partidos en este bloque</td></tr>`;
-  const ppp=s.pts/s.pj, gfpj=s.gf/s.pj;
-  const pctW=Math.round(s.pg/s.pj*100);
-  const idx=Math.round(Math.min(100,(ppp/3*50)+(pctW/100*30)+(Math.min(gfpj,4)/4*20)));
-  const label=cats.length>1?'TOTAL':cats[0];
-  const color=cats.length>1?'var(--gold2)':CAT_COLORS[cats[0]];
-  return `<tr>
-    <td style="font-family:Bebas Neue,sans-serif;font-size:15px;letter-spacing:1px;color:${color}">${label}</td>
-    <td class="indice-bar-wrap"><div class="indice-bar" style="width:${Math.min(idx,100)}%"></div></td>
-    <td style="color:var(--gold2);font-family:Bebas Neue,sans-serif;font-size:15px">${ppp.toFixed(2)}</td>
-    <td style="color:#60a5fa;font-family:Bebas Neue,sans-serif;font-size:15px">${gfpj.toFixed(2)}</td>
-    <td style="color:var(--win);font-family:Bebas Neue,sans-serif;font-size:15px">${pctW}%</td>
-    <td class="indice-score" style="color:${idx>=70?'var(--win)':idx>=45?'var(--draw)':'var(--loss)'}">${idx}</td>
-  </tr>`;
+// Tabla "RESUMEN POR BLOQUE": una fila por bloque (+ total) con Pts/PJ,
+// % victorias, GF/PJ, GC/PJ y los puntos de local y de visitante. Reemplaza
+// al viejo "Local vs Visitante" (solo último bloque) + "Índice de
+// rendimiento" (índice compuesto 0-100, sacado a pedido).
+function buildResumenPorBloqueHTML(calcFn, periodsCat, cats){
+  const { filas, tot } = calcBloqueFilas(calcFn, periodsCat);
+  if(!filas.length) return '';
+  const isReserva = periodsCat==='RESERVA'||periodsCat==='RESERVA_S2';
+  const cell=(v,col)=>`<td style="text-align:center;color:${col}">${v}</td>`;
+  const lvvCell=(s)=>`<td style="text-align:center"><div style="font-weight:700;color:var(--gold2)">${s.pts}</div><div style="font-size:9px;color:var(--muted)">${s.pg}-${s.pe}-${s.pp}</div></td>`;
+  const buildRow=(label, s, from, to, extraStyle)=>{
+    if(s.pj===0) return '';
+    const ppp=(s.pts/s.pj).toFixed(2);
+    const pctW=Math.round(s.pg/s.pj*100)+'%';
+    const gfpj=(s.gf/s.pj).toFixed(2);
+    const gcpj=(s.gc/s.pj).toFixed(2);
+    const lvv=lvvSplit(cats, from, to);
+    return `<tr${extraStyle||''}>
+      <td class="cat-cell">${label}</td>
+      ${cell(ppp,'var(--gold2)')}
+      ${cell(pctW,'var(--win)')}
+      ${cell(gfpj,'#60a5fa')}
+      ${cell(gcpj,'#f87171')}
+      ${lvvCell(lvv.L)}${lvvCell(lvv.V)}
+    </tr>`;
+  };
+  const rowsHTML=filas.map(f=>buildRow(f.label, f.s, f.from, f.to,
+    f.destacado?' style="outline:2px solid var(--gold);outline-offset:-2px"':'')).join('');
+  const totRow=buildRow('TOTAL', tot, 1, isReserva?18:35, ' style="background:rgba(192,21,42,0.1);font-weight:700"');
+  return `<div class="st" style="margin-top:16px"><div class="stbar"></div>RESUMEN POR BLOQUE</div>
+    <div class="gen-table-wrap"><table class="gen-table">
+      <thead><tr>
+        <th>BLOQUE</th><th>PTS/PJ</th><th>% VICT</th><th>GF/PJ</th><th>GC/PJ</th>
+        <th>🏠 LOCAL</th><th>✈ VISIT</th>
+      </tr></thead>
+      <tbody>${rowsHTML}${totRow}</tbody>
+    </table></div>
+    <div style="font-family:'Barlow Condensed',sans-serif;font-size:11px;color:var(--muted);margin-top:4px">
+      Local / Visitante: puntos y G-E-P de cada condición${cats.length>1?' (las categorías menores 7ma/8va/9na juegan al revés que las mayores, ya contemplado)':''}.
+    </div>`;
 }
 
-// Sección completa: tabla por bloque + (si hubo algún bloque jugado) local/
-// visitante e índice del último bloque, sin librería aparte.
+// Sección completa: tabla por bloque (goles) + resumen por bloque
+// (rendimiento + local/visitante).
 function buildRendimientoGeneralHTML(calcFn, periodsCat, cats){
   const tablaHTML=bloqueComparativaHTML(calcFn, periodsCat);
   const { filas }=calcBloqueFilas(calcFn, periodsCat);
-  const ultimo=filas.length?filas[filas.length-1]:null;
-  if(!ultimo) return tablaHTML;
-  return `${tablaHTML}
-    <div class="lvv-grid" style="margin-top:14px">${buildLVVTotalHTML(cats, ultimo.from, ultimo.to)}</div>
-    <div class="indice-table-wrap" style="margin-top:14px"><table class="indice-table">
-      <thead><tr>
-        <th>CAT.</th><th style="text-align:left;padding-left:12px">MÉTRICAS</th>
-        <th>PTS/PJ</th><th>GF/PJ</th><th>% VICTORIAS</th><th>ÍNDICE</th>
-      </tr></thead>
-      <tbody>${buildIndiceTotalRowHTML(cats, ultimo.from, ultimo.to)}</tbody>
-    </table></div>`;
+  if(!filas.length) return tablaHTML;
+  return `${tablaHTML}${buildResumenPorBloqueHTML(calcFn, periodsCat, cats)}`;
 }
 
 // ── TARJETAS ──────────────────────────────────────────────────
