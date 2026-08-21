@@ -1,5 +1,5 @@
 {
-  "actualizado": "2026-08-21 08:54",
+  "actualizado": "2026-08-21 09:50",
   "fuente": "ligaprofesional.ar (oficial)",
   "fuente_fixture": "sabadogol.com.ar",
   "categorias": {
@@ -4134,6 +4134,20 @@
   },
   "fixture_futdetail": {
     "4TA": {
+      "20": {
+        "gf": 2,
+        "gc": 1,
+        "rival": "Banfield",
+        "partido_url": "https://youtu.be/75FT-Wv-RT4",
+        "momentos_destacados_url": "https://youtu.be/VVMLcwBEjSA",
+        "analisis_url": "https://youtu.be/cY_q-IA7cw4",
+        "rival_url": "https://youtu.be/zLdWvvOsHTU",
+        "informe_partido": "",
+        "pelota_parada_url": "",
+        "gps_url": "",
+        "charla_dt": "",
+        "arenga_jugadores_url": ""
+      },
       "19": {
         "gf": 2,
         "gc": 1,
