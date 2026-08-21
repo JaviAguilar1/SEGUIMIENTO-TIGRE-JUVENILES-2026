@@ -1,5 +1,5 @@
 {
-  "actualizado": "2026-08-21 08:27",
+  "actualizado": "2026-08-21 08:54",
   "fuente": "ligaprofesional.ar (oficial)",
   "fuente_fixture": "sabadogol.com.ar",
   "categorias": {
@@ -5544,9 +5544,23 @@
       }
     },
     "9NA": {
-      "21": {
+      "22": {
         "gf": 0,
         "gc": 0,
+        "rival": "Rosario Central",
+        "partido_url": "",
+        "momentos_destacados_url": "",
+        "analisis_url": "",
+        "rival_url": "",
+        "informe_partido": "",
+        "pelota_parada_url": "",
+        "gps_url": "",
+        "charla_dt": "",
+        "arenga_jugadores_url": ""
+      },
+      "21": {
+        "gf": 1,
+        "gc": 2,
         "rival": "Racing Club",
         "partido_url": "",
         "momentos_destacados_url": "",
