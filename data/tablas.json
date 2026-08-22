@@ -1,5 +1,5 @@
 {
-  "actualizado": "2026-08-22 05:31",
+  "actualizado": "2026-08-22 06:27",
   "fuente": "ligaprofesional.ar (oficial)",
   "fuente_fixture": "sabadogol.com.ar",
   "categorias": {
@@ -4134,6 +4134,34 @@
   },
   "fixture_futdetail": {
     "4TA": {
+      "22": {
+        "gf": 0,
+        "gc": 0,
+        "rival": "Rosario Central",
+        "partido_url": "",
+        "momentos_destacados_url": "",
+        "analisis_url": "",
+        "rival_url": "",
+        "informe_partido": "",
+        "pelota_parada_url": "",
+        "gps_url": "",
+        "charla_dt": "",
+        "arenga_jugadores_url": ""
+      },
+      "21": {
+        "gf": 2,
+        "gc": 1,
+        "rival": "Racing Club",
+        "partido_url": "https://youtu.be/GvtwbSKRL70",
+        "momentos_destacados_url": "https://youtu.be/lswW1yDl7Eg",
+        "analisis_url": "https://youtu.be/qql-vFchfnw",
+        "rival_url": "https://youtu.be/AHPAu_AGTNM",
+        "informe_partido": "",
+        "pelota_parada_url": "",
+        "gps_url": "",
+        "charla_dt": "",
+        "arenga_jugadores_url": ""
+      },
       "20": {
         "gf": 2,
         "gc": 1,
@@ -4437,7 +4465,7 @@
         "partido_url": "https://youtu.be/20FESmVtMfo",
         "momentos_destacados_url": "https://youtu.be/pOzHzyYYkWo",
         "analisis_url": "https://youtu.be/P4ziCY7hIBw",
-        "rival_url": "",
+        "rival_url": "https://youtu.be/ESxKIl9ivww",
         "informe_partido": "",
         "pelota_parada_url": "",
         "gps_url": "",
