@@ -1,5 +1,5 @@
 {
-  "actualizado": "2026-08-23 19:23",
+  "actualizado": "2026-08-23 19:48",
   "fuente": "ligaprofesional.ar (oficial)",
   "fuente_fixture": "sabadogol.com.ar",
   "categorias": {
@@ -5374,6 +5374,20 @@
       }
     },
     "8VA": {
+      "14": {
+        "gf": 3,
+        "gc": 1,
+        "rival": "Union(Santa Fe)",
+        "partido_url": "https://youtu.be/dY6Hq9W9_R4",
+        "momentos_destacados_url": "",
+        "analisis_url": "",
+        "rival_url": "",
+        "informe_partido": "",
+        "pelota_parada_url": "",
+        "gps_url": "",
+        "charla_dt": "",
+        "arenga_jugadores_url": ""
+      },
       "19": {
         "gf": 0,
         "gc": 0,
@@ -5435,20 +5449,6 @@
         "gc": 1,
         "rival": "San Lorenzo",
         "partido_url": "",
-        "momentos_destacados_url": "",
-        "analisis_url": "",
-        "rival_url": "",
-        "informe_partido": "",
-        "pelota_parada_url": "",
-        "gps_url": "",
-        "charla_dt": "",
-        "arenga_jugadores_url": ""
-      },
-      "14": {
-        "gf": 3,
-        "gc": 1,
-        "rival": "Union(Santa Fe)",
-        "partido_url": "https://youtu.be/dY6Hq9W9_R4",
         "momentos_destacados_url": "",
         "analisis_url": "",
         "rival_url": "",
