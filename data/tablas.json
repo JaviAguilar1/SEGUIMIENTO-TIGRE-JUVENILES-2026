@@ -1,5 +1,5 @@
 {
-  "actualizado": "2026-08-24 08:02",
+  "actualizado": "2026-08-24 08:54",
   "fuente": "ligaprofesional.ar (oficial)",
   "fuente_fixture": "sabadogol.com.ar",
   "categorias": {
@@ -4471,7 +4471,7 @@
     "5TA": {
       "22": {
         "gf": 0,
-        "gc": 0,
+        "gc": 2,
         "rival": "Rosario Central",
         "partido_url": "",
         "momentos_destacados_url": "",
@@ -4780,8 +4780,8 @@
     },
     "6TA": {
       "22": {
-        "gf": 0,
-        "gc": 0,
+        "gf": 1,
+        "gc": 5,
         "rival": "Rosario Central",
         "partido_url": "",
         "momentos_destacados_url": "",
