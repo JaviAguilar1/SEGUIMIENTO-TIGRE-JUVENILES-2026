@@ -1,5 +1,5 @@
 {
-  "actualizado": "2026-08-24 07:10",
+  "actualizado": "2026-08-24 08:02",
   "fuente": "ligaprofesional.ar (oficial)",
   "fuente_fixture": "sabadogol.com.ar",
   "categorias": {
@@ -5668,8 +5668,8 @@
     },
     "9NA": {
       "22": {
-        "gf": 0,
-        "gc": 0,
+        "gf": 1,
+        "gc": 1,
         "rival": "Rosario Central",
         "partido_url": "",
         "momentos_destacados_url": "",
