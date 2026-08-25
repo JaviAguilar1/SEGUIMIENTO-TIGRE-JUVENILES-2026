@@ -1,5 +1,5 @@
 {
-  "actualizado": "2026-08-24 22:19",
+  "actualizado": "2026-08-24 23:39",
   "fuente": "ligaprofesional.ar (oficial)",
   "fuente_fixture": "sabadogol.com.ar",
   "categorias": {
@@ -4154,6 +4154,11 @@
         "gf": 1,
         "gc": 2,
         "rival": "RACING"
+      },
+      "22": {
+        "gf": 1,
+        "gc": 1,
+        "rival": "ROSARIO CENTRAL"
       }
     }
   },
