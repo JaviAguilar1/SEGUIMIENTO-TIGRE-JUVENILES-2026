@@ -3986,20 +3986,67 @@ function abrirCitacionView(cat, fecha){
     ${p.warn?'<span title="No coincide con nadie del plantel — revisar contra el PDF original" style="margin-left:auto;font-size:13px">⚠️</span>':''}
   </div>`;
 
+  // Gol/tarjeta van por jugador (chipsList sin la parte de salió/entró).
+  // Los cambios se muestran aparte, agrupados por minuto — así el que sale
+  // y el que entra en la misma sustitución quedan en la misma fila, en vez
+  // de dos filas sueltas sin relación visible entre sí.
+  const chipsGolTarjeta = p => {
+    if(!partido) return [];
+    const id = idDeJugador(p);
+    if(!id) return [];
+    const chips=[];
+    (partido.goles||[]).filter(g=>g.id===id).forEach(g=>chips.push(
+      `<span title="Gol${g.penal?' de penal':''} · ${g.minuto}'" style="color:var(--gold2)">⚽${g.minuto}'${g.penal?' (P)':''}</span>`));
+    (partido.amarillas||[]).filter(a=>a.id===id).forEach(a=>chips.push(
+      `<span title="Amarilla · ${a.minuto}'">🟨${a.minuto}'</span>`));
+    (partido.rojas||[]).filter(a=>a.id===id).forEach(a=>chips.push(
+      `<span title="Roja · ${a.minuto}'">🟥${a.minuto}'</span>`));
+    return chips;
+  };
+  const cambiosAgrupadosHTML = (titulares, suplentes) => {
+    if(!partido) return '';
+    const porMinuto = {};
+    titulares.forEach(p=>{
+      const id=idDeJugador(p); if(!id) return;
+      const t=(partido.titulares||[]).find(x=>x.id===id);
+      if(t?.minutoSalida!=null){
+        if(!porMinuto[t.minutoSalida]) porMinuto[t.minutoSalida]={sale:[],entra:[]};
+        porMinuto[t.minutoSalida].sale.push(p.nombre);
+      }
+    });
+    suplentes.forEach(p=>{
+      const id=idDeJugador(p); if(!id) return;
+      const s=(partido.suplentes||[]).find(x=>x.id===id);
+      if(s?.minutoEntrada!=null){
+        if(!porMinuto[s.minutoEntrada]) porMinuto[s.minutoEntrada]={sale:[],entra:[]};
+        porMinuto[s.minutoEntrada].entra.push(p.nombre);
+      }
+    });
+    const minutos = Object.keys(porMinuto).map(Number).sort((a,b)=>a-b);
+    return minutos.map(min=>{
+      const {sale,entra} = porMinuto[min];
+      return `<div style="display:flex;align-items:center;gap:8px;padding:5px 8px;background:var(--surface2);border-radius:6px;margin-bottom:4px;font-family:'Barlow Condensed',sans-serif;font-size:12px">
+        <span style="font-family:'Bebas Neue',sans-serif;color:var(--gold2);min-width:28px">${min}'</span>
+        <span style="flex:1">${sale.length?`<span style="color:var(--muted)">↓ ${sale.map(esc).join(', ')}</span>`:''}${sale.length&&entra.length?' <span style="color:var(--muted)">→</span> ':''}${entra.length?`<span style="color:var(--win)">↑ ${entra.map(esc).join(', ')}</span>`:''}</span>
+      </div>`;
+    }).join('');
+  };
   // Resumen de eventos de un lado (titulares+suplentes) — solo jugadores
-  // con algo para mostrar (gol/tarjeta/entró/salió). Reemplaza a la lista
-  // completa cuando ya tenemos la imagen real de la planilla (no tiene
-  // sentido repetir a todo el plantel si ya se lo ve en la foto).
+  // con gol/tarjeta, más los cambios agrupados por minuto. Reemplaza a la
+  // lista completa cuando ya tenemos la imagen real de la planilla (no
+  // tiene sentido repetir a todo el plantel si ya se lo ve en la foto).
   const eventosHTML = (titulares, suplentes) => {
-    const filas = [...titulares.map(p=>({p,esTitular:true})), ...suplentes.map(p=>({p,esTitular:false}))]
-      .map(({p,esTitular})=>({p, chips: chipsList(p,esTitular)}))
+    const filas = [...titulares, ...suplentes]
+      .map(p=>({p, chips: chipsGolTarjeta(p)}))
       .filter(x=>x.chips.length);
-    if(!filas.length) return '<div style="color:var(--muted);font-size:11px;font-family:Barlow Condensed,sans-serif;margin-bottom:6px">Sin goles, tarjetas ni cambios cargados para este partido.</div>';
-    return filas.map(({p,chips})=>`<div style="display:flex;align-items:center;gap:8px;padding:5px 8px;background:var(--surface2);border-radius:6px;margin-bottom:4px">
+    const filasHTML = filas.map(({p,chips})=>`<div style="display:flex;align-items:center;gap:8px;padding:5px 8px;background:var(--surface2);border-radius:6px;margin-bottom:4px">
       <span style="font-family:'Bebas Neue',sans-serif;font-size:15px;color:var(--gold2);min-width:22px;text-align:center">${p.num||'—'}</span>
       <span style="font-family:'Barlow Condensed',sans-serif;font-size:13px;color:var(--text);flex:1">${esc(p.nombre)}</span>
       <span style="display:flex;gap:6px;font-size:10px;font-family:'Barlow Condensed',sans-serif">${chips.join('')}</span>
     </div>`).join('');
+    const cambios = cambiosAgrupadosHTML(titulares, suplentes);
+    if(!filas.length && !cambios) return '<div style="color:var(--muted);font-size:11px;font-family:Barlow Condensed,sans-serif;margin-bottom:6px">Sin goles, tarjetas ni cambios cargados para este partido.</div>';
+    return filasHTML + cambios;
   };
   const listaCompletaHTML = (titulares, suplentes) => `
     <div style="font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:1px;color:var(--muted);margin:14px 0 6px">TITULARES (${titulares.length})</div>
