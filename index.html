@@ -2443,7 +2443,10 @@ function calcConfiabilidad(){
     // coma y acentos para que crucen bien.
     const normComparable=s=>(s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'')
       .replace(/,/g,' ').replace(/\s+/g,' ').trim();
-    (goleadores[cat]||[]).forEach(g=>{
+    // Usa golesEfectivos (carga manual + COMET, COMET gana por fecha) en vez
+    // de la carga manual sola — así compara lo que de verdad se ve en
+    // pantalla contra futdetail, no un número viejo que COMET ya reemplazó.
+    golesEfectivos(cat, fechasExcluidasGoles(cat)).forEach(g=>{
       const key=normComparable(g.name);
       misGoles[key]=(misGoles[key]||0)+g.goals;
       nombreOriginal[key]=nombreOriginal[key]||g.name;
@@ -2512,7 +2515,9 @@ function calcConfiabilidad(){
   // para el aviso, y evita otro sistema de "vincular" nombre por nombre.
   const golesCometMismatches=[]; // {cat, fecha, manual, comet}
   CONFIABILIDAD_CATS.forEach(cat=>{
+    const excluidas=fechasExcluidasGoles(cat);
     Object.keys(partidos[cat]||{}).map(Number).forEach(fecha=>{
+      if(excluidas.has(fecha)) return;
       const partido=partidos[cat][fecha];
       const manualDeFecha=(goleadores[cat]||[]).filter(g=>g.fecha===fecha);
       if(!partido || !manualDeFecha.length) return;
@@ -2607,6 +2612,14 @@ function renderConfiabilidad(containerId){
       style="background:rgba(26,58,143,0.25);border:1px solid var(--border2);color:var(--gold2);
       border-radius:6px;padding:4px 10px;font-family:Barlow Condensed,sans-serif;font-size:11px;
       letter-spacing:1px;cursor:pointer;white-space:nowrap">→ VER EN GOLEADORES</button>`;
+    // Para "carga manual vs COMET": COMET ya gana en pantalla, así que la
+    // carga manual de esa fecha puntual quedó redundante — borrarla SOLO esa
+    // fecha (no todo el jugador, no otras fechas) hace desaparecer el aviso
+    // sin perder nada real (los goles siguen estando, vía COMET).
+    const borrarManualFechaBtn=(cat,fecha)=>canEdit?`<button onclick="borrarCargaManualFecha('${cat}',${fecha})"
+      style="background:rgba(192,21,42,0.15);border:1px solid var(--border2);color:#f87171;
+      border-radius:6px;padding:4px 10px;font-family:Barlow Condensed,sans-serif;font-size:11px;
+      letter-spacing:1px;cursor:pointer;white-space:nowrap">🗑 Borrar carga manual de F${fecha}</button>`:'';
     // btn=true → REVISAR de siempre, false → sin botón, string → botón propio
     // (ej. las filas de GOLES no tienen nada que "revisar" automático, pero
     // sí un lugar donde ir a corregirlo a mano).
@@ -2691,7 +2704,7 @@ function renderConfiabilidad(containerId){
       html+=golesCometMismatches.map(m=>row(
         `<b style="color:${CAT_COLORS[m.cat]}">${m.cat} F${m.fecha}</b>`,
         `Carga manual: <b>${m.manual}</b> · COMET: <b>${m.comet}</b>`,
-        irGoleadoresBtn(m.cat)
+        borrarManualFechaBtn(m.cat, m.fecha)
       )).join('');
     }
 
@@ -4257,7 +4270,17 @@ function plantelNombreDeId(cat, id){
 // manual. Para categorías sin COMET (7MA/8VA/9NA/RESERVA) partidos[cat]
 // siempre está vacío, así que esto se reduce exactamente a la carga manual
 // de siempre — no hace falta una rama aparte por categoría.
-function golesEfectivos(cat){
+// Fecha 3 de 4TA se jugó en dos canchas distintas (se cortó y se completó
+// en otro predio, ver Citaciones/segundoTiempo) — los goles de esa fecha
+// quedan repartidos de forma rara entre el informe de COMET y la carga
+// manual, así que las comparaciones de Confiabilidad la saltean a propósito
+// (a pedido explícito del usuario) en vez de mostrar un falso desacuerdo.
+const FECHAS_GOLES_EXCLUIDAS = {'4TA': new Set([3])};
+function fechasExcluidasGoles(cat){
+  return FECHAS_GOLES_EXCLUIDAS[cat] || new Set();
+}
+function golesEfectivos(cat, excluirFechas){
+  const excluir = excluirFechas || new Set();
   // La carga manual a veces se tipea distinto entre fechas ("Gonzalez
   // Santino" vs "GONZALEZ, SANTINO") — sin esto, el mismo jugador termina
   // partido en dos filas separadas de Goleadores. Se empareja contra el
@@ -4273,6 +4296,7 @@ function golesEfectivos(cat){
   ]);
   const map={};
   fechas.forEach(fecha=>{
+    if(excluir.has(fecha)) return;
     const partido = (partidos[cat]||{})[fecha];
     if(partido){
       (partido.goles||[]).forEach(g=>{
@@ -4526,6 +4550,17 @@ function delGoleador(cat,name){
     saveData();
     renderGoleadores(cat);
   }, 'ELIMINAR');
+}
+// Borra SOLO la carga manual de goleadores de una fecha puntual (no toca
+// otras fechas ni otros jugadores) — para cuando ya hay informe de COMET
+// cargado para esa fecha y la carga manual quedó redundante.
+function borrarCargaManualFecha(cat, fecha){
+  confirmAction(`¿Borrar la carga manual de goleadores de ${cat} F${fecha}? COMET ya tiene esos goles, esto solo saca el duplicado.`, ()=>{
+    goleadores[cat]=(goleadores[cat]||[]).filter(g=>g.fecha!==fecha);
+    saveData();
+    renderConfiabilidad('gen-confiabilidad');
+    if(document.getElementById(`goleadores-${cat}`)) renderGoleadores(cat);
+  }, 'BORRAR');
 }
 
 // ============================================================
