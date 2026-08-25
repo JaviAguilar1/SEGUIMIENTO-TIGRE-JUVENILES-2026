@@ -2388,6 +2388,15 @@ function renderTablaGeneral(containerId){
 // 7MA, 8VA y 9NA quedan afuera de la confiabilidad a pedido de Javi
 // (ver CATEGORIAS_CONFIG, campo enConfiabilidad).
 
+// futdetail linkea en formato corto (youtu.be/ID) y la carga manual suele
+// ser el formato largo (youtube.com/watch?v=ID) — mismo video, texto
+// distinto. Se extrae el ID para comparar contra eso, no contra el link
+// completo.
+function youtubeId(url){
+  const m = (url||'').match(/(?:youtu\.be\/|[?&]v=|\/embed\/)([\w-]{11})/);
+  return m ? m[1] : null;
+}
+
 function calcConfiabilidad(){
   // Partido por partido: mi carga (results) vs LIGA (fixture scrapeado de
   // sabadogol.com.ar) vs futdetail (panel privado del club). Reemplaza al
@@ -2482,7 +2491,9 @@ function calcConfiabilidad(){
         const label=LINK_TYPES.find(lt=>lt.key===key)?.label||key;
         const mio=(links[cat]?.[fecha]?.[key]||'').trim();
         const fut=((fixtureFut[fecha]||{})[campo]||'').trim();
-        if(mio && fut && mio!==fut){
+        const idMio=youtubeId(mio), idFut=youtubeId(fut);
+        const distinto = (idMio && idFut) ? idMio!==idFut : mio!==fut;
+        if(mio && fut && distinto){
           linkMismatches.push({cat, fecha, key, label, mio, fut});
         }else if(!mio && !fut && hayFechaPosteriorJugada){
           const dismissKey=`${cat}_${fecha}_${key}`;
@@ -2577,12 +2588,12 @@ function renderConfiabilidad(containerId){
       return;
     }
 
-    const row=(left,right)=>`
+    const row=(left,right,mostrarRevisar=true)=>`
       <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;
         background:rgba(192,21,42,0.08);border:1px solid var(--loss);border-radius:8px;padding:8px 14px;margin-bottom:6px">
         <div>${left}</div>
         <div style="display:flex;align-items:center;gap:10px;font-family:'Barlow Condensed',sans-serif;font-size:13px">
-          <span>${right}</span>${revisarBtn}
+          <span>${right}</span>${mostrarRevisar?revisarBtn:''}
         </div>
       </div>`;
     const rowRecordatorio=(left,dismissKey)=>`
@@ -2646,7 +2657,8 @@ function renderConfiabilidad(containerId){
         }
         return row(
           `<b style="color:${CAT_COLORS[m.cat]}">${m.cat}</b> · ${esc(m.jugador)}`,
-          `Mi carga: <b>${m.mio}</b> · futdetail: <b>${m.fut}</b>${vincularHTML}`
+          `Mi carga: <b>${m.mio}</b> · futdetail: <b>${m.fut}</b>${vincularHTML}`,
+          false
         );
       }).join('');
     }
@@ -2656,7 +2668,8 @@ function renderConfiabilidad(containerId){
         GOLES · carga manual vs COMET (gana COMET)</div>`;
       html+=golesCometMismatches.map(m=>row(
         `<b style="color:${CAT_COLORS[m.cat]}">${m.cat} F${m.fecha}</b>`,
-        `Carga manual: <b>${m.manual}</b> · COMET: <b>${m.comet}</b>`
+        `Carga manual: <b>${m.manual}</b> · COMET: <b>${m.comet}</b>`,
+        false
       )).join('');
     }
 
