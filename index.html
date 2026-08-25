@@ -2162,19 +2162,29 @@ function buildStatsCatSelect(){
         style="background:rgba(26,58,143,0.25);border:1px solid var(--border2);color:var(--gold2);
         border-radius:6px;padding:8px 14px;font-family:'Barlow Condensed',sans-serif;font-size:13px;
         letter-spacing:1px;font-weight:700;cursor:pointer;white-space:nowrap">🔄 ACTUALIZAR DATOS</button>
-      ${canEdit?`<button onclick="document.getElementById('cit-pdf-global').click()"
-        title="Subís un PDF de citación (puede traer varias categorías juntas) y se reparte solo en cada una — sirve también para volver a cargar una fecha ya subida"
-        style="background:rgba(201,162,39,0.15);border:1px solid var(--border2);color:var(--gold2);
-        border-radius:6px;padding:8px 14px;font-family:'Barlow Condensed',sans-serif;font-size:13px;
-        letter-spacing:1px;font-weight:700;cursor:pointer;white-space:nowrap">⬆ SUBIR CITACIÓN (PDF)</button>
-      <input type="file" id="cit-pdf-global" accept=".pdf" style="display:none"
-        onchange="uploadCitacionPdfGlobal(this.files[0])">`:''}
+      <div id="cit-upload-btn-wrap"></div>
     </div>`;
   document.getElementById('stats-cat-select').addEventListener('change',e=>{
     const cat=e.target.value;
     if(cat!=='GENERAL') currentCategoria=cat;
     renderStatsCat(cat);
   });
+}
+
+// Solo en GENERAL: el PDF de citación trae varias categorías juntas, no
+// tiene sentido mostrar el botón en la vista de una categoría puntual
+// (a diferencia de "EXPORTAR PDF", que sí es por categoría).
+function updateCitUploadButton(cat){
+  const wrap=document.getElementById('cit-upload-btn-wrap');
+  if(!wrap) return;
+  if(cat!=='GENERAL' || !canEdit){ wrap.innerHTML=''; return; }
+  wrap.innerHTML=`<button onclick="document.getElementById('cit-pdf-global').click()"
+    title="Subís un PDF de citación (puede traer varias categorías juntas) y se reparte solo en cada una — sirve también para volver a cargar una fecha ya subida"
+    style="background:rgba(201,162,39,0.15);border:1px solid var(--border2);color:var(--gold2);
+    border-radius:6px;padding:8px 14px;font-family:'Barlow Condensed',sans-serif;font-size:13px;
+    letter-spacing:1px;font-weight:700;cursor:pointer;white-space:nowrap">⬆ SUBIR CITACIÓN (PDF)</button>
+  <input type="file" id="cit-pdf-global" accept=".pdf" style="display:none"
+    onchange="uploadCitacionPdfGlobal(this.files[0])">`;
 }
 function setStatsCat(cat){
   const sel=document.getElementById('stats-cat-select');
@@ -2259,6 +2269,7 @@ function toggleSeccion(idSeccion, event){
 function renderStatsCat(cat){
   const content=document.getElementById('stats-content');
   updatePdfExportButton(cat);
+  updateCitUploadButton(cat);
   if(cat==='GENERAL') renderStatsGeneral(content);
   else renderStatsSingle(cat, content);
 }
