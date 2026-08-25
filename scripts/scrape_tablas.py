@@ -13,6 +13,7 @@ la tabla, el script termina con codigo != 0 y NO sobrescribe el JSON
 existente (asi la app sigue mostrando el ultimo dato bueno).
 """
 
+import base64
 import json
 import os
 import re
@@ -93,6 +94,12 @@ def fetch_post(url: str, data: dict) -> str:
         return resp.read().decode("utf-8", errors="replace")
 
 
+def fetch_bytes(url: str) -> bytes:
+    req = urllib.request.Request(url, headers=HEADERS)
+    with urllib.request.urlopen(req, timeout=30) as resp:
+        return resp.read()
+
+
 def _quitar_tags(s: str) -> str:
     return re.sub(r"<[^>]+>", "", s).strip()
 
@@ -139,6 +146,62 @@ def parse_fixture_cat(html: str):
             else:
                 out[fecha] = {"gf": g2, "gc": g1, "rival": local}
     return out
+
+
+def parse_fixture_completo(html: str):
+    """
+    Extrae TODOS los partidos ya jugados de cada fecha (los de Tigre y los
+    de los demas equipos), de la misma respuesta que ya usa parse_fixture_cat
+    -- no hace falta un pedido HTTP aparte. Sirve para calcular, por ejemplo,
+    los ultimos resultados de un rival puntual (no solo los de Tigre), como
+    para armar el analisis previo a un partido.
+    De paso, saca la URL del escudo de cada equipo (sabadogol pone un <img>
+    pegado al nombre en cada celda) -- se junta en un dict aparte porque el
+    escudo de un equipo es siempre el mismo, no depende de la fecha.
+    Devuelve una tupla (partidos, escudos):
+      partidos: {fecha:int -> [{"local":str,"visitante":str,"gl":int,"gv":int}, ...]}
+      escudos: {nombre_equipo:str -> url_relativa:str}
+    Partidos sin marcador "N - N" (todavia no jugados) se omiten.
+    """
+    partes = re.split(r"<!--\s*(\d+)\s*-->", html)
+    out = {}
+    escudos = {}
+    for i in range(1, len(partes), 2):
+        try:
+            fecha = int(partes[i])
+        except ValueError:
+            continue
+        bloque = partes[i + 1]
+        m = re.search(r'<table class="table">(.*?)</table>', bloque, re.DOTALL)
+        if not m:
+            continue
+        filas = re.findall(
+            r'<tr>\s*<td class="text-end[^"]*"[^>]*>(.*?)</td>\s*'
+            r'<td[^>]*><div[^>]*>([^<]*)</div></td>\s*'
+            r'<td class="text-start[^"]*"[^>]*>(.*?)</td>\s*</tr>',
+            m.group(1), re.DOTALL)
+        partidos = []
+        for local_raw, marcador, visitante_raw in filas:
+            gm = re.match(r"^\s*(\d+)\s*-\s*(\d+)\s*$", marcador.strip())
+            if not gm:
+                continue  # todavia no jugado
+            local = norm_equipo(_quitar_tags(local_raw))
+            visitante = norm_equipo(_quitar_tags(visitante_raw))
+            partidos.append({
+                "local": local,
+                "visitante": visitante,
+                "gl": int(gm.group(1)),
+                "gv": int(gm.group(2)),
+            })
+            for nombre, celda_raw in ((local, local_raw), (visitante, visitante_raw)):
+                if nombre in escudos:
+                    continue
+                m_esc = re.search(r'<img[^>]+src="([^"]+)"', celda_raw)
+                if m_esc:
+                    escudos[nombre] = m_esc.group(1).strip()
+        if partidos:
+            out[fecha] = partidos
+    return out, escudos
 
 
 # ── futdetail (panel privado del club) ──────────────────────────────────
@@ -445,6 +508,8 @@ def main():
     # Resultados de Tigre partido por partido (4TA-9NA), fuente sabadogol.com.ar.
     # Independiente de la tabla de posiciones: si esto falla, no afecta lo de arriba.
     resultado["fixture"] = {}
+    resultado["fixture_completo"] = {}
+    escudos_urls = {}  # nombre_equipo -> url relativa (el mismo equipo repite escudo en todas las categorias)
     for cat, (d, t) in FIXTURE_TORNEOS.items():
         try:
             html = fetch_post(FIXTURE_URL, {"a": FIXTURE_ANIO, "c": FIXTURE_CAT, "d": d, "t": t})
@@ -453,9 +518,31 @@ def main():
                 raise ValueError("no se encontro ningun partido de Tigre")
             resultado["fixture"][cat] = partidos
             print(f"[OK] fixture {cat}: {len(partidos)} fechas")
+            fc, escudos_cat = parse_fixture_completo(html)
+            resultado["fixture_completo"][cat] = fc
+            for nombre, url in escudos_cat.items():
+                escudos_urls.setdefault(nombre, url)
+            print(f"[OK] fixture_completo {cat}: {len(fc)} fechas")
         except Exception as e:  # noqa
             errores.append(f"fixture {cat}: {e}")
             print(f"[ERROR] fixture {cat}: {e}", file=sys.stderr)
+
+    # Escudos de los equipos (sacados de sabadogol.com.ar, ver parse_fixture_completo).
+    # Se descargan una sola vez por equipo y se guardan embebidos en base64 --
+    # sabadogol no manda header CORS, asi que si la app los enlazara directo
+    # por URL, exportar la tarjeta de "proximo rival" a PNG con canvas
+    # fallaria (canvas "contaminado" por una imagen de otro origen). Que
+    # falle un escudo puntual no debe romper el resto del scraping.
+    resultado["escudos"] = {}
+    for nombre, url_rel in escudos_urls.items():
+        try:
+            url_abs = urllib.parse.urljoin(FIXTURE_URL, url_rel)
+            img_bytes = fetch_bytes(url_abs)
+            ext = url_rel.rsplit(".", 1)[-1].split("?")[0].lower() or "gif"
+            resultado["escudos"][nombre] = f"data:image/{ext};base64," + base64.b64encode(img_bytes).decode("ascii")
+        except Exception as e:  # noqa
+            print(f"[AVISO] escudo {nombre}: {e}", file=sys.stderr)
+    print(f"[OK] escudos: {len(resultado['escudos'])}/{len(escudos_urls)} equipos")
 
     # Resultados de Tigre partido por partido segun futdetail (panel privado).
     # Necesita FUTDETAIL_USER / FUTDETAIL_PASS como variables de entorno (las

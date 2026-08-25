@@ -1460,6 +1460,58 @@ const RIVALS = [
   {f:33,r:'ESTUDIANTES LP',c:'L'},{f:34,r:'DEFENSA Y JUSTICIA',c:'V'},
   {f:35,r:'ATL. TUCUMÁN',c:'V'},
 ];
+// Equivalencia de nombres entre 3 fuentes para el mismo club -- cada una lo
+// escribe distinto: RIVALS (a mano, arriba), sabadogol (TABLA_DATA.fixture_completo,
+// nombres en mayúsculas sin tildes) y la tabla oficial LPF (TABLA_DATA.categorias).
+// Hace falta para "Estadísticas próximo rival" (ver generarEstadisticasRival):
+// cruzar los últimos partidos del rival y su fila en la tabla de posiciones.
+// "escudo" es el archivo en escudos/ (subidos a mano por Javi).
+const RIVAL_INFO = {
+  'IND. RIVADAVIA':    {escudo:'independienteriv.png', sabadogol:'INDEPENDIENTE RIV',      lpf:'Indepte. Rivadavia'},
+  'FERRO':             {escudo:'ferro.png',            sabadogol:'FERRO C.O.',             lpf:'Ferro'},
+  'LANÚS':             {escudo:'lanus.png',            sabadogol:'LANÚS',                  lpf:'Lanús'},
+  'INDEPENDIENTE':     {escudo:'independiente.png',    sabadogol:'INDEPENDIENTE',          lpf:'Independiente'},
+  'NEWELLS':           {escudo:'newells.png',          sabadogol:"NEWELL'S",               lpf:"Newell's"},
+  'SAN MARTIN SJ':     {escudo:'sanmartinsj.png',      sabadogol:'SAN MARTIN SJ.',         lpf:'San Martin SJ'},
+  'ARGENTINOS JRS':    {escudo:'argentinos.png',       sabadogol:'ARGENTINOS JRS',         lpf:'Argentinos Jrs.'},
+  'INSTITUTO':         {escudo:'instituto.png',        sabadogol:'INSTITUTO',              lpf:'Instituto'},
+  'TALLERES':          {escudo:'talleres.png',         sabadogol:'TALLERES CBA',           lpf:'Talleres'},
+  'ESTUDIANTES RC':    {escudo:'estudiantesrc.png',    sabadogol:'ESTUDIANTES RIO CUARTO', lpf:'Estudiantes RC'},
+  'BARRACAS CENTRAL':  {escudo:'barracas.png',         sabadogol:'BARRACAS CTRAL',         lpf:'Barracas Central'},
+  'QUILMES':           {escudo:'quilmes.png',          sabadogol:'QUILMES',                lpf:'Quilmes'},
+  'RIVER PLATE':       {escudo:'river.png',            sabadogol:'RIVER PLATE',            lpf:'River Plate'},
+  'UNIÓN':             {escudo:'union.png',            sabadogol:'UNION',                  lpf:'Unión'},
+  'SAN LORENZO':       {escudo:'sanlorenzo.png',       sabadogol:'SAN LORENZO',            lpf:'San Lorenzo'},
+  'GIMNASIA LP':       {escudo:'gimnasia.png',         sabadogol:'GIMNASIA LP',            lpf:'Gimnasia LP'},
+  'CENTRAL CÓRDOBA':   {escudo:'centralcordoba.png',   sabadogol:'CTRAL CORDOBA SE',       lpf:'Central Córdoba'},
+  'GIMNASIA MENDOZA':  {escudo:'gimnasiamendoza.png',  sabadogol:'GIM. y ESGRIMA MZA',     lpf:'Gimnasia MZA'},
+  'VÉLEZ SARSFIELD':   {escudo:'velez.png',            sabadogol:'VELEZ SARSFIELD',        lpf:'Vélez'},
+  'BANFIELD':          {escudo:'banfield.png',         sabadogol:'BANFIELD',               lpf:'Banfield'},
+  'RACING':            {escudo:'racing.png',           sabadogol:'RACING',                 lpf:'Racing'},
+  'ROSARIO CENTRAL':   {escudo:'rosariocentral.png',   sabadogol:'ROSARIO CENTRAL',        lpf:'Rosario Central'},
+  'GODOY CRUZ':        {escudo:'godoycruz.png',        sabadogol:'GODOY CRUZ',             lpf:'Godoy Cruz'},
+  'PLATENSE':          {escudo:'platense.png',         sabadogol:'PLATENSE',               lpf:'Platense'},
+  'SARMIENTO':         {escudo:'sarmiento.png',        sabadogol:'SARMIENTO',              lpf:'Sarmiento'},
+  'BELGRANO':          {escudo:'belgrano.png',         sabadogol:'BELGRANO CBA',           lpf:'Belgrano'},
+  'ATL. DE RAFAELA':   {escudo:'atleticorafaela.png',  sabadogol:'ATLETICO RAFAELA',       lpf:'Atlético Rafaela'},
+  'DEP. RIESTRA':      {escudo:'riestra.png',          sabadogol:'DEP. RIESTRA',           lpf:'Dep. Riestra'},
+  'ALDOSIVI':          {escudo:'aldosivi.png',         sabadogol:'ALDOSIVI',               lpf:'Aldosivi'},
+  'BOCA JUNIORS':      {escudo:'boca.png',             sabadogol:'BOCA JUNIORS',           lpf:'Boca Jrs.'},
+  'COLÓN':             {escudo:'colon.png',            sabadogol:'COLON',                  lpf:'Colón'},
+  'HURACÁN':           {escudo:'huracan.png',          sabadogol:'HURACAN',                lpf:'Huracán'},
+  'ESTUDIANTES LP':    {escudo:'estudiantes.png',      sabadogol:'ESTUDIANTES LP',         lpf:'Estudiantes'},
+  'DEFENSA Y JUSTICIA':{escudo:'defensa.png',          sabadogol:'DEF. Y JUSTICIA',        lpf:'Defensa y Justicia'},
+  'ATL. TUCUMÁN':      {escudo:'atleticotucuman.png',  sabadogol:'ATLETICO TUCUMAN',       lpf:'Atlético Tucumán'},
+};
+// Reverso (nombre sabadogol -> escudo) para dibujar el escudo del RIVAL del
+// rival en "últimos resultados" (ej. a quién le ganó Godoy Cruz esa fecha).
+const ESCUDO_POR_SABADOGOL = {};
+const NOMBRE_POR_SABADOGOL = {};
+Object.entries(RIVAL_INFO).forEach(([nombre,v])=>{
+  ESCUDO_POR_SABADOGOL[v.sabadogol]=v.escudo;
+  NOMBRE_POR_SABADOGOL[v.sabadogol]=nombre;
+});
+
 const PREFILLED = {
   '4TA':{1:[1,0],2:[0,1],3:[2,4],4:[2,3],5:[2,0],6:[4,0],7:[0,1],8:[0,2],9:[2,0]},
   '5TA':{1:[2,0],2:[0,0],3:[0,3],4:[0,0],5:[1,1],6:[4,0],7:[1,2],8:[2,0],9:[2,2],10:[2,2]},
@@ -2157,6 +2209,7 @@ function buildStatsCatSelect(){
         color:var(--gold2);font-family:'Barlow Condensed',sans-serif;font-weight:700;letter-spacing:1px;
         font-size:14px;padding:8px 14px;border-radius:6px;cursor:pointer;outline:none">${opts}</select>
       <div id="pdf-export-btn-wrap"></div>
+      <div id="rival-stats-btn-wrap"></div>
       <button onclick="actualizarDatosAhora()" id="btn-actualizar-datos"
         title="Refresca en la app los datos ya disponibles y abre GitHub Actions para forzar un scrapeo nuevo"
         style="background:rgba(26,58,143,0.25);border:1px solid var(--border2);color:var(--gold2);
@@ -2203,6 +2256,19 @@ function updatePdfExportButton(cat){
   } else {
     wrap.innerHTML=`<button onclick="abrirExportCategoria('${cat}')" style="${btnStyle}">⬇ EXPORTAR PDF</button>`;
   }
+}
+
+// Botón "estadísticas próximo rival" al lado del selector -- solo en 4TA/5TA/6TA
+// (mismo alcance que CONFIABILIDAD_CATS, a pedido de Javi: no tiene sentido para
+// las menores ni para RESERVA, que no tienen fixture_completo).
+function updateRivalStatsButton(cat){
+  const wrap=document.getElementById('rival-stats-btn-wrap');
+  if(!wrap) return;
+  if(!CONFIABILIDAD_CATS.includes(cat)){ wrap.innerHTML=''; return; }
+  wrap.innerHTML=`<button onclick="generarEstadisticasRival('${cat}')" id="btn-rival-stats"
+    style="background:rgba(240,192,64,0.15);border:1px solid var(--border2);color:var(--gold2);
+    border-radius:6px;padding:8px 14px;font-family:'Barlow Condensed',sans-serif;font-size:13px;
+    letter-spacing:1px;font-weight:700;cursor:pointer;white-space:nowrap">📊 ESTADÍSTICAS PRÓXIMO RIVAL</button>`;
 }
 
 // Slider para elegir cada cuántas fechas se arma un bloque (2 a 17, no aplica a RESERVA).
@@ -2270,6 +2336,7 @@ function renderStatsCat(cat){
   const content=document.getElementById('stats-content');
   updatePdfExportButton(cat);
   updateCitUploadButton(cat);
+  updateRivalStatsButton(cat);
   if(cat==='GENERAL') renderStatsGeneral(content);
   else renderStatsSingle(cat, content);
 }
@@ -5673,6 +5740,267 @@ function pdfSectionJugadores(cat){
   return `<div class="section-title">Datos de jugadores</div>
     <table><thead><tr><th>Jugador</th><th>Pos.</th><th>Conv.</th><th>Titular</th><th>Min.</th>
     <th>Goles</th><th>Asist.</th><th>T.A / T.R</th></tr></thead><tbody>${rows}</tbody></table>`;
+}
+
+// ============================================================
+//  ESTADÍSTICAS PRÓXIMO RIVAL (export a PNG) -- solo 4TA/5TA/6TA
+// ============================================================
+// Se dibuja a mano sobre <canvas> (sin SVG ni librerías externas): los
+// escudos son archivos propios en escudos/, del mismo origen que la app,
+// así el canvas nunca queda "contaminado" por una imagen de otro sitio
+// (lo que pasaría si se enlazaran directo los escudos de sabadogol, que no
+// mandan header CORS -- por eso ese scrapeo los descarga y los guarda
+// embebidos en tablas.json en vez de solo la URL).
+
+// Próxima fecha sin resultado cargado en `results[cat]`, con la condición
+// de Tigre esa fecha (reusa condicionCat, ya contempla las menores -- acá
+// no aplica porque el alcance es solo 4TA/5TA/6TA, pero es la misma fuente
+// de verdad que usa el resto de la app).
+function proximoRivalInfo(cat){
+  const entry = RIVALS.find(e => !(results[cat] && results[cat][e.f]));
+  if(!entry) return null;
+  const condTigre = condicionCat(cat, entry.f);
+  return {fecha:entry.f, rival:entry.r, condTigre, condRival: condTigre==='L'?'V':'L'};
+}
+
+function fixtureCompletoCat(cat){
+  return (TABLA_DATA && TABLA_DATA.fixture_completo && TABLA_DATA.fixture_completo[cat]) || {};
+}
+
+// Últimos `cant` partidos del rival jugando en `condicion` (la del RIVAL,
+// no la de Tigre), de más reciente a más viejo.
+function ultimosPartidosRival(cat, rivalNombre, condicion, cant){
+  const info = RIVAL_INFO[rivalNombre];
+  if(!info) return [];
+  const fc = fixtureCompletoCat(cat);
+  const fechas = Object.keys(fc).map(Number).sort((a,b)=>b-a);
+  const out=[];
+  for(const f of fechas){
+    for(const p of fc[f]){
+      if(condicion==='L' && p.local===info.sabadogol) out.push({fecha:f, rivalDe:p.visitante, gf:p.gl, gc:p.gv});
+      else if(condicion==='V' && p.visitante===info.sabadogol) out.push({fecha:f, rivalDe:p.local, gf:p.gv, gc:p.gl});
+      if(out.length>=cant) return out.reverse(); // más viejo primero al mostrarlos
+    }
+  }
+  out.reverse();
+  return out;
+}
+
+// Partido más reciente del rival, en cualquier condición.
+function partidoMasRecienteRival(cat, rivalNombre){
+  const info = RIVAL_INFO[rivalNombre];
+  if(!info) return null;
+  const fc = fixtureCompletoCat(cat);
+  const fechas = Object.keys(fc).map(Number).sort((a,b)=>b-a);
+  for(const f of fechas){
+    for(const p of fc[f]){
+      if(p.local===info.sabadogol) return {fecha:f, cond:'L', rivalDe:p.visitante, gf:p.gl, gc:p.gv};
+      if(p.visitante===info.sabadogol) return {fecha:f, cond:'V', rivalDe:p.local, gf:p.gv, gc:p.gl};
+    }
+  }
+  return null;
+}
+
+function filaTablaLPF(cat, nombreLpf){
+  const filas = (TABLA_DATA && TABLA_DATA.categorias && TABLA_DATA.categorias[cat]) || [];
+  return filas.find(f=>f.equipo===nombreLpf) || null;
+}
+
+function resultadoLabel(gf, gc){
+  if(gf>gc) return {texto:'GANÓ', color:'#22c55e'};
+  if(gf<gc) return {texto:'PERDIÓ', color:'#ef4444'};
+  return {texto:'EMPATÓ', color:'#f59e0b'};
+}
+
+function slugArchivo(s){
+  return (s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'')
+    .replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'');
+}
+
+function cargarImagen(src){
+  return new Promise(resolve=>{
+    if(!src){ resolve(null); return; }
+    const img=new Image();
+    img.onload=()=>resolve(img);
+    img.onerror=()=>resolve(null);
+    img.src=src;
+  });
+}
+
+function ctxRoundRect(ctx,x,y,w,h,r){
+  ctx.beginPath();
+  ctx.moveTo(x+r,y);
+  ctx.arcTo(x+w,y,x+w,y+h,r);
+  ctx.arcTo(x+w,y+h,x,y+h,r);
+  ctx.arcTo(x,y+h,x,y,r);
+  ctx.arcTo(x,y,x+w,y,r);
+  ctx.closePath();
+}
+
+// Punto de entrada del botón: junta los datos y dispara la descarga del PNG.
+async function generarEstadisticasRival(cat){
+  const btn=document.getElementById('btn-rival-stats');
+  if(btn) btn.disabled=true;
+  try{
+    await loadTablaData();
+    const prox = proximoRivalInfo(cat);
+    if(!prox){ alert('No encontré ningún partido pendiente en el fixture de '+cat+'.'); return; }
+    const info = RIVAL_INFO[prox.rival];
+    if(!info){ alert('Todavía no tengo cargado el escudo/equivalencia de "'+prox.rival+'".'); return; }
+    const filaRival = filaTablaLPF(cat, info.lpf);
+    const filaTigre = filaTablaLPF(cat, 'Tigre');
+    if(!filaRival || !filaTigre){ alert('Todavía no tengo la tabla de posiciones de '+cat+' descargada. Probá "🔄 Actualizar datos".'); return; }
+    const ultimos = ultimosPartidosRival(cat, prox.rival, prox.condRival, 4);
+    const reciente = partidoMasRecienteRival(cat, prox.rival);
+    const blob = await dibujarTarjetaRival({cat, prox, info, ultimos, reciente, filaRival, filaTigre});
+    const a=document.createElement('a');
+    a.href=URL.createObjectURL(blob);
+    a.download=`proximo-rival-${cat}-F${prox.fecha}-${slugArchivo(prox.rival)}.png`;
+    a.click();
+  } finally {
+    if(btn) btn.disabled=false;
+  }
+}
+
+async function dibujarTarjetaRival({cat, prox, info, ultimos, reciente, filaRival, filaTigre}){
+  if(document.fonts && document.fonts.ready) await document.fonts.ready;
+
+  const BG='#05080f', SURF='#0d1528', SURF2='#0a0f1e', RED='#c0152a', GOLD='#f0c040',
+        TXT='#d8e4ff', TXT2='#a8c0e8', MUTED='#5a7099', WIN='#22c55e', DRAW='#f59e0b',
+        LOSS='#ef4444', BORDER='#243f7a', WHITE='#ffffff';
+
+  const [escudoRival, escudoTigre, ...escudosResultados] = await Promise.all([
+    cargarImagen('escudos/'+info.escudo),
+    cargarImagen(document.getElementById('escudoImg')?.src),
+    ...ultimos.map(p=>cargarImagen(ESCUDO_POR_SABADOGOL[p.rivalDe] ? 'escudos/'+ESCUDO_POR_SABADOGOL[p.rivalDe] : null)),
+  ]);
+  const escudoReciente = reciente ? await cargarImagen(ESCUDO_POR_SABADOGOL[reciente.rivalDe] ? 'escudos/'+ESCUDO_POR_SABADOGOL[reciente.rivalDe] : null) : null;
+
+  const W=900, pad=34, rowH=42, rowH2=52;
+  const rowsN=Math.max(ultimos.length,1);
+  // Margen inferior generoso a pedido de Javi (ver mockup aprobado) --
+  // 70px libres después de la última línea de contenido.
+  const MARGEN_INFERIOR=70;
+  const H = pad + 50 + 70 + 32 + rowH + rowH*2 + 30 + 34 + rowsN*rowH2 + 40 + 30 + MARGEN_INFERIOR;
+
+  // Se dibuja al doble de resolución (SCALE=2) y se escala el contexto --
+  // si no, el PNG sale a 900px de ancho real y se ve borroso/pixelado en
+  // pantallas de alta densidad. Todo el resto del código sigue usando
+  // coordenadas "lógicas" (W, H) sin tocar nada.
+  const SCALE=3;
+  const canvas=document.createElement('canvas');
+  canvas.width=W*SCALE; canvas.height=H*SCALE;
+  const ctx=canvas.getContext('2d');
+  ctx.scale(SCALE,SCALE);
+  ctx.imageSmoothingEnabled=true; ctx.imageSmoothingQuality='high';
+  ctx.fillStyle=BG; ctx.fillRect(0,0,W,H);
+  ctx.textBaseline='top';
+
+  const catLabel = CATEGORIAS_CONFIG[cat]?.label ? CATEGORIAS_CONFIG[cat].label.toUpperCase()+' DIVISIÓN' : cat;
+  let y=pad;
+  ctx.font="14px 'Barlow', sans-serif"; ctx.fillStyle=TXT2;
+  ctx.fillText(`ANÁLISIS DE RIVAL · ${prox.rival} · ${catLabel}`, pad, y+4);
+  ctxRoundRect(ctx, W-pad-160, y-6, 160, 28, 14); ctx.fillStyle=RED; ctx.fill();
+  ctx.font="700 12px 'Barlow', sans-serif"; ctx.fillStyle=WHITE; ctx.textAlign='center';
+  ctx.fillText('PRÓXIMO RIVAL', W-pad-80, y+3); ctx.textAlign='left';
+  y+=50;
+
+  ctx.font="700 40px 'Barlow Condensed', sans-serif"; ctx.fillStyle=WHITE;
+  ctx.fillText('Estadísticas', pad, y);
+  y+=70;
+
+  ctx.fillStyle=RED; ctx.fillRect(pad,y,4,18);
+  ctx.font="700 13px 'Barlow Condensed', sans-serif"; ctx.fillStyle=GOLD;
+  ctx.fillText('UBICACIONES EN LA TABLA', pad+14, y+1);
+  y+=32;
+
+  const colX=[pad,pad+260,pad+340,pad+410,pad+480,pad+550,pad+620,pad+690,pad+760,pad+830];
+  const headers=['EQUIPO','POS','PTS','PJ','PG','PE','PP','GF','GC','DG'];
+  ctx.fillStyle=RED; ctx.fillRect(pad,y,W-2*pad,rowH);
+  ctx.font="700 12px 'Barlow', sans-serif"; ctx.fillStyle=WHITE;
+  headers.forEach((h,i)=>ctx.fillText(h, colX[i], y+14));
+  y+=rowH;
+
+  function filaTabla(nombreMostrar, escudoImg, fila, bg){
+    ctx.fillStyle=bg; ctx.fillRect(pad,y,W-2*pad,rowH);
+    let tx=pad+6;
+    if(escudoImg){ ctx.drawImage(escudoImg, pad+6, y+6, 30, 30); tx=pad+6+38; }
+    ctx.font="700 14px 'Barlow', sans-serif"; ctx.fillStyle=TXT;
+    ctx.fillText(nombreMostrar, tx, y+14);
+    ctx.font="14px 'Barlow', sans-serif";
+    const vals=[fila.pos+'°',fila.pts,fila.pj,fila.pg,fila.pe,fila.pp,fila.gf,fila.gc];
+    vals.forEach((v,i)=>ctx.fillText(String(v), colX[i+1], y+14));
+    ctx.font="700 14px 'Barlow', sans-serif"; ctx.fillStyle=fila.dif>=0?WIN:LOSS;
+    ctx.fillText((fila.dif>=0?'+':'')+fila.dif, colX[9], y+14);
+    y+=rowH;
+  }
+  filaTabla(info.lpf, escudoRival, filaRival, SURF);
+  filaTabla('Tigre', escudoTigre, filaTigre, SURF2);
+  y+=30;
+
+  ctx.fillStyle=RED; ctx.fillRect(pad,y,4,18);
+  ctx.font="700 13px 'Barlow Condensed', sans-serif"; ctx.fillStyle=GOLD;
+  ctx.fillText('ÚLTIMOS RESULTADOS', pad+14, y+1);
+  y+=34;
+
+  const colW=(W-2*pad-20)/2, leftX=pad, rightX=pad+colW+20;
+  ctx.font="700 11px 'Barlow', sans-serif"; ctx.fillStyle=MUTED;
+  ctx.fillText('COMO '+(prox.condRival==='L'?'LOCAL':'VISITANTE'), leftX, y);
+  let ry=y+26;
+  if(ultimos.length===0){
+    ctx.font="13px 'Barlow', sans-serif"; ctx.fillStyle=MUTED;
+    ctx.fillText('Sin partidos registrados todavía en esta condición.', leftX, ry+14);
+  }
+  ultimos.forEach((p,i)=>{
+    const r=resultadoLabel(p.gf,p.gc);
+    ctx.fillStyle=SURF; ctx.fillRect(leftX,ry,colW,rowH2-8);
+    ctx.fillStyle=r.color; ctx.fillRect(leftX,ry,4,rowH2-8);
+    let tx=leftX+14;
+    const escImg=escudosResultados[i];
+    if(escImg){ ctx.drawImage(escImg, tx, ry+8, 24, 24); tx+=30; }
+    ctx.font="13px 'Barlow', sans-serif"; ctx.fillStyle=TXT2;
+    ctx.fillText(`Fecha ${p.fecha} vs ${NOMBRE_POR_SABADOGOL[p.rivalDe]||p.rivalDe}`, tx, ry+16);
+    ctx.font="700 15px 'Barlow', sans-serif"; ctx.fillStyle=TXT;
+    ctx.fillText(`${p.gf}-${p.gc}`, leftX+colW-150, ry+15);
+    const bw=72;
+    ctxRoundRect(ctx, leftX+colW-bw-12, ry+10, bw, 22, 4); ctx.fillStyle=r.color; ctx.fill();
+    ctx.font="700 11px 'Barlow', sans-serif"; ctx.fillStyle='#0a0a0a'; ctx.textAlign='center';
+    ctx.fillText(r.texto, leftX+colW-bw/2-12, ry+15); ctx.textAlign='left';
+    ry+=rowH2;
+  });
+
+  const cardH=ry-y-8;
+  ctxRoundRect(ctx, rightX, y, colW, cardH, 10);
+  ctx.fillStyle=SURF; ctx.fill(); ctx.strokeStyle=BORDER; ctx.lineWidth=1; ctx.stroke();
+  let cy=y+18;
+  ctx.font="700 12px 'Barlow', sans-serif"; ctx.fillStyle=GOLD;
+  ctx.fillText(reciente ? `PARTIDO MÁS RECIENTE · FECHA ${reciente.fecha}` : 'PARTIDO MÁS RECIENTE', rightX+16, cy);
+  cy+=26;
+  if(reciente){
+    let tx=rightX+16;
+    if(escudoReciente){ ctx.drawImage(escudoReciente, tx, cy, 26, 26); tx+=32; }
+    ctx.font="14px 'Barlow', sans-serif"; ctx.fillStyle=TXT2;
+    ctx.fillText('vs '+(NOMBRE_POR_SABADOGOL[reciente.rivalDe]||reciente.rivalDe), tx, cy+5);
+    cy+=42;
+    ctx.font="700 34px 'Barlow Condensed', sans-serif"; ctx.fillStyle=WHITE;
+    ctx.fillText(`${reciente.gf} - ${reciente.gc}`, rightX+16, cy);
+    cy+=50;
+    const r=resultadoLabel(reciente.gf,reciente.gc);
+    const label=`${r.texto} · DE ${reciente.cond==='L'?'LOCAL':'VISITANTE'}`;
+    ctx.font="700 11px 'Barlow', sans-serif";
+    const bw2=ctx.measureText(label).width+18;
+    ctxRoundRect(ctx, rightX+16, cy, bw2, 24, 4); ctx.fillStyle=r.color; ctx.fill();
+    ctx.fillStyle='#0a0a0a'; ctx.fillText(label, rightX+25, cy+7);
+  } else {
+    ctx.font="13px 'Barlow', sans-serif"; ctx.fillStyle=MUTED;
+    ctx.fillText('Sin partidos registrados todavía.', rightX+16, cy);
+  }
+
+  y=ry+40;
+  ctx.strokeStyle=BORDER; ctx.lineWidth=1; ctx.setLineDash([4,4]);
+  ctx.beginPath(); ctx.moveTo(pad,y); ctx.lineTo(W-pad,y); ctx.stroke(); ctx.setLineDash([]);
+
+  return new Promise(resolve=>canvas.toBlob(resolve,'image/png'));
 }
 
 // ── Modo 1: exportar por categoría (checkboxes de secciones) ──────────────
