@@ -2162,6 +2162,13 @@ function buildStatsCatSelect(){
         style="background:rgba(26,58,143,0.25);border:1px solid var(--border2);color:var(--gold2);
         border-radius:6px;padding:8px 14px;font-family:'Barlow Condensed',sans-serif;font-size:13px;
         letter-spacing:1px;font-weight:700;cursor:pointer;white-space:nowrap">🔄 ACTUALIZAR DATOS</button>
+      ${canEdit?`<button onclick="document.getElementById('cit-pdf-global').click()"
+        title="Subís un PDF de citación (puede traer varias categorías juntas) y se reparte solo en cada una — sirve también para volver a cargar una fecha ya subida"
+        style="background:rgba(201,162,39,0.15);border:1px solid var(--border2);color:var(--gold2);
+        border-radius:6px;padding:8px 14px;font-family:'Barlow Condensed',sans-serif;font-size:13px;
+        letter-spacing:1px;font-weight:700;cursor:pointer;white-space:nowrap">⬆ SUBIR CITACIÓN (PDF)</button>
+      <input type="file" id="cit-pdf-global" accept=".pdf" style="display:none"
+        onchange="uploadCitacionPdfGlobal(this.files[0])">`:''}
     </div>`;
   document.getElementById('stats-cat-select').addEventListener('change',e=>{
     const cat=e.target.value;
@@ -3242,6 +3249,7 @@ async function parseCitacionPdf(file, catHint, fechaHint, inputEl, segundoTiempo
     const arrayBuf = await file.arrayBuffer();
     const pdf = await pdfjsLib.getDocument({data: arrayBuf}).promise;
     const results_parsed = {};
+    const pageImages = {};
 
     for (let pg = 1; pg <= pdf.numPages; pg++) {
       const page   = await pdf.getPage(pg);
@@ -3266,6 +3274,18 @@ async function parseCitacionPdf(file, catHint, fechaHint, inputEl, segundoTiempo
         if (pageText.toLowerCase().includes(key)) { detectedCat = val; break; }
       }
       if (!detectedCat) continue;
+
+      // Imagen de la planilla original (Fase citaciones con imagen): se
+      // renderiza la página tal cual, comprimida a JPEG, y se guarda aparte
+      // de matchData (nodo 'citacionesImg', ver más abajo) — así no pesa en
+      // la carga general de la app, solo se pide al abrir esa citación.
+      try {
+        const viewport = page.getViewport({scale: 1.3});
+        const canvas = document.createElement('canvas');
+        canvas.width = viewport.width; canvas.height = viewport.height;
+        await page.render({canvasContext: canvas.getContext('2d'), viewport}).promise;
+        pageImages[detectedCat] = canvas.toDataURL('image/jpeg', 0.75);
+      } catch(e) { console.warn('[CITACION PDF] no se pudo renderizar imagen', e); }
 
       // Rival
       const rivalMatch =
@@ -3365,6 +3385,7 @@ async function parseCitacionPdf(file, catHint, fechaHint, inputEl, segundoTiempo
               suplentes: results_parsed[cat].suplentes,
             },
           };
+          if (pageImages[cat]) db.ref(`citacionesImg/${cat}/${fechaHint}_2`).set(pageImages[cat]).catch(e=>console.warn('[CITACION IMG] no se guardó — revisar reglas de Firebase para citacionesImg', e));
         } else {
           matchData[cat][fechaHint] = {
             ...existing,
@@ -3374,6 +3395,7 @@ async function parseCitacionPdf(file, catHint, fechaHint, inputEl, segundoTiempo
             cambios: existing.cambios || [],
             duracion: existing.duracion || 90,
           };
+          if (pageImages[cat]) db.ref(`citacionesImg/${cat}/${fechaHint}`).set(pageImages[cat]).catch(e=>console.warn('[CITACION IMG] no se guardó — revisar reglas de Firebase para citacionesImg', e));
         }
         const panel = document.getElementById(`mdp-${cat}-${fechaHint}`);
         if (panel) renderMatchPanel(cat, fechaHint);
@@ -3418,6 +3440,7 @@ async function parseCitacionPdf(file, catHint, fechaHint, inputEl, segundoTiempo
             cambios:   existing.cambios  || [],
             duracion:  existing.duracion || 90,
           };
+          if (pageImages[cat]) db.ref(`citacionesImg/${cat}/${f}`).set(pageImages[cat]).catch(e=>console.warn('[CITACION IMG] no se guardó — revisar reglas de Firebase para citacionesImg', e));
           const panel = document.getElementById(`mdp-${cat}-${f}`);
           if(panel) renderMatchPanel(cat, f);
           const btn = document.querySelector(`button.btn-equipo[data-cat="${cat}"][data-fecha="${f}"]`);
@@ -3898,29 +3921,6 @@ function confirmarComet(cat, fecha){
     .catch(e=>{ console.error('savePartidoComet error:',e); showToast('⚠ No se pudo guardar — revisá la consola'); });
 }
 
-// Agrupa titulares en líneas tácticas (arquero/defensa/medio/delanteros)
-// por su posición Y en la planilla real — confirmado contra un PDF real
-// (Fecha 20 vs Banfield, 4ta): la separación DENTRO de una línea es de
-// pocos píxeles (jugadores parados a la misma altura), mientras que ENTRE
-// líneas el salto es mucho más grande (40-220px según la formación) — así
-// que un corte fijo de 70px separa bien una cosa de la otra. Solo funciona
-// con citaciones cargadas DESPUÉS de este cambio (necesita x/y de cada
-// titular, que antes no se guardaba) — las ya procesadas antes siguen
-// mostrándose como lista simple, sin romperse.
-function agruparLineasCitacion(titulares){
-  if(!titulares.length || titulares.some(p=>p.y==null)) return null;
-  const GAP=70;
-  const ordenados=titulares.slice().sort((a,b)=>b.y-a.y);
-  const lineas=[];
-  ordenados.forEach(p=>{
-    const ultima=lineas[lineas.length-1];
-    if(ultima && Math.abs(ultima[ultima.length-1].y-p.y)<GAP) ultima.push(p);
-    else lineas.push([p]);
-  });
-  lineas.forEach(l=>l.sort((a,b)=>a.x-b.x));
-  return lineas;
-}
-
 // ── VISTA DE CITACIÓN (solo lectura) ───────────────────────────
 // Reemplaza al viejo campo "pegar un link a mano": si esa fecha ya se
 // procesó (matchData[cat][fecha] tiene titulares), el ícono 📋 de la tabla
@@ -3975,29 +3975,42 @@ function abrirCitacionView(cat, fecha){
     ${p.warn?'<span title="No coincide con nadie del plantel — revisar contra el PDF original" style="margin-left:auto;font-size:13px">⚠️</span>':''}
   </div>`;
 
-  // Cancha: una fila por línea táctica, jugadores como circulito+nombre
-  // (mismo estilo que la maqueta que se le mostró al usuario). Si la
-  // citación es vieja y no tiene x/y guardado, cae sola a la lista plana
-  // de siempre (playerRow) — agruparLineasCitacion devuelve null en ese caso.
-  // Ancho angosto a propósito: una línea de 5 (back-5, no tan raro) tiene
-  // que entrar en una sola fila incluso en el modal más chico (pantalla de
-  // celular) — con 68px se probó contra una línea de 5 real y quedaba uno
-  // solo, envuelto a la fila de abajo. 52px + el modal un poco más ancho
-  // alcanza para 5-6 sin envolver.
-  const jugadorChipHTML = p => `<div style="display:flex;flex-direction:column;align-items:center;gap:2px;width:52px;flex-shrink:0">
-    <div style="width:22px;height:22px;border-radius:50%;background:var(--surface1,#050810);border:1px solid var(--gold,#c9a227);display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:11px;color:var(--gold2)">${p.num}</div>
-    <span style="font-size:8px;color:var(--text);text-align:center;line-height:1.15;max-width:52px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${esc(p.nombre)}">${esc(p.nombre)}</span>
-    ${p.warn?'<span title="No coincide con nadie del plantel" style="font-size:9px">⚠️</span>':''}
-    ${chipsList(p,true).map(c=>c.replace('<span','<span style="display:block;font-size:8px"')).join('')}
-  </div>`;
-  const canchaHTML = titulares => {
-    const lineas = agruparLineasCitacion(titulares);
-    if(!lineas) return null;
-    const sistema = lineas.slice(1).map(l=>l.length).join('-');
-    return `<div style="font-size:11px;color:var(--muted);text-align:center;margin-bottom:8px">Sistema detectado: <b style="color:var(--gold2)">${esc(sistema)}</b></div>
-      <div style="background:var(--surface2);border-radius:8px;padding:12px 4px;display:flex;flex-direction:column;gap:14px;margin-bottom:6px">
-        ${lineas.map(l=>`<div style="display:flex;justify-content:center;gap:6px;flex-wrap:wrap">${l.map(jugadorChipHTML).join('')}</div>`).join('')}
-      </div>`;
+  // Resumen de eventos de un lado (titulares+suplentes) — solo jugadores
+  // con algo para mostrar (gol/tarjeta/entró/salió). Reemplaza a la lista
+  // completa cuando ya tenemos la imagen real de la planilla (no tiene
+  // sentido repetir a todo el plantel si ya se lo ve en la foto).
+  const eventosHTML = (titulares, suplentes) => {
+    const filas = [...titulares.map(p=>({p,esTitular:true})), ...suplentes.map(p=>({p,esTitular:false}))]
+      .map(({p,esTitular})=>({p, chips: chipsList(p,esTitular)}))
+      .filter(x=>x.chips.length);
+    if(!filas.length) return '<div style="color:var(--muted);font-size:11px;font-family:Barlow Condensed,sans-serif;margin-bottom:6px">Sin goles, tarjetas ni cambios cargados para este partido.</div>';
+    return filas.map(({p,chips})=>`<div style="display:flex;align-items:center;gap:8px;padding:5px 8px;background:var(--surface2);border-radius:6px;margin-bottom:4px">
+      <span style="font-family:'Bebas Neue',sans-serif;font-size:15px;color:var(--gold2);min-width:22px;text-align:center">${p.num||'—'}</span>
+      <span style="font-family:'Barlow Condensed',sans-serif;font-size:13px;color:var(--text);flex:1">${esc(p.nombre)}</span>
+      <span style="display:flex;gap:6px;font-size:10px;font-family:'Barlow Condensed',sans-serif">${chips.join('')}</span>
+    </div>`).join('');
+  };
+  const listaCompletaHTML = (titulares, suplentes) => `
+    <div style="font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:1px;color:var(--muted);margin:14px 0 6px">TITULARES (${titulares.length})</div>
+    ${titulares.map(p=>playerRow(p,true)).join('')}
+    <div style="font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:1px;color:var(--muted);margin:14px 0 6px">SUPLENTES (${suplentes.length})</div>
+    ${suplentes.map(p=>playerRow(p,false)).join('')}`;
+  // Bloque de una "mitad" (primer/segundo tiempo): imagen (si existe, se
+  // pide aparte a Firebase — ver más abajo) + lista completa como placeholder
+  // hasta que resuelva. Si la imagen aparece, se cambia la lista completa
+  // por el resumen de eventos nada más (la foto ya muestra a todo el plantel).
+  const mitadHTML = (imgKey, titulares, suplentes) => `
+    <div id="cit-img-${imgKey}"></div>
+    <div id="cit-body-${imgKey}">${listaCompletaHTML(titulares, suplentes)}</div>`;
+  const cargarMitad = (imgKey, titulares, suplentes) => {
+    db.ref(`citacionesImg/${imgKey}`).once('value').then(snap=>{
+      const b64 = snap.val();
+      if(!b64) return;
+      const imgBox = document.getElementById(`cit-img-${imgKey}`);
+      const bodyBox = document.getElementById(`cit-body-${imgKey}`);
+      if(imgBox) imgBox.innerHTML = `<img src="${b64}" style="width:100%;display:block;border-radius:8px;margin-bottom:10px">`;
+      if(bodyBox) bodyBox.innerHTML = eventosHTML(titulares, suplentes);
+    }).catch(e=>console.warn('[CITACION IMG] no se pudo leer — revisar reglas de Firebase para citacionesImg', e));
   };
   const ov=document.createElement('div');
   ov.style.cssText='position:fixed;inset:0;z-index:10001;background:rgba(5,8,15,0.88);display:flex;align-items:center;justify-content:center;padding:16px';
@@ -4011,25 +4024,19 @@ function abrirCitacionView(cat, fecha){
     </div>
     ${hayWarn?`<div style="font-size:11px;color:var(--draw);font-family:'Barlow Condensed',sans-serif;margin:8px 0">⚠️ Los nombres marcados no coinciden con el plantel — puede haber salido incompleto o cruzado al leer el PDF, revisá contra el original si hace falta.</div>`:''}
     ${d.segundoTiempo?`<div style="font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:1px;color:var(--gold2);margin-top:10px">⏱️ PRIMER TIEMPO · NITO SAN ANDRÉS</div>`:''}
-    ${canchaHTML(d.titulares) || `
-    <div style="font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:1px;color:var(--muted);margin:14px 0 6px">TITULARES (${d.titulares.length})</div>
-    ${d.titulares.map(p=>playerRow(p,true)).join('')}`}
-    <div style="font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:1px;color:var(--muted);margin:14px 0 6px">SUPLENTES (${d.suplentes.length})</div>
-    ${d.suplentes.map(p=>playerRow(p,false)).join('')}
+    ${mitadHTML(`${cat}/${fecha}`, d.titulares, d.suplentes)}
     ${d.segundoTiempo?`
     <div style="border-top:1px solid #1a2d5a;margin:16px 0"></div>
     <div style="font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:1px;color:var(--gold2)">⏱️ SEGUNDO TIEMPO · ${esc(d.segundoTiempo.venue)}</div>
     <div style="font-size:11px;color:var(--muted);font-family:'Barlow Condensed',sans-serif;margin-bottom:6px">El partido se cortó y siguió en otra cancha — esta es la planilla que se volvió a presentar ahí.</div>
-    ${canchaHTML(d.segundoTiempo.titulares) || `
-    <div style="font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:1px;color:var(--muted);margin:10px 0 6px">TITULARES (${d.segundoTiempo.titulares.length})</div>
-    ${d.segundoTiempo.titulares.map(p=>playerRow(p,true)).join('')}`}
-    <div style="font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:1px;color:var(--muted);margin:14px 0 6px">SUPLENTES (${d.segundoTiempo.suplentes.length})</div>
-    ${d.segundoTiempo.suplentes.map(p=>playerRow(p,false)).join('')}
+    ${mitadHTML(`${cat}/${fecha}_2`, d.segundoTiempo.titulares, d.segundoTiempo.suplentes)}
     `:''}
   </div>`;
   ov.addEventListener('click',e=>{ if(e.target===ov) ov.remove(); });
   document.body.appendChild(ov);
   ov.querySelector('#cit-view-close').addEventListener('click',()=>ov.remove());
+  cargarMitad(`${cat}/${fecha}`, d.titulares, d.suplentes);
+  if(d.segundoTiempo) cargarMitad(`${cat}/${fecha}_2`, d.segundoTiempo.titulares, d.segundoTiempo.suplentes);
 }
 
 // ── TABLE EVENTS ──────────────────────────────────────────────
