@@ -4182,6 +4182,13 @@ function plantelNombreDeId(cat, id){
 // siempre está vacío, así que esto se reduce exactamente a la carga manual
 // de siempre — no hace falta una rama aparte por categoría.
 function golesEfectivos(cat){
+  // La carga manual a veces se tipea distinto entre fechas ("Gonzalez
+  // Santino" vs "GONZALEZ, SANTINO") — sin esto, el mismo jugador termina
+  // partido en dos filas separadas de Goleadores. Se empareja contra el
+  // plantel de ESTA categoría solamente (nunca cruza a otra categoría, así
+  // que un mismo nombre en 4ta y 7ma nunca se mezcla).
+  const rosterPorNombre={};
+  (plantelFutdetail[cat]||[]).forEach(p=>{ rosterPorNombre[normNombreOrdenIndependiente(p.nombre)]=p.nombre; });
   const manualPorFecha = {};
   (goleadores[cat]||[]).forEach(g=>{ (manualPorFecha[g.fecha]=manualPorFecha[g.fecha]||[]).push(g); });
   const fechas = new Set([
@@ -4200,9 +4207,10 @@ function golesEfectivos(cat){
       });
     } else {
       (manualPorFecha[fecha]||[]).forEach(g=>{
-        if(!map[g.name]) map[g.name]={name:g.name, goals:0, fechas:[]};
-        map[g.name].goals+=g.goals;
-        map[g.name].fechas.push(`F${g.fecha}`);
+        const name = rosterPorNombre[normNombreOrdenIndependiente(g.name)] || g.name;
+        if(!map[name]) map[name]={name, goals:0, fechas:[]};
+        map[name].goals+=g.goals;
+        map[name].fechas.push(`F${g.fecha}`);
       });
     }
   });
