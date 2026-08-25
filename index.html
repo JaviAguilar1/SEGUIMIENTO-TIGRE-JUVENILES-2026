@@ -2533,6 +2533,21 @@ function revisarConfiabilidad(){
   renderConfiabilidad('gen-confiabilidad');
 }
 
+// Las filas de GOLES en Confiabilidad no tienen nada que recalcular solo
+// (la diferencia hay que resolverla a mano, corrigiendo la carga) — este
+// botón lleva directo a GOLEADORES de esa categoría, con la sección
+// desplegada, en vez de un "REVISAR" que no hacía nada.
+function irAGoleadores(cat){
+  seccionColapsada['goleadores-'+cat]=false;
+  const sel=document.getElementById('stats-cat-select');
+  if(sel) sel.value=cat;
+  if(cat!=='GENERAL') currentCategoria=cat;
+  renderStatsCat(cat);
+  setTimeout(()=>{
+    document.getElementById('sec-goleadores-'+cat)?.scrollIntoView({behavior:'smooth', block:'start'});
+  }, 50);
+}
+
 // Tabla de equivalencias de jugadores: vincula un nombre "huérfano" (que
 // solo aparece en una fuente) con el que elegiste del lado opuesto, para
 // que de ahora en más se sumen como la misma persona.
@@ -2588,12 +2603,19 @@ function renderConfiabilidad(containerId){
       return;
     }
 
-    const row=(left,right,mostrarRevisar=true)=>`
+    const irGoleadoresBtn=cat=>`<button onclick="irAGoleadores('${cat}')"
+      style="background:rgba(26,58,143,0.25);border:1px solid var(--border2);color:var(--gold2);
+      border-radius:6px;padding:4px 10px;font-family:Barlow Condensed,sans-serif;font-size:11px;
+      letter-spacing:1px;cursor:pointer;white-space:nowrap">→ VER EN GOLEADORES</button>`;
+    // btn=true → REVISAR de siempre, false → sin botón, string → botón propio
+    // (ej. las filas de GOLES no tienen nada que "revisar" automático, pero
+    // sí un lugar donde ir a corregirlo a mano).
+    const row=(left,right,btn=true)=>`
       <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;
         background:rgba(192,21,42,0.08);border:1px solid var(--loss);border-radius:8px;padding:8px 14px;margin-bottom:6px">
         <div>${left}</div>
         <div style="display:flex;align-items:center;gap:10px;font-family:'Barlow Condensed',sans-serif;font-size:13px">
-          <span>${right}</span>${mostrarRevisar?revisarBtn:''}
+          <span>${right}</span>${btn===true?revisarBtn:btn===false?'':btn}
         </div>
       </div>`;
     const rowRecordatorio=(left,dismissKey)=>`
@@ -2658,7 +2680,7 @@ function renderConfiabilidad(containerId){
         return row(
           `<b style="color:${CAT_COLORS[m.cat]}">${m.cat}</b> · ${esc(m.jugador)}`,
           `Mi carga: <b>${m.mio}</b> · futdetail: <b>${m.fut}</b>${vincularHTML}`,
-          false
+          irGoleadoresBtn(m.cat)
         );
       }).join('');
     }
@@ -2669,7 +2691,7 @@ function renderConfiabilidad(containerId){
       html+=golesCometMismatches.map(m=>row(
         `<b style="color:${CAT_COLORS[m.cat]}">${m.cat} F${m.fecha}</b>`,
         `Carga manual: <b>${m.manual}</b> · COMET: <b>${m.comet}</b>`,
-        false
+        irGoleadoresBtn(m.cat)
       )).join('');
     }
 
@@ -3263,6 +3285,45 @@ function toggleMatchDetail(cat, fecha) {
 // CAT_DIV_MAP ahora sale de CATEGORIAS_CONFIG (campo nombresPdf), definido
 // más arriba junto con el resto de la config de categorías.
 
+function normEquipoCitacion(s){
+  return (s||'').toUpperCase().normalize('NFD').replace(/[̀-ͯ]/g,'')
+    .replace(/[^A-Z0-9\s]/g,' ').replace(/\s+/g,' ').trim();
+}
+// Adivina la fecha a partir del rival extraído del PDF, cruzando contra el
+// fixture ya conocido — así no hace falta tipearla a mano. Es un "mejor
+// intento": el input queda editable por si el nombre no matchea bien o el
+// partido se pospuso.
+// Palabras genéricas que no cambian de qué equipo se trata ("Racing Club"
+// == "Racing"), a diferencia de una palabra real como "Rivadavia"
+// ("Independiente" != "Independiente Rivadavia", son clubes distintos).
+const EQUIPO_STOPWORDS = new Set(['CLUB','C','A','F','DE','LOS','ATLETICO']);
+function coreWordsEquipo(s){
+  return normEquipoCitacion(s).split(' ').filter(w=>w && !EQUIPO_STOPWORDS.has(w)).sort();
+}
+function matchFechaPorRival(rival, cat){
+  const words = coreWordsEquipo(rival);
+  if(!words.length) return null;
+  const key = words.join(' ');
+  const lista = cat==='RESERVA' ? (typeof RIVALS_RESERVA!=='undefined'?RIVALS_RESERVA:[]) : RIVALS;
+  // A propósito exige el mismo CONJUNTO de palabras (sin las genéricas), no
+  // que una contenga a la otra como texto — nombres parecidos pero DISTINTOS
+  // son comunes en la liga ("Independiente" vs "Independiente Rivadavia",
+  // ambos clubes reales) y un simple .includes() los confundía en la prueba.
+  // Si no matchea exacto así, mejor dejarlo en blanco para tipear a mano que
+  // arriesgar una fecha equivocada.
+  const exacto = lista.find(x=>coreWordsEquipo(x.r).join(' ')===key);
+  return exacto ? exacto.f : null;
+}
+// Fechas ya jugadas (con resultado cargado) a las que todavía les falta la
+// citación — para avisar en el modal de subida qué queda pendiente.
+function fechasCitacionFaltantes(cat){
+  return Object.keys(results[cat]||{})
+    .filter(f=>results[cat][f])
+    .map(Number)
+    .filter(f=>!(matchData[cat]?.[f]?.titulares?.length))
+    .sort((a,b)=>a-b);
+}
+
 async function parseCitacionPdf(file, catHint, fechaHint, inputEl, segundoTiempoDe) {
   const titleCase = s => String(s).toLowerCase().replace(/(^|\s|')([a-záéíóúñ])/g, (m,p,c)=>p+c.toUpperCase());
   if (!file) return;
@@ -3430,16 +3491,30 @@ async function parseCitacionPdf(file, catHint, fechaHint, inputEl, segundoTiempo
       saveData();
       showToast(`✓ ${catsFound.length} categorías cargadas: ${catsFound.join(', ')}`);
     } else {
-      // Show a non-blocking modal to ask for the fecha number
+      // Show a non-blocking modal to ask for the fecha number — se intenta
+      // adivinar sola cruzando el rival extraído contra el fixture (mismo
+      // criterio para todas las categorías del PDF; si difieren, gana la
+      // primera que matcheó). Sigue editable por si está mal.
+      const fechasAdivinadas = catsFound
+        .map(c=>matchFechaPorRival(results_parsed[c].rival, c))
+        .filter(Boolean);
+      const fechaAdivinada = fechasAdivinadas[0] || null;
+      const faltantesHTML = catsFound.map(c=>{
+        const falt = fechasCitacionFaltantes(c);
+        return falt.length ? `${c}: falta F${falt.join(', F')}` : '';
+      }).filter(Boolean).join(' · ');
+      const yaCargada = fechaAdivinada && catsFound.some(c=>matchData[c]?.[fechaAdivinada]?.titulares?.length);
       const overlay = document.createElement('div');
       overlay.style.cssText='position:fixed;inset:0;z-index:10000;background:rgba(5,8,15,0.85);display:flex;align-items:center;justify-content:center';
-      const summaryLine = catsFound.map(c=>`${c}: ${results_parsed[c].titulares.length}T + ${results_parsed[c].suplentes.length}S`).join(' · ');
+      const summaryLine = catsFound.map(c=>`${c} vs ${esc(results_parsed[c].rival||'?')}: ${results_parsed[c].titulares.length}T + ${results_parsed[c].suplentes.length}S`).join(' · ');
       overlay.innerHTML=`<div style="background:#0a0f1e;border:1px solid #1a2d5a;border-radius:12px;padding:24px;max-width:360px;width:90%;font-family:'Barlow Condensed',sans-serif">
         <div style="font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:3px;color:#c9a227;margin-bottom:8px">ASIGNAR FECHA</div>
         <div style="font-size:11px;color:#5a7099;margin-bottom:12px">${summaryLine}</div>
-        <div style="font-size:12px;color:var(--text2,#d8e4ff);margin-bottom:8px">¿Para qué número de FECHA son estos datos?</div>
-        <input id="cit-fecha-inp" type="number" min="1" max="35" placeholder="Ej: 13"
+        <div style="font-size:12px;color:var(--text2,#d8e4ff);margin-bottom:8px">${fechaAdivinada?`Detectada por el rival — revisá que esté bien:`:'No se pudo adivinar la fecha por el rival — ¿para qué número de FECHA son estos datos?'}</div>
+        <input id="cit-fecha-inp" type="number" min="1" max="35" placeholder="Ej: 13" value="${fechaAdivinada||''}"
           style="width:100%;background:rgba(5,8,15,0.8);border:1px solid #1a2d5a;border-radius:6px;color:#d8e4ff;font-size:16px;padding:10px 12px;box-sizing:border-box;margin-bottom:12px;outline:none">
+        ${yaCargada?`<div style="font-size:11px;color:var(--draw,#f5c542);margin-bottom:12px">⚠️ Ya había una citación cargada para esa fecha — se va a reemplazar.</div>`:''}
+        ${faltantesHTML?`<div style="font-size:11px;color:#5a7099;margin-bottom:12px">Todavía sin citación: ${esc(faltantesHTML)}</div>`:''}
         <div style="display:flex;gap:8px">
           <button onclick="this.closest('div[style*=inset]').remove()"
             style="flex:1;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);border-radius:6px;color:#f87171;font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:1px;padding:8px;cursor:pointer">CANCELAR</button>
@@ -3450,6 +3525,7 @@ async function parseCitacionPdf(file, catHint, fechaHint, inputEl, segundoTiempo
       document.body.appendChild(overlay);
       const inp = overlay.querySelector('#cit-fecha-inp');
       inp.focus();
+      if(fechaAdivinada) inp.select();
       const confirmFecha = () => {
         const f = parseInt(inp.value);
         if(!f || f < 1 || f > 35){ inp.style.borderColor='#ef4444'; return; }
