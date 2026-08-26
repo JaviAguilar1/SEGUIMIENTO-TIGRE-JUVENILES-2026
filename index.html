@@ -5440,8 +5440,7 @@ function buildResumenPorBloqueHTML(calcFn, periodsCat, cats){
   const rowsHTML=filas.map(f=>buildRow(f.label, f.s, f.from, f.to,
     f.destacado?' style="outline:2px solid var(--gold);outline-offset:-2px"':'')).join('');
   const totRow=buildRow('TOTAL', tot, 1, isReserva?18:35, ' style="background:rgba(192,21,42,0.1);font-weight:700"');
-  return `<div class="st" style="margin-top:16px"><div class="stbar"></div>RESUMEN POR BLOQUE</div>
-    <div class="gen-table-wrap"><table class="gen-table">
+  return `<div class="gen-table-wrap"><table class="gen-table">
       <thead><tr>
         <th>BLOQUE</th><th>PTS</th><th>PJ</th><th>PG</th><th>PE</th><th>PP</th><th>GF</th><th>GC</th>
         <th style="${DIV}">DG</th>
