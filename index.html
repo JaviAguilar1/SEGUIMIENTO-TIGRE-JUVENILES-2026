@@ -1797,6 +1797,7 @@ function initFirebase(){
             updateAuthUI();
             // Re-render active module with correct permissions
             refreshActiveModule();
+            sincronizarJugadoresDesdeFutdetail();
           });
           // Real-time data sync — listen for remote changes
           db.ref('stats').on('value', snap=>{
@@ -3063,7 +3064,7 @@ function renderStatsSingle(cat, content){
       : '';
 
     rows+=`<tr data-cat="${dataCat}" data-fecha="${r.f}">
-      <td class="fecha-num">${r.f}</td>${rivalCell}${condCell}
+      <td class="fecha-num">${r.f}</td><td class="fecha-cal" style="color:var(--muted);font-size:11px;white-space:nowrap">${isReserva?'':formatFechaCalendario(r.f)}</td>${rivalCell}${condCell}
       <td><div class="score-cell">
         <input class="score-input" type="number" min="0" max="99" value="${gf}"
           data-cat="${dataCat}" data-fecha="${r.f}" data-side="0" placeholder="—" ${canEdit?'':'disabled'}>
@@ -3074,7 +3075,7 @@ function renderStatsSingle(cat, content){
       <td>${rb}</td><td style="font-weight:700;color:${ptC}">${pts}</td>
       ${linkCols}${equipoBtn}</tr>${showEquipo?`
     <tr class="match-detail-row" id="mdr-${dataCat}-${r.f}" style="display:none">
-      <td colspan="${7+(isLink?activeLinks.length:0)}">
+      <td colspan="${8+(isLink?activeLinks.length:0)}">
         <div class="match-detail-panel" id="mdp-${dataCat}-${r.f}"></div>
       </td>
     </tr>`:''}`;
@@ -3106,7 +3107,17 @@ function renderStatsSingle(cat, content){
     return;
   }
 
+  const amarillaAlertCat = CONFIABILIDAD_CATS.includes(cat) ? amarillasEnAlerta(cat) : [];
+  const amarillaAlertHTML = amarillaAlertCat.length
+    ? `<div style="background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.35);border-radius:8px;
+        padding:10px 14px;margin-bottom:12px;font-family:'Barlow Condensed',sans-serif;font-size:13px">
+        <span style="color:var(--gold2);font-weight:700">🟨 Riesgo de suspensión (4+ amarillas):</span>
+        <span style="color:var(--text2)"> ${amarillaAlertCat.map(p=>`${esc(p.nombre)} (${p.count})`).join(', ')}</span>
+      </div>`
+    : '';
+
   tabEl.innerHTML=`
+    ${amarillaAlertHTML}
     ${seccionTitulo('resultados-'+dataCat,
       `RESULTADOS · <span style="color:${CAT_COLORS[cat]}">${cat}</span>${isReserva?` · <span style="color:var(--gold)">${reservaSemestre===2?'2do SEMESTRE':'1er SEMESTRE'}</span>`:''}`)}
     <div id="sec-resultados-${dataCat}"${seccionEstiloInicial('resultados-'+dataCat)}>
@@ -3114,11 +3125,11 @@ function renderStatsSingle(cat, content){
       <div class="table-wrap"><table>
         <thead>
           <tr class="thead-top">
-            <th colspan="6" style="background:linear-gradient(135deg,#0a0f1e,#08111f);color:var(--muted);font-size:10px;letter-spacing:2px;">DATOS DEL PARTIDO</th>
+            <th colspan="7" style="background:linear-gradient(135deg,#0a0f1e,#08111f);color:var(--muted);font-size:10px;letter-spacing:2px;">DATOS DEL PARTIDO</th>
             ${linkGH}
             ${showEquipo?`<th style="background:linear-gradient(135deg,#1a2a10,#0f1a08);color:#86a86a;border-top:2px solid #4a7a3a;font-size:10px;letter-spacing:2px;">👥</th>`:''}
           </tr>
-          <tr class="thead-sub"><th>#</th><th>RIVAL</th><th>COND</th><th>RESULTADO</th><th>RES</th><th>PTS</th>${linkSH}${showEquipo?`<th title="Equipo / Alineación">EQUIPO</th>`:''}</tr>
+          <tr class="thead-sub"><th>#</th><th>FECHA</th><th>RIVAL</th><th>COND</th><th>RESULTADO</th><th>RES</th><th>PTS</th>${linkSH}${showEquipo?`<th title="Equipo / Alineación">EQUIPO</th>`:''}</tr>
         </thead>
         <tbody id="tbody-${dataCat}">${rows}</tbody>
       </table></div>
@@ -5072,6 +5083,26 @@ function completarLinksDesdeFutdetail(data){
     });
   });
 }
+// Los "minutos jugados"/goles/etc. de PLANTEL quedaban estaticos en Firebase
+// (a diferencia de la tabla LPF, que se refresca sola cada 30 min) porque
+// nunca hubo nada que los volviera a pedir. Ahora el scraper los trae
+// frescos en data/tablas.json (jugadores_futdetail) y, cuando abre un
+// editor, esto los compara contra lo ya guardado y sube solo lo que cambió
+// -- mismo criterio que completarLinksDesdeFutdetail, pero esto sí escribe
+// directo (no espera a que otra cosa dispare un saveData()).
+function sincronizarJugadoresDesdeFutdetail(){
+  if(!canEdit || !fbReady) return;
+  const fresh=TABLA_DATA && TABLA_DATA.jugadores_futdetail;
+  if(!fresh) return;
+  Object.keys(fresh).forEach(cat=>{
+    const nuevo=fresh[cat];
+    if(!nuevo || !nuevo.length) return;
+    if(JSON.stringify(nuevo)===JSON.stringify(jugadoresStats[cat])) return;
+    jugadoresStats[cat]=nuevo;
+    db.ref('stats/jugadores/'+cat).set(nuevo).catch(e=>console.warn('sincronizarJugadoresDesdeFutdetail:',e));
+  });
+  refreshActiveModule();
+}
 // La tabla de resultados puede haberse dibujado antes de que esto termine
 // de cargar (es una llamada async aparte) — sincroniza los inputs que
 // hayan quedado vacíos en pantalla con lo que se acaba de completar.
@@ -5114,6 +5145,7 @@ function loadTablaData(){
       TABLA_DATA=aplicarCorreccionesTablaLPF(j);
       completarLinksDesdeFutdetail(TABLA_DATA);
       sincronizarLinksVaciosEnPantalla();
+      sincronizarJugadoresDesdeFutdetail();
       return TABLA_DATA;
     })
     .catch(e=>{ console.warn('tablas.json:',e); TABLA_DATA={categorias:{}}; return TABLA_DATA; });
@@ -7278,6 +7310,23 @@ function exportWeeklyReport(catFilter){
 // ============================================================
 //  ALERT SYSTEM — header badges
 // ============================================================
+// Jugadores de una categoría con 4+ amarillas en la temporada (riesgo de
+// suspensión), contadas desde los informes de COMET ya cargados. Compartida
+// entre el pill del header (agregado de 4TA/5TA/6TA) y el aviso dentro de
+// cada categoría (ver renderStatsSingle) — antes solo existía en el header
+// y había que pasar el mouse por arriba para ver quién era.
+function amarillasEnAlerta(cat){
+  const AMARILLAS_ALERTA = 4;
+  const porJugador = {}; // id -> {nombre, count}
+  Object.values(partidos[cat]||{}).forEach(partido=>{
+    (partido.amarillas||[]).forEach(a=>{
+      if(!a.id) return;
+      if(!porJugador[a.id]) porJugador[a.id]={nombre:plantelNombreDeId(cat,a.id)||a.nombre, count:0};
+      porJugador[a.id].count++;
+    });
+  });
+  return Object.values(porJugador).filter(p=>p.count>=AMARILLAS_ALERTA);
+}
 function refreshAlerts(){
   const wrap = document.getElementById('alert-pills');
   if(!wrap) return;
@@ -7287,26 +7336,16 @@ function refreshAlerts(){
   // Tarjetas: 4+ amarillas en la temporada (riesgo de suspensión), contadas
   // desde los informes de COMET ya cargados (Fase 4) — reemplaza a la
   // alerta vieja de 3+ que se sacó en la Fase 0 junto con la carga manual
-  // de tarjetas. Solo existe para 4TA/5TA/6TA (únicas con COMET).
-  const AMARILLAS_ALERTA = 4;
-  const amarillasPorJugador = {}; // "cat||id" -> {nombre, cat, count}
-  CONFIABILIDAD_CATS.forEach(cat=>{
-    Object.values(partidos[cat]||{}).forEach(partido=>{
-      (partido.amarillas||[]).forEach(a=>{
-        if(!a.id) return;
-        const key=cat+'||'+a.id;
-        if(!amarillasPorJugador[key]) amarillasPorJugador[key]={nombre:plantelNombreDeId(cat,a.id)||a.nombre, cat, count:0};
-        amarillasPorJugador[key].count++;
-      });
-    });
-  });
+  // de tarjetas. Solo existe para 4TA/5TA/6TA (únicas con COMET). El conteo
+  // vive en amarillasEnAlerta() (compartido con el aviso dentro de cada
+  // categoría, ver renderStatsSingle) para no calcularlo dos veces.
   const amarillaNames=[];
-  Object.values(amarillasPorJugador).forEach(p=>{
-    if(p.count>=AMARILLAS_ALERTA) amarillaNames.push(`${p.nombre} (${p.cat})`);
+  CONFIABILIDAD_CATS.forEach(cat=>{
+    amarillasEnAlerta(cat).forEach(p=>amarillaNames.push(`${p.nombre} (${cat})`));
   });
   if(amarillaNames.length) pills.push({
     icon:'🟨', text:`${amarillaNames.length} en alerta`, color:'rgba(245,158,11,0.25)', border:'rgba(245,158,11,0.5)',
-    title:`${AMARILLAS_ALERTA}+ amarillas — riesgo suspensión:\n`+amarillaNames.join('\n')
+    title:`4+ amarillas — riesgo suspensión:\n`+amarillaNames.join('\n')
   });
 
   // Render pills

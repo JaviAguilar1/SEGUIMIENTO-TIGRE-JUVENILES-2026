@@ -215,6 +215,7 @@ def parse_fixture_completo(html: str):
 FUTDETAIL_BASE = "https://futdetail.com.ar/futdetail_web_tigre/"
 FUTDETAIL_LOGIN_URL = FUTDETAIL_BASE + "login.php"
 FUTDETAIL_PARTIDOS_URL = FUTDETAIL_BASE + "partidos_consulta_procesos.php"
+FUTDETAIL_ESTADISTICAS_URL = FUTDETAIL_BASE + "division_estadisticas.php"
 FUTDETAIL_TEMPORADA_ID = "3"  # 2026, mismo criterio que el desplegable del panel
 FUTDETAIL_DIVISIONES = {
     "4TA": "3",
@@ -314,6 +315,79 @@ def parse_futdetail_partidos(filas):
         elif localia == "V":
             out[fecha] = {"gf": gv, "gc": gl, "rival": rival, **links}
         # localia distinto de L/V: no deberia pasar, se ignora la fila
+    return out
+
+
+def fetch_futdetail_estadisticas(opener, id_division: str):
+    """Pide la pagina de 'Estadisticas por jugador' de una division ya
+    logueado. A diferencia de partidos_consulta_procesos.php, este endpoint
+    no devuelve JSON -- es la pagina HTML completa con la tabla embebida."""
+    url = f"{FUTDETAIL_ESTADISTICAS_URL}?id_division={id_division}"
+    resp = opener.open(urllib.request.Request(url, headers=HEADERS), timeout=30)
+    return resp.read().decode("utf-8", errors="replace")
+
+
+def parse_futdetail_estadisticas(html: str):
+    """
+    Extrae la tabla "Estadisticas por Jugador" (convocatorias, partidos
+    titular, minutos, goles, asistencias, amarillas, rojas -- acumulado de
+    toda la temporada). Matchea columnas por el TEXTO del encabezado, no por
+    posicion fija, porque la pagina trae mas columnas de las que usamos
+    (ej. "Ausencia Ent.") y el orden no esta garantizado.
+    """
+    m = re.search(r"<table\b[^>]*>(.*?)</table>", html, re.IGNORECASE | re.DOTALL)
+    if not m:
+        raise ValueError("No se encontro ninguna <table> en division_estadisticas.php")
+    tabla_html = m.group(1)
+    filas = re.findall(r"<tr\b[^>]*>(.*?)</tr>", tabla_html, re.IGNORECASE | re.DOTALL)
+    if not filas:
+        raise ValueError("Tabla encontrada pero sin filas <tr>")
+
+    CAMPOS = {
+        "jugador": "jugador",
+        "convocatorias": "convocatorias",
+        "partidos titular": "partidos_titular",
+        "min.": "minutos_jugados",
+        "goles": "goles",
+        "asist.": "asistencias",
+        "t.a": "tarjeta_amarilla",
+        "t.r": "tarjeta_roja",
+    }
+
+    def celdas_de(fila):
+        celdas = re.findall(r"<t[dh]\b[^>]*>(.*?)</t[dh]>", fila, re.IGNORECASE | re.DOTALL)
+        return [re.sub(r"<[^>]+>", "", c).replace("&nbsp;", " ").strip() for c in celdas]
+
+    header = celdas_de(filas[0])
+    idx_por_campo = {}
+    for i, h in enumerate(header):
+        campo = CAMPOS.get(h.strip().lower())
+        if campo:
+            idx_por_campo[campo] = i
+    if "jugador" not in idx_por_campo:
+        raise ValueError(f"No se encontro columna 'Jugador' en el encabezado: {header}")
+
+    out = []
+    for fila in filas[1:]:
+        celdas = celdas_de(fila)
+        if len(celdas) <= idx_por_campo["jugador"]:
+            continue
+        jugador = celdas[idx_por_campo["jugador"]].strip()
+        if not jugador:
+            continue
+        fila_dict = {"jugador": jugador}
+        for campo, idx in idx_por_campo.items():
+            if campo == "jugador":
+                continue
+            valor = celdas[idx].strip() if idx < len(celdas) else ""
+            try:
+                fila_dict[campo] = int(valor) if valor else 0
+            except ValueError:
+                fila_dict[campo] = 0
+        out.append(fila_dict)
+
+    if not out:
+        raise ValueError("Se encontro la tabla pero no se pudo parsear ningun jugador")
     return out
 
 
@@ -576,6 +650,22 @@ def main():
                 except Exception as e:  # noqa
                     errores.append(f"futdetail {cat}: {e}")
                     print(f"[ERROR] futdetail {cat}: {e}", file=sys.stderr)
+
+            # Estadisticas de jugadores (convocatorias/titular/minutos/goles/
+            # asist./amarillas/rojas, acumulado de temporada) -- reusa la
+            # misma sesion ya logueada arriba. La app las sincroniza sola a
+            # Firebase cuando abre un editor (ver sincronizarJugadoresDesde
+            # Futdetail en index.html); antes de esto quedaban estaticas.
+            resultado["jugadores_futdetail"] = {}
+            for cat, id_division in FUTDETAIL_DIVISIONES.items():
+                try:
+                    html_est = fetch_futdetail_estadisticas(opener_fd, id_division)
+                    jugadores = parse_futdetail_estadisticas(html_est)
+                    resultado["jugadores_futdetail"][cat] = jugadores
+                    print(f"[OK] futdetail estadisticas {cat}: {len(jugadores)} jugadores")
+                except Exception as e:  # noqa
+                    errores.append(f"futdetail estadisticas {cat}: {e}")
+                    print(f"[ERROR] futdetail estadisticas {cat}: {e}", file=sys.stderr)
         except Exception as e:  # noqa
             errores.append(f"futdetail login: {e}")
             print(f"[ERROR] futdetail login: {e}", file=sys.stderr)
