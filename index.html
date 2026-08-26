@@ -2234,7 +2234,6 @@ function buildStatsCatSelect(){
         color:var(--gold2);font-family:'Barlow Condensed',sans-serif;font-weight:700;letter-spacing:1px;
         font-size:14px;padding:8px 14px;border-radius:6px;cursor:pointer;outline:none">${opts}</select>
       <div id="pdf-export-btn-wrap"></div>
-      <div id="rival-stats-btn-wrap"></div>
       <button onclick="actualizarDatosAhora()" id="btn-actualizar-datos"
         title="Refresca en la app los datos ya disponibles y abre GitHub Actions para forzar un scrapeo nuevo"
         style="background:rgba(26,58,143,0.25);border:1px solid var(--border2);color:var(--gold2);
@@ -2281,19 +2280,6 @@ function updatePdfExportButton(cat){
   } else {
     wrap.innerHTML=`<button onclick="abrirExportCategoria('${cat}')" style="${btnStyle}">⬇ EXPORTAR PDF</button>`;
   }
-}
-
-// Botón "estadísticas próximo rival" al lado del selector -- solo en 4TA/5TA/6TA
-// (mismo alcance que CONFIABILIDAD_CATS, a pedido de Javi: no tiene sentido para
-// las menores ni para RESERVA, que no tienen fixture_completo).
-function updateRivalStatsButton(cat){
-  const wrap=document.getElementById('rival-stats-btn-wrap');
-  if(!wrap) return;
-  if(!CONFIABILIDAD_CATS.includes(cat)){ wrap.innerHTML=''; return; }
-  wrap.innerHTML=`<button onclick="generarEstadisticasRival('${cat}')" id="btn-rival-stats"
-    style="background:rgba(240,192,64,0.15);border:1px solid var(--border2);color:var(--gold2);
-    border-radius:6px;padding:8px 14px;font-family:'Barlow Condensed',sans-serif;font-size:13px;
-    letter-spacing:1px;font-weight:700;cursor:pointer;white-space:nowrap">📊 ESTADÍSTICAS PRÓXIMO RIVAL</button>`;
 }
 
 // Slider para elegir cada cuántas fechas se arma un bloque (2 a 17, no aplica a RESERVA).
@@ -2361,7 +2347,6 @@ function renderStatsCat(cat){
   const content=document.getElementById('stats-content');
   updatePdfExportButton(cat);
   updateCitUploadButton(cat);
-  updateRivalStatsButton(cat);
   if(cat==='GENERAL') renderStatsGeneral(content);
   else renderStatsSingle(cat, content);
 }
@@ -6062,7 +6047,23 @@ async function dibujarTarjetaRival({cat, prox, info, ultimos, reciente, filaRiva
 //    calendario sale de FECHA_CALENDARIO, no hace falta tipearla.
 function renderPlacasTab(cat, tabEl){
   const conPortada = CONFIABILIDAD_CATS.includes(cat);
+  const btnStyle=`background:rgba(240,192,64,0.15);border:1px solid var(--border2);color:var(--gold2);
+    border-radius:6px;padding:9px 16px;font-family:'Barlow Condensed',sans-serif;font-size:13px;
+    letter-spacing:1px;font-weight:700;cursor:pointer`;
   tabEl.innerHTML = `
+    ${conPortada ? `
+    ${seccionTitulo('placa-portada-'+cat, '🎬 PLACA DE PORTADA')}
+    <div id="sec-placa-portada-${cat}"${seccionEstiloInicial('placa-portada-'+cat)}>
+      <div id="placa-portada-info-${cat}" style="padding:4px 0 14px;font-family:'Barlow Condensed',sans-serif;font-size:14px;color:var(--text2)"></div>
+    </div>
+
+    ${seccionTitulo('placa-stats-'+cat, '🎬 PLACA DE ESTADÍSTICAS')}
+    <div id="sec-placa-stats-${cat}"${seccionEstiloInicial('placa-stats-'+cat)}>
+      <div style="padding:4px 0 14px">
+        <button onclick="generarEstadisticasRival('${cat}')" id="btn-rival-stats" style="${btnStyle}">⬇ GENERAR ESTADÍSTICAS</button>
+      </div>
+    </div>` : ''}
+
     ${seccionTitulo('placa-fase-'+cat, '🎬 PLACA DE FASE')}
     <div id="sec-placa-fase-${cat}"${seccionEstiloInicial('placa-fase-'+cat)}>
       <div style="max-width:420px;display:flex;flex-direction:column;gap:10px;padding:4px 0 14px">
@@ -6074,18 +6075,16 @@ function renderPlacasTab(cat, tabEl){
         <input id="placa-fase-subtitulo" type="text" placeholder="Ej: A favor" maxlength="60"
           style="background:var(--surface2);border:1px solid var(--border2);color:var(--text);
           border-radius:6px;padding:9px 12px;font-family:'Barlow Condensed',sans-serif;font-size:15px;outline:none">
-        <button onclick="generarPlacaFase()" id="btn-placa-fase" style="align-self:flex-start;margin-top:6px;
-          background:rgba(240,192,64,0.15);border:1px solid var(--border2);color:var(--gold2);
-          border-radius:6px;padding:9px 16px;font-family:'Barlow Condensed',sans-serif;font-size:13px;
-          letter-spacing:1px;font-weight:700;cursor:pointer">⬇ GENERAR PLACA</button>
+        <button onclick="generarPlacaFase()" id="btn-placa-fase" style="align-self:flex-start;margin-top:6px;${btnStyle}">⬇ GENERAR PLACA</button>
       </div>
     </div>
 
-    ${conPortada ? `
-    ${seccionTitulo('placa-portada-'+cat, '🎬 PLACA DE PORTADA')}
-    <div id="sec-placa-portada-${cat}"${seccionEstiloInicial('placa-portada-'+cat)}>
-      <div id="placa-portada-info-${cat}" style="padding:4px 0 14px;font-family:'Barlow Condensed',sans-serif;font-size:14px;color:var(--text2)"></div>
-    </div>` : ''}
+    ${seccionTitulo('placa-cierre-'+cat, '🎬 PLACA DE CIERRE')}
+    <div id="sec-placa-cierre-${cat}"${seccionEstiloInicial('placa-cierre-'+cat)}>
+      <div style="padding:4px 0 14px">
+        <button onclick="generarPlacaCierre()" id="btn-placa-cierre" style="${btnStyle}">⬇ GENERAR PLACA</button>
+      </div>
+    </div>
   `;
   if(conPortada) renderPlacaPortadaInfo(cat);
 }
@@ -6147,6 +6146,44 @@ async function dibujarPlacaFase({titulo, subtitulo}){
   }
   ctx.textAlign = 'left'; ctx.textBaseline = 'top';
 
+  return new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+}
+
+// Placa de cierre: fija y única (no depende de categoría ni de datos), solo
+// el escudo de Tigre grande centrado -- mismo escudo que ya usa el resto de
+// la app (#escudoImg), no el de escudos/tigre.png (ese es el que subiste
+// para los rivales, éste es el oficial que ya estaba embebido).
+async function generarPlacaCierre(){
+  const btn = document.getElementById('btn-placa-cierre');
+  if(btn) btn.disabled = true;
+  try{
+    const blob = await dibujarPlacaCierre();
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'placa-cierre.png';
+    a.click();
+  } finally {
+    if(btn) btn.disabled = false;
+  }
+}
+
+async function dibujarPlacaCierre(){
+  if(document.fonts && document.fonts.ready) await document.fonts.ready;
+  const BG='#111e38', RED='#c0152a';
+  const W=1280, H=720, SCALE=3;
+  const escudo = await cargarImagen(document.getElementById('escudoImg')?.src);
+  const canvas = document.createElement('canvas');
+  canvas.width = W*SCALE; canvas.height = H*SCALE;
+  const ctx = canvas.getContext('2d');
+  ctx.scale(SCALE, SCALE);
+  ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high';
+  ctx.fillStyle = BG; ctx.fillRect(0, 0, W, H);
+  ctx.fillStyle = RED; ctx.fillRect(0, 0, 24, H);
+  if(escudo){
+    const targetH = 475; // referencia + 13%, a pedido de Javi
+    const w = escudo.naturalWidth/escudo.naturalHeight*targetH;
+    ctx.drawImage(escudo, (W-w)/2, (H-targetH)/2, w, targetH);
+  }
   return new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
 }
 
