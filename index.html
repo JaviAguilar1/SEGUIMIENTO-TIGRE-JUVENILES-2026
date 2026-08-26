@@ -4384,7 +4384,11 @@ function golesEfectivos(cat, excluirFechas){
         const name = plantelNombreDeId(cat, g.id) || g.nombre;
         if(!map[name]) map[name]={name, goals:0, fechas:[]};
         map[name].goals+=1;
-        map[name].fechas.push(`F${fecha}`);
+        // COMET trae minuto y si fue de penal por gol -- antes se guardaba
+        // pero se perdía acá, mostrando solo "F6" (sin poder ver en qué
+        // minuto ni si fue penal, aunque el dato ya estaba cargado).
+        const detalle = g.minuto!=null ? `${g.minuto}'${g.penal?' P':''}` : '';
+        map[name].fechas.push(detalle ? `F${fecha} (${detalle})` : `F${fecha}`);
       });
     } else {
       (manualPorFecha[fecha]||[]).forEach(g=>{
@@ -5873,6 +5877,30 @@ function ctxRoundRect(ctx,x,y,w,h,r){
   ctx.closePath();
 }
 
+// Rectángulo real del dibujo dentro de un escudo (sin el margen transparente
+// del archivo) -- distintos escudos vienen con distinto margen alrededor,
+// así que centrar por el tamaño del archivo entero no alinea los centros
+// visuales de dos escudos uno al lado del otro. Se usa para eso (ver
+// dibujarPlacaPostPartido).
+function bordesVisibles(img){
+  const c=document.createElement('canvas');
+  c.width=img.naturalWidth; c.height=img.naturalHeight;
+  const cctx=c.getContext('2d');
+  cctx.drawImage(img,0,0);
+  const data=cctx.getImageData(0,0,c.width,c.height).data;
+  let minX=c.width, minY=c.height, maxX=0, maxY=0, found=false;
+  for(let y=0;y<c.height;y++){
+    for(let x=0;x<c.width;x++){
+      if(data[(y*c.width+x)*4+3]>10){
+        found=true;
+        if(x<minX)minX=x; if(x>maxX)maxX=x;
+        if(y<minY)minY=y; if(y>maxY)maxY=y;
+      }
+    }
+  }
+  return found ? {x:minX,y:minY,w:maxX-minX+1,h:maxY-minY+1} : {x:0,y:0,w:img.naturalWidth,h:img.naturalHeight};
+}
+
 // Punto de entrada del botón: junta los datos y dispara la descarga del PNG.
 async function generarEstadisticasRival(cat){
   const btn=document.getElementById('btn-rival-stats');
@@ -6112,15 +6140,67 @@ function renderPlacasTab(cat, tabEl){
   if(conPortada) renderPlacaPortadaInfo(cat);
 }
 
+// 'proximo' (como estaba) o 'post' (nueva, análisis post partido) -- por
+// categoría, no se comparte entre categorías.
+const placaPortadaModo = {};
+function setPlacaPortadaModo(cat, modo){
+  placaPortadaModo[cat] = modo;
+  renderPlacaPortadaInfo(cat);
+}
+
 async function renderPlacaPortadaInfo(cat){
   const el = document.getElementById(`placa-portada-info-${cat}`);
   if(!el) return;
   await loadTablaData();
+  const modo = placaPortadaModo[cat] || 'proximo';
+  const modoBtn = (val, label) => `<button onclick="setPlacaPortadaModo('${cat}','${val}')" style="padding:6px 12px;
+    border-radius:6px;border:1px solid ${modo===val?'var(--gold)':'var(--border2)'};
+    background:${modo===val?'rgba(240,192,64,0.15)':'transparent'};color:${modo===val?'var(--gold2)':'var(--muted)'};
+    font-family:'Barlow Condensed',sans-serif;font-size:12px;letter-spacing:1px;font-weight:700;cursor:pointer">${label}</button>`;
+  const toggleHTML = `<div style="display:flex;gap:8px;margin-bottom:10px">
+    ${modoBtn('proximo','PRÓXIMO RIVAL')}${modoBtn('post','POST PARTIDO')}
+  </div>`;
+
+  if(modo==='post'){
+    const jugadas = RIVALS.filter(r=>results[cat]?.[r.f]).sort((a,b)=>b.f-a.f);
+    if(!jugadas.length){
+      el.innerHTML = toggleHTML+'Todavía no hay partidos jugados en esta categoría.';
+      return;
+    }
+    const opciones = jugadas.map(r=>`<option value="${r.f}">Fecha ${r.f} · ${r.r}</option>`).join('');
+    const sliderRow = (id, label, val, min, max, unit) => `<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+      <span style="font-size:11px;color:var(--muted);letter-spacing:1px;width:110px">${label}</span>
+      <input type="range" id="${id}" min="${min}" max="${max}" value="${val}" oninput="document.getElementById('${id}-val').textContent=this.value+'${unit}'" style="width:160px">
+      <span id="${id}-val" style="font-size:12px;color:var(--gold2);width:36px">${val}${unit}</span>
+    </div>`;
+    el.innerHTML = toggleHTML+`
+      <select id="placa-post-fecha-${cat}" style="background:var(--surface2);border:1px solid var(--border2);
+        color:var(--text);border-radius:6px;padding:8px 10px;font-family:'Barlow Condensed',sans-serif;
+        font-size:14px;outline:none;margin-bottom:10px">${opciones}</select>
+      <div style="margin-bottom:6px">
+        <div style="font-size:10px;color:var(--muted);letter-spacing:1px;margin-bottom:4px">ESCUDO TIGRE</div>
+        ${sliderRow('placa-post-escala-tigre-'+cat, 'TAMAÑO', 100, 50, 180, '%')}
+        ${sliderRow('placa-post-x-tigre-'+cat, 'HORIZONTAL', 0, -40, 40, 'px')}
+        ${sliderRow('placa-post-y-tigre-'+cat, 'VERTICAL', 0, -40, 40, 'px')}
+        <div style="font-size:10px;color:var(--muted);letter-spacing:1px;margin:8px 0 4px">ESCUDO RIVAL</div>
+        ${sliderRow('placa-post-escala-rival-'+cat, 'TAMAÑO', 100, 50, 180, '%')}
+        ${sliderRow('placa-post-x-rival-'+cat, 'HORIZONTAL', 0, -40, 40, 'px')}
+        ${sliderRow('placa-post-y-rival-'+cat, 'VERTICAL', 0, -40, 40, 'px')}
+      </div>
+      <div>
+        <button onclick="generarPlacaPostPartido('${cat}')" id="btn-placa-post" style="
+          background:rgba(240,192,64,0.15);border:1px solid var(--border2);color:var(--gold2);
+          border-radius:6px;padding:9px 16px;font-family:'Barlow Condensed',sans-serif;font-size:13px;
+          letter-spacing:1px;font-weight:700;cursor:pointer">⬇ GENERAR POST PARTIDO</button>
+      </div>`;
+    return;
+  }
+
   const prox = proximoRivalInfo(cat);
-  if(!prox){ el.innerHTML = 'No encontré ningún partido pendiente en el fixture.'; return; }
+  if(!prox){ el.innerHTML = toggleHTML+'No encontré ningún partido pendiente en el fixture.'; return; }
   const info = RIVAL_INFO[prox.rival];
-  if(!info){ el.innerHTML = `Todavía no tengo cargado el escudo/equivalencia de "${prox.rival}".`; return; }
-  el.innerHTML = `
+  if(!info){ el.innerHTML = toggleHTML+`Todavía no tengo cargado el escudo/equivalencia de "${prox.rival}".`; return; }
+  el.innerHTML = toggleHTML+`
     Próximo rival: <strong style="color:var(--gold2)">${prox.rival}</strong>
     · Fecha ${prox.fecha} · ${formatFechaCalendario(prox.fecha)}
     <div style="margin-top:10px">
@@ -6129,6 +6209,112 @@ async function renderPlacaPortadaInfo(cat){
         border-radius:6px;padding:9px 16px;font-family:'Barlow Condensed',sans-serif;font-size:13px;
         letter-spacing:1px;font-weight:700;cursor:pointer">⬇ GENERAR PORTADA</button>
     </div>`;
+}
+
+async function generarPlacaPostPartido(cat){
+  const sel = document.getElementById(`placa-post-fecha-${cat}`);
+  const fecha = parseInt(sel.value);
+  const entry = RIVALS.find(r=>r.f===fecha);
+  const info = entry && RIVAL_INFO[entry.r];
+  if(!info){ alert('Todavía no tengo cargado el escudo/equivalencia de "'+(entry?entry.r:fecha)+'".'); return; }
+  const num = (id, def) => parseInt(document.getElementById(id+cat)?.value ?? def) || def;
+  const escalaTigre = num('placa-post-escala-tigre-', 100)/100;
+  const escalaRival = num('placa-post-escala-rival-', 100)/100;
+  const offsetXTigre = num('placa-post-x-tigre-', 0);
+  const offsetYTigre = num('placa-post-y-tigre-', 0);
+  const offsetXRival = num('placa-post-x-rival-', 0);
+  const offsetYRival = num('placa-post-y-rival-', 0);
+  const btn = document.getElementById('btn-placa-post');
+  if(btn) btn.disabled = true;
+  try{
+    const blob = await dibujarPlacaPostPartido({fecha, info, escalaTigre, escalaRival,
+      offsetXTigre, offsetYTigre, offsetXRival, offsetYRival});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `placa-post-partido-${cat}-F${fecha}-${slugArchivo(entry.r)}.png`;
+    a.click();
+  } finally {
+    if(btn) btn.disabled = false;
+  }
+}
+
+// Placa "análisis post partido": logo LPF arriba a la izquierda, escudos de
+// Tigre y del rival de esa fecha arriba a la derecha ("TIGRE vs RIVAL"), y
+// título + subtítulo centrados con el mismo criterio que la placa de fase.
+async function dibujarPlacaPostPartido({fecha, info, escalaTigre, escalaRival,
+  offsetXTigre, offsetYTigre, offsetXRival, offsetYRival}){
+  escalaTigre = escalaTigre || 1;
+  escalaRival = escalaRival || 1;
+  offsetXTigre = offsetXTigre || 0; offsetYTigre = offsetYTigre || 0;
+  offsetXRival = offsetXRival || 0; offsetYRival = offsetYRival || 0;
+  if(document.fonts && document.fonts.ready) await document.fonts.ready;
+  const BG='#111e38', RED='#c0152a', WHITE='#ffffff', TXT2='#a8c0e8';
+  const W=1280, H=720, pad=60, SCALE=3;
+  const [escudoTigre, escudoRival, escudoLiga] = await Promise.all([
+    cargarImagen(document.getElementById('escudoImg')?.src),
+    cargarImagen('escudos/'+info.escudo),
+    cargarImagen('escudos/LIGA.png'),
+  ]);
+  const canvas = document.createElement('canvas');
+  canvas.width = W*SCALE; canvas.height = H*SCALE;
+  const ctx = canvas.getContext('2d');
+  ctx.scale(SCALE, SCALE);
+  ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high';
+  ctx.fillStyle = BG; ctx.fillRect(0, 0, W, H);
+  ctx.fillStyle = RED; ctx.fillRect(0, 0, 24, H);
+  ctx.textBaseline = 'top';
+
+  if(escudoLiga) ctx.drawImage(escudoLiga, pad, pad-12, 75, 75);
+
+  // Cada escudo llena el mismo cuadro (crestBox x crestBox) por su cuenta,
+  // según el tamaño real de SU DIBUJO (sin el margen transparente del
+  // archivo, ver bordesVisibles) -- da un tamaño comparable entre los dos
+  // sin depender de la resolución de cada archivo. Arriba de esa base, Javi
+  // puede agrandar/achicar cada escudo a mano con los sliders (escalaTigre/
+  // escalaRival, 50%-180%) en vez de perseguir un algoritmo automático que
+  // "adivine" el tamaño relativo correcto para cualquier combinación de
+  // escudos.
+  const crestBox = 76;
+  const bTigre = escudoTigre ? bordesVisibles(escudoTigre) : null;
+  const bRival = escudoRival ? bordesVisibles(escudoRival) : null;
+  const fitCrest = (b, escala) => {
+    if(!b) return {w:0,h:0};
+    const s = Math.min(crestBox/b.w, crestBox/b.h)*escala;
+    return {w: b.w*s, h: b.h*s};
+  };
+  const dimTigre = fitCrest(bTigre, escalaTigre), dimRival = fitCrest(bRival, escalaRival);
+  const gap = 8; // mismo espacio a cada lado del "VS", para que quede centrado de verdad
+  ctx.font = "700 16px 'Barlow', sans-serif";
+  const vsW = ctx.measureText('VS').width;
+
+  // rx marca el flujo "de referencia" (sin mover nada); los offsetX/Y de
+  // cada escudo son un empujón final solo sobre dónde se dibuja, no afectan
+  // el espaciado entre los demás elementos.
+  let rx = W-pad;
+  if(escudoRival){
+    rx-=dimRival.w;
+    ctx.drawImage(escudoRival, bRival.x, bRival.y, bRival.w, bRival.h,
+      rx+offsetXRival, pad+(crestBox-dimRival.h)/2+offsetYRival, dimRival.w, dimRival.h);
+  }
+  rx -= gap;
+  ctx.fillStyle=TXT2; ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText('VS', rx-vsW/2, pad+crestBox/2);
+  ctx.textAlign='left'; ctx.textBaseline='top';
+  rx -= vsW+gap;
+  if(escudoTigre){
+    rx-=dimTigre.w;
+    ctx.drawImage(escudoTigre, bTigre.x, bTigre.y, bTigre.w, bTigre.h,
+      rx+offsetXTigre, pad+(crestBox-dimTigre.h)/2+offsetYTigre, dimTigre.w, dimTigre.h);
+  }
+
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.font = "700 84px 'Barlow Condensed', sans-serif"; ctx.fillStyle = WHITE;
+  ctx.fillText('Análisis post partido', W/2, H/2-28);
+  ctx.font = "700 38px 'Barlow', sans-serif";
+  ctx.fillText(`Fecha ${fecha}: ${info.lpf}`, W/2, H/2+48);
+  ctx.textAlign = 'left'; ctx.textBaseline = 'top';
+
+  return new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
 }
 
 async function generarPlacaFase(){
