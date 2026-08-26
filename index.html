@@ -5864,9 +5864,12 @@ async function generarEstadisticasRival(cat){
 async function dibujarTarjetaRival({cat, prox, info, ultimos, reciente, filaRival, filaTigre}){
   if(document.fonts && document.fonts.ready) await document.fonts.ready;
 
-  const BG='#05080f', SURF='#0d1528', SURF2='#0a0f1e', RED='#c0152a', GOLD='#f0c040',
-        TXT='#d8e4ff', TXT2='#a8c0e8', MUTED='#5a7099', WIN='#22c55e', DRAW='#f59e0b',
-        LOSS='#ef4444', BORDER='#243f7a', WHITE='#ffffff';
+  // Fondo más azulado (var(--surface3) de la app) en vez de var(--bg) --
+  // a pedido de Javi, se veía "demasiado negro" comparado con la
+  // referencia original.
+  const BG='#111e38', SURF='#0d1528', SURF2='#0a0f1e', RED='#c0152a', GOLD='#f0c040',
+        TXT='#d8e4ff', TXT2='#a8c0e8', MUTED='#8aa0cc', WIN='#22c55e', DRAW='#f59e0b',
+        LOSS='#ef4444', BORDER='#3a5090', WHITE='#ffffff';
 
   const [escudoRival, escudoTigre, ...escudosResultados] = await Promise.all([
     cargarImagen('escudos/'+info.escudo),
@@ -5875,15 +5878,19 @@ async function dibujarTarjetaRival({cat, prox, info, ultimos, reciente, filaRiva
   ]);
   const escudoReciente = reciente ? await cargarImagen(ESCUDO_POR_SABADOGOL[reciente.rivalDe] ? 'escudos/'+ESCUDO_POR_SABADOGOL[reciente.rivalDe] : null) : null;
 
-  const W=900, pad=34, rowH=42, rowH2=52;
+  // 16:9 (1280x720) a pedido de Javi, para que ocupe mejor la pantalla en
+  // presentaciones. El contenido (tabla + hasta 4 resultados) casi siempre
+  // entra dentro de 720 con margen de sobra -- si por algún motivo no
+  // entrara (no debería, "últimos" está topeado a 4 filas), el alto crece
+  // solo para no cortar nada, en vez de forzar 720 igual.
+  const W=1280, pad=40, rowH=48, rowH2=58;
   const rowsN=Math.max(ultimos.length,1);
-  // Margen inferior generoso a pedido de Javi (ver mockup aprobado) --
-  // 70px libres después de la última línea de contenido.
-  const MARGEN_INFERIOR=70;
-  const H = pad + 50 + 70 + 32 + rowH + rowH*2 + 30 + 34 + rowsN*rowH2 + 40 + 30 + MARGEN_INFERIOR;
+  const MARGEN_MINIMO=50;
+  const contenidoHastaDivisor = pad + 56 + 76 + 36 + rowH + rowH*2 + 32 + 38 + rowsN*rowH2 + 42;
+  const H = Math.max(720, contenidoHastaDivisor + MARGEN_MINIMO);
 
-  // Se dibuja al doble de resolución (SCALE=2) y se escala el contexto --
-  // si no, el PNG sale a 900px de ancho real y se ve borroso/pixelado en
+  // Se dibuja al triple de resolución (SCALE=3) y se escala el contexto --
+  // si no, el PNG sale a 1280px de ancho real y se ve borroso/pixelado en
   // pantallas de alta densidad. Todo el resto del código sigue usando
   // coordenadas "lógicas" (W, H) sin tocar nada.
   const SCALE=3;
@@ -5897,105 +5904,113 @@ async function dibujarTarjetaRival({cat, prox, info, ultimos, reciente, filaRiva
 
   const catLabel = CATEGORIAS_CONFIG[cat]?.label ? CATEGORIAS_CONFIG[cat].label.toUpperCase()+' DIVISIÓN' : cat;
   let y=pad;
-  ctx.font="14px 'Barlow', sans-serif"; ctx.fillStyle=TXT2;
-  ctx.fillText(`ANÁLISIS DE RIVAL · ${prox.rival} · ${catLabel}`, pad, y+4);
-  ctxRoundRect(ctx, W-pad-160, y-6, 160, 28, 14); ctx.fillStyle=RED; ctx.fill();
-  ctx.font="700 12px 'Barlow', sans-serif"; ctx.fillStyle=WHITE; ctx.textAlign='center';
-  ctx.fillText('PRÓXIMO RIVAL', W-pad-80, y+3); ctx.textAlign='left';
-  y+=50;
+  ctx.font="15px 'Barlow', sans-serif"; ctx.fillStyle=TXT2;
+  ctx.fillText(`ANÁLISIS DE RIVAL · ${prox.rival} · ${catLabel}`, pad, y+5);
+  ctxRoundRect(ctx, W-pad-170, y-6, 170, 30, 15); ctx.fillStyle=RED; ctx.fill();
+  ctx.font="700 13px 'Barlow', sans-serif"; ctx.fillStyle=WHITE; ctx.textAlign='center';
+  ctx.fillText('PRÓXIMO RIVAL', W-pad-85, y+3); ctx.textAlign='left';
+  y+=56;
 
-  ctx.font="700 40px 'Barlow Condensed', sans-serif"; ctx.fillStyle=WHITE;
+  ctx.font="700 46px 'Barlow Condensed', sans-serif"; ctx.fillStyle=WHITE;
   ctx.fillText('Estadísticas', pad, y);
-  y+=70;
+  y+=76;
 
-  ctx.fillStyle=RED; ctx.fillRect(pad,y,4,18);
-  ctx.font="700 13px 'Barlow Condensed', sans-serif"; ctx.fillStyle=GOLD;
-  ctx.fillText('UBICACIONES EN LA TABLA', pad+14, y+1);
-  y+=32;
+  ctx.fillStyle=RED; ctx.fillRect(pad,y,4,20);
+  ctx.font="700 14px 'Barlow Condensed', sans-serif"; ctx.fillStyle=GOLD;
+  ctx.fillText('UBICACIONES EN LA TABLA', pad+16, y+2);
+  y+=36;
 
-  const colX=[pad,pad+260,pad+340,pad+410,pad+480,pad+550,pad+620,pad+690,pad+760,pad+830];
+  // Columnas repartidas en todo el ancho (1280) -- antes quedaban apretadas
+  // contra el borde derecho y "DG" se veía cortado.
+  const equipoColW=300, colGap=100;
+  const colX=[pad]; for(let i=0;i<9;i++) colX.push(pad+equipoColW+colGap*i);
   const headers=['EQUIPO','POS','PTS','PJ','PG','PE','PP','GF','GC','DG'];
   ctx.fillStyle=RED; ctx.fillRect(pad,y,W-2*pad,rowH);
-  ctx.font="700 12px 'Barlow', sans-serif"; ctx.fillStyle=WHITE;
-  headers.forEach((h,i)=>ctx.fillText(h, colX[i], y+14));
+  ctx.font="700 13px 'Barlow', sans-serif"; ctx.fillStyle=WHITE;
+  headers.forEach((h,i)=>ctx.fillText(h, colX[i], y+17));
   y+=rowH;
 
   function filaTabla(nombreMostrar, escudoImg, fila, bg){
     ctx.fillStyle=bg; ctx.fillRect(pad,y,W-2*pad,rowH);
-    let tx=pad+6;
-    if(escudoImg){ ctx.drawImage(escudoImg, pad+6, y+6, 30, 30); tx=pad+6+38; }
-    ctx.font="700 14px 'Barlow', sans-serif"; ctx.fillStyle=TXT;
-    ctx.fillText(nombreMostrar, tx, y+14);
-    ctx.font="14px 'Barlow', sans-serif";
+    let tx=pad+8;
+    if(escudoImg){ ctx.drawImage(escudoImg, pad+8, y+9, 30, 30); tx=pad+8+40; }
+    ctx.font="700 15px 'Barlow', sans-serif"; ctx.fillStyle=TXT;
+    ctx.fillText(nombreMostrar, tx, y+16);
+    ctx.font="15px 'Barlow', sans-serif";
     const vals=[fila.pos+'°',fila.pts,fila.pj,fila.pg,fila.pe,fila.pp,fila.gf,fila.gc];
-    vals.forEach((v,i)=>ctx.fillText(String(v), colX[i+1], y+14));
-    ctx.font="700 14px 'Barlow', sans-serif"; ctx.fillStyle=fila.dif>=0?WIN:LOSS;
-    ctx.fillText((fila.dif>=0?'+':'')+fila.dif, colX[9], y+14);
+    vals.forEach((v,i)=>ctx.fillText(String(v), colX[i+1], y+16));
+    ctx.font="700 15px 'Barlow', sans-serif"; ctx.fillStyle=fila.dif>=0?WIN:LOSS;
+    ctx.fillText((fila.dif>=0?'+':'')+fila.dif, colX[9], y+16);
     y+=rowH;
   }
-  filaTabla(info.lpf, escudoRival, filaRival, SURF);
-  filaTabla('Tigre', escudoTigre, filaTigre, SURF2);
-  y+=30;
+  // Orden por posición real en la tabla (el mejor ubicado arriba), no
+  // siempre "rival primero, Tigre segundo".
+  [{label:info.lpf, escudo:escudoRival, fila:filaRival},
+   {label:'Tigre', escudo:escudoTigre, fila:filaTigre}]
+    .sort((a,b)=>a.fila.pos-b.fila.pos)
+    .forEach((f,i)=>filaTabla(f.label, f.escudo, f.fila, i===0?SURF:SURF2));
+  y+=32;
 
-  ctx.fillStyle=RED; ctx.fillRect(pad,y,4,18);
-  ctx.font="700 13px 'Barlow Condensed', sans-serif"; ctx.fillStyle=GOLD;
-  ctx.fillText('ÚLTIMOS RESULTADOS', pad+14, y+1);
-  y+=34;
+  ctx.fillStyle=RED; ctx.fillRect(pad,y,4,20);
+  ctx.font="700 14px 'Barlow Condensed', sans-serif"; ctx.fillStyle=GOLD;
+  ctx.fillText('ÚLTIMOS RESULTADOS', pad+16, y+2);
+  y+=38;
 
-  const colW=(W-2*pad-20)/2, leftX=pad, rightX=pad+colW+20;
-  ctx.font="700 11px 'Barlow', sans-serif"; ctx.fillStyle=MUTED;
+  const colW=(W-2*pad-24)/2, leftX=pad, rightX=pad+colW+24;
+  ctx.font="700 12px 'Barlow', sans-serif"; ctx.fillStyle=MUTED;
   ctx.fillText('COMO '+(prox.condRival==='L'?'LOCAL':'VISITANTE'), leftX, y);
-  let ry=y+26;
+  let ry=y+28;
+  const rowH2visual=rowH2-10;
   if(ultimos.length===0){
-    ctx.font="13px 'Barlow', sans-serif"; ctx.fillStyle=MUTED;
-    ctx.fillText('Sin partidos registrados todavía en esta condición.', leftX, ry+14);
+    ctx.font="14px 'Barlow', sans-serif"; ctx.fillStyle=MUTED;
+    ctx.fillText('Sin partidos registrados todavía en esta condición.', leftX, ry+16);
   }
   ultimos.forEach((p,i)=>{
     const r=resultadoLabel(p.gf,p.gc);
-    ctx.fillStyle=SURF; ctx.fillRect(leftX,ry,colW,rowH2-8);
-    ctx.fillStyle=r.color; ctx.fillRect(leftX,ry,4,rowH2-8);
-    let tx=leftX+14;
+    ctx.fillStyle=SURF; ctx.fillRect(leftX,ry,colW,rowH2visual);
+    ctx.fillStyle=r.color; ctx.fillRect(leftX,ry,4,rowH2visual);
+    let tx=leftX+16;
     const escImg=escudosResultados[i];
-    if(escImg){ ctx.drawImage(escImg, tx, ry+8, 24, 24); tx+=30; }
-    ctx.font="13px 'Barlow', sans-serif"; ctx.fillStyle=TXT2;
-    ctx.fillText(`Fecha ${p.fecha} vs ${NOMBRE_POR_SABADOGOL[p.rivalDe]||p.rivalDe}`, tx, ry+16);
-    ctx.font="700 15px 'Barlow', sans-serif"; ctx.fillStyle=TXT;
-    ctx.fillText(`${p.gf}-${p.gc}`, leftX+colW-150, ry+15);
-    const bw=72;
-    ctxRoundRect(ctx, leftX+colW-bw-12, ry+10, bw, 22, 4); ctx.fillStyle=r.color; ctx.fill();
-    ctx.font="700 11px 'Barlow', sans-serif"; ctx.fillStyle='#0a0a0a'; ctx.textAlign='center';
-    ctx.fillText(r.texto, leftX+colW-bw/2-12, ry+15); ctx.textAlign='left';
+    if(escImg){ ctx.drawImage(escImg, tx, ry+(rowH2visual-28)/2, 28, 28); tx+=36; }
+    ctx.font="14px 'Barlow', sans-serif"; ctx.fillStyle=TXT2;
+    ctx.fillText(`Fecha ${p.fecha} vs ${NOMBRE_POR_SABADOGOL[p.rivalDe]||p.rivalDe}`, tx, ry+rowH2visual/2-7);
+    ctx.font="700 17px 'Barlow', sans-serif"; ctx.fillStyle=TXT;
+    ctx.fillText(`${p.gf}-${p.gc}`, leftX+colW-170, ry+rowH2visual/2-8);
+    const bw=80;
+    ctxRoundRect(ctx, leftX+colW-bw-14, ry+(rowH2visual-26)/2, bw, 26, 5); ctx.fillStyle=r.color; ctx.fill();
+    ctx.font="700 12px 'Barlow', sans-serif"; ctx.fillStyle='#0a0a0a'; ctx.textAlign='center';
+    ctx.fillText(r.texto, leftX+colW-bw/2-14, ry+rowH2visual/2-6); ctx.textAlign='left';
     ry+=rowH2;
   });
 
-  const cardH=ry-y-8;
-  ctxRoundRect(ctx, rightX, y, colW, cardH, 10);
+  const cardH=ry-y-(rowH2-rowH2visual);
+  ctxRoundRect(ctx, rightX, y, colW, cardH, 12);
   ctx.fillStyle=SURF; ctx.fill(); ctx.strokeStyle=BORDER; ctx.lineWidth=1; ctx.stroke();
-  let cy=y+18;
-  ctx.font="700 12px 'Barlow', sans-serif"; ctx.fillStyle=GOLD;
-  ctx.fillText(reciente ? `PARTIDO MÁS RECIENTE · FECHA ${reciente.fecha}` : 'PARTIDO MÁS RECIENTE', rightX+16, cy);
-  cy+=26;
+  let cy=y+20;
+  ctx.font="700 13px 'Barlow', sans-serif"; ctx.fillStyle=GOLD;
+  ctx.fillText(reciente ? `PARTIDO MÁS RECIENTE · FECHA ${reciente.fecha}` : 'PARTIDO MÁS RECIENTE', rightX+18, cy);
+  cy+=30;
   if(reciente){
-    let tx=rightX+16;
-    if(escudoReciente){ ctx.drawImage(escudoReciente, tx, cy, 26, 26); tx+=32; }
-    ctx.font="14px 'Barlow', sans-serif"; ctx.fillStyle=TXT2;
-    ctx.fillText('vs '+(NOMBRE_POR_SABADOGOL[reciente.rivalDe]||reciente.rivalDe), tx, cy+5);
-    cy+=42;
-    ctx.font="700 34px 'Barlow Condensed', sans-serif"; ctx.fillStyle=WHITE;
-    ctx.fillText(`${reciente.gf} - ${reciente.gc}`, rightX+16, cy);
-    cy+=50;
+    let tx=rightX+18;
+    if(escudoReciente){ ctx.drawImage(escudoReciente, tx, cy, 30, 30); tx+=38; }
+    ctx.font="15px 'Barlow', sans-serif"; ctx.fillStyle=TXT2;
+    ctx.fillText('vs '+(NOMBRE_POR_SABADOGOL[reciente.rivalDe]||reciente.rivalDe), tx, cy+7);
+    cy+=48;
+    ctx.font="700 40px 'Barlow Condensed', sans-serif"; ctx.fillStyle=WHITE;
+    ctx.fillText(`${reciente.gf} - ${reciente.gc}`, rightX+18, cy);
+    cy+=58;
     const r=resultadoLabel(reciente.gf,reciente.gc);
     const label=`${r.texto} · DE ${reciente.cond==='L'?'LOCAL':'VISITANTE'}`;
-    ctx.font="700 11px 'Barlow', sans-serif";
-    const bw2=ctx.measureText(label).width+18;
-    ctxRoundRect(ctx, rightX+16, cy, bw2, 24, 4); ctx.fillStyle=r.color; ctx.fill();
-    ctx.fillStyle='#0a0a0a'; ctx.fillText(label, rightX+25, cy+7);
+    ctx.font="700 12px 'Barlow', sans-serif";
+    const bw2=ctx.measureText(label).width+20;
+    ctxRoundRect(ctx, rightX+18, cy, bw2, 26, 5); ctx.fillStyle=r.color; ctx.fill();
+    ctx.fillStyle='#0a0a0a'; ctx.fillText(label, rightX+28, cy+8);
   } else {
-    ctx.font="13px 'Barlow', sans-serif"; ctx.fillStyle=MUTED;
-    ctx.fillText('Sin partidos registrados todavía.', rightX+16, cy);
+    ctx.font="14px 'Barlow', sans-serif"; ctx.fillStyle=MUTED;
+    ctx.fillText('Sin partidos registrados todavía.', rightX+18, cy);
   }
 
-  y=ry+40;
+  y=ry+42;
   ctx.strokeStyle=BORDER; ctx.lineWidth=1; ctx.setLineDash([4,4]);
   ctx.beginPath(); ctx.moveTo(pad,y); ctx.lineTo(W-pad,y); ctx.stroke(); ctx.setLineDash([]);
 
