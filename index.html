@@ -313,8 +313,7 @@ table tr:hover td{background:rgba(26,58,143,0.15);}
 .link-btn.empty{opacity:0.2;pointer-events:none;}
 
 /* ── GOLEADORES ─────────────────────────────────────── */
-.goleadores-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));
-  gap:14px;margin-bottom:24px;}
+.goleadores-grid{display:grid;grid-template-columns:1fr;margin-bottom:24px;}
 .goleadores-card{background:linear-gradient(135deg,var(--surface2),var(--surface));
   border:1px solid var(--border);border-radius:12px;overflow:hidden;}
 .goleadores-card .gc-header{
@@ -323,17 +322,25 @@ table tr:hover td{background:rgba(26,58,143,0.15);}
 .goleadores-card .gc-header h3{font-family:'Bebas Neue',sans-serif;font-size:15px;
   letter-spacing:2px;color:white;}
 .goleadores-card .gc-body{padding:0;}
-.gol-row{display:flex;align-items:center;gap:10px;padding:8px 14px;
-  border-bottom:1px solid rgba(26,45,90,0.4);transition:background .15s;}
+.gol-item{border-bottom:1px solid rgba(26,45,90,0.4);}
+.gol-item:last-child{border-bottom:none;}
+.gol-row{display:flex;align-items:center;gap:14px;padding:12px 16px;cursor:pointer;transition:background .15s;}
 .gol-row:hover{background:rgba(26,58,143,0.15);}
-.gol-row:last-child{border-bottom:none;}
-.gol-rank{font-family:'Bebas Neue',sans-serif;font-size:18px;color:var(--muted);
-  width:24px;text-align:center;flex-shrink:0;}
+.gol-rank{font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--muted);
+  width:26px;text-align:center;flex-shrink:0;}
 .gol-rank.gold{color:var(--gold2);}
 .gol-rank.silver{color:#94a3b8;}
 .gol-rank.bronze{color:#b45309;}
-.gol-name{flex:1;font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:13px;}
-.gol-count{font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--gold2);}
+.gol-name{flex:1;font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:17px;}
+.gol-count{font-family:'Bebas Neue',sans-serif;font-size:26px;color:var(--gold2);}
+.gol-toggle{font-size:12px;color:var(--muted);transition:transform .15s;flex-shrink:0;}
+.gol-item.expanded .gol-toggle{transform:rotate(180deg);}
+.gol-detail{display:none;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));
+  gap:8px;padding:2px 16px 14px 56px;}
+.gol-item.expanded .gol-detail{display:grid;}
+.gol-detail-item{font-family:'Barlow Condensed',sans-serif;font-size:14px;color:var(--text2);
+  background:rgba(255,255,255,0.04);border-radius:6px;padding:7px 10px;text-align:center;}
+.gol-detail-item.penal{color:#f0a0a8;background:rgba(192,21,42,0.15);}
 .gol-add-row{padding:8px 14px;display:flex;gap:6px;align-items:center;
   border-top:1px solid var(--border);}
 .gol-input{flex:1;background:rgba(5,8,15,0.7);border:1px solid var(--border2);
@@ -2580,6 +2587,20 @@ function calcConfiabilidad(){
           if(!recordatoriosOmitidos[dismissKey]) recordatorios.push({cat, fecha, key, label, dismissKey});
         }
       });
+      // Partido ya jugado sin informe de COMET cargado (mismo criterio de
+      // "ya pasó al menos una fecha más" que los links de arriba, para no
+      // avisar apenas se termina de jugar).
+      if(hayFechaPosteriorJugada && !partidos[cat]?.[fecha]){
+        const dismissKey=`${cat}_${fecha}_comet`;
+        if(!recordatoriosOmitidos[dismissKey]) recordatorios.push({cat, fecha, key:'comet', label:'Informe de COMET', dismissKey});
+      }
+      // Partido ya jugado sin planilla de citación cargada -- mismo
+      // criterio que ya usa la columna "CITACIONES" de RESULTADOS
+      // (matchData[cat][fecha].titulares) para decidir si hay algo cargado.
+      if(hayFechaPosteriorJugada && !(matchData[cat]?.[fecha]?.titulares?.length)){
+        const dismissKey=`${cat}_${fecha}_cit`;
+        if(!recordatoriosOmitidos[dismissKey]) recordatorios.push({cat, fecha, key:'cit', label:'Planilla de citación', dismissKey});
+      }
     });
   });
 
@@ -2797,7 +2818,7 @@ function renderConfiabilidad(containerId){
 
     if(recordatorios.length){
       html+=`<div style="font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:1px;color:var(--muted);margin:14px 0 6px">
-        RECORDATORIOS · links sin cargar (${recordatorios.length})</div>`;
+        RECORDATORIOS · datos sin cargar (${recordatorios.length})</div>`;
       html+=recordatorios.map(m=>rowRecordatorio(
         `<b style="color:${CAT_COLORS[m.cat]}">${m.cat} F${m.fecha}</b> · ${esc(m.label)}`,
         m.dismissKey
@@ -4413,13 +4434,21 @@ function renderGoleadores(cat){
   } else {
     sorted.forEach((g,i)=>{
       const rankClass=i===0?'gold':i===1?'silver':i===2?'bronze':'';
-      rowsHTML+=`<div class="gol-row">
-        <div class="gol-rank ${rankClass}">${i+1}</div>
-        <div class="gol-name">${esc(g.name)}<br><span style="font-size:10px;color:var(--muted);font-weight:400">${g.fechas.join(', ')}</span></div>
-        <div class="gol-count">${g.goals}</div>
-        ${canEdit?`<button class="btn-del-gol" onclick="delGoleador('${cat}','${esc(g.name)}')"
-          style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:14px;padding:2px 6px;"
-          title="Eliminar">✕</button>`:''}
+      const detalleHTML=g.fechas.map(f=>{
+        const penal=/ P\)$/.test(f);
+        return `<div class="gol-detail-item${penal?' penal':''}">${esc(f)}</div>`;
+      }).join('');
+      rowsHTML+=`<div class="gol-item">
+        <div class="gol-row" onclick="this.closest('.gol-item').classList.toggle('expanded')">
+          <div class="gol-rank ${rankClass}">${i+1}</div>
+          <div class="gol-name">${esc(g.name)}</div>
+          <div class="gol-count">${g.goals}</div>
+          <div class="gol-toggle">▾</div>
+          ${canEdit?`<button class="btn-del-gol" onclick="event.stopPropagation();delGoleador('${cat}','${esc(g.name)}')"
+            style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:14px;padding:2px 6px;"
+            title="Eliminar">✕</button>`:''}
+        </div>
+        <div class="gol-detail">${detalleHTML}</div>
       </div>`;
     });
   }
@@ -5857,14 +5886,22 @@ function slugArchivo(s){
     .replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'');
 }
 
+// Cacheada por src -- la vista previa en vivo de la placa post partido
+// (ver actualizarPlacaPostPreview) llama a esto en cada movimiento de
+// slider, no tiene sentido volver a bajar/decodificar la misma imagen
+// cada vez.
+const cargarImagenCache = {};
 function cargarImagen(src){
-  return new Promise(resolve=>{
-    if(!src){ resolve(null); return; }
+  if(!src) return Promise.resolve(null);
+  if(cargarImagenCache[src]) return cargarImagenCache[src];
+  const p = new Promise(resolve=>{
     const img=new Image();
     img.onload=()=>resolve(img);
     img.onerror=()=>resolve(null);
     img.src=src;
   });
+  cargarImagenCache[src] = p;
+  return p;
 }
 
 function ctxRoundRect(ctx,x,y,w,h,r){
@@ -5882,7 +5919,17 @@ function ctxRoundRect(ctx,x,y,w,h,r){
 // así que centrar por el tamaño del archivo entero no alinea los centros
 // visuales de dos escudos uno al lado del otro. Se usa para eso (ver
 // dibujarPlacaPostPartido).
+// Cacheada por src -- escanear millones de píxeles en cada movimiento de
+// slider de la vista previa en vivo lo hacía sentir colgado (con el escudo
+// de Tigre, 2322x2567px, tardaba más de un segundo por llamada).
+const bordesVisiblesCache = {};
 function bordesVisibles(img){
+  if(bordesVisiblesCache[img.src]) return bordesVisiblesCache[img.src];
+  const r = _calcularBordesVisibles(img);
+  bordesVisiblesCache[img.src] = r;
+  return r;
+}
+function _calcularBordesVisibles(img){
   const c=document.createElement('canvas');
   c.width=img.naturalWidth; c.height=img.naturalHeight;
   const cctx=c.getContext('2d');
@@ -6168,31 +6215,42 @@ async function renderPlacaPortadaInfo(cat){
       return;
     }
     const opciones = jugadas.map(r=>`<option value="${r.f}">Fecha ${r.f} · ${r.r}</option>`).join('');
+    const onSlide = `actualizarPlacaPostPreview('${cat}')`;
     const sliderRow = (id, label, val, min, max, unit) => `<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
       <span style="font-size:11px;color:var(--muted);letter-spacing:1px;width:110px">${label}</span>
-      <input type="range" id="${id}" min="${min}" max="${max}" value="${val}" oninput="document.getElementById('${id}-val').textContent=this.value+'${unit}'" style="width:160px">
+      <input type="range" id="${id}" min="${min}" max="${max}" value="${val}"
+        oninput="document.getElementById('${id}-val').textContent=this.value+'${unit}';${onSlide}" style="width:160px">
       <span id="${id}-val" style="font-size:12px;color:var(--gold2);width:36px">${val}${unit}</span>
     </div>`;
-    el.innerHTML = toggleHTML+`
-      <select id="placa-post-fecha-${cat}" style="background:var(--surface2);border:1px solid var(--border2);
-        color:var(--text);border-radius:6px;padding:8px 10px;font-family:'Barlow Condensed',sans-serif;
-        font-size:14px;outline:none;margin-bottom:10px">${opciones}</select>
-      <div style="margin-bottom:6px">
-        <div style="font-size:10px;color:var(--muted);letter-spacing:1px;margin-bottom:4px">ESCUDO TIGRE</div>
-        ${sliderRow('placa-post-escala-tigre-'+cat, 'TAMAÑO', 100, 50, 180, '%')}
-        ${sliderRow('placa-post-x-tigre-'+cat, 'HORIZONTAL', 0, -40, 40, 'px')}
-        ${sliderRow('placa-post-y-tigre-'+cat, 'VERTICAL', 0, -40, 40, 'px')}
-        <div style="font-size:10px;color:var(--muted);letter-spacing:1px;margin:8px 0 4px">ESCUDO RIVAL</div>
-        ${sliderRow('placa-post-escala-rival-'+cat, 'TAMAÑO', 100, 50, 180, '%')}
-        ${sliderRow('placa-post-x-rival-'+cat, 'HORIZONTAL', 0, -40, 40, 'px')}
-        ${sliderRow('placa-post-y-rival-'+cat, 'VERTICAL', 0, -40, 40, 'px')}
+    el.innerHTML = `<div style="display:flex;gap:24px;flex-wrap:wrap;align-items:flex-start">
+      <div style="min-width:280px">
+        ${toggleHTML}
+        <select id="placa-post-fecha-${cat}" onchange="${onSlide}" style="background:var(--surface2);border:1px solid var(--border2);
+          color:var(--text);border-radius:6px;padding:8px 10px;font-family:'Barlow Condensed',sans-serif;
+          font-size:14px;outline:none;margin-bottom:10px">${opciones}</select>
+        <div style="margin-bottom:6px">
+          <div style="font-size:10px;color:var(--muted);letter-spacing:1px;margin-bottom:4px">ESCUDO TIGRE</div>
+          ${sliderRow('placa-post-escala-tigre-'+cat, 'TAMAÑO', 100, 50, 180, '%')}
+          ${sliderRow('placa-post-x-tigre-'+cat, 'HORIZONTAL', 0, -40, 40, 'px')}
+          ${sliderRow('placa-post-y-tigre-'+cat, 'VERTICAL', 0, -40, 40, 'px')}
+          <div style="font-size:10px;color:var(--muted);letter-spacing:1px;margin:8px 0 4px">ESCUDO RIVAL</div>
+          ${sliderRow('placa-post-escala-rival-'+cat, 'TAMAÑO', 100, 50, 180, '%')}
+          ${sliderRow('placa-post-x-rival-'+cat, 'HORIZONTAL', 0, -40, 40, 'px')}
+          ${sliderRow('placa-post-y-rival-'+cat, 'VERTICAL', 0, -40, 40, 'px')}
+        </div>
+        <div>
+          <button onclick="generarPlacaPostPartido('${cat}')" id="btn-placa-post" style="
+            background:rgba(240,192,64,0.15);border:1px solid var(--border2);color:var(--gold2);
+            border-radius:6px;padding:9px 16px;font-family:'Barlow Condensed',sans-serif;font-size:13px;
+            letter-spacing:1px;font-weight:700;cursor:pointer">⬇ GENERAR POST PARTIDO</button>
+        </div>
       </div>
-      <div>
-        <button onclick="generarPlacaPostPartido('${cat}')" id="btn-placa-post" style="
-          background:rgba(240,192,64,0.15);border:1px solid var(--border2);color:var(--gold2);
-          border-radius:6px;padding:9px 16px;font-family:'Barlow Condensed',sans-serif;font-size:13px;
-          letter-spacing:1px;font-weight:700;cursor:pointer">⬇ GENERAR POST PARTIDO</button>
-      </div>`;
+      <div style="flex:1;min-width:320px;max-width:640px">
+        <div style="font-size:10px;color:var(--muted);letter-spacing:1px;margin-bottom:6px">VISTA PREVIA</div>
+        <img id="placa-post-preview-${cat}" style="width:100%;border-radius:8px;border:1px solid var(--border2);display:block;background:#111e38">
+      </div>
+    </div>`;
+    actualizarPlacaPostPreview(cat);
     return;
   }
 
@@ -6211,27 +6269,55 @@ async function renderPlacaPortadaInfo(cat){
     </div>`;
 }
 
-async function generarPlacaPostPartido(cat){
+// Lee fecha+sliders del panel "post partido" de una categoría. Se usa tanto
+// para generar el PNG final como para la vista previa en vivo (mismo dato,
+// un solo lugar que lo arma).
+function leerControlesPlacaPost(cat){
   const sel = document.getElementById(`placa-post-fecha-${cat}`);
+  if(!sel) return null;
   const fecha = parseInt(sel.value);
   const entry = RIVALS.find(r=>r.f===fecha);
   const info = entry && RIVAL_INFO[entry.r];
-  if(!info){ alert('Todavía no tengo cargado el escudo/equivalencia de "'+(entry?entry.r:fecha)+'".'); return; }
+  if(!info) return null;
   const num = (id, def) => parseInt(document.getElementById(id+cat)?.value ?? def) || def;
-  const escalaTigre = num('placa-post-escala-tigre-', 100)/100;
-  const escalaRival = num('placa-post-escala-rival-', 100)/100;
-  const offsetXTigre = num('placa-post-x-tigre-', 0);
-  const offsetYTigre = num('placa-post-y-tigre-', 0);
-  const offsetXRival = num('placa-post-x-rival-', 0);
-  const offsetYRival = num('placa-post-y-rival-', 0);
+  return {
+    fecha, info, entry,
+    escalaTigre: num('placa-post-escala-tigre-', 100)/100,
+    escalaRival: num('placa-post-escala-rival-', 100)/100,
+    offsetXTigre: num('placa-post-x-tigre-', 0),
+    offsetYTigre: num('placa-post-y-tigre-', 0),
+    offsetXRival: num('placa-post-x-rival-', 0),
+    offsetYRival: num('placa-post-y-rival-', 0),
+  };
+}
+
+// Debounced -- se dispara en cada movimiento de slider, no hace falta
+// redibujar en cada pixel mientras se arrastra.
+const placaPostPreviewTimers = {};
+function actualizarPlacaPostPreview(cat){
+  clearTimeout(placaPostPreviewTimers[cat]);
+  placaPostPreviewTimers[cat] = setTimeout(async ()=>{
+    const params = leerControlesPlacaPost(cat);
+    const img = document.getElementById(`placa-post-preview-${cat}`);
+    if(!params || !img) return;
+    const blob = await dibujarPlacaPostPartido({...params, scale:1});
+    if(img.dataset.prevUrl) URL.revokeObjectURL(img.dataset.prevUrl);
+    const url = URL.createObjectURL(blob);
+    img.src = url;
+    img.dataset.prevUrl = url;
+  }, 200);
+}
+
+async function generarPlacaPostPartido(cat){
+  const params = leerControlesPlacaPost(cat);
+  if(!params){ alert('Todavía no tengo cargado el escudo/equivalencia de ese rival.'); return; }
   const btn = document.getElementById('btn-placa-post');
   if(btn) btn.disabled = true;
   try{
-    const blob = await dibujarPlacaPostPartido({fecha, info, escalaTigre, escalaRival,
-      offsetXTigre, offsetYTigre, offsetXRival, offsetYRival});
+    const blob = await dibujarPlacaPostPartido(params);
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
-    a.download = `placa-post-partido-${cat}-F${fecha}-${slugArchivo(entry.r)}.png`;
+    a.download = `placa-post-partido-${cat}-F${params.fecha}-${slugArchivo(params.entry.r)}.png`;
     a.click();
   } finally {
     if(btn) btn.disabled = false;
@@ -6242,14 +6328,19 @@ async function generarPlacaPostPartido(cat){
 // Tigre y del rival de esa fecha arriba a la derecha ("TIGRE vs RIVAL"), y
 // título + subtítulo centrados con el mismo criterio que la placa de fase.
 async function dibujarPlacaPostPartido({fecha, info, escalaTigre, escalaRival,
-  offsetXTigre, offsetYTigre, offsetXRival, offsetYRival}){
+  offsetXTigre, offsetYTigre, offsetXRival, offsetYRival, scale}){
   escalaTigre = escalaTigre || 1;
   escalaRival = escalaRival || 1;
   offsetXTigre = offsetXTigre || 0; offsetYTigre = offsetYTigre || 0;
   offsetXRival = offsetXRival || 0; offsetYRival = offsetYRival || 0;
   if(document.fonts && document.fonts.ready) await document.fonts.ready;
   const BG='#111e38', RED='#c0152a', WHITE='#ffffff', TXT2='#a8c0e8';
-  const W=1280, H=720, pad=60, SCALE=3;
+  // La vista previa en vivo pide scale más bajo (se ve chica en pantalla
+  // igual) -- codificar el PNG final a 3840x2160 tarda como un segundo,
+  // sea cual sea el contenido, y en la vista previa eso se nota en cada
+  // movimiento de slider. La descarga final sigue pidiendo la calidad
+  // completa (scale=3, el default).
+  const W=1280, H=720, pad=60, SCALE=scale||3;
   const [escudoTigre, escudoRival, escudoLiga] = await Promise.all([
     cargarImagen(document.getElementById('escudoImg')?.src),
     cargarImagen('escudos/'+info.escudo),
