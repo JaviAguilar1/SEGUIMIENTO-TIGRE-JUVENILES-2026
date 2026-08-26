@@ -1,5 +1,5 @@
 {
-  "actualizado": "2026-08-26 11:48",
+  "actualizado": "2026-08-26 13:18",
   "fuente": "ligaprofesional.ar (oficial)",
   "fuente_fixture": "sabadogol.com.ar",
   "categorias": {
@@ -555,8 +555,8 @@
         "pe": 5,
         "pp": 6,
         "gf": 39,
-        "gc": 29,
-        "dif": 10
+        "gc": 30,
+        "dif": 9
       },
       {
         "pos": 11,
@@ -854,9 +854,9 @@
         "pg": 2,
         "pe": 6,
         "pp": 14,
-        "gf": 18,
+        "gf": 19,
         "gc": 53,
-        "dif": -35
+        "dif": -34
       },
       {
         "pos": 36,
