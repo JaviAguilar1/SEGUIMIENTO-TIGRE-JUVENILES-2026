@@ -4428,12 +4428,9 @@ function renderGoleadores(cat){
       </div>
       <div class="gc-body">${rowsHTML}</div>
       ${canEdit && CONFIABILIDAD_CATS.includes(cat) ? `<div class="gol-add-row" style="border-top:1px solid var(--border,#1a2d5a);padding-top:10px;margin-top:6px">
-        <label for="comet-upload-${cat}" style="flex:1;cursor:pointer;font-size:11px;color:var(--gold2,#f0c040);font-family:'Barlow Condensed',sans-serif;letter-spacing:1px">
-          📄 CARGAR INFORME DE COMET (PDF)
-        </label>
         <input type="file" id="comet-upload-${cat}" accept="application/pdf" style="display:none"
           onchange="subirInformeComet(this.files[0], '${cat}', this)">
-        <button class="btn-add-gol" onclick="document.getElementById('comet-upload-${cat}').click()">⬆ SUBIR PDF</button>
+        <button class="btn-add-gol" style="flex:1" onclick="document.getElementById('comet-upload-${cat}').click()">📄 CARGAR INFORME DE COMET (PDF)</button>
       </div>`:''}
       ${canEdit?`<div class="gol-add-row">
         <input class="gol-input" id="gol-name-${cat}" placeholder="Nombre del jugador…" autocomplete="off">
@@ -5708,13 +5705,19 @@ function pdfSectionGoleadores(dataCat){
     <table><thead><tr><th>#</th><th>Jugador</th><th>Goles</th></tr></thead><tbody>${rows}</tbody></table>`;
 }
 
-function pdfSectionBloque(calcFn, periodsCat){
+// cats/isReserva: mismo criterio que buildResumenPorBloqueHTML en pantalla
+// -- RESERVA (o si no se pasa cats) se queda con el formato simple de
+// siempre; el resto suma Local/Visitante/% (antes el PDF se había quedado
+// con el formato viejo, de antes de esa fusión -- bug reportado por Javi).
+function pdfSectionBloque(calcFn, periodsCat, cats, isReserva){
   const { filas, tot } = calcBloqueFilas(calcFn, periodsCat);
-  let rows='';
   if(!filas.length){
-    rows=`<tr><td colspan="9" style="color:#999;padding:16px;text-align:center">Todavía no se jugaron partidos</td></tr>`;
-  } else {
-    rows=filas.map(f=>{
+    return `<div class="section-title">Rendimiento por bloque de fechas</div>
+      <table><thead><tr><th>Bloque</th><th>Pts</th><th>PJ</th><th>PG</th><th>PE</th><th>PP</th><th>GF</th><th>GC</th><th>DG</th></tr></thead>
+      <tbody><tr><td colspan="9" style="color:#999;padding:16px;text-align:center">Todavía no se jugaron partidos</td></tr></tbody></table>`;
+  }
+  if(isReserva || !cats){
+    let rows=filas.map(f=>{
       const dgC=f.s.dg>0?'#16a34a':f.s.dg<0?'#dc2626':'#888';
       return `<tr><td>${esc(f.label)}</td><td style="font-weight:700">${f.s.pts}</td><td>${f.s.pj}</td>
         <td style="color:#16a34a">${f.s.pg}</td><td style="color:#ca8a04">${f.s.pe}</td><td style="color:#dc2626">${f.s.pp}</td>
@@ -5726,10 +5729,30 @@ function pdfSectionBloque(calcFn, periodsCat){
       <td style="color:#16a34a">${tot.pg}</td><td style="color:#ca8a04">${tot.pe}</td><td style="color:#dc2626">${tot.pp}</td>
       <td style="color:#2563eb">${tot.gf}</td><td style="color:#dc2626">${tot.gc}</td>
       <td style="color:${tDgC};font-weight:700">${tot.dg>0?'+':''}${tot.dg}</td></tr>`;
+    return `<div class="section-title">Rendimiento por bloque de fechas</div>
+      <table><thead><tr><th>Bloque</th><th>Pts</th><th>PJ</th><th>PG</th><th>PE</th><th>PP</th><th>GF</th><th>GC</th><th>DG</th></tr></thead>
+      <tbody>${rows}</tbody></table>`;
   }
+  const lvvCell=x=>`<td style="text-align:center"><div style="font-weight:700">${x.pts}</div><div style="font-size:9px;color:#888">${x.pg}-${x.pe}-${x.pp}</div></td>`;
+  const buildRow=(label, s, from, to, esTotal)=>{
+    if(s.pj===0) return '';
+    const dgC=s.dg>0?'#16a34a':s.dg<0?'#dc2626':'#888';
+    const pctW=Math.round(s.pg/s.pj*100)+'%';
+    const lvv=lvvSplit(cats, from, to);
+    return `<tr${esTotal?' class="tigre-row"':''}><td>${esc(label)}</td>
+      <td style="font-weight:700">${s.pts}</td><td>${s.pj}</td>
+      <td style="color:#16a34a">${s.pg}</td><td style="color:#ca8a04">${s.pe}</td><td style="color:#dc2626">${s.pp}</td>
+      <td style="color:#2563eb">${s.gf}</td><td style="color:#dc2626">${s.gc}</td>
+      <td style="color:${dgC};font-weight:700">${s.dg>0?'+':''}${s.dg}</td>
+      <td>${pctW}</td>${lvvCell(lvv.L)}${lvvCell(lvv.V)}</tr>`;
+  };
+  const rowsHTML=filas.map(f=>buildRow(f.label, f.s, f.from, f.to, false)).join('');
+  const isReservaPeriod=periodsCat==='RESERVA'||periodsCat==='RESERVA_S2';
+  const totRow=buildRow('TOTAL', tot, 1, isReservaPeriod?18:35, true);
   return `<div class="section-title">Rendimiento por bloque de fechas</div>
-    <table><thead><tr><th>Bloque</th><th>Pts</th><th>PJ</th><th>PG</th><th>PE</th><th>PP</th><th>GF</th><th>GC</th><th>DG</th></tr></thead>
-    <tbody>${rows}</tbody></table>`;
+    <table><thead><tr><th>Bloque</th><th>Pts</th><th>PJ</th><th>PG</th><th>PE</th><th>PP</th><th>GF</th><th>GC</th><th>DG</th>
+    <th>%</th><th>Local</th><th>Visit.</th></tr></thead>
+    <tbody>${rowsHTML}${totRow}</tbody></table>`;
 }
 
 function pdfSectionJugadores(cat){
@@ -6324,7 +6347,7 @@ async function generarPDFCategoria(cat){
   if(checked.includes('resultados')) sections+=pdfSectionResultados(cat, dataCat, isReserva, rivalList);
   if(checked.includes('tablalpf'))   sections+=await pdfSectionTablaLPF(cat, isReserva);
   if(checked.includes('goleadores')) sections+=pdfSectionGoleadores(dataCat);
-  if(checked.includes('bloque'))     sections+=pdfSectionBloque((from,to)=>calcStats(dataCat,from,to), dataCat);
+  if(checked.includes('bloque'))     sections+=pdfSectionBloque((from,to)=>calcStats(dataCat,from,to), dataCat, [cat], isReserva);
   if(checked.includes('jugadores'))  sections+=pdfSectionJugadores(cat);
 
   abrirVentanaPDF(`${cat} — Estadísticas`, sections);
@@ -6442,7 +6465,7 @@ async function generarPDFGeneral(){
       <table><thead><tr><th>Cat</th><th>Pts</th><th>PJ</th><th>PG</th><th>PE</th><th>PP</th>
       <th>GF</th><th>GC</th><th>DG</th><th>%</th></tr></thead><tbody>${trows}</tbody></table>`;
   }
-  if(checked.includes('rendimiento'))   sections+=pdfSectionBloque(calcStatsAll, '4TA');
+  if(checked.includes('rendimiento'))   sections+=pdfSectionBloque(calcStatsAll, '4TA', GENERAL_CATS, false);
   if(checked.includes('topgoleadores')) sections+=pdfSectionTopGoleadores();
   if(checked.includes('tablageneral'))  sections+=await pdfSectionTablaGeneral();
 
