@@ -1,5 +1,5 @@
 {
-  "actualizado": "2026-08-27 00:56",
+  "actualizado": "2026-08-27 05:43",
   "fuente": "ligaprofesional.ar (oficial)",
   "fuente_fixture": "sabadogol.com.ar",
   "categorias": {
@@ -18742,7 +18742,8 @@
         "pelota_parada_url": "",
         "gps_url": "",
         "charla_dt": "",
-        "arenga_jugadores_url": ""
+        "arenga_jugadores_url": "",
+        "sistema_tactico": "1-3-5-2"
       },
       "21": {
         "gf": 2,
@@ -18756,7 +18757,8 @@
         "pelota_parada_url": "",
         "gps_url": "",
         "charla_dt": "",
-        "arenga_jugadores_url": ""
+        "arenga_jugadores_url": "",
+        "sistema_tactico": "1-4-1-3-2"
       },
       "20": {
         "gf": 2,
@@ -18770,7 +18772,8 @@
         "pelota_parada_url": "",
         "gps_url": "",
         "charla_dt": "",
-        "arenga_jugadores_url": ""
+        "arenga_jugadores_url": "",
+        "sistema_tactico": "1-4-1-3-2"
       },
       "19": {
         "gf": 2,
@@ -18784,7 +18787,8 @@
         "pelota_parada_url": "",
         "gps_url": "",
         "charla_dt": "",
-        "arenga_jugadores_url": ""
+        "arenga_jugadores_url": "",
+        "sistema_tactico": "1-3-5-2"
       },
       "18": {
         "gf": 0,
@@ -18798,7 +18802,8 @@
         "pelota_parada_url": "",
         "gps_url": "",
         "charla_dt": "",
-        "arenga_jugadores_url": ""
+        "arenga_jugadores_url": "",
+        "sistema_tactico": "1-3-5-2"
       },
       "17": {
         "gf": 5,
@@ -18812,7 +18817,8 @@
         "pelota_parada_url": "",
         "gps_url": "",
         "charla_dt": "",
-        "arenga_jugadores_url": ""
+        "arenga_jugadores_url": "",
+        "sistema_tactico": "1-4-1-3-2"
       },
       "16": {
         "gf": 1,
@@ -18826,7 +18832,8 @@
         "pelota_parada_url": "",
         "gps_url": "",
         "charla_dt": "",
-        "arenga_jugadores_url": ""
+        "arenga_jugadores_url": "",
+        "sistema_tactico": "1-4-1-4-1"
       },
       "15": {
         "gf": 1,
@@ -18840,7 +18847,8 @@
         "pelota_parada_url": "",
         "gps_url": "",
         "charla_dt": "",
-        "arenga_jugadores_url": ""
+        "arenga_jugadores_url": "",
+        "sistema_tactico": "1-3-5-2"
       },
       "14": {
         "gf": 0,
@@ -18854,7 +18862,8 @@
         "pelota_parada_url": "",
         "gps_url": "",
         "charla_dt": "",
-        "arenga_jugadores_url": ""
+        "arenga_jugadores_url": "",
+        "sistema_tactico": "1-4-4-2"
       },
       "13": {
         "gf": 0,
@@ -18868,7 +18877,8 @@
         "pelota_parada_url": "",
         "gps_url": "",
         "charla_dt": "",
-        "arenga_jugadores_url": ""
+        "arenga_jugadores_url": "",
+        "sistema_tactico": "1-4-4-2"
       },
       "12": {
         "gf": 3,
@@ -18882,7 +18892,8 @@
         "pelota_parada_url": "",
         "gps_url": "",
         "charla_dt": "",
-        "arenga_jugadores_url": ""
+        "arenga_jugadores_url": "",
+        "sistema_tactico": "1-3-4-1-2"
       },
       "11": {
         "gf": 2,
@@ -18896,7 +18907,8 @@
         "pelota_parada_url": "",
         "gps_url": "",
         "charla_dt": "",
-        "arenga_jugadores_url": ""
+        "arenga_jugadores_url": "",
+        "sistema_tactico": "1-4-4-2"
       },
       "10": {
         "gf": 2,
@@ -18910,7 +18922,8 @@
         "pelota_parada_url": "",
         "gps_url": "",
         "charla_dt": "",
-        "arenga_jugadores_url": ""
+        "arenga_jugadores_url": "",
+        "sistema_tactico": "1-4-4-1-1"
       },
       "9": {
         "gf": 2,
@@ -18924,7 +18937,8 @@
         "pelota_parada_url": "",
         "gps_url": "",
         "charla_dt": "",
-        "arenga_jugadores_url": ""
+        "arenga_jugadores_url": "",
+        "sistema_tactico": "1-4-4-1-1"
       },
       "8": {
         "gf": 0,
@@ -18938,7 +18952,8 @@
         "pelota_parada_url": "",
         "gps_url": "",
         "charla_dt": "",
-        "arenga_jugadores_url": ""
+        "arenga_jugadores_url": "",
+        "sistema_tactico": "1-3-4-1-2"
       },
       "7": {
         "gf": 0,
@@ -18952,7 +18967,8 @@
         "pelota_parada_url": "",
         "gps_url": "",
         "charla_dt": "",
-        "arenga_jugadores_url": ""
+        "arenga_jugadores_url": "",
+        "sistema_tactico": "1-4-4-1-1"
       },
       "6": {
         "gf": 4,
@@ -18966,7 +18982,8 @@
         "pelota_parada_url": "",
         "gps_url": "",
         "charla_dt": "",
-        "arenga_jugadores_url": ""
+        "arenga_jugadores_url": "",
+        "sistema_tactico": "1-4-1-3-2"
       },
       "5": {
         "gf": 2,
@@ -18980,7 +18997,8 @@
         "pelota_parada_url": "",
         "gps_url": "",
         "charla_dt": "",
-        "arenga_jugadores_url": ""
+        "arenga_jugadores_url": "",
+        "sistema_tactico": "1-4-1-4-1"
       },
       "4": {
         "gf": 2,
@@ -18994,7 +19012,8 @@
         "pelota_parada_url": "",
         "gps_url": "",
         "charla_dt": "",
-        "arenga_jugadores_url": ""
+        "arenga_jugadores_url": "",
+        "sistema_tactico": "1-3-5-2"
       },
       "3": {
         "gf": 2,
@@ -19008,7 +19027,8 @@
         "pelota_parada_url": "",
         "gps_url": "",
         "charla_dt": "",
-        "arenga_jugadores_url": ""
+        "arenga_jugadores_url": "",
+        "sistema_tactico": "1-3-5-2"
       },
       "2": {
         "gf": 0,
@@ -19022,7 +19042,8 @@
         "pelota_parada_url": "",
         "gps_url": "",
         "charla_dt": "",
-        "arenga_jugadores_url": ""
+        "arenga_jugadores_url": "",
+        "sistema_tactico": "1-3-5-2"
       },
       "1": {
         "gf": 1,
@@ -19036,7 +19057,8 @@
         "pelota_parada_url": "",
         "gps_url": "",
         "charla_dt": "",
-        "arenga_jugadores_url": ""
+        "arenga_jugadores_url": "",
+        "sistema_tactico": "1-3-5-2"
       }
     },
     "5TA": {
@@ -19052,7 +19074,8 @@
         "pelota_parada_url": "",
         "gps_url": "",
         "charla_dt": "",
-        "arenga_jugadores_url": ""
+        "arenga_jugadores_url": "",
+        "sistema_tactico": "1-3-5-2"
       },
       "21": {
         "gf": 5,
@@ -19066,7 +19089,8 @@
         "pelota_parada_url": "",
         "gps_url": "",
         "charla_dt": "",
-        "arenga_jugadores_url": ""
+        "arenga_jugadores_url": "",
+        "sistema_tactico": "1-3-5-2"
       },
       "20": {
         "gf": 3,
@@ -19080,7 +19104,8 @@
         "pelota_parada_url": "",
         "gps_url": "",
         "charla_dt": "",
-        "arenga_jugadores_url": ""
+        "arenga_jugadores_url": "",
+        "sistema_tactico": "1-3-5-2"
       },
       "19": {
         "gf": 1,
@@ -19094,7 +19119,8 @@
         "pelota_parada_url": "",
         "gps_url": "",
         "charla_dt": "",
-        "arenga_jugadores_url": ""
+        "arenga_jugadores_url": "",
+        "sistema_tactico": "1-3-5-2"
       },
       "18": {
         "gf": 1,
@@ -19108,7 +19134,8 @@
         "pelota_parada_url": "",
         "gps_url": "",
         "charla_dt": "",
-        "arenga_jugadores_url": ""
+        "arenga_jugadores_url": "",
+        "sistema_tactico": "1-4-4-2"
       },
       "17": {
         "gf": 3,
@@ -19122,7 +19149,8 @@
         "pelota_parada_url": "",
         "gps_url": "",
         "charla_dt": "",
-        "arenga_jugadores_url": ""
+        "arenga_jugadores_url": "",
+        "sistema_tactico": "1-3-4-1-2"
       },
       "16": {
         "gf": 0,
@@ -19136,7 +19164,8 @@
         "pelota_parada_url": "",
         "gps_url": "",
         "charla_dt": "",
-        "arenga_jugadores_url": ""
+        "arenga_jugadores_url": "",
+        "sistema_tactico": "1-4-1-4-1"
       },
       "15": {
         "gf": 0,
@@ -19150,7 +19179,8 @@
         "pelota_parada_url": "",
         "gps_url": "",
         "charla_dt": "",
-        "arenga_jugadores_url": ""
+        "arenga_jugadores_url": "",
+        "sistema_tactico": "1-3-5-2"
       },
       "14": {
         "gf": 1,
@@ -19164,7 +19194,8 @@
         "pelota_parada_url": "",
         "gps_url": "",
         "charla_dt": "",
-        "arenga_jugadores_url": ""
+        "arenga_jugadores_url": "",
+        "sistema_tactico": "1-3-5-2"
       },
       "13": {
         "gf": 0,
@@ -19178,7 +19209,8 @@
         "pelota_parada_url": "",
         "gps_url": "",
         "charla_dt": "",
-        "arenga_jugadores_url": ""
+        "arenga_jugadores_url": "",
+        "sistema_tactico": "1-4-1-4-1"
       },
       "12": {
         "gf": 1,
@@ -19192,7 +19224,8 @@
         "pelota_parada_url": "",
         "gps_url": "",
         "charla_dt": "",
-        "arenga_jugadores_url": ""
+        "arenga_jugadores_url": "",
+        "sistema_tactico": "1-4-3-1-2"
       },
       "11": {
         "gf": 2,
@@ -19206,7 +19239,8 @@
         "pelota_parada_url": "",
         "gps_url": "",
         "charla_dt": "",
-        "arenga_jugadores_url": ""
+        "arenga_jugadores_url": "",
+        "sistema_tactico": "1-4-4-2"
       },
       "10": {
         "gf": 2,
@@ -19220,7 +19254,8 @@
         "pelota_parada_url": "",
         "gps_url": "",
         "charla_dt": "",
-        "arenga_jugadores_url": ""
+        "arenga_jugadores_url": "",
+        "sistema_tactico": "1-4-4-2"
       },
       "9": {
         "gf": 2,
@@ -19234,7 +19269,8 @@
         "pelota_parada_url": "",
         "gps_url": "",
         "charla_dt": "",
-        "arenga_jugadores_url": ""
+        "arenga_jugadores_url": "",
+        "sistema_tactico": "1-4-4-2"
       },
       "8": {
         "gf": 2,
@@ -19248,7 +19284,8 @@
         "pelota_parada_url": "",
         "gps_url": "",
         "charla_dt": "",
-        "arenga_jugadores_url": ""
+        "arenga_jugadores_url": "",
+        "sistema_tactico": "1-3-5-2"
       },
       "7": {
         "gf": 1,
@@ -19262,7 +19299,8 @@
         "pelota_parada_url": "",
         "gps_url": "",
         "charla_dt": "",
-        "arenga_jugadores_url": ""
+        "arenga_jugadores_url": "",
+        "sistema_tactico": "1-3-5-2"
       },
       "6": {
         "gf": 4,
@@ -19276,7 +19314,8 @@
         "pelota_parada_url": "",
         "gps_url": "",
         "charla_dt": "",
-        "arenga_jugadores_url": ""
+        "arenga_jugadores_url": "",
+        "sistema_tactico": "1-3-5-2"
       },
       "3": {
         "gf": 0,
@@ -19290,7 +19329,8 @@
         "pelota_parada_url": "",
         "gps_url": "",
         "charla_dt": "",
-        "arenga_jugadores_url": ""
+        "arenga_jugadores_url": "",
+        "sistema_tactico": "1-4-4-2"
       },
       "5": {
         "gf": 1,
@@ -19304,7 +19344,8 @@
         "pelota_parada_url": "",
         "gps_url": "",
         "charla_dt": "",
-        "arenga_jugadores_url": ""
+        "arenga_jugadores_url": "",
+        "sistema_tactico": "1-3-5-2"
       },
       "4": {
         "gf": 0,
@@ -19318,7 +19359,8 @@
         "pelota_parada_url": "",
         "gps_url": "",
         "charla_dt": "",
-        "arenga_jugadores_url": ""
+        "arenga_jugadores_url": "",
+        "sistema_tactico": "1-3-5-2"
       },
       "2": {
         "gf": 0,
@@ -19332,7 +19374,8 @@
         "pelota_parada_url": "",
         "gps_url": "",
         "charla_dt": "",
-        "arenga_jugadores_url": ""
+        "arenga_jugadores_url": "",
+        "sistema_tactico": "1-3-5-2"
       },
       "1": {
         "gf": 2,
@@ -19346,7 +19389,8 @@
         "pelota_parada_url": "",
         "gps_url": "",
         "charla_dt": "",
-        "arenga_jugadores_url": ""
+        "arenga_jugadores_url": "",
+        "sistema_tactico": "1-3-5-2"
       }
     },
     "6TA": {
@@ -19362,7 +19406,8 @@
         "pelota_parada_url": "",
         "gps_url": "",
         "charla_dt": "",
-        "arenga_jugadores_url": ""
+        "arenga_jugadores_url": "",
+        "sistema_tactico": "1-4-4-2"
       },
       "21": {
         "gf": 1,
@@ -19376,7 +19421,8 @@
         "pelota_parada_url": "",
         "gps_url": "",
         "charla_dt": "",
-        "arenga_jugadores_url": ""
+        "arenga_jugadores_url": "",
+        "sistema_tactico": "1-4-4-2"
       },
       "20": {
         "gf": 1,
@@ -19390,7 +19436,8 @@
         "pelota_parada_url": "",
         "gps_url": "",
         "charla_dt": "",
-        "arenga_jugadores_url": ""
+        "arenga_jugadores_url": "",
+        "sistema_tactico": "1-4-3-3"
       },
       "19": {
         "gf": 2,
@@ -19404,7 +19451,8 @@
         "pelota_parada_url": "",
         "gps_url": "",
         "charla_dt": "",
-        "arenga_jugadores_url": ""
+        "arenga_jugadores_url": "",
+        "sistema_tactico": "1-4-3-3"
       },
       "18": {
         "gf": 0,
@@ -19418,7 +19466,8 @@
         "pelota_parada_url": "",
         "gps_url": "",
         "charla_dt": "",
-        "arenga_jugadores_url": ""
+        "arenga_jugadores_url": "",
+        "sistema_tactico": "1-3-4-1-2"
       },
       "17": {
         "gf": 1,
@@ -19432,7 +19481,8 @@
         "pelota_parada_url": "",
         "gps_url": "",
         "charla_dt": "",
-        "arenga_jugadores_url": ""
+        "arenga_jugadores_url": "",
+        "sistema_tactico": "1-3-5-2"
       },
       "16": {
         "gf": 1,
@@ -19446,7 +19496,8 @@
         "pelota_parada_url": "",
         "gps_url": "",
         "charla_dt": "",
-        "arenga_jugadores_url": ""
+        "arenga_jugadores_url": "",
+        "sistema_tactico": "1-4-3-3"
       },
       "15": {
         "gf": 2,
@@ -19460,7 +19511,8 @@
         "pelota_parada_url": "",
         "gps_url": "",
         "charla_dt": "",
-        "arenga_jugadores_url": ""
+        "arenga_jugadores_url": "",
+        "sistema_tactico": "1-4-1-3-2"
       },
       "14": {
         "gf": 1,
@@ -19474,7 +19526,8 @@
         "pelota_parada_url": "",
         "gps_url": "",
         "charla_dt": "",
-        "arenga_jugadores_url": ""
+        "arenga_jugadores_url": "",
+        "sistema_tactico": "1-4-1-3-2"
       },
       "13": {
         "gf": 1,
@@ -19488,7 +19541,8 @@
         "pelota_parada_url": "",
         "gps_url": "",
         "charla_dt": "",
-        "arenga_jugadores_url": ""
+        "arenga_jugadores_url": "",
+        "sistema_tactico": "1-3-5-2"
       },
       "12": {
         "gf": 1,
@@ -19502,7 +19556,8 @@
         "pelota_parada_url": "",
         "gps_url": "",
         "charla_dt": "",
-        "arenga_jugadores_url": ""
+        "arenga_jugadores_url": "",
+        "sistema_tactico": "1-3-5-2"
       },
       "11": {
         "gf": 2,
@@ -19516,7 +19571,8 @@
         "pelota_parada_url": "",
         "gps_url": "",
         "charla_dt": "",
-        "arenga_jugadores_url": ""
+        "arenga_jugadores_url": "",
+        "sistema_tactico": "1-4-4-2"
       },
       "10": {
         "gf": 1,
@@ -19530,7 +19586,8 @@
         "pelota_parada_url": "",
         "gps_url": "",
         "charla_dt": "",
-        "arenga_jugadores_url": ""
+        "arenga_jugadores_url": "",
+        "sistema_tactico": "1-3-5-2"
       },
       "9": {
         "gf": 1,
@@ -19544,7 +19601,8 @@
         "pelota_parada_url": "",
         "gps_url": "",
         "charla_dt": "",
-        "arenga_jugadores_url": ""
+        "arenga_jugadores_url": "",
+        "sistema_tactico": "1-3-5-2"
       },
       "8": {
         "gf": 2,
@@ -19558,7 +19616,8 @@
         "pelota_parada_url": "",
         "gps_url": "https://drive.google.com/file/d/1j6mFmC7M6SGUgBFDqwA_pYySf8Fg_BTh/view?usp=drive_link",
         "charla_dt": "",
-        "arenga_jugadores_url": ""
+        "arenga_jugadores_url": "",
+        "sistema_tactico": "1-3-5-2"
       },
       "7": {
         "gf": 1,
@@ -19572,7 +19631,8 @@
         "pelota_parada_url": "",
         "gps_url": "https://drive.google.com/file/d/1YVvSr9WUm9oM-2GVLQDKQb7YYR_KtG5d/view?usp=drive_link",
         "charla_dt": "",
-        "arenga_jugadores_url": ""
+        "arenga_jugadores_url": "",
+        "sistema_tactico": "1-3-5-2"
       },
       "6": {
         "gf": 4,
@@ -19586,7 +19646,8 @@
         "pelota_parada_url": "",
         "gps_url": "https://drive.google.com/file/d/1as3oJVUWzHO3mekdVK3BcLfRBLVECjSH/view?usp=drive_link",
         "charla_dt": "",
-        "arenga_jugadores_url": ""
+        "arenga_jugadores_url": "",
+        "sistema_tactico": "1-4-4-2"
       },
       "3": {
         "gf": 0,
@@ -19600,7 +19661,8 @@
         "pelota_parada_url": "",
         "gps_url": "",
         "charla_dt": "",
-        "arenga_jugadores_url": ""
+        "arenga_jugadores_url": "",
+        "sistema_tactico": "1-4-2-3-1"
       },
       "5": {
         "gf": 3,
@@ -19614,7 +19676,8 @@
         "pelota_parada_url": "",
         "gps_url": "https://drive.google.com/file/d/1AtyAOFunsCo6UCwTVej_8ahfHLaiOWlj/view?usp=drive_link",
         "charla_dt": "",
-        "arenga_jugadores_url": ""
+        "arenga_jugadores_url": "",
+        "sistema_tactico": "1-4-2-3-1"
       },
       "4": {
         "gf": 1,
@@ -19628,7 +19691,8 @@
         "pelota_parada_url": "",
         "gps_url": "https://drive.google.com/file/d/1GraS2GHDFBXM5EZcb8vrOXyf9SI-dRED/view?usp=drive_link",
         "charla_dt": "",
-        "arenga_jugadores_url": ""
+        "arenga_jugadores_url": "",
+        "sistema_tactico": "1-3-5-2"
       },
       "2": {
         "gf": 1,
@@ -19642,7 +19706,8 @@
         "pelota_parada_url": "",
         "gps_url": "https://drive.google.com/file/d/1_zVEZ2wRS_j67g6RwdoSffnFpzL8X2u7/view?usp=drive_link",
         "charla_dt": "",
-        "arenga_jugadores_url": ""
+        "arenga_jugadores_url": "",
+        "sistema_tactico": "1-4-2-3-1"
       },
       "1": {
         "gf": 3,
@@ -19656,7 +19721,8 @@
         "pelota_parada_url": "",
         "gps_url": "https://drive.google.com/file/d/1S79vgE-71h3ZUl2erk1b62cbgTBoA8n2/view?usp=drive_link",
         "charla_dt": "",
-        "arenga_jugadores_url": ""
+        "arenga_jugadores_url": "",
+        "sistema_tactico": "1-4-2-3-1"
       }
     },
     "7MA": {
@@ -19672,7 +19738,8 @@
         "pelota_parada_url": "",
         "gps_url": "",
         "charla_dt": "",
-        "arenga_jugadores_url": ""
+        "arenga_jugadores_url": "",
+        "sistema_tactico": "1-3-4-1-2"
       },
       "21": {
         "gf": 3,
@@ -19686,7 +19753,8 @@
         "pelota_parada_url": "",
         "gps_url": "",
         "charla_dt": "",
-        "arenga_jugadores_url": ""
+        "arenga_jugadores_url": "",
+        "sistema_tactico": "1-3-4-1-2"
       },
       "20": {
         "gf": 1,
@@ -19700,7 +19768,8 @@
         "pelota_parada_url": "",
         "gps_url": "",
         "charla_dt": "",
-        "arenga_jugadores_url": ""
+        "arenga_jugadores_url": "",
+        "sistema_tactico": "1-3-4-1-2"
       },
       "19": {
         "gf": 1,
@@ -19714,7 +19783,8 @@
         "pelota_parada_url": "",
         "gps_url": "",
         "charla_dt": "",
-        "arenga_jugadores_url": ""
+        "arenga_jugadores_url": "",
+        "sistema_tactico": "1-3-4-1-2"
       },
       "18": {
         "gf": 4,
@@ -19728,7 +19798,8 @@
         "pelota_parada_url": "",
         "gps_url": "",
         "charla_dt": "",
-        "arenga_jugadores_url": ""
+        "arenga_jugadores_url": "",
+        "sistema_tactico": "1-3-4-1-2"
       },
       "17": {
         "gf": 2,
@@ -19742,7 +19813,8 @@
         "pelota_parada_url": "",
         "gps_url": "",
         "charla_dt": "",
-        "arenga_jugadores_url": ""
+        "arenga_jugadores_url": "",
+        "sistema_tactico": "1-3-4-1-2"
       },
       "16": {
         "gf": 2,
@@ -19756,7 +19828,8 @@
         "pelota_parada_url": "",
         "gps_url": "",
         "charla_dt": "",
-        "arenga_jugadores_url": ""
+        "arenga_jugadores_url": "",
+        "sistema_tactico": "1-3-4-1-2"
       },
       "15": {
         "gf": 2,
@@ -19770,7 +19843,8 @@
         "pelota_parada_url": "",
         "gps_url": "",
         "charla_dt": "",
-        "arenga_jugadores_url": ""
+        "arenga_jugadores_url": "",
+        "sistema_tactico": "1-3-4-1-2"
       },
       "14": {
         "gf": 2,
@@ -19784,7 +19858,8 @@
         "pelota_parada_url": "",
         "gps_url": "",
         "charla_dt": "",
-        "arenga_jugadores_url": ""
+        "arenga_jugadores_url": "",
+        "sistema_tactico": "1-4-1-3-2"
       },
       "13": {
         "gf": 1,
@@ -19798,7 +19873,8 @@
         "pelota_parada_url": "",
         "gps_url": "",
         "charla_dt": "",
-        "arenga_jugadores_url": ""
+        "arenga_jugadores_url": "",
+        "sistema_tactico": "1-4-3-1-2"
       },
       "12": {
         "gf": 1,
@@ -19812,7 +19888,8 @@
         "pelota_parada_url": "",
         "gps_url": "",
         "charla_dt": "",
-        "arenga_jugadores_url": ""
+        "arenga_jugadores_url": "",
+        "sistema_tactico": "1-4-1-3-2"
       },
       "11": {
         "gf": 0,
@@ -19826,7 +19903,8 @@
         "pelota_parada_url": "",
         "gps_url": "",
         "charla_dt": "",
-        "arenga_jugadores_url": ""
+        "arenga_jugadores_url": "",
+        "sistema_tactico": "1-4-1-4-1"
       },
       "10": {
         "gf": 2,
@@ -19840,7 +19918,8 @@
         "pelota_parada_url": "",
         "gps_url": "",
         "charla_dt": "",
-        "arenga_jugadores_url": ""
+        "arenga_jugadores_url": "",
+        "sistema_tactico": "1-4-1-3-2"
       },
       "9": {
         "gf": 2,
@@ -19854,7 +19933,8 @@
         "pelota_parada_url": "",
         "gps_url": "",
         "charla_dt": "",
-        "arenga_jugadores_url": ""
+        "arenga_jugadores_url": "",
+        "sistema_tactico": "1-3-4-3"
       },
       "8": {
         "gf": 3,
@@ -19868,7 +19948,8 @@
         "pelota_parada_url": "",
         "gps_url": "",
         "charla_dt": "",
-        "arenga_jugadores_url": ""
+        "arenga_jugadores_url": "",
+        "sistema_tactico": "1-4-1-3-2"
       },
       "7": {
         "gf": 2,
@@ -19882,7 +19963,8 @@
         "pelota_parada_url": "",
         "gps_url": "",
         "charla_dt": "",
-        "arenga_jugadores_url": ""
+        "arenga_jugadores_url": "",
+        "sistema_tactico": "1-4-1-3-2"
       },
       "6": {
         "gf": 3,
@@ -19896,7 +19978,8 @@
         "pelota_parada_url": "",
         "gps_url": "",
         "charla_dt": "",
-        "arenga_jugadores_url": ""
+        "arenga_jugadores_url": "",
+        "sistema_tactico": "1-4-2-3-1"
       },
       "5": {
         "gf": 2,
@@ -19910,7 +19993,8 @@
         "pelota_parada_url": "",
         "gps_url": "",
         "charla_dt": "",
-        "arenga_jugadores_url": ""
+        "arenga_jugadores_url": "",
+        "sistema_tactico": "1-3-4-3"
       },
       "4": {
         "gf": 1,
@@ -19924,7 +20008,8 @@
         "pelota_parada_url": "",
         "gps_url": "",
         "charla_dt": "",
-        "arenga_jugadores_url": ""
+        "arenga_jugadores_url": "",
+        "sistema_tactico": "1-4-2-3-1"
       },
       "3": {
         "gf": 4,
@@ -19938,7 +20023,8 @@
         "pelota_parada_url": "",
         "gps_url": "",
         "charla_dt": "",
-        "arenga_jugadores_url": ""
+        "arenga_jugadores_url": "",
+        "sistema_tactico": "1-4-2-3-1"
       },
       "2": {
         "gf": 3,
@@ -19952,7 +20038,8 @@
         "pelota_parada_url": "",
         "gps_url": "",
         "charla_dt": "",
-        "arenga_jugadores_url": ""
+        "arenga_jugadores_url": "",
+        "sistema_tactico": "1-4-2-3-1"
       },
       "1": {
         "gf": 3,
@@ -19966,7 +20053,8 @@
         "pelota_parada_url": "",
         "gps_url": "",
         "charla_dt": "",
-        "arenga_jugadores_url": ""
+        "arenga_jugadores_url": "",
+        "sistema_tactico": "1-4-3-3"
       }
     },
     "8VA": {
@@ -19982,7 +20070,8 @@
         "pelota_parada_url": "",
         "gps_url": "",
         "charla_dt": "",
-        "arenga_jugadores_url": ""
+        "arenga_jugadores_url": "",
+        "sistema_tactico": "1-4-4-2"
       },
       "19": {
         "gf": 0,
@@ -19996,7 +20085,8 @@
         "pelota_parada_url": "",
         "gps_url": "",
         "charla_dt": "",
-        "arenga_jugadores_url": ""
+        "arenga_jugadores_url": "",
+        "sistema_tactico": "1-4-4-1-1"
       },
       "18": {
         "gf": 1,
@@ -20010,7 +20100,8 @@
         "pelota_parada_url": "",
         "gps_url": "",
         "charla_dt": "",
-        "arenga_jugadores_url": ""
+        "arenga_jugadores_url": "",
+        "sistema_tactico": "1-3-4-1-2"
       },
       "16": {
         "gf": 0,
@@ -20024,7 +20115,8 @@
         "pelota_parada_url": "",
         "gps_url": "",
         "charla_dt": "",
-        "arenga_jugadores_url": ""
+        "arenga_jugadores_url": "",
+        "sistema_tactico": "1-4-4-2"
       },
       "17": {
         "gf": 1,
@@ -20038,7 +20130,8 @@
         "pelota_parada_url": "",
         "gps_url": "",
         "charla_dt": "",
-        "arenga_jugadores_url": ""
+        "arenga_jugadores_url": "",
+        "sistema_tactico": "1-4-4-2"
       },
       "15": {
         "gf": 0,
@@ -20052,7 +20145,8 @@
         "pelota_parada_url": "",
         "gps_url": "",
         "charla_dt": "",
-        "arenga_jugadores_url": ""
+        "arenga_jugadores_url": "",
+        "sistema_tactico": "1-4-4-2"
       },
       "13": {
         "gf": 0,
@@ -20066,7 +20160,8 @@
         "pelota_parada_url": "",
         "gps_url": "",
         "charla_dt": "",
-        "arenga_jugadores_url": ""
+        "arenga_jugadores_url": "",
+        "sistema_tactico": "1-3-5-2"
       },
       "12": {
         "gf": 3,
@@ -20080,7 +20175,8 @@
         "pelota_parada_url": "",
         "gps_url": "",
         "charla_dt": "",
-        "arenga_jugadores_url": ""
+        "arenga_jugadores_url": "",
+        "sistema_tactico": "1-4-4-2"
       },
       "11": {
         "gf": 0,
@@ -20094,7 +20190,8 @@
         "pelota_parada_url": "",
         "gps_url": "",
         "charla_dt": "",
-        "arenga_jugadores_url": ""
+        "arenga_jugadores_url": "",
+        "sistema_tactico": "1-4-3-1-2"
       },
       "10": {
         "gf": 1,
@@ -20108,7 +20205,8 @@
         "pelota_parada_url": "",
         "gps_url": "",
         "charla_dt": "",
-        "arenga_jugadores_url": ""
+        "arenga_jugadores_url": "",
+        "sistema_tactico": "1-4-3-1-2"
       },
       "9": {
         "gf": 0,
@@ -20122,7 +20220,8 @@
         "pelota_parada_url": "",
         "gps_url": "",
         "charla_dt": "",
-        "arenga_jugadores_url": ""
+        "arenga_jugadores_url": "",
+        "sistema_tactico": "1-4-3-1-2"
       },
       "8": {
         "gf": 1,
@@ -20136,7 +20235,8 @@
         "pelota_parada_url": "",
         "gps_url": "",
         "charla_dt": "",
-        "arenga_jugadores_url": ""
+        "arenga_jugadores_url": "",
+        "sistema_tactico": "1-3-5-2"
       },
       "7": {
         "gf": 1,
@@ -20150,7 +20250,8 @@
         "pelota_parada_url": "",
         "gps_url": "",
         "charla_dt": "",
-        "arenga_jugadores_url": ""
+        "arenga_jugadores_url": "",
+        "sistema_tactico": "1-3-5-2"
       },
       "6": {
         "gf": 3,
@@ -20164,7 +20265,8 @@
         "pelota_parada_url": "",
         "gps_url": "",
         "charla_dt": "",
-        "arenga_jugadores_url": ""
+        "arenga_jugadores_url": "",
+        "sistema_tactico": "1-3-5-2"
       },
       "5": {
         "gf": 1,
@@ -20178,7 +20280,8 @@
         "pelota_parada_url": "",
         "gps_url": "",
         "charla_dt": "",
-        "arenga_jugadores_url": ""
+        "arenga_jugadores_url": "",
+        "sistema_tactico": "1-3-5-2"
       },
       "4": {
         "gf": 0,
@@ -20192,7 +20295,8 @@
         "pelota_parada_url": "",
         "gps_url": "",
         "charla_dt": "",
-        "arenga_jugadores_url": ""
+        "arenga_jugadores_url": "",
+        "sistema_tactico": "1-4-3-3"
       },
       "3": {
         "gf": 0,
@@ -20206,7 +20310,8 @@
         "pelota_parada_url": "",
         "gps_url": "",
         "charla_dt": "",
-        "arenga_jugadores_url": ""
+        "arenga_jugadores_url": "",
+        "sistema_tactico": "1-3-4-1-2"
       },
       "2": {
         "gf": 2,
@@ -20220,7 +20325,8 @@
         "pelota_parada_url": "",
         "gps_url": "",
         "charla_dt": "",
-        "arenga_jugadores_url": ""
+        "arenga_jugadores_url": "",
+        "sistema_tactico": "1-4-3-3"
       },
       "1": {
         "gf": 2,
@@ -20234,7 +20340,8 @@
         "pelota_parada_url": "",
         "gps_url": "",
         "charla_dt": "",
-        "arenga_jugadores_url": ""
+        "arenga_jugadores_url": "",
+        "sistema_tactico": "1-4-3-3"
       }
     },
     "9NA": {
@@ -20250,7 +20357,8 @@
         "pelota_parada_url": "",
         "gps_url": "",
         "charla_dt": "",
-        "arenga_jugadores_url": ""
+        "arenga_jugadores_url": "",
+        "sistema_tactico": "1-4-1-4-1"
       },
       "21": {
         "gf": 1,
@@ -20264,7 +20372,8 @@
         "pelota_parada_url": "",
         "gps_url": "",
         "charla_dt": "",
-        "arenga_jugadores_url": ""
+        "arenga_jugadores_url": "",
+        "sistema_tactico": "1-4-1-4-1"
       },
       "20": {
         "gf": 1,
@@ -20278,7 +20387,8 @@
         "pelota_parada_url": "",
         "gps_url": "",
         "charla_dt": "",
-        "arenga_jugadores_url": ""
+        "arenga_jugadores_url": "",
+        "sistema_tactico": "1-3-4-1-2"
       },
       "19": {
         "gf": 0,
@@ -20292,7 +20402,8 @@
         "pelota_parada_url": "",
         "gps_url": "",
         "charla_dt": "",
-        "arenga_jugadores_url": ""
+        "arenga_jugadores_url": "",
+        "sistema_tactico": "1-4-3-3"
       },
       "18": {
         "gf": 4,
@@ -20306,7 +20417,8 @@
         "pelota_parada_url": "",
         "gps_url": "",
         "charla_dt": "",
-        "arenga_jugadores_url": ""
+        "arenga_jugadores_url": "",
+        "sistema_tactico": "1-4-3-1-2"
       },
       "17": {
         "gf": 0,
@@ -20320,7 +20432,8 @@
         "pelota_parada_url": "",
         "gps_url": "",
         "charla_dt": "",
-        "arenga_jugadores_url": ""
+        "arenga_jugadores_url": "",
+        "sistema_tactico": "1-4-3-1-2"
       },
       "16": {
         "gf": 0,
@@ -20334,7 +20447,8 @@
         "pelota_parada_url": "",
         "gps_url": "",
         "charla_dt": "",
-        "arenga_jugadores_url": ""
+        "arenga_jugadores_url": "",
+        "sistema_tactico": "1-4-1-3-2"
       },
       "15": {
         "gf": 1,
@@ -20348,7 +20462,8 @@
         "pelota_parada_url": "",
         "gps_url": "",
         "charla_dt": "",
-        "arenga_jugadores_url": ""
+        "arenga_jugadores_url": "",
+        "sistema_tactico": "1-4-3-1-2"
       },
       "14": {
         "gf": 1,
@@ -20362,7 +20477,8 @@
         "pelota_parada_url": "",
         "gps_url": "",
         "charla_dt": "",
-        "arenga_jugadores_url": ""
+        "arenga_jugadores_url": "",
+        "sistema_tactico": "1-4-3-1-2"
       },
       "13": {
         "gf": 0,
@@ -20376,7 +20492,8 @@
         "pelota_parada_url": "",
         "gps_url": "",
         "charla_dt": "",
-        "arenga_jugadores_url": ""
+        "arenga_jugadores_url": "",
+        "sistema_tactico": "1-4-3-1-2"
       },
       "12": {
         "gf": 0,
@@ -20390,7 +20507,8 @@
         "pelota_parada_url": "",
         "gps_url": "",
         "charla_dt": "",
-        "arenga_jugadores_url": ""
+        "arenga_jugadores_url": "",
+        "sistema_tactico": "1-4-3-1-2"
       },
       "11": {
         "gf": 1,
@@ -20404,7 +20522,8 @@
         "pelota_parada_url": "",
         "gps_url": "",
         "charla_dt": "",
-        "arenga_jugadores_url": ""
+        "arenga_jugadores_url": "",
+        "sistema_tactico": "1-4-3-1-2"
       },
       "10": {
         "gf": 0,
@@ -20418,7 +20537,8 @@
         "pelota_parada_url": "",
         "gps_url": "",
         "charla_dt": "",
-        "arenga_jugadores_url": ""
+        "arenga_jugadores_url": "",
+        "sistema_tactico": "1-4-3-1-2"
       },
       "9": {
         "gf": 1,
@@ -20432,7 +20552,8 @@
         "pelota_parada_url": "",
         "gps_url": "",
         "charla_dt": "",
-        "arenga_jugadores_url": ""
+        "arenga_jugadores_url": "",
+        "sistema_tactico": "1-4-3-1-2"
       },
       "8": {
         "gf": 0,
@@ -20446,7 +20567,8 @@
         "pelota_parada_url": "",
         "gps_url": "",
         "charla_dt": "",
-        "arenga_jugadores_url": ""
+        "arenga_jugadores_url": "",
+        "sistema_tactico": "1-4-3-1-2"
       },
       "7": {
         "gf": 1,
@@ -20460,7 +20582,8 @@
         "pelota_parada_url": "",
         "gps_url": "",
         "charla_dt": "",
-        "arenga_jugadores_url": ""
+        "arenga_jugadores_url": "",
+        "sistema_tactico": "1-4-3-1-2"
       },
       "6": {
         "gf": 0,
@@ -20474,7 +20597,8 @@
         "pelota_parada_url": "",
         "gps_url": "",
         "charla_dt": "",
-        "arenga_jugadores_url": ""
+        "arenga_jugadores_url": "",
+        "sistema_tactico": "1-4-3-1-2"
       },
       "5": {
         "gf": 0,
@@ -20488,7 +20612,8 @@
         "pelota_parada_url": "",
         "gps_url": "",
         "charla_dt": "",
-        "arenga_jugadores_url": ""
+        "arenga_jugadores_url": "",
+        "sistema_tactico": "1-4-4-1-1"
       },
       "4": {
         "gf": 3,
@@ -20502,7 +20627,8 @@
         "pelota_parada_url": "",
         "gps_url": "",
         "charla_dt": "",
-        "arenga_jugadores_url": ""
+        "arenga_jugadores_url": "",
+        "sistema_tactico": "1-4-1-3-2"
       },
       "3": {
         "gf": 0,
@@ -20516,7 +20642,8 @@
         "pelota_parada_url": "",
         "gps_url": "",
         "charla_dt": "",
-        "arenga_jugadores_url": ""
+        "arenga_jugadores_url": "",
+        "sistema_tactico": "1-4-1-3-2"
       },
       "2": {
         "gf": 1,
@@ -20530,7 +20657,8 @@
         "pelota_parada_url": "",
         "gps_url": "",
         "charla_dt": "",
-        "arenga_jugadores_url": ""
+        "arenga_jugadores_url": "",
+        "sistema_tactico": "1-4-1-3-2"
       },
       "1": {
         "gf": 2,
@@ -20544,2372 +20672,10 @@
         "pelota_parada_url": "",
         "gps_url": "",
         "charla_dt": "",
-        "arenga_jugadores_url": ""
+        "arenga_jugadores_url": "",
+        "sistema_tactico": "1-4-2-3-1"
       }
     }
   },
-  "jugadores_futdetail": {
-    "4TA": [
-      {
-        "jugador": "Cáceres Thomas",
-        "convocatorias": 13,
-        "partidos_titular": 12,
-        "minutos_jugados": 843,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 1,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Saravia Roman",
-        "convocatorias": 3,
-        "partidos_titular": 3,
-        "minutos_jugados": 270,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 1,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Pannoni Lautaro",
-        "convocatorias": 16,
-        "partidos_titular": 15,
-        "minutos_jugados": 1125,
-        "goles": 1,
-        "asistencias": 1,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 2
-      },
-      {
-        "jugador": "Andrusisen Lautaro",
-        "convocatorias": 6,
-        "partidos_titular": 6,
-        "minutos_jugados": 437,
-        "goles": 2,
-        "asistencias": 0,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Aguirre Iñaki",
-        "convocatorias": 16,
-        "partidos_titular": 14,
-        "minutos_jugados": 1080,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 1,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "González Alex",
-        "convocatorias": 5,
-        "partidos_titular": 5,
-        "minutos_jugados": 405,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 2,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Leguizamon Maximo",
-        "convocatorias": 1,
-        "partidos_titular": 1,
-        "minutos_jugados": 90,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Pereyra Manuel",
-        "convocatorias": 1,
-        "partidos_titular": 1,
-        "minutos_jugados": 90,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Luna Agustin",
-        "convocatorias": 15,
-        "partidos_titular": 13,
-        "minutos_jugados": 986,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Luongo Alan",
-        "convocatorias": 19,
-        "partidos_titular": 17,
-        "minutos_jugados": 1195,
-        "goles": 1,
-        "asistencias": 0,
-        "tarjeta_amarilla": 1,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Ordoñez Ignacio",
-        "convocatorias": 10,
-        "partidos_titular": 9,
-        "minutos_jugados": 632,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 1,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Leszczuk  Brandon",
-        "convocatorias": 12,
-        "partidos_titular": 2,
-        "minutos_jugados": 382,
-        "goles": 2,
-        "asistencias": 0,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Gonzalez Santino",
-        "convocatorias": 17,
-        "partidos_titular": 15,
-        "minutos_jugados": 1050,
-        "goles": 4,
-        "asistencias": 0,
-        "tarjeta_amarilla": 2,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Afonso Nicolas",
-        "convocatorias": 2,
-        "partidos_titular": 2,
-        "minutos_jugados": 137,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Fredes Felipe",
-        "convocatorias": 15,
-        "partidos_titular": 12,
-        "minutos_jugados": 916,
-        "goles": 4,
-        "asistencias": 0,
-        "tarjeta_amarilla": 2,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Rojas Elias",
-        "convocatorias": 14,
-        "partidos_titular": 9,
-        "minutos_jugados": 787,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Perez Gaston",
-        "convocatorias": 2,
-        "partidos_titular": 2,
-        "minutos_jugados": 145,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Ramos Bautista",
-        "convocatorias": 9,
-        "partidos_titular": 9,
-        "minutos_jugados": 765,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 1,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Alvaro Navoni",
-        "convocatorias": 8,
-        "partidos_titular": 7,
-        "minutos_jugados": 575,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Benítez Cristian",
-        "convocatorias": 18,
-        "partidos_titular": 13,
-        "minutos_jugados": 1022,
-        "goles": 2,
-        "asistencias": 0,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Medina Tiziano",
-        "convocatorias": 3,
-        "partidos_titular": 2,
-        "minutos_jugados": 210,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Molas Lucas",
-        "convocatorias": 2,
-        "partidos_titular": 1,
-        "minutos_jugados": 110,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Hillairet Yair",
-        "convocatorias": 4,
-        "partidos_titular": 0,
-        "minutos_jugados": 103,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Mayer Tomas",
-        "convocatorias": 7,
-        "partidos_titular": 2,
-        "minutos_jugados": 227,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Ferreira Rodrigo",
-        "convocatorias": 12,
-        "partidos_titular": 5,
-        "minutos_jugados": 587,
-        "goles": 3,
-        "asistencias": 0,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Zalazar Benjamín",
-        "convocatorias": 1,
-        "partidos_titular": 0,
-        "minutos_jugados": 20,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Figueredo Benjamin",
-        "convocatorias": 8,
-        "partidos_titular": 5,
-        "minutos_jugados": 330,
-        "goles": 0,
-        "asistencias": 1,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Mansilla Nehemias",
-        "convocatorias": 9,
-        "partidos_titular": 0,
-        "minutos_jugados": 103,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "López Facundo",
-        "convocatorias": 8,
-        "partidos_titular": 3,
-        "minutos_jugados": 275,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Benitez Lautaro",
-        "convocatorias": 16,
-        "partidos_titular": 12,
-        "minutos_jugados": 924,
-        "goles": 1,
-        "asistencias": 0,
-        "tarjeta_amarilla": 1,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Copes Tomas",
-        "convocatorias": 16,
-        "partidos_titular": 2,
-        "minutos_jugados": 303,
-        "goles": 1,
-        "asistencias": 0,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Ruiz Santiago",
-        "convocatorias": 18,
-        "partidos_titular": 7,
-        "minutos_jugados": 405,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "González Kevin",
-        "convocatorias": 5,
-        "partidos_titular": 1,
-        "minutos_jugados": 105,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Fares Hamdan",
-        "convocatorias": 2,
-        "partidos_titular": 0,
-        "minutos_jugados": 5,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Gómez Luka",
-        "convocatorias": 8,
-        "partidos_titular": 1,
-        "minutos_jugados": 90,
-        "goles": 2,
-        "asistencias": 0,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      }
-    ],
-    "5TA": [
-      {
-        "jugador": "Cordoba Santiago",
-        "convocatorias": 8,
-        "partidos_titular": 6,
-        "minutos_jugados": 643,
-        "goles": 1,
-        "asistencias": 0,
-        "tarjeta_amarilla": 1,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Luque Gonzalo",
-        "convocatorias": 9,
-        "partidos_titular": 5,
-        "minutos_jugados": 361,
-        "goles": 1,
-        "asistencias": 0,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Wirz Axel",
-        "convocatorias": 17,
-        "partidos_titular": 17,
-        "minutos_jugados": 1420,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 5,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Pereyra Manuel",
-        "convocatorias": 4,
-        "partidos_titular": 2,
-        "minutos_jugados": 190,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 1,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Canullo Juan",
-        "convocatorias": 9,
-        "partidos_titular": 7,
-        "minutos_jugados": 506,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 1,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Poblete Matias",
-        "convocatorias": 17,
-        "partidos_titular": 14,
-        "minutos_jugados": 1241,
-        "goles": 0,
-        "asistencias": 5,
-        "tarjeta_amarilla": 5,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Juarez Nahuel",
-        "convocatorias": 9,
-        "partidos_titular": 7,
-        "minutos_jugados": 399,
-        "goles": 0,
-        "asistencias": 1,
-        "tarjeta_amarilla": 1,
-        "tarjeta_roja": 1
-      },
-      {
-        "jugador": "Letizia Ignacio",
-        "convocatorias": 17,
-        "partidos_titular": 16,
-        "minutos_jugados": 1302,
-        "goles": 10,
-        "asistencias": 2,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Llera Mariano",
-        "convocatorias": 14,
-        "partidos_titular": 11,
-        "minutos_jugados": 884,
-        "goles": 0,
-        "asistencias": 2,
-        "tarjeta_amarilla": 4,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Vargas Thiago",
-        "convocatorias": 3,
-        "partidos_titular": 1,
-        "minutos_jugados": 75,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Miño Roman",
-        "convocatorias": 15,
-        "partidos_titular": 15,
-        "minutos_jugados": 1149,
-        "goles": 2,
-        "asistencias": 4,
-        "tarjeta_amarilla": 8,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Rivas Marco",
-        "convocatorias": 1,
-        "partidos_titular": 1,
-        "minutos_jugados": 56,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Galesio Santino",
-        "convocatorias": 4,
-        "partidos_titular": 4,
-        "minutos_jugados": 90,
-        "goles": 1,
-        "asistencias": 0,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Moyano Jerónimo",
-        "convocatorias": 11,
-        "partidos_titular": 10,
-        "minutos_jugados": 656,
-        "goles": 0,
-        "asistencias": 1,
-        "tarjeta_amarilla": 1,
-        "tarjeta_roja": 2
-      },
-      {
-        "jugador": "Ledesma Gonzalo",
-        "convocatorias": 13,
-        "partidos_titular": 12,
-        "minutos_jugados": 727,
-        "goles": 2,
-        "asistencias": 0,
-        "tarjeta_amarilla": 2,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Vera Conrado",
-        "convocatorias": 8,
-        "partidos_titular": 6,
-        "minutos_jugados": 574,
-        "goles": 1,
-        "asistencias": 0,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Clauser Ramiro",
-        "convocatorias": 11,
-        "partidos_titular": 1,
-        "minutos_jugados": 296,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 1,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Samper Joaquin",
-        "convocatorias": 3,
-        "partidos_titular": 0,
-        "minutos_jugados": 65,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Crotto Ivo",
-        "convocatorias": 3,
-        "partidos_titular": 0,
-        "minutos_jugados": 40,
-        "goles": 1,
-        "asistencias": 0,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Villanueva Román",
-        "convocatorias": 9,
-        "partidos_titular": 1,
-        "minutos_jugados": 122,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 3,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Rodriguez Thiago",
-        "convocatorias": 14,
-        "partidos_titular": 9,
-        "minutos_jugados": 791,
-        "goles": 2,
-        "asistencias": 0,
-        "tarjeta_amarilla": 2,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Perez Joaquin",
-        "convocatorias": 14,
-        "partidos_titular": 5,
-        "minutos_jugados": 523,
-        "goles": 1,
-        "asistencias": 0,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Zerda Santiago Lionel",
-        "convocatorias": 17,
-        "partidos_titular": 15,
-        "minutos_jugados": 1217,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 1,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Gonzalez Lautaro",
-        "convocatorias": 6,
-        "partidos_titular": 0,
-        "minutos_jugados": 65,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 1,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Petry Uriel",
-        "convocatorias": 11,
-        "partidos_titular": 0,
-        "minutos_jugados": 13,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Sosena Fausto",
-        "convocatorias": 1,
-        "partidos_titular": 0,
-        "minutos_jugados": 0,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Ricaldi Ian",
-        "convocatorias": 12,
-        "partidos_titular": 1,
-        "minutos_jugados": 244,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Hernandez Emanuel",
-        "convocatorias": 3,
-        "partidos_titular": 0,
-        "minutos_jugados": 50,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Demonte Tomas",
-        "convocatorias": 9,
-        "partidos_titular": 4,
-        "minutos_jugados": 369,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Crotto Nicolas",
-        "convocatorias": 8,
-        "partidos_titular": 4,
-        "minutos_jugados": 286,
-        "goles": 2,
-        "asistencias": 0,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Barrios Cristian",
-        "convocatorias": 1,
-        "partidos_titular": 0,
-        "minutos_jugados": 0,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Adamovsky Felipe",
-        "convocatorias": 16,
-        "partidos_titular": 12,
-        "minutos_jugados": 1049,
-        "goles": 0,
-        "asistencias": 2,
-        "tarjeta_amarilla": 2,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Feversani Bautista",
-        "convocatorias": 1,
-        "partidos_titular": 1,
-        "minutos_jugados": 0,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      }
-    ],
-    "6TA": [
-      {
-        "jugador": "Sosena Fausto",
-        "convocatorias": 14,
-        "partidos_titular": 10,
-        "minutos_jugados": 921,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Calderon Roman",
-        "convocatorias": 17,
-        "partidos_titular": 8,
-        "minutos_jugados": 882,
-        "goles": 1,
-        "asistencias": 3,
-        "tarjeta_amarilla": 3,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Mauriño Octavio",
-        "convocatorias": 4,
-        "partidos_titular": 4,
-        "minutos_jugados": 333,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Ibañez Tiziano",
-        "convocatorias": 2,
-        "partidos_titular": 0,
-        "minutos_jugados": 35,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Pomar Santino",
-        "convocatorias": 15,
-        "partidos_titular": 7,
-        "minutos_jugados": 636,
-        "goles": 1,
-        "asistencias": 2,
-        "tarjeta_amarilla": 2,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Sigel Bruno",
-        "convocatorias": 1,
-        "partidos_titular": 0,
-        "minutos_jugados": 20,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Luna Alejo",
-        "convocatorias": 8,
-        "partidos_titular": 3,
-        "minutos_jugados": 271,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Torres David",
-        "convocatorias": 4,
-        "partidos_titular": 1,
-        "minutos_jugados": 146,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 1,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Dechiara Francesco",
-        "convocatorias": 6,
-        "partidos_titular": 2,
-        "minutos_jugados": 175,
-        "goles": 0,
-        "asistencias": 1,
-        "tarjeta_amarilla": 1,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Nuñez Jonathan",
-        "convocatorias": 9,
-        "partidos_titular": 4,
-        "minutos_jugados": 305,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 2,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Muchiutti Valentino",
-        "convocatorias": 4,
-        "partidos_titular": 1,
-        "minutos_jugados": 108,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Romero Aureleano",
-        "convocatorias": 16,
-        "partidos_titular": 15,
-        "minutos_jugados": 1125,
-        "goles": 1,
-        "asistencias": 0,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Collado Lautaro",
-        "convocatorias": 10,
-        "partidos_titular": 3,
-        "minutos_jugados": 275,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Moralejo Santiago",
-        "convocatorias": 21,
-        "partidos_titular": 21,
-        "minutos_jugados": 1738,
-        "goles": 2,
-        "asistencias": 0,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Sotelo Benjamín",
-        "convocatorias": 13,
-        "partidos_titular": 6,
-        "minutos_jugados": 573,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Parra Matias",
-        "convocatorias": 7,
-        "partidos_titular": 3,
-        "minutos_jugados": 120,
-        "goles": 0,
-        "asistencias": 1,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Ambiela Emilio",
-        "convocatorias": 21,
-        "partidos_titular": 18,
-        "minutos_jugados": 1527,
-        "goles": 7,
-        "asistencias": 3,
-        "tarjeta_amarilla": 4,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Fernandez Jerónimo",
-        "convocatorias": 18,
-        "partidos_titular": 14,
-        "minutos_jugados": 1335,
-        "goles": 2,
-        "asistencias": 1,
-        "tarjeta_amarilla": 3,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Lizardia Bautista",
-        "convocatorias": 14,
-        "partidos_titular": 5,
-        "minutos_jugados": 474,
-        "goles": 1,
-        "asistencias": 2,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Cortes Adrian maximiliano",
-        "convocatorias": 22,
-        "partidos_titular": 16,
-        "minutos_jugados": 1154,
-        "goles": 6,
-        "asistencias": 2,
-        "tarjeta_amarilla": 3,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Umeres Agustin",
-        "convocatorias": 23,
-        "partidos_titular": 23,
-        "minutos_jugados": 1859,
-        "goles": 1,
-        "asistencias": 0,
-        "tarjeta_amarilla": 1,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Marchetti Ivan",
-        "convocatorias": 16,
-        "partidos_titular": 12,
-        "minutos_jugados": 1007,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 1,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Gomez Santiago",
-        "convocatorias": 16,
-        "partidos_titular": 11,
-        "minutos_jugados": 925,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 4,
-        "tarjeta_roja": 1
-      },
-      {
-        "jugador": "Schenone Elias",
-        "convocatorias": 24,
-        "partidos_titular": 18,
-        "minutos_jugados": 1389,
-        "goles": 3,
-        "asistencias": 2,
-        "tarjeta_amarilla": 1,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Scungio Sebastian",
-        "convocatorias": 10,
-        "partidos_titular": 2,
-        "minutos_jugados": 270,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 1,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Zarza Quimey",
-        "convocatorias": 6,
-        "partidos_titular": 0,
-        "minutos_jugados": 109,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Ortiz Ignacio",
-        "convocatorias": 19,
-        "partidos_titular": 15,
-        "minutos_jugados": 1272,
-        "goles": 1,
-        "asistencias": 0,
-        "tarjeta_amarilla": 5,
-        "tarjeta_roja": 1
-      },
-      {
-        "jugador": "Bruno Lautaro",
-        "convocatorias": 10,
-        "partidos_titular": 7,
-        "minutos_jugados": 545,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Delgado Francisco",
-        "convocatorias": 19,
-        "partidos_titular": 14,
-        "minutos_jugados": 1208,
-        "goles": 1,
-        "asistencias": 2,
-        "tarjeta_amarilla": 4,
-        "tarjeta_roja": 1
-      },
-      {
-        "jugador": "Brandy German",
-        "convocatorias": 6,
-        "partidos_titular": 0,
-        "minutos_jugados": 50,
-        "goles": 1,
-        "asistencias": 0,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Camba Rocco",
-        "convocatorias": 11,
-        "partidos_titular": 1,
-        "minutos_jugados": 11,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Mallmann Félix",
-        "convocatorias": 20,
-        "partidos_titular": 11,
-        "minutos_jugados": 999,
-        "goles": 3,
-        "asistencias": 3,
-        "tarjeta_amarilla": 1,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Serapio Ignacio",
-        "convocatorias": 5,
-        "partidos_titular": 0,
-        "minutos_jugados": 17,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Acosta Jonathan",
-        "convocatorias": 12,
-        "partidos_titular": 7,
-        "minutos_jugados": 649,
-        "goles": 1,
-        "asistencias": 0,
-        "tarjeta_amarilla": 3,
-        "tarjeta_roja": 0
-      }
-    ],
-    "7MA": [
-      {
-        "jugador": "Rodríguez  Josué Francisco",
-        "convocatorias": 1,
-        "partidos_titular": 1,
-        "minutos_jugados": 82,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Omann Juan Ignacio",
-        "convocatorias": 8,
-        "partidos_titular": 3,
-        "minutos_jugados": 359,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 1,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Cabrera Luca",
-        "convocatorias": 1,
-        "partidos_titular": 0,
-        "minutos_jugados": 45,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Aquilue Santiago",
-        "convocatorias": 1,
-        "partidos_titular": 0,
-        "minutos_jugados": 45,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Inostroza Bastian",
-        "convocatorias": 1,
-        "partidos_titular": 0,
-        "minutos_jugados": 45,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Martinez Giuliano",
-        "convocatorias": 10,
-        "partidos_titular": 3,
-        "minutos_jugados": 421,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Fredes Tiago",
-        "convocatorias": 20,
-        "partidos_titular": 19,
-        "minutos_jugados": 1512,
-        "goles": 14,
-        "asistencias": 7,
-        "tarjeta_amarilla": 3,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Prieto Alexander",
-        "convocatorias": 19,
-        "partidos_titular": 6,
-        "minutos_jugados": 829,
-        "goles": 3,
-        "asistencias": 1,
-        "tarjeta_amarilla": 1,
-        "tarjeta_roja": 1
-      },
-      {
-        "jugador": "Lopez Sebastian",
-        "convocatorias": 28,
-        "partidos_titular": 25,
-        "minutos_jugados": 1884,
-        "goles": 1,
-        "asistencias": 1,
-        "tarjeta_amarilla": 8,
-        "tarjeta_roja": 3
-      },
-      {
-        "jugador": "Mancuello Tobias",
-        "convocatorias": 27,
-        "partidos_titular": 19,
-        "minutos_jugados": 1809,
-        "goles": 1,
-        "asistencias": 0,
-        "tarjeta_amarilla": 4,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Sodero Santino",
-        "convocatorias": 27,
-        "partidos_titular": 25,
-        "minutos_jugados": 1789,
-        "goles": 14,
-        "asistencias": 4,
-        "tarjeta_amarilla": 2,
-        "tarjeta_roja": 1
-      },
-      {
-        "jugador": "Dominguez Bautista",
-        "convocatorias": 29,
-        "partidos_titular": 26,
-        "minutos_jugados": 2189,
-        "goles": 1,
-        "asistencias": 0,
-        "tarjeta_amarilla": 5,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Puchi Santino",
-        "convocatorias": 8,
-        "partidos_titular": 6,
-        "minutos_jugados": 435,
-        "goles": 0,
-        "asistencias": 2,
-        "tarjeta_amarilla": 2,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Jara Juan",
-        "convocatorias": 13,
-        "partidos_titular": 4,
-        "minutos_jugados": 478,
-        "goles": 1,
-        "asistencias": 0,
-        "tarjeta_amarilla": 4,
-        "tarjeta_roja": 1
-      },
-      {
-        "jugador": "Lamanna Fabrizio",
-        "convocatorias": 27,
-        "partidos_titular": 19,
-        "minutos_jugados": 1337,
-        "goles": 9,
-        "asistencias": 0,
-        "tarjeta_amarilla": 3,
-        "tarjeta_roja": 2
-      },
-      {
-        "jugador": "Astesana Valentino",
-        "convocatorias": 13,
-        "partidos_titular": 9,
-        "minutos_jugados": 437,
-        "goles": 4,
-        "asistencias": 0,
-        "tarjeta_amarilla": 1,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Conte Maximiliano",
-        "convocatorias": 2,
-        "partidos_titular": 0,
-        "minutos_jugados": 70,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Mena Sebastian",
-        "convocatorias": 32,
-        "partidos_titular": 10,
-        "minutos_jugados": 1381,
-        "goles": 3,
-        "asistencias": 2,
-        "tarjeta_amarilla": 2,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Molina Ramiro",
-        "convocatorias": 26,
-        "partidos_titular": 11,
-        "minutos_jugados": 983,
-        "goles": 1,
-        "asistencias": 2,
-        "tarjeta_amarilla": 3,
-        "tarjeta_roja": 1
-      },
-      {
-        "jugador": "Herrera Thiago",
-        "convocatorias": 30,
-        "partidos_titular": 22,
-        "minutos_jugados": 1658,
-        "goles": 8,
-        "asistencias": 2,
-        "tarjeta_amarilla": 3,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Core Valentino",
-        "convocatorias": 8,
-        "partidos_titular": 3,
-        "minutos_jugados": 249,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Lopez Dionel",
-        "convocatorias": 18,
-        "partidos_titular": 15,
-        "minutos_jugados": 878,
-        "goles": 2,
-        "asistencias": 0,
-        "tarjeta_amarilla": 2,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Gallardo Dylan",
-        "convocatorias": 4,
-        "partidos_titular": 2,
-        "minutos_jugados": 155,
-        "goles": 1,
-        "asistencias": 0,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Insaurralde Ihan",
-        "convocatorias": 23,
-        "partidos_titular": 15,
-        "minutos_jugados": 1316,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 5,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Burela Santino",
-        "convocatorias": 28,
-        "partidos_titular": 14,
-        "minutos_jugados": 1478,
-        "goles": 1,
-        "asistencias": 1,
-        "tarjeta_amarilla": 3,
-        "tarjeta_roja": 1
-      },
-      {
-        "jugador": "Almiron Sebastian",
-        "convocatorias": 32,
-        "partidos_titular": 24,
-        "minutos_jugados": 1834,
-        "goles": 1,
-        "asistencias": 0,
-        "tarjeta_amarilla": 2,
-        "tarjeta_roja": 2
-      },
-      {
-        "jugador": "Sala Valentino",
-        "convocatorias": 28,
-        "partidos_titular": 15,
-        "minutos_jugados": 1044,
-        "goles": 4,
-        "asistencias": 1,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Montoya Francisco",
-        "convocatorias": 24,
-        "partidos_titular": 23,
-        "minutos_jugados": 1880,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 3,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Di Sipio Agustin",
-        "convocatorias": 27,
-        "partidos_titular": 18,
-        "minutos_jugados": 1301,
-        "goles": 1,
-        "asistencias": 4,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Barrios Bautista",
-        "convocatorias": 25,
-        "partidos_titular": 10,
-        "minutos_jugados": 1015,
-        "goles": 2,
-        "asistencias": 0,
-        "tarjeta_amarilla": 1,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Baltazar Alejandro Emanuel",
-        "convocatorias": 27,
-        "partidos_titular": 14,
-        "minutos_jugados": 1400,
-        "goles": 8,
-        "asistencias": 1,
-        "tarjeta_amarilla": 6,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Trejo Nicolas",
-        "convocatorias": 22,
-        "partidos_titular": 10,
-        "minutos_jugados": 799,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Guglielmo Lisandro",
-        "convocatorias": 1,
-        "partidos_titular": 0,
-        "minutos_jugados": 35,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Maturano Benjamin",
-        "convocatorias": 26,
-        "partidos_titular": 7,
-        "minutos_jugados": 723,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 1,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Levy Thiago",
-        "convocatorias": 19,
-        "partidos_titular": 16,
-        "minutos_jugados": 1256,
-        "goles": 3,
-        "asistencias": 0,
-        "tarjeta_amarilla": 1,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Marini Tomas",
-        "convocatorias": 33,
-        "partidos_titular": 19,
-        "minutos_jugados": 1860,
-        "goles": 0,
-        "asistencias": 1,
-        "tarjeta_amarilla": 4,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Gaitan Valentin",
-        "convocatorias": 23,
-        "partidos_titular": 17,
-        "minutos_jugados": 1576,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 5,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Gonzalez Santino",
-        "convocatorias": 25,
-        "partidos_titular": 16,
-        "minutos_jugados": 1248,
-        "goles": 3,
-        "asistencias": 1,
-        "tarjeta_amarilla": 2,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Godoy Gonzalo",
-        "convocatorias": 23,
-        "partidos_titular": 11,
-        "minutos_jugados": 968,
-        "goles": 1,
-        "asistencias": 4,
-        "tarjeta_amarilla": 1,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Pucill Mateo",
-        "convocatorias": 24,
-        "partidos_titular": 17,
-        "minutos_jugados": 919,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 1,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Lovisi Luciano",
-        "convocatorias": 19,
-        "partidos_titular": 11,
-        "minutos_jugados": 778,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 3,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Gagliardo Pedro Tomas",
-        "convocatorias": 18,
-        "partidos_titular": 8,
-        "minutos_jugados": 796,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 2,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Cazal Fernandez Gustavo Alberto",
-        "convocatorias": 1,
-        "partidos_titular": 0,
-        "minutos_jugados": 35,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Reyes Jose",
-        "convocatorias": 1,
-        "partidos_titular": 0,
-        "minutos_jugados": 32,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Cuba Gio",
-        "convocatorias": 1,
-        "partidos_titular": 0,
-        "minutos_jugados": 32,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Gonzalez Leonardo Fabian",
-        "convocatorias": 1,
-        "partidos_titular": 0,
-        "minutos_jugados": 32,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Meza Luca",
-        "convocatorias": 1,
-        "partidos_titular": 0,
-        "minutos_jugados": 32,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Castro Matias",
-        "convocatorias": 24,
-        "partidos_titular": 13,
-        "minutos_jugados": 779,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      }
-    ],
-    "8VA": [
-      {
-        "jugador": "Merlos Galeano Lautaro Benjamin",
-        "convocatorias": 12,
-        "partidos_titular": 9,
-        "minutos_jugados": 405,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 2,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Fino Amadeo",
-        "convocatorias": 6,
-        "partidos_titular": 6,
-        "minutos_jugados": 344,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Navarro Valentin",
-        "convocatorias": 14,
-        "partidos_titular": 12,
-        "minutos_jugados": 634,
-        "goles": 0,
-        "asistencias": 1,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Conte Ian",
-        "convocatorias": 12,
-        "partidos_titular": 8,
-        "minutos_jugados": 529,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Reynoso Tomas",
-        "convocatorias": 12,
-        "partidos_titular": 10,
-        "minutos_jugados": 294,
-        "goles": 1,
-        "asistencias": 0,
-        "tarjeta_amarilla": 2,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Tobler Bautista",
-        "convocatorias": 23,
-        "partidos_titular": 17,
-        "minutos_jugados": 1099,
-        "goles": 0,
-        "asistencias": 3,
-        "tarjeta_amarilla": 1,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Fino Amadeo Benjamin",
-        "convocatorias": 11,
-        "partidos_titular": 11,
-        "minutos_jugados": 211,
-        "goles": 1,
-        "asistencias": 0,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 1
-      },
-      {
-        "jugador": "Mosqueda Ernesto Jesús",
-        "convocatorias": 8,
-        "partidos_titular": 7,
-        "minutos_jugados": 248,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Cabrera Luca",
-        "convocatorias": 13,
-        "partidos_titular": 13,
-        "minutos_jugados": 387,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 1,
-        "tarjeta_roja": 1
-      },
-      {
-        "jugador": "Ruiz Ullua David",
-        "convocatorias": 9,
-        "partidos_titular": 8,
-        "minutos_jugados": 290,
-        "goles": 0,
-        "asistencias": 1,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Galeano Joaquin",
-        "convocatorias": 7,
-        "partidos_titular": 6,
-        "minutos_jugados": 360,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 1,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Cocozza Maximo",
-        "convocatorias": 15,
-        "partidos_titular": 15,
-        "minutos_jugados": 680,
-        "goles": 3,
-        "asistencias": 0,
-        "tarjeta_amarilla": 1,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Aquilue Santiago",
-        "convocatorias": 13,
-        "partidos_titular": 13,
-        "minutos_jugados": 286,
-        "goles": 4,
-        "asistencias": 0,
-        "tarjeta_amarilla": 1,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Cuba Gio",
-        "convocatorias": 13,
-        "partidos_titular": 10,
-        "minutos_jugados": 587,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Rodríguez  Josué Francisco",
-        "convocatorias": 13,
-        "partidos_titular": 10,
-        "minutos_jugados": 281,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Maguna Pedro",
-        "convocatorias": 6,
-        "partidos_titular": 6,
-        "minutos_jugados": 168,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "De Olivera Elias",
-        "convocatorias": 10,
-        "partidos_titular": 9,
-        "minutos_jugados": 53,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Radaelli Manuel",
-        "convocatorias": 15,
-        "partidos_titular": 13,
-        "minutos_jugados": 400,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 2,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Fernández leis Gabriel",
-        "convocatorias": 8,
-        "partidos_titular": 8,
-        "minutos_jugados": 365,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 1,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Simone  Pedro",
-        "convocatorias": 5,
-        "partidos_titular": 5,
-        "minutos_jugados": 325,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 1,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Bustamante Alan",
-        "convocatorias": 11,
-        "partidos_titular": 11,
-        "minutos_jugados": 485,
-        "goles": 1,
-        "asistencias": 0,
-        "tarjeta_amarilla": 2,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Reinoso Patricio",
-        "convocatorias": 3,
-        "partidos_titular": 2,
-        "minutos_jugados": 90,
-        "goles": 1,
-        "asistencias": 0,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Noriega Mateo",
-        "convocatorias": 14,
-        "partidos_titular": 13,
-        "minutos_jugados": 450,
-        "goles": 1,
-        "asistencias": 1,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Garcia Bautista",
-        "convocatorias": 10,
-        "partidos_titular": 8,
-        "minutos_jugados": 185,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Arias Bonilla  Nicolás Geremias",
-        "convocatorias": 5,
-        "partidos_titular": 4,
-        "minutos_jugados": 155,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Monzon Tiziano",
-        "convocatorias": 11,
-        "partidos_titular": 11,
-        "minutos_jugados": 330,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Gonzalia Bautista",
-        "convocatorias": 9,
-        "partidos_titular": 8,
-        "minutos_jugados": 320,
-        "goles": 0,
-        "asistencias": 1,
-        "tarjeta_amarilla": 1,
-        "tarjeta_roja": 1
-      },
-      {
-        "jugador": "Martinuccio Bautista",
-        "convocatorias": 9,
-        "partidos_titular": 8,
-        "minutos_jugados": 370,
-        "goles": 3,
-        "asistencias": 0,
-        "tarjeta_amarilla": 1,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Zelaya Franco",
-        "convocatorias": 11,
-        "partidos_titular": 9,
-        "minutos_jugados": 390,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 2,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Meza Luca",
-        "convocatorias": 13,
-        "partidos_titular": 9,
-        "minutos_jugados": 395,
-        "goles": 1,
-        "asistencias": 0,
-        "tarjeta_amarilla": 1,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Sanchez Mathias",
-        "convocatorias": 6,
-        "partidos_titular": 4,
-        "minutos_jugados": 160,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Rios Mateo",
-        "convocatorias": 13,
-        "partidos_titular": 10,
-        "minutos_jugados": 514,
-        "goles": 0,
-        "asistencias": 1,
-        "tarjeta_amarilla": 4,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Reinoso Martiniano",
-        "convocatorias": 2,
-        "partidos_titular": 2,
-        "minutos_jugados": 70,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Celiz Teo",
-        "convocatorias": 20,
-        "partidos_titular": 14,
-        "minutos_jugados": 525,
-        "goles": 1,
-        "asistencias": 0,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Saragoza Ramiro",
-        "convocatorias": 15,
-        "partidos_titular": 12,
-        "minutos_jugados": 320,
-        "goles": 2,
-        "asistencias": 2,
-        "tarjeta_amarilla": 1,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Chmea Roque",
-        "convocatorias": 1,
-        "partidos_titular": 1,
-        "minutos_jugados": 25,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Gonzalez Leonardo Fabian",
-        "convocatorias": 2,
-        "partidos_titular": 2,
-        "minutos_jugados": 45,
-        "goles": 1,
-        "asistencias": 0,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Lagos Benjamin",
-        "convocatorias": 12,
-        "partidos_titular": 2,
-        "minutos_jugados": 115,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Bin Justin",
-        "convocatorias": 13,
-        "partidos_titular": 10,
-        "minutos_jugados": 275,
-        "goles": 1,
-        "asistencias": 0,
-        "tarjeta_amarilla": 2,
-        "tarjeta_roja": 1
-      },
-      {
-        "jugador": "Blanco Dylan Alex",
-        "convocatorias": 18,
-        "partidos_titular": 15,
-        "minutos_jugados": 841,
-        "goles": 1,
-        "asistencias": 0,
-        "tarjeta_amarilla": 1,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Inostroza Bastian",
-        "convocatorias": 12,
-        "partidos_titular": 8,
-        "minutos_jugados": 137,
-        "goles": 1,
-        "asistencias": 0,
-        "tarjeta_amarilla": 2,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Arias Nicolas",
-        "convocatorias": 19,
-        "partidos_titular": 9,
-        "minutos_jugados": 334,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Beron Santiago",
-        "convocatorias": 10,
-        "partidos_titular": 7,
-        "minutos_jugados": 83,
-        "goles": 1,
-        "asistencias": 0,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Guglielmo Lisandro",
-        "convocatorias": 14,
-        "partidos_titular": 11,
-        "minutos_jugados": 448,
-        "goles": 1,
-        "asistencias": 1,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Reyes Jose",
-        "convocatorias": 18,
-        "partidos_titular": 13,
-        "minutos_jugados": 456,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 1,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Punos Tiziano",
-        "convocatorias": 7,
-        "partidos_titular": 2,
-        "minutos_jugados": 0,
-        "goles": 1,
-        "asistencias": 0,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      }
-    ],
-    "9NA": [
-      {
-        "jugador": "Alvarenga Martin Adriano",
-        "convocatorias": 18,
-        "partidos_titular": 16,
-        "minutos_jugados": 1152,
-        "goles": 2,
-        "asistencias": 1,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Nuñez Tiziano",
-        "convocatorias": 28,
-        "partidos_titular": 13,
-        "minutos_jugados": 1040,
-        "goles": 3,
-        "asistencias": 1,
-        "tarjeta_amarilla": 2,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Diaz Francisco Roman",
-        "convocatorias": 4,
-        "partidos_titular": 3,
-        "minutos_jugados": 162,
-        "goles": 1,
-        "asistencias": 0,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Dominic Tomassi Benjamin",
-        "convocatorias": 3,
-        "partidos_titular": 2,
-        "minutos_jugados": 109,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Cubilla Jonathan",
-        "convocatorias": 8,
-        "partidos_titular": 4,
-        "minutos_jugados": 330,
-        "goles": 1,
-        "asistencias": 0,
-        "tarjeta_amarilla": 1,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Pesolilla Ian",
-        "convocatorias": 10,
-        "partidos_titular": 6,
-        "minutos_jugados": 280,
-        "goles": 0,
-        "asistencias": 2,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Enrique Ian",
-        "convocatorias": 19,
-        "partidos_titular": 13,
-        "minutos_jugados": 960,
-        "goles": 0,
-        "asistencias": 4,
-        "tarjeta_amarilla": 2,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Bojorge Benjamin",
-        "convocatorias": 17,
-        "partidos_titular": 1,
-        "minutos_jugados": 433,
-        "goles": 2,
-        "asistencias": 0,
-        "tarjeta_amarilla": 1,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Denis Galli Sebastian",
-        "convocatorias": 7,
-        "partidos_titular": 1,
-        "minutos_jugados": 192,
-        "goles": 1,
-        "asistencias": 0,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Arce Miño  Axel",
-        "convocatorias": 9,
-        "partidos_titular": 2,
-        "minutos_jugados": 273,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Vargas Valentino",
-        "convocatorias": 5,
-        "partidos_titular": 0,
-        "minutos_jugados": 151,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Mora Bautista",
-        "convocatorias": 22,
-        "partidos_titular": 20,
-        "minutos_jugados": 1279,
-        "goles": 1,
-        "asistencias": 0,
-        "tarjeta_amarilla": 1,
-        "tarjeta_roja": 1
-      },
-      {
-        "jugador": "Zapata Alejo",
-        "convocatorias": 20,
-        "partidos_titular": 20,
-        "minutos_jugados": 1161,
-        "goles": 2,
-        "asistencias": 3,
-        "tarjeta_amarilla": 2,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Gomez Joaquin",
-        "convocatorias": 22,
-        "partidos_titular": 16,
-        "minutos_jugados": 1100,
-        "goles": 3,
-        "asistencias": 1,
-        "tarjeta_amarilla": 5,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Olocco Mikeas",
-        "convocatorias": 22,
-        "partidos_titular": 13,
-        "minutos_jugados": 881,
-        "goles": 4,
-        "asistencias": 0,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Diaz Oliva Santiago",
-        "convocatorias": 23,
-        "partidos_titular": 19,
-        "minutos_jugados": 1183,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Tulis Federico",
-        "convocatorias": 13,
-        "partidos_titular": 12,
-        "minutos_jugados": 825,
-        "goles": 1,
-        "asistencias": 1,
-        "tarjeta_amarilla": 1,
-        "tarjeta_roja": 1
-      },
-      {
-        "jugador": "Gomez Zaracho Octavio",
-        "convocatorias": 23,
-        "partidos_titular": 19,
-        "minutos_jugados": 1218,
-        "goles": 1,
-        "asistencias": 0,
-        "tarjeta_amarilla": 6,
-        "tarjeta_roja": 2
-      },
-      {
-        "jugador": "Peludero Mateo",
-        "convocatorias": 17,
-        "partidos_titular": 11,
-        "minutos_jugados": 620,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Lopez Tomas",
-        "convocatorias": 19,
-        "partidos_titular": 16,
-        "minutos_jugados": 1019,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 2,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Maidana Lautaro",
-        "convocatorias": 19,
-        "partidos_titular": 12,
-        "minutos_jugados": 974,
-        "goles": 2,
-        "asistencias": 1,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Ortiz Leonardo",
-        "convocatorias": 16,
-        "partidos_titular": 14,
-        "minutos_jugados": 816,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Ibañez Bastian",
-        "convocatorias": 20,
-        "partidos_titular": 18,
-        "minutos_jugados": 1179,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 1
-      },
-      {
-        "jugador": "Torrecilla Enzo Francisco",
-        "convocatorias": 18,
-        "partidos_titular": 11,
-        "minutos_jugados": 858,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Agorreca Ignacio",
-        "convocatorias": 22,
-        "partidos_titular": 20,
-        "minutos_jugados": 1383,
-        "goles": 2,
-        "asistencias": 2,
-        "tarjeta_amarilla": 3,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Sanchez Benjamin",
-        "convocatorias": 15,
-        "partidos_titular": 9,
-        "minutos_jugados": 512,
-        "goles": 0,
-        "asistencias": 1,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Villalba Bogado Gustavo",
-        "convocatorias": 20,
-        "partidos_titular": 12,
-        "minutos_jugados": 930,
-        "goles": 1,
-        "asistencias": 1,
-        "tarjeta_amarilla": 2,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Baccaro Santino",
-        "convocatorias": 14,
-        "partidos_titular": 4,
-        "minutos_jugados": 394,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Becerra Lionel",
-        "convocatorias": 19,
-        "partidos_titular": 8,
-        "minutos_jugados": 607,
-        "goles": 1,
-        "asistencias": 1,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Vargas Felipe",
-        "convocatorias": 1,
-        "partidos_titular": 0,
-        "minutos_jugados": 22,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Monzon Ian",
-        "convocatorias": 23,
-        "partidos_titular": 11,
-        "minutos_jugados": 733,
-        "goles": 2,
-        "asistencias": 0,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 1
-      },
-      {
-        "jugador": "Holm Ian",
-        "convocatorias": 20,
-        "partidos_titular": 10,
-        "minutos_jugados": 746,
-        "goles": 2,
-        "asistencias": 0,
-        "tarjeta_amarilla": 1,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Baigorria Nicolás Nahuel",
-        "convocatorias": 23,
-        "partidos_titular": 9,
-        "minutos_jugados": 578,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 1,
-        "tarjeta_roja": 1
-      },
-      {
-        "jugador": "Dos Santos  Bayron",
-        "convocatorias": 16,
-        "partidos_titular": 5,
-        "minutos_jugados": 467,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 3,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Soto Mateo",
-        "convocatorias": 24,
-        "partidos_titular": 15,
-        "minutos_jugados": 1136,
-        "goles": 0,
-        "asistencias": 1,
-        "tarjeta_amarilla": 4,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Duarte Gonzalo Isaias",
-        "convocatorias": 24,
-        "partidos_titular": 11,
-        "minutos_jugados": 698,
-        "goles": 5,
-        "asistencias": 1,
-        "tarjeta_amarilla": 1,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Duarte Gaston",
-        "convocatorias": 23,
-        "partidos_titular": 17,
-        "minutos_jugados": 1348,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 9,
-        "tarjeta_roja": 1
-      },
-      {
-        "jugador": "Prado Lautaro",
-        "convocatorias": 19,
-        "partidos_titular": 13,
-        "minutos_jugados": 654,
-        "goles": 1,
-        "asistencias": 2,
-        "tarjeta_amarilla": 2,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Echevarrieta Bautista",
-        "convocatorias": 20,
-        "partidos_titular": 12,
-        "minutos_jugados": 654,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      }
-    ]
-  }
+  "jugadores_futdetail": {}
 }
