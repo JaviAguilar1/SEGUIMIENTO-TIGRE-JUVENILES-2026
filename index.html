@@ -3120,8 +3120,8 @@ function renderStatsSingle(cat, content){
   const amarillaAlertHTML = amarillaAlertCat.length
     ? `<div style="background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.35);border-radius:8px;
         padding:10px 14px;margin-bottom:12px;font-family:'Barlow Condensed',sans-serif;font-size:13px">
-        <span style="color:var(--gold2);font-weight:700">🟨 Riesgo de suspensión (4+ amarillas):</span>
-        <span style="color:var(--text2)"> ${amarillaAlertCat.map(p=>`${esc(p.nombre)} (${p.count})`).join(', ')}</span>
+        <span style="color:var(--text);font-weight:700">🟨 Jugadores con 4 amarillas:</span>
+        <span style="color:var(--text)"> ${amarillaAlertCat.map(p=>esc(p.nombre)).join(' - ')}</span>
       </div>`
     : '';
 
@@ -7344,6 +7344,7 @@ function exportWeeklyReport(catFilter){
 // y había que pasar el mouse por arriba para ver quién era.
 function amarillasEnAlerta(cat){
   const AMARILLAS_ALERTA = 4;
+  const AMARILLAS_SUSPENSION = 5; // a la 5ta amarilla se cumple 1 fecha y el conteo arranca de cero
   const porJugador = {}; // id -> {nombre, count}
   Object.values(partidos[cat]||{}).forEach(partido=>{
     (partido.amarillas||[]).forEach(a=>{
@@ -7352,7 +7353,12 @@ function amarillasEnAlerta(cat){
       porJugador[a.id].count++;
     });
   });
-  return Object.values(porJugador).filter(p=>p.count>=AMARILLAS_ALERTA);
+  // El aviso es por CICLO, no por total de temporada: si ya cumplió una
+  // suspensión (5, 10, 15... amarillas), el conteo relevante es el que
+  // lleva desde esa última suspensión, no el acumulado entero.
+  return Object.values(porJugador)
+    .map(p=>({...p, ciclo: p.count % AMARILLAS_SUSPENSION}))
+    .filter(p=>p.ciclo>=AMARILLAS_ALERTA);
 }
 function refreshAlerts(){
   const wrap = document.getElementById('alert-pills');
