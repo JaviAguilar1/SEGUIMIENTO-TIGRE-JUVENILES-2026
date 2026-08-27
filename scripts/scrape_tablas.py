@@ -325,7 +325,14 @@ def fetch_futdetail_estadisticas(opener, id_division: str):
     esa pagina en realidad la arma con JavaScript: los datos reales salen de
     un POST aparte a division_estadisticas_proceso.php, que SI devuelve JSON
     -- confirmado inspeccionando el pedido real con el usuario (DevTools ->
-    Network -> Fetch/XHR)."""
+    Network -> Fetch/XHR). Pedir el POST en frio (sin visitar antes la
+    pagina) devuelve el HTML de la pagina normal en vez del JSON -- asi que
+    primero se visita division_estadisticas.php (deja algo de estado de
+    sesion / referer, como con el login) y recien despues se hace el POST.
+    """
+    pagina_url = f"{FUTDETAIL_ESTADISTICAS_URL}?id_division={id_division}"
+    opener.open(urllib.request.Request(pagina_url, headers=HEADERS), timeout=30)
+
     body = urllib.parse.urlencode({
         "id_division": id_division, "temporada_id": FUTDETAIL_TEMPORADA_ID,
     }).encode()
@@ -334,6 +341,7 @@ def fetch_futdetail_estadisticas(opener, id_division: str):
     # El backend distingue pedidos AJAX reales por este header (asi lo manda
     # el JS de la pagina) -- sin el, la respuesta viene distinta.
     headers["X-Requested-With"] = "XMLHttpRequest"
+    headers["Referer"] = pagina_url
     resp = opener.open(urllib.request.Request(FUTDETAIL_ESTADISTICAS_URL, data=body, headers=headers), timeout=30)
     texto = resp.read().decode("utf-8", errors="replace")
     try:
