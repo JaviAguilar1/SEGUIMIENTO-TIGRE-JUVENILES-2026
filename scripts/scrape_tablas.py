@@ -331,18 +331,13 @@ def parse_futdetail_estadisticas(html: str):
     """
     Extrae la tabla "Estadisticas por Jugador" (convocatorias, partidos
     titular, minutos, goles, asistencias, amarillas, rojas -- acumulado de
-    toda la temporada). Matchea columnas por el TEXTO del encabezado, no por
-    posicion fija, porque la pagina trae mas columnas de las que usamos
-    (ej. "Ausencia Ent.") y el orden no esta garantizado.
+    toda la temporada). La pagina trae VARIAS <table> (confirmado con datos
+    reales: la primera es otra cosa, de documentos/novedades, no jugadores),
+    asi que se recorren todas buscando la que tenga una fila con una celda
+    "Jugador" -- esa fila es el encabezado real. Las columnas tambien se
+    matchean por TEXTO, no por posicion fija, porque hay mas columnas de
+    las que usamos (ej. "Ausencia Ent.") y el orden no esta garantizado.
     """
-    m = re.search(r"<table\b[^>]*>(.*?)</table>", html, re.IGNORECASE | re.DOTALL)
-    if not m:
-        raise ValueError("No se encontro ninguna <table> en division_estadisticas.php")
-    tabla_html = m.group(1)
-    filas = re.findall(r"<tr\b[^>]*>(.*?)</tr>", tabla_html, re.IGNORECASE | re.DOTALL)
-    if not filas:
-        raise ValueError("Tabla encontrada pero sin filas <tr>")
-
     CAMPOS = {
         "jugador": "jugador",
         "convocatorias": "convocatorias",
@@ -358,17 +353,28 @@ def parse_futdetail_estadisticas(html: str):
         celdas = re.findall(r"<t[dh]\b[^>]*>(.*?)</t[dh]>", fila, re.IGNORECASE | re.DOTALL)
         return [re.sub(r"<[^>]+>", "", c).replace("&nbsp;", " ").strip() for c in celdas]
 
-    header = celdas_de(filas[0])
+    filas_tabla, header_idx, header = None, None, None
+    for tabla_m in re.finditer(r"<table\b[^>]*>(.*?)</table>", html, re.IGNORECASE | re.DOTALL):
+        filas_candidatas = re.findall(r"<tr\b[^>]*>(.*?)</tr>", tabla_m.group(1), re.IGNORECASE | re.DOTALL)
+        for i, fila in enumerate(filas_candidatas):
+            celdas = celdas_de(fila)
+            if any(c.strip().lower() == "jugador" for c in celdas):
+                filas_tabla, header_idx, header = filas_candidatas, i, celdas
+                break
+        if filas_tabla:
+            break
+
+    if not filas_tabla:
+        raise ValueError("No se encontro ninguna tabla con columna 'Jugador' en division_estadisticas.php")
+
     idx_por_campo = {}
     for i, h in enumerate(header):
         campo = CAMPOS.get(h.strip().lower())
         if campo:
             idx_por_campo[campo] = i
-    if "jugador" not in idx_por_campo:
-        raise ValueError(f"No se encontro columna 'Jugador' en el encabezado: {header}")
 
     out = []
-    for fila in filas[1:]:
+    for fila in filas_tabla[header_idx + 1:]:
         celdas = celdas_de(fila)
         if len(celdas) <= idx_por_campo["jugador"]:
             continue
