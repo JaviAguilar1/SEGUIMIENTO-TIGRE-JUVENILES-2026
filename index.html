@@ -1807,7 +1807,7 @@ function initFirebase(){
           db.ref('users/'+user.uid+'/role').on('value', snap=>{
             currentRole = snap.val() || 'viewer';
             isAdmin     = currentRole==='admin';
-            canEdit     = ['admin','videoanalista','videoanalista_reserva'].includes(currentRole);
+            canEdit     = ['admin','videoanalista','videoanalista_reserva','videoanalista_menores'].includes(currentRole);
             catRole     = currentRole; // store for cat filtering
             applyViewMode();
             updateAuthUI();
@@ -1870,16 +1870,31 @@ function applyViewMode(){
   const cerrarTempBtn=document.getElementById('btn-cerrar-temporada');
   if(cerrarTempBtn) cerrarTempBtn.style.display=isAdmin?'':'none';
 
-  // Filter categories for category-specific roles
-  // e.g. role 'cat_4TA' only ve 4TA (ni GENERAL ni el resto)
+  // Filter categories for category-specific roles.
+  // 'cat_4TA' -> solo esa categoria (ni GENERAL ni el resto).
+  // 'videoanalista_menores' -> las 3 categorias menores (7MA/8VA/9NA, mismo
+  // grupo que ya usa CATS_MENORES en el resto de la app) -- Nacho edita esas
+  // tres, nada mas.
+  let allowedCats = null;
   if(currentRole && currentRole.startsWith('cat_')){
-    const allowedCat = currentRole.replace('cat_','').toUpperCase();
-    const sel=document.getElementById('stats-cat-select');
-    if(sel){
-      [...sel.options].forEach(o=>{ o.hidden = o.value!==allowedCat; });
-      sel.value=allowedCat;
-      currentCategoria=allowedCat;
-      renderStatsCat(allowedCat);
+    allowedCats = [currentRole.replace('cat_','').toUpperCase()];
+  } else if(currentRole === 'videoanalista_menores'){
+    allowedCats = [...CATS_MENORES];
+  }
+  const sel=document.getElementById('stats-cat-select');
+  if(sel){
+    if(allowedCats){
+      [...sel.options].forEach(o=>{ o.hidden = !allowedCats.includes(o.value); });
+      const first = allowedCats[0];
+      sel.value=first;
+      currentCategoria=first;
+      renderStatsCat(first);
+    } else {
+      // Sin restriccion de categoria (admin/coordinador/director/etc) --
+      // deshacer cualquier ocultamiento que haya quedado de un rol anterior
+      // (el listener de rol es en vivo, el usuario puede cambiar de cuenta
+      // sin recargar la pagina).
+      [...sel.options].forEach(o=>{ o.hidden = false; });
     }
   }
 }
@@ -1894,7 +1909,7 @@ function updateAuthUI(){
     if(logoutBtn) logoutBtn.style.display='flex';
     if(badge)     badge.style.display='flex';
     const roleLabels={'admin':'ADMIN','videoanalista':'VIDEOANALISTA',
-      'videoanalista_reserva':'VIDEO RESERVA',
+      'videoanalista_reserva':'VIDEO RESERVA','videoanalista_menores':'VIDEO 7-8-9',
       'director':'DIR. DEPORTIVO','coordinador':'COORDINADOR',
       'reserva_viewer':'RESERVA (VISTA)','cat_RESERVA':'RESERVA'};
     if(roleTagEl) roleTagEl.textContent=roleLabels[currentRole]||currentRole.toUpperCase();
