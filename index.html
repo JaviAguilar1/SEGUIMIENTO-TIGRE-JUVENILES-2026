@@ -2102,6 +2102,27 @@ function cerrarTemporada(){
 }
 
 // ── Auth actions ─────────────────────────────────────────────
+// Roles de DT por categoria: login/alta "sin email" -- el DT solo elige su
+// categoria y una contraseña. El email que pide Firebase Auth por dentro se
+// arma solo (dtEmailFor), nunca lo ve ni lo escribe nadie. La exclusividad
+// (un solo DT por categoria) la garantiza Firebase Auth mismo -- el email
+// es unico por definicion, asi que un segundo alta con el mismo rol falla
+// solo con "email-already-in-use". roles_taken es nada mas para que el
+// desplegable de alta ya no muestre una categoria ocupada, no es la unica
+// traba real.
+const DT_ROLES = [
+  {role:'cat_4TA',     label:'DT · 4TA'},
+  {role:'cat_5TA',     label:'DT · 5TA'},
+  {role:'cat_6TA',     label:'DT · 6TA'},
+  {role:'cat_7MA',     label:'DT · 7MA'},
+  {role:'cat_8VA',     label:'DT · 8VA'},
+  {role:'cat_9NA',     label:'DT · 9NA'},
+  {role:'cat_RESERVA', label:'DT · Reserva'},
+];
+function dtEmailFor(role){
+  return 'dt.' + role.replace('cat_','').toLowerCase() + '@tigrejuveniles.internal';
+}
+let dtMode = 'login';
 function showLoginModal(){
   let m=document.getElementById('login-modal');
   if(m){m.style.display='flex';return;}
@@ -2110,13 +2131,99 @@ function showLoginModal(){
   m.innerHTML=`<div class="modal-box">
     <img class="m-crest" src="${document.getElementById('escudoImg').src}">
     <h2>ACCESO</h2><p>TIGRE JUVENILES — ANÁLISIS</p>
-    <input id="m-email" class="m-input" type="email" placeholder="Email">
-    <input id="m-pass"  class="m-input" type="password" placeholder="Contraseña">
-    <button class="m-btn" onclick="doLogin()">INGRESAR</button>
-    <div class="m-error" id="m-err">Email o contraseña incorrectos</div>
+    <div id="login-normal">
+      <input id="m-email" class="m-input" type="email" placeholder="Email">
+      <input id="m-pass"  class="m-input" type="password" placeholder="Contraseña">
+      <button class="m-btn" onclick="doLogin()">INGRESAR</button>
+      <div class="m-error" id="m-err">Email o contraseña incorrectos</div>
+    </div>
+    <div id="dt-panel" style="display:none">
+      <div style="display:flex;gap:6px;margin-bottom:12px">
+        <button type="button" id="dt-tab-login" class="cat-subtab-btn" onclick="dtSetMode('login')"
+          style="flex:1;padding:8px;border-radius:8px;font-size:11px">INGRESAR</button>
+        <button type="button" id="dt-tab-signup" class="cat-subtab-btn" onclick="dtSetMode('signup')"
+          style="flex:1;padding:8px;border-radius:8px;font-size:11px">CREAR CUENTA</button>
+      </div>
+      <select id="dt-role" class="m-input"></select>
+      <input id="dt-nombre" class="m-input" type="text" placeholder="Nombre y apellido" style="display:none">
+      <input id="dt-pass" class="m-input" type="password" placeholder="Contraseña">
+      <button class="m-btn" id="dt-submit-btn" onclick="doDtSubmit()">INGRESAR</button>
+      <div class="m-error" id="dt-err"></div>
+    </div>
+    <button class="m-cancel" id="dt-toggle-link" onclick="toggleDtPanel()" style="margin-top:10px">¿Sos DT de una categoría? Entrá acá</button>
   </div>`;
   document.body.appendChild(m);
   document.getElementById('m-pass').addEventListener('keydown',e=>{ if(e.key==='Enter')doLogin(); });
+  document.getElementById('dt-pass').addEventListener('keydown',e=>{ if(e.key==='Enter')doDtSubmit(); });
+}
+function toggleDtPanel(){
+  const normal=document.getElementById('login-normal');
+  const panel=document.getElementById('dt-panel');
+  const link=document.getElementById('dt-toggle-link');
+  const showingDt = panel.style.display==='none';
+  normal.style.display = showingDt ? 'none' : '';
+  panel.style.display  = showingDt ? '' : 'none';
+  link.textContent = showingDt ? '¿No sos DT? Volver' : '¿Sos DT de una categoría? Entrá acá';
+  if(showingDt) dtSetMode('login');
+}
+function dtSetMode(mode){
+  dtMode = mode;
+  const errEl=document.getElementById('dt-err'); errEl.style.display='none'; errEl.textContent='';
+  document.getElementById('dt-nombre').style.display = mode==='signup' ? '' : 'none';
+  document.getElementById('dt-submit-btn').textContent = mode==='signup' ? 'CREAR CUENTA' : 'INGRESAR';
+  ['login','signup'].forEach(m=>{
+    const btn=document.getElementById('dt-tab-'+m); const on=m===mode;
+    btn.style.borderColor = on?'var(--gold)':'var(--border2)';
+    btn.style.color       = on?'var(--gold)':'var(--muted)';
+    btn.style.background  = on?'linear-gradient(135deg,#3a2a08,#1a1206)':'rgba(5,8,15,0.5)';
+  });
+  populateDtRoleSelect(mode==='signup');
+}
+function populateDtRoleSelect(filtrarOcupados){
+  const sel=document.getElementById('dt-role');
+  const build=(ocupados)=>{
+    const opts = DT_ROLES.filter(r=>!filtrarOcupados || !ocupados.includes(r.role));
+    sel.innerHTML = opts.length
+      ? opts.map(r=>`<option value="${r.role}">${r.label}</option>`).join('')
+      : `<option value="">Ya están todos los roles creados</option>`;
+  };
+  if(filtrarOcupados && fbReady && db){
+    db.ref('roles_taken').once('value').then(snap=>build(snap.val()?Object.keys(snap.val()):[])).catch(()=>build([]));
+  } else {
+    build([]);
+  }
+}
+function doDtSubmit(){
+  const role=document.getElementById('dt-role').value;
+  const pass=document.getElementById('dt-pass').value;
+  const errEl=document.getElementById('dt-err');
+  errEl.style.display='none';
+  if(!role){ errEl.textContent='Elegí un rol.'; errEl.style.display='block'; return; }
+  if(!pass){ errEl.textContent='Ingresá la contraseña.'; errEl.style.display='block'; return; }
+  const email=dtEmailFor(role);
+  if(dtMode==='signup'){
+    const nombre=document.getElementById('dt-nombre').value.trim();
+    if(!nombre){ errEl.textContent='Ingresá tu nombre.'; errEl.style.display='block'; return; }
+    firebase.auth().createUserWithEmailAndPassword(email, pass)
+      .then(cred=>{
+        const uid=cred.user.uid;
+        const updates={};
+        updates['users/'+uid+'/role']=role;
+        updates['users/'+uid+'/nombre']=nombre;
+        updates['roles_taken/'+role]=uid;
+        return db.ref().update(updates);
+      })
+      .then(()=>{ document.getElementById('login-modal').style.display='none'; })
+      .catch(e=>{
+        errEl.textContent = e.code==='auth/email-already-in-use' ? 'Ese rol ya tiene una cuenta creada.'
+          : e.code==='auth/weak-password' ? 'La contraseña necesita al menos 6 caracteres.' : e.message;
+        errEl.style.display='block';
+      });
+  } else {
+    firebase.auth().signInWithEmailAndPassword(email, pass)
+      .then(()=>{ document.getElementById('login-modal').style.display='none'; })
+      .catch(()=>{ errEl.textContent='Rol o contraseña incorrectos.'; errEl.style.display='block'; });
+  }
 }
 function doLogin(){
   const email=document.getElementById('m-email').value;
