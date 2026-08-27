@@ -26,6 +26,8 @@ jobs:
         env:
           FUTDETAIL_USER: ${{ secrets.FUTDETAIL_USER }}
           FUTDETAIL_PASS: ${{ secrets.FUTDETAIL_PASS }}
+          BL_USER: ${{ secrets.BL_USER }}
+          BL_PASS: ${{ secrets.BL_PASS }}
         run: python scripts/scrape_tablas.py
 
       - name: Commit y push si hubo cambios
