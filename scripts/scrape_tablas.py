@@ -217,6 +217,14 @@ FUTDETAIL_BASE = "https://futdetail.com.ar/futdetail_web_tigre/"
 FUTDETAIL_LOGIN_URL = FUTDETAIL_BASE + "login.php"
 FUTDETAIL_PARTIDOS_URL = FUTDETAIL_BASE + "partidos_consulta_procesos.php"
 FUTDETAIL_ESTADISTICAS_URL = FUTDETAIL_BASE + "division_estadisticas.php"
+# El JSON real de estadisticas por jugador sale de este endpoint, no de la
+# pagina de arriba (confirmado con el Network tab de un navegador real
+# logueado: la pagina la pide con un POST aparte a esto). El bug de fondo
+# de "Expecting value ... <!doctype html>" que venia fallando desde que se
+# agrego esta parte era justamente pedir el JSON a la URL de la pagina en
+# vez de a esta -- FUTDETAIL_ESTADISTICAS_URL solo sirve para la visita
+# previa que deja estado de sesion/referer (ver fetch_futdetail_estadisticas).
+FUTDETAIL_ESTADISTICAS_PROCESO_URL = FUTDETAIL_BASE + "division_estadisticas_proceso.php"
 FUTDETAIL_TEMPORADA_ID = "3"  # 2026, mismo criterio que el desplegable del panel
 FUTDETAIL_DIVISIONES = {
     "4TA": "3",
@@ -327,10 +335,16 @@ def fetch_futdetail_estadisticas(opener, id_division: str):
     esa pagina en realidad la arma con JavaScript: los datos reales salen de
     un POST aparte a division_estadisticas_proceso.php, que SI devuelve JSON
     -- confirmado inspeccionando el pedido real con el usuario (DevTools ->
-    Network -> Fetch/XHR). Pedir el POST en frio (sin visitar antes la
-    pagina) devuelve el HTML de la pagina normal en vez del JSON -- asi que
-    primero se visita division_estadisticas.php (deja algo de estado de
-    sesion / referer, como con el login) y recien despues se hace el POST.
+    Network -> Fetch/XHR). Primero se visita division_estadisticas.php (deja
+    estado de sesion / referer, como con el login) y recien despues se hace
+    el POST -- pero el POST tiene que ir a division_estadisticas_proceso.php
+    (FUTDETAIL_ESTADISTICAS_PROCESO_URL), NO a la url de la pagina: ese era
+    el bug real detras del "Expecting value ... <!doctype html>" que
+    persistia en varios intentos anteriores (headers, Referer, GET previo)
+    -- nunca era la sesion, era la URL equivocada. Confirmado re-mirando el
+    Network tab con un navegador logueado: la pagina pide el JSON a
+    division_estadisticas_proceso.php, y ESA respuesta matchea exacto lo que
+    parse_futdetail_estadisticas espera.
     """
     pagina_url = f"{FUTDETAIL_ESTADISTICAS_URL}?id_division={id_division}"
     opener.open(urllib.request.Request(pagina_url, headers=HEADERS), timeout=30)
@@ -344,7 +358,7 @@ def fetch_futdetail_estadisticas(opener, id_division: str):
     # el JS de la pagina) -- sin el, la respuesta viene distinta.
     headers["X-Requested-With"] = "XMLHttpRequest"
     headers["Referer"] = pagina_url
-    resp = opener.open(urllib.request.Request(FUTDETAIL_ESTADISTICAS_URL, data=body, headers=headers), timeout=30)
+    resp = opener.open(urllib.request.Request(FUTDETAIL_ESTADISTICAS_PROCESO_URL, data=body, headers=headers), timeout=30)
     texto = resp.read().decode("utf-8", errors="replace")
     try:
         return json.loads(texto)
