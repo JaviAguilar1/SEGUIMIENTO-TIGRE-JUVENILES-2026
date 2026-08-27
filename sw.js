@@ -61,10 +61,14 @@ self.addEventListener('fetch', event => {
 
   // Navegaciones (el documento HTML principal): red primero, para que el
   // usuario siempre vea la versión nueva. Si no hay conexión, se usa el
-  // caché como respaldo.
+  // caché como respaldo. cache:'no-store' es necesario además del fetch-
+  // primero: sin esto, el fetch podía volver a resolverse desde el caché
+  // HTTP normal del navegador (GitHub Pages manda Cache-Control con unos
+  // minutos de validez) y un F5 común seguía mostrando la versión vieja
+  // -- solo un hard refresh (Ctrl+Shift+R) lo salteaba.
   if (req.mode === 'navigate') {
     event.respondWith(
-      fetch(req).then(res => {
+      fetch(req, {cache: 'no-store'}).then(res => {
         if (res && res.status === 200) {
           const copy = res.clone();
           caches.open(CACHE).then(cache => cache.put(req, copy));

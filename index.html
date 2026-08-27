@@ -1543,6 +1543,12 @@ function formatFechaCalendario(fecha){
   const dia = new Date(2026, f.mes, f.dia).toLocaleDateString('es-AR', {weekday:'long'});
   return `${dia.charAt(0).toUpperCase()+dia.slice(1)} ${f.dia}/${f.mes+1}`;
 }
+// Version compacta ("14/3") para meter al lado de "F1" en la columna FECHA
+// de RESULTADOS, donde no entra el nombre del día.
+function fechaCalCompacta(fecha){
+  const f = FECHA_CALENDARIO[fecha];
+  return f ? `${f.dia}/${f.mes+1}` : '';
+}
 
 const PREFILLED = {
   '4TA':{1:[1,0],2:[0,1],3:[2,4],4:[2,3],5:[2,0],6:[4,0],7:[0,1],8:[0,2],9:[2,0]},
@@ -3000,13 +3006,12 @@ function renderStatsSingle(cat, content){
   fixtureList.forEach(r=>{
     // No block dividers for RESERVA (18 matches, no need to split)
     if(!isReserva && (r.f-1)%bloqueSize===0 && r.f>1){
-      const span=6+(isLink?activeLinks.length:0)+(showEquipo?1:0);
+      const span=3+(isLink?activeLinks.length:0)+(showEquipo?1:0);
       rows+=`<tr class="divider-row"><td colspan="${span}">── BLOQUE F${r.f}–F${Math.min(r.f+bloqueSize-1,35)}</td></tr>`;
     }
     const stored=results[dataCat][r.f];
     const gf=stored?stored[0]:'', gc=stored?stored[1]:'';
     const res=stored?getResult(stored[0],stored[1]):null;
-    const rb=res?`<span class="result-badge result-${res}">${res}</span>`:'—';
     const pts=res==='W'?3:res==='D'?1:res==='L'?0:'—';
     const ptC=res==='W'?'var(--win)':res==='D'?'var(--draw)':res==='L'?'var(--loss)':'var(--muted)';
 
@@ -3014,26 +3019,27 @@ function renderStatsSingle(cat, content){
     const rName = isReserva ? (rivalData[dataCat][r.f]?.rival || '') : r.r;
     const rCond = isReserva ? (rivalData[dataCat][r.f]?.cond  || 'L') : r.c;
 
-    // Rival + cond cells
+    // Rival + condición van juntos en una sola celda (antes eran dos
+    // columnas separadas) — la condición queda como badge chico al lado
+    // del nombre en vez de tener su propio ancho de columna.
     const rivalCell = isReserva && canEdit
-      ? `<td><input class="rival-edit-input" type="text" value="${esc(rName)}"
+      ? `<td><div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+          <input class="rival-edit-input" type="text" value="${esc(rName)}"
             data-fecha="${r.f}" data-field="rival"
             placeholder="Rival…"
             style="background:rgba(5,8,15,0.6);border:1px solid var(--border2);border-radius:4px;
-            color:var(--text);font-size:12px;padding:3px 7px;width:130px;font-family:Barlow Condensed,sans-serif;
+            color:var(--text);font-size:12px;padding:3px 7px;width:120px;font-family:Barlow Condensed,sans-serif;
             font-weight:600;outline:none;"
-            onfocus="this.style.borderColor='var(--gold)'" onblur="this.style.borderColor='var(--border2)'"></td>`
-      : `<td class="rival-name">${esc(rName)||'—'}</td>`;
-
-    const condCell = isReserva && canEdit
-      ? `<td><select class="cond-edit-select" data-fecha="${r.f}" data-field="cond"
+            onfocus="this.style.borderColor='var(--gold)'" onblur="this.style.borderColor='var(--border2)'">
+          <select class="cond-edit-select" data-fecha="${r.f}" data-field="cond"
             style="background:rgba(5,8,15,0.7);border:1px solid var(--border2);border-radius:4px;
             color:var(--text);font-size:11px;padding:3px 6px;font-family:Barlow Condensed,sans-serif;
             font-weight:700;outline:none;cursor:pointer;">
             <option value="L" ${rCond==='L'?'selected':''}>LOCAL</option>
             <option value="V" ${rCond==='V'?'selected':''}>VISIT.</option>
-          </select></td>`
-      : `<td><span class="cond-badge cond-${rCond}">${rCond==='L'?'LOCAL':'VISIT.'}</span></td>`;
+          </select>
+        </div></td>`
+      : `<td class="rival-name">${esc(rName)||'—'} <span class="cond-badge cond-${rCond}" style="margin-left:4px;font-size:10px">${rCond==='L'?'LOCAL':'VISIT.'}</span></td>`;
 
     const hasTeamData = !!(matchData[dataCat][r.f]?.titulares?.length);
     let linkCols='';
@@ -3063,19 +3069,22 @@ function renderStatsSingle(cat, content){
       ? `<td><button class="btn-equipo${hasTeamData?' active':''}" data-cat="${dataCat}" data-fecha="${r.f}" title="Ver/editar equipo">👥${hasTeamData?' ✓':''}</button></td>`
       : '';
 
+    const fechaCal = isReserva ? '' : fechaCalCompacta(r.f);
+    const letraEs = res==='W'?'G':res==='D'?'E':res==='L'?'P':'';
+
     rows+=`<tr data-cat="${dataCat}" data-fecha="${r.f}">
-      <td class="fecha-num">${r.f}</td><td class="fecha-cal" style="color:var(--muted);font-size:11px;white-space:nowrap">${isReserva?'':formatFechaCalendario(r.f)}</td>${rivalCell}${condCell}
+      <td class="fecha-num">F${r.f}${fechaCal?` <span style="color:var(--muted);font-size:11px;font-weight:400">(${fechaCal})</span>`:''}</td>${rivalCell}
       <td><div class="score-cell">
         <input class="score-input" type="number" min="0" max="99" value="${gf}"
           data-cat="${dataCat}" data-fecha="${r.f}" data-side="0" placeholder="—" ${canEdit?'':'disabled'}>
         <span class="score-sep">-</span>
         <input class="score-input" type="number" min="0" max="99" value="${gc}"
           data-cat="${dataCat}" data-fecha="${r.f}" data-side="1" placeholder="—" ${canEdit?'':'disabled'}>
+        ${res?`<span class="result-inline" style="margin-left:8px;font-weight:700;color:${ptC}">${letraEs} (${pts})</span>`:''}
       </div></td>
-      <td>${rb}</td><td style="font-weight:700;color:${ptC}">${pts}</td>
       ${linkCols}${equipoBtn}</tr>${showEquipo?`
     <tr class="match-detail-row" id="mdr-${dataCat}-${r.f}" style="display:none">
-      <td colspan="${8+(isLink?activeLinks.length:0)}">
+      <td colspan="${4+(isLink?activeLinks.length:0)}">
         <div class="match-detail-panel" id="mdp-${dataCat}-${r.f}"></div>
       </td>
     </tr>`:''}`;
@@ -3125,11 +3134,11 @@ function renderStatsSingle(cat, content){
       <div class="table-wrap"><table>
         <thead>
           <tr class="thead-top">
-            <th colspan="7" style="background:linear-gradient(135deg,#0a0f1e,#08111f);color:var(--muted);font-size:10px;letter-spacing:2px;">DATOS DEL PARTIDO</th>
+            <th colspan="3" style="background:linear-gradient(135deg,#0a0f1e,#08111f);color:var(--muted);font-size:10px;letter-spacing:2px;">DATOS DEL PARTIDO</th>
             ${linkGH}
             ${showEquipo?`<th style="background:linear-gradient(135deg,#1a2a10,#0f1a08);color:#86a86a;border-top:2px solid #4a7a3a;font-size:10px;letter-spacing:2px;">👥</th>`:''}
           </tr>
-          <tr class="thead-sub"><th>#</th><th>FECHA</th><th>RIVAL</th><th>COND</th><th>RESULTADO</th><th>RES</th><th>PTS</th>${linkSH}${showEquipo?`<th title="Equipo / Alineación">EQUIPO</th>`:''}</tr>
+          <tr class="thead-sub"><th>FECHA</th><th>RIVAL</th><th>RESULTADO</th>${linkSH}${showEquipo?`<th title="Equipo / Alineación">EQUIPO</th>`:''}</tr>
         </thead>
         <tbody id="tbody-${dataCat}">${rows}</tbody>
       </table></div>
@@ -3944,8 +3953,11 @@ async function parseCometPdf(file, cat){
   const iSubst = idxWord('SUBSTITUCIONES', iAline);
   // "CUERPO TÉCNICO" sale partido en 2-3 tokens por el acento ("CUERPO T"+"É"+"CNICO") — buscar por prefijo.
   const iCuerpo = idxMatch(/^CUERPO/, iSubst);
+  // GOLES es la única sección que COMET puede omitir del todo (partido 0-0,
+  // sin ningún gol de ningún equipo) -- no exigirla como las demás, el
+  // array de goles queda vacío en ese caso en vez de tirar error.
   const iGoles = idxWord('GOLES', iCuerpo);
-  if([iAline,iSubst,iCuerpo,iGoles].some(i=>i<0)) throw new Error('No se reconoció la estructura del informe (ALINEACIONES/SUBSTITUCIONES/GOLES) — revisá que sea el PDF correcto.');
+  if([iAline,iSubst,iCuerpo].some(i=>i<0)) throw new Error('No se reconoció la estructura del informe (ALINEACIONES/SUBSTITUCIONES) — revisá que sea el PDF correcto.');
 
   const alineWords = all.slice(iAline+1, iSubst);
   const substWords = all.slice(iSubst+1, iCuerpo);
@@ -4052,23 +4064,25 @@ async function parseCometPdf(file, cat){
     return {dorsal: m?parseInt(m[1]):null, nombre:cometNorm((m?m[2]:items[0].s)+' '+items.slice(1).map(w=>w.s).join(' '))};
   }
 
-  const iDisc = idxWord('DISCIPLINARIO', iGoles);
-  const golesWords = sideWords(all.slice(iGoles+1, iDisc<0?iGoles+300:iDisc));
-  const rowsG = cometGroupRows(golesWords, 6);
   const golesRaw = [];
-  rowsG.forEach(r=>{
-    const items = r.items;
-    if(!items.length || !cometMinRe.test(items[0].s)) return;
-    const minuto = parseInt(items[0].s);
-    // "Gol de penal" es OTRO item de texto, en la misma fila que el dorsal+
-    // nombre pero más a la derecha (no una fila propia debajo, como el
-    // motivo de una tarjeta) — hay que sacarlo antes de armar el nombre, si
-    // no queda pegado ("BENITEZ, CRISTIAN ALEJANDRO Gol de penal").
-    const penal = items.slice(1).some(w=>/penal/i.test(w.s));
-    const nameItems = items.slice(1).filter(w=>!/penal/i.test(w.s));
-    const {dorsal, nombre} = splitDorsalNombre(nameItems);
-    golesRaw.push({minuto, dorsal, nombre, penal});
-  });
+  if(iGoles>=0){
+    const iDisc = idxWord('DISCIPLINARIO', iGoles);
+    const golesWords = sideWords(all.slice(iGoles+1, iDisc<0?iGoles+300:iDisc));
+    const rowsG = cometGroupRows(golesWords, 6);
+    rowsG.forEach(r=>{
+      const items = r.items;
+      if(!items.length || !cometMinRe.test(items[0].s)) return;
+      const minuto = parseInt(items[0].s);
+      // "Gol de penal" es OTRO item de texto, en la misma fila que el dorsal+
+      // nombre pero más a la derecha (no una fila propia debajo, como el
+      // motivo de una tarjeta) — hay que sacarlo antes de armar el nombre, si
+      // no queda pegado ("BENITEZ, CRISTIAN ALEJANDRO Gol de penal").
+      const penal = items.slice(1).some(w=>/penal/i.test(w.s));
+      const nameItems = items.slice(1).filter(w=>!/penal/i.test(w.s));
+      const {dorsal, nombre} = splitDorsalNombre(nameItems);
+      golesRaw.push({minuto, dorsal, nombre, penal});
+    });
+  }
 
   function parseTarjetas(labelRe){
     const iLab = idxMatch(labelRe);
@@ -4582,11 +4596,24 @@ function rebuildRow(cat,fecha){
     const inp=tr.querySelectorAll('.score-input');
     if(!inp.length||parseInt(inp[0].dataset.fecha)!==fecha)return;
     const r=results[cat][fecha],res=r?getResult(r[0],r[1]):null;
-    tr.children[4].innerHTML=res?`<span class="result-badge result-${res}">${res}</span>`:'—';
-    const pts=res==='W'?3:res==='D'?1:res==='L'?0:'—';
-    tr.children[5].textContent=pts;
-    tr.children[5].style.color=res==='W'?'var(--win)':res==='D'?'var(--draw)':res==='L'?'var(--loss)':'var(--muted)';
-    tr.children[5].style.fontWeight='700';
+    const scoreCell=inp[0].closest('.score-cell');
+    let span=scoreCell.querySelector('.result-inline');
+    if(res){
+      const letraEs=res==='W'?'G':res==='D'?'E':'P';
+      const pts=res==='W'?3:res==='D'?1:0;
+      const color=res==='W'?'var(--win)':res==='D'?'var(--draw)':'var(--loss)';
+      if(!span){
+        span=document.createElement('span');
+        span.className='result-inline';
+        span.style.marginLeft='8px';
+        span.style.fontWeight='700';
+        scoreCell.appendChild(span);
+      }
+      span.style.color=color;
+      span.textContent=`${letraEs} (${pts})`;
+    } else if(span){
+      span.remove();
+    }
   });
 }
 
