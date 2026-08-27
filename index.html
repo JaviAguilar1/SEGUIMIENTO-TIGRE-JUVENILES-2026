@@ -3118,10 +3118,14 @@ function renderStatsSingle(cat, content){
 
   const amarillaAlertCat = CONFIABILIDAD_CATS.includes(cat) ? amarillasEnAlerta(cat) : [];
   const amarillaAlertHTML = amarillaAlertCat.length
-    ? `<div style="background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.35);border-radius:8px;
-        padding:10px 14px;margin-bottom:12px;font-family:'Barlow Condensed',sans-serif;font-size:13px">
-        <span style="color:var(--text);font-weight:700">🟨 Jugadores con 4 amarillas:</span>
-        <span style="color:var(--text)"> ${amarillaAlertCat.map(p=>esc(p.nombre)).join(' - ')}</span>
+    ? `<div style="background:rgba(245,158,11,0.15);border:1px solid rgba(245,158,11,0.45);border-radius:8px;
+        padding:12px 16px;margin-bottom:12px;font-family:'Barlow Condensed',sans-serif">
+        <div style="font-size:11px;letter-spacing:1.5px;color:var(--gold2);font-weight:700;text-transform:uppercase;margin-bottom:4px">
+          🟨 JUGADORES CON 4 AMARILLAS
+        </div>
+        <div style="font-size:16px;font-weight:700;color:var(--text);letter-spacing:0.5px;text-transform:uppercase">
+          ${amarillaAlertCat.map(p=>esc(p.nombre)).join(' &nbsp;·&nbsp; ')}
+        </div>
       </div>`
     : '';
 
