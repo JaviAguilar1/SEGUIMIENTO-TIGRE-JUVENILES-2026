@@ -6246,7 +6246,11 @@ async function generarEstadisticasRival(cat){
     if(!filaRival || !filaTigre){ alert('Todavía no tengo la tabla de posiciones de '+cat+' descargada. Probá "🔄 Actualizar datos".'); return; }
     const ultimos = ultimosPartidosRival(cat, prox.rival, prox.condRival, 4);
     const reciente = partidoMasRecienteRival(cat, prox.rival);
-    const blob = await dibujarTarjetaRival({cat, prox, info, ultimos, reciente, filaRival, filaTigre});
+    const num = (id, def) => parseInt(document.getElementById(id+cat)?.value ?? def) || def;
+    const escalaLiga = num('placa-stats-escala-liga-', 100)/100;
+    const offsetXLiga = num('placa-stats-x-liga-', 0);
+    const offsetYLiga = num('placa-stats-y-liga-', 0);
+    const blob = await dibujarTarjetaRival({cat, prox, info, ultimos, reciente, filaRival, filaTigre, escalaLiga, offsetXLiga, offsetYLiga});
     const a=document.createElement('a');
     a.href=URL.createObjectURL(blob);
     a.download=`proximo-rival-${cat}-F${prox.fecha}-${slugArchivo(prox.rival)}.png`;
@@ -6256,8 +6260,9 @@ async function generarEstadisticasRival(cat){
   }
 }
 
-async function dibujarTarjetaRival({cat, prox, info, ultimos, reciente, filaRival, filaTigre}){
+async function dibujarTarjetaRival({cat, prox, info, ultimos, reciente, filaRival, filaTigre, escalaLiga, offsetXLiga, offsetYLiga}){
   if(document.fonts && document.fonts.ready) await document.fonts.ready;
+  escalaLiga = escalaLiga || 1; offsetXLiga = offsetXLiga || 0; offsetYLiga = offsetYLiga || 0;
 
   // Fondo más azulado (var(--surface3) de la app) en vez de var(--bg) --
   // a pedido de Javi, se veía "demasiado negro" comparado con la
@@ -6266,9 +6271,10 @@ async function dibujarTarjetaRival({cat, prox, info, ultimos, reciente, filaRiva
         TXT='#d8e4ff', TXT2='#a8c0e8', MUTED='#8aa0cc', WIN='#22c55e', DRAW='#f59e0b',
         LOSS='#ef4444', BORDER='#3a5090', WHITE='#ffffff';
 
-  const [escudoRival, escudoTigre, ...escudosResultados] = await Promise.all([
+  const [escudoRival, escudoTigre, escudoLiga, ...escudosResultados] = await Promise.all([
     cargarImagen('escudos/'+info.escudo),
     cargarImagen(document.getElementById('escudoImg')?.src),
+    cargarImagen('escudos/LIGA.png'),
     ...ultimos.map(p=>cargarImagen(ESCUDO_POR_SABADOGOL[p.rivalDe] ? 'escudos/'+ESCUDO_POR_SABADOGOL[p.rivalDe] : null)),
   ]);
   const escudoReciente = reciente ? await cargarImagen(ESCUDO_POR_SABADOGOL[reciente.rivalDe] ? 'escudos/'+ESCUDO_POR_SABADOGOL[reciente.rivalDe] : null) : null;
@@ -6296,6 +6302,11 @@ async function dibujarTarjetaRival({cat, prox, info, ultimos, reciente, filaRiva
   ctx.imageSmoothingEnabled=true; ctx.imageSmoothingQuality='high';
   ctx.fillStyle=BG; ctx.fillRect(0,0,W,H);
   ctx.textBaseline='top';
+
+  if(escudoLiga){
+    const wLiga=75*escalaLiga, hLiga=75*escalaLiga;
+    ctx.drawImage(escudoLiga, W-pad-wLiga+offsetXLiga, pad-12+offsetYLiga, wLiga, hLiga);
+  }
 
   const catLabel = CATEGORIAS_CONFIG[cat]?.label ? CATEGORIAS_CONFIG[cat].label.toUpperCase()+' DIVISIÓN' : cat;
   let y=pad;
@@ -6426,6 +6437,18 @@ async function dibujarTarjetaRival({cat, prox, info, ultimos, reciente, filaRiva
 // 2) Placa de portada: fija, solo en 4TA/5TA/6TA (mismo alcance que
 //    "Estadísticas próximo rival" -- usa los mismos datos). La fecha de
 //    calendario sale de FECHA_CALENDARIO, no hace falta tipearla.
+// Fila de slider chica (tamaño %/horizontal px/vertical px) reusada por los
+// controles de ajuste de logos de las 4 placas -- onSlide es opcional
+// (Portada la usa para refrescar su vista previa en vivo; las demás placas
+// no tienen vista previa, así que el slider solo actualiza el numerito).
+function sliderRowPlacas(id, label, val, min, max, unit, onSlide=''){
+  return `<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+    <span style="font-size:11px;color:var(--muted);letter-spacing:1px;width:110px">${label}</span>
+    <input type="range" id="${id}" min="${min}" max="${max}" value="${val}"
+      oninput="document.getElementById('${id}-val').textContent=this.value+'${unit}';${onSlide}" style="width:160px">
+    <span id="${id}-val" style="font-size:12px;color:var(--gold2);width:36px">${val}${unit}</span>
+  </div>`;
+}
 function renderPlacasTab(cat, tabEl){
   const conPortada = CONFIABILIDAD_CATS.includes(cat);
   const btnStyle=`background:rgba(240,192,64,0.15);border:1px solid var(--border2);color:var(--gold2);
@@ -6440,8 +6463,12 @@ function renderPlacasTab(cat, tabEl){
 
     ${seccionTitulo('placa-stats-'+cat, '🎬 PLACA DE ESTADÍSTICAS')}
     <div id="sec-placa-stats-${cat}"${seccionEstiloInicial('placa-stats-'+cat)}>
-      <div style="padding:4px 0 14px">
-        <button onclick="generarEstadisticasRival('${cat}')" id="btn-rival-stats" style="${btnStyle}">⬇ GENERAR ESTADÍSTICAS</button>
+      <div style="max-width:280px;padding:4px 0 14px">
+        <div style="font-size:10px;color:var(--muted);letter-spacing:1px;margin-bottom:4px">LOGO LPF</div>
+        ${sliderRowPlacas('placa-stats-escala-liga-'+cat, 'TAMAÑO', 100, 50, 180, '%')}
+        ${sliderRowPlacas('placa-stats-x-liga-'+cat, 'HORIZONTAL', 0, -40, 40, 'px')}
+        ${sliderRowPlacas('placa-stats-y-liga-'+cat, 'VERTICAL', 0, -40, 40, 'px')}
+        <button onclick="generarEstadisticasRival('${cat}')" id="btn-rival-stats" style="margin-top:10px;${btnStyle}">⬇ GENERAR ESTADÍSTICAS</button>
       </div>
     </div>` : ''}
 
@@ -6456,14 +6483,26 @@ function renderPlacasTab(cat, tabEl){
         <input id="placa-fase-subtitulo" type="text" placeholder="Ej: A favor" maxlength="60"
           style="background:var(--surface2);border:1px solid var(--border2);color:var(--text);
           border-radius:6px;padding:9px 12px;font-family:'Barlow Condensed',sans-serif;font-size:15px;outline:none">
-        <button onclick="generarPlacaFase()" id="btn-placa-fase" style="align-self:flex-start;margin-top:6px;${btnStyle}">⬇ GENERAR PLACA</button>
+        <div style="font-size:10px;color:var(--muted);letter-spacing:1px;margin-top:8px">LOGO LPF</div>
+        ${sliderRowPlacas('placa-fase-escala-liga-'+cat, 'TAMAÑO', 100, 50, 180, '%')}
+        ${sliderRowPlacas('placa-fase-x-liga-'+cat, 'HORIZONTAL', 0, -40, 40, 'px')}
+        ${sliderRowPlacas('placa-fase-y-liga-'+cat, 'VERTICAL', 0, -40, 40, 'px')}
+        <div style="font-size:10px;color:var(--muted);letter-spacing:1px;margin-top:8px">ESCUDO TIGRE</div>
+        ${sliderRowPlacas('placa-fase-escala-tigre-'+cat, 'TAMAÑO', 100, 50, 180, '%')}
+        ${sliderRowPlacas('placa-fase-x-tigre-'+cat, 'HORIZONTAL', 0, -40, 40, 'px')}
+        ${sliderRowPlacas('placa-fase-y-tigre-'+cat, 'VERTICAL', 0, -40, 40, 'px')}
+        <button onclick="generarPlacaFase('${cat}')" id="btn-placa-fase" style="align-self:flex-start;margin-top:6px;${btnStyle}">⬇ GENERAR PLACA</button>
       </div>
     </div>
 
     ${seccionTitulo('placa-cierre-'+cat, '🎬 PLACA DE CIERRE')}
     <div id="sec-placa-cierre-${cat}"${seccionEstiloInicial('placa-cierre-'+cat)}>
-      <div style="padding:4px 0 14px">
-        <button onclick="generarPlacaCierre()" id="btn-placa-cierre" style="${btnStyle}">⬇ GENERAR PLACA</button>
+      <div style="max-width:280px;padding:4px 0 14px">
+        <div style="font-size:10px;color:var(--muted);letter-spacing:1px;margin-bottom:4px">ESCUDO TIGRE</div>
+        ${sliderRowPlacas('placa-cierre-escala-tigre-'+cat, 'TAMAÑO', 100, 50, 180, '%')}
+        ${sliderRowPlacas('placa-cierre-x-tigre-'+cat, 'HORIZONTAL', 0, -40, 40, 'px')}
+        ${sliderRowPlacas('placa-cierre-y-tigre-'+cat, 'VERTICAL', 0, -40, 40, 'px')}
+        <button onclick="generarPlacaCierre('${cat}')" id="btn-placa-cierre" style="margin-top:10px;${btnStyle}">⬇ GENERAR PLACA</button>
       </div>
     </div>
   `;
@@ -6499,12 +6538,7 @@ async function renderPlacaPortadaInfo(cat){
     }
     const opciones = jugadas.map(r=>`<option value="${r.f}">Fecha ${r.f} · ${r.r}</option>`).join('');
     const onSlide = `actualizarPlacaPostPreview('${cat}')`;
-    const sliderRow = (id, label, val, min, max, unit) => `<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
-      <span style="font-size:11px;color:var(--muted);letter-spacing:1px;width:110px">${label}</span>
-      <input type="range" id="${id}" min="${min}" max="${max}" value="${val}"
-        oninput="document.getElementById('${id}-val').textContent=this.value+'${unit}';${onSlide}" style="width:160px">
-      <span id="${id}-val" style="font-size:12px;color:var(--gold2);width:36px">${val}${unit}</span>
-    </div>`;
+    const sliderRow = (id, label, val, min, max, unit) => sliderRowPlacas(id, label, val, min, max, unit, onSlide);
     el.innerHTML = `<div style="display:flex;gap:24px;flex-wrap:wrap;align-items:flex-start">
       <div style="min-width:280px">
         ${toggleHTML}
@@ -6520,6 +6554,10 @@ async function renderPlacaPortadaInfo(cat){
           ${sliderRow('placa-post-escala-rival-'+cat, 'TAMAÑO', 100, 50, 180, '%')}
           ${sliderRow('placa-post-x-rival-'+cat, 'HORIZONTAL', 0, -40, 40, 'px')}
           ${sliderRow('placa-post-y-rival-'+cat, 'VERTICAL', 0, -40, 40, 'px')}
+          <div style="font-size:10px;color:var(--muted);letter-spacing:1px;margin:8px 0 4px">LOGO LPF</div>
+          ${sliderRow('placa-post-escala-liga-'+cat, 'TAMAÑO', 100, 50, 180, '%')}
+          ${sliderRow('placa-post-x-liga-'+cat, 'HORIZONTAL', 0, -40, 40, 'px')}
+          ${sliderRow('placa-post-y-liga-'+cat, 'VERTICAL', 0, -40, 40, 'px')}
         </div>
         <div>
           <button onclick="generarPlacaPostPartido('${cat}')" id="btn-placa-post" style="
@@ -6567,10 +6605,13 @@ function leerControlesPlacaPost(cat){
     fecha, info, entry,
     escalaTigre: num('placa-post-escala-tigre-', 100)/100,
     escalaRival: num('placa-post-escala-rival-', 100)/100,
+    escalaLiga: num('placa-post-escala-liga-', 100)/100,
     offsetXTigre: num('placa-post-x-tigre-', 0),
     offsetYTigre: num('placa-post-y-tigre-', 0),
     offsetXRival: num('placa-post-x-rival-', 0),
     offsetYRival: num('placa-post-y-rival-', 0),
+    offsetXLiga: num('placa-post-x-liga-', 0),
+    offsetYLiga: num('placa-post-y-liga-', 0),
   };
 }
 
@@ -6610,12 +6651,14 @@ async function generarPlacaPostPartido(cat){
 // Placa "análisis post partido": logo LPF arriba a la izquierda, escudos de
 // Tigre y del rival de esa fecha arriba a la derecha ("TIGRE vs RIVAL"), y
 // título + subtítulo centrados con el mismo criterio que la placa de fase.
-async function dibujarPlacaPostPartido({fecha, info, escalaTigre, escalaRival,
-  offsetXTigre, offsetYTigre, offsetXRival, offsetYRival, scale}){
+async function dibujarPlacaPostPartido({fecha, info, escalaTigre, escalaRival, escalaLiga,
+  offsetXTigre, offsetYTigre, offsetXRival, offsetYRival, offsetXLiga, offsetYLiga, scale}){
   escalaTigre = escalaTigre || 1;
   escalaRival = escalaRival || 1;
+  escalaLiga = escalaLiga || 1;
   offsetXTigre = offsetXTigre || 0; offsetYTigre = offsetYTigre || 0;
   offsetXRival = offsetXRival || 0; offsetYRival = offsetYRival || 0;
+  offsetXLiga = offsetXLiga || 0; offsetYLiga = offsetYLiga || 0;
   if(document.fonts && document.fonts.ready) await document.fonts.ready;
   const BG='#111e38', RED='#c0152a', WHITE='#ffffff', TXT2='#a8c0e8';
   // La vista previa en vivo pide scale más bajo (se ve chica en pantalla
@@ -6638,7 +6681,10 @@ async function dibujarPlacaPostPartido({fecha, info, escalaTigre, escalaRival,
   ctx.fillStyle = RED; ctx.fillRect(0, 0, 24, H);
   ctx.textBaseline = 'top';
 
-  if(escudoLiga) ctx.drawImage(escudoLiga, pad, pad-12, 75, 75);
+  if(escudoLiga){
+    const wLiga = 75*escalaLiga, hLiga = 75*escalaLiga;
+    ctx.drawImage(escudoLiga, pad+offsetXLiga, pad-12+offsetYLiga, wLiga, hLiga);
+  }
 
   // Cada escudo llena el mismo cuadro (crestBox x crestBox) por su cuenta,
   // según el tamaño real de SU DIBUJO (sin el margen transparente del
@@ -6691,14 +6737,24 @@ async function dibujarPlacaPostPartido({fecha, info, escalaTigre, escalaRival,
   return new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
 }
 
-async function generarPlacaFase(){
+async function generarPlacaFase(cat){
   const titulo = document.getElementById('placa-fase-titulo').value.trim();
   const subtitulo = document.getElementById('placa-fase-subtitulo').value.trim();
   if(!titulo){ alert('Escribí un título primero.'); return; }
   const btn = document.getElementById('btn-placa-fase');
   if(btn) btn.disabled = true;
   try{
-    const blob = await dibujarPlacaFase({titulo, subtitulo});
+    const num = (id, def) => parseInt(document.getElementById(id+cat)?.value ?? def) || def;
+    const params = {
+      titulo, subtitulo,
+      escalaLiga: num('placa-fase-escala-liga-', 100)/100,
+      offsetXLiga: num('placa-fase-x-liga-', 0),
+      offsetYLiga: num('placa-fase-y-liga-', 0),
+      escalaTigre: num('placa-fase-escala-tigre-', 100)/100,
+      offsetXTigre: num('placa-fase-x-tigre-', 0),
+      offsetYTigre: num('placa-fase-y-tigre-', 0),
+    };
+    const blob = await dibujarPlacaFase(params);
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
     a.download = `placa-${slugArchivo(titulo)}.png`;
@@ -6708,10 +6764,16 @@ async function generarPlacaFase(){
   }
 }
 
-async function dibujarPlacaFase({titulo, subtitulo}){
+async function dibujarPlacaFase({titulo, subtitulo, escalaLiga, offsetXLiga, offsetYLiga, escalaTigre, offsetXTigre, offsetYTigre}){
   if(document.fonts && document.fonts.ready) await document.fonts.ready;
+  escalaLiga = escalaLiga || 1; offsetXLiga = offsetXLiga || 0; offsetYLiga = offsetYLiga || 0;
+  escalaTigre = escalaTigre || 1; offsetXTigre = offsetXTigre || 0; offsetYTigre = offsetYTigre || 0;
   const BG='#111e38', RED='#c0152a', WHITE='#ffffff', TXT2='#a8c0e8';
-  const W=1280, H=720, SCALE=3;
+  const W=1280, H=720, pad=60, SCALE=3;
+  const [escudoLiga, escudoTigre] = await Promise.all([
+    cargarImagen('escudos/LIGA.png'),
+    cargarImagen(document.getElementById('escudoImg')?.src),
+  ]);
   const canvas = document.createElement('canvas');
   canvas.width = W*SCALE; canvas.height = H*SCALE;
   const ctx = canvas.getContext('2d');
@@ -6719,6 +6781,19 @@ async function dibujarPlacaFase({titulo, subtitulo}){
   ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high';
   ctx.fillStyle = BG; ctx.fillRect(0, 0, W, H);
   ctx.fillStyle = RED; ctx.fillRect(0, 0, 24, H);
+
+  if(escudoLiga){
+    const wLiga=75*escalaLiga, hLiga=75*escalaLiga;
+    ctx.drawImage(escudoLiga, pad+offsetXLiga, pad-12+offsetYLiga, wLiga, hLiga);
+  }
+  if(escudoTigre){
+    const bTigre = bordesVisibles(escudoTigre);
+    const base = 75*escalaTigre;
+    const s = base/Math.max(bTigre.w, bTigre.h);
+    const wTigre = bTigre.w*s, hTigre = bTigre.h*s;
+    ctx.drawImage(escudoTigre, bTigre.x, bTigre.y, bTigre.w, bTigre.h,
+      W-pad-wTigre+offsetXTigre, pad-12+offsetYTigre, wTigre, hTigre);
+  }
 
   ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
   ctx.font = "700 84px 'Barlow Condensed', sans-serif"; ctx.fillStyle = WHITE;
@@ -6736,11 +6811,17 @@ async function dibujarPlacaFase({titulo, subtitulo}){
 // el escudo de Tigre grande centrado -- mismo escudo que ya usa el resto de
 // la app (#escudoImg), no el de escudos/tigre.png (ese es el que subiste
 // para los rivales, éste es el oficial que ya estaba embebido).
-async function generarPlacaCierre(){
+async function generarPlacaCierre(cat){
   const btn = document.getElementById('btn-placa-cierre');
   if(btn) btn.disabled = true;
   try{
-    const blob = await dibujarPlacaCierre();
+    const num = (id, def) => parseInt(document.getElementById(id+cat)?.value ?? def) || def;
+    const params = {
+      escalaTigre: num('placa-cierre-escala-tigre-', 100)/100,
+      offsetXTigre: num('placa-cierre-x-tigre-', 0),
+      offsetYTigre: num('placa-cierre-y-tigre-', 0),
+    };
+    const blob = await dibujarPlacaCierre(params);
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
     a.download = 'placa-cierre.png';
@@ -6750,8 +6831,9 @@ async function generarPlacaCierre(){
   }
 }
 
-async function dibujarPlacaCierre(){
+async function dibujarPlacaCierre({escalaTigre, offsetXTigre, offsetYTigre}={}){
   if(document.fonts && document.fonts.ready) await document.fonts.ready;
+  escalaTigre = escalaTigre || 1; offsetXTigre = offsetXTigre || 0; offsetYTigre = offsetYTigre || 0;
   const BG='#111e38', RED='#c0152a';
   const W=1280, H=720, SCALE=3;
   const escudo = await cargarImagen(document.getElementById('escudoImg')?.src);
@@ -6763,9 +6845,9 @@ async function dibujarPlacaCierre(){
   ctx.fillStyle = BG; ctx.fillRect(0, 0, W, H);
   ctx.fillStyle = RED; ctx.fillRect(0, 0, 24, H);
   if(escudo){
-    const targetH = 475; // referencia + 13%, a pedido de Javi
+    const targetH = 475*escalaTigre; // 475 = referencia + 13%, a pedido de Javi
     const w = escudo.naturalWidth/escudo.naturalHeight*targetH;
-    ctx.drawImage(escudo, (W-w)/2, (H-targetH)/2, w, targetH);
+    ctx.drawImage(escudo, (W-w)/2+offsetXTigre, (H-targetH)/2+offsetYTigre, w, targetH);
   }
   return new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
 }
