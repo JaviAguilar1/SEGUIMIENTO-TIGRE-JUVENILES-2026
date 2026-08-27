@@ -319,81 +319,49 @@ def parse_futdetail_partidos(filas):
 
 
 def fetch_futdetail_estadisticas(opener, id_division: str):
-    """Pide la pagina de 'Estadisticas por jugador' de una division ya
-    logueado. A diferencia de partidos_consulta_procesos.php, este endpoint
-    no devuelve JSON -- es la pagina HTML completa con la tabla embebida."""
-    url = f"{FUTDETAIL_ESTADISTICAS_URL}?id_division={id_division}"
-    resp = opener.open(urllib.request.Request(url, headers=HEADERS), timeout=30)
-    return resp.read().decode("utf-8", errors="replace")
+    """Pide las estadisticas por jugador de una division ya logueado.
+    Al principio se penso que division_estadisticas.php devolvia la tabla
+    ya renderizada en HTML (por eso el primer intento la parseaba asi), pero
+    esa pagina en realidad la arma con JavaScript: los datos reales salen de
+    un POST aparte a division_estadisticas_proceso.php, que SI devuelve JSON
+    -- confirmado inspeccionando el pedido real con el usuario (DevTools ->
+    Network -> Fetch/XHR)."""
+    body = urllib.parse.urlencode({
+        "id_division": id_division, "temporada_id": FUTDETAIL_TEMPORADA_ID,
+    }).encode()
+    headers = dict(HEADERS)
+    headers["Content-Type"] = "application/x-www-form-urlencoded"
+    resp = opener.open(urllib.request.Request(FUTDETAIL_ESTADISTICAS_URL, data=body, headers=headers), timeout=30)
+    return json.loads(resp.read().decode("utf-8", errors="replace"))
 
 
-def parse_futdetail_estadisticas(html: str):
+def parse_futdetail_estadisticas(filas):
     """
-    Extrae la tabla "Estadisticas por Jugador" (convocatorias, partidos
-    titular, minutos, goles, asistencias, amarillas, rojas -- acumulado de
-    toda la temporada). La pagina trae VARIAS <table> (confirmado con datos
-    reales: la primera es otra cosa, de documentos/novedades, no jugadores),
-    asi que se recorren todas buscando la que tenga una fila con una celda
-    "Jugador" -- esa fila es el encabezado real. Las columnas tambien se
-    matchean por TEXTO, no por posicion fija, porque hay mas columnas de
-    las que usamos (ej. "Ausencia Ent.") y el orden no esta garantizado.
+    Convierte la lista cruda de division_estadisticas_proceso.php (todos los
+    campos vienen como string) en dicts con los numeros ya convertidos:
+    convocatorias, partidos titular, minutos, goles, asistencias, amarillas,
+    rojas -- acumulado de toda la temporada. Ignora "entrenamiento_ausencia"
+    (viene en la respuesta pero no se usa en la app).
     """
-    CAMPOS = {
-        "jugador": "jugador",
-        "convocatorias": "convocatorias",
-        "partidos titular": "partidos_titular",
-        "min.": "minutos_jugados",
-        "goles": "goles",
-        "asist.": "asistencias",
-        "t.a": "tarjeta_amarilla",
-        "t.r": "tarjeta_roja",
-    }
-
-    def celdas_de(fila):
-        celdas = re.findall(r"<t[dh]\b[^>]*>(.*?)</t[dh]>", fila, re.IGNORECASE | re.DOTALL)
-        return [re.sub(r"<[^>]+>", "", c).replace("&nbsp;", " ").strip() for c in celdas]
-
-    filas_tabla, header_idx, header = None, None, None
-    for tabla_m in re.finditer(r"<table\b[^>]*>(.*?)</table>", html, re.IGNORECASE | re.DOTALL):
-        filas_candidatas = re.findall(r"<tr\b[^>]*>(.*?)</tr>", tabla_m.group(1), re.IGNORECASE | re.DOTALL)
-        for i, fila in enumerate(filas_candidatas):
-            celdas = celdas_de(fila)
-            if any(c.strip().lower() == "jugador" for c in celdas):
-                filas_tabla, header_idx, header = filas_candidatas, i, celdas
-                break
-        if filas_tabla:
-            break
-
-    if not filas_tabla:
-        raise ValueError("No se encontro ninguna tabla con columna 'Jugador' en division_estadisticas.php")
-
-    idx_por_campo = {}
-    for i, h in enumerate(header):
-        campo = CAMPOS.get(h.strip().lower())
-        if campo:
-            idx_por_campo[campo] = i
-
+    CAMPOS_NUM = [
+        "convocatorias", "partidos_titular", "minutos_jugados",
+        "goles", "asistencias", "tarjeta_amarilla", "tarjeta_roja",
+    ]
     out = []
-    for fila in filas_tabla[header_idx + 1:]:
-        celdas = celdas_de(fila)
-        if len(celdas) <= idx_por_campo["jugador"]:
-            continue
-        jugador = celdas[idx_por_campo["jugador"]].strip()
+    for f in filas:
+        jugador = str(f.get("jugador") or "").strip()
         if not jugador:
             continue
         fila_dict = {"jugador": jugador}
-        for campo, idx in idx_por_campo.items():
-            if campo == "jugador":
-                continue
-            valor = celdas[idx].strip() if idx < len(celdas) else ""
+        for campo in CAMPOS_NUM:
             try:
-                fila_dict[campo] = int(valor) if valor else 0
-            except ValueError:
+                fila_dict[campo] = int(f.get(campo) or 0)
+            except (TypeError, ValueError):
                 fila_dict[campo] = 0
         out.append(fila_dict)
 
     if not out:
-        raise ValueError("Se encontro la tabla pero no se pudo parsear ningun jugador")
+        raise ValueError("Se recibio la respuesta pero no se pudo parsear ningun jugador")
     return out
 
 
@@ -665,8 +633,8 @@ def main():
             resultado["jugadores_futdetail"] = {}
             for cat, id_division in FUTDETAIL_DIVISIONES.items():
                 try:
-                    html_est = fetch_futdetail_estadisticas(opener_fd, id_division)
-                    jugadores = parse_futdetail_estadisticas(html_est)
+                    filas_raw = fetch_futdetail_estadisticas(opener_fd, id_division)
+                    jugadores = parse_futdetail_estadisticas(filas_raw)
                     resultado["jugadores_futdetail"][cat] = jugadores
                     print(f"[OK] futdetail estadisticas {cat}: {len(jugadores)} jugadores")
                 except Exception as e:  # noqa
