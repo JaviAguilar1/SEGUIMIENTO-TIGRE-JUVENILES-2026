@@ -331,8 +331,18 @@ def fetch_futdetail_estadisticas(opener, id_division: str):
     }).encode()
     headers = dict(HEADERS)
     headers["Content-Type"] = "application/x-www-form-urlencoded"
+    # El backend distingue pedidos AJAX reales por este header (asi lo manda
+    # el JS de la pagina) -- sin el, la respuesta viene distinta.
+    headers["X-Requested-With"] = "XMLHttpRequest"
     resp = opener.open(urllib.request.Request(FUTDETAIL_ESTADISTICAS_URL, data=body, headers=headers), timeout=30)
-    return json.loads(resp.read().decode("utf-8", errors="replace"))
+    texto = resp.read().decode("utf-8", errors="replace")
+    try:
+        return json.loads(texto)
+    except ValueError as e:
+        # Si esto vuelve a fallar, el mensaje ya trae un pedazo de lo que
+        # realmente contesto el servidor (login vencido, HTML de error,
+        # etc.) en vez de un simple "Expecting value" sin contexto.
+        raise ValueError(f"{e} -- respuesta cruda: {texto[:200]!r}") from e
 
 
 def parse_futdetail_estadisticas(filas):
