@@ -3271,9 +3271,15 @@ function blFechaNum(str){
 function blLogin(email, pass){
   initBlFirebase();
   blError=''; blLoading=true; renderRendimientoTabIfActive();
-  blAuth.signInWithEmailAndPassword(email, pass).then(()=>blDb.ref('PLAYERS').once('value'))
+  // BL no guarda los datos en un nodo compartido: cada usuario tiene su
+  // propio blob en usuarios/{uid}/blob (un JSON.stringify de todo su
+  // estado — PLAYERS/H2/etc). Hay que leer el uid del que se loguea acá.
+  blAuth.signInWithEmailAndPassword(email, pass)
+    .then(cred=>blDb.ref('usuarios/'+cred.user.uid+'/blob').once('value'))
     .then(snap=>{
-      blPlayers = snap.val() || {};
+      const raw = snap.val();
+      const data = raw ? JSON.parse(raw) : {};
+      blPlayers = data.PLAYERS || {};
       blLoggedIn = true; blLoading=false;
       renderRendimientoTabIfActive();
     })
