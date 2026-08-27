@@ -1651,6 +1651,26 @@ let isAdmin      = false;
 let canEdit      = false;
 let currentRole  = 'viewer';
 let catRole      = 'viewer'; // for category-level access
+
+// Roles con permiso de edicion y a que categorias alcanza. null = todas
+// (admin). Array = solo esas categorias -- el usuario puede VER cualquier
+// categoria igual, pero los inputs de edicion solo se habilitan en las de
+// su alcance. Cualquier rol que no este ac (coordinador/director/cat_X/
+// etc) no edita nada, solo mira. Se recalcula por categoria en
+// renderStatsCat -- no es un permiso fijo por sesion, cambia solo con la
+// categoria que se este mirando.
+const EDIT_SCOPES = {
+  admin: null,
+  videoanalista_reserva: ['RESERVA'],
+  videoanalista_menores: [...CATS_MENORES],
+};
+function canEditCat(cat){
+  if(!(currentRole in EDIT_SCOPES)) return false;
+  const scope = EDIT_SCOPES[currentRole];
+  if(scope===null) return true;
+  const base = (cat||'').replace('_S2','');
+  return scope.includes(base);
+}
 let fbReady      = false;
 let db           = null;
 let saveTimeout  = null;
@@ -1807,7 +1827,7 @@ function initFirebase(){
           db.ref('users/'+user.uid+'/role').on('value', snap=>{
             currentRole = snap.val() || 'viewer';
             isAdmin     = currentRole==='admin';
-            canEdit     = ['admin','videoanalista','videoanalista_reserva','videoanalista_menores'].includes(currentRole);
+            canEdit     = canEditCat(currentCategoria); // recalculado por categoria en cada render (ver renderStatsCat)
             catRole     = currentRole; // store for cat filtering
             applyViewMode();
             updateAuthUI();
@@ -1871,15 +1891,13 @@ function applyViewMode(){
   if(cerrarTempBtn) cerrarTempBtn.style.display=isAdmin?'':'none';
 
   // Filter categories for category-specific roles.
-  // 'cat_4TA' -> solo esa categoria (ni GENERAL ni el resto).
-  // 'videoanalista_menores' -> las 3 categorias menores (7MA/8VA/9NA, mismo
-  // grupo que ya usa CATS_MENORES en el resto de la app) -- Nacho edita esas
-  // tres, nada mas.
+  // 'cat_4TA' -> solo esa categoria (ni GENERAL ni el resto) -- roles de DT,
+  // de solo vista. videoanalista_reserva/videoanalista_menores NO restringen
+  // la vista (ven todo) -- solo su EDICION queda acotada, ver EDIT_SCOPES y
+  // canEditCat, recalculado por categoria en cada render.
   let allowedCats = null;
   if(currentRole && currentRole.startsWith('cat_')){
     allowedCats = [currentRole.replace('cat_','').toUpperCase()];
-  } else if(currentRole === 'videoanalista_menores'){
-    allowedCats = [...CATS_MENORES];
   }
   const sel=document.getElementById('stats-cat-select');
   if(sel){
@@ -1908,10 +1926,10 @@ function updateAuthUI(){
     if(loginBtn)  loginBtn.style.display='none';
     if(logoutBtn) logoutBtn.style.display='flex';
     if(badge)     badge.style.display='flex';
-    const roleLabels={'admin':'ADMIN','videoanalista':'VIDEOANALISTA',
+    const roleLabels={'admin':'ADMIN',
       'videoanalista_reserva':'VIDEO RESERVA','videoanalista_menores':'VIDEO 7-8-9',
       'director':'DIR. DEPORTIVO','coordinador':'COORDINADOR',
-      'reserva_viewer':'RESERVA (VISTA)','cat_RESERVA':'RESERVA'};
+      'cat_RESERVA':'RESERVA'};
     if(roleTagEl) roleTagEl.textContent=roleLabels[currentRole]||currentRole.toUpperCase();
   } else {
     if(loginBtn)  loginBtn.style.display='flex';
@@ -2384,6 +2402,7 @@ function toggleSeccion(idSeccion, event){
 // ── GENERAL VIEW ─────────────────────────────────────────────
 function renderStatsCat(cat){
   const content=document.getElementById('stats-content');
+  canEdit = canEditCat(cat); // el alcance de edicion depende de la categoria que se este mirando, no solo del rol
   updatePdfExportButton(cat);
   updateCitUploadButton(cat);
   if(cat==='GENERAL') renderStatsGeneral(content);
