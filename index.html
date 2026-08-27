@@ -94,11 +94,6 @@ header::after{
 .role-tag{background:rgba(240,192,64,0.15);border:1px solid rgba(240,192,64,0.3);
   border-radius:4px;padding:2px 8px;font-family:'Barlow Condensed',sans-serif;
   font-size:10px;letter-spacing:1px;color:var(--gold2);}
-#btn-login{display:flex;align-items:center;gap:5px;
-  background:rgba(26,58,143,0.3);border:1px solid rgba(36,80,192,0.5);
-  border-radius:4px;color:#60a5fa;font-size:10px;padding:3px 8px;cursor:pointer;
-  font-family:'Barlow Condensed',sans-serif;letter-spacing:1px;transition:all .2s;}
-#btn-login:hover{background:rgba(26,58,143,0.6);}
 #btn-logout{display:none;align-items:center;gap:5px;
   background:rgba(192,21,42,0.2);border:1px solid rgba(192,21,42,0.4);
   border-radius:4px;color:#fca5a5;font-size:10px;padding:3px 8px;cursor:pointer;
@@ -1353,22 +1348,11 @@ table.gen-table .cat-cell{font-family:'Bebas Neue',sans-serif;font-size:15px;
   </div>
   <div class="header-right">
     <div class="season-pill">TEMPORADA 2026</div>
-    <button id="btn-share" onclick="copyShareLink()"
-      style="display:flex;align-items:center;gap:5px;margin-top:4px;
-      background:rgba(26,58,143,0.25);border:1px solid rgba(36,80,192,0.4);
-      border-radius:4px;color:var(--muted);font-size:9px;padding:3px 8px;cursor:pointer;
-      font-family:Barlow Condensed,sans-serif;letter-spacing:1px;transition:all .2s;"
-      title="Copiar link de vista pública"
-      onmouseover="this.style.color='var(--gold2)'"
-      onmouseout="this.style.color='var(--muted)'">
-      🔗 COMPARTIR
-    </button>
     <div id="admin-badge">
       <span class="admin-tag" id="role-tag-txt">ADMIN</span>
       <button id="btn-cerrar-temporada" onclick="cerrarTemporada()" title="Archivar la temporada activa y arrancar una nueva" style="display:none;background:rgba(240,192,64,0.15);border:1px solid rgba(240,192,64,0.4);border-radius:4px;color:var(--gold2);font-size:9px;padding:2px 6px;cursor:pointer;font-family:Barlow Condensed,sans-serif;letter-spacing:1px;">📦</button>
       <button id="btn-reset" onclick="clearData()" style="display:none;background:rgba(192,21,42,0.2);border:1px solid rgba(192,21,42,0.4);border-radius:4px;color:rgba(255,100,100,0.7);font-size:9px;padding:2px 6px;cursor:pointer;font-family:Barlow Condensed,sans-serif;letter-spacing:1px;">🗑</button>
     </div>
-    <button id="btn-login" onclick="showLoginModal()">🔑 INGRESAR</button>
     <button id="btn-logout" onclick="doLogout()">✕ SALIR</button>
     <!-- Alert pills — shown when there are active warnings -->
     <div id="alert-pills" style="display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end;margin-top:2px;min-height:16px"></div>
@@ -1918,21 +1902,23 @@ function applyViewMode(){
 }
 
 function updateAuthUI(){
-  const loginBtn  =document.getElementById('btn-login');
   const logoutBtn =document.getElementById('btn-logout');
   const badge     =document.getElementById('admin-badge');
   const roleTagEl =document.getElementById('role-tag-txt');
-  if(canEdit||isAdmin){
-    if(loginBtn)  loginBtn.style.display='none';
+  // Cualquier rol logueado (no solo los que editan) muestra SALIR + badge --
+  // antes esto miraba canEdit||isAdmin, asi que un coordinador/director/DT
+  // (que solo miran, canEdit=false) quedaban con la UI como si no hubiese
+  // sesion iniciada.
+  if(currentRole && currentRole!=='viewer'){
     if(logoutBtn) logoutBtn.style.display='flex';
     if(badge)     badge.style.display='flex';
     const roleLabels={'admin':'ADMIN',
       'videoanalista_reserva':'VIDEO RESERVA','videoanalista_menores':'VIDEO 7-8-9',
-      'director':'DIR. DEPORTIVO','coordinador':'COORDINADOR',
-      'cat_RESERVA':'RESERVA'};
-    if(roleTagEl) roleTagEl.textContent=roleLabels[currentRole]||currentRole.toUpperCase();
+      'director':'DIR. DEPORTIVO','coordinador':'COORDINADOR'};
+    let label = roleLabels[currentRole];
+    if(!label && currentRole.startsWith('cat_')) label = 'DT · '+currentRole.replace('cat_','');
+    if(roleTagEl) roleTagEl.textContent = label || currentRole.toUpperCase();
   } else {
-    if(loginBtn)  loginBtn.style.display='flex';
     if(logoutBtn) logoutBtn.style.display='none';
     if(badge)     badge.style.display='none';
   }
@@ -2123,39 +2109,11 @@ function dtEmailFor(role){
   return 'dt.' + role.replace('cat_','').toLowerCase() + '@tigrejuveniles.internal';
 }
 let dtMode = 'login';
-function showLoginModal(){
-  let m=document.getElementById('login-modal');
-  if(m){m.style.display='flex';return;}
-  m=document.createElement('div');
-  m.id='login-modal'; m.className='modal-bg';
-  m.innerHTML=`<div class="modal-box">
-    <img class="m-crest" src="${document.getElementById('escudoImg').src}">
-    <h2>ACCESO</h2><p>TIGRE JUVENILES — ANÁLISIS</p>
-    <div id="login-normal">
-      <input id="m-email" class="m-input" type="email" placeholder="Email">
-      <input id="m-pass"  class="m-input" type="password" placeholder="Contraseña">
-      <button class="m-btn" onclick="doLogin()">INGRESAR</button>
-      <div class="m-error" id="m-err">Email o contraseña incorrectos</div>
-    </div>
-    <div id="dt-panel" style="display:none">
-      <div style="display:flex;gap:6px;margin-bottom:12px">
-        <button type="button" id="dt-tab-login" class="cat-subtab-btn" onclick="dtSetMode('login')"
-          style="flex:1;padding:8px;border-radius:8px;font-size:11px">INGRESAR</button>
-        <button type="button" id="dt-tab-signup" class="cat-subtab-btn" onclick="dtSetMode('signup')"
-          style="flex:1;padding:8px;border-radius:8px;font-size:11px">CREAR CUENTA</button>
-      </div>
-      <select id="dt-role" class="m-input"></select>
-      <input id="dt-nombre" class="m-input" type="text" placeholder="Nombre y apellido" style="display:none">
-      <input id="dt-pass" class="m-input" type="password" placeholder="Contraseña">
-      <button class="m-btn" id="dt-submit-btn" onclick="doDtSubmit()">INGRESAR</button>
-      <div class="m-error" id="dt-err"></div>
-    </div>
-    <button class="m-cancel" id="dt-toggle-link" onclick="toggleDtPanel()" style="margin-top:10px">¿Sos DT de una categoría? Entrá acá</button>
-  </div>`;
-  document.body.appendChild(m);
-  document.getElementById('m-pass').addEventListener('keydown',e=>{ if(e.key==='Enter')doLogin(); });
-  document.getElementById('dt-pass').addEventListener('keydown',e=>{ if(e.key==='Enter')doDtSubmit(); });
-}
+// El panel de DT (rol + nombre + contraseña, sin email) vive dentro del
+// muro de login (buildLoginWall, más abajo) -- es el único punto de acceso
+// ahora que no hay nada visible sin loguearse. toggleDtPanel/dtSetMode
+// trabajan sobre los ids del muro (login-normal/dt-panel/etc), reusados
+// tal cual estaban en el modal viejo.
 function toggleDtPanel(){
   const normal=document.getElementById('login-normal');
   const panel=document.getElementById('dt-panel');
@@ -2213,7 +2171,7 @@ function doDtSubmit(){
         updates['roles_taken/'+role]=uid;
         return db.ref().update(updates);
       })
-      .then(()=>{ document.getElementById('login-modal').style.display='none'; })
+      .then(()=>{ cerrarLoginWall(); })
       .catch(e=>{
         errEl.textContent = e.code==='auth/email-already-in-use' ? 'Ese rol ya tiene una cuenta creada.'
           : e.code==='auth/weak-password' ? 'La contraseña necesita al menos 6 caracteres.' : e.message;
@@ -2221,61 +2179,22 @@ function doDtSubmit(){
       });
   } else {
     firebase.auth().signInWithEmailAndPassword(email, pass)
-      .then(()=>{ document.getElementById('login-modal').style.display='none'; })
+      .then(()=>{ cerrarLoginWall(); })
       .catch(()=>{ errEl.textContent='Rol o contraseña incorrectos.'; errEl.style.display='block'; });
   }
 }
-function doLogin(){
-  const email=document.getElementById('m-email').value;
-  const pass =document.getElementById('m-pass').value;
-  document.getElementById('m-err').style.display='none';
-  firebase.auth().signInWithEmailAndPassword(email,pass)
-    .then(()=>{ document.getElementById('login-modal').style.display='none'; })
-    .catch(()=>{ document.getElementById('m-err').style.display='block'; });
+function cerrarLoginWall(){
+  const wall=document.getElementById('login-wall');
+  if(wall){ wall.style.opacity='0'; setTimeout(()=>wall.remove(),300); }
 }
 function doLogout(){
   firebase.auth().signOut().then(()=>{
-    // Reset state — el sitio sigue visible en modo público (sin muro)
+    // Reset state y volver a tapar todo con el muro -- sin sesion no se ve nada
     isAdmin=false; canEdit=false; currentRole='viewer'; catRole='viewer';
     updateAuthUI();
     applyViewMode();
     refreshActiveModule();
-    showToast('SESIÓN CERRADA · MODO VISTA');
-  });
-}
-function _doLogoutOldWall(){
-  firebase.auth().signOut().then(()=>{
-    // Reset state
-    isAdmin=false; canEdit=false; currentRole='viewer'; catRole='viewer';
-    // Rebuild login wall (full-screen, same as initial load)
-    if(!document.getElementById('login-wall')){
-      // Re-run the login wall builder
-      const wall = document.createElement('div');
-      wall.id = 'login-wall';
-      wall.style.cssText = 'position:fixed;inset:0;z-index:9999;background:linear-gradient(160deg,#05080f 0%,#0a0f1e 40%,#0d1528 100%);display:flex;flex-direction:column;align-items:center;justify-content:center';
-      wall.innerHTML = document.getElementById('login-wall-template')?.innerHTML || '';
-      // Fallback: minimal wall
-      if(!wall.innerHTML.trim()){
-        wall.innerHTML = `<div style="text-align:center;padding:0 20px;max-width:380px;width:100%">
-          <img style="width:72px;height:72px;object-fit:contain;filter:drop-shadow(0 0 18px rgba(192,21,42,0.6));margin-bottom:18px" src="${document.getElementById('escudoImg')?.src||''}">
-          <h1 style="font-family:'Bebas Neue',sans-serif;font-size:32px;letter-spacing:6px;color:#fff;margin-bottom:4px">TIGRE JUVENILES</h1>
-          <p style="font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:3px;color:#5a7099;margin-bottom:32px">Plataforma de Análisis · Divisiones Inferiores</p>
-          <div style="background:rgba(10,15,30,0.8);border:1px solid #1a2d5a;border-radius:14px;padding:28px 24px">
-            <p style="font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:3px;color:#c9a227;margin-bottom:18px">ACCESO RESTRINGIDO</p>
-            <input id="wall-email" type="email" placeholder="Email" style="width:100%;background:rgba(5,8,15,0.8);border:1px solid #1a2d5a;border-radius:8px;color:#d8e4ff;font-size:14px;padding:11px 14px;font-family:'Barlow',sans-serif;outline:none;margin-bottom:10px;box-sizing:border-box">
-            <input id="wall-pass" type="password" placeholder="Contraseña" style="width:100%;background:rgba(5,8,15,0.8);border:1px solid #1a2d5a;border-radius:8px;color:#d8e4ff;font-size:14px;padding:11px 14px;font-family:'Barlow',sans-serif;outline:none;margin-bottom:16px;box-sizing:border-box">
-            <button id="wall-btn" onclick="doWallLogin()" style="width:100%;background:linear-gradient(135deg,#c0152a,#e01830);border:none;border-radius:8px;color:#fff;font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:3px;padding:12px;cursor:pointer;margin-bottom:10px">🔑 INGRESAR</button>
-            <div id="wall-err" style="display:none;color:#ef4444;font-family:'Barlow Condensed',sans-serif;font-size:12px">Email o contraseña incorrectos</div>
-            <div id="wall-loading" style="display:none;color:#5a7099;font-family:'Barlow Condensed',sans-serif;font-size:11px">Verificando...</div>
-          </div>
-        </div>`;
-      }
-      document.body.appendChild(wall);
-      setTimeout(()=>{
-        const p = document.getElementById('wall-pass');
-        if(p) p.addEventListener('keydown', e=>{ if(e.key==='Enter') doWallLogin(); });
-      }, 50);
-    }
+    if(!document.getElementById('login-wall')) buildLoginWall();
   });
 }
 
@@ -2304,37 +2223,6 @@ function refreshActiveModule(){
 }
 function refreshPlantelIfActive(){
   if(document.getElementById('panel-plantel')?.classList.contains('active')) renderPlantel();
-}
-
-// ── Public share link ─────────────────────────────────────────
-// Add ?public=1 to URL to show read-only view with a banner
-function copyShareLink(){
-  const url = window.location.href.split('?')[0] + '?public=1';
-  navigator.clipboard.writeText(url).then(()=>{
-    showToast('🔗 LINK COPIADO');
-  }).catch(()=>{
-    showToast('Link: ' + url.slice(-40)); // fallback: show truncated URL
-  });
-}
-
-function checkPublicMode(){
-  const params=new URLSearchParams(window.location.search);
-  if(params.get('public')==='1'){
-    // Show public banner
-    const b=document.createElement('div');
-    b.style.cssText='background:linear-gradient(135deg,rgba(26,58,143,0.9),rgba(8,17,31,0.95));'+
-      'border-bottom:1px solid var(--border2);padding:7px 20px;'+
-      'display:flex;align-items:center;justify-content:space-between;'+
-      'font-family:Barlow Condensed,sans-serif;font-size:12px;letter-spacing:1px;color:var(--muted);';
-    b.innerHTML='<span>👁 VISTA PÚBLICA — Solo lectura</span>'+
-      '<span style="color:var(--gold2)">TIGRE JUVENILES · DIVISIONES INFERIORES</span>';
-    document.getElementById('panel-stats').insertAdjacentElement('beforebegin',b);
-    // Hide login button
-    setTimeout(()=>{
-      const btn=document.getElementById('btn-login');
-      if(btn) btn.style.display='none';
-    },100);
-  }
 }
 
 function showOfflineBanner(){
@@ -2569,11 +2457,11 @@ function renderStatsGeneral(content){
       <div id="gen-tabla-general"></div>
     </div>
 
-    <div class="st"><div class="stbar"></div>🔎 CONFIABILIDAD</div>
-    <div id="gen-confiabilidad" style="margin-bottom:20px"></div>
+    ${isAdmin ? `<div class="st"><div class="stbar"></div>🔎 CONFIABILIDAD</div>
+    <div id="gen-confiabilidad" style="margin-bottom:20px"></div>` : ''}
   `;
 
-  renderConfiabilidad('gen-confiabilidad');
+  if(isAdmin) renderConfiabilidad('gen-confiabilidad');
   renderPosicionGeneral('gen-posicion');
   wireBloqueSlider('general', ()=>renderStatsCat('GENERAL'));
 
@@ -5271,20 +5159,10 @@ if('serviceWorker' in navigator){
   window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
 }
 
-checkPublicMode();
-
 // ── LOGIN WALL — show before any content ─────────────────────
-(function showLoginWall(){
-  // PÚBLICO POR DEFECTO: el sitio se ve sin login. La edición/carga queda
-  // detrás del botón "🔑 INGRESAR" del header (showLoginModal). No se construye
-  // ningún muro de pantalla completa.
-  return;
-
-  // (código del muro desactivado — se conserva por referencia)
-  // eslint-disable-next-line no-unreachable
-  const params = new URLSearchParams(window.location.search);
-  if(params.get('public')==='1') return;
-
+// Nada se ve sin loguearse (ni siquiera con un link viejo con ?public=1,
+// que ya no existe como excepcion -- se saco a proposito).
+function buildLoginWall(){
   // Build and inject the login wall overlay
   const wall = document.createElement('div');
   wall.id = 'login-wall';
@@ -5309,39 +5187,57 @@ checkPublicMode();
         <p style="font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:3px;
           color:#c9a227;margin-bottom:18px">ACCESO RESTRINGIDO</p>
 
-        <input id="wall-email" type="email" placeholder="Email"
-          style="width:100%;background:rgba(5,8,15,0.8);border:1px solid #1a2d5a;
-          border-radius:8px;color:#d8e4ff;font-size:14px;padding:11px 14px;
-          font-family:'Barlow',sans-serif;outline:none;margin-bottom:10px;
-          box-sizing:border-box;transition:border-color .2s"
-          onfocus="this.style.borderColor='#c9a227'"
-          onblur="this.style.borderColor='#1a2d5a'">
+        <div id="login-normal">
+          <input id="wall-email" type="email" placeholder="Email"
+            style="width:100%;background:rgba(5,8,15,0.8);border:1px solid #1a2d5a;
+            border-radius:8px;color:#d8e4ff;font-size:14px;padding:11px 14px;
+            font-family:'Barlow',sans-serif;outline:none;margin-bottom:10px;
+            box-sizing:border-box;transition:border-color .2s"
+            onfocus="this.style.borderColor='#c9a227'"
+            onblur="this.style.borderColor='#1a2d5a'">
 
-        <input id="wall-pass" type="password" placeholder="Contraseña"
-          style="width:100%;background:rgba(5,8,15,0.8);border:1px solid #1a2d5a;
-          border-radius:8px;color:#d8e4ff;font-size:14px;padding:11px 14px;
-          font-family:'Barlow',sans-serif;outline:none;margin-bottom:16px;
-          box-sizing:border-box;transition:border-color .2s"
-          onfocus="this.style.borderColor='#c9a227'"
-          onblur="this.style.borderColor='#1a2d5a'">
+          <input id="wall-pass" type="password" placeholder="Contraseña"
+            style="width:100%;background:rgba(5,8,15,0.8);border:1px solid #1a2d5a;
+            border-radius:8px;color:#d8e4ff;font-size:14px;padding:11px 14px;
+            font-family:'Barlow',sans-serif;outline:none;margin-bottom:16px;
+            box-sizing:border-box;transition:border-color .2s"
+            onfocus="this.style.borderColor='#c9a227'"
+            onblur="this.style.borderColor='#1a2d5a'">
 
-        <button id="wall-btn" onclick="doWallLogin()"
-          style="width:100%;background:linear-gradient(135deg,#c0152a,#e01830);
-          border:none;border-radius:8px;color:#fff;
-          font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:3px;
-          padding:12px;cursor:pointer;transition:opacity .2s;margin-bottom:10px"
-          onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">
-          🔑 INGRESAR
-        </button>
+          <button id="wall-btn" onclick="doWallLogin()"
+            style="width:100%;background:linear-gradient(135deg,#c0152a,#e01830);
+            border:none;border-radius:8px;color:#fff;
+            font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:3px;
+            padding:12px;cursor:pointer;transition:opacity .2s;margin-bottom:10px"
+            onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">
+            🔑 INGRESAR
+          </button>
 
-        <div id="wall-err" style="display:none;color:#ef4444;font-family:'Barlow Condensed',sans-serif;
-          font-size:12px;letter-spacing:1px;margin-top:4px">
-          Email o contraseña incorrectos
+          <div id="wall-err" style="display:none;color:#ef4444;font-family:'Barlow Condensed',sans-serif;
+            font-size:12px;letter-spacing:1px;margin-top:4px">
+            Email o contraseña incorrectos
+          </div>
+          <div id="wall-loading" style="display:none;color:#5a7099;font-family:'Barlow Condensed',sans-serif;
+            font-size:11px;letter-spacing:1px;margin-top:4px">
+            Verificando...
+          </div>
         </div>
-        <div id="wall-loading" style="display:none;color:#5a7099;font-family:'Barlow Condensed',sans-serif;
-          font-size:11px;letter-spacing:1px;margin-top:4px">
-          Verificando...
+
+        <div id="dt-panel" style="display:none">
+          <div style="display:flex;gap:6px;margin-bottom:12px">
+            <button type="button" id="dt-tab-login" class="cat-subtab-btn" onclick="dtSetMode('login')"
+              style="flex:1;padding:8px;border-radius:8px;font-size:11px">INGRESAR</button>
+            <button type="button" id="dt-tab-signup" class="cat-subtab-btn" onclick="dtSetMode('signup')"
+              style="flex:1;padding:8px;border-radius:8px;font-size:11px">CREAR CUENTA</button>
+          </div>
+          <select id="dt-role" class="m-input" style="width:100%;box-sizing:border-box"></select>
+          <input id="dt-nombre" class="m-input" type="text" placeholder="Nombre y apellido" style="display:none;width:100%;box-sizing:border-box">
+          <input id="dt-pass" class="m-input" type="password" placeholder="Contraseña" style="width:100%;box-sizing:border-box">
+          <button class="m-btn" id="dt-submit-btn" onclick="doDtSubmit()">INGRESAR</button>
+          <div class="m-error" id="dt-err"></div>
         </div>
+
+        <button class="m-cancel" id="dt-toggle-link" onclick="toggleDtPanel()" style="margin-top:6px">¿Sos DT de una categoría? Entrá acá</button>
       </div>
 
       <p style="font-family:'Barlow Condensed',sans-serif;font-size:10px;
@@ -5362,8 +5258,11 @@ checkPublicMode();
     if(passEl) passEl.addEventListener('keydown', e=>{ if(e.key==='Enter') doWallLogin(); });
     const emailEl = document.getElementById('wall-email');
     if(emailEl) emailEl.addEventListener('keydown', e=>{ if(e.key==='Enter') document.getElementById('wall-pass')?.focus(); });
+    const dtPassEl = document.getElementById('dt-pass');
+    if(dtPassEl) dtPassEl.addEventListener('keydown', e=>{ if(e.key==='Enter') doDtSubmit(); });
   }, 100);
-})();
+}
+buildLoginWall();
 
 function doWallLogin(){
   const email = document.getElementById('wall-email')?.value;
@@ -5376,10 +5275,7 @@ function doWallLogin(){
   if(loadEl) loadEl.style.display='block';
   if(btn)    btn.disabled=true;
   firebase.auth().signInWithEmailAndPassword(email, pass)
-    .then(()=>{
-      const wall = document.getElementById('login-wall');
-      if(wall) wall.style.opacity='0', setTimeout(()=>wall.remove(),300);
-    })
+    .then(()=>{ cerrarLoginWall(); })
     .catch(()=>{
       if(errEl)  errEl.style.display='block';
       if(loadEl) loadEl.style.display='none';
