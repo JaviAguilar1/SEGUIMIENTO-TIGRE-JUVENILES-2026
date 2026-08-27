@@ -1401,6 +1401,17 @@ const FB_CONFIG = {
 // Credenciales: ingresalas manualmente en el modal de login
 // No se almacenan en el código por seguridad
 
+// Firebase de "BL GPS Performance" (Brian, cuerpo técnico) — proyecto
+// aparte, SOLO LECTURA desde acá. El apiKey es público por diseño (la
+// seguridad la dan las reglas de la base, no ocultar esto); igual nunca se
+// escribe nada ahí desde esta app. Login con el usuario/contraseña propios
+// de Brian en su plataforma (mismo signInWithEmailAndPassword que usa BL).
+const BL_FB_CONFIG = {
+  apiKey:      "AIzaSyAE6tdPK5rUDlE5YABF31M5gKkug6HMdl8",
+  databaseURL: "https://bl-gps-performance-default-rtdb.firebaseio.com",
+  projectId:   "bl-gps-performance"
+};
+
 // ============================================================
 //  CONSTANTS
 // ============================================================
@@ -1647,6 +1658,11 @@ let catRole      = 'viewer'; // for category-level access
 let fbReady      = false;
 let db           = null;
 let saveTimeout  = null;
+
+// -- BL GPS Performance (Firebase aparte, solo lectura) --
+let blApp = null, blDb = null, blAuth = null;
+let blLoggedIn = false, blLoading = false, blError = '';
+let blPlayers = {}; // {nombre: {pos, match:[{fecha,opp,min,metrics:[...]}], training:[...]}}
 
 CATEGORIES.forEach(cat => {
   results[cat]    = {};
@@ -2961,7 +2977,7 @@ function renderTopGoleadores(wrap){
 let catActiveTab = 'resultados'; // 'resultados' | 'plantel' | 'placas'
 
 function buildCatTabsHTML(){
-  const tabs = [ {id:'resultados', label:'📊 ESTADÍSTICAS'}, {id:'plantel', label:'👥 PLANTEL'}, {id:'placas', label:'🎬 PLACAS'} ];
+  const tabs = [ {id:'resultados', label:'📊 ESTADÍSTICAS'}, {id:'plantel', label:'👥 PLANTEL'}, {id:'rendimiento', label:'🏃 RENDIMIENTO'}, {id:'placas', label:'🎬 PLACAS'} ];
   return `<div style="display:flex;gap:8px;margin:10px 0 4px;">
     ${tabs.map(t=>{
       const active = catActiveTab===t.id;
@@ -3115,6 +3131,10 @@ function renderStatsSingle(cat, content){
     renderPlacasTab(cat, tabEl);
     return;
   }
+  if(catActiveTab==='rendimiento'){
+    renderRendimientoTab(tabEl);
+    return;
+  }
 
   const amarillaAlertCat = CONFIABILIDAD_CATS.includes(cat) ? amarillasEnAlerta(cat) : [];
   const amarillaAlertHTML = amarillaAlertCat.length
@@ -3153,6 +3173,11 @@ function renderStatsSingle(cat, content){
       <div id="bloque-cat-${dataCat}"></div>
     </div>
 
+    ${isReserva?'':`${seccionTitulo('sistema-'+dataCat, 'RENDIMIENTO POR SISTEMA TÁCTICO')}
+    <div id="sec-sistema-${dataCat}"${seccionEstiloInicial('sistema-'+dataCat)}>
+      <div id="sistema-${dataCat}"></div>
+    </div>`}
+
     ${seccionTitulo('goleadores-'+dataCat, `GOLEADORES · <span style="color:${CAT_COLORS[cat]}">${cat}</span>`)}
     <div id="sec-goleadores-${dataCat}"${seccionEstiloInicial('goleadores-'+dataCat)}>
       <div id="goleadores-${dataCat}"></div>
@@ -3182,6 +3207,7 @@ function renderStatsSingle(cat, content){
   document.getElementById(`bloque-cat-${dataCat}`).innerHTML= isReserva
     ? bloqueComparativaHTML((from,to)=>calcStats(dataCat,from,to), dataCat)
     : buildRendimientoGeneralHTML((from,to)=>calcStats(dataCat,from,to), dataCat, [cat]);
+  if(!isReserva) document.getElementById(`sistema-${dataCat}`).innerHTML = buildSistemaTacticoHTML(dataCat);
   renderGoleadores(dataCat);
   if(isReserva) renderTablaReserva(`tabla-lpf-${cat}`);
   else renderTablaLPF(cat, `tabla-lpf-${cat}`);
@@ -3197,6 +3223,212 @@ function renderPlantelTab(cat, tabEl){
     </div>
   `;
   renderRosterCat(cat, document.getElementById(`roster-content-${cat}`));
+}
+
+// ============================================================
+//  RENDIMIENTO — cruce de datos GPS desde "BL GPS Performance"
+//  (Firebase aparte de Brian, SOLO LECTURA — ver BL_FB_CONFIG). No está
+//  separado por categoría de Tigre (Brian no lo carga así), por eso esta
+//  pestaña muestra siempre todos los jugadores que haya en su base.
+// ============================================================
+
+// Índice de métricas tal cual las guarda BL en metrics[0..16] (orden fijo,
+// confirmado leyendo su código fuente — arrays MCH/JUG_MCH).
+const BL_METRICAS = [
+  {i:0,  label:'Dist. Total',  unit:'m'},
+  {i:1,  label:'Mts/min',      unit:'m/min'},
+  {i:2,  label:'18-21 km/h',   unit:'m'},
+  {i:3,  label:'HSR 21-25',    unit:'m'},
+  {i:4,  label:'+25 km/h',     unit:'m'},
+  {i:5,  label:'Sprints',      unit:'#'},
+  {i:6,  label:'Top Speed',    unit:'km/h'},
+  {i:7,  label:'Acel +3',      unit:'#'},
+  {i:8,  label:'Desac +3',     unit:'#'},
+  {i:9,  label:'Acel2/3',      unit:'#'},
+  {i:10, label:'Rhie',         unit:'#'},
+  {i:11, label:'Acel Max',     unit:'m/s²'},
+  {i:12, label:'Desac Max',    unit:'m/s²'},
+  {i:13, label:'Acc/min',      unit:'#'},
+  {i:14, label:'HSR/min',      unit:'m/min'},
+  {i:15, label:'+25/min',      unit:'m/min'},
+  {i:16, label:'Player Load',  unit:'#'},
+];
+
+function initBlFirebase(){
+  if(blApp) return;
+  blApp  = firebase.initializeApp(BL_FB_CONFIG, 'bl');
+  blDb   = blApp.database();
+  blAuth = blApp.auth();
+}
+
+// BL guarda la fecha como texto libre ("F13", "FECHA 13", etc.) — nos
+// quedamos con el número para poder cruzarla contra los datos de Tigre.
+function blFechaNum(str){
+  const m = String(str||'').match(/\d+/);
+  return m ? parseInt(m[0],10) : null;
+}
+
+function blLogin(email, pass){
+  initBlFirebase();
+  blError=''; blLoading=true; renderRendimientoTabIfActive();
+  blAuth.signInWithEmailAndPassword(email, pass).then(()=>blDb.ref('PLAYERS').once('value'))
+    .then(snap=>{
+      blPlayers = snap.val() || {};
+      blLoggedIn = true; blLoading=false;
+      renderRendimientoTabIfActive();
+    })
+    .catch(err=>{
+      blError = err.message || 'No se pudo conectar';
+      blLoading=false;
+      renderRendimientoTabIfActive();
+    });
+}
+
+function renderRendimientoTabIfActive(){
+  if(catActiveTab!=='rendimiento') return;
+  const tabEl = document.querySelector('[id^="cat-tab-content-"]');
+  if(tabEl) renderRendimientoTab(tabEl);
+}
+
+function renderRendimientoTab(tabEl){
+  if(!blLoggedIn){
+    tabEl.innerHTML = `
+      ${seccionTitulo('bl-login', '🏃 RENDIMIENTO · Datos de BL GPS Performance')}
+      <div id="sec-bl-login"${seccionEstiloInicial('bl-login')}>
+        <div style="max-width:360px;margin:0 auto;padding:20px 0">
+          <div style="font-family:'Barlow Condensed',sans-serif;font-size:12px;color:var(--muted);margin-bottom:14px">
+            Conectate con tu usuario de BL GPS Performance para ver y cruzar los datos GPS (solo lectura, no se modifica nada allá — Brian sigue cargando ahí como siempre).
+          </div>
+          <input id="bl-email" type="email" placeholder="Email" autocomplete="username"
+            style="width:100%;box-sizing:border-box;margin-bottom:8px;background:rgba(5,8,15,.8);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:13px;padding:9px 10px;">
+          <input id="bl-pass" type="password" placeholder="Contraseña" autocomplete="current-password"
+            style="width:100%;box-sizing:border-box;margin-bottom:10px;background:rgba(5,8,15,.8);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:13px;padding:9px 10px;">
+          ${blError?`<div style="color:var(--loss);font-size:12px;margin-bottom:8px">${esc(blError)}</div>`:''}
+          <button onclick="blLogin(document.getElementById('bl-email').value, document.getElementById('bl-pass').value)"
+            ${blLoading?'disabled':''}
+            style="width:100%;background:var(--red);border:none;border-radius:6px;color:#fff;font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:1px;padding:10px;cursor:pointer;">
+            ${blLoading?'CONECTANDO…':'CONECTAR'}
+          </button>
+        </div>
+      </div>`;
+    return;
+  }
+  tabEl.innerHTML = `
+    ${seccionTitulo('bl-cruce', '🏃 RENDIMIENTO · Cruce de datos GPS (BL)')}
+    <div id="sec-bl-cruce"${seccionEstiloInicial('bl-cruce')}>
+      ${blCruceFormHTML()}
+      <div id="bl-cruce-result"></div>
+    </div>`;
+  wireBlCruceForm();
+}
+
+function blCruceFormHTML(){
+  const nombres = Object.keys(blPlayers).sort();
+  const jugOpts = nombres.map(n=>`<option value="${esc(n)}">${esc(n)}</option>`).join('');
+  const metOpts = BL_METRICAS.map(m=>`<option value="${m.i}">${m.label} (${m.unit})</option>`).join('');
+  return `
+    <div style="display:flex;gap:8px;margin-bottom:12px">
+      <button type="button" id="bl-mode-cmp" class="cat-subtab-btn" onclick="blSetMode('cmp')"
+        style="flex:1;padding:8px;border-radius:8px;border:1px solid var(--gold);background:linear-gradient(135deg,#3a2a08,#1a1206);color:var(--gold);font-family:'Barlow Condensed',sans-serif;font-weight:700;letter-spacing:1px;font-size:12px;cursor:pointer;">COMPARAR JUGADORES</button>
+      <button type="button" id="bl-mode-rank" class="cat-subtab-btn" onclick="blSetMode('rank')"
+        style="flex:1;padding:8px;border-radius:8px;border:1px solid var(--border2);background:rgba(5,8,15,0.5);color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-weight:700;letter-spacing:1px;font-size:12px;cursor:pointer;">RANKING POR MÉTRICA</button>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr auto;gap:10px;align-items:end;margin-bottom:12px">
+      <div id="bl-jug-wrap">
+        <label style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;display:block;margin-bottom:4px">Jugadores (Ctrl/Cmd+clic para varios)</label>
+        <select id="bl-jugadores" multiple size="6" style="width:100%;background:rgba(5,8,15,.8);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:12px;padding:6px;">${jugOpts}</select>
+      </div>
+      <div>
+        <label style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;display:block;margin-bottom:4px">Fechas (ej: 5,9,13 — vacío = todas)</label>
+        <input id="bl-fechas" type="text" placeholder="Todas" style="width:100%;box-sizing:border-box;background:rgba(5,8,15,.8);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:12px;padding:8px 10px;margin-bottom:8px;">
+        <label style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;display:block;margin-bottom:4px">Métrica</label>
+        <select id="bl-metrica" style="width:100%;background:rgba(5,8,15,.8);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:12px;padding:8px 10px;">${metOpts}</select>
+      </div>
+      <button type="button" onclick="runBlCruce()"
+        style="background:var(--red);border:none;border-radius:6px;color:#fff;font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:1px;padding:10px 18px;cursor:pointer;">BUSCAR</button>
+    </div>`;
+}
+
+let blMode = 'cmp';
+function blSetMode(m){
+  blMode = m;
+  document.getElementById('bl-jug-wrap').style.display = m==='cmp' ? '' : 'none';
+  ['cmp','rank'].forEach(x=>{
+    const btn = document.getElementById('bl-mode-'+x);
+    const on = x===m;
+    btn.style.borderColor = on?'var(--gold)':'var(--border2)';
+    btn.style.background  = on?'linear-gradient(135deg,#3a2a08,#1a1206)':'rgba(5,8,15,0.5)';
+    btn.style.color       = on?'var(--gold)':'var(--muted)';
+  });
+}
+function wireBlCruceForm(){ blSetMode(blMode); }
+
+function blFechasSeleccionadas(){
+  const raw = (document.getElementById('bl-fechas').value||'').trim();
+  if(!raw) return null; // null = todas
+  return new Set(raw.split(',').map(s=>parseInt(s.trim(),10)).filter(n=>!isNaN(n)));
+}
+
+function runBlCruce(){
+  const metIdx = parseInt(document.getElementById('bl-metrica').value,10);
+  const met = BL_METRICAS[metIdx];
+  const fechasSel = blFechasSeleccionadas();
+  const out = document.getElementById('bl-cruce-result');
+
+  if(blMode==='cmp'){
+    const jugSel = [...document.getElementById('bl-jugadores').selectedOptions].map(o=>o.value);
+    if(!jugSel.length){ out.innerHTML = `<div style="color:var(--muted);font-size:12px;padding:12px 0">Elegí al menos un jugador.</div>`; return; }
+    // Fechas: unión de las que tenga cada jugador elegido (filtradas si hay selección)
+    const fechasSet = new Set();
+    jugSel.forEach(n=>(blPlayers[n]?.match||[]).forEach(r=>{
+      const f = blFechaNum(r.fecha);
+      if(f!=null && (!fechasSel || fechasSel.has(f))) fechasSet.add(f);
+    }));
+    const fechas = [...fechasSet].sort((a,b)=>a-b);
+    if(!fechas.length){ out.innerHTML = `<div style="color:var(--muted);font-size:12px;padding:12px 0">No hay datos para esa combinación.</div>`; return; }
+    const rows = jugSel.map(n=>{
+      const byFecha={};
+      (blPlayers[n]?.match||[]).forEach(r=>{ const f=blFechaNum(r.fecha); if(f!=null) byFecha[f]=r; });
+      const vals = fechas.map(f=>{
+        const r = byFecha[f];
+        const v = r && r.metrics ? r.metrics[met.i] : null;
+        return `<td style="text-align:center">${v!=null?Number(v).toFixed(v%1?1:0):'—'}</td>`;
+      });
+      const nums = fechas.map(f=>byFecha[f]?.metrics?.[met.i]).filter(v=>v!=null).map(Number);
+      const prom = nums.length ? (nums.reduce((a,b)=>a+b,0)/nums.length).toFixed(1) : '—';
+      return `<tr><td class="cat-cell">${esc(n)}</td>${vals.join('')}<td style="text-align:center;color:var(--gold2);font-weight:700">${prom}</td></tr>`;
+    }).join('');
+    out.innerHTML = `<div class="gen-table-wrap"><table class="gen-table">
+      <thead><tr><th>JUGADOR</th>${fechas.map(f=>`<th>F${f}</th>`).join('')}<th>PROM.</th></tr></thead>
+      <tbody>${rows}</tbody></table></div>
+      <div style="font-family:'Barlow Condensed',sans-serif;font-size:11px;color:var(--muted);margin-top:4px">${met.label} (${met.unit})</div>`;
+    return;
+  }
+
+  // Ranking: todos los jugadores, todas sus fechas (filtradas), la mejor
+  // marca de cada uno para esa métrica en el rango elegido.
+  const filas = [];
+  Object.entries(blPlayers).forEach(([nombre, p])=>{
+    (p.match||[]).forEach(r=>{
+      const f = blFechaNum(r.fecha);
+      if(f==null || (fechasSel && !fechasSel.has(f))) return;
+      const v = r.metrics ? r.metrics[met.i] : null;
+      if(v==null) return;
+      filas.push({nombre, fecha:f, opp:r.opp||'', v:Number(v)});
+    });
+  });
+  filas.sort((a,b)=>b.v-a.v);
+  if(!filas.length){ out.innerHTML = `<div style="color:var(--muted);font-size:12px;padding:12px 0">No hay datos para esa combinación.</div>`; return; }
+  const rows = filas.slice(0,50).map((r,idx)=>`<tr>
+      <td style="text-align:center;color:var(--muted)">${idx+1}</td>
+      <td class="cat-cell">${esc(r.nombre)}</td>
+      <td style="text-align:center">F${r.fecha}${r.opp?` <span style="color:var(--muted);font-size:11px">vs ${esc(r.opp)}</span>`:''}</td>
+      <td style="text-align:center;color:var(--gold2);font-weight:700">${r.v.toFixed(r.v%1?1:0)}</td>
+    </tr>`).join('');
+  out.innerHTML = `<div class="gen-table-wrap"><table class="gen-table">
+    <thead><tr><th>#</th><th>JUGADOR</th><th>FECHA</th><th>${met.label}</th></tr></thead>
+    <tbody>${rows}</tbody></table></div>
+    <div style="font-family:'Barlow Condensed',sans-serif;font-size:11px;color:var(--muted);margin-top:4px">${met.label} (${met.unit}) · top 50${filas.length>50?` de ${filas.length}`:''}</div>`;
 }
 
 // ============================================================
@@ -5782,6 +6014,67 @@ function buildResumenPorBloqueHTML(calcFn, periodsCat, cats){
 
 function buildRendimientoGeneralHTML(calcFn, periodsCat, cats){
   return buildResumenPorBloqueHTML(calcFn, periodsCat, cats);
+}
+
+// Tabla "RENDIMIENTO POR SISTEMA TÁCTICO": agrupa los partidos jugados por
+// el sistema táctico cargado en futdetail (fixture_futdetail[cat][fecha]
+// .sistema_tactico, ya viene del mismo endpoint que trae los links, no hace
+// falta scrapear nada nuevo). Solo cuenta fechas que tienen resultado propio
+// Y sistema cargado en futdetail a la vez.
+function buildSistemaTacticoHTML(cat){
+  const fixtureFut=(TABLA_DATA&&TABLA_DATA.fixture_futdetail&&TABLA_DATA.fixture_futdetail[cat])||{};
+  const porSistema={};
+  for(let f=1; f<=35; f++){
+    const res=results[cat]?.[f];
+    const sis=fixtureFut[f]?.sistema_tactico;
+    if(!res || !sis) continue;
+    if(!porSistema[sis]) porSistema[sis]={pg:0,pe:0,pp:0,gf:0,gc:0,L:{pg:0,pe:0,pp:0},V:{pg:0,pe:0,pp:0}};
+    const s=porSistema[sis];
+    const x=getResult(res[0],res[1]);
+    if(x==='W')s.pg++; else if(x==='D')s.pe++; else s.pp++;
+    s.gf+=res[0]; s.gc+=res[1];
+    const cond=condicionCat(cat,f);
+    if(cond){
+      const b=cond==='L'?s.L:s.V;
+      if(x==='W')b.pg++; else if(x==='D')b.pe++; else b.pp++;
+    }
+  }
+  const sistemas=Object.keys(porSistema);
+  if(!sistemas.length){
+    return `<div style="text-align:center;padding:20px;color:var(--muted);
+      font-family:'Barlow Condensed',sans-serif;font-size:13px">Todavía no hay partidos con sistema táctico cargado en futdetail</div>`;
+  }
+  const pj=s=>s.pg+s.pe+s.pp, pts=s=>s.pg*3+s.pe;
+  sistemas.sort((a,b)=>pts(porSistema[b])/pj(porSistema[b]) - pts(porSistema[a])/pj(porSistema[a]));
+  const DIV='border-right:3px solid rgba(240,192,64,0.4)';
+  const cell=(v,col)=>`<td style="text-align:center;color:${col}">${v}</td>`;
+  const lvvCell=(b)=>`<td style="text-align:center;font-size:11px">${b.pg}-${b.pe}-${b.pp}</td>`;
+  const rows=sistemas.map(sis=>{
+    const s=porSistema[sis], j=pj(s), dg=s.gf-s.gc;
+    const dgC=dg>0?'var(--win)':dg<0?'var(--loss)':'var(--muted)';
+    return `<tr>
+      <td class="cat-cell">${sis}</td>
+      <td style="text-align:center">${j}</td>
+      ${cell(pts(s),'var(--gold2)')}
+      ${cell((pts(s)/j).toFixed(2),'var(--gold2)')}
+      ${cell(s.pg,'var(--win)')}${cell(s.pe,'var(--draw)')}${cell(s.pp,'var(--loss)')}
+      ${cell((s.gf/j).toFixed(2),'#60a5fa')}
+      ${cell((s.gc/j).toFixed(2),'#f87171')}
+      <td style="text-align:center;color:${dgC};font-weight:700;${DIV}">${dg>0?'+':''}${dg}</td>
+      ${lvvCell(s.L)}${lvvCell(s.V)}
+    </tr>`;
+  }).join('');
+  return `<div class="gen-table-wrap"><table class="gen-table">
+      <thead><tr>
+        <th>SISTEMA</th><th>PJ</th><th>PTS</th><th>PTS/PJ</th><th>PG</th><th>PE</th><th>PP</th><th>GF/PJ</th><th>GC/PJ</th>
+        <th style="${DIV}">DG</th>
+        <th>🏠 LOCAL (G-E-P)</th><th>✈ VISIT (G-E-P)</th>
+      </tr></thead>
+      <tbody>${rows}</tbody>
+    </table></div>
+    <div style="font-family:'Barlow Condensed',sans-serif;font-size:11px;color:var(--muted);margin-top:4px">
+      Ordenado por PTS/PJ. Sistema táctico cargado en futdetail por fecha; solo se cuentan fechas con resultado propio y sistema cargado a la vez.
+    </div>`;
 }
 
 // ── PDF CITACIONES ────────────────────────────────────────────

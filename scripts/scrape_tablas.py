@@ -309,6 +309,7 @@ def parse_futdetail_partidos(filas):
             "gps_url": (f.get("gps_url") or "").strip(),
             "charla_dt": (f.get("charla_dt") or "").strip(),
             "arenga_jugadores_url": (f.get("arenga_jugadores_url") or "").strip(),
+            "sistema_tactico": (f.get("sistema_tactico") or "").strip(),
         }
         if localia == "L":
             out[fecha] = {"gf": gl, "gc": gv, "rival": rival, **links}
