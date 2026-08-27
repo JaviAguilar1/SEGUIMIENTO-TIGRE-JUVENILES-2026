@@ -1401,16 +1401,12 @@ const FB_CONFIG = {
 // Credenciales: ingresalas manualmente en el modal de login
 // No se almacenan en el código por seguridad
 
-// Firebase de "BL GPS Performance" (Brian, cuerpo técnico) — proyecto
-// aparte, SOLO LECTURA desde acá. El apiKey es público por diseño (la
-// seguridad la dan las reglas de la base, no ocultar esto); igual nunca se
-// escribe nada ahí desde esta app. Login con el usuario/contraseña propios
-// de Brian en su plataforma (mismo signInWithEmailAndPassword que usa BL).
-const BL_FB_CONFIG = {
-  apiKey:      "AIzaSyAE6tdPK5rUDlE5YABF31M5gKkug6HMdl8",
-  databaseURL: "https://bl-gps-performance-default-rtdb.firebaseio.com",
-  projectId:   "bl-gps-performance"
-};
+// Los datos de "BL GPS Performance" (Brian, cuerpo técnico) NO se leen
+// desde el navegador: su Firebase no tiene un nodo compartido (cada usuario
+// guarda su propio blob) y guardar una contraseña de Brian en este código
+// público la expondría a cualquiera. Se traen server-side, igual que
+// futdetail (ver fetch_bl_players en scripts/scrape_tablas.py, credenciales
+// en GitHub Secrets BL_USER/BL_PASS) y llegan acá dentro de tablas.json.
 
 // ============================================================
 //  CONSTANTS
@@ -1659,10 +1655,8 @@ let fbReady      = false;
 let db           = null;
 let saveTimeout  = null;
 
-// -- BL GPS Performance (Firebase aparte, solo lectura) --
-let blApp = null, blDb = null, blAuth = null;
-let blLoggedIn = false, blLoading = false, blError = '';
-let blPlayers = {}; // {nombre: {pos, match:[{fecha,opp,min,metrics:[...]}], training:[...]}}
+// -- BL GPS Performance (datos traidos server-side, ver scrape_tablas.py) --
+let blPlayers = {}; // {nombre: {pos, match:[{fecha,opp,min,metrics:[...]}]}}, sync en loadTablaData()
 
 CATEGORIES.forEach(cat => {
   results[cat]    = {};
@@ -3227,9 +3221,10 @@ function renderPlantelTab(cat, tabEl){
 
 // ============================================================
 //  RENDIMIENTO — cruce de datos GPS desde "BL GPS Performance"
-//  (Firebase aparte de Brian, SOLO LECTURA — ver BL_FB_CONFIG). No está
-//  separado por categoría de Tigre (Brian no lo carga así), por eso esta
-//  pestaña muestra siempre todos los jugadores que haya en su base.
+//  (traídos server-side, ver fetch_bl_players en scrape_tablas.py — nunca
+//  se loguea nada desde el navegador). No está separado por categoría de
+//  Tigre (Brian no lo carga así), por eso esta pestaña muestra siempre
+//  todos los jugadores que haya en su base.
 // ============================================================
 
 // Índice de métricas tal cual las guarda BL en metrics[0..16] (orden fijo,
@@ -3254,13 +3249,6 @@ const BL_METRICAS = [
   {i:16, label:'Player Load',  unit:'#'},
 ];
 
-function initBlFirebase(){
-  if(blApp) return;
-  blApp  = firebase.initializeApp(BL_FB_CONFIG, 'bl');
-  blDb   = blApp.database();
-  blAuth = blApp.auth();
-}
-
 // BL guarda la fecha como texto libre ("F13", "FECHA 13", etc.) — nos
 // quedamos con el número para poder cruzarla contra los datos de Tigre.
 function blFechaNum(str){
@@ -3268,53 +3256,14 @@ function blFechaNum(str){
   return m ? parseInt(m[0],10) : null;
 }
 
-function blLogin(email, pass){
-  initBlFirebase();
-  blError=''; blLoading=true; renderRendimientoTabIfActive();
-  // BL no guarda los datos en un nodo compartido: cada usuario tiene su
-  // propio blob en usuarios/{uid}/blob (un JSON.stringify de todo su
-  // estado — PLAYERS/H2/etc). Hay que leer el uid del que se loguea acá.
-  blAuth.signInWithEmailAndPassword(email, pass)
-    .then(cred=>blDb.ref('usuarios/'+cred.user.uid+'/blob').once('value'))
-    .then(snap=>{
-      const raw = snap.val();
-      const data = raw ? JSON.parse(raw) : {};
-      blPlayers = data.PLAYERS || {};
-      blLoggedIn = true; blLoading=false;
-      renderRendimientoTabIfActive();
-    })
-    .catch(err=>{
-      blError = err.message || 'No se pudo conectar';
-      blLoading=false;
-      renderRendimientoTabIfActive();
-    });
-}
-
-function renderRendimientoTabIfActive(){
-  if(catActiveTab!=='rendimiento') return;
-  const tabEl = document.querySelector('[id^="cat-tab-content-"]');
-  if(tabEl) renderRendimientoTab(tabEl);
-}
-
 function renderRendimientoTab(tabEl){
-  if(!blLoggedIn){
+  const hayDatos = Object.keys(blPlayers).length > 0;
+  if(!hayDatos){
     tabEl.innerHTML = `
-      ${seccionTitulo('bl-login', '🏃 RENDIMIENTO · Datos de BL GPS Performance')}
-      <div id="sec-bl-login"${seccionEstiloInicial('bl-login')}>
-        <div style="max-width:360px;margin:0 auto;padding:20px 0">
-          <div style="font-family:'Barlow Condensed',sans-serif;font-size:12px;color:var(--muted);margin-bottom:14px">
-            Conectate con tu usuario de BL GPS Performance para ver y cruzar los datos GPS (solo lectura, no se modifica nada allá — Brian sigue cargando ahí como siempre).
-          </div>
-          <input id="bl-email" type="email" placeholder="Email" autocomplete="username"
-            style="width:100%;box-sizing:border-box;margin-bottom:8px;background:rgba(5,8,15,.8);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:13px;padding:9px 10px;">
-          <input id="bl-pass" type="password" placeholder="Contraseña" autocomplete="current-password"
-            style="width:100%;box-sizing:border-box;margin-bottom:10px;background:rgba(5,8,15,.8);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:13px;padding:9px 10px;">
-          ${blError?`<div style="color:var(--loss);font-size:12px;margin-bottom:8px">${esc(blError)}</div>`:''}
-          <button onclick="blLogin(document.getElementById('bl-email').value, document.getElementById('bl-pass').value)"
-            ${blLoading?'disabled':''}
-            style="width:100%;background:var(--red);border:none;border-radius:6px;color:#fff;font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:1px;padding:10px;cursor:pointer;">
-            ${blLoading?'CONECTANDO…':'CONECTAR'}
-          </button>
+      ${seccionTitulo('bl-cruce', '🏃 RENDIMIENTO · Cruce de datos GPS (BL)')}
+      <div id="sec-bl-cruce"${seccionEstiloInicial('bl-cruce')}>
+        <div style="text-align:center;padding:20px;color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-size:13px">
+          Todavía no hay datos de BL GPS Performance cargados (se actualiza solo, cada 30 min, en cuanto Brian suba algo ahí).
         </div>
       </div>`;
     return;
@@ -5415,6 +5364,7 @@ function loadTablaData(){
       completarLinksDesdeFutdetail(TABLA_DATA);
       sincronizarLinksVaciosEnPantalla();
       sincronizarJugadoresDesdeFutdetail();
+      blPlayers = (TABLA_DATA.bl_gps && TABLA_DATA.bl_gps.players) || {};
       return TABLA_DATA;
     })
     .catch(e=>{ console.warn('tablas.json:',e); TABLA_DATA={categorias:{}}; return TABLA_DATA; });

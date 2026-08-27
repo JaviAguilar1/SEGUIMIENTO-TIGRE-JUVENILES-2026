@@ -21,6 +21,7 @@ import sys
 import datetime
 import urllib.request
 import urllib.parse
+import urllib.error
 import http.cookiejar
 
 # Categoria en la app  ->  slug de la URL oficial
@@ -384,6 +385,58 @@ def parse_futdetail_estadisticas(filas):
     return out
 
 
+# ── BL GPS Performance (app aparte de Brian, preparador fisico) ─────────
+# Firebase distinto al de Tigre, SOLO LECTURA. No tiene un nodo compartido:
+# cada usuario guarda todo su estado como un JSON serializado en
+# usuarios/{uid}/blob (confirmado leyendo como su propia app guarda/carga
+# los datos) -- hay que loguearse con un usuario real de esa app para leer
+# algo. Credenciales en GitHub Secrets (BL_USER, BL_PASS), igual que
+# futdetail; si no estan configuradas esta parte se saltea sola.
+BL_FB_API_KEY = "AIzaSyAE6tdPK5rUDlE5YABF31M5gKkug6HMdl8"
+BL_FB_DB_URL = "https://bl-gps-performance-default-rtdb.firebaseio.com"
+
+
+def fetch_bl_players(email: str, password: str):
+    """
+    Login con email/password contra Firebase Auth (API REST, sin SDK) y
+    lectura de usuarios/{uid}/blob. Devuelve
+    {nombre: {"pos":..., "match":[{"fecha","opp","min","metrics":[...]},...]}}
+    -- se descarta todo lo demas del blob (entrenamientos, ejercicios,
+    planificacion de fuerza, etc.) porque la app de Tigre solo cruza datos
+    de partido.
+    """
+    auth_url = (
+        "https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword"
+        f"?key={BL_FB_API_KEY}"
+    )
+    body = json.dumps({"email": email, "password": password, "returnSecureToken": True}).encode()
+    req = urllib.request.Request(auth_url, data=body, headers={"Content-Type": "application/json"})
+    try:
+        with urllib.request.urlopen(req, timeout=30) as resp:
+            auth_data = json.loads(resp.read().decode("utf-8"))
+    except urllib.error.HTTPError as e:
+        detalle = e.read().decode("utf-8", errors="replace")[:200]
+        raise RuntimeError(f"login BL invalido: {detalle}") from e
+    uid = auth_data["localId"]
+    id_token = auth_data["idToken"]
+
+    blob_url = f"{BL_FB_DB_URL}/usuarios/{uid}/blob.json?auth={id_token}"
+    with urllib.request.urlopen(blob_url, timeout=30) as resp:
+        raw = json.loads(resp.read().decode("utf-8"))  # el valor guardado ES un string JSON
+    if not raw:
+        return {}
+    data = json.loads(raw)
+    players = data.get("PLAYERS") or {}
+
+    out = {}
+    for nombre, p in players.items():
+        matches = p.get("match") or []
+        if not matches:
+            continue
+        out[nombre] = {"pos": p.get("pos", ""), "match": matches}
+    return out
+
+
 def parse_tabla(html: str):
     """
     Extrae las filas de la 'Tabla de posiciones'.
@@ -664,6 +717,22 @@ def main():
             print(f"[ERROR] futdetail login: {e}", file=sys.stderr)
     else:
         print("[AVISO] FUTDETAIL_USER/FUTDETAIL_PASS no configurados, se omite futdetail")
+
+    # Datos de rendimiento fisico (GPS) de "BL GPS Performance" -- Firebase
+    # de Brian, el preparador fisico. Fuente opcional: si no estan las
+    # credenciales configuradas se saltea sin romper el resto.
+    usuario_bl = os.environ.get("BL_USER")
+    password_bl = os.environ.get("BL_PASS")
+    if usuario_bl and password_bl:
+        try:
+            jugadores_bl = fetch_bl_players(usuario_bl, password_bl)
+            resultado["bl_gps"] = {"players": jugadores_bl}
+            print(f"[OK] BL GPS Performance: {len(jugadores_bl)} jugadores")
+        except Exception as e:  # noqa
+            errores.append(f"BL GPS Performance: {e}")
+            print(f"[ERROR] BL GPS Performance: {e}", file=sys.stderr)
+    else:
+        print("[AVISO] BL_USER/BL_PASS no configurados, se omite BL GPS Performance")
 
     # Salvaguarda: si Zona A y Zona B de un mismo torneo de reserva salieron
     # IDENTICAS, es casi seguro que la deteccion de zona por posicion de la
