@@ -3326,7 +3326,7 @@ function abrirVideoEmbebido(url, titulo){
   m = document.createElement('div');
   m.id = 'video-embed-modal'; m.className = 'modal-bg';
   m.addEventListener('click', e=>{ if(e.target===m) m.remove(); });
-  m.innerHTML = `<div class="modal-box" style="width:720px;max-width:94vw;text-align:left;padding:20px">
+  m.innerHTML = `<div class="modal-box" style="width:min(1200px,92vw);text-align:left;padding:20px">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;gap:10px">
       <p style="margin:0;color:var(--gold2);font-family:'Barlow Condensed',sans-serif;font-size:13px;letter-spacing:1px">${esc(titulo||'')}</p>
       <button class="m-cancel" onclick="document.getElementById('video-embed-modal').remove()">✕</button>
