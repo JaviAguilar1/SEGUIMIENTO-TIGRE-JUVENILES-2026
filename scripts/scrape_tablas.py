@@ -489,6 +489,236 @@ def fetch_parenlapelota_tigre(slug: str):
     }
 
 
+# ── statfutbol.com.ar (alertas del proximo rival) ────────────────────────
+# Fuente publica, HTML servido plano (confirmado con curl, sin JS). Se usa
+# SOLO para el proximo partido de cada categoria (no toda la temporada):
+# 1) quien es el goleador del plantel del rival, y 2) si alguien del rival
+# se amonesto en su ULTIMO partido jugado y ese cartel lo dejo justo en un
+# multiplo de 5 amarillas de la temporada (nuestra regla de suspension:
+# cada 5ta amarilla = 1 partido afuera).
+STATFUTBOL_BASE = "https://statfutbol.com.ar/"
+STATFUTBOL_CATNUM = {"4TA": "4", "5TA": "5", "6TA": "6", "7MA": "7", "8VA": "8", "9NA": "9"}
+
+# Los nombres de equipo no se escriben igual en las distintas paginas del
+# propio statfutbol (el fixture abrevia mas que el selector de planteles:
+# "DEF Y JUSTICIA" vs "DEFENSA Y JUSTICIA", "C.CORDOBA(SDE)" vs "CENTRAL
+# CORDOBA (SANTIAGO DEL ESTERO)", etc). _statfutbol_match_equipo empareja
+# por nombre base + codigo de ciudad (cuando hay parentesis en los dos
+# lados), probado a mano contra los 35 rivales reales de Cuarta 2026 antes
+# de escribir esto (34/35 automatico, 1 con el parche de C.CORDOBA de abajo).
+STATFUTBOL_CITY_CODES = {
+    "LP": "LP", "LA PLATA": "LP",
+    "RC": "RC", "RIO CUARTO": "RC", "RIO CUARTO - CORDOBA": "RC",
+    "SDE": "SDE", "SANTIAGO DEL ESTERO": "SDE",
+    "SJ": "SJ", "SAN JUAN": "SJ",
+    "SF": "SF", "SANTA FE": "SF",
+    "C": "CBA", "CORDOBA": "CBA",
+    "M": "MZA", "MZA": "MZA", "MENDOZA": "MZA",
+    "MDP": "MDP", "MAR DEL PLATA": "MDP",
+    "J": "JUNIN", "JUNIN": "JUNIN",
+}
+# Alias palabra-por-palabra (nunca substring suelto, para no pisar nombres
+# reales como "Colon" o "San Martin").
+STATFUTBOL_PALABRA_ALIAS = {
+    "IND": "INDEPENDIENTE", "JRS": "JUNIORS", "CTRAL": "CENTRAL", "DEF": "DEFENSA",
+}
+# Nombres coloquiales cortos que en el futbol argentino todos entienden a
+# que club se refieren, pero que por substring solo son ambiguos (matchean
+# con mas de un club real).
+STATFUTBOL_ALIAS_EXACTOS = {"CENTRAL": "ROSARIO CENTRAL"}
+
+
+def _statfutbol_norm_palabras(s):
+    s = s.upper().replace(".", " ")
+    s = re.sub(r"\s+", " ", s).strip()
+    # Caso puntual: "C.CORDOBA" (ya con el punto convertido a espacio arriba)
+    # es Central Cordoba, no "Cordoba" a secas -- sin esto, la "C" sola no
+    # significa nada y el match falla.
+    s = re.sub(r"^C CORDOBA\b", "CENTRAL CORDOBA", s)
+    return " ".join(STATFUTBOL_PALABRA_ALIAS.get(w, w) for w in s.split(" "))
+
+
+def _statfutbol_partes(s):
+    s = _statfutbol_norm_palabras(s)
+    m = re.match(r"^(.*?)\s*\(([^)]*)\)\s*$", s)
+    if m:
+        base, city = m.group(1).strip(), m.group(2).strip()
+    else:
+        base, city = s, ""
+    return base, STATFUTBOL_CITY_CODES.get(city, city)
+
+
+def statfutbol_match_equipo(nombre_fixture, equipos):
+    """equipos: lista de (id, nombre) del selector de planteles. Devuelve
+    (id, nombre) del que mejor matchea, o None si no hay un match unico."""
+    alias = STATFUTBOL_ALIAS_EXACTOS.get(nombre_fixture.upper().strip())
+    if alias:
+        for eid, en in equipos:
+            if _statfutbol_partes(en)[0] == alias:
+                return (eid, en)
+    fbase, fcity = _statfutbol_partes(nombre_fixture)
+    cands = []
+    for eid, en in equipos:
+        ebase, ecity = _statfutbol_partes(en)
+        if fbase in ebase or ebase in fbase:
+            if not fcity or not ecity or fcity == ecity:
+                cands.append((eid, en, ebase == fbase))
+    if len(cands) > 1:
+        exactos = [c for c in cands if c[2]]
+        if len(exactos) == 1:
+            cands = exactos
+    return (cands[0][0], cands[0][1]) if len(cands) == 1 else None
+
+
+def fetch_statfutbol_fixture(catnum):
+    """Fixture completo de la categoria (35 fechas, todos los equipos).
+    Partidos no jugados traen score ".-." (confirmado con datos reales)."""
+    html = fetch(f"{STATFUTBOL_BASE}afafixtureliga{catnum}2026Resolucion.php")
+    filas = re.findall(r'<tr class="trConsult[^"]*">(.*?)</tr>', html, re.DOTALL)
+    out = []
+    for fila in filas:
+        celdas = re.findall(r"<td[^>]*>(.*?)</td>", fila, re.DOTALL)
+        if len(celdas) < 9:
+            continue
+        def equipo_de(c):
+            m = re.search(r'class="pc">([^<]*)</span>', c)
+            return m.group(1).strip() if m else ""
+        jm = re.match(r"\s*(\d+)", re.sub(r"<[^>]+>", "", celdas[1]))
+        local, visita = equipo_de(celdas[2]), equipo_de(celdas[4])
+        score = re.sub(r"<[^>]+>", "", celdas[3]).strip()
+        fm = re.search(r"(\d{4}-\d{2}-\d{2})", celdas[6])
+        idm = re.search(r'name="idPartido" value="(\d+)"', celdas[8])
+        if not (jm and local and visita and fm and idm):
+            continue
+        out.append({
+            "jornada": int(jm.group(1)), "local": local, "visita": visita,
+            "jugado": score not in ("", ".-."), "fecha_iso": fm.group(1), "id_partido": idm.group(1),
+        })
+    return out
+
+
+def fetch_statfutbol_equipos(catnum):
+    """Lista (id, nombre) del selector 'Elija un equipo' de PLANTELES."""
+    html = fetch(f"{STATFUTBOL_BASE}afaplanteles{catnum}2026.php")
+    opts = re.findall(r'<option value="(\d+)">\s*([^<]+?)\s*</option>', html)
+    return [(v, n.strip()) for v, n in opts]
+
+
+def fetch_statfutbol_plantel(catnum, team_id):
+    """Plantel del equipo con acumulado de temporada por jugador (ya viene
+    calculado por statfutbol, no hay que sumar partido a partido)."""
+    html = fetch_post(f"{STATFUTBOL_BASE}afaplanteles{catnum}2026Resolucion.php", {"player": team_id})
+    filas = re.findall(r'<tr class="trConsultParaJugadores">(.*?)</tr>', html, re.DOTALL)
+    out = []
+    for fila in filas:
+        nombre_m = re.search(r'jugador-pc">([^<]*)</span>', fila)
+        celdas = re.findall(r"<td[^>]*>(.*?)</td>", fila, re.DOTALL)
+        # celdas: [0]=nombre, [1]=PJ, [2]=MIN, [3]=GOL, [4]=AM, [5]=EXP, [6]=OUT, [7]=IN, [8]=boton
+        if not nombre_m or len(celdas) < 5:
+            continue
+        try:
+            gol = int(re.sub(r"<[^>]+>", "", celdas[3]).strip())
+            am = int(re.sub(r"<[^>]+>", "", celdas[4]).strip())
+        except (ValueError, IndexError):
+            continue
+        out.append({"nombre": nombre_m.group(1).strip(), "gol": gol, "am": am})
+    return out
+
+
+def fetch_statfutbol_sintesis_amarillas(catnum, id_partido, team_id_objetivo, equipos):
+    """Devuelve los nombres de jugadores del equipo team_id_objetivo que se
+    amonestaron (amarilla) en ese partido puntual."""
+    html = fetch_post(f"{STATFUTBOL_BASE}sintesispartido{catnum}2026.php",
+                       {"idPartido": id_partido, "fixGL": "0", "fixGV": "0"})
+    # ojo: "encabezado-equipo" tambien aparece en el <style> inline mas
+    # arriba en la pagina -- hay que buscar el <th>, no el string suelto.
+    idx = html.find('<th class="encabezado-equipo"')
+    idx2 = html.find("</table>", idx)
+    if idx < 0 or idx2 < 0:
+        raise ValueError("No se encontro la tabla de sintesis")
+    bloque = html[idx:idx2]
+    # "1 gol" (singular) vs "2 goles" (plural) -- statfutbol usa las dos. El
+    # nombre del equipo puede traer su propio parentesis (ej. "GODOY CRUZ
+    # A.T. (MENDOZA)"), asi que no se puede cortar en el primer "(" -- se
+    # captura todo sin exigir nada mas que terminar justo antes de
+    # "(N gol/es)</th>" (ese es siempre el ultimo parentesis de la celda).
+    nombres_equipo = re.findall(r'encabezado-equipo">.*?;(.+?)\s*\(\d+ gol(?:es)?\)\s*</th>', bloque)
+    tds = re.findall(r'<td class="jugadores-equipo"[^>]*>(.*?)</td>', bloque, re.DOTALL)
+    if len(nombres_equipo) != 2 or len(tds) != 2:
+        raise ValueError("Formato de sintesis inesperado (equipos/columnas)")
+    nombre_objetivo = next((n for eid, n in equipos if eid == team_id_objetivo), None)
+    lado = None
+    for i, ne in enumerate(nombres_equipo):
+        m = statfutbol_match_equipo(ne, equipos)
+        if m and m[0] == team_id_objetivo:
+            lado = i
+    if lado is None:
+        raise ValueError(f"No pude identificar de que lado esta el equipo {nombre_objetivo!r} en la sintesis")
+    spans = re.findall(r'<span class="linea-jugador">(.*?)</span>', tds[lado], re.DOTALL)
+    amonestados = []
+    for sp in spans:
+        iconos = re.findall(r'<i class="([^"]+)"[^>]*?style="color:([^;"]+)', sp)
+        if not any("fa-square" in cls and color == "yellow" for cls, color in iconos):
+            continue
+        texto = re.sub(r"<form.*?</form>", "", sp, flags=re.DOTALL)
+        texto = re.sub(r"<i.*?</i>|<i[^>]*/?>", "", texto, flags=re.DOTALL)
+        nombre = re.sub(r"^\s*\d+\.\s*", "", texto).strip()
+        if nombre:
+            amonestados.append(nombre)
+    return amonestados
+
+
+def calcular_alerta_rival(cat, catnum):
+    """Para el PROXIMO partido de la categoria (el primero sin jugar en el
+    fixture de statfutbol): goleador del plantel rival + jugadores que se
+    amonestaron en el ultimo partido del rival y quedaron en multiplo de 5
+    amarillas de la temporada (posible suspension para jugar contra
+    nosotros). Devuelve None si no hay proximo partido o algo no matchea
+    (fuente opcional, no debe romper el resto del scraping)."""
+    fixture = fetch_statfutbol_fixture(catnum)
+    proximo = next((p for p in fixture if not p["jugado"] and (p["local"] == "TIGRE" or p["visita"] == "TIGRE")), None)
+    if not proximo:
+        return None
+    rival_nombre_fx = proximo["visita"] if proximo["local"] == "TIGRE" else proximo["local"]
+
+    equipos = fetch_statfutbol_equipos(catnum)
+    match = statfutbol_match_equipo(rival_nombre_fx, equipos)
+    if not match:
+        raise ValueError(f"No pude identificar al equipo rival {rival_nombre_fx!r} en el listado de planteles")
+    team_id, team_nombre = match
+
+    plantel = fetch_statfutbol_plantel(catnum, team_id)
+    if not plantel:
+        raise ValueError(f"Plantel vacio para {team_nombre!r}")
+    goleador = max(plantel, key=lambda j: j["gol"])
+    am_por_nombre = {j["nombre"]: j["am"] for j in plantel}
+
+    # Ultimo partido JUGADO del rival antes de enfrentarnos (no necesariamente
+    # la fecha anterior a la nuestra -- el rival puede tener fechas libres/
+    # reprogramadas distintas a las nuestras).
+    partidos_rival = [p for p in fixture if p["jugado"] and (p["local"] == team_nombre.split(" (")[0]
+                       or p["visita"] == team_nombre.split(" (")[0]
+                       or statfutbol_match_equipo(p["local"], equipos) == match
+                       or statfutbol_match_equipo(p["visita"], equipos) == match)]
+    partidos_rival.sort(key=lambda p: p["fecha_iso"])
+    ultimo = partidos_rival[-1] if partidos_rival else None
+
+    riesgo = []
+    if ultimo:
+        amonestados = fetch_statfutbol_sintesis_amarillas(catnum, ultimo["id_partido"], team_id, equipos)
+        for nombre in amonestados:
+            am_total = am_por_nombre.get(nombre)
+            if am_total is not None and am_total > 0 and am_total % 5 == 0:
+                riesgo.append({"nombre": nombre, "amarillas": am_total})
+
+    return {
+        "fecha": proximo["jornada"],
+        "rival": team_nombre,
+        "goleador": {"nombre": goleador["nombre"], "goles": goleador["gol"]} if goleador["gol"] > 0 else None,
+        "amarillas_riesgo": riesgo,
+    }
+
+
 def parse_tabla(html: str):
     """
     Extrae las filas de la 'Tabla de posiciones'.
@@ -727,6 +957,25 @@ def main():
         except Exception as e:  # noqa
             errores.append(f"parenlapelota {cat}: {e}")
             print(f"[ERROR] parenlapelota {cat}: {e}", file=sys.stderr)
+
+    # Alertas del proximo rival (statfutbol.com.ar): goleador del plantel +
+    # jugadores en riesgo de suspension por 5ta amarilla. Fuente publica, no
+    # necesita credenciales. Si calcular_alerta_rival no encuentra proximo
+    # partido (temporada terminada) devuelve None y esa categoria se omite
+    # sin marcar error.
+    resultado["rival_alertas"] = {}
+    for cat, catnum in STATFUTBOL_CATNUM.items():
+        try:
+            alerta = calcular_alerta_rival(cat, catnum)
+            if alerta:
+                resultado["rival_alertas"][cat] = alerta
+                print(f"[OK] statfutbol {cat}: rival {alerta['rival']}, "
+                      f"{len(alerta['amarillas_riesgo'])} en riesgo de suspension")
+            else:
+                print(f"[OK] statfutbol {cat}: sin proximo partido pendiente")
+        except Exception as e:  # noqa
+            errores.append(f"statfutbol {cat}: {e}")
+            print(f"[ERROR] statfutbol {cat}: {e}", file=sys.stderr)
 
     # Resultados de Tigre partido por partido segun futdetail (panel privado).
     # Necesita FUTDETAIL_USER / FUTDETAIL_PASS como variables de entorno (las
