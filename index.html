@@ -2313,20 +2313,20 @@ function buildStatsCatSelect(){
   });
 }
 
-// Solo en GENERAL: el PDF de citación trae varias categorías juntas, no
-// tiene sentido mostrar el botón en la vista de una categoría puntual
-// (a diferencia de "EXPORTAR PDF", que sí es por categoría).
+// Solo en GENERAL: un solo botón para subir cualquier planilla (citación o
+// informe de COMET, mezclados en la misma tanda) -- el sistema detecta solo
+// de qué tipo es cada PDF y a qué categoría corresponde (subirPlanillasLote).
 function updateCitUploadButton(cat){
   const wrap=document.getElementById('cit-upload-btn-wrap');
   if(!wrap) return;
   if(cat!=='GENERAL' || !canEdit){ wrap.innerHTML=''; return; }
   wrap.innerHTML=`<button onclick="document.getElementById('cit-pdf-global').click()"
-    title="Subís uno o varios PDF de citación (cada uno puede traer varias categorías juntas) y se reparten solos — sirve también para volver a cargar una fecha ya subida"
+    title="Subís PDF de citación y/o informes de COMET, mezclados o no — el sistema detecta solo de qué tipo es cada uno y a qué categoría corresponde. También sirve para volver a cargar una fecha ya subida"
     style="background:rgba(201,162,39,0.15);border:1px solid var(--border2);color:var(--gold2);
     border-radius:6px;padding:8px 14px;font-family:'Barlow Condensed',sans-serif;font-size:13px;
-    letter-spacing:1px;font-weight:700;cursor:pointer;white-space:nowrap">⬆ SUBIR CITACIÓN (PDF, podés elegir varios)</button>
+    letter-spacing:1px;font-weight:700;cursor:pointer;white-space:nowrap">⬆ SUBIR PLANILLAS (PDF, podés elegir varios)</button>
   <input type="file" id="cit-pdf-global" accept=".pdf" multiple style="display:none"
-    onchange="subirCitacionesLote(this.files, this)">`;
+    onchange="subirPlanillasLote(this.files, this)">`;
 }
 function setStatsCat(cat){
   const sel=document.getElementById('stats-cat-select');
@@ -4227,32 +4227,59 @@ async function parseCitacionPdf(file, catHint, fechaHint, inputEl, segundoTiempo
   }
 }
 
-// ── Carga de varias citaciones a la vez ─────────────────────────────────
-// Cada PDF trae UNA fecha con UN rival (varias categorías juntas en el
-// mismo archivo) -- a diferencia de COMET, acá no hay riesgo real de que
-// dos PDF del lote caigan en la misma fecha (el único caso conocido, el
+// ── Un solo botón para subir cualquier planilla ─────────────────────────
+// El usuario ya no elige el tipo: cada PDF se prueba primero como citación
+// (parseCitacionRaw detecta la categoría por el texto de "división" en cada
+// página, sin tirar error si no encuentra ninguna — results_parsed queda
+// vacío) y, si no matcheó nada, se prueba como informe de COMET
+// (parseCometPdf detecta 4ta/5ta/6ta por el encabezado y sí tira error si
+// no reconoce la estructura — ahí se lo descarta como "no reconocido").
+async function sniffPlanillaPdf(file){
+  try{
+    const cit = await parseCitacionRaw(file, null);
+    if(Object.keys(cit.results_parsed).length) return {tipo:'citacion', file, ...cit};
+  }catch(e){ /* no era citación, probamos COMET */ }
+  try{
+    const data = await parseCometPdf(file, null);
+    return {tipo:'comet', file, data};
+  }catch(e){
+    return {tipo:null, file, error: 'No se reconoció como planilla de citación ni informe de COMET.'};
+  }
+}
+
+// Cada PDF de citación trae UNA fecha con UN rival (varias categorías juntas
+// en el mismo archivo) -- a diferencia de COMET, acá no hay riesgo real de
+// que dos PDF del lote caigan en la misma fecha (el único caso conocido, el
 // partido de Lanús F3 cortado a mitad, ya está resuelto aparte con el
 // mecanismo de "segundo tiempo"), así que no hace falta un selector de
-// conflictos: solo una fila editable por archivo con la fecha adivinada
+// conflictos ahí: solo una fila editable por archivo con la fecha adivinada
 // (o vacía si no se pudo) para confirmar o corregir antes de guardar.
-async function subirCitacionesLote(fileList, inputEl){
+// Si en la misma tanda hay PDF de citación Y de COMET, se muestra primero
+// el modal de COMET y, al cerrarlo (guardando o cancelando), se abre el de
+// citación -- los dos modales comparten estilo pero son overlays de pantalla
+// completa, así que no pueden mostrarse a la vez.
+async function subirPlanillasLote(fileList, inputEl){
   const files = Array.from(fileList||[]);
   if(inputEl) inputEl.value='';
   if(!files.length) return;
   showToast(`☁ LEYENDO ${files.length} PDF…`);
-  const parsed = [];
+  const citParsed = [], cometParsed = [], noReconocido = [];
   for(const file of files){
-    try{
-      const {results_parsed, pageImages} = await parseCitacionRaw(file, null);
-      const catsFound = Object.keys(results_parsed);
-      if(!catsFound.length){ parsed.push({file, error:'No se encontraron datos de citación'}); continue; }
-      const fechasAdivinadas = catsFound.map(c=>matchFechaPorRival(results_parsed[c].rival, c)).filter(Boolean);
-      parsed.push({file, error:null, catsFound, results_parsed, pageImages, fechaAdivinada: fechasAdivinadas[0]||null});
-    }catch(e){
-      parsed.push({file, error:e.message});
+    const r = await sniffPlanillaPdf(file);
+    if(r.tipo==='citacion'){
+      const catsFound = Object.keys(r.results_parsed);
+      const fechasAdivinadas = catsFound.map(c=>matchFechaPorRival(r.results_parsed[c].rival, c)).filter(Boolean);
+      citParsed.push({file, error:null, catsFound, results_parsed:r.results_parsed, pageImages:r.pageImages, fechaAdivinada: fechasAdivinadas[0]||null});
+    } else if(r.tipo==='comet'){
+      cometParsed.push({file, data:r.data, error:null});
+    } else {
+      noReconocido.push(r);
     }
   }
-  abrirConfirmCitacionLote(parsed);
+  if(noReconocido.length) showToast(`⚠ ${noReconocido.length} PDF no reconocido(s): ${noReconocido.map(r=>r.file.name).join(', ')}`);
+  const abrirCitacion = () => { if(citParsed.length) abrirConfirmCitacionLote(citParsed); };
+  if(cometParsed.length) abrirConfirmCometLote(cometParsed, abrirCitacion);
+  else abrirCitacion();
 }
 
 function avisoCitLoteTexto(catsFound, fecha){
@@ -4725,53 +4752,44 @@ async function subirInformeComet(file, cat, inputEl){
 // PDF del lote apuntan a la MISMA fecha es un partido cortado y re-jugado
 // en otra cancha (pasó con Lanús F3 en 4ta) -- ahí no adivinamos cuál vale,
 // se lo mostramos aparte para que la persona elija.
-async function subirInformesComet(fileList, cat, inputEl){
-  const files = Array.from(fileList||[]);
-  if(inputEl) inputEl.value='';
-  if(!files.length) return;
-  showToast(`☁ LEYENDO ${files.length} PDF…`);
-  const parsed = [];
-  for(const file of files){
-    try{
-      const data = await parseCometPdf(file, cat);
-      parsed.push({file, data, error:null});
-    }catch(e){
-      parsed.push({file, data:null, error:e.message});
-    }
-  }
-  abrirConfirmCometLote(cat, parsed);
-}
-
-function abrirConfirmCometLote(cat, parsed){
+// Agrupa por categoría+fecha (no por fecha sola) porque ahora un mismo lote
+// puede traer informes de más de una categoría juntos -- cada PDF ya trae su
+// propia categoría detectada (parseCometPdf), no hace falta que quien sube
+// el archivo la elija de antemano.
+function abrirConfirmCometLote(parsed, onClose){
   let m=document.getElementById('comet-confirm-modal');
   if(m) m.remove();
   m=document.createElement('div');
   m.id='comet-confirm-modal'; m.className='modal-bg';
 
-  const porFecha = {};
-  parsed.forEach(p=>{ if(p.data) (porFecha[p.data.fecha]=porFecha[p.data.fecha]||[]).push(p); });
+  const porClave = {}; // "CAT|fecha" -> [{file,data,error}]
+  parsed.forEach(p=>{ if(p.data) (porClave[`${p.data.categoria}|${p.data.fecha}`]=porClave[`${p.data.categoria}|${p.data.fecha}`]||[]).push(p); });
   const errores = parsed.filter(p=>p.error);
-  const fechas = Object.keys(porFecha).map(Number).sort((a,b)=>a-b);
+  const claves = Object.keys(porClave).sort((a,b)=>{
+    const [catA,fA]=a.split('|'), [catB,fB]=b.split('|');
+    return catA===catB ? Number(fA)-Number(fB) : catA.localeCompare(catB);
+  });
 
   const marcador = d => d.condicion==='L' ? `${d.golesTigre}-${d.golesRival}` : `${d.golesRival}-${d.golesTigre}`;
 
-  const rowsHTML = fechas.map(f=>{
-    const grupo = porFecha[f];
+  const rowsHTML = claves.map(clave=>{
+    const [cat, fStr] = clave.split('|'); const f = Number(fStr);
+    const grupo = porClave[clave];
     if(grupo.length>1){
-      return `<div class="comet-lote-row conflict" data-fecha="${f}"
+      return `<div class="comet-lote-row conflict" data-clave="${clave}"
         style="background:rgba(192,21,42,0.1);border:1px solid rgba(192,21,42,0.4);border-radius:6px;padding:8px 10px;margin-bottom:6px">
-        <div style="font-size:12px;color:#f0a0a8;margin-bottom:6px">⚠ Fecha ${f}: ${grupo.length} PDF distintos apuntan a la misma fecha — elegí cuál usar</div>
+        <div style="font-size:12px;color:#f0a0a8;margin-bottom:6px">⚠ ${esc(cat)} · Fecha ${f}: ${grupo.length} PDF distintos apuntan a la misma fecha — elegí cuál usar</div>
         ${grupo.map((p,i)=>`<label style="display:flex;gap:6px;align-items:center;font-size:12px;margin:4px 0">
-          <input type="radio" name="comet-lote-pick-${f}" value="${i}" ${i===0?'checked':''}>
+          <input type="radio" name="comet-lote-pick-${clave}" value="${i}" ${i===0?'checked':''}>
           <span>${esc(p.file.name)} — ${esc(p.data.rival)} · Tigre ${marcador(p.data)} · ${p.data.goles.length} goles</span>
         </label>`).join('')}
       </div>`;
     }
     const p = grupo[0], yaExiste = partidos[cat] && partidos[cat][f];
-    return `<div class="comet-lote-row" data-fecha="${f}" style="padding:6px 0;border-bottom:1px solid rgba(26,45,90,0.4)">
+    return `<div class="comet-lote-row" data-clave="${clave}" style="padding:6px 0;border-bottom:1px solid rgba(26,45,90,0.4)">
       <label style="display:flex;gap:8px;align-items:flex-start;font-size:12px;cursor:pointer">
         <input type="checkbox" class="comet-lote-check" checked style="margin-top:2px">
-        <span style="flex:1">Fecha ${f} · ${esc(p.data.rival)} · Tigre ${marcador(p.data)} · ${p.data.goles.length} goles${yaExiste?' <span style="color:var(--muted)">(ya cargada, se actualiza)</span>':''}</span>
+        <span style="flex:1"><b style="color:var(--gold2)">${esc(cat)}</b> · Fecha ${f} · ${esc(p.data.rival)} · Tigre ${marcador(p.data)} · ${p.data.goles.length} goles${yaExiste?' <span style="color:var(--muted)">(ya cargada, se actualiza)</span>':''}</span>
       </label>
       ${p.data.warnings.length?`<div style="font-size:11px;color:var(--gold2);margin:2px 0 0 24px">${p.data.warnings.map(w=>'⚠ '+esc(w)).join('<br>')}</div>`:''}
     </div>`;
@@ -4782,38 +4800,49 @@ function abrirConfirmCometLote(cat, parsed){
   </div>`:'';
 
   m.innerHTML = `<div class="modal-box" style="width:440px;text-align:left;max-height:80vh;overflow:auto">
-    <h2 style="text-align:center">INFORMES DE COMET · ${esc(cat)}</h2>
-    <p style="text-align:center;font-size:12px;color:var(--muted)">${fechas.length} fecha(s) detectada(s) de ${parsed.length} PDF</p>
+    <h2 style="text-align:center">INFORMES DE COMET</h2>
+    <p style="text-align:center;font-size:12px;color:var(--muted)">${claves.length} fecha(s) detectada(s) de ${parsed.length} PDF</p>
     <div id="comet-lote-rows">${rowsHTML || '<p style="text-align:center;color:var(--muted)">No se pudo leer ninguna fecha.</p>'}</div>
     ${erroresHTML}
-    <button class="m-btn" onclick="confirmarCometLote('${cat}')">✓ GUARDAR TODO</button>
-    <button class="m-cancel" onclick="document.getElementById('comet-confirm-modal').remove()">Cancelar</button>
+    <button class="m-btn" onclick="confirmarCometLote()">✓ GUARDAR TODO</button>
+    <button class="m-cancel" onclick="cerrarCometLoteModal()">Cancelar</button>
   </div>`;
   document.body.appendChild(m);
-  m._cometLote = porFecha;
+  m._cometLote = porClave;
+  m._onClose = onClose;
 }
 
-async function confirmarCometLote(cat){
+function cerrarCometLoteModal(){
   const m=document.getElementById('comet-confirm-modal');
-  const porFecha = m && m._cometLote;
-  if(!porFecha) return;
+  const cb = m && m._onClose;
+  if(m) m.remove();
+  if(cb) cb();
+}
+
+async function confirmarCometLote(){
+  const m=document.getElementById('comet-confirm-modal');
+  const porClave = m && m._cometLote;
+  const onClose = m && m._onClose;
+  if(!porClave) return;
   const aGuardar = [];
   m.querySelectorAll('.comet-lote-row').forEach(row=>{
-    const fecha = Number(row.dataset.fecha);
-    const grupo = porFecha[fecha];
+    const clave = row.dataset.clave;
+    const [cat, fStr] = clave.split('|'); const fecha = Number(fStr);
+    const grupo = porClave[clave];
     if(row.classList.contains('conflict')){
-      const picked = row.querySelector(`input[name="comet-lote-pick-${fecha}"]:checked`);
-      if(picked) aGuardar.push({fecha, data: grupo[Number(picked.value)].data});
+      const picked = row.querySelector(`input[name="comet-lote-pick-${clave}"]:checked`);
+      if(picked) aGuardar.push({cat, fecha, data: grupo[Number(picked.value)].data});
     } else {
       const check = row.querySelector('.comet-lote-check');
-      if(check && check.checked) aGuardar.push({fecha, data: grupo[0].data});
+      if(check && check.checked) aGuardar.push({cat, fecha, data: grupo[0].data});
     }
   });
   m.remove();
-  if(!aGuardar.length) return;
+  if(!aGuardar.length){ onClose && onClose(); return; }
   showToast(`☁ GUARDANDO ${aGuardar.length} FECHA(S)…`);
   let ok=0;
-  for(const {fecha, data} of aGuardar){
+  const catsAfectadas = new Set();
+  for(const {cat, fecha, data} of aGuardar){
     try{
       await savePartidoComet(cat, fecha, data);
       if(!partidos[cat]) partidos[cat]={};
@@ -4823,13 +4852,15 @@ async function confirmarCometLote(cat){
         titulares:data.titulares, suplentes:data.suplentes,
         goles:data.goles, amarillas:data.amarillas, rojas:data.rojas,
       };
+      catsAfectadas.add(cat);
       ok++;
-    }catch(e){ console.error('[COMET lote]', fecha, e); }
+    }catch(e){ console.error('[COMET lote]', cat, fecha, e); }
   }
   showToast(ok===aGuardar.length ? `✓ ${ok} INFORME(S) GUARDADO(S)` : `⚠ ${ok}/${aGuardar.length} guardados — revisá la consola`);
-  if(document.getElementById(`goleadores-${cat}`)) renderGoleadores(cat);
+  catsAfectadas.forEach(cat=>{ if(document.getElementById(`goleadores-${cat}`)) renderGoleadores(cat); });
   renderConfiabilidad('gen-confiabilidad');
   refreshAlerts();
+  onClose && onClose();
 }
 
 function abrirConfirmComet(cat, data){
@@ -5268,11 +5299,6 @@ function renderGoleadores(cat){
         <span style="font-family:Bebas Neue,sans-serif;font-size:20px;color:rgba(255,255,255,0.7)">${sorted.length}</span>
       </div>
       <div class="gc-body">${rowsHTML}</div>
-      ${canEdit && CONFIABILIDAD_CATS.includes(cat) ? `<div class="gol-add-row" style="border-top:1px solid var(--border,#1a2d5a);padding-top:10px;margin-top:6px">
-        <input type="file" id="comet-upload-${cat}" accept="application/pdf" multiple style="display:none"
-          onchange="subirInformesComet(this.files, '${cat}', this)">
-        <button class="btn-add-gol" style="flex:1" onclick="document.getElementById('comet-upload-${cat}').click()">📄 CARGAR INFORMES DE COMET (PDF, podés elegir varios)</button>
-      </div>`:''}
       ${canEdit?`<div class="gol-add-row">
         <input class="gol-input" id="gol-name-${cat}" placeholder="Nombre del jugador…" autocomplete="off">
         <input class="gol-fecha-input" id="gol-fecha-${cat}" type="number" min="1" max="35" placeholder="F#">
