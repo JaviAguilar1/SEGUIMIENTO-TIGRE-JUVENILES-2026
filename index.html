@@ -3016,7 +3016,7 @@ function renderTopGoleadores(wrap){
 let catActiveTab = 'resultados'; // 'resultados' | 'plantel' | 'placas'
 
 function buildCatTabsHTML(){
-  const tabs = [ {id:'resultados', label:'📊 ESTADÍSTICAS'}, {id:'plantel', label:'👥 PLANTEL'}, {id:'rendimiento', label:'🏃 RENDIMIENTO'}, {id:'placas', label:'🎬 PLACAS'} ];
+  const tabs = [ {id:'resultados', label:'📊 ESTADÍSTICAS'}, {id:'plantel', label:'👥 PLANTEL'}, {id:'rendimiento', label:'🏃 RENDIMIENTO'}, {id:'videoanalisis', label:'▶ VIDEOANÁLISIS'}, {id:'placas', label:'🎬 PLACAS'} ];
   return `<div style="display:flex;gap:8px;margin:10px 0 4px;">
     ${tabs.map(t=>{
       const active = catActiveTab===t.id;
@@ -3033,11 +3033,12 @@ function renderStatsSingle(cat, content){
   const isReserva = cat === 'RESERVA';
   // dataCat: clave real de storage. Para RESERVA depende del semestre elegido.
   const dataCat = isReserva ? (reservaSemestre===2 ? 'RESERVA_S2' : 'RESERVA') : cat;
-  // RESERVA: solo "Partido completo" (sin citaciones/equipo). Otras: todos los links.
-  const activeLinks = isReserva
-    ? LINK_TYPES.filter(lt=>lt.key==='par')
-    : (CATEGORIES.includes(cat) ? LINK_TYPES : []);
-  const isLink = activeLinks.length > 0;
+  // Los links de video (Partido/Resumen/Análisis/Próximo Rival) se mudaron
+  // a la pestaña VIDEOANÁLISIS -- acá en ESTADÍSTICAS solo queda Citaciones
+  // (a pedido: "tiene que vivir en los dos lugares"). RESERVA nunca tuvo
+  // citaciones, así que para RESERVA esta columna directamente no existe.
+  const resultadosLinks = (!isReserva && CATEGORIES.includes(cat)) ? LINK_TYPES.filter(lt=>lt.key==='cit') : [];
+  const isLink = resultadosLinks.length > 0;
   const showEquipo = false;   // botón/panel de equipo retirado de todas las categorías
   const fixtureList = isReserva ? (reservaSemestre===2 ? RIVALS_RESERVA_S2 : RIVALS_RESERVA) : RIVALS;
 
@@ -3061,7 +3062,7 @@ function renderStatsSingle(cat, content){
   fixtureList.forEach(r=>{
     // No block dividers for RESERVA (18 matches, no need to split)
     if(!isReserva && (r.f-1)%bloqueSize===0 && r.f>1){
-      const span=3+(isLink?activeLinks.length:0)+(showEquipo?1:0);
+      const span=3+(isLink?resultadosLinks.length:0)+(showEquipo?1:0);
       rows+=`<tr class="divider-row"><td colspan="${span}">── BLOQUE F${r.f}–F${Math.min(r.f+bloqueSize-1,35)}</td></tr>`;
     }
     const stored=results[dataCat][r.f];
@@ -3078,7 +3079,7 @@ function renderStatsSingle(cat, content){
     // columnas separadas) — la condición queda como badge chico al lado
     // del nombre en vez de tener su propio ancho de columna.
     const rivalCell = isReserva && canEdit
-      ? `<td><div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+      ? `<td><div style="display:flex;align-items:center;justify-content:center;gap:6px;flex-wrap:wrap">
           <input class="rival-edit-input" type="text" value="${esc(rName)}"
             data-fecha="${r.f}" data-field="rival"
             placeholder="Rival…"
@@ -3094,32 +3095,18 @@ function renderStatsSingle(cat, content){
             <option value="V" ${rCond==='V'?'selected':''}>VISIT.</option>
           </select>
         </div></td>`
-      : `<td class="rival-name">${esc(rName)||'—'} <span class="cond-badge cond-${rCond}" style="margin-left:4px;font-size:10px">${rCond==='L'?'LOCAL':'VISIT.'}</span></td>`;
+      : `<td class="rival-name" style="text-align:center">${esc(rName)||'—'} <span class="cond-badge cond-${rCond}" style="margin-left:4px;font-size:10px">${rCond==='L'?'LOCAL':'VISIT.'}</span></td>`;
 
     const hasTeamData = !!(matchData[dataCat][r.f]?.titulares?.length);
-    let linkCols='';
-    if(isLink){
-      activeLinks.forEach(lt=>{
-        if(lt.key==='cit'){
-          // Citaciones: no hay campo para pegar link a mano — el ícono abre
-          // la ficha ya procesada (extraída del PDF real) si existe, o queda
-          // vacío si esa fecha todavía no se cargó.
-          linkCols+=`<td class="link-cell" style="text-align:center">
-            <button class="link-btn${hasTeamData?'':' empty'}" title="${lt.label}"
-              ${hasTeamData?`onclick="abrirCitacionView('${dataCat}',${r.f})"`:'disabled'}
-              style="background:none;border:none;cursor:${hasTeamData?'pointer':'default'};font-size:15px;padding:2px 6px">${lt.icon}</button>
-          </td>`;
-          return;
-        }
-        const val=links[dataCat][r.f][lt.key]||'',has=val.trim()!=='';
-        linkCols+=`<td class="link-cell"><div class="link-wrap">
-          <input class="link-input" type="url" value="${esc(val)}" placeholder="${lt.label}…"
-            data-cat="${dataCat}" data-fecha="${r.f}" data-lkey="${lt.key}" title="${lt.label}"
-            ${canEdit?'':'disabled'}>
-          <a class="link-btn${has?'':' empty'}" href="${has?esc(val):'#'}" target="_blank" rel="noopener" title="${lt.label}">${lt.icon}</a>
-        </div></td>`;
-      });
-    }
+    // Citaciones: no hay campo para pegar link a mano — el ícono abre la
+    // ficha ya procesada (extraída del PDF real) si existe, o queda vacío
+    // si esa fecha todavía no se cargó. Vive acá Y en VIDEOANÁLISIS (a
+    // pedido, mismo botón/comportamiento en los dos lugares).
+    const linkCols = isLink ? `<td class="link-cell" style="text-align:center">
+        <button class="link-btn${hasTeamData?'':' empty'}" title="Citaciones"
+          ${hasTeamData?`onclick="abrirCitacionView('${dataCat}',${r.f})"`:'disabled'}
+          style="background:none;border:none;cursor:${hasTeamData?'pointer':'default'};font-size:15px;padding:2px 6px">📋</button>
+      </td>` : '';
     const equipoBtn = showEquipo
       ? `<td><button class="btn-equipo${hasTeamData?' active':''}" data-cat="${dataCat}" data-fecha="${r.f}" title="Ver/editar equipo">👥${hasTeamData?' ✓':''}</button></td>`
       : '';
@@ -3128,7 +3115,7 @@ function renderStatsSingle(cat, content){
     const letraEs = res==='W'?'G':res==='D'?'E':res==='L'?'P':'';
 
     rows+=`<tr data-cat="${dataCat}" data-fecha="${r.f}">
-      <td class="fecha-num">F${r.f}${fechaCal?` <span style="color:var(--muted);font-size:11px;font-weight:400">(${fechaCal})</span>`:''}</td>${rivalCell}
+      <td class="fecha-num" style="white-space:nowrap">F${r.f}${fechaCal?` - (${fechaCal})`:''}</td>${rivalCell}
       <td><div class="score-cell">
         <input class="score-input" type="number" min="0" max="99" value="${gf}"
           data-cat="${dataCat}" data-fecha="${r.f}" data-side="0" placeholder="—" ${canEdit?'':'disabled'}>
@@ -3139,7 +3126,7 @@ function renderStatsSingle(cat, content){
       </div></td>
       ${linkCols}${equipoBtn}</tr>${showEquipo?`
     <tr class="match-detail-row" id="mdr-${dataCat}-${r.f}" style="display:none">
-      <td colspan="${4+(isLink?activeLinks.length:0)}">
+      <td colspan="${4+(isLink?resultadosLinks.length:0)}">
         <div class="match-detail-panel" id="mdp-${dataCat}-${r.f}"></div>
       </td>
     </tr>`:''}`;
@@ -3148,8 +3135,8 @@ function renderStatsSingle(cat, content){
   // Link headers
   let linkGH='', linkSH='';
   if(isLink){
-    linkGH=`<th colspan="${activeLinks.length}" style="background:linear-gradient(135deg,#0d1a3a,#08111f);color:var(--blue2);border-top:2px solid var(--blue2);font-size:12px;letter-spacing:2px;">🔗 LINKS</th>`;
-    activeLinks.forEach(lt=>{ linkSH+=`<th title="${lt.label}">${lt.icon} ${lt.label}</th>`; });
+    linkGH=`<th colspan="${resultadosLinks.length}" style="background:linear-gradient(135deg,#0d1a3a,#08111f);color:var(--blue2);border-top:2px solid var(--blue2);font-size:12px;letter-spacing:2px;">📋</th>`;
+    resultadosLinks.forEach(lt=>{ linkSH+=`<th title="${lt.label}">${lt.icon} ${lt.label}</th>`; });
   }
 
   content.innerHTML = `${buildCatTabsHTML()}<div id="cat-tab-content-${dataCat}"></div>`;
@@ -3172,6 +3159,10 @@ function renderStatsSingle(cat, content){
   }
   if(catActiveTab==='rendimiento'){
     renderRendimientoTab(tabEl);
+    return;
+  }
+  if(catActiveTab==='videoanalisis'){
+    renderVideoanalisisTab(cat, tabEl);
     return;
   }
 
@@ -3250,6 +3241,102 @@ function renderStatsSingle(cat, content){
   renderGoleadores(dataCat);
   if(isReserva) renderTablaReserva(`tabla-lpf-${cat}`);
   else renderTablaLPF(cat, `tabla-lpf-${cat}`);
+}
+
+// VIDEOANÁLISIS: los 4 links de video (Partido/Resumen/Análisis Propio/
+// Próximo Rival) que antes vivían adentro de la tabla de RESULTADOS -- se
+// mudaron acá para no saturar esa tabla. Citaciones vive en LOS DOS
+// lugares (a pedido explícito), mismo botón/comportamiento que ya tenía.
+// Clic en un link de video lo abre embebido adentro de la plataforma
+// (abrirVideoEmbebido) en vez de mandar a YouTube en pestaña nueva.
+function renderVideoanalisisTab(cat, tabEl){
+  const isReserva = cat === 'RESERVA';
+  const dataCat = isReserva ? (reservaSemestre===2 ? 'RESERVA_S2' : 'RESERVA') : cat;
+  // RESERVA: mismo alcance que siempre tuvo (solo "Partido completo", sin
+  // citaciones) -- no cambia por esta reorganización.
+  const videoLinks = isReserva ? LINK_TYPES.filter(lt=>lt.key==='par') : LINK_TYPES;
+  const fixtureList = isReserva ? (reservaSemestre===2 ? RIVALS_RESERVA_S2 : RIVALS_RESERVA) : RIVALS;
+
+  const headHTML = videoLinks.map(lt=>`<th title="${lt.label}">${lt.icon} ${lt.label}</th>`).join('');
+
+  let rows = '';
+  fixtureList.forEach(r=>{
+    if(!isReserva && (r.f-1)%bloqueSize===0 && r.f>1){
+      rows += `<tr class="divider-row"><td colspan="${2+videoLinks.length}">── BLOQUE F${r.f}–F${Math.min(r.f+bloqueSize-1,35)}</td></tr>`;
+    }
+    const rName = isReserva ? (rivalData[dataCat][r.f]?.rival || '') : r.r;
+    const hasTeamData = !!(matchData[dataCat][r.f]?.titulares?.length);
+    const fechaCal = isReserva ? '' : fechaCalCompacta(r.f);
+
+    const cols = videoLinks.map(lt=>{
+      if(lt.key==='cit'){
+        return `<td class="link-cell" style="text-align:center">
+          <button class="link-btn${hasTeamData?'':' empty'}" title="Citaciones"
+            ${hasTeamData?`onclick="abrirCitacionView('${dataCat}',${r.f})"`:'disabled'}
+            style="background:none;border:none;cursor:${hasTeamData?'pointer':'default'};font-size:15px;padding:2px 6px">📋</button>
+        </td>`;
+      }
+      const val = links[dataCat][r.f][lt.key] || '';
+      const has = val.trim() !== '';
+      const titulo = `F${r.f} · ${lt.label}${rName?' · vs '+rName:''}`.replace(/'/g,"\\'");
+      return `<td class="link-cell"><div class="link-wrap">
+        ${canEdit?`<input class="link-input" type="url" value="${esc(val)}" placeholder="${lt.label}…"
+          data-cat="${dataCat}" data-fecha="${r.f}" data-lkey="${lt.key}" title="${lt.label}">`:''}
+        <button class="link-btn${has?'':' empty'}" title="${lt.label}"
+          onclick="abrirVideoEmbebido(this.previousElementSibling&&this.previousElementSibling.classList.contains('link-input')?this.previousElementSibling.value:'${esc(val).replace(/'/g,"\\'")}','${titulo}')"
+          ${has||canEdit?'':'disabled'}
+          style="background:none;border:none;cursor:${has||canEdit?'pointer':'default'};font-size:15px;padding:2px 6px">${lt.icon}</button>
+      </div></td>`;
+    }).join('');
+
+    rows += `<tr data-cat="${dataCat}" data-fecha="${r.f}">
+      <td class="fecha-num" style="white-space:nowrap">F${r.f}${fechaCal?` - (${fechaCal})`:''}</td>
+      <td class="rival-name" style="text-align:center">${esc(rName)||'—'}</td>
+      ${cols}
+    </tr>`;
+  });
+
+  tabEl.innerHTML = `
+    ${seccionTitulo('videoanalisis-'+dataCat, `▶ VIDEOANÁLISIS · <span style="color:${CAT_COLORS[cat]}">${cat}</span>`)}
+    <div id="sec-videoanalisis-${dataCat}"${seccionEstiloInicial('videoanalisis-'+dataCat)}>
+      <div class="table-wrap"><table>
+        <thead><tr class="thead-sub"><th>FECHA</th><th>RIVAL</th>${headHTML}</tr></thead>
+        <tbody id="tbody-${dataCat}">${rows}</tbody>
+      </table></div>
+    </div>`;
+
+  attachTableEvents(dataCat); // mismo listener que ESTADÍSTICAS: .link-input ya sabe guardar en links[cat][f][key]
+}
+
+// Extrae el ID de video de un link de YouTube en cualquiera de sus formas
+// (youtu.be/ID, youtube.com/watch?v=ID, /embed/ID, /shorts/ID). null si no
+// matchea nada -- ahí se abre en pestaña nueva en vez de embeber.
+function extraerYoutubeId(url){
+  const m = String(url||'').match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([\w-]{11})/);
+  return m ? m[1] : null;
+}
+
+function abrirVideoEmbebido(url, titulo){
+  url = (url||'').trim();
+  if(!url) return;
+  const id = extraerYoutubeId(url);
+  if(!id){ window.open(url, '_blank', 'noopener'); return; }
+  let m = document.getElementById('video-embed-modal');
+  if(m) m.remove();
+  m = document.createElement('div');
+  m.id = 'video-embed-modal'; m.className = 'modal-bg';
+  m.addEventListener('click', e=>{ if(e.target===m) m.remove(); });
+  m.innerHTML = `<div class="modal-box" style="width:720px;max-width:94vw;text-align:left;padding:20px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;gap:10px">
+      <p style="margin:0;color:var(--gold2);font-family:'Barlow Condensed',sans-serif;font-size:13px;letter-spacing:1px">${esc(titulo||'')}</p>
+      <button class="m-cancel" onclick="document.getElementById('video-embed-modal').remove()">✕</button>
+    </div>
+    <div style="position:relative;padding-top:56.25%;background:#000;border-radius:8px;overflow:hidden">
+      <iframe src="https://www.youtube.com/embed/${id}" style="position:absolute;inset:0;width:100%;height:100%;border:0"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+    </div>
+  </div>`;
+  document.body.appendChild(m);
 }
 
 // PLANTEL: roster + comparar jugadores (ya existentes, mudados acá) +
