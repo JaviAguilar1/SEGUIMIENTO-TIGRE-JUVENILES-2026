@@ -2303,11 +2303,6 @@ function buildStatsCatSelect(){
         color:var(--gold2);font-family:'Barlow Condensed',sans-serif;font-weight:700;letter-spacing:1px;
         font-size:14px;padding:8px 14px;border-radius:6px;cursor:pointer;outline:none">${opts}</select>
       <div id="pdf-export-btn-wrap"></div>
-      <button onclick="actualizarDatosAhora()" id="btn-actualizar-datos"
-        title="Refresca en la app los datos ya disponibles y abre GitHub Actions para forzar un scrapeo nuevo"
-        style="background:rgba(26,58,143,0.25);border:1px solid var(--border2);color:var(--gold2);
-        border-radius:6px;padding:8px 14px;font-family:'Barlow Condensed',sans-serif;font-size:13px;
-        letter-spacing:1px;font-weight:700;cursor:pointer;white-space:nowrap">🔄 ACTUALIZAR DATOS</button>
       <span id="tabla-data-status"></span>
       <div id="cit-upload-btn-wrap"></div>
     </div>`;
@@ -5392,25 +5387,6 @@ function sincronizarLinksVaciosEnPantalla(){
     const btn=inp.parentElement.querySelector('.link-btn');
     if(btn){ btn.href=val; btn.classList.remove('empty'); }
   });
-}
-
-// Botón "Actualizar datos": (1) descarta la caché en memoria y vuelve a
-// pedir data/tablas.json al servidor (por si la Action ya corrió y el
-// navegador todavía tenía la versión vieja guardada), y (2) abre en una
-// pestaña nueva la página de GitHub Actions para que, si hace falta, se
-// pueda forzar un scrapeo nuevo ahí mismo con "Run workflow".
-function actualizarDatosAhora(){
-  const btn=document.getElementById('btn-actualizar-datos');
-  if(btn){ btn.disabled=true; btn.textContent='⏳ ACTUALIZANDO...'; }
-  TABLA_DATA=null;
-  const sel=document.getElementById('stats-cat-select');
-  const cat=sel?sel.value:'GENERAL';
-  loadTablaData().finally(()=>{
-    renderStatsCat(cat);
-    renderTablaDataStatus();
-    if(btn){ btn.disabled=false; btn.textContent='🔄 ACTUALIZAR DATOS'; }
-  });
-  window.open('https://github.com/JaviAguilar1/SEGUIMIENTO-TIGRE-JUVENILES-2026/actions/workflows/tablas.yml','_blank');
 }
 
 function loadTablaData(){
