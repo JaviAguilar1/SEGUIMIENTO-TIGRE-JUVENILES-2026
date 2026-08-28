@@ -2572,15 +2572,18 @@ function calcConfiabilidad(){
     });
   });
 
-  const equipoMismatches=[]; // {cat, campo, mio, lpf}
+  const equipoMismatches=[]; // {cat, campo, mio, valor, fuente}
   CONFIABILIDAD_CATS.forEach(cat=>{
+    const mio=calcStats(cat,1,35);
     const filas=(TABLA_DATA&&TABLA_DATA.categorias&&TABLA_DATA.categorias[cat])||[];
     const lpf=filas.find(f=>/tigre/i.test(f.equipo));
-    if(!lpf) return; // todavía sin datos LPF para esta categoría
-    const mio=calcStats(cat,1,35);
-    if(mio.pj!==lpf.pj) equipoMismatches.push({cat, campo:'PJ', mio:mio.pj, lpf:lpf.pj});
-    if(mio.pg!==lpf.pg) equipoMismatches.push({cat, campo:'PG', mio:mio.pg, lpf:lpf.pg});
-    if(mio.gf!==lpf.gf) equipoMismatches.push({cat, campo:'GF', mio:mio.gf, lpf:lpf.gf});
+    const pln=(TABLA_DATA&&TABLA_DATA.tigre_parenlapelota&&TABLA_DATA.tigre_parenlapelota[cat])||null;
+    [['LPF oficial',lpf],['parenlapelota',pln]].forEach(([fuente,fila])=>{
+      if(!fila) return; // todavía sin datos de esa fuente para esta categoría
+      if(mio.pj!==fila.pj) equipoMismatches.push({cat, campo:'PJ', mio:mio.pj, valor:fila.pj, fuente});
+      if(mio.pg!==fila.pg) equipoMismatches.push({cat, campo:'PG', mio:mio.pg, valor:fila.pg, fuente});
+      if(mio.gf!==fila.gf) equipoMismatches.push({cat, campo:'GF', mio:mio.gf, valor:fila.gf, fuente});
+    });
   });
 
   const golesMismatches=[]; // {cat, jugador, mio, fut, key, soloEn}
@@ -2821,10 +2824,10 @@ function renderConfiabilidad(containerId){
 
     if(equipoMismatches.length){
       html+=`<div style="font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:1px;color:var(--muted);margin:14px 0 6px">
-        EQUIPO · mi planilla vs LPF oficial</div>`;
+        EQUIPO · mi planilla vs LPF oficial / parenlapelota</div>`;
       html+=equipoMismatches.map(m=>row(
         `<b style="color:${CAT_COLORS[m.cat]}">${m.cat}</b> · ${m.campo}`,
-        `Mi planilla: <b>${m.mio}</b> · LPF oficial: <b>${m.lpf}</b>`
+        `Mi planilla: <b>${m.mio}</b> · ${m.fuente}: <b>${m.valor}</b>`
       )).join('');
     }
 
