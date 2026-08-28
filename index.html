@@ -5343,7 +5343,11 @@ function renderRosterCat(cat, content){
   const statsPorNombre={};
   (jugadoresStats[cat]||[]).forEach(j=>{ statsPorNombre[normNombre(j.jugador)]=j; });
 
-  content.innerHTML=`<div id="roster-table-${cat}"></div>`;
+  content.innerHTML=`
+    <input type="text" id="roster-search-${cat}" placeholder="🔎 Buscar jugador…" oninput="filtrarRosterJugadores('${cat}')"
+      style="background:var(--surface2);border:1px solid var(--border2);color:var(--text);width:100%;max-width:280px;
+      border-radius:6px;padding:8px 12px;font-family:'Barlow Condensed',sans-serif;font-size:14px;outline:none;margin-bottom:10px">
+    <div id="roster-table-${cat}"></div>`;
 
   if(roster.length===0){
     document.getElementById(`roster-table-${cat}`).innerHTML=
@@ -5417,6 +5421,13 @@ function renderComparativaJugadores(cat, merged){
   </table></div>`;
 }
 
+function filtrarRosterJugadores(cat){
+  const q=(document.getElementById(`roster-search-${cat}`)?.value||'').toLowerCase().trim();
+  document.querySelectorAll(`#roster-table-${cat} tbody tr`).forEach(tr=>{
+    tr.style.display = !q || (tr.dataset.nombre||'').includes(q) ? '' : 'none';
+  });
+}
+
 function renderRosterTable(cat, merged){
   const {key, dir}=rosterSortState[cat];
   const col=ROSTER_COLS.find(c=>c.key===key);
@@ -5440,7 +5451,7 @@ function renderRosterTable(cat, merged){
       ? `<img src="${esc(p.foto)}" alt="" style="width:32px;height:32px;border-radius:50%;object-fit:cover;vertical-align:middle;margin-right:8px" onerror="this.style.display='none'">`
       : `<span style="display:inline-block;width:32px;height:32px;border-radius:50%;background:var(--surface2);vertical-align:middle;margin-right:8px"></span>`;
     const s=p.stats||{};
-    return `<tr>
+    return `<tr data-nombre="${esc((p.nombre||'').toLowerCase())}">
       <td class="rival-name" style="cursor:pointer" onclick="abrirPerfilJugador('${cat}','${esc(p.nombre||'').replace(/'/g,"\\'")}')"
         title="Ver perfil">${foto}${esc(p.nombre||'—')}</td>
       <td>${esc(p.posicion||'—')}</td>
@@ -7960,6 +7971,21 @@ function abrirPerfilJugador(cat, nombre){
       </tbody></table></div>`
     : `<div style="color:var(--muted);font-size:12px;padding:6px 0">Sin datos de rendimiento físico todavía — se completa solo cuando Brian cargue en BL GPS Performance.</div>`;
 
+  // Cruza contra matchData (citaciones) de TODAS las fechas de la categoría
+  // -- veces titular, veces entró desde el banco, veces salió. Match por id
+  // si la citación ya lo trae (parseCitacionRaw lo resuelve contra el
+  // plantel al cargar); si no, cae al mismo criterio de nombre "orden
+  // independiente" que usa el resto de la app para cruzar fuentes distintas.
+  const nombreNorm = normNombreOrdenIndependiente(nombre);
+  const esMismoJugador = p => (jugador?.id!=null && p.id===jugador.id) || normNombreOrdenIndependiente(p.nombre)===nombreNorm;
+  let vecesTitular=0, vecesBanco=0, vecesEntroDeBanco=0, vecesSalio=0;
+  Object.values(matchData[cat]||{}).forEach(d=>{
+    const enTit=(d.titulares||[]).find(esMismoJugador);
+    if(enTit){ vecesTitular++; if(enTit.minutoSalida!=null) vecesSalio++; }
+    const enSup=(d.suplentes||[]).find(esMismoJugador);
+    if(enSup){ vecesBanco++; if(enSup.minutoEntrada!=null) vecesEntroDeBanco++; }
+  });
+
   let m=document.getElementById('perfil-jugador-modal');
   if(m) m.remove();
   m=document.createElement('div');
@@ -7975,6 +8001,14 @@ function abrirPerfilJugador(cat, nombre){
           <div style="font-size:10px;color:var(--muted);text-transform:uppercase">${label}</div>
           <div style="font-size:18px;font-weight:700;color:var(--gold2)">${val||0}</div></div>`).join('')}
     </div>
+    <div class="st"><div class="stbar"></div>📋 CITACIONES</div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:10px 0">
+      ${[['Titular',vecesTitular],['Entró de banco',vecesEntroDeBanco],['Salió',vecesSalio]]
+        .map(([label,val])=>`<div style="background:var(--surface2);border-radius:8px;padding:8px;text-align:center">
+          <div style="font-size:10px;color:var(--muted);text-transform:uppercase">${label}</div>
+          <div style="font-size:18px;font-weight:700;color:var(--gold2)">${val}</div></div>`).join('')}
+    </div>
+    <div style="font-size:11px;color:var(--muted);margin-bottom:6px">En banco (citado, no siempre entró): ${vecesBanco}</div>
     <div class="st"><div class="stbar"></div>⚽ GOLES</div>
     <div class="table-wrap"><table><tbody>${golesFilas}</tbody></table></div>
     <div class="st" style="margin-top:14px"><div class="stbar"></div>📡 RENDIMIENTO FÍSICO (BL)</div>
