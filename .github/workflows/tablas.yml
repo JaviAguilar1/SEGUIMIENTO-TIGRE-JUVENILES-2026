@@ -22,7 +22,12 @@ jobs:
         with:
           python-version: "3.12"
 
+      # continue-on-error: si alguna fuente fallo, el script sale con error
+      # (para que quede registrado), pero igual queremos commitear el dato
+      # parcial que si funciono -- por eso el paso siguiente corre igual.
       - name: Ejecutar scraper
+        id: scraper
+        continue-on-error: true
         env:
           FUTDETAIL_USER: ${{ secrets.FUTDETAIL_USER }}
           FUTDETAIL_PASS: ${{ secrets.FUTDETAIL_PASS }}
@@ -41,3 +46,10 @@ jobs:
             git commit -m "Actualizacion automatica de tablas LPF"
             git push
           fi
+
+      # Recien aca se deja que el run quede marcado como fallido -- asi
+      # GitHub manda el aviso por mail (notificacion default de Actions),
+      # pero sin haber bloqueado el commit del dato parcial de arriba.
+      - name: Marcar el run como fallido si el scraper tuvo errores
+        if: steps.scraper.outcome == 'failure'
+        run: exit 1

@@ -2274,6 +2274,23 @@ function buildStatsModule(){
     <div class="main" id="stats-content"></div>`;
   buildStatsCatSelect();
   renderStatsCat('GENERAL');
+  loadTablaData().then(renderTablaDataStatus);
+}
+
+// Aviso corto al lado de "ACTUALIZAR DATOS": ultima vez que corrio el
+// scraper y si alguna fuente fallo esa vez (TABLA_DATA.errores, ver
+// scripts/scrape_tablas.py) -- asi no queda en silencio si algo se rompe.
+function renderTablaDataStatus(){
+  const el = document.getElementById('tabla-data-status');
+  if(!el || !TABLA_DATA) return;
+  const errores = TABLA_DATA.errores || [];
+  const upd = TABLA_DATA.actualizado || '?';
+  if(errores.length){
+    el.innerHTML = `<span title="${esc(errores.join(' · '))}" style="color:var(--loss);
+      font-family:'Barlow Condensed',sans-serif;font-size:11px;cursor:help">⚠ ${errores.length} problema(s) en la última actualización (${esc(upd)})</span>`;
+  } else {
+    el.innerHTML = `<span style="color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-size:11px">✓ Actualizado ${esc(upd)}</span>`;
+  }
 }
 
 // Desplegable único para elegir GENERAL o una categoría dentro de ESTADÍSTICAS
@@ -2291,6 +2308,7 @@ function buildStatsCatSelect(){
         style="background:rgba(26,58,143,0.25);border:1px solid var(--border2);color:var(--gold2);
         border-radius:6px;padding:8px 14px;font-family:'Barlow Condensed',sans-serif;font-size:13px;
         letter-spacing:1px;font-weight:700;cursor:pointer;white-space:nowrap">🔄 ACTUALIZAR DATOS</button>
+      <span id="tabla-data-status"></span>
       <div id="cit-upload-btn-wrap"></div>
     </div>`;
   document.getElementById('stats-cat-select').addEventListener('change',e=>{
@@ -5386,6 +5404,7 @@ function actualizarDatosAhora(){
   const cat=sel?sel.value:'GENERAL';
   loadTablaData().finally(()=>{
     renderStatsCat(cat);
+    renderTablaDataStatus();
     if(btn){ btn.disabled=false; btn.textContent='🔄 ACTUALIZAR DATOS'; }
   });
   window.open('https://github.com/JaviAguilar1/SEGUIMIENTO-TIGRE-JUVENILES-2026/actions/workflows/tablas.yml','_blank');

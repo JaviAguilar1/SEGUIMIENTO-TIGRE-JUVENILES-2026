@@ -767,15 +767,26 @@ def main():
         print("Ninguna categoria pudo procesarse. No se sobrescribe el JSON.", file=sys.stderr)
         sys.exit(1)
 
+    # Se guardan los errores en el JSON (aunque el resto haya salido bien)
+    # para que la propia app pueda avisar "hubo un problema en la ultima
+    # actualizacion" en vez de mostrar datos parciales como si estuviera
+    # todo perfecto.
+    if errores:
+        resultado["errores"] = errores
+
     os.makedirs("data", exist_ok=True)
     with open(OUT_PATH, "w", encoding="utf-8") as f:
         json.dump(resultado, f, ensure_ascii=False, indent=2)
     print(f"Escrito {OUT_PATH} ({len(resultado['categorias'])} categorias)")
 
-    # Salir con error si alguna fallo, para que la Action lo marque en amarillo,
-    # pero igual dejamos el JSON con lo que si funciono.
+    # Salir con error si alguna fuente fallo -- el commit del dato parcial
+    # ya se hace en un paso aparte de la Action (con continue-on-error en
+    # este paso), asi que salir con error ac no lo bloquea: solo hace que
+    # el run quede marcado como fallido y GitHub mande el aviso por mail.
+    # (Antes esto hacia exit(0) pese al comentario que decia lo contrario
+    # -- el run siempre quedaba en verde aunque hubiera fuentes rotas.)
     if errores:
-        sys.exit(0)  # no rompemos el commit; el dato parcial sigue siendo util
+        sys.exit(1)
 
 
 if __name__ == "__main__":
