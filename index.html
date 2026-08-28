@@ -3013,10 +3013,10 @@ function renderTopGoleadores(wrap){
 // pantalla que RESULTADOS — ahora es su propia pestaña, compartida entre
 // categorías (si estabas mirando PLANTEL de 4TA y cambiás a 5TA, se queda
 // en PLANTEL).
-let catActiveTab = 'resultados'; // 'resultados' | 'plantel' | 'placas'
+let catActiveTab = 'resultados'; // 'resultados' | 'plantel' | 'rendimiento' | 'videoanalisis'
 
 function buildCatTabsHTML(){
-  const tabs = [ {id:'resultados', label:'📊 ESTADÍSTICAS'}, {id:'plantel', label:'👥 PLANTEL'}, {id:'rendimiento', label:'🏃 RENDIMIENTO'}, {id:'videoanalisis', label:'▶ VIDEOANÁLISIS'}, {id:'placas', label:'🎬 PLACAS'} ];
+  const tabs = [ {id:'resultados', label:'📊 ESTADÍSTICAS'}, {id:'plantel', label:'👥 PLANTEL'}, {id:'rendimiento', label:'🏃 RENDIMIENTO'}, {id:'videoanalisis', label:'▶ VIDEOANÁLISIS'} ];
   return `<div style="display:flex;gap:8px;margin:10px 0 4px;">
     ${tabs.map(t=>{
       const active = catActiveTab===t.id;
@@ -3153,10 +3153,6 @@ function renderStatsSingle(cat, content){
     renderPlantelTab(cat, tabEl);
     return;
   }
-  if(catActiveTab==='placas'){
-    renderPlacasTab(cat, tabEl);
-    return;
-  }
   if(catActiveTab==='rendimiento'){
     renderRendimientoTab(tabEl);
     return;
@@ -3243,20 +3239,131 @@ function renderStatsSingle(cat, content){
   else renderTablaLPF(cat, `tabla-lpf-${cat}`);
 }
 
-// VIDEOANÁLISIS: los 4 links de video (Partido/Resumen/Análisis Propio/
-// Próximo Rival) que antes vivían adentro de la tabla de RESULTADOS -- se
-// mudaron acá para no saturar esa tabla. Citaciones vive en LOS DOS
-// lugares (a pedido explícito), mismo botón/comportamiento que ya tenía.
-// Clic en un link de video lo abre embebido adentro de la plataforma
-// (abrirVideoEmbebido) en vez de mandar a YouTube en pestaña nueva.
+// VIDEOANÁLISIS: se organiza en dos ramas -- ANÁLISIS PROPIOS (Placas de
+// Post Partido/Fase/Cierre + tabla partido a partido con los links de
+// video propios y Citaciones) y ANÁLISIS DE RIVAL (Placas de Portada
+// Próximo Rival/Estadísticas + accesos directos a Fase/Cierre + posición
+// en la tabla, últimos partidos, goleador y riesgo de suspensión del
+// próximo rival). Citaciones vive en LOS DOS lugares (acá y en
+// ESTADÍSTICAS) a pedido explícito. Fase y Cierre son UN SOLO juego de
+// controles (viven en Propios) -- los botones de Rival generan/comparten
+// con esos mismos datos en vez de duplicar sliders y estado.
 function renderVideoanalisisTab(cat, tabEl){
   const isReserva = cat === 'RESERVA';
   const dataCat = isReserva ? (reservaSemestre===2 ? 'RESERVA_S2' : 'RESERVA') : cat;
-  // RESERVA: mismo alcance que siempre tuvo (solo "Partido completo", sin
-  // citaciones) -- no cambia por esta reorganización.
-  const videoLinks = isReserva ? LINK_TYPES.filter(lt=>lt.key==='par') : LINK_TYPES;
-  const fixtureList = isReserva ? (reservaSemestre===2 ? RIVALS_RESERVA_S2 : RIVALS_RESERVA) : RIVALS;
+  const conRival = CONFIABILIDAD_CATS.includes(cat); // mismo alcance que ya tenían Portada/Estadísticas de rival
+  const btnStyle=`background:rgba(240,192,64,0.15);border:1px solid var(--border2);color:var(--gold2);
+    border-radius:6px;padding:9px 16px;font-family:'Barlow Condensed',sans-serif;font-size:13px;
+    letter-spacing:1px;font-weight:700;cursor:pointer`;
 
+  tabEl.innerHTML = `
+    ${seccionTitulo('va-propios-'+dataCat, `🟦 ANÁLISIS PROPIOS · <span style="color:${CAT_COLORS[cat]}">${cat}</span>`)}
+    <div id="sec-va-propios-${dataCat}"${seccionEstiloInicial('va-propios-'+dataCat)}>
+
+      ${seccionTitulo('va-prop-placas-'+dataCat, '🎬 PLACAS')}
+      <div id="sec-va-prop-placas-${dataCat}"${seccionEstiloInicial('va-prop-placas-'+dataCat)}>
+        ${conRival ? `<div id="placa-post-block-${cat}" style="margin-bottom:18px"></div>` : ''}
+        <div style="padding:4px 0 14px">
+          ${bloquePlacaConPreview(`
+            <label style="font-size:11px;color:var(--muted);letter-spacing:1px">TÍTULO</label>
+            <input id="placa-fase-titulo" type="text" placeholder="Ej: Tiro libre" maxlength="60" oninput="actualizarPlacaFasePreview('${cat}')"
+              style="background:var(--surface2);border:1px solid var(--border2);color:var(--text);width:100%;
+              border-radius:6px;padding:9px 12px;font-family:'Barlow Condensed',sans-serif;font-size:15px;outline:none;margin-bottom:10px">
+            <label style="font-size:11px;color:var(--muted);letter-spacing:1px">SUBTÍTULO (opcional)</label>
+            <input id="placa-fase-subtitulo" type="text" placeholder="Ej: A favor" maxlength="60" oninput="actualizarPlacaFasePreview('${cat}')"
+              style="background:var(--surface2);border:1px solid var(--border2);color:var(--text);width:100%;
+              border-radius:6px;padding:9px 12px;font-family:'Barlow Condensed',sans-serif;font-size:15px;outline:none;margin-bottom:10px">
+            <div style="font-size:10px;color:var(--muted);letter-spacing:1px;margin-top:8px">LOGO LPF</div>
+            ${sliderRowPlacas('placa-fase-escala-liga-'+cat, 'TAMAÑO', 100, 50, 180, '%', `actualizarPlacaFasePreview('${cat}')`)}
+            ${sliderRowPlacas('placa-fase-x-liga-'+cat, 'HORIZONTAL', 0, -40, 40, 'px', `actualizarPlacaFasePreview('${cat}')`)}
+            ${sliderRowPlacas('placa-fase-y-liga-'+cat, 'VERTICAL', 0, -40, 40, 'px', `actualizarPlacaFasePreview('${cat}')`)}
+            <div style="font-size:10px;color:var(--muted);letter-spacing:1px;margin-top:8px">ESCUDO TIGRE</div>
+            ${sliderRowPlacas('placa-fase-escala-tigre-'+cat, 'TAMAÑO', 100, 50, 180, '%', `actualizarPlacaFasePreview('${cat}')`)}
+            ${sliderRowPlacas('placa-fase-x-tigre-'+cat, 'HORIZONTAL', 0, -40, 40, 'px', `actualizarPlacaFasePreview('${cat}')`)}
+            ${sliderRowPlacas('placa-fase-y-tigre-'+cat, 'VERTICAL', 0, -40, 40, 'px', `actualizarPlacaFasePreview('${cat}')`)}
+            <div style="display:flex;gap:8px;margin-top:6px">
+              <button onclick="generarPlacaFase('${cat}')" id="btn-placa-fase" style="${btnStyle}">⬇ PLACA DE FASE</button>
+              ${botonCompartirPlacaHTML(`generarPlacaFase('${cat}', true)`)}
+            </div>
+          `, `placa-fase-preview-${cat}`)}
+        </div>
+        <div style="padding:4px 0 14px">
+          ${bloquePlacaConPreview(`
+            <div style="font-size:10px;color:var(--muted);letter-spacing:1px;margin-bottom:4px">ESCUDO TIGRE</div>
+            ${sliderRowPlacas('placa-cierre-escala-tigre-'+cat, 'TAMAÑO', 100, 50, 180, '%', `actualizarPlacaCierrePreview('${cat}')`)}
+            ${sliderRowPlacas('placa-cierre-x-tigre-'+cat, 'HORIZONTAL', 0, -40, 40, 'px', `actualizarPlacaCierrePreview('${cat}')`)}
+            ${sliderRowPlacas('placa-cierre-y-tigre-'+cat, 'VERTICAL', 0, -40, 40, 'px', `actualizarPlacaCierrePreview('${cat}')`)}
+            <div style="display:flex;gap:8px;margin-top:10px">
+              <button onclick="generarPlacaCierre('${cat}')" id="btn-placa-cierre" style="${btnStyle}">⬇ PLACA DE CIERRE</button>
+              ${botonCompartirPlacaHTML(`generarPlacaCierre('${cat}', true)`)}
+            </div>
+          `, `placa-cierre-preview-${cat}`)}
+        </div>
+      </div>
+
+      ${seccionTitulo('va-prop-stats-'+dataCat, '📊 ESTADÍSTICAS PROPIAS')}
+      <div id="sec-va-prop-stats-${dataCat}"${seccionEstiloInicial('va-prop-stats-'+dataCat)}>
+        ${videoLinksTablaPropiosHTML(cat, dataCat)}
+      </div>
+    </div>
+
+    ${seccionTitulo('va-rival-'+dataCat, `🟥 ANÁLISIS DE RIVAL · <span style="color:${CAT_COLORS[cat]}">${cat}</span>`)}
+    <div id="sec-va-rival-${dataCat}"${seccionEstiloInicial('va-rival-'+dataCat)}>
+
+      ${seccionTitulo('va-riv-placas-'+dataCat, '🎬 PLACAS')}
+      <div id="sec-va-riv-placas-${dataCat}"${seccionEstiloInicial('va-riv-placas-'+dataCat)}>
+        ${conRival ? `<div id="placa-portada-info-${cat}" style="margin-bottom:18px;font-family:'Barlow Condensed',sans-serif;font-size:14px;color:var(--text2)"></div>` : ''}
+        ${conRival ? `<div style="padding:4px 0 14px">
+          ${bloquePlacaConPreview(`
+            <div style="font-size:10px;color:var(--muted);letter-spacing:1px;margin-bottom:4px">LOGO LPF</div>
+            ${sliderRowPlacas('placa-stats-escala-liga-'+cat, 'TAMAÑO', 100, 50, 180, '%', `actualizarPlacaStatsPreview('${cat}')`)}
+            ${sliderRowPlacas('placa-stats-x-liga-'+cat, 'HORIZONTAL', 0, -40, 40, 'px', `actualizarPlacaStatsPreview('${cat}')`)}
+            ${sliderRowPlacas('placa-stats-y-liga-'+cat, 'VERTICAL', 0, -40, 40, 'px', `actualizarPlacaStatsPreview('${cat}')`)}
+            <div style="display:flex;gap:8px;margin-top:10px">
+              <button onclick="generarEstadisticasRival('${cat}')" id="btn-rival-stats" style="${btnStyle}">⬇ ESTADÍSTICAS DE RIVAL</button>
+              ${botonCompartirPlacaHTML(`generarEstadisticasRival('${cat}', true)`)}
+            </div>
+          `, `placa-stats-preview-${cat}`)}
+        </div>` : ''}
+        <div style="display:flex;gap:8px;flex-wrap:wrap;padding:8px 0">
+          <button onclick="generarPlacaFase('${cat}')" style="${btnStyle}">⬇ PLACA DE FASE</button>
+          ${botonCompartirPlacaHTML(`generarPlacaFase('${cat}', true)`)}
+          <button onclick="generarPlacaCierre('${cat}')" style="${btnStyle}">⬇ PLACA DE CIERRE</button>
+          ${botonCompartirPlacaHTML(`generarPlacaCierre('${cat}', true)`)}
+        </div>
+        <div style="font-size:11px;color:var(--muted);font-family:'Barlow Condensed',sans-serif">
+          Fase y Cierre usan lo que hayas cargado en "Análisis Propios" — mismo botón, mismos datos.
+        </div>
+      </div>
+
+      ${seccionTitulo('va-riv-stats-'+dataCat, '📊 ESTADÍSTICAS DE RIVAL')}
+      <div id="sec-va-riv-stats-${dataCat}"${seccionEstiloInicial('va-riv-stats-'+dataCat)}>
+        <div id="rival-stats-detalle-${dataCat}"></div>
+      </div>
+    </div>
+  `;
+
+  attachTableEvents(dataCat); // mismo listener que ESTADÍSTICAS: .link-input/.score-input ya saben guardar
+  if(conRival){
+    renderPlacaPostPartidoBlock(cat);
+    renderPlacaProximoRivalBlock(cat);
+    actualizarPlacaStatsPreview(cat);
+    renderRivalStatsDetalle(dataCat, cat);
+  } else {
+    const el = document.getElementById(`rival-stats-detalle-${dataCat}`);
+    if(el) el.innerHTML = `<div style="text-align:center;padding:16px;color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-size:13px">No disponible para esta categoría todavía.</div>`;
+  }
+  actualizarPlacaFasePreview(cat);
+  actualizarPlacaCierrePreview(cat);
+}
+
+// Tabla partido a partido de "Estadísticas propias": Partido/Resumen/
+// Análisis Propio (video embebido) + Citaciones (misma ficha que ya existe
+// en ESTADÍSTICAS). "Próximo Rival" NO va acá -- es de Rival.
+function videoLinksTablaPropiosHTML(cat, dataCat){
+  const isReserva = cat === 'RESERVA';
+  const videoLinks = isReserva ? LINK_TYPES.filter(lt=>lt.key==='par') : LINK_TYPES.filter(lt=>lt.key!=='prx');
+  const fixtureList = isReserva ? (reservaSemestre===2 ? RIVALS_RESERVA_S2 : RIVALS_RESERVA) : RIVALS;
   const headHTML = videoLinks.map(lt=>`<th title="${lt.label}">${lt.icon} ${lt.label}</th>`).join('');
 
   let rows = '';
@@ -3296,16 +3403,77 @@ function renderVideoanalisisTab(cat, tabEl){
     </tr>`;
   });
 
-  tabEl.innerHTML = `
-    ${seccionTitulo('videoanalisis-'+dataCat, `▶ VIDEOANÁLISIS · <span style="color:${CAT_COLORS[cat]}">${cat}</span>`)}
-    <div id="sec-videoanalisis-${dataCat}"${seccionEstiloInicial('videoanalisis-'+dataCat)}>
-      <div class="table-wrap"><table>
-        <thead><tr class="thead-sub"><th>FECHA</th><th>RIVAL</th>${headHTML}</tr></thead>
-        <tbody id="tbody-${dataCat}">${rows}</tbody>
-      </table></div>
-    </div>`;
+  return `<div class="table-wrap"><table>
+      <thead><tr class="thead-sub"><th>FECHA</th><th>RIVAL</th>${headHTML}</tr></thead>
+      <tbody id="tbody-${dataCat}">${rows}</tbody>
+    </table></div>`;
+}
 
-  attachTableEvents(dataCat); // mismo listener que ESTADÍSTICAS: .link-input ya sabe guardar en links[cat][f][key]
+// Posición en la tabla, últimos partidos, goleador del plantel y riesgo de
+// suspensión por 5ta amarilla del PRÓXIMO rival (Estadísticas de Rival).
+// Goleador/amarillas salen de TABLA_DATA.rival_alertas[cat] (statfutbol.com.ar,
+// ver calcular_alerta_rival en scrape_tablas.py); posición/últimos partidos
+// reusan los mismos helpers que ya usaba la Placa de Estadísticas.
+async function renderRivalStatsDetalle(dataCat, cat){
+  const el = document.getElementById(`rival-stats-detalle-${dataCat}`);
+  if(!el) return;
+  await loadTablaData();
+  const prox = proximoRivalInfo(cat);
+  if(!prox){
+    el.innerHTML = `<div style="text-align:center;padding:16px;color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-size:13px">No encontré ningún partido pendiente en el fixture.</div>`;
+    return;
+  }
+  const info = RIVAL_INFO[prox.rival];
+  const filaRival = info ? filaTablaLPF(cat, info.lpf) : null;
+  const ultimos = ultimosPartidosRival(cat, prox.rival, prox.condRival, 4);
+  const alerta = TABLA_DATA.rival_alertas && TABLA_DATA.rival_alertas[cat];
+
+  let html = `<div style="font-family:'Barlow Condensed',sans-serif">
+    <div style="margin-bottom:10px;font-size:14px">Próximo rival: <strong style="color:var(--gold2)">${esc(prox.rival)}</strong> · Fecha ${prox.fecha} · ${formatFechaCalendario(prox.fecha)}</div>`;
+
+  if(filaRival){
+    const dif = filaRival.dif ?? filaRival.dg;
+    html += `<div class="gen-table-wrap"><table class="gen-table">
+      <thead><tr><th>POS</th><th>PTS</th><th>PJ</th><th>PG</th><th>PE</th><th>PP</th><th>GF</th><th>GC</th><th>DIF</th></tr></thead>
+      <tbody><tr>
+        <td style="text-align:center">${filaRival.pos}°</td>
+        <td style="text-align:center;color:var(--gold2)">${filaRival.pts}</td>
+        <td style="text-align:center">${filaRival.pj}</td>
+        <td style="text-align:center;color:var(--win)">${filaRival.pg}</td>
+        <td style="text-align:center;color:var(--draw)">${filaRival.pe}</td>
+        <td style="text-align:center;color:var(--loss)">${filaRival.pp}</td>
+        <td style="text-align:center">${filaRival.gf}</td>
+        <td style="text-align:center">${filaRival.gc}</td>
+        <td style="text-align:center">${dif>0?'+':''}${dif}</td>
+      </tr></tbody></table></div>`;
+  } else {
+    html += `<div style="color:var(--muted);font-size:12px;padding:6px 0">Todavía no tengo la tabla de posiciones descargada.</div>`;
+  }
+
+  if(ultimos && ultimos.length){
+    html += `<div style="margin-top:14px;font-size:11px;letter-spacing:1px;color:var(--muted);text-transform:uppercase">Últimos partidos</div>`;
+    html += ultimos.slice().reverse().map(u=>{
+      const r = resultadoLabel(u.gf, u.gc);
+      return `<div style="display:flex;justify-content:space-between;padding:4px 0;font-size:13px">
+        <span>F${u.fecha} vs ${esc(u.rivalDe)}</span>
+        <span style="color:${r.color};font-weight:700">${u.gf}-${u.gc} ${r.texto}</span>
+      </div>`;
+    }).join('');
+  }
+
+  if(alerta){
+    if(alerta.goleador){
+      html += `<div style="margin-top:14px;font-size:13px">⚽ Goleador del equipo: <strong style="color:var(--gold2)">${esc(alerta.goleador.nombre)}</strong> (${alerta.goleador.goles})</div>`;
+    }
+    if(alerta.amarillas_riesgo && alerta.amarillas_riesgo.length){
+      html += `<div style="margin-top:10px;background:rgba(245,158,11,0.15);border:1px solid rgba(245,158,11,0.45);border-radius:8px;padding:10px 14px">
+        <div style="font-size:11px;color:var(--gold2);text-transform:uppercase;font-weight:700">🟨 Posible ausencia por 5ta amarilla</div>
+        <div style="font-size:12px;margin-top:4px">${alerta.amarillas_riesgo.map(a=>esc(a.nombre)+' ('+a.amarillas+')').join(' · ')}</div>
+      </div>`;
+    }
+  }
+  html += `</div>`;
+  el.innerHTML = html;
 }
 
 // Extrae el ID de video de un link de YouTube en cualquiera de sus formas
@@ -6960,162 +7128,80 @@ function actualizarPlacaPreviewGenerica(key, imgId, buildParamsFn, drawFn){
     img.dataset.prevUrl = url;
   }, 200);
 }
-function renderPlacasTab(cat, tabEl){
-  const conPortada = CONFIABILIDAD_CATS.includes(cat);
-  const btnStyle=`background:rgba(240,192,64,0.15);border:1px solid var(--border2);color:var(--gold2);
-    border-radius:6px;padding:9px 16px;font-family:'Barlow Condensed',sans-serif;font-size:13px;
-    letter-spacing:1px;font-weight:700;cursor:pointer`;
-  tabEl.innerHTML = `
-    ${conPortada ? `
-    ${seccionTitulo('placa-portada-'+cat, '🎬 PLACA DE PORTADA')}
-    <div id="sec-placa-portada-${cat}"${seccionEstiloInicial('placa-portada-'+cat)}>
-      <div id="placa-portada-info-${cat}" style="padding:4px 0 14px;font-family:'Barlow Condensed',sans-serif;font-size:14px;color:var(--text2)"></div>
-    </div>
-
-    ${seccionTitulo('placa-stats-'+cat, '🎬 PLACA DE ESTADÍSTICAS')}
-    <div id="sec-placa-stats-${cat}"${seccionEstiloInicial('placa-stats-'+cat)}>
-      <div style="padding:4px 0 14px">
-        ${bloquePlacaConPreview(`
-          <div style="font-size:10px;color:var(--muted);letter-spacing:1px;margin-bottom:4px">LOGO LPF</div>
-          ${sliderRowPlacas('placa-stats-escala-liga-'+cat, 'TAMAÑO', 100, 50, 180, '%', `actualizarPlacaStatsPreview('${cat}')`)}
-          ${sliderRowPlacas('placa-stats-x-liga-'+cat, 'HORIZONTAL', 0, -40, 40, 'px', `actualizarPlacaStatsPreview('${cat}')`)}
-          ${sliderRowPlacas('placa-stats-y-liga-'+cat, 'VERTICAL', 0, -40, 40, 'px', `actualizarPlacaStatsPreview('${cat}')`)}
-          <div style="display:flex;gap:8px;margin-top:10px">
-            <button onclick="generarEstadisticasRival('${cat}')" id="btn-rival-stats" style="${btnStyle}">⬇ GENERAR ESTADÍSTICAS</button>
-            ${botonCompartirPlacaHTML(`generarEstadisticasRival('${cat}', true)`)}
+// Placas de Post Partido (Propios) y de Próximo Rival (Rival) -- antes
+// compartían un solo panel con toggle "PRÓXIMO RIVAL"/"POST PARTIDO";
+// ahora viven cada una directo en su sección, sin selector.
+async function renderPlacaPostPartidoBlock(cat){
+  const el = document.getElementById(`placa-post-block-${cat}`);
+  if(!el) return;
+  await loadTablaData();
+  const jugadas = RIVALS.filter(r=>results[cat]?.[r.f]).sort((a,b)=>b.f-a.f);
+  if(!jugadas.length){
+    el.innerHTML = `${seccionTitulo('placa-post-'+cat, '🎬 PLACA POST PARTIDO')}
+      <div id="sec-placa-post-${cat}"${seccionEstiloInicial('placa-post-'+cat)}>
+        <div style="padding:4px 0 14px;font-family:'Barlow Condensed',sans-serif;font-size:14px;color:var(--text2)">
+          Todavía no hay partidos jugados en esta categoría.
+        </div>
+      </div>`;
+    return;
+  }
+  const opciones = jugadas.map(r=>`<option value="${r.f}">Fecha ${r.f} · ${r.r}</option>`).join('');
+  const onSlide = `actualizarPlacaPostPreview('${cat}')`;
+  const sliderRow = (id, label, val, min, max, unit) => sliderRowPlacas(id, label, val, min, max, unit, onSlide);
+  el.innerHTML = `${seccionTitulo('placa-post-'+cat, '🎬 PLACA POST PARTIDO')}
+    <div id="sec-placa-post-${cat}"${seccionEstiloInicial('placa-post-'+cat)}>
+      <div style="display:flex;gap:24px;flex-wrap:wrap;align-items:flex-start;padding:4px 0 14px">
+        <div style="min-width:280px">
+          <select id="placa-post-fecha-${cat}" onchange="${onSlide}" style="background:var(--surface2);border:1px solid var(--border2);
+            color:var(--text);border-radius:6px;padding:8px 10px;font-family:'Barlow Condensed',sans-serif;
+            font-size:14px;outline:none;margin-bottom:10px">${opciones}</select>
+          <div style="margin-bottom:6px">
+            <div style="font-size:10px;color:var(--muted);letter-spacing:1px;margin-bottom:4px">ESCUDO TIGRE</div>
+            ${sliderRow('placa-post-escala-tigre-'+cat, 'TAMAÑO', 100, 50, 180, '%')}
+            ${sliderRow('placa-post-x-tigre-'+cat, 'HORIZONTAL', 0, -40, 40, 'px')}
+            ${sliderRow('placa-post-y-tigre-'+cat, 'VERTICAL', 0, -40, 40, 'px')}
+            <div style="font-size:10px;color:var(--muted);letter-spacing:1px;margin:8px 0 4px">ESCUDO RIVAL</div>
+            ${sliderRow('placa-post-escala-rival-'+cat, 'TAMAÑO', 100, 50, 180, '%')}
+            ${sliderRow('placa-post-x-rival-'+cat, 'HORIZONTAL', 0, -40, 40, 'px')}
+            ${sliderRow('placa-post-y-rival-'+cat, 'VERTICAL', 0, -40, 40, 'px')}
+            <div style="font-size:10px;color:var(--muted);letter-spacing:1px;margin:8px 0 4px">LOGO LPF</div>
+            ${sliderRow('placa-post-escala-liga-'+cat, 'TAMAÑO', 100, 50, 180, '%')}
+            ${sliderRow('placa-post-x-liga-'+cat, 'HORIZONTAL', 0, -40, 40, 'px')}
+            ${sliderRow('placa-post-y-liga-'+cat, 'VERTICAL', 0, -40, 40, 'px')}
           </div>
-        `, `placa-stats-preview-${cat}`)}
-      </div>
-    </div>` : ''}
-
-    ${seccionTitulo('placa-fase-'+cat, '🎬 PLACA DE FASE')}
-    <div id="sec-placa-fase-${cat}"${seccionEstiloInicial('placa-fase-'+cat)}>
-      <div style="padding:4px 0 14px">
-        ${bloquePlacaConPreview(`
-          <label style="font-size:11px;color:var(--muted);letter-spacing:1px">TÍTULO</label>
-          <input id="placa-fase-titulo" type="text" placeholder="Ej: Tiro libre" maxlength="60" oninput="actualizarPlacaFasePreview('${cat}')"
-            style="background:var(--surface2);border:1px solid var(--border2);color:var(--text);width:100%;
-            border-radius:6px;padding:9px 12px;font-family:'Barlow Condensed',sans-serif;font-size:15px;outline:none;margin-bottom:10px">
-          <label style="font-size:11px;color:var(--muted);letter-spacing:1px">SUBTÍTULO (opcional)</label>
-          <input id="placa-fase-subtitulo" type="text" placeholder="Ej: A favor" maxlength="60" oninput="actualizarPlacaFasePreview('${cat}')"
-            style="background:var(--surface2);border:1px solid var(--border2);color:var(--text);width:100%;
-            border-radius:6px;padding:9px 12px;font-family:'Barlow Condensed',sans-serif;font-size:15px;outline:none;margin-bottom:10px">
-          <div style="font-size:10px;color:var(--muted);letter-spacing:1px;margin-top:8px">LOGO LPF</div>
-          ${sliderRowPlacas('placa-fase-escala-liga-'+cat, 'TAMAÑO', 100, 50, 180, '%', `actualizarPlacaFasePreview('${cat}')`)}
-          ${sliderRowPlacas('placa-fase-x-liga-'+cat, 'HORIZONTAL', 0, -40, 40, 'px', `actualizarPlacaFasePreview('${cat}')`)}
-          ${sliderRowPlacas('placa-fase-y-liga-'+cat, 'VERTICAL', 0, -40, 40, 'px', `actualizarPlacaFasePreview('${cat}')`)}
-          <div style="font-size:10px;color:var(--muted);letter-spacing:1px;margin-top:8px">ESCUDO TIGRE</div>
-          ${sliderRowPlacas('placa-fase-escala-tigre-'+cat, 'TAMAÑO', 100, 50, 180, '%', `actualizarPlacaFasePreview('${cat}')`)}
-          ${sliderRowPlacas('placa-fase-x-tigre-'+cat, 'HORIZONTAL', 0, -40, 40, 'px', `actualizarPlacaFasePreview('${cat}')`)}
-          ${sliderRowPlacas('placa-fase-y-tigre-'+cat, 'VERTICAL', 0, -40, 40, 'px', `actualizarPlacaFasePreview('${cat}')`)}
-          <div style="display:flex;gap:8px;margin-top:6px">
-            <button onclick="generarPlacaFase('${cat}')" id="btn-placa-fase" style="${btnStyle}">⬇ GENERAR PLACA</button>
-            ${botonCompartirPlacaHTML(`generarPlacaFase('${cat}', true)`)}
+          <div style="display:flex;gap:8px">
+            <button onclick="generarPlacaPostPartido('${cat}')" id="btn-placa-post" style="
+              background:rgba(240,192,64,0.15);border:1px solid var(--border2);color:var(--gold2);
+              border-radius:6px;padding:9px 16px;font-family:'Barlow Condensed',sans-serif;font-size:13px;
+              letter-spacing:1px;font-weight:700;cursor:pointer">⬇ PLACA POST PARTIDO</button>
+            ${botonCompartirPlacaHTML(`generarPlacaPostPartido('${cat}', true)`)}
           </div>
-        `, `placa-fase-preview-${cat}`)}
+        </div>
+        <div style="flex:1;min-width:320px;max-width:640px">
+          <div style="font-size:10px;color:var(--muted);letter-spacing:1px;margin-bottom:6px">VISTA PREVIA</div>
+          <img id="placa-post-preview-${cat}" style="width:100%;border-radius:8px;border:1px solid var(--border2);display:block;background:#111e38">
+        </div>
       </div>
-    </div>
-
-    ${seccionTitulo('placa-cierre-'+cat, '🎬 PLACA DE CIERRE')}
-    <div id="sec-placa-cierre-${cat}"${seccionEstiloInicial('placa-cierre-'+cat)}>
-      <div style="padding:4px 0 14px">
-        ${bloquePlacaConPreview(`
-          <div style="font-size:10px;color:var(--muted);letter-spacing:1px;margin-bottom:4px">ESCUDO TIGRE</div>
-          ${sliderRowPlacas('placa-cierre-escala-tigre-'+cat, 'TAMAÑO', 100, 50, 180, '%', `actualizarPlacaCierrePreview('${cat}')`)}
-          ${sliderRowPlacas('placa-cierre-x-tigre-'+cat, 'HORIZONTAL', 0, -40, 40, 'px', `actualizarPlacaCierrePreview('${cat}')`)}
-          ${sliderRowPlacas('placa-cierre-y-tigre-'+cat, 'VERTICAL', 0, -40, 40, 'px', `actualizarPlacaCierrePreview('${cat}')`)}
-          <div style="display:flex;gap:8px;margin-top:10px">
-            <button onclick="generarPlacaCierre('${cat}')" id="btn-placa-cierre" style="${btnStyle}">⬇ GENERAR PLACA</button>
-            ${botonCompartirPlacaHTML(`generarPlacaCierre('${cat}', true)`)}
-          </div>
-        `, `placa-cierre-preview-${cat}`)}
-      </div>
-    </div>
-  `;
-  if(conPortada){ renderPlacaPortadaInfo(cat); actualizarPlacaStatsPreview(cat); }
-  actualizarPlacaFasePreview(cat);
-  actualizarPlacaCierrePreview(cat);
+    </div>`;
+  actualizarPlacaPostPreview(cat);
 }
 
-// 'proximo' (como estaba) o 'post' (nueva, análisis post partido) -- por
-// categoría, no se comparte entre categorías.
-const placaPortadaModo = {};
-function setPlacaPortadaModo(cat, modo){
-  placaPortadaModo[cat] = modo;
-  renderPlacaPortadaInfo(cat);
-}
-
-async function renderPlacaPortadaInfo(cat){
+async function renderPlacaProximoRivalBlock(cat){
   const el = document.getElementById(`placa-portada-info-${cat}`);
   if(!el) return;
   await loadTablaData();
-  const modo = placaPortadaModo[cat] || 'proximo';
-  const modoBtn = (val, label) => `<button onclick="setPlacaPortadaModo('${cat}','${val}')" style="padding:6px 12px;
-    border-radius:6px;border:1px solid ${modo===val?'var(--gold)':'var(--border2)'};
-    background:${modo===val?'rgba(240,192,64,0.15)':'transparent'};color:${modo===val?'var(--gold2)':'var(--muted)'};
-    font-family:'Barlow Condensed',sans-serif;font-size:12px;letter-spacing:1px;font-weight:700;cursor:pointer">${label}</button>`;
-  const toggleHTML = `<div style="display:flex;gap:8px;margin-bottom:10px">
-    ${modoBtn('proximo','PRÓXIMO RIVAL')}${modoBtn('post','POST PARTIDO')}
-  </div>`;
-
-  if(modo==='post'){
-    const jugadas = RIVALS.filter(r=>results[cat]?.[r.f]).sort((a,b)=>b.f-a.f);
-    if(!jugadas.length){
-      el.innerHTML = toggleHTML+'Todavía no hay partidos jugados en esta categoría.';
-      return;
-    }
-    const opciones = jugadas.map(r=>`<option value="${r.f}">Fecha ${r.f} · ${r.r}</option>`).join('');
-    const onSlide = `actualizarPlacaPostPreview('${cat}')`;
-    const sliderRow = (id, label, val, min, max, unit) => sliderRowPlacas(id, label, val, min, max, unit, onSlide);
-    el.innerHTML = `<div style="display:flex;gap:24px;flex-wrap:wrap;align-items:flex-start">
-      <div style="min-width:280px">
-        ${toggleHTML}
-        <select id="placa-post-fecha-${cat}" onchange="${onSlide}" style="background:var(--surface2);border:1px solid var(--border2);
-          color:var(--text);border-radius:6px;padding:8px 10px;font-family:'Barlow Condensed',sans-serif;
-          font-size:14px;outline:none;margin-bottom:10px">${opciones}</select>
-        <div style="margin-bottom:6px">
-          <div style="font-size:10px;color:var(--muted);letter-spacing:1px;margin-bottom:4px">ESCUDO TIGRE</div>
-          ${sliderRow('placa-post-escala-tigre-'+cat, 'TAMAÑO', 100, 50, 180, '%')}
-          ${sliderRow('placa-post-x-tigre-'+cat, 'HORIZONTAL', 0, -40, 40, 'px')}
-          ${sliderRow('placa-post-y-tigre-'+cat, 'VERTICAL', 0, -40, 40, 'px')}
-          <div style="font-size:10px;color:var(--muted);letter-spacing:1px;margin:8px 0 4px">ESCUDO RIVAL</div>
-          ${sliderRow('placa-post-escala-rival-'+cat, 'TAMAÑO', 100, 50, 180, '%')}
-          ${sliderRow('placa-post-x-rival-'+cat, 'HORIZONTAL', 0, -40, 40, 'px')}
-          ${sliderRow('placa-post-y-rival-'+cat, 'VERTICAL', 0, -40, 40, 'px')}
-          <div style="font-size:10px;color:var(--muted);letter-spacing:1px;margin:8px 0 4px">LOGO LPF</div>
-          ${sliderRow('placa-post-escala-liga-'+cat, 'TAMAÑO', 100, 50, 180, '%')}
-          ${sliderRow('placa-post-x-liga-'+cat, 'HORIZONTAL', 0, -40, 40, 'px')}
-          ${sliderRow('placa-post-y-liga-'+cat, 'VERTICAL', 0, -40, 40, 'px')}
-        </div>
-        <div style="display:flex;gap:8px">
-          <button onclick="generarPlacaPostPartido('${cat}')" id="btn-placa-post" style="
-            background:rgba(240,192,64,0.15);border:1px solid var(--border2);color:var(--gold2);
-            border-radius:6px;padding:9px 16px;font-family:'Barlow Condensed',sans-serif;font-size:13px;
-            letter-spacing:1px;font-weight:700;cursor:pointer">⬇ GENERAR POST PARTIDO</button>
-          ${botonCompartirPlacaHTML(`generarPlacaPostPartido('${cat}', true)`)}
-        </div>
-      </div>
-      <div style="flex:1;min-width:320px;max-width:640px">
-        <div style="font-size:10px;color:var(--muted);letter-spacing:1px;margin-bottom:6px">VISTA PREVIA</div>
-        <img id="placa-post-preview-${cat}" style="width:100%;border-radius:8px;border:1px solid var(--border2);display:block;background:#111e38">
-      </div>
-    </div>`;
-    actualizarPlacaPostPreview(cat);
-    return;
-  }
-
   const prox = proximoRivalInfo(cat);
-  if(!prox){ el.innerHTML = toggleHTML+'No encontré ningún partido pendiente en el fixture.'; return; }
+  if(!prox){ el.innerHTML = 'No encontré ningún partido pendiente en el fixture.'; return; }
   const info = RIVAL_INFO[prox.rival];
-  if(!info){ el.innerHTML = toggleHTML+`Todavía no tengo cargado el escudo/equivalencia de "${prox.rival}".`; return; }
-  el.innerHTML = toggleHTML + bloquePlacaConPreview(`
+  if(!info){ el.innerHTML = `Todavía no tengo cargado el escudo/equivalencia de "${prox.rival}".`; return; }
+  el.innerHTML = bloquePlacaConPreview(`
     Próximo rival: <strong style="color:var(--gold2)">${prox.rival}</strong>
     · Fecha ${prox.fecha} · ${formatFechaCalendario(prox.fecha)}
     <div style="margin-top:10px;display:flex;gap:8px">
       <button onclick="generarPlacaPortada('${cat}')" id="btn-placa-portada" style="
         background:rgba(240,192,64,0.15);border:1px solid var(--border2);color:var(--gold2);
         border-radius:6px;padding:9px 16px;font-family:'Barlow Condensed',sans-serif;font-size:13px;
-        letter-spacing:1px;font-weight:700;cursor:pointer">⬇ GENERAR PORTADA</button>
+        letter-spacing:1px;font-weight:700;cursor:pointer">⬇ PLACA DE PORTADA</button>
       ${botonCompartirPlacaHTML(`generarPlacaPortada('${cat}', true)`)}
     </div>`, `placa-portada-proximo-preview-${cat}`);
   actualizarPlacaPreviewGenerica('portada-proximo-'+cat, `placa-portada-proximo-preview-${cat}`,
