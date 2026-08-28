@@ -1875,19 +1875,21 @@ function applyViewMode(){
   if(cerrarTempBtn) cerrarTempBtn.style.display=isAdmin?'':'none';
 
   // Filter categories for category-specific roles.
-  // 'cat_4TA' -> solo esa categoria (ni GENERAL ni el resto) -- roles de DT,
-  // de solo vista. videoanalista_reserva/videoanalista_menores NO restringen
-  // la vista (ven todo) -- solo su EDICION queda acotada, ver EDIT_SCOPES y
-  // canEditCat, recalculado por categoria en cada render.
-  let allowedCats = null;
+  // 'cat_4TA' -> su categoria + GENERAL (GENERAL le muestra una version
+  // acotada, ver renderStatsGeneral) -- roles de DT, de solo vista.
+  // videoanalista_reserva/videoanalista_menores NO restringen la vista (ven
+  // todo) -- solo su EDICION queda acotada, ver EDIT_SCOPES y canEditCat,
+  // recalculado por categoria en cada render.
+  let allowedCats = null, dtCatPropia = null;
   if(currentRole && currentRole.startsWith('cat_')){
-    allowedCats = [currentRole.replace('cat_','').toUpperCase()];
+    dtCatPropia = currentRole.replace('cat_','').toUpperCase();
+    allowedCats = ['GENERAL', dtCatPropia];
   }
   const sel=document.getElementById('stats-cat-select');
   if(sel){
     if(allowedCats){
       [...sel.options].forEach(o=>{ o.hidden = !allowedCats.includes(o.value); });
-      const first = allowedCats[0];
+      const first = dtCatPropia; // arranca en su propia categoria, no en GENERAL
       sel.value=first;
       currentCategoria=first;
       renderStatsCat(first);
@@ -2418,6 +2420,10 @@ function renderStatsCat(cat){
 }
 
 function renderStatsGeneral(content){
+  // DT (rol cat_XXX): version acotada de GENERAL -- solo resumen +
+  // rendimiento + tabla de posiciones. Sin top goleadores, sin tabla
+  // general combinada, sin confiabilidad (esa ya estaba atada a isAdmin).
+  const esDT = currentRole && currentRole.startsWith('cat_');
   // Summary table rows
   let trows=GENERAL_CATS.map(cat=>{
     const s=calcStats(cat,1,35);
@@ -2460,6 +2466,7 @@ function renderStatsGeneral(content){
       ${buildRendimientoGeneralHTML(calcStatsAll, '4TA', GENERAL_CATS)}
     </div>
 
+    ${esDT ? '' : `
     ${seccionTitulo('topgol-general', '🏆 TOP GOLEADORES — 4TA A 9NA')}
     <div id="sec-topgol-general"${seccionEstiloInicial('topgol-general')}>
       <div id="gen-top-goleadores"></div>
@@ -2468,7 +2475,7 @@ function renderStatsGeneral(content){
     ${seccionTitulo('tablagen-general', '🏆 TABLA GENERAL DE POSICIONES (SUMA 4TA A 9NA)')}
     <div id="sec-tablagen-general"${seccionEstiloInicial('tablagen-general')}>
       <div id="gen-tabla-general"></div>
-    </div>
+    </div>`}
 
     ${isAdmin ? `<div class="st"><div class="stbar"></div>🔎 CONFIABILIDAD</div>
     <div id="gen-confiabilidad" style="margin-bottom:20px"></div>` : ''}
@@ -2478,11 +2485,13 @@ function renderStatsGeneral(content){
   renderPosicionGeneral('gen-posicion');
   wireBloqueSlider('general', ()=>renderStatsCat('GENERAL'));
 
-  // Top 5 goleadores all categories
-  const topWrap = document.getElementById('gen-top-goleadores');
-  if(topWrap) renderTopGoleadores(topWrap);
+  if(!esDT){
+    // Top 5 goleadores all categories
+    const topWrap = document.getElementById('gen-top-goleadores');
+    if(topWrap) renderTopGoleadores(topWrap);
 
-  renderTablaGeneral('gen-tabla-general');
+    renderTablaGeneral('gen-tabla-general');
+  }
 }
 
 // Suma la tabla de posiciones LPF de 4TA a 9NA por equipo, en una sola tabla combinada.
@@ -3276,25 +3285,7 @@ function renderVideoanalisisTab(cat, tabEl){
       ${seccionTitulo('va-riv-placas-'+dataCat, '🎬 PLACAS')}
       <div id="sec-va-riv-placas-${dataCat}"${seccionEstiloInicial('va-riv-placas-'+dataCat)}>
         ${conRival ? `<div id="placa-portada-info-${cat}" style="margin-bottom:18px"></div>` : ''}
-        ${conRival ? `<div style="margin-bottom:18px">
-          ${placaRotuloHTML('🖼️ ESTADÍSTICAS DE RIVAL')}
-          ${bloquePlacaConPreview(`
-            <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2);margin-bottom:6px;cursor:pointer">
-              <input type="checkbox" id="placa-stats-incluir-goleador-${cat}" checked onchange="actualizarPlacaStatsPreview('${cat}')"> Incluir goleador del rival
-            </label>
-            <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2);margin-bottom:10px;cursor:pointer">
-              <input type="checkbox" id="placa-stats-incluir-amarillas-${cat}" checked onchange="actualizarPlacaStatsPreview('${cat}')"> Incluir alerta de 5ta amarilla
-            </label>
-            <div style="font-size:10px;color:var(--muted);letter-spacing:1px;margin-bottom:4px">LOGO LPF</div>
-            ${sliderRowPlacas('placa-stats-escala-liga-'+cat, 'TAMAÑO', 100, 50, 180, '%', `actualizarPlacaStatsPreview('${cat}')`)}
-            ${sliderRowPlacas('placa-stats-x-liga-'+cat, 'HORIZONTAL', 0, -40, 40, 'px', `actualizarPlacaStatsPreview('${cat}')`)}
-            ${sliderRowPlacas('placa-stats-y-liga-'+cat, 'VERTICAL', 0, -40, 40, 'px', `actualizarPlacaStatsPreview('${cat}')`)}
-            <div style="display:flex;gap:8px;margin-top:10px">
-              <button onclick="generarEstadisticasRival('${cat}')" id="btn-rival-stats" style="${PLACA_BTN_STYLE}">⬇ ESTADÍSTICAS DE RIVAL</button>
-              ${botonCompartirPlacaHTML(`generarEstadisticasRival('${cat}', true)`)}
-            </div>
-          `, `placa-stats-preview-${cat}`)}
-        </div>` : ''}
+        ${conRival ? `<div id="placa-stats-block-${cat}" style="margin-bottom:18px"></div>` : ''}
         <div style="margin-bottom:18px">${placaRotuloHTML('🖼️ FASE')}${placaFaseControlesHTML(cat, '-riv')}</div>
         <div>${placaRotuloHTML('🖼️ CIERRE')}${placaCierreControlesHTML(cat, '-riv')}</div>
       </div>
@@ -3310,7 +3301,7 @@ function renderVideoanalisisTab(cat, tabEl){
   if(conRival){
     renderPlacaPostPartidoBlock(cat);
     renderPlacaProximoRivalBlock(cat);
-    actualizarPlacaStatsPreview(cat);
+    renderPlacaStatsControlesBlock(cat);
     renderRivalStatsDetalle(dataCat, cat);
   } else {
     const el = document.getElementById(`rival-stats-detalle-${dataCat}`);
@@ -3391,6 +3382,15 @@ function rivalStatsCajaHTML(titulo, contenidoHTML){
   </div>`;
 }
 
+// Cantidad de "últimos partidos" a mostrar en la pantalla (no en la placa,
+// que tiene su propio selector) -- por defecto 10, ajustable con el slider
+// de la propia tarjeta hasta ese mismo tope.
+const rivalStatsCantUltimos = {}; // dataCat -> cantidad (1-10)
+function setRivalStatsCant(dataCat, cat, val){
+  rivalStatsCantUltimos[dataCat] = parseInt(val)||10;
+  renderRivalStatsDetalle(dataCat, cat);
+}
+
 async function renderRivalStatsDetalle(dataCat, cat){
   const el = document.getElementById(`rival-stats-detalle-${dataCat}`);
   if(!el) return;
@@ -3402,7 +3402,8 @@ async function renderRivalStatsDetalle(dataCat, cat){
   }
   const info = RIVAL_INFO[prox.rival];
   const filaRival = info ? filaTablaLPF(cat, info.lpf) : null;
-  const ultimos = ultimosPartidosRival(cat, prox.rival, prox.condRival, 4);
+  const cantUltimos = rivalStatsCantUltimos[dataCat] || 10;
+  const ultimos = ultimosPartidosRival(cat, prox.rival, null, cantUltimos);
   const alerta = TABLA_DATA.rival_alertas && TABLA_DATA.rival_alertas[cat];
 
   let html = `<div style="font-family:'Barlow Condensed',sans-serif">
@@ -3414,32 +3415,41 @@ async function renderRivalStatsDetalle(dataCat, cat){
 
   if(filaRival){
     const dif = filaRival.dif ?? filaRival.dg;
-    const stat = (val, label, color) => `<div style="text-align:center">
-        <div style="font-size:22px;font-weight:700;color:${color||'var(--text)'}">${val}</div>
-        <div style="font-size:12px;color:var(--muted);margin-top:2px">${label}</div>
-      </div>`;
     html += rivalStatsCajaHTML('Posición en la tabla', `
-      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px">
-        ${stat(filaRival.pos+'°', 'POS')}
-        ${stat(filaRival.pts, 'PTS', 'var(--gold2)')}
-        ${stat(filaRival.pj, 'PJ')}
-        ${stat((dif>0?'+':'')+dif, 'DIF', dif>=0?'var(--win)':'var(--loss)')}
-      </div>`);
+      <div class="gen-table-wrap" style="margin:0"><table class="gen-table" style="font-size:15px">
+        <thead><tr><th>POS</th><th>PTS</th><th>PJ</th><th>PG</th><th>PE</th><th>PP</th><th>GF</th><th>GC</th><th>DIF</th></tr></thead>
+        <tbody><tr>
+          <td style="text-align:center">${filaRival.pos}°</td>
+          <td style="text-align:center;color:var(--gold2);font-weight:700">${filaRival.pts}</td>
+          <td style="text-align:center">${filaRival.pj}</td>
+          <td style="text-align:center;color:var(--win)">${filaRival.pg}</td>
+          <td style="text-align:center;color:var(--draw)">${filaRival.pe}</td>
+          <td style="text-align:center;color:var(--loss)">${filaRival.pp}</td>
+          <td style="text-align:center">${filaRival.gf}</td>
+          <td style="text-align:center">${filaRival.gc}</td>
+          <td style="text-align:center;color:${dif>=0?'var(--win)':'var(--loss)'};font-weight:700">${dif>0?'+':''}${dif}</td>
+        </tr></tbody>
+      </table></div>`);
   } else {
     html += rivalStatsCajaHTML('Posición en la tabla',
       `<div style="color:var(--muted);font-size:14px">Todavía no tengo la tabla de posiciones descargada.</div>`);
   }
 
-  if(ultimos && ultimos.length){
-    const filas = ultimos.slice().reverse().map(u=>{
-      const r = resultadoLabel(u.gf, u.gc);
-      return `<div style="display:flex;justify-content:space-between;padding:6px 0;font-size:15px">
-        <span>F${u.fecha} vs ${esc(u.rivalDe)}</span>
-        <span style="color:${r.color};font-weight:700">${u.gf}-${u.gc} ${r.texto}</span>
-      </div>`;
-    }).join('');
-    html += rivalStatsCajaHTML('Últimos partidos', filas);
-  }
+  const sliderUltimos = `<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+    <span style="font-size:12px;color:var(--muted)">Cantidad</span>
+    <input type="range" min="1" max="10" value="${cantUltimos}"
+      oninput="this.nextElementSibling.textContent=this.value"
+      onchange="setRivalStatsCant('${dataCat}','${cat}',this.value)" style="flex:1;max-width:180px">
+    <span style="font-size:13px;color:var(--gold2);width:20px">${cantUltimos}</span>
+  </div>`;
+  const filasUltimos = (ultimos && ultimos.length) ? ultimos.slice().reverse().map(u=>{
+    const r = resultadoLabel(u.gf, u.gc);
+    return `<div style="display:flex;justify-content:space-between;padding:6px 0;font-size:15px">
+      <span>F${u.fecha} vs ${esc(u.rivalDe)} <span style="color:var(--muted);font-size:12px">· ${u.cond==='L'?'LOCAL':'VISIT.'}</span></span>
+      <span style="color:${r.color};font-weight:700">${u.gf}-${u.gc} ${r.texto}</span>
+    </div>`;
+  }).join('') : `<div style="color:var(--muted);font-size:14px;padding:4px 0">Sin partidos registrados todavía.</div>`;
+  html += rivalStatsCajaHTML('Últimos partidos', sliderUltimos + filasUltimos);
 
   const golHTML = alerta && alerta.goleador
     ? `<div style="font-size:17px;font-weight:700;color:var(--text)">${esc(alerta.goleador.nombre)}</div>
@@ -6345,17 +6355,75 @@ function buildRendimientoGeneralHTML(calcFn, periodsCat, cats){
   return buildResumenPorBloqueHTML(calcFn, periodsCat, cats);
 }
 
+// Detecta el sistema táctico ("1-4-3-3") a partir de las coordenadas x/y de
+// los titulares que ya guarda la citación (parseCitacionRaw ya las guarda
+// por jugador, se usaban antes solo para saber a qué línea de texto
+// pertenece cada uno). Agrupa los 10 jugadores de campo en líneas por
+// cercanía en Y (el arquero, dorsal 1, no cuenta como línea -- va aparte
+// como el "1" fijo al principio) y arma las líneas de defensa a ataque
+// según cuál queda más cerca del arquero.
+// OJO -- a diferencia del resto de los parsers de PDF de este proyecto
+// (GPS, COMET, citación en sí), este agrupamiento todavía NO se probó
+// contra citaciones reales -- si el sistema que muestra no coincide con lo
+// que se ve en la planilla real de una fecha, hace falta calibrarlo con
+// ese PDF como referencia (mismo criterio que se usó para los demás).
+function detectarSistemaCitacion(titulares){
+  if(!titulares || titulares.length<11) return null;
+  const conCoords = titulares.filter(p=>p.x!=null && p.y!=null);
+  if(conCoords.length<11) return null;
+  let gk = conCoords.find(p=>p.num===1);
+  let outfield = gk ? conCoords.filter(p=>p!==gk) : conCoords.slice();
+  if(!gk){
+    // Sin dorsal 1 -- el arquero es el que queda más lejos del centroide del resto.
+    const avgY = outfield.reduce((a,p)=>a+p.y,0)/outfield.length;
+    outfield = outfield.slice().sort((a,b)=>Math.abs(b.y-avgY)-Math.abs(a.y-avgY));
+    gk = outfield.shift();
+  }
+  if(outfield.length!==10) return null;
+  const sorted = outfield.slice().sort((a,b)=>a.y-b.y);
+  const gaps = [];
+  for(let i=1;i<sorted.length;i++) gaps.push(sorted[i].y-sorted[i-1].y);
+  if(!gaps.length || gaps.every(g=>g<=0)) return null;
+  // En vez de un umbral fijo (fallaba: la variación normal DENTRO de una
+  // línea a veces es más grande que el "típico" global y se cortaba de
+  // más) -- prueba usar los k gaps más grandes como bordes entre líneas
+  // (k=1 -> 2 líneas, k=3 -> 4 líneas) y se queda con el k que separa
+  // mejor "gap de borde" de "gap dentro de la línea": el salto relativo
+  // entre el último gap usado y el primero que quedó afuera.
+  const porIndice = gaps.map((g,i)=>({g,i}));
+  const ordenDesc = porIndice.slice().sort((a,b)=>b.g-a.g);
+  let bestK=1, bestRatio=-1;
+  for(let k=1; k<=Math.min(3, ordenDesc.length-1); k++){
+    const usedMin=ordenDesc[k-1].g, nextMax=ordenDesc[k].g;
+    if(usedMin<=0) continue;
+    const ratio = nextMax>0 ? usedMin/nextMax : Infinity;
+    if(ratio>bestRatio){ bestRatio=ratio; bestK=k; }
+  }
+  if(bestRatio < 2) return null; // sin un salto claro entre líneas, mejor no adivinar
+  const cortesIdx = [...new Set(ordenDesc.slice(0,bestK).map(o=>o.i+1))].sort((a,b)=>a-b);
+  const lineas=[]; let start=0;
+  cortesIdx.forEach(c=>{ lineas.push(sorted.slice(start,c)); start=c; });
+  lineas.push(sorted.slice(start));
+  if(lineas.length<2 || lineas.length>4) return null; // agrupamiento poco confiable, mejor no mostrar nada
+  // Orden defensa -> ataque: la línea más cercana al arquero va primero.
+  if(Math.abs(lineas[0][0].y-gk.y) > Math.abs(lineas[lineas.length-1][0].y-gk.y)) lineas.reverse();
+  return '1-'+lineas.map(l=>l.length).join('-');
+}
+
 // Tabla "RENDIMIENTO POR SISTEMA TÁCTICO": agrupa los partidos jugados por
-// el sistema táctico cargado en futdetail (fixture_futdetail[cat][fecha]
-// .sistema_tactico, ya viene del mismo endpoint que trae los links, no hace
-// falta scrapear nada nuevo). Solo cuenta fechas que tienen resultado propio
-// Y sistema cargado en futdetail a la vez.
+// el sistema táctico detectado en la citación de esa fecha
+// (detectarSistemaCitacion, arriba) y, si esa fecha no tiene citación
+// cargada o el agrupamiento no fue confiable, cae al sistema que trae
+// futdetail (fixture_futdetail[cat][fecha].sistema_tactico) -- así no se
+// pierde cobertura en las fechas viejas que no tienen PDF de citación
+// subido. Solo cuenta fechas que tienen resultado propio Y sistema (de
+// cualquiera de las dos fuentes) a la vez.
 function buildSistemaTacticoHTML(cat){
   const fixtureFut=(TABLA_DATA&&TABLA_DATA.fixture_futdetail&&TABLA_DATA.fixture_futdetail[cat])||{};
   const porSistema={};
   for(let f=1; f<=35; f++){
     const res=results[cat]?.[f];
-    const sis=fixtureFut[f]?.sistema_tactico;
+    const sis = detectarSistemaCitacion(matchData[cat]?.[f]?.titulares) || fixtureFut[f]?.sistema_tactico;
     if(!res || !sis) continue;
     if(!porSistema[sis]) porSistema[sis]={pg:0,pe:0,pp:0,gf:0,gc:0,L:{pg:0,pe:0,pp:0},V:{pg:0,pe:0,pp:0}};
     const s=porSistema[sis];
@@ -6371,7 +6439,7 @@ function buildSistemaTacticoHTML(cat){
   const sistemas=Object.keys(porSistema);
   if(!sistemas.length){
     return `<div style="text-align:center;padding:20px;color:var(--muted);
-      font-family:'Barlow Condensed',sans-serif;font-size:13px">Todavía no hay partidos con sistema táctico cargado en futdetail</div>`;
+      font-family:'Barlow Condensed',sans-serif;font-size:13px">Todavía no hay partidos con sistema táctico detectado (citación o futdetail)</div>`;
   }
   const pj=s=>s.pg+s.pe+s.pp, pts=s=>s.pg*3+s.pe;
   sistemas.sort((a,b)=>pts(porSistema[b])/pj(porSistema[b]) - pts(porSistema[a])/pj(porSistema[a]));
@@ -6385,25 +6453,55 @@ function buildSistemaTacticoHTML(cat){
       <td class="cat-cell">${sis}</td>
       <td style="text-align:center">${j}</td>
       ${cell(pts(s),'var(--gold2)')}
-      ${cell((pts(s)/j).toFixed(2),'var(--gold2)')}
       ${cell(s.pg,'var(--win)')}${cell(s.pe,'var(--draw)')}${cell(s.pp,'var(--loss)')}
-      ${cell((s.gf/j).toFixed(2),'#60a5fa')}
-      ${cell((s.gc/j).toFixed(2),'#f87171')}
+      ${cell(s.gf,'#60a5fa')}${cell(s.gc,'#f87171')}
       <td style="text-align:center;color:${dgC};font-weight:700;${DIV}">${dg>0?'+':''}${dg}</td>
       ${lvvCell(s.L)}${lvvCell(s.V)}
     </tr>`;
   }).join('');
-  return `<div class="gen-table-wrap"><table class="gen-table">
+  return `<div style="display:flex;justify-content:flex-end;margin-bottom:6px">
+      <button onclick="imprimirSistemaTactico('${cat}')" style="background:rgba(240,192,64,0.15);border:1px solid var(--border2);
+        color:var(--gold2);border-radius:6px;padding:6px 12px;font-family:'Barlow Condensed',sans-serif;font-size:12px;
+        letter-spacing:1px;font-weight:700;cursor:pointer">🖨 IMPRIMIR</button>
+    </div>
+    <div class="gen-table-wrap"><table class="gen-table">
       <thead><tr>
-        <th>SISTEMA</th><th>PJ</th><th>PTS</th><th>PTS/PJ</th><th>PG</th><th>PE</th><th>PP</th><th>GF/PJ</th><th>GC/PJ</th>
+        <th>SISTEMA</th><th>PJ</th><th>PTS</th><th>PG</th><th>PE</th><th>PP</th><th>GF</th><th>GC</th>
         <th style="${DIV}">DG</th>
         <th>🏠 LOCAL (G-E-P)</th><th>✈ VISIT (G-E-P)</th>
       </tr></thead>
       <tbody>${rows}</tbody>
     </table></div>
     <div style="font-family:'Barlow Condensed',sans-serif;font-size:11px;color:var(--muted);margin-top:4px">
-      Ordenado por PTS/PJ. Sistema táctico cargado en futdetail por fecha; solo se cuentan fechas con resultado propio y sistema cargado a la vez.
+      Ordenado por rendimiento (PTS/PJ). Sistema detectado en la citación de cada fecha (o futdetail si esa fecha no tiene citación cargada); solo se cuentan fechas con resultado propio y sistema detectado a la vez.
     </div>`;
+}
+
+// Imprime la tabla de rendimiento por sistema táctico -- mismo patrón que
+// generarPDF/exportWeeklyReport (ventana nueva, HTML propio, print() en el
+// onload), sin depender de estilos var(--...) que no existen en esa ventana.
+function imprimirSistemaTactico(cat){
+  const el = document.getElementById(`sistema-${cat}`);
+  if(!el) return;
+  const tablaHTML = el.querySelector('table')?.outerHTML || '';
+  const catLabel = CATEGORIAS_CONFIG[cat]?.label ? CATEGORIAS_CONFIG[cat].label.toUpperCase() : cat;
+  const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Rendimiento por sistema · ${esc(catLabel)}</title>
+    <style>
+      body{font-family:Arial,sans-serif;padding:24px;color:#111}
+      h1{font-size:18px;margin-bottom:4px}
+      p{font-size:12px;color:#555;margin-top:0}
+      table{width:100%;border-collapse:collapse;margin-top:16px;font-size:12px}
+      th,td{border:1px solid #ccc;padding:6px 8px;text-align:center}
+      th{background:#eee}
+    </style></head>
+    <body>
+      <h1>Rendimiento por sistema táctico — ${esc(catLabel)}</h1>
+      <p>Club Atlético Tigre · Temporada 2026 · Generado ${new Date().toLocaleString('es-AR')}</p>
+      ${tablaHTML}
+    </body></html>`;
+  const w = window.open('','_blank','width=900,height=700');
+  if(w){ w.document.write(html); w.document.close(); setTimeout(()=>w.print(),400); }
+  else showToast('Permitir ventanas emergentes para imprimir');
 }
 
 // ── PDF CITACIONES ────────────────────────────────────────────
@@ -6742,7 +6840,9 @@ function fixtureCompletoCat(cat){
 }
 
 // Últimos `cant` partidos del rival jugando en `condicion` (la del RIVAL,
-// no la de Tigre), de más reciente a más viejo.
+// no la de Tigre), de más reciente a más viejo. `condicion=null` trae los
+// últimos partidos SIN filtrar por local/visitante (corridos, mezclados) --
+// cada resultado igual trae su `cond` ('L'/'V') para poder etiquetarlo.
 function ultimosPartidosRival(cat, rivalNombre, condicion, cant){
   const info = RIVAL_INFO[rivalNombre];
   if(!info) return [];
@@ -6751,8 +6851,8 @@ function ultimosPartidosRival(cat, rivalNombre, condicion, cant){
   const out=[];
   for(const f of fechas){
     for(const p of fc[f]){
-      if(condicion==='L' && p.local===info.sabadogol) out.push({fecha:f, rivalDe:p.visitante, gf:p.gl, gc:p.gv});
-      else if(condicion==='V' && p.visitante===info.sabadogol) out.push({fecha:f, rivalDe:p.local, gf:p.gv, gc:p.gl});
+      if((condicion===null||condicion==='L') && p.local===info.sabadogol) out.push({fecha:f, rivalDe:p.visitante, gf:p.gl, gc:p.gv, cond:'L'});
+      else if((condicion===null||condicion==='V') && p.visitante===info.sabadogol) out.push({fecha:f, rivalDe:p.local, gf:p.gv, gc:p.gl, cond:'V'});
       if(out.length>=cant) return out.reverse(); // más viejo primero al mostrarlos
     }
   }
@@ -6872,11 +6972,12 @@ async function construirParamsPlacaStats(cat){
   const filaRival = filaTablaLPF(cat, info.lpf);
   const filaTigre = filaTablaLPF(cat, 'Tigre');
   if(!filaRival || !filaTigre) return null;
-  const ultimos = ultimosPartidosRival(cat, prox.rival, prox.condRival, 4);
+  const modoInfo = leerModoUltimosPlaca(cat, prox.condRival);
+  const ultimos = ultimosPartidosRival(cat, prox.rival, modoInfo.condicion, modoInfo.cant);
   const reciente = partidoMasRecienteRival(cat, prox.rival);
   const num = (id, def) => parseInt(document.getElementById(id+cat)?.value ?? def) || def;
   const alerta = TABLA_DATA.rival_alertas && TABLA_DATA.rival_alertas[cat];
-  return {cat, prox, info, ultimos, reciente, filaRival, filaTigre, alerta,
+  return {cat, prox, info, ultimos, ultimosLabel: modoInfo.label, reciente, filaRival, filaTigre, alerta,
     incluirGoleador: chk('placa-stats-incluir-goleador-'+cat),
     incluirAmarillas: chk('placa-stats-incluir-amarillas-'+cat),
     escalaLiga: num('placa-stats-escala-liga-', 100)/100,
@@ -6927,7 +7028,8 @@ async function generarEstadisticasRival(cat, compartir){
     const filaRival = filaTablaLPF(cat, info.lpf);
     const filaTigre = filaTablaLPF(cat, 'Tigre');
     if(!filaRival || !filaTigre){ alert('Todavía no tengo la tabla de posiciones de '+cat+' descargada. Probá "🔄 Actualizar datos".'); return; }
-    const ultimos = ultimosPartidosRival(cat, prox.rival, prox.condRival, 4);
+    const modoInfo = leerModoUltimosPlaca(cat, prox.condRival);
+    const ultimos = ultimosPartidosRival(cat, prox.rival, modoInfo.condicion, modoInfo.cant);
     const reciente = partidoMasRecienteRival(cat, prox.rival);
     const num = (id, def) => parseInt(document.getElementById(id+cat)?.value ?? def) || def;
     const escalaLiga = num('placa-stats-escala-liga-', 100)/100;
@@ -6936,14 +7038,14 @@ async function generarEstadisticasRival(cat, compartir){
     const alerta = TABLA_DATA.rival_alertas && TABLA_DATA.rival_alertas[cat];
     const incluirGoleador = chk('placa-stats-incluir-goleador-'+cat);
     const incluirAmarillas = chk('placa-stats-incluir-amarillas-'+cat);
-    const blob = await dibujarTarjetaRival({cat, prox, info, ultimos, reciente, filaRival, filaTigre, alerta, incluirGoleador, incluirAmarillas, escalaLiga, offsetXLiga, offsetYLiga});
+    const blob = await dibujarTarjetaRival({cat, prox, info, ultimos, ultimosLabel: modoInfo.label, reciente, filaRival, filaTigre, alerta, incluirGoleador, incluirAmarillas, escalaLiga, offsetXLiga, offsetYLiga});
     await descargarOCompartirPlaca(blob, `proximo-rival-${cat}-F${prox.fecha}-${slugArchivo(prox.rival)}.png`, compartir);
   } finally {
     if(btn) btn.disabled=false;
   }
 }
 
-async function dibujarTarjetaRival({cat, prox, info, ultimos, reciente, filaRival, filaTigre, alerta, incluirGoleador, incluirAmarillas, escalaLiga, offsetXLiga, offsetYLiga, scale}){
+async function dibujarTarjetaRival({cat, prox, info, ultimos, ultimosLabel, reciente, filaRival, filaTigre, alerta, incluirGoleador, incluirAmarillas, escalaLiga, offsetXLiga, offsetYLiga, scale}){
   if(document.fonts && document.fonts.ready) await document.fonts.ready;
   escalaLiga = escalaLiga || 1; offsetXLiga = offsetXLiga || 0; offsetYLiga = offsetYLiga || 0;
   // Los checkboxes de "incluir goleador"/"incluir amarillas" solo se leen
@@ -7055,7 +7157,7 @@ async function dibujarTarjetaRival({cat, prox, info, ultimos, reciente, filaRiva
 
   const colW=(W-2*pad-24)/2, leftX=pad, rightX=pad+colW+24;
   ctx.font="700 12px 'Barlow', sans-serif"; ctx.fillStyle=MUTED;
-  ctx.fillText('COMO '+(prox.condRival==='L'?'LOCAL':'VISITANTE'), leftX, y);
+  ctx.fillText(ultimosLabel || ('COMO '+(prox.condRival==='L'?'LOCAL':'VISITANTE')), leftX, y);
   let ry=y+28;
   const cardTop=ry; // la tarjeta de la derecha arranca a la altura de la primera fila, no del título
   const rowH2visual=rowH2-10;
@@ -7071,7 +7173,7 @@ async function dibujarTarjetaRival({cat, prox, info, ultimos, reciente, filaRiva
     const escImg=escudosResultados[i];
     if(escImg){ ctx.drawImage(escImg, tx, ry+(rowH2visual-28)/2, 28, 28); tx+=36; }
     ctx.font="14px 'Barlow', sans-serif"; ctx.fillStyle=TXT2;
-    ctx.fillText(`Fecha ${p.fecha} vs ${NOMBRE_POR_SABADOGOL[p.rivalDe]||p.rivalDe}`, tx, ry+rowH2visual/2-7);
+    ctx.fillText(`Fecha ${p.fecha} vs ${NOMBRE_POR_SABADOGOL[p.rivalDe]||p.rivalDe} · ${p.cond==='L'?'LOCAL':'VISIT.'}`, tx, ry+rowH2visual/2-7);
     ctx.font="700 17px 'Barlow', sans-serif"; ctx.fillStyle=TXT;
     ctx.fillText(`${p.gf}-${p.gc}`, leftX+colW-170, ry+rowH2visual/2-8);
     const bw=80;
@@ -7345,6 +7447,59 @@ async function renderPlacaProximoRivalBlock(cat){
     </div>`, `placa-portada-proximo-preview-${cat}`);
   actualizarPlacaPreviewGenerica('portada-proximo-'+cat, `placa-portada-proximo-preview-${cat}`,
     async ()=>({cat, prox, info}), dibujarPlacaPortada);
+}
+
+// Qué partidos entran en "ÚLTIMOS RESULTADOS" de la Placa de Estadísticas de
+// Rival -- dos modos: 'x' (cantidad libre 1-10, corridos, sin filtrar por
+// local/visitante) o 'cond' (últimos 4, pero en la condición que el rival
+// va a jugar la próxima fecha -- local o visitante, según corresponda; es
+// el comportamiento que ya tenía esto antes de agregar el selector, Javi
+// pidió que esto se calcule solo, no que quede fijo en "de local").
+const placaStatsModoUltimos = {}; // cat -> 'x' | 'cond' (default 'cond')
+function setPlacaStatsModo(cat, modo){
+  placaStatsModoUltimos[cat] = modo;
+  renderPlacaStatsControlesBlock(cat);
+}
+function leerModoUltimosPlaca(cat, condRival){
+  const modo = placaStatsModoUltimos[cat] || 'cond';
+  if(modo==='x'){
+    const cant = parseInt(document.getElementById('placa-stats-cant-'+cat)?.value) || 4;
+    return {modo, cant, condicion:null, label:`ÚLTIMOS ${cant} PARTIDOS`};
+  }
+  return {modo, cant:4, condicion:condRival, label:'ÚLTIMOS 4 · '+(condRival==='L'?'COMO LOCAL':'COMO VISITANTE')};
+}
+
+async function renderPlacaStatsControlesBlock(cat){
+  const el = document.getElementById(`placa-stats-block-${cat}`);
+  if(!el) return;
+  await loadTablaData();
+  const prox = proximoRivalInfo(cat);
+  const modo = placaStatsModoUltimos[cat] || 'cond';
+  const modoBtn = (val, label) => `<button type="button" onclick="setPlacaStatsModo('${cat}','${val}')" style="padding:6px 12px;
+    border-radius:6px;border:1px solid ${modo===val?'var(--gold)':'var(--border2)'};
+    background:${modo===val?'rgba(240,192,64,0.15)':'transparent'};color:${modo===val?'var(--gold2)':'var(--muted)'};
+    font-family:'Barlow Condensed',sans-serif;font-size:12px;letter-spacing:1px;font-weight:700;cursor:pointer">${label}</button>`;
+  const labelCond = prox ? ('ÚLTIMOS 4 · '+(prox.condRival==='L'?'LOCAL':'VISITANTE')) : 'ÚLTIMOS 4';
+  el.innerHTML = placaRotuloHTML('🖼️ ESTADÍSTICAS DE RIVAL') + bloquePlacaConPreview(`
+    <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2);margin-bottom:6px;cursor:pointer">
+      <input type="checkbox" id="placa-stats-incluir-goleador-${cat}" checked onchange="actualizarPlacaStatsPreview('${cat}')"> Incluir goleador del rival
+    </label>
+    <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2);margin-bottom:10px;cursor:pointer">
+      <input type="checkbox" id="placa-stats-incluir-amarillas-${cat}" checked onchange="actualizarPlacaStatsPreview('${cat}')"> Incluir alerta de 5ta amarilla
+    </label>
+    <div style="font-size:10px;color:var(--muted);letter-spacing:1px;margin-bottom:6px">ÚLTIMOS RESULTADOS</div>
+    <div style="display:flex;gap:8px;margin-bottom:8px">${modoBtn('x','X FECHAS')}${modoBtn('cond',labelCond)}</div>
+    ${modo==='x' ? sliderRowPlacas('placa-stats-cant-'+cat, 'CANTIDAD', 4, 1, 10, '', `actualizarPlacaStatsPreview('${cat}')`) : ''}
+    <div style="font-size:10px;color:var(--muted);letter-spacing:1px;margin-top:8px;margin-bottom:4px">LOGO LPF</div>
+    ${sliderRowPlacas('placa-stats-escala-liga-'+cat, 'TAMAÑO', 100, 50, 180, '%', `actualizarPlacaStatsPreview('${cat}')`)}
+    ${sliderRowPlacas('placa-stats-x-liga-'+cat, 'HORIZONTAL', 0, -40, 40, 'px', `actualizarPlacaStatsPreview('${cat}')`)}
+    ${sliderRowPlacas('placa-stats-y-liga-'+cat, 'VERTICAL', 0, -40, 40, 'px', `actualizarPlacaStatsPreview('${cat}')`)}
+    <div style="display:flex;gap:8px;margin-top:10px">
+      <button onclick="generarEstadisticasRival('${cat}')" id="btn-rival-stats" style="${PLACA_BTN_STYLE}">⬇ ESTADÍSTICAS DE RIVAL</button>
+      ${botonCompartirPlacaHTML(`generarEstadisticasRival('${cat}', true)`)}
+    </div>
+  `, `placa-stats-preview-${cat}`);
+  actualizarPlacaStatsPreview(cat);
 }
 
 // Lee fecha+sliders del panel "post partido" de una categoría. Se usa tanto
@@ -7691,7 +7846,14 @@ async function dibujarPlacaPortada({cat, prox, info, scale}){
   const anchoFecha = ctx.measureText(`Fecha ${prox.fecha}`).width;
   ctx.font = "26px 'Barlow', sans-serif"; ctx.fillStyle = TXT2;
   ctx.fillText(`   ·   ${formatFechaCalendario(prox.fecha)}`, pad+24+anchoFecha, y);
-  y += 86;
+  y += 46;
+
+  // Condición de Tigre esa fecha ("LOCAL vs"/"VISITANTE vs"), a pedido de Javi.
+  ctx.font = "700 22px 'Barlow Condensed', sans-serif"; ctx.fillStyle = GOLD;
+  try{ ctx.letterSpacing = '1px'; }catch(e){}
+  ctx.fillText(prox.condTigre==='L' ? 'LOCAL vs' : 'VISITANTE vs', pad+24, y);
+  try{ ctx.letterSpacing = '0px'; }catch(e){}
+  y += 40;
 
   // Rival: escudo grande + nombre apenas más grande que el título "Análisis
   // Próximo Rival" (72px) -- ajustado a pedido de Javi tras varias pruebas.
@@ -8271,35 +8433,15 @@ function amarillasEnAlerta(cat){
     .map(p=>({...p, ciclo: p.count % AMARILLAS_SUSPENSION}))
     .filter(p=>p.ciclo>=AMARILLAS_ALERTA);
 }
+// El pill "N en alerta" del header se sacó a pedido de Javi -- el mismo
+// aviso (4+ amarillas, riesgo de suspensión) ya se ve adentro de cada
+// categoría (renderStatsSingle, vía amarillasEnAlerta) y quedaba
+// duplicado. La función queda (llamada desde varios lugares tras guardar
+// datos) pero ahora solo limpia el contenedor por si venía de una versión
+// vieja con algo dibujado.
 function refreshAlerts(){
   const wrap = document.getElementById('alert-pills');
-  if(!wrap) return;
-  wrap.innerHTML = '';
-  const pills = [];
-
-  // Tarjetas: 4+ amarillas en la temporada (riesgo de suspensión), contadas
-  // desde los informes de COMET ya cargados (Fase 4) — reemplaza a la
-  // alerta vieja de 3+ que se sacó en la Fase 0 junto con la carga manual
-  // de tarjetas. Solo existe para 4TA/5TA/6TA (únicas con COMET). El conteo
-  // vive en amarillasEnAlerta() (compartido con el aviso dentro de cada
-  // categoría, ver renderStatsSingle) para no calcularlo dos veces.
-  const amarillaNames=[];
-  CONFIABILIDAD_CATS.forEach(cat=>{
-    amarillasEnAlerta(cat).forEach(p=>amarillaNames.push(`${p.nombre} (${cat})`));
-  });
-  if(amarillaNames.length) pills.push({
-    icon:'🟨', text:`${amarillaNames.length} en alerta`, color:'rgba(245,158,11,0.25)', border:'rgba(245,158,11,0.5)',
-    title:`4+ amarillas — riesgo suspensión:\n`+amarillaNames.join('\n')
-  });
-
-  // Render pills
-  [...new Map(pills.map(p=>[p.text,p])).values()].slice(0,6).forEach(pill=>{
-    const el = document.createElement('div');
-    el.style.cssText=`display:inline-flex;align-items:center;gap:3px;background:${pill.color};border:1px solid ${pill.border};border-radius:10px;padding:1px 7px;font-family:'Barlow Condensed',sans-serif;font-size:10px;color:#e0e0e0;cursor:default;white-space:nowrap`;
-    el.title = pill.title || '';
-    el.textContent = `${pill.icon} ${pill.text}`;
-    wrap.appendChild(el);
-  });
+  if(wrap) wrap.innerHTML = '';
 }
 
 // ============================================================
