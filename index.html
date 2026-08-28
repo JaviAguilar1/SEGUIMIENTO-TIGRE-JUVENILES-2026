@@ -6542,7 +6542,36 @@ async function construirParamsPlacaStats(cat){
 function actualizarPlacaStatsPreview(cat){
   actualizarPlacaPreviewGenerica('stats-'+cat, `placa-stats-preview-${cat}`, ()=>construirParamsPlacaStats(cat), dibujarTarjetaRival);
 }
-async function generarEstadisticasRival(cat){
+// Descarga un blob como archivo (como siempre) o, si compartir=true y el
+// dispositivo lo soporta (celular), abre el menu nativo de compartir
+// (WhatsApp, etc) directo con la imagen -- sin pasar por la carpeta de
+// descargas. En desktop (o si el navegador no soporta Web Share con
+// archivos) cae solo a la descarga de siempre.
+async function descargarOCompartirPlaca(blob, filename, compartir){
+  if(compartir && navigator.canShare){
+    try{
+      const file = new File([blob], filename, {type: blob.type || 'image/png'});
+      if(navigator.canShare({files:[file]})){
+        await navigator.share({files:[file], title: filename});
+        return;
+      }
+    }catch(e){
+      if(e.name==='AbortError') return; // el usuario cerro el menu de compartir sin elegir nada
+    }
+  }
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download=filename;
+  a.click();
+}
+function botonCompartirPlacaHTML(fnCall){
+  return `<button onclick="${fnCall}" title="Compartir (en celular abre WhatsApp/etc. directo; en PC descarga)"
+    style="background:rgba(26,58,143,0.2);border:1px solid var(--border2);color:var(--muted);
+    border-radius:6px;padding:9px 12px;font-family:'Barlow Condensed',sans-serif;font-size:13px;
+    letter-spacing:1px;font-weight:700;cursor:pointer">📤</button>`;
+}
+
+async function generarEstadisticasRival(cat, compartir){
   const btn=document.getElementById('btn-rival-stats');
   if(btn) btn.disabled=true;
   try{
@@ -6561,10 +6590,7 @@ async function generarEstadisticasRival(cat){
     const offsetXLiga = num('placa-stats-x-liga-', 0);
     const offsetYLiga = num('placa-stats-y-liga-', 0);
     const blob = await dibujarTarjetaRival({cat, prox, info, ultimos, reciente, filaRival, filaTigre, escalaLiga, offsetXLiga, offsetYLiga});
-    const a=document.createElement('a');
-    a.href=URL.createObjectURL(blob);
-    a.download=`proximo-rival-${cat}-F${prox.fecha}-${slugArchivo(prox.rival)}.png`;
-    a.click();
+    await descargarOCompartirPlaca(blob, `proximo-rival-${cat}-F${prox.fecha}-${slugArchivo(prox.rival)}.png`, compartir);
   } finally {
     if(btn) btn.disabled=false;
   }
@@ -6809,7 +6835,10 @@ function renderPlacasTab(cat, tabEl){
           ${sliderRowPlacas('placa-stats-escala-liga-'+cat, 'TAMAÑO', 100, 50, 180, '%', `actualizarPlacaStatsPreview('${cat}')`)}
           ${sliderRowPlacas('placa-stats-x-liga-'+cat, 'HORIZONTAL', 0, -40, 40, 'px', `actualizarPlacaStatsPreview('${cat}')`)}
           ${sliderRowPlacas('placa-stats-y-liga-'+cat, 'VERTICAL', 0, -40, 40, 'px', `actualizarPlacaStatsPreview('${cat}')`)}
-          <button onclick="generarEstadisticasRival('${cat}')" id="btn-rival-stats" style="margin-top:10px;${btnStyle}">⬇ GENERAR ESTADÍSTICAS</button>
+          <div style="display:flex;gap:8px;margin-top:10px">
+            <button onclick="generarEstadisticasRival('${cat}')" id="btn-rival-stats" style="${btnStyle}">⬇ GENERAR ESTADÍSTICAS</button>
+            ${botonCompartirPlacaHTML(`generarEstadisticasRival('${cat}', true)`)}
+          </div>
         `, `placa-stats-preview-${cat}`)}
       </div>
     </div>` : ''}
@@ -6834,7 +6863,10 @@ function renderPlacasTab(cat, tabEl){
           ${sliderRowPlacas('placa-fase-escala-tigre-'+cat, 'TAMAÑO', 100, 50, 180, '%', `actualizarPlacaFasePreview('${cat}')`)}
           ${sliderRowPlacas('placa-fase-x-tigre-'+cat, 'HORIZONTAL', 0, -40, 40, 'px', `actualizarPlacaFasePreview('${cat}')`)}
           ${sliderRowPlacas('placa-fase-y-tigre-'+cat, 'VERTICAL', 0, -40, 40, 'px', `actualizarPlacaFasePreview('${cat}')`)}
-          <button onclick="generarPlacaFase('${cat}')" id="btn-placa-fase" style="margin-top:6px;${btnStyle}">⬇ GENERAR PLACA</button>
+          <div style="display:flex;gap:8px;margin-top:6px">
+            <button onclick="generarPlacaFase('${cat}')" id="btn-placa-fase" style="${btnStyle}">⬇ GENERAR PLACA</button>
+            ${botonCompartirPlacaHTML(`generarPlacaFase('${cat}', true)`)}
+          </div>
         `, `placa-fase-preview-${cat}`)}
       </div>
     </div>
@@ -6847,7 +6879,10 @@ function renderPlacasTab(cat, tabEl){
           ${sliderRowPlacas('placa-cierre-escala-tigre-'+cat, 'TAMAÑO', 100, 50, 180, '%', `actualizarPlacaCierrePreview('${cat}')`)}
           ${sliderRowPlacas('placa-cierre-x-tigre-'+cat, 'HORIZONTAL', 0, -40, 40, 'px', `actualizarPlacaCierrePreview('${cat}')`)}
           ${sliderRowPlacas('placa-cierre-y-tigre-'+cat, 'VERTICAL', 0, -40, 40, 'px', `actualizarPlacaCierrePreview('${cat}')`)}
-          <button onclick="generarPlacaCierre('${cat}')" id="btn-placa-cierre" style="margin-top:10px;${btnStyle}">⬇ GENERAR PLACA</button>
+          <div style="display:flex;gap:8px;margin-top:10px">
+            <button onclick="generarPlacaCierre('${cat}')" id="btn-placa-cierre" style="${btnStyle}">⬇ GENERAR PLACA</button>
+            ${botonCompartirPlacaHTML(`generarPlacaCierre('${cat}', true)`)}
+          </div>
         `, `placa-cierre-preview-${cat}`)}
       </div>
     </div>
@@ -6907,11 +6942,12 @@ async function renderPlacaPortadaInfo(cat){
           ${sliderRow('placa-post-x-liga-'+cat, 'HORIZONTAL', 0, -40, 40, 'px')}
           ${sliderRow('placa-post-y-liga-'+cat, 'VERTICAL', 0, -40, 40, 'px')}
         </div>
-        <div>
+        <div style="display:flex;gap:8px">
           <button onclick="generarPlacaPostPartido('${cat}')" id="btn-placa-post" style="
             background:rgba(240,192,64,0.15);border:1px solid var(--border2);color:var(--gold2);
             border-radius:6px;padding:9px 16px;font-family:'Barlow Condensed',sans-serif;font-size:13px;
             letter-spacing:1px;font-weight:700;cursor:pointer">⬇ GENERAR POST PARTIDO</button>
+          ${botonCompartirPlacaHTML(`generarPlacaPostPartido('${cat}', true)`)}
         </div>
       </div>
       <div style="flex:1;min-width:320px;max-width:640px">
@@ -6930,11 +6966,12 @@ async function renderPlacaPortadaInfo(cat){
   el.innerHTML = toggleHTML + bloquePlacaConPreview(`
     Próximo rival: <strong style="color:var(--gold2)">${prox.rival}</strong>
     · Fecha ${prox.fecha} · ${formatFechaCalendario(prox.fecha)}
-    <div style="margin-top:10px">
+    <div style="margin-top:10px;display:flex;gap:8px">
       <button onclick="generarPlacaPortada('${cat}')" id="btn-placa-portada" style="
         background:rgba(240,192,64,0.15);border:1px solid var(--border2);color:var(--gold2);
         border-radius:6px;padding:9px 16px;font-family:'Barlow Condensed',sans-serif;font-size:13px;
         letter-spacing:1px;font-weight:700;cursor:pointer">⬇ GENERAR PORTADA</button>
+      ${botonCompartirPlacaHTML(`generarPlacaPortada('${cat}', true)`)}
     </div>`, `placa-portada-proximo-preview-${cat}`);
   actualizarPlacaPreviewGenerica('portada-proximo-'+cat, `placa-portada-proximo-preview-${cat}`,
     async ()=>({cat, prox, info}), dibujarPlacaPortada);
@@ -6982,17 +7019,14 @@ function actualizarPlacaPostPreview(cat){
   }, 200);
 }
 
-async function generarPlacaPostPartido(cat){
+async function generarPlacaPostPartido(cat, compartir){
   const params = leerControlesPlacaPost(cat);
   if(!params){ alert('Todavía no tengo cargado el escudo/equivalencia de ese rival.'); return; }
   const btn = document.getElementById('btn-placa-post');
   if(btn) btn.disabled = true;
   try{
     const blob = await dibujarPlacaPostPartido(params);
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = `placa-post-partido-${cat}-F${params.fecha}-${slugArchivo(params.entry.r)}.png`;
-    a.click();
+    await descargarOCompartirPlaca(blob, `placa-post-partido-${cat}-F${params.fecha}-${slugArchivo(params.entry.r)}.png`, compartir);
   } finally {
     if(btn) btn.disabled = false;
   }
@@ -7109,17 +7143,14 @@ function actualizarPlacaFasePreview(cat){
   actualizarPlacaPreviewGenerica('fase-'+cat, `placa-fase-preview-${cat}`, ()=>construirParamsPlacaFase(cat), dibujarPlacaFase);
 }
 
-async function generarPlacaFase(cat){
+async function generarPlacaFase(cat, compartir){
   const params = construirParamsPlacaFase(cat);
   if(!params){ alert('Escribí un título primero.'); return; }
   const btn = document.getElementById('btn-placa-fase');
   if(btn) btn.disabled = true;
   try{
     const blob = await dibujarPlacaFase(params);
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = `placa-${slugArchivo(params.titulo)}.png`;
-    a.click();
+    await descargarOCompartirPlaca(blob, `placa-${slugArchivo(params.titulo)}.png`, compartir);
   } finally {
     if(btn) btn.disabled = false;
   }
@@ -7184,16 +7215,13 @@ function actualizarPlacaCierrePreview(cat){
   actualizarPlacaPreviewGenerica('cierre-'+cat, `placa-cierre-preview-${cat}`, ()=>construirParamsPlacaCierre(cat), dibujarPlacaCierre);
 }
 
-async function generarPlacaCierre(cat){
+async function generarPlacaCierre(cat, compartir){
   const btn = document.getElementById('btn-placa-cierre');
   if(btn) btn.disabled = true;
   try{
     const params = construirParamsPlacaCierre(cat);
     const blob = await dibujarPlacaCierre(params);
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = 'placa-cierre.png';
-    a.click();
+    await descargarOCompartirPlaca(blob, 'placa-cierre.png', compartir);
   } finally {
     if(btn) btn.disabled = false;
   }
@@ -7220,7 +7248,7 @@ async function dibujarPlacaCierre({escalaTigre, offsetXTigre, offsetYTigre, scal
   return new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
 }
 
-async function generarPlacaPortada(cat){
+async function generarPlacaPortada(cat, compartir){
   const btn = document.getElementById('btn-placa-portada');
   if(btn) btn.disabled = true;
   try{
@@ -7230,10 +7258,7 @@ async function generarPlacaPortada(cat){
     const info = RIVAL_INFO[prox.rival];
     if(!info){ alert('Todavía no tengo cargado el escudo/equivalencia de "'+prox.rival+'".'); return; }
     const blob = await dibujarPlacaPortada({cat, prox, info});
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = `portada-${cat}-F${prox.fecha}-${slugArchivo(prox.rival)}.png`;
-    a.click();
+    await descargarOCompartirPlaca(blob, `portada-${cat}-F${prox.fecha}-${slugArchivo(prox.rival)}.png`, compartir);
   } finally {
     if(btn) btn.disabled = false;
   }
