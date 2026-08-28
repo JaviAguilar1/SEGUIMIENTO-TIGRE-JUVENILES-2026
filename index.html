@@ -3025,7 +3025,12 @@ function renderTopGoleadores(wrap){
 let catActiveTab = 'resultados'; // 'resultados' | 'plantel' | 'rendimiento' | 'videoanalisis'
 
 function buildCatTabsHTML(){
-  const tabs = [ {id:'resultados', label:'📊 ESTADÍSTICAS'}, {id:'plantel', label:'👥 PLANTEL'}, {id:'rendimiento', label:'🏃 RENDIMIENTO'}, {id:'videoanalisis', label:'▶ VIDEOANÁLISIS'} ];
+  // Los DT (rol cat_XXX) no ven VIDEOANÁLISIS -- a cambio, "Estadísticas
+  // próximo rival" se les muestra directo adentro de ESTADÍSTICAS (ver
+  // renderStatsSingle).
+  const esDT = currentRole && currentRole.startsWith('cat_');
+  const tabs = [ {id:'resultados', label:'📊 ESTADÍSTICAS'}, {id:'plantel', label:'👥 PLANTEL'}, {id:'rendimiento', label:'🏃 RENDIMIENTO'},
+    ...(esDT ? [] : [{id:'videoanalisis', label:'▶ VIDEOANÁLISIS'}]) ];
   return `<div style="display:flex;gap:8px;margin:10px 0 4px;">
     ${tabs.map(t=>{
       const active = catActiveTab===t.id;
@@ -3166,10 +3171,13 @@ function renderStatsSingle(cat, content){
     renderRendimientoTab(tabEl);
     return;
   }
-  if(catActiveTab==='videoanalisis'){
+  if(catActiveTab==='videoanalisis' && !(currentRole && currentRole.startsWith('cat_'))){
     renderVideoanalisisTab(cat, tabEl);
     return;
   }
+  // Un DT nunca ve el tab de VIDEOANÁLISIS (se saca de buildCatTabsHTML) --
+  // si quedó ese estado guardado de una sesión anterior (u otro rol), cae
+  // acá y sigue de largo como si fuera 'resultados'.
 
   const amarillaAlertCat = CONFIABILIDAD_CATS.includes(cat) ? amarillasEnAlerta(cat) : [];
   const amarillaAlertHTML = amarillaAlertCat.length
@@ -3202,6 +3210,12 @@ function renderStatsSingle(cat, content){
         <tbody id="tbody-${dataCat}">${rows}</tbody>
       </table></div>
     </div>
+
+    ${(currentRole && currentRole.startsWith('cat_') && CONFIABILIDAD_CATS.includes(cat)) ? `
+    ${seccionTitulo('rivalstats-'+dataCat, 'ESTADÍSTICAS PRÓXIMO RIVAL')}
+    <div id="sec-rivalstats-${dataCat}"${seccionEstiloInicial('rivalstats-'+dataCat)}>
+      <div id="rival-stats-detalle-${dataCat}"></div>
+    </div>` : ''}
 
     ${seccionTitulo('rendcat-'+dataCat, 'RENDIMIENTO', isReserva?'':bloqueSliderHTML('cat'))}
     <div id="sec-rendcat-${dataCat}"${seccionEstiloInicial('rendcat-'+dataCat)}>
@@ -3243,6 +3257,7 @@ function renderStatsSingle(cat, content){
     ? bloqueComparativaHTML((from,to)=>calcStats(dataCat,from,to), dataCat)
     : buildRendimientoGeneralHTML((from,to)=>calcStats(dataCat,from,to), dataCat, [cat]);
   if(!isReserva) document.getElementById(`sistema-${dataCat}`).innerHTML = buildSistemaTacticoHTML(dataCat);
+  if(currentRole && currentRole.startsWith('cat_') && CONFIABILIDAD_CATS.includes(cat)) renderRivalStatsDetalle(dataCat, cat);
   renderGoleadores(dataCat);
   if(isReserva) renderTablaReserva(`tabla-lpf-${cat}`);
   else renderTablaLPF(cat, `tabla-lpf-${cat}`);
