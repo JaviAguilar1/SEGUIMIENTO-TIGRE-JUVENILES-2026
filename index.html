@@ -854,133 +854,6 @@ table.gen-table .cat-cell{font-family:'Bebas Neue',sans-serif;font-size:15px;
 }
 .forma-pts span { color: var(--gold2); font-weight: 700; }
 
-/* ── LESIONES ───────────────────────────────────────── */
-.lesiones-toolbar {
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-  margin-bottom: 16px;
-  align-items: center;
-}
-.lesiones-list {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  margin-bottom: 24px;
-}
-.lesion-item {
-  background: linear-gradient(135deg, var(--surface2), var(--surface));
-  border: 1px solid var(--border);
-  border-left: 4px solid var(--red);
-  border-radius: 8px;
-  padding: 12px 16px;
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  transition: border-color .2s;
-}
-.lesion-item.recovered { border-left-color: var(--win); opacity: .65; }
-.lesion-item .li-icon { font-size: 20px; flex-shrink: 0; }
-.lesion-item .li-body { flex: 1; min-width: 0; }
-.lesion-item .li-name {
-  font-family: 'Barlow Condensed', sans-serif;
-  font-weight: 700;
-  font-size: 14px;
-  color: var(--text);
-}
-.lesion-item .li-detail {
-  font-size: 11px;
-  color: var(--muted);
-  margin-top: 2px;
-  font-family: 'Barlow Condensed', sans-serif;
-}
-.lesion-badge {
-  padding: 3px 10px;
-  border-radius: 20px;
-  font-family: 'Barlow Condensed', sans-serif;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 1px;
-  white-space: nowrap;
-}
-.lesion-badge.active { background: rgba(239,68,68,.2); color: var(--loss); border: 1px solid rgba(239,68,68,.3); }
-.lesion-badge.recovered { background: rgba(34,197,94,.15); color: var(--win); border: 1px solid rgba(34,197,94,.25); }
-.btn-lesion-toggle {
-  background: none;
-  border: 1px solid var(--border2);
-  border-radius: 5px;
-  color: var(--muted);
-  font-size: 11px;
-  padding: 3px 8px;
-  cursor: pointer;
-  font-family: 'Barlow Condensed', sans-serif;
-  letter-spacing: .5px;
-  transition: all .2s;
-}
-.btn-lesion-toggle:hover { border-color: var(--win); color: var(--win); }
-.btn-del-lesion {
-  background: none;
-  border: none;
-  color: var(--muted);
-  cursor: pointer;
-  font-size: 14px;
-  padding: 2px 6px;
-  transition: color .2s;
-}
-.btn-del-lesion:hover { color: var(--loss); }
-
-/* ── ADD LESION FORM ────────────────────────────────── */
-.add-lesion-form {
-  background: linear-gradient(135deg, var(--surface2), var(--surface));
-  border: 1px solid var(--border2);
-  border-radius: 10px;
-  padding: 16px;
-  margin-bottom: 24px;
-  display: grid;
-  grid-template-columns: 2fr 2fr 1fr 1fr auto;
-  gap: 8px;
-  align-items: end;
-}
-.add-lesion-form label {
-  display: block;
-  font-size: 9px;
-  color: var(--muted);
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  font-family: 'Barlow Condensed', sans-serif;
-  margin-bottom: 4px;
-}
-.add-lesion-form input,
-.add-lesion-form select {
-  width: 100%;
-  background: rgba(5,8,15,.8);
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  color: var(--text);
-  font-size: 12px;
-  padding: 7px 10px;
-  font-family: 'Barlow', sans-serif;
-  outline: none;
-  transition: border-color .2s;
-}
-.add-lesion-form input:focus,
-.add-lesion-form select:focus { border-color: var(--gold); }
-.add-lesion-form select option { background: #0d1528; }
-.btn-add-lesion {
-  background: var(--red);
-  border: none;
-  border-radius: 6px;
-  color: white;
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: 13px;
-  letter-spacing: 1px;
-  padding: 7px 14px;
-  cursor: pointer;
-  transition: opacity .2s;
-  white-space: nowrap;
-}
-.btn-add-lesion:hover { opacity: .85; }
-
 /* ── TARJETAS ───────────────────────────────────────── */
 .tarjetas-grid {
   display: grid;
@@ -1234,7 +1107,6 @@ table.gen-table .cat-cell{font-family:'Bebas Neue',sans-serif;font-size:15px;
 .check-player span { font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 600; }
 
 @media(max-width:750px){
-  .add-lesion-form { grid-template-columns: 1fr 1fr; }
   .pdf-form { grid-template-columns: 1fr 1fr; }
   .pdf-form .btn-gen-pdf { grid-column: 1/-1; }
   .tarjetas-grid,.forma-grid { grid-template-columns: 1fr; }
@@ -5495,31 +5367,51 @@ function renderComparativaJugadores(cat, merged){
     return;
   }
   const players=nombres.map(n=>merged.find(p=>p.nombre===n)).filter(Boolean);
-  const metricRows=[
-    {label:'Posición',      get:p=>p.posicion||'—',                       num:false},
-    {label:'Edad',          get:p=>p.edad||'—',                           num:false},
-    {label:'Convocatorias', get:p=>parseInt(p.stats.convocatorias)||0,    num:true},
-    {label:'Titular',       get:p=>parseInt(p.stats.partidos_titular)||0, num:true},
-    {label:'Minutos',       get:p=>parseInt(p.stats.minutos_jugados)||0,  num:true},
-    {label:'Goles',         get:p=>parseInt(p.stats.goles)||0,            num:true},
-    {label:'Asistencias',   get:p=>parseInt(p.stats.asistencias)||0,      num:true},
-    {label:'Amarillas',     get:p=>parseInt(p.stats.tarjeta_amarilla)||0, num:true},
-    {label:'Rojas',         get:p=>parseInt(p.stats.tarjeta_roja)||0,     num:true},
+  container.innerHTML=`<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px">
+    ${players.map(p=>tarjetaComparativaHTML(cat, p, players)).join('')}
+  </div>`;
+}
+
+// Misma info que la tarjeta de PLANTEL, pero pensada para verse una al lado
+// de la otra: en vez de resaltar solo "mejor valor" con texto dorado (como
+// hacía la tabla vieja), acá cada número que gana la comparación se dibuja
+// con el mismo criterio visual dorado que ya usa el resto de la app.
+function tarjetaComparativaHTML(cat, p, players){
+  const s = p.stats||{};
+  const nombre = p.nombre||'—';
+  const iniciales = nombre.split(/[\s,]+/).filter(Boolean).slice(0,2).map(w=>w[0]).join('').toUpperCase()||'?';
+  const golData = golesEfectivos(cat).find(g=>g.name===nombre
+    || normNombreOrdenIndependiente(g.name)===normNombreOrdenIndependiente(nombre));
+  const golesFilas = (golData?.fechas||[]).slice(0,3);
+  const STAT_KEYS=[
+    ['convocatorias','Conv.'],['partidos_titular','Titular'],['minutos_jugados','Min.'],['goles','Goles'],
+    ['asistencias','Asist.'],['tarjeta_amarilla','Amar.'],['tarjeta_roja','Rojas'],
   ];
-  const headHTML=players.map(p=>`<th style="text-align:center">${esc(p.nombre)}</th>`).join('');
-  const rowsHTML=metricRows.map(m=>{
-    const vals=players.map(p=>m.get(p));
-    const max=m.num?Math.max(...vals):null;
-    const cells=vals.map(v=>{
-      const destacado=m.num && v===max && max>0;
-      return `<td style="text-align:center${destacado?';font-weight:700;color:var(--gold2)':''}">${v}</td>`;
-    }).join('');
-    return `<tr><td style="color:var(--muted)">${m.label}</td>${cells}</tr>`;
-  }).join('');
-  container.innerHTML=`<div class="table-wrap"><table>
-    <thead><tr><th></th>${headHTML}</tr></thead>
-    <tbody>${rowsHTML}</tbody>
-  </table></div>`;
+  const statBoxHTML=([key,label])=>{
+    const val=parseInt(s[key])||0;
+    const max=Math.max(...players.map(o=>parseInt((o.stats||{})[key])||0));
+    const esMejor=max>0 && val===max;
+    return `<div style="background:rgba(5,8,15,0.5);border:1px solid ${esMejor?'var(--gold)':'var(--border2)'};border-radius:7px;padding:6px 4px;text-align:center">
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:15px;color:${esMejor?'var(--gold2)':'var(--text2)'}">${val}</div>
+      <div style="font-size:8.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-top:2px">${label}</div>
+    </div>`;
+  };
+  return `<div style="background:linear-gradient(135deg,var(--surface2),rgba(5,8,15,0.6));border:1px solid var(--border2);border-radius:12px;overflow:hidden">
+    <div style="display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--border2)">
+      <div style="width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,var(--gold),#8a6a10);
+        display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:17px;color:#1a1206;flex-shrink:0">${esc(iniciales)}</div>
+      <div style="min-width:0">
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:1px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(nombre)}</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px">${esc(p.posicion||'—')} · ${p.edad?p.edad+' años':'—'}</div>
+      </div>
+    </div>
+    <div style="padding:12px 16px">
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:${golesFilas.length?10:0}px">
+        ${STAT_KEYS.map(statBoxHTML).join('')}
+      </div>
+      ${golesFilas.length?`<div style="font-size:10.5px;color:var(--text2)">⚽ ${golesFilas.map(esc).join(' · ')}</div>`:''}
+    </div>
+  </div>`;
 }
 
 function filtrarRosterJugadores(cat){
