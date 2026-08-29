@@ -977,11 +977,29 @@ ya se ve GF y GC en crudo al lado.
   sin disparar una escritura real a Firebase para no tocar datos
   productivos); sin errores de consola.
 
+**Badge local/visitante y planilla de citaciones corregidos para menores
+(COMPLETO, 2026-08-29):** los dos puntos que habían quedado afuera del
+arreglo de LVV (ver arriba) también usaban la condición cruda de `RIVALS`
+(la de 4ta/5ta/6ta) en vez de `condicionCat`, así que para 7ma/8va/9na
+mostraban local/visitante al revés:
+- Badge de condición en la tabla de RESULTADOS (`renderStatsSingle`, cerca
+  de la línea 3107): `rCond` ahora sale de `condicionCat(cat, r.f)` para
+  las categorías no-Reserva (Reserva sigue con su propio `rivalData`, no
+  se tocó).
+- `generarPDF()` (planilla de citaciones con firma, cerca de la línea
+  6575): el texto LOCAL/VISITANTE impreso en el PDF ahora sale de
+  `condicionCat(cat, fechaIdx)`. Esta función hoy no tiene botón que la
+  dispare (`buildPDFSection` quedó sin punto de entrada desde la
+  reorganización de RENDIMIENTO, ver más arriba), así que el arreglo no se
+  ve todavía en pantalla, pero queda listo para cuando se decida dónde
+  poner Citaciones de nuevo.
+- La vista automática de citaciones (`abrirCitacionView`) y el LVV ya
+  usaban `condicionCat` correctamente desde antes, no hizo falta tocarlos.
+- Verificado por consola (`condicionCat('4TA',21)` → 'L',
+  `condicionCat('7MA',21)` → 'V', coincide con el resultado real ya
+  confirmado para el LVV).
+
 **Pendiente / a futuro:**
-- Si se quiere, revisar si el badge de condición local/visitante de la tabla
-  de RESULTADOS y el selector de citaciones deberían mostrar la condición
-  correcta por categoría (hoy usan la cruda de RIVALS, o sea la de las
-  mayores) — el usuario solo pidió arreglar el LVV por ahora.
 - Si futdetail sigue sin traer a Josué Rojas / Cristian Lezcano dentro del
   plantel de 4ta, confirmar con el club si corresponde revisar la carga en
   futdetail (no es algo que se arregle desde acá).

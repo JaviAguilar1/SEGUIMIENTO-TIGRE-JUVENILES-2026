@@ -1690,6 +1690,7 @@ function initFirebase(){
             // Re-render active module with correct permissions
             refreshActiveModule();
             sincronizarJugadoresDesdeFutdetail();
+            sincronizarPlantelDesdeFutdetail();
           });
           // Real-time data sync — listen for remote changes
           db.ref('stats').on('value', snap=>{
@@ -3104,7 +3105,7 @@ function renderStatsSingle(cat, content){
 
     // RESERVA: use editable rivalData, other cats use fixed RIVALS
     const rName = isReserva ? (rivalData[dataCat][r.f]?.rival || '') : r.r;
-    const rCond = isReserva ? (rivalData[dataCat][r.f]?.cond  || 'L') : r.c;
+    const rCond = isReserva ? (rivalData[dataCat][r.f]?.cond  || 'L') : condicionCat(cat, r.f);
 
     // Rival + condición van juntos en una sola celda (antes eran dos
     // columnas separadas) — la condición queda como badge chico al lado
@@ -5726,6 +5727,26 @@ function sincronizarJugadoresDesdeFutdetail(){
   });
   refreshActiveModule();
 }
+// El plantel (roster con posición/edad/altura/peso/pie/foto) también queda
+// estático en Firebase salvo que esto lo pise -- mismo criterio que
+// sincronizarJugadoresDesdeFutdetail, pero para TABLA_DATA.plantel_futdetail
+// (scripts/scrape_tablas.py, agregado 2026-08-29). Un jugador nuevo dado de
+// alta en futdetail, o un dato corregido ahí, llega solo la próxima vez que
+// alguien con permiso de edición abre la app.
+function sincronizarPlantelDesdeFutdetail(){
+  if(!canEdit || !fbReady) return;
+  const fresh=TABLA_DATA && TABLA_DATA.plantel_futdetail;
+  if(!fresh) return;
+  Object.keys(fresh).forEach(cat=>{
+    const nuevo=fresh[cat];
+    if(!nuevo || !nuevo.length) return;
+    if(JSON.stringify(nuevo)===JSON.stringify(plantelFutdetail[cat])) return;
+    plantelFutdetail[cat]=nuevo;
+    db.ref('stats/plantel/'+cat).set(nuevo).catch(e=>console.warn('sincronizarPlantelDesdeFutdetail:',e));
+  });
+  assignPlayerIds();
+  refreshActiveModule();
+}
 // La tabla de resultados puede haberse dibujado antes de que esto termine
 // de cargar (es una llamada async aparte) — sincroniza los inputs que
 // hayan quedado vacíos en pantalla con lo que se acaba de completar.
@@ -5751,6 +5772,7 @@ function loadTablaData(){
       completarLinksDesdeFutdetail(TABLA_DATA);
       sincronizarLinksVaciosEnPantalla();
       sincronizarJugadoresDesdeFutdetail();
+      sincronizarPlantelDesdeFutdetail();
       blPlayers = (TABLA_DATA.bl_gps && TABLA_DATA.bl_gps.players) || {};
       return TABLA_DATA;
     })
@@ -6511,7 +6533,8 @@ function imprimirSistemaTactico(cat){
 // ── PDF CITACIONES ────────────────────────────────────────────
 function buildPDFSection(){
   const catOpts=CATEGORIES.map(c=>`<option value="${c}">${c}</option>`).join('');
-  const rivalOpts=RIVALS.map(r=>`<option value="${r.f}">${r.f}. ${r.r} (${r.c==='L'?'Local':'Visit.'})</option>`).join('');
+  const cat0=CATEGORIES[0];
+  const rivalOpts=RIVALS.map(r=>`<option value="${r.f}">${r.f}. ${r.r} (${condicionCat(cat0,r.f)==='L'?'Local':'Visit.'})</option>`).join('');
   return `<div class="pdf-section">
     <h3>📋 GENERAR CITACIONES EN PDF</h3>
     <div class="pdf-form">
@@ -6571,7 +6594,7 @@ function generarPDF(){
 
   // Build PDF content using print window
   const escudoB64='data:image/png;base64,'+ESCUDO_B64;
-  const condText=rival?.c==='L'?'LOCAL':'VISITANTE';
+  const condText=condicionCat(cat,fechaIdx)==='L'?'LOCAL':'VISITANTE';
   const rows=selected.map((name,i)=>`<tr style="border-bottom:1px solid #eee">
     <td style="padding:8px 12px;font-weight:600;color:#333;font-size:13px">${String(i+1).padStart(2,'0')}</td>
     <td style="padding:8px 12px;font-size:13px;color:#222">${name}</td>

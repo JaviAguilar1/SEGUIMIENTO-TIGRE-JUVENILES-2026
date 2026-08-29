@@ -225,6 +225,10 @@ FUTDETAIL_ESTADISTICAS_URL = FUTDETAIL_BASE + "division_estadisticas.php"
 # vez de a esta -- FUTDETAIL_ESTADISTICAS_URL solo sirve para la visita
 # previa que deja estado de sesion/referer (ver fetch_futdetail_estadisticas).
 FUTDETAIL_ESTADISTICAS_PROCESO_URL = FUTDETAIL_BASE + "division_estadisticas_proceso.php"
+# Plantel (roster) por division: posicion, nombre, edad, altura, peso, pie,
+# valoracion, foto. Confirmado con el usuario via DevTools -- GET con estos
+# parametros (el "_" es un cache-buster de jQuery, no hace falta mandarlo).
+FUTDETAIL_JUGADORES_URL = FUTDETAIL_BASE + "jugadores_consulta_lista_procesos.php"
 FUTDETAIL_TEMPORADA_ID = "3"  # 2026, mismo criterio que el desplegable del panel
 FUTDETAIL_DIVISIONES = {
     "4TA": "3",
@@ -396,6 +400,67 @@ def parse_futdetail_estadisticas(filas):
 
     if not out:
         raise ValueError("Se recibio la respuesta pero no se pudo parsear ningun jugador")
+    return out
+
+
+def fetch_futdetail_plantel(opener, id_division: str):
+    """Pide el roster (plantel propio) de una division ya logueado --
+    posicion, nombre, edad, altura, peso, pie, valoracion, foto. Confirmado
+    con el usuario via DevTools (Network -> Fetch/XHR) sobre la pantalla
+    "Jugadores Propios" (scoutdetail.php?jugadores_propios=S): al filtrar
+    por division, la tabla pide este GET y devuelve JSON directo (no hace
+    falta parsear HTML). El resto de los parametros son los que manda el
+    formulario "sin filtrar" (posicion/nombre/edad/valoracion vacios,
+    ver_baja=N para no traer jugadores dados de baja).
+    """
+    params = {
+        "division": id_division, "jugadores_propios": "S", "id_jugador": "0",
+        "opcion": "1", "posicion": "", "edad": "0", "nombre": "",
+        "valoracion": "0", "ver_baja": "N", "id_categoria": "0",
+        "nacionalidad": "0", "id_equipo": "0", "ver_a_prestamo": "N",
+    }
+    url = f"{FUTDETAIL_JUGADORES_URL}?{urllib.parse.urlencode(params)}"
+    resp = opener.open(urllib.request.Request(url, headers=HEADERS), timeout=30)
+    return json.loads(resp.read().decode("utf-8", errors="replace"))
+
+
+def parse_futdetail_plantel(filas):
+    """Convierte la lista cruda de jugadores_consulta_lista_procesos.php en
+    el shape que espera plantelFutdetail en index.html: {nombre, posicion,
+    edad, altura, peso, pie, valoracion, foto}. El id lo calcula la app
+    sola a partir del nombre (assignPlayerIds), no hace falta mandarlo.
+
+    Altura viene inconsistente desde futdetail: a veces en cm ("187.00") y
+    a veces en metros ("1.85") segun quien haya cargado a cada jugador --
+    se normaliza a cm siempre que el valor sea menor a 10 (nadie mide menos
+    de 10 metros).
+    """
+    def _num(v):
+        try:
+            n = float(v)
+            return n if n else None
+        except (TypeError, ValueError):
+            return None
+
+    out = []
+    for f in filas:
+        nombre = str(f.get("Nombre") or "").strip()
+        if not nombre:
+            continue
+        altura = _num(f.get("Altura"))
+        if altura is not None and altura < 10:
+            altura *= 100
+        foto = f.get("imagen_jugador")
+        out.append({
+            "nombre": nombre,
+            "posicion": str(f.get("Posicion") or "").strip(),
+            "edad": int(f["edad"]) if str(f.get("edad") or "").isdigit() else None,
+            "altura": round(altura) if altura is not None else None,
+            "peso": _num(f.get("Peso")),
+            "pie": {"D": "Derecho", "I": "Izquierdo"}.get(f.get("pie"), ""),
+            "valoracion": f.get("valoracion") or "",
+            "foto": (FUTDETAIL_BASE + foto) if foto else None,
+        })
     return out
 
 
@@ -1025,6 +1090,22 @@ def main():
                 except Exception as e:  # noqa
                     errores.append(f"futdetail estadisticas {cat}: {e}")
                     print(f"[ERROR] futdetail estadisticas {cat}: {e}", file=sys.stderr)
+
+            # Plantel (roster: posicion/edad/altura/peso/pie/foto) -- misma
+            # sesion. La app lo sincroniza sola a Firebase (ver
+            # sincronizarPlantelDesdeFutdetail en index.html), asi que un
+            # jugador nuevo dado de alta en futdetail (o un dato corregido)
+            # llega solo, sin carga manual.
+            resultado["plantel_futdetail"] = {}
+            for cat, id_division in FUTDETAIL_DIVISIONES.items():
+                try:
+                    filas_raw = fetch_futdetail_plantel(opener_fd, id_division)
+                    plantel = parse_futdetail_plantel(filas_raw)
+                    resultado["plantel_futdetail"][cat] = plantel
+                    print(f"[OK] futdetail plantel {cat}: {len(plantel)} jugadores")
+                except Exception as e:  # noqa
+                    errores.append(f"futdetail plantel {cat}: {e}")
+                    print(f"[ERROR] futdetail plantel {cat}: {e}", file=sys.stderr)
         except Exception as e:  # noqa
             errores.append(f"futdetail login: {e}")
             print(f"[ERROR] futdetail login: {e}", file=sys.stderr)
