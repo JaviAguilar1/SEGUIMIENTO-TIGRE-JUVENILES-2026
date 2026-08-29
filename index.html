@@ -2304,15 +2304,102 @@ function buildStatsCatSelect(){
       <select id="stats-cat-select" style="background:var(--surface2);border:1px solid var(--border2);
         color:var(--gold2);font-family:'Barlow Condensed',sans-serif;font-weight:700;letter-spacing:1px;
         font-size:14px;padding:8px 14px;border-radius:6px;cursor:pointer;outline:none">${opts}</select>
+      <div style="position:relative">
+        <input type="text" id="buscador-global-jugador" placeholder="🔎 Buscar jugador (todas las categorías)…"
+          autocomplete="off" style="background:var(--surface2);border:1px solid var(--border2);color:var(--text);
+          width:240px;border-radius:6px;padding:8px 12px;font-family:'Barlow Condensed',sans-serif;font-size:13px;outline:none">
+        <div id="buscador-global-resultados" style="position:absolute;top:calc(100% + 4px);left:0;width:280px;
+          max-height:280px;overflow-y:auto;background:#0d1528;border:1px solid var(--border2);border-radius:8px;
+          z-index:200;display:none"></div>
+      </div>
       <div id="pdf-export-btn-wrap"></div>
       <span id="tabla-data-status"></span>
       <div id="cit-upload-btn-wrap"></div>
+      <span id="confiabilidad-badge-wrap"></span>
     </div>`;
   document.getElementById('stats-cat-select').addEventListener('change',e=>{
     const cat=e.target.value;
     if(cat!=='GENERAL') currentCategoria=cat;
     renderStatsCat(cat);
   });
+  wireBuscadorGlobalJugador();
+  refreshConfiabilidadBadge();
+}
+
+// Badge chico junto al selector con el total de problemas de Confiabilidad
+// (mismos cruces que la sección al final de GENERAL) — así avisa sin tener
+// que entrar a GENERAL y scrollear hasta el final. Solo admin (Confiabilidad
+// es admin-only).
+function refreshConfiabilidadBadge(){
+  const wrap=document.getElementById('confiabilidad-badge-wrap');
+  if(!wrap || !isAdmin) { if(wrap) wrap.innerHTML=''; return; }
+  loadTablaData().then(()=>{
+    if(!document.getElementById('confiabilidad-badge-wrap')) return; // se re-renderizó la pantalla mientras tanto
+    const {partidoMismatches, equipoMismatches, golesMismatches, golesCometMismatches, linkMismatches, recordatorios, citacionWarnings}=calcConfiabilidad();
+    const total=partidoMismatches.length+equipoMismatches.length+golesMismatches.length+golesCometMismatches.length+linkMismatches.length+recordatorios.length+citacionWarnings.length;
+    const w=document.getElementById('confiabilidad-badge-wrap');
+    if(!w) return;
+    w.innerHTML = total>0
+      ? `<button onclick="irAConfiabilidad()" title="Ver detalle en Confiabilidad"
+          style="background:rgba(192,21,42,0.15);border:1px solid var(--loss);color:#f87171;
+          border-radius:6px;padding:6px 12px;font-family:'Barlow Condensed',sans-serif;font-size:12px;
+          font-weight:700;letter-spacing:1px;cursor:pointer;white-space:nowrap">⚠ ${total} EN CONFIABILIDAD</button>`
+      : '';
+  });
+}
+function irAConfiabilidad(){
+  setStatsCat('GENERAL');
+  renderStatsCat('GENERAL');
+  setTimeout(()=>{
+    document.getElementById('gen-confiabilidad')?.scrollIntoView({behavior:'smooth', block:'start'});
+  }, 50);
+}
+
+// Buscador global de jugador — busca en el plantel (futdetail) de todas las
+// categorías a la vez, así se puede llegar a la ficha de cualquiera sin
+// tener que primero elegir su categoría a mano.
+function wireBuscadorGlobalJugador(){
+  const input=document.getElementById('buscador-global-jugador');
+  const resWrap=document.getElementById('buscador-global-resultados');
+  if(!input || !resWrap) return;
+  input.addEventListener('input',()=>{
+    const q=input.value.trim().toLowerCase();
+    if(q.length<2){ resWrap.style.display='none'; resWrap.innerHTML=''; return; }
+    const matches=[];
+    CATEGORIES.forEach(cat=>{
+      (plantelFutdetail[cat]||[]).forEach(p=>{
+        if((p.nombre||'').toLowerCase().includes(q)) matches.push({cat, nombre:p.nombre, posicion:p.posicion});
+      });
+    });
+    if(!matches.length){
+      resWrap.innerHTML=`<div style="padding:10px 12px;color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-size:12px">Sin resultados</div>`;
+      resWrap.style.display='';
+      return;
+    }
+    resWrap.innerHTML=matches.slice(0,8).map(m=>`<div class="buscador-global-item" data-cat="${m.cat}" data-nombre="${esc(m.nombre)}"
+      style="padding:8px 12px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-size:13px;color:var(--text);
+      border-bottom:1px solid var(--border2)">${esc(m.nombre)} <span style="color:var(--muted);font-size:11px">· ${m.cat}${m.posicion?' · '+esc(m.posicion):''}</span></div>`).join('');
+    resWrap.style.display='';
+    resWrap.querySelectorAll('.buscador-global-item').forEach(item=>{
+      item.addEventListener('click',()=>{
+        irAJugadorGlobal(item.dataset.cat, item.dataset.nombre);
+        input.value=''; resWrap.style.display='none'; resWrap.innerHTML='';
+      });
+    });
+  });
+  document.addEventListener('click',e=>{
+    if(!e.target.closest('#buscador-global-jugador') && !e.target.closest('#buscador-global-resultados')){
+      resWrap.style.display='none';
+    }
+  });
+}
+
+function irAJugadorGlobal(cat, nombre){
+  currentCategoria=cat;
+  setStatsCat(cat);
+  catActiveTab='plantel';
+  renderStatsCat(cat);
+  abrirPerfilJugador(cat, nombre);
 }
 
 // Solo en GENERAL: un solo botón para subir cualquier planilla (citación o
@@ -2470,12 +2557,12 @@ function renderStatsGeneral(content){
     ${seccionTitulo('topgol-general', '🏆 TOP GOLEADORES — 4TA A 9NA')}
     <div id="sec-topgol-general"${seccionEstiloInicial('topgol-general')}>
       <div id="gen-top-goleadores"></div>
-    </div>
+    </div>`}
 
     ${seccionTitulo('tablagen-general', '🏆 TABLA GENERAL DE POSICIONES (SUMA 4TA A 9NA)')}
     <div id="sec-tablagen-general"${seccionEstiloInicial('tablagen-general')}>
       <div id="gen-tabla-general"></div>
-    </div>`}
+    </div>
 
     ${isAdmin ? `<div class="st"><div class="stbar"></div>🔎 CONFIABILIDAD</div>
     <div id="gen-confiabilidad" style="margin-bottom:20px"></div>` : ''}
@@ -2489,9 +2576,8 @@ function renderStatsGeneral(content){
     // Top 5 goleadores all categories
     const topWrap = document.getElementById('gen-top-goleadores');
     if(topWrap) renderTopGoleadores(topWrap);
-
-    renderTablaGeneral('gen-tabla-general');
   }
+  renderTablaGeneral('gen-tabla-general');
 }
 
 // Suma la tabla de posiciones LPF de 4TA a 9NA por equipo, en una sola tabla combinada.
@@ -2696,7 +2782,26 @@ function calcConfiabilidad(){
     });
   });
 
-  return {partidoMismatches, equipoMismatches, golesMismatches, golesCometMismatches, linkMismatches, recordatorios};
+  // Nombres de citación que no coincidieron con nadie del plantel al leer el
+  // PDF (p.warn, ver parseCitacionPdf) — hoy solo se ven abriendo el modal de
+  // cada fecha una por una; acá se juntan todos para poder revisarlos de un
+  // saque.
+  const citacionWarnings=[]; // {cat, fecha, nombre}
+  CONFIABILIDAD_CATS.forEach(cat=>{
+    Object.entries(matchData[cat]||{}).forEach(([fechaStr,d])=>{
+      const fecha=parseInt(fechaStr,10);
+      [...(d.titulares||[]), ...(d.suplentes||[])].filter(p=>p.warn).forEach(p=>{
+        citacionWarnings.push({cat, fecha, nombre:p.nombre});
+      });
+      if(d.segundoTiempo){
+        [...(d.segundoTiempo.titulares||[]), ...(d.segundoTiempo.suplentes||[])].filter(p=>p.warn).forEach(p=>{
+          citacionWarnings.push({cat, fecha, nombre:p.nombre});
+        });
+      }
+    });
+  });
+
+  return {partidoMismatches, equipoMismatches, golesMismatches, golesCometMismatches, linkMismatches, recordatorios, citacionWarnings};
 }
 
 // Botón "REVISAR" único para toda la sección: fuerza traer la tabla LPF de
@@ -2711,6 +2816,13 @@ function revisarConfiabilidad(){
 // (la diferencia hay que resolverla a mano, corrigiendo la carga) — este
 // botón lleva directo a GOLEADORES de esa categoría, con la sección
 // desplegada, en vez de un "REVISAR" que no hacía nada.
+function irAConfiabilidadCitacion(cat, fecha){
+  if(cat!=='GENERAL') currentCategoria=cat;
+  const sel=document.getElementById('stats-cat-select');
+  if(sel) sel.value=cat;
+  renderStatsCat(cat);
+  setTimeout(()=>abrirCitacionView(cat, fecha), 50);
+}
 function irAGoleadores(cat){
   seccionColapsada['goleadores-'+cat]=false;
   const sel=document.getElementById('stats-cat-select');
@@ -2719,6 +2831,20 @@ function irAGoleadores(cat){
   renderStatsCat(cat);
   setTimeout(()=>{
     document.getElementById('sec-goleadores-'+cat)?.scrollIntoView({behavior:'smooth', block:'start'});
+  }, 50);
+}
+
+// Mismo patrón que irAGoleadores, pero para las diferencias de EQUIPO
+// (PJ/PG/GF de temporada) -- no hay una fecha puntual a la que saltar, así
+// que lleva a RESULTADOS de la categoría para repasar partido por partido.
+function irAResultados(cat){
+  seccionColapsada['resultados-'+cat]=false;
+  const sel=document.getElementById('stats-cat-select');
+  if(sel) sel.value=cat;
+  currentCategoria=cat;
+  renderStatsCat(cat);
+  setTimeout(()=>{
+    document.getElementById('sec-resultados-'+cat)?.scrollIntoView({behavior:'smooth', block:'start'});
   }, 50);
 }
 
@@ -2761,8 +2887,8 @@ function renderConfiabilidad(containerId){
   const el=document.getElementById(containerId);
   if(!el) return;
   loadTablaData().then(()=>{
-    const {partidoMismatches, equipoMismatches, golesMismatches, golesCometMismatches, linkMismatches, recordatorios}=calcConfiabilidad();
-    const total=partidoMismatches.length+equipoMismatches.length+golesMismatches.length+golesCometMismatches.length+linkMismatches.length;
+    const {partidoMismatches, equipoMismatches, golesMismatches, golesCometMismatches, linkMismatches, recordatorios, citacionWarnings}=calcConfiabilidad();
+    const total=partidoMismatches.length+equipoMismatches.length+golesMismatches.length+golesCometMismatches.length+linkMismatches.length+citacionWarnings.length;
 
     const revisarBtn=`<button onclick="revisarConfiabilidad()"
       style="background:rgba(255,255,255,0.08);border:1px solid var(--border2);color:var(--text);
@@ -2827,11 +2953,16 @@ function renderConfiabilidad(containerId){
     }
 
     if(equipoMismatches.length){
+      const irResultadosBtn=cat=>`<button onclick="irAResultados('${cat}')"
+        style="background:rgba(26,58,143,0.25);border:1px solid var(--border2);color:var(--gold2);
+        border-radius:6px;padding:4px 10px;font-family:Barlow Condensed,sans-serif;font-size:11px;
+        letter-spacing:1px;cursor:pointer;white-space:nowrap">→ VER RESULTADOS</button>`;
       html+=`<div style="font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:1px;color:var(--muted);margin:14px 0 6px">
         EQUIPO · mi planilla vs LPF oficial / parenlapelota</div>`;
       html+=equipoMismatches.map(m=>row(
         `<b style="color:${CAT_COLORS[m.cat]}">${m.cat}</b> · ${m.campo}`,
-        `Mi planilla: <b>${m.mio}</b> · ${m.fuente}: <b>${m.valor}</b>`
+        `Mi planilla: <b>${m.mio}</b> · ${m.fuente}: <b>${m.valor}</b>`,
+        revisarBtn+irResultadosBtn(m.cat)
       )).join('');
     }
 
@@ -2884,6 +3015,20 @@ function renderConfiabilidad(containerId){
         `<b style="color:${CAT_COLORS[m.cat]}">${m.cat} F${m.fecha}</b> · ${esc(m.label)}`,
         `Mi carga: <a href="${esc(m.mio)}" target="_blank" rel="noopener" style="color:var(--gold2)">ver</a> ·
          futdetail: <a href="${esc(m.fut)}" target="_blank" rel="noopener" style="color:var(--gold2)">ver</a>`
+      )).join('');
+    }
+
+    if(citacionWarnings.length){
+      const irCitacionBtn=(cat,fecha)=>`<button onclick="irAConfiabilidadCitacion('${cat}',${fecha})"
+        style="background:rgba(26,58,143,0.25);border:1px solid var(--border2);color:var(--gold2);
+        border-radius:6px;padding:4px 10px;font-family:Barlow Condensed,sans-serif;font-size:11px;
+        letter-spacing:1px;cursor:pointer;white-space:nowrap">→ VER CITACIÓN</button>`;
+      html+=`<div style="font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:1px;color:var(--muted);margin:14px 0 6px">
+        CITACIONES · nombres sin coincidir con el plantel (${citacionWarnings.length})</div>`;
+      html+=citacionWarnings.map(m=>row(
+        `<b style="color:${CAT_COLORS[m.cat]}">${m.cat} F${m.fecha}</b>`,
+        `⚠️ ${esc(m.nombre)}`,
+        irCitacionBtn(m.cat, m.fecha)
       )).join('');
     }
 
@@ -3168,7 +3313,7 @@ function renderStatsSingle(cat, content){
     return;
   }
   if(catActiveTab==='rendimiento'){
-    renderRendimientoTab(tabEl);
+    renderRendimientoTab(tabEl, cat);
     return;
   }
   if(catActiveTab==='videoanalisis' && !(currentRole && currentRole.startsWith('cat_'))){
@@ -3578,14 +3723,31 @@ function blFechaNum(str){
   return m ? parseInt(m[0],10) : null;
 }
 
-function renderRendimientoTab(tabEl){
-  const hayDatos = Object.keys(blPlayers).length > 0;
+// BL GPS Performance no separa por categoría de Tigre en su propia base (un
+// solo listado de jugadores) -- acá se cruza cada nombre contra el plantel
+// real de la categoría que se está mirando (mismo criterio de nombres
+// "orden independiente" que usa el resto de la app) para no mezclar
+// jugadores de otra categoría apenas Brian suba más de una.
+function blPlayersDeCategoria(cat){
+  const nombresRoster = new Set((plantelFutdetail[cat]||[]).map(p=>normNombreOrdenIndependiente(p.nombre)));
+  const out = {};
+  Object.entries(blPlayers).forEach(([nombre,p])=>{
+    if(nombresRoster.has(normNombreOrdenIndependiente(nombre))) out[nombre]=p;
+  });
+  return out;
+}
+
+let blCruceCat = null; // categoría activa del cruce BL, para runBlCruce (sin params, atado a inputs del DOM)
+
+function renderRendimientoTab(tabEl, cat){
+  blCruceCat = cat;
+  const hayDatos = Object.keys(blPlayersDeCategoria(cat)).length > 0;
   if(!hayDatos){
     tabEl.innerHTML = `
       ${seccionTitulo('bl-cruce', '🏃 RENDIMIENTO · Cruce de datos GPS (BL)')}
       <div id="sec-bl-cruce"${seccionEstiloInicial('bl-cruce')}>
         <div style="text-align:center;padding:20px;color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-size:13px">
-          Todavía no hay datos de BL GPS Performance cargados (se actualiza solo, cada 30 min, en cuanto Brian suba algo ahí).
+          Todavía no hay datos de BL GPS Performance cargados para ${cat} (se actualiza solo, cada 30 min, en cuanto Brian suba algo ahí).
         </div>
       </div>`;
     return;
@@ -3593,12 +3755,12 @@ function renderRendimientoTab(tabEl){
   tabEl.innerHTML = `
     ${seccionTitulo('bl-acwr', '🚦 SEMÁFORO DE CARGA (ACWR)')}
     <div id="sec-bl-acwr"${seccionEstiloInicial('bl-acwr')}>
-      ${buildAcwrSemaforoHTML()}
+      ${buildAcwrSemaforoHTML(cat)}
     </div>
 
     ${seccionTitulo('bl-cruce', '🏃 RENDIMIENTO · Cruce de datos GPS (BL)')}
     <div id="sec-bl-cruce"${seccionEstiloInicial('bl-cruce')}>
-      ${blCruceFormHTML()}
+      ${blCruceFormHTML(cat)}
       <div id="bl-cruce-result"></div>
     </div>`;
   wireBlCruceForm();
@@ -3613,9 +3775,9 @@ function renderRendimientoTab(tabEl){
 // aguda = distancia del ULTIMO partido, cronica = promedio de los ultimos
 // 4. Umbrales de zona (0.8-1.3 zona segura, 1.3-1.5 precaucion, resto
 // riesgo) son los mismos que usa la literatura de ACWR (Gabbett).
-function buildAcwrSemaforoHTML(){
+function buildAcwrSemaforoHTML(cat){
   const filas = [];
-  Object.entries(blPlayers).forEach(([nombre, p])=>{
+  Object.entries(blPlayersDeCategoria(cat)).forEach(([nombre, p])=>{
     const partidos = (p.match||[])
       .map(m=>({fecha: blFechaNum(m.fecha), opp:m.opp, dist: m.metrics ? Number(m.metrics[0]) : null}))
       .filter(m=>m.fecha!=null && m.dist!=null)
@@ -3658,8 +3820,8 @@ function buildAcwrSemaforoHTML(){
     </div>`;
 }
 
-function blCruceFormHTML(){
-  const nombres = Object.keys(blPlayers).sort();
+function blCruceFormHTML(cat){
+  const nombres = Object.keys(blPlayersDeCategoria(cat)).sort();
   const jugOpts = nombres.map(n=>`<option value="${esc(n)}">${esc(n)}</option>`).join('');
   const metOpts = BL_METRICAS.map(m=>`<option value="${m.i}">${m.label} (${m.unit})</option>`).join('');
   return `
@@ -3741,10 +3903,11 @@ function runBlCruce(){
     return;
   }
 
-  // Ranking: todos los jugadores, todas sus fechas (filtradas), la mejor
-  // marca de cada uno para esa métrica en el rango elegido.
+  // Ranking: todos los jugadores DE ESTA CATEGORÍA, todas sus fechas
+  // (filtradas), la mejor marca de cada uno para esa métrica en el rango
+  // elegido.
   const filas = [];
-  Object.entries(blPlayers).forEach(([nombre, p])=>{
+  Object.entries(blPlayersDeCategoria(blCruceCat)).forEach(([nombre, p])=>{
     (p.match||[]).forEach(r=>{
       const f = blFechaNum(r.fecha);
       if(f==null || (fechasSel && !fechasSel.has(f))) return;
@@ -3765,227 +3928,6 @@ function runBlCruce(){
     <thead><tr><th>#</th><th>JUGADOR</th><th>FECHA</th><th>${met.label}</th></tr></thead>
     <tbody>${rows}</tbody></table></div>
     <div style="font-family:'Barlow Condensed',sans-serif;font-size:11px;color:var(--muted);margin-top:4px">${met.label} (${met.unit}) · top 50${filas.length>50?` de ${filas.length}`:''}</div>`;
-}
-
-// ============================================================
-//  MATCH DETAIL — EQUIPO / ALINEACIÓN / MINUTOS
-// ============================================================
-
-/** Calculate minutes played for each player in a match */
-function calcMinutosJugados(cat, fecha) {
-  const m = matchData[cat]?.[fecha];
-  if (!m || !m.titulares?.length) return {};
-  const dur = m.duracion || 90;
-  const mins = {};
-  (m.titulares || []).forEach(p => { mins[p.nombre] = dur; });
-  (m.cambios || []).forEach(c => {
-    if (c.sale && mins[c.sale] !== undefined) mins[c.sale] = c.min;
-    if (c.entra) mins[c.entra] = (mins[c.entra] || 0) + (dur - c.min);
-  });
-  return mins;
-}
-
-/** Get GPS minutes for a player in a given match session */
-function getGpsMinutos(cat, fecha, playerName) {
-  const rName = (matchData[cat]?.[fecha]?.rival || '').toUpperCase();
-  const session = gpsSessions.find(s =>
-    s.cat === cat &&
-    (s.match?.includes('F'+fecha) || s.name?.includes('F'+fecha) ||
-     (rName && s.match?.toUpperCase().includes(rName.split(' ')[0])))
-  );
-  if (!session) return null;
-  const pl = (session.players || []).find(p =>
-    p.name?.toLowerCase() === playerName.toLowerCase() ||
-    p.name?.toLowerCase().includes(playerName.split(' ').slice(-1)[0].toLowerCase())
-  );
-  return pl ? pl.min : null;
-}
-
-/** Render the match detail panel for a given cat/fecha */
-function renderMatchPanel(cat, fecha) {
-  const panel = document.getElementById(`mdp-${cat}-${fecha}`);
-  if (!panel) return;
-  const m = matchData[cat]?.[fecha] || {};
-  const titulares = m.titulares || [];
-  const suplentes = m.suplentes || [];
-  const cambios   = m.cambios   || [];
-  const dur       = m.duracion  || 90;
-  const minutos   = calcMinutosJugados(cat, fecha);
-  const hasData   = titulares.length > 0;
-
-  // All players available for selects
-  const allPlayers = [...titulares, ...suplentes].map(p => p.nombre);
-
-  // Build minutes section
-  function playerMinRow(p) {
-    const calc = minutos[p.nombre];
-    const gps  = getGpsMinutos(cat, fecha, p.nombre);
-    let minsHtml = '';
-    if (calc !== undefined) {
-      if (gps !== null) {
-        const diff = Math.abs(calc - gps);
-        const cls  = diff <= 3 ? 'ok' : 'diff';
-        minsHtml = `<span class="mdp-mins ${cls}">${calc}' calc | ${gps}' GPS${diff>3?' ⚠':'  ✓'}</span>`;
-      } else {
-        minsHtml = `<span class="mdp-mins">${calc}'</span>`;
-      }
-    }
-    return `<div class="mdp-player">
-      <span class="mdp-num">${p.num}</span>
-      <span>${esc(p.nombre)}</span>${minsHtml}
-    </div>`;
-  }
-
-  const titHTML = titulares.map(playerMinRow).join('') ||
-    '<div style="color:var(--muted);font-size:11px;font-family:Barlow Condensed,sans-serif">Sin datos</div>';
-
-  const supHTML = suplentes.map(p => {
-    const calc = minutos[p.nombre];
-    const gps  = getGpsMinutos(cat, fecha, p.nombre);
-    let minsHtml = '';
-    if (calc !== undefined && calc > 0) {
-      if (gps !== null) {
-        const diff = Math.abs(calc - gps);
-        const cls  = diff <= 3 ? 'ok' : 'diff';
-        minsHtml = `<span class="mdp-mins ${cls}">${calc}' calc | ${gps}' GPS${diff>3?' ⚠':'  ✓'}</span>`;
-      } else {
-        minsHtml = `<span class="mdp-mins">${calc}'</span>`;
-      }
-    }
-    return `<div class="mdp-player">
-      <span class="mdp-num">${p.num}</span>
-      <span style="${calc?'':'color:var(--muted)'}">${esc(p.nombre)}</span>${minsHtml}
-    </div>`;
-  }).join('') || '<div style="color:var(--muted);font-size:11px;font-family:Barlow Condensed,sans-serif">Sin datos</div>';
-
-  const cambiosHTML = cambios.map((c, idx) =>
-    `<div class="mdp-cambio">
-      <span class="mdp-cambio-min">${c.min}'</span>
-      <span style="color:var(--loss)">▼ ${esc(c.sale)}</span>
-      <span style="color:var(--muted)">→</span>
-      <span style="color:var(--win)">▲ ${esc(c.entra)}</span>
-      ${canEdit ? `<button class="mdp-del" onclick="delCambio('${cat}',${fecha},${idx})">✕</button>` : ''}
-    </div>`
-  ).join('') || '<div style="color:var(--muted);font-size:11px;font-family:Barlow Condensed,sans-serif">Sin cambios</div>';
-
-  const optsSale  = allPlayers.map(n => `<option value="${esc(n)}">${esc(n)}</option>`).join('');
-  const optsEntra = allPlayers.map(n => `<option value="${esc(n)}">${esc(n)}</option>`).join('');
-
-  const addCambioForm = canEdit ? `
-    <div class="mdp-add-form" style="margin-top:8px">
-      <select class="mdp-sel" id="mdp-sale-${cat}-${fecha}"><option value="">Sale…</option>${optsSale}</select>
-      <select class="mdp-sel" id="mdp-entra-${cat}-${fecha}"><option value="">Entra…</option>${optsEntra}</select>
-      <input class="mdp-min-input" type="number" min="1" max="120" placeholder="Min"
-        id="mdp-min-${cat}-${fecha}">
-      <button class="mdp-add-btn" onclick="addCambio('${cat}',${fecha})">+ CAMBIO</button>
-    </div>` : '';
-
-  const durEdit = canEdit
-    ? `<div class="mdp-dur-row">⏱ Duración:
-        <input class="mdp-dur-input" type="number" min="40" max="120" value="${dur}"
-          onchange="setDuracion('${cat}',${fecha},this.value)"> min</div>`
-    : `<div style="color:var(--muted);font-size:11px;font-family:Barlow Condensed,sans-serif;margin-bottom:6px">⏱ ${dur} min</div>`;
-
-  const uploadSection = canEdit ? `
-    <div style="margin-bottom:10px;display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-      <button class="mdp-upload-btn" onclick="document.getElementById('cit-pdf-${cat}-${fecha}').click()">
-        📄 CARGAR PDF CITACIONES
-      </button>
-      <input type="file" id="cit-pdf-${cat}-${fecha}" accept=".pdf" style="display:none"
-        onchange="parseCitacionPdf(this.files[0],'${cat}',${fecha},this)">
-      <span style="font-size:10px;color:var(--muted);font-family:Barlow Condensed,sans-serif">
-        ${hasData ? '✓ Datos cargados' : 'O cargá manualmente abajo'}
-      </span>
-    </div>` : '';
-
-  // Manual add players section (when no PDF)
-  const manualSection = canEdit && !hasData ? `
-    <div style="margin-bottom:8px">
-      <div style="font-size:10px;color:var(--muted);font-family:Barlow Condensed,sans-serif;margin-bottom:4px">
-        TITULARES (separados por coma, formato: "Num Apellido Nombre"):
-      </div>
-      <textarea id="mdp-manual-tit-${cat}-${fecha}" style="width:100%;background:rgba(5,8,15,0.8);border:1px solid var(--border2);border-radius:5px;color:var(--text);font-size:11px;padding:6px;font-family:Barlow Condensed,sans-serif;resize:vertical;min-height:50px;" placeholder="1 Ruiz Santiago, 2 Luongo Alan, 3 Benitez Lautaro…"></textarea>
-      <textarea id="mdp-manual-sup-${cat}-${fecha}" style="width:100%;background:rgba(5,8,15,0.8);border:1px solid var(--border2);border-radius:5px;color:var(--text);font-size:11px;padding:6px;font-family:Barlow Condensed,sans-serif;resize:vertical;min-height:40px;margin-top:4px;" placeholder="12 Petry Uriel, 13 Rojas Josue…"></textarea>
-      <button class="mdp-add-btn" style="margin-top:4px" onclick="saveManualLineup('${cat}',${fecha})">💾 GUARDAR ALINEACIÓN</button>
-    </div>` : '';
-
-  panel.innerHTML = `
-    ${uploadSection}
-    ${manualSection}
-    ${durEdit}
-    <div class="mdp-grid">
-      <div class="mdp-section">
-        <h4>👕 TITULARES (${titulares.length}/11)</h4>
-        ${titHTML}
-      </div>
-      <div class="mdp-section">
-        <h4>🪑 SUPLENTES (${suplentes.length})</h4>
-        ${supHTML}
-      </div>
-      <div class="mdp-section">
-        <h4>🔄 CAMBIOS (${cambios.length})</h4>
-        ${cambiosHTML}
-        ${addCambioForm}
-      </div>
-    </div>`;
-}
-
-function addCambio(cat, fecha) {
-  const sale  = document.getElementById(`mdp-sale-${cat}-${fecha}`)?.value;
-  const entra = document.getElementById(`mdp-entra-${cat}-${fecha}`)?.value;
-  const min   = parseInt(document.getElementById(`mdp-min-${cat}-${fecha}`)?.value);
-  if (!sale || !entra || !min || sale === entra) { showToast('⚠ Completá todos los campos'); return; }
-  if (!matchData[cat]) matchData[cat] = {};
-  if (!matchData[cat][fecha]) matchData[cat][fecha] = {titulares:[],suplentes:[],cambios:[],duracion:90};
-  if (!matchData[cat][fecha].cambios) matchData[cat][fecha].cambios = [];
-  matchData[cat][fecha].cambios.push({min, sale, entra});
-  matchData[cat][fecha].cambios.sort((a,b)=>a.min-b.min);
-  renderMatchPanel(cat, fecha);
-  saveData();
-}
-
-function delCambio(cat, fecha, idx) {
-  if (!matchData[cat]?.[fecha]?.cambios) return;
-  matchData[cat][fecha].cambios.splice(idx, 1);
-  renderMatchPanel(cat, fecha);
-  saveData();
-}
-
-function setDuracion(cat, fecha, val) {
-  if (!matchData[cat]) matchData[cat] = {};
-  if (!matchData[cat][fecha]) matchData[cat][fecha] = {titulares:[],suplentes:[],cambios:[],duracion:90};
-  matchData[cat][fecha].duracion = parseInt(val) || 90;
-  renderMatchPanel(cat, fecha);
-  saveData();
-}
-
-function saveManualLineup(cat, fecha) {
-  const titRaw = document.getElementById(`mdp-manual-tit-${cat}-${fecha}`)?.value || '';
-  const supRaw = document.getElementById(`mdp-manual-sup-${cat}-${fecha}`)?.value || '';
-  function parsePlayers(raw) {
-    return raw.split(',').map(s => s.trim()).filter(Boolean).map(s => {
-      const m = s.match(/^(\d+)\s+(.+)$/);
-      if (m) return {num: parseInt(m[1]), nombre: m[2].trim()};
-      return {num: 0, nombre: s};
-    });
-  }
-  if (!matchData[cat]) matchData[cat] = {};
-  if (!matchData[cat][fecha]) matchData[cat][fecha] = {cambios:[], duracion:90};
-  matchData[cat][fecha].titulares = parsePlayers(titRaw);
-  matchData[cat][fecha].suplentes = parsePlayers(supRaw);
-  renderMatchPanel(cat, fecha);
-  saveData();
-  showToast('✓ Alineación guardada');
-}
-
-function toggleMatchDetail(cat, fecha) {
-  const row = document.getElementById(`mdr-${cat}-${fecha}`);
-  const btn = document.querySelector(`button.btn-equipo[data-cat="${cat}"][data-fecha="${fecha}"]`);
-  if (!row) return;
-  const open = row.style.display !== 'none';
-  row.style.display = open ? 'none' : '';
-  if (btn) btn.classList.toggle('active', !open);
-  if (!open) renderMatchPanel(cat, fecha);
 }
 
 // ── PDF Citation Parser ───────────────────────────────────────
@@ -4186,10 +4128,6 @@ async function parseCitacionPdf(file, catHint, fechaHint, inputEl, segundoTiempo
             },
           };
           if (pageImages[cat]) db.ref(`citacionesImg/${cat}/${fechaHint}_2`).set(pageImages[cat]).catch(e=>console.warn('[CITACION IMG] no se guardó — revisar reglas de Firebase para citacionesImg', e));
-          const panel = document.getElementById(`mdp-${cat}-${fechaHint}`);
-          if (panel) renderMatchPanel(cat, fechaHint);
-          const btn = document.querySelector(`button.btn-equipo[data-cat="${cat}"][data-fecha="${fechaHint}"]`);
-          if (btn) { btn.textContent = '👥 ✓'; btn.classList.add('active'); }
         } else {
           guardarCitacionParaFecha(cat, fechaHint, results_parsed[cat], pageImages[cat]);
         }
@@ -4365,10 +4303,6 @@ function guardarCitacionParaFecha(cat, fecha, parsedForCat, pageImg){
     duracion:  existing.duracion || 90,
   };
   if (pageImg) db.ref(`citacionesImg/${cat}/${fecha}`).set(pageImg).catch(e=>console.warn('[CITACION IMG] no se guardó — revisar reglas de Firebase para citacionesImg', e));
-  const panel = document.getElementById(`mdp-${cat}-${fecha}`);
-  if (panel) renderMatchPanel(cat, fecha);
-  const btn = document.querySelector(`button.btn-equipo[data-cat="${cat}"][data-fecha="${fecha}"]`);
-  if (btn) { btn.textContent = '👥 ✓'; btn.classList.add('active'); }
 }
 
 function confirmarCitacionLote(){
@@ -5033,7 +4967,8 @@ function abrirCitacionView(cat, fecha){
 
   const playerRow = (p, esTitular) => `<div style="display:flex;align-items:center;gap:8px;padding:5px 8px;background:var(--surface2);border-radius:6px;margin-bottom:4px">
     <span style="font-family:'Bebas Neue',sans-serif;font-size:15px;color:var(--gold2);min-width:22px;text-align:center">${p.num||'—'}</span>
-    <span style="font-family:'Barlow Condensed',sans-serif;font-size:13px;color:var(--text)">${esc(p.nombre)}</span>
+    <span style="font-family:'Barlow Condensed',sans-serif;font-size:13px;color:var(--text);cursor:pointer" title="Ver perfil"
+      onclick="document.getElementById('cit-view-overlay')?.remove();abrirPerfilJugador('${cat}','${esc(p.nombre).replace(/'/g,"\\'")}')">${esc(p.nombre)}</span>
     ${chipsDe(p, esTitular)}
     ${p.warn?'<span title="No coincide con nadie del plantel — revisar contra el PDF original" style="margin-left:auto;font-size:13px">⚠️</span>':''}
   </div>`;
@@ -5123,6 +5058,7 @@ function abrirCitacionView(cat, fecha){
     }).catch(e=>console.warn('[CITACION IMG] no se pudo leer — revisar reglas de Firebase para citacionesImg', e));
   };
   const ov=document.createElement('div');
+  ov.id='cit-view-overlay';
   ov.style.cssText='position:fixed;inset:0;z-index:10001;background:rgba(5,8,15,0.88);display:flex;align-items:center;justify-content:center;padding:16px';
   ov.innerHTML=`<div style="background:#0a0f1e;border:1px solid #1a2d5a;border-radius:12px;max-width:420px;width:100%;max-height:90vh;overflow-y:auto;padding:20px 22px">
     <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px">
@@ -5153,11 +5089,6 @@ function abrirCitacionView(cat, fecha){
 function attachTableEvents(cat){
   const tbody=document.getElementById(`tbody-${cat}`);
   if(!tbody)return;
-  // Equipo button — toggle match detail panel
-  tbody.addEventListener('click',e=>{
-    const btn=e.target.closest('.btn-equipo');
-    if(btn){ toggleMatchDetail(btn.dataset.cat, parseInt(btn.dataset.fecha)); }
-  });
   tbody.addEventListener('change',e=>{
     if(e.target.classList.contains('score-input')){
       const f=parseInt(e.target.dataset.fecha),s=parseInt(e.target.dataset.side);
@@ -5302,7 +5233,8 @@ function renderGoleadores(cat){
       rowsHTML+=`<div class="gol-item">
         <div class="gol-row" onclick="this.closest('.gol-item').classList.toggle('expanded')">
           <div class="gol-rank ${rankClass}">${i+1}</div>
-          <div class="gol-name">${esc(g.name)}</div>
+          <div class="gol-name" style="cursor:pointer" title="Ver perfil"
+            onclick="event.stopPropagation();abrirPerfilJugador('${cat}','${esc(g.name).replace(/'/g,"\\'")}')">${esc(g.name)}</div>
           <div class="gol-count">${g.goals}</div>
           <div class="gol-toggle">▾</div>
           ${canEdit?`<button class="btn-del-gol" onclick="event.stopPropagation();delGoleador('${cat}','${esc(g.name)}')"
@@ -5374,11 +5306,165 @@ function renderRosterCat(cat, content){
   if(!rosterSortState[cat]) rosterSortState[cat]={key:'minutos_jugados', dir:-1};
   renderRosterTable(cat, merged);
 
+  content.insertAdjacentHTML('beforeend', buildTarjetasJugadoresHTML(cat, merged));
   content.insertAdjacentHTML('beforeend', buildComparativaJugadoresHTML(cat, merged));
   document.querySelectorAll(`#comp-jug-selects-${cat} .comp-jug-select`).forEach(sel=>{
     sel.addEventListener('change',()=>renderComparativaJugadores(cat, merged));
   });
   renderComparativaJugadores(cat, merged);
+}
+
+// Mejor vel. máx (BL GPS) de un jugador y en qué fecha, para destacarla en
+// su tarjeta -- mismo criterio de emparejamiento por nombre "orden
+// independiente" que ya usa el resto de la app entre fuentes distintas.
+function blTopSpeedInfo(cat, nombre){
+  const nn = normNombreOrdenIndependiente(nombre);
+  const entry = Object.entries(blPlayers).find(([n])=>normNombreOrdenIndependiente(n)===nn);
+  if(!entry) return null;
+  const matches = (entry[1].match||[]).filter(m=>m.metrics && m.metrics[6]!=null);
+  if(!matches.length) return null;
+  const best = matches.reduce((a,b)=> b.metrics[6]>a.metrics[6] ? b : a);
+  return {velmax: best.metrics[6], fecha: blFechaNum(best.fecha)};
+}
+
+// Tarjeta resumen de un jugador -- pensada para verse de a varias juntas
+// (grilla), a diferencia de la Ficha completa (abrirPerfilJugador, con
+// historial partido a partido y comparativas). Click en la tarjeta abre esa
+// Ficha completa.
+function tarjetaJugadorHTML(cat, p){
+  const s = p.stats||{};
+  const nombre = p.nombre||'—';
+  const iniciales = nombre.split(/[\s,]+/).filter(Boolean).slice(0,2).map(w=>w[0]).join('').toUpperCase()||'?';
+  const golData = golesEfectivos(cat).find(g=>g.name===nombre
+    || normNombreOrdenIndependiente(g.name)===normNombreOrdenIndependiente(nombre));
+  const golesFilas = (golData?.fechas||[]).slice(0,3);
+  const top = blTopSpeedInfo(cat, nombre);
+  return `<div class="tarjeta-jugador" onclick="abrirPerfilJugador('${cat}','${esc(nombre).replace(/'/g,"\\'")}')"
+    style="cursor:pointer;background:linear-gradient(135deg,var(--surface2),rgba(5,8,15,0.6));border:1px solid var(--border2);border-radius:12px;overflow:hidden">
+    <div style="display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--border2)">
+      <div style="width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,var(--gold),#8a6a10);
+        display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:17px;color:#1a1206;flex-shrink:0">${esc(iniciales)}</div>
+      <div style="min-width:0">
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:1px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(nombre)}</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px">${esc(p.posicion||'—')} · ${cat}</div>
+      </div>
+    </div>
+    <div style="padding:12px 16px">
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:${(golesFilas.length||top)?10:0}px">
+        ${[['Conv.',s.convocatorias],['Titular',s.partidos_titular],['Min.',s.minutos_jugados],['Goles',s.goles]]
+          .map(([l,v])=>`<div style="background:rgba(5,8,15,0.5);border:1px solid var(--border2);border-radius:7px;padding:6px 4px;text-align:center">
+            <div style="font-family:'Bebas Neue',sans-serif;font-size:15px;color:var(--gold2)">${v||0}</div>
+            <div style="font-size:8.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-top:2px">${l}</div>
+          </div>`).join('')}
+      </div>
+      ${golesFilas.length?`<div style="font-size:10.5px;color:var(--text2);margin-bottom:${top?6:0}px">⚽ ${golesFilas.map(esc).join(' · ')}</div>`:''}
+      ${top?`<div style="font-size:10.5px;color:var(--gold2)">⚡ Vel. máx ${top.velmax}km/h${top.fecha?` · F${top.fecha}`:''}</div>`:''}
+      <button onclick="event.stopPropagation();exportarTarjetaJugadorImg('${cat}','${esc(nombre).replace(/'/g,"\\'")}',false)"
+        title="Descargar/compartir tarjeta como imagen"
+        style="margin-top:10px;width:100%;background:rgba(201,162,39,0.1);border:1px solid var(--border2);color:var(--gold2);
+        border-radius:6px;padding:6px;font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:1px;
+        font-weight:700;cursor:pointer">📤 COMPARTIR</button>
+    </div>
+  </div>`;
+}
+
+// Dibuja la tarjeta de un jugador como imagen (canvas), mismo patrón que
+// dibujarTarjetaRival (fuentes/colores fijos porque canvas no lee
+// var(--...), SCALE=3 para que no salga pixelado, toBlob al final).
+async function dibujarTarjetaJugador(cat, nombre){
+  if(document.fonts && document.fonts.ready) await document.fonts.ready;
+  const roster = plantelFutdetail[cat]||[];
+  const jugador = roster.find(p=>p.nombre===nombre);
+  const statsPorNombre={};
+  (jugadoresStats[cat]||[]).forEach(j=>{ statsPorNombre[normNombre(j.jugador)]=j; });
+  const s = statsPorNombre[normNombre(nombre)]||{};
+  const golData = golesEfectivos(cat).find(g=>g.name===nombre
+    || normNombreOrdenIndependiente(g.name)===normNombreOrdenIndependiente(nombre));
+  const golesFilas = (golData?.fechas||[]).slice(0,4);
+  const top = blTopSpeedInfo(cat, nombre);
+
+  const BG='#111e38', GOLD='#f0c040', GOLD2='#e0bc4a', TXT='#e8edf7', TXT2='#a8c0e8', MUTED='#8aa0cc', BORDER='#3a5090';
+  const W=900, H=700, pad=48, SCALE=3;
+  const canvas=document.createElement('canvas');
+  canvas.width=W*SCALE; canvas.height=H*SCALE;
+  const ctx=canvas.getContext('2d');
+  ctx.scale(SCALE,SCALE);
+  ctx.imageSmoothingEnabled=true; ctx.imageSmoothingQuality='high';
+  ctx.fillStyle=BG; ctx.fillRect(0,0,W,H);
+  ctx.textBaseline='top';
+
+  const escudoTigre = await cargarImagen(document.getElementById('escudoImg')?.src);
+  if(escudoTigre) ctx.drawImage(escudoTigre, pad, pad, 60, 60);
+
+  ctx.font="15px 'Barlow', sans-serif"; ctx.fillStyle=TXT2; ctx.textAlign='right';
+  const catLabel = CATEGORIAS_CONFIG[cat]?.label ? CATEGORIAS_CONFIG[cat].label.toUpperCase()+' DIVISIÓN' : cat;
+  ctx.fillText(catLabel, W-pad, pad+22);
+  ctx.textAlign='left';
+
+  let y = pad+100;
+  const iniciales = nombre.split(/[\s,]+/).filter(Boolean).slice(0,2).map(w=>w[0]).join('').toUpperCase()||'?';
+  const cx=pad+55, cy=y+55, r=55;
+  const grad = ctx.createLinearGradient(cx-r,cy-r,cx+r,cy+r);
+  grad.addColorStop(0,'#c9a227'); grad.addColorStop(1,'#8a6a10');
+  ctx.fillStyle=grad;
+  ctx.beginPath(); ctx.arc(cx,cy,r,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle='#1a1206'; ctx.font="700 40px 'Bebas Neue', sans-serif"; ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText(iniciales, cx, cy+2);
+  ctx.textAlign='left'; ctx.textBaseline='top';
+
+  ctx.font="700 44px 'Bebas Neue', sans-serif"; ctx.fillStyle=TXT;
+  ctx.fillText(nombre.toUpperCase(), pad+130, y+18);
+  ctx.font="18px 'Barlow Condensed', sans-serif"; ctx.fillStyle=MUTED;
+  ctx.fillText(`${jugador?.posicion||'—'} · ${cat}`, pad+130, y+68);
+
+  y += 160;
+  const stats=[['CONV.',s.convocatorias],['TITULAR',s.partidos_titular],['MINUTOS',s.minutos_jugados],['GOLES',s.goles]];
+  const boxW=(W-pad*2-3*16)/4, boxH=100;
+  stats.forEach(([label,val],i)=>{
+    const bx=pad+i*(boxW+16);
+    ctx.strokeStyle=BORDER; ctx.lineWidth=1;
+    ctxRoundRect(ctx,bx,y,boxW,boxH,10); ctx.stroke();
+    ctx.font="700 38px 'Bebas Neue', sans-serif"; ctx.fillStyle=GOLD2; ctx.textAlign='center';
+    ctx.fillText(String(val||0), bx+boxW/2, y+22);
+    ctx.font="13px 'Barlow Condensed', sans-serif"; ctx.fillStyle=MUTED;
+    ctx.fillText(label, bx+boxW/2, y+70);
+    ctx.textAlign='left';
+  });
+
+  y += boxH+50;
+  if(golesFilas.length){
+    ctx.font="700 20px 'Barlow Condensed', sans-serif"; ctx.fillStyle=GOLD;
+    ctx.fillText('⚽ GOLES', pad, y);
+    y+=36;
+    ctx.font="20px 'Barlow Condensed', sans-serif"; ctx.fillStyle=TXT2;
+    golesFilas.forEach(f=>{ ctx.fillText(f, pad, y); y+=32; });
+    y+=20;
+  }
+  if(top){
+    ctx.font="700 20px 'Barlow Condensed', sans-serif"; ctx.fillStyle=GOLD;
+    ctx.fillText('⚡ RENDIMIENTO FÍSICO', pad, y);
+    y+=36;
+    ctx.font="20px 'Barlow Condensed', sans-serif"; ctx.fillStyle=TXT2;
+    ctx.fillText(`Vel. máx ${top.velmax} km/h${top.fecha?` · F${top.fecha}`:''}`, pad, y);
+    y+=32;
+  }
+
+  return new Promise(resolve=>canvas.toBlob(resolve,'image/png'));
+}
+
+async function exportarTarjetaJugadorImg(cat, nombre, compartir){
+  const blob = await dibujarTarjetaJugador(cat, nombre);
+  await descargarOCompartirPlaca(blob, `tarjeta-${slugArchivo(nombre)}-${cat}.png`, compartir);
+}
+
+function buildTarjetasJugadoresHTML(cat, merged){
+  const idSec = 'tarjetas-'+cat;
+  return `${seccionTitulo(idSec, '🃏 TARJETAS DE JUGADORES')}
+    <div id="sec-${idSec}"${seccionEstiloInicial(idSec)}>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;margin-bottom:20px">
+        ${merged.map(p=>tarjetaJugadorHTML(cat,p)).join('')}
+      </div>
+    </div>`;
 }
 
 // Selectores de 2-3 jugadores para comparar (tabla, una fila por métrica)
@@ -6504,8 +6590,8 @@ function buildSistemaTacticoHTML(cat){
 }
 
 // Imprime la tabla de rendimiento por sistema táctico -- mismo patrón que
-// generarPDF/exportWeeklyReport (ventana nueva, HTML propio, print() en el
-// onload), sin depender de estilos var(--...) que no existen en esa ventana.
+// generarPDF (ventana nueva, HTML propio, print() en el onload), sin
+// depender de estilos var(--...) que no existen en esa ventana.
 function imprimirSistemaTactico(cat){
   const el = document.getElementById(`sistema-${cat}`);
   if(!el) return;
@@ -7910,28 +7996,42 @@ const PDF_CAT_SECCIONES = [
   {key:'jugadores',  label:'Datos de jugadores'},
 ];
 
-function abrirExportCategoria(cat){
-  let m=document.getElementById('export-cat-modal');
+// Modal genérico de "elegir secciones a exportar" — comparten esta base
+// abrirExportCategoria y abrirExportGeneral (antes eran dos copias casi
+// idénticas, solo cambiaba la lista de secciones y a qué función generadora
+// apuntaba el botón).
+function abrirExportModal({modalId, subtitulo, secciones, checkClass, onGenerar}){
+  let m=document.getElementById(modalId);
   if(m) m.remove();
   m=document.createElement('div');
-  m.id='export-cat-modal'; m.className='modal-bg';
+  m.id=modalId; m.className='modal-bg';
   m.innerHTML=`<div class="modal-box" style="width:320px;text-align:left">
     <h2 style="text-align:center">EXPORTAR PDF</h2>
-    <p style="text-align:center">${esc(cat)}</p>
+    <p style="text-align:center">${esc(subtitulo)}</p>
     <div>
-      ${PDF_CAT_SECCIONES.map(s=>`<label style="display:flex;align-items:center;gap:8px;padding:7px 0;
+      ${secciones.map(s=>`<label style="display:flex;align-items:center;gap:8px;padding:7px 0;
         font-family:'Barlow Condensed',sans-serif;font-size:13px;color:var(--text);cursor:pointer">
-        <input type="checkbox" class="export-cat-check" value="${s.key}" checked> ${s.label}
+        <input type="checkbox" class="${checkClass}" value="${s.key}" checked> ${s.label}
       </label>`).join('')}
     </div>
-    <button class="m-btn" onclick="generarPDFCategoria('${cat}')">⬇ GENERAR PDF</button>
-    <button class="m-cancel" onclick="document.getElementById('export-cat-modal').remove()">Cancelar</button>
+    <button class="m-btn" onclick="${onGenerar}">⬇ GENERAR PDF</button>
+    <button class="m-cancel" onclick="document.getElementById('${modalId}').remove()">Cancelar</button>
   </div>`;
   document.body.appendChild(m);
 }
+// Valores de los checkboxes tildados de una clase dada (usado por los dos
+// generadores de PDF con selección de secciones).
+function checkedValues(checkClass){
+  return [...document.querySelectorAll(`.${checkClass}:checked`)].map(c=>c.value);
+}
+
+function abrirExportCategoria(cat){
+  abrirExportModal({modalId:'export-cat-modal', subtitulo:cat, secciones:PDF_CAT_SECCIONES,
+    checkClass:'export-cat-check', onGenerar:`generarPDFCategoria('${cat}')`});
+}
 
 async function generarPDFCategoria(cat){
-  const checked=[...document.querySelectorAll('.export-cat-check:checked')].map(c=>c.value);
+  const checked=checkedValues('export-cat-check');
   if(checked.length===0){ showToast('Elegí al menos una sección'); return; }
   const modal=document.getElementById('export-cat-modal');
   if(modal) modal.remove();
@@ -7994,12 +8094,40 @@ function abrirPerfilJugador(cat, nombre){
   const nombreNorm = normNombreOrdenIndependiente(nombre);
   const esMismoJugador = p => (jugador?.id!=null && p.id===jugador.id) || normNombreOrdenIndependiente(p.nombre)===nombreNorm;
   let vecesTitular=0, vecesBanco=0, vecesEntroDeBanco=0, vecesSalio=0;
-  Object.values(matchData[cat]||{}).forEach(d=>{
+  const partidosJugados=[]; // {fecha, rival, cond, res:[gf,gc], rol, eventos:[..chips]}
+  Object.entries(matchData[cat]||{}).forEach(([fechaStr,d])=>{
+    const fecha=parseInt(fechaStr,10);
     const enTit=(d.titulares||[]).find(esMismoJugador);
-    if(enTit){ vecesTitular++; if(enTit.minutoSalida!=null) vecesSalio++; }
     const enSup=(d.suplentes||[]).find(esMismoJugador);
+    if(enTit){ vecesTitular++; if(enTit.minutoSalida!=null) vecesSalio++; }
     if(enSup){ vecesBanco++; if(enSup.minutoEntrada!=null) vecesEntroDeBanco++; }
+    if(!enTit && !enSup) return;
+    const rol = enTit ? (enTit.minutoSalida!=null?`Titular · salió ${enTit.minutoSalida}'`:'Titular')
+      : (enSup.minutoEntrada!=null?`Entró ${enSup.minutoEntrada}'`:'Banco');
+    const partido=(partidos[cat]||{})[fecha];
+    const idJ = jugador?.id!=null ? jugador.id : null;
+    const eventos=[];
+    if(partido && idJ!=null){
+      (partido.goles||[]).filter(g=>g.id===idJ).forEach(g=>eventos.push(`⚽${g.minuto}'${g.penal?' (P)':''}`));
+      (partido.amarillas||[]).filter(a=>a.id===idJ).forEach(a=>eventos.push(`🟨${a.minuto}'`));
+      (partido.rojas||[]).filter(a=>a.id===idJ).forEach(a=>eventos.push(`🟥${a.minuto}'`));
+    }
+    partidosJugados.push({fecha, rival:d.rival||'—', cond:condicionCat(cat,fecha), res:results[cat]?.[fecha]||null, rol, eventos});
   });
+  partidosJugados.sort((a,b)=>a.fecha-b.fecha);
+  const partidosJugadosHTML = partidosJugados.length
+    ? `<div class="table-wrap"><table><thead><tr><th>F</th><th>Rival</th><th>Res.</th><th>Rol</th><th>Eventos</th></tr></thead><tbody>
+        ${partidosJugados.map(pj=>{
+          const condTxt = pj.cond==='L'?'L':pj.cond==='V'?'V':'';
+          const r = pj.res;
+          const resTxt = (r && r[0]!=null && r[1]!=null) ? `${r[0]}-${r[1]}` : '—';
+          const resColor = r ? (getResult(r[0],r[1])==='W'?'var(--win)':getResult(r[0],r[1])==='D'?'var(--draw)':'var(--loss)') : 'var(--muted)';
+          return `<tr><td>F${pj.fecha}</td><td>${esc(pj.rival)}${condTxt?` <span class="cond-badge cond-${pj.cond}" style="font-size:9px">${condTxt}</span>`:''}</td>
+            <td style="color:${resColor};font-weight:700">${resTxt}</td><td style="font-size:11px">${esc(pj.rol)}</td>
+            <td style="font-size:11px">${pj.eventos.join(' ')||'—'}</td></tr>`;
+        }).join('')}
+      </tbody></table></div>`
+    : `<div style="color:var(--muted);font-size:12px;padding:6px 0">Sin partidos con citación cargada todavía.</div>`;
 
   let m=document.getElementById('perfil-jugador-modal');
   if(m) m.remove();
@@ -8024,7 +8152,9 @@ function abrirPerfilJugador(cat, nombre){
           <div style="font-size:18px;font-weight:700;color:var(--gold2)">${val}</div></div>`).join('')}
     </div>
     <div style="font-size:11px;color:var(--muted);margin-bottom:6px">En banco (citado, no siempre entró): ${vecesBanco}</div>
-    <div class="st"><div class="stbar"></div>⚽ GOLES</div>
+    <div class="st"><div class="stbar"></div>🗓️ PARTIDOS JUGADOS</div>
+    ${partidosJugadosHTML}
+    <div class="st" style="margin-top:14px"><div class="stbar"></div>⚽ GOLES</div>
     <div class="table-wrap"><table><tbody>${golesFilas}</tbody></table></div>
     <div class="st" style="margin-top:14px"><div class="stbar"></div>📡 RENDIMIENTO FÍSICO (BL)</div>
     ${gpsHTML}
@@ -8070,23 +8200,8 @@ const PDF_GENERAL_SECCIONES = [
 ];
 
 function abrirExportGeneral(){
-  let m=document.getElementById('export-general-modal');
-  if(m) m.remove();
-  m=document.createElement('div');
-  m.id='export-general-modal'; m.className='modal-bg';
-  m.innerHTML=`<div class="modal-box" style="width:320px;text-align:left">
-    <h2 style="text-align:center">EXPORTAR PDF</h2>
-    <p style="text-align:center">General</p>
-    <div>
-      ${PDF_GENERAL_SECCIONES.map(s=>`<label style="display:flex;align-items:center;gap:8px;padding:7px 0;
-        font-family:'Barlow Condensed',sans-serif;font-size:13px;color:var(--text);cursor:pointer">
-        <input type="checkbox" class="export-general-check" value="${s.key}" checked> ${s.label}
-      </label>`).join('')}
-    </div>
-    <button class="m-btn" onclick="generarPDFGeneral()">⬇ GENERAR PDF</button>
-    <button class="m-cancel" onclick="document.getElementById('export-general-modal').remove()">Cancelar</button>
-  </div>`;
-  document.body.appendChild(m);
+  abrirExportModal({modalId:'export-general-modal', subtitulo:'General', secciones:PDF_GENERAL_SECCIONES,
+    checkClass:'export-general-check', onGenerar:'generarPDFGeneral()'});
 }
 
 function pdfSectionTopGoleadores(){
@@ -8115,7 +8230,7 @@ async function pdfSectionTablaGeneral(){
 }
 
 async function generarPDFGeneral(){
-  const checked=[...document.querySelectorAll('.export-general-check:checked')].map(c=>c.value);
+  const checked=checkedValues('export-general-check');
   if(checked.length===0){ showToast('Elegí al menos una sección'); return; }
   const modal=document.getElementById('export-general-modal');
   if(modal) modal.remove();
@@ -8190,271 +8305,6 @@ function normNombreOrdenIndependiente(s){
 }
 
 
-// ============================================================
-//  WEEKLY LOAD CHART — carga acumulada por jugador
-// ============================================================
-function renderCargaWeeklyChart(cat, containerId){
-  const el = document.getElementById(containerId);
-  if(!el) return;
-  const sessions = (gymData[cat]||[]).slice().sort((a,b)=>a.date.localeCompare(b.date));
-  if(!sessions.length){ el.innerHTML='<div style="color:var(--muted);font-size:11px;font-family:Barlow Condensed,sans-serif;padding:8px">Sin datos de carga</div>'; return; }
-
-  // Group by ISO week
-  const getWeek = dateStr => {
-    const d = new Date(dateStr);
-    const jan1 = new Date(d.getFullYear(),0,1);
-    return Math.ceil(((d-jan1)/86400000 + jan1.getDay()+1)/7);
-  };
-  const weekMap = {};
-  sessions.forEach(s=>{
-    const wk = d=>{ const d2=new Date(d); return d2.getFullYear()+'-W'+String(getWeek(d)).padStart(2,'0'); };
-    const weekKey = wk(s.date);
-    if(!weekMap[weekKey]) weekMap[weekKey]={week:weekKey,total:0,players:{}};
-    (s.players||[]).forEach(p=>{
-      weekMap[weekKey].total += (p.load||0);
-      if(!weekMap[weekKey].players[p.name]) weekMap[weekKey].players[p.name]=0;
-      weekMap[weekKey].players[p.name]+=(p.load||0);
-    });
-  });
-  const weeks = Object.keys(weekMap).sort();
-  const totalsByWeek = weeks.map(w=>weekMap[w].total);
-  const avgLoad = totalsByWeek.length ? totalsByWeek.reduce((a,b)=>a+b,0)/totalsByWeek.length : 0;
-
-  // Load:rest ratio — this week vs previous week
-  const lastWeek = weeks[weeks.length-1];
-  const prevWeek = weeks[weeks.length-2];
-  const lwLoad = lastWeek ? weekMap[lastWeek].total : 0;
-  const pwLoad = prevWeek ? weekMap[prevWeek].total : 0;
-  const ratio = pwLoad > 0 ? (lwLoad/pwLoad).toFixed(2) : '—';
-  const ratioColor = ratio === '—' ? 'var(--muted)' : parseFloat(ratio) > 1.3 ? 'var(--loss)' : parseFloat(ratio) < 0.7 ? '#60a5fa' : 'var(--win)';
-  const ratioLabel = ratio === '—' ? '—' : parseFloat(ratio) > 1.3 ? '⚠ Sobrecarga' : parseFloat(ratio) < 0.7 ? '↓ Subcarga' : '✓ Óptimo';
-
-  el.innerHTML = `
-    <div style="display:flex;align-items:center;gap:16px;margin-bottom:10px;flex-wrap:wrap">
-      <div style="font-family:'Bebas Neue',sans-serif;font-size:12px;letter-spacing:2px;color:var(--muted)">CARGA SEMANAL ACUMULADA · ${cat}</div>
-      <div style="background:rgba(10,15,30,0.6);border:1px solid rgba(26,45,90,0.6);border-radius:6px;padding:4px 12px">
-        <span style="font-size:10px;color:var(--muted);font-family:'Barlow Condensed',sans-serif">RATIO CARGA:DESCANSO </span>
-        <span style="font-size:14px;font-family:'Bebas Neue',sans-serif;color:${ratioColor}">${ratio}</span>
-        <span style="font-size:10px;color:${ratioColor};font-family:'Barlow Condensed',sans-serif;margin-left:4px">${ratioLabel}</span>
-      </div>
-      <div style="font-size:10px;color:var(--muted);font-family:'Barlow Condensed',sans-serif">Promedio: ${Math.round(avgLoad)} UA/semana</div>
-    </div>
-    <canvas id="gym-chart-${cat}" height="80"></canvas>`;
-
-  setTimeout(()=>{
-    const ctx = document.getElementById(`gym-chart-${cat}`)?.getContext('2d');
-    if(!ctx) return;
-    killChart(`gym-chart-${cat}`);
-    new Chart(ctx,{
-      type:'bar',
-      data:{
-        labels: weeks,
-        datasets:[{
-          label:'Carga total (UA)',
-          data: totalsByWeek,
-          backgroundColor: totalsByWeek.map(v => v > avgLoad*1.3 ? 'rgba(239,68,68,0.6)' : v < avgLoad*0.7 ? 'rgba(96,165,250,0.6)' : 'rgba(34,197,94,0.6)'),
-          borderRadius:4
-        }]
-      },
-      options:{
-        responsive:true, animation:{duration:250},
-        plugins:{legend:{display:false}},
-        scales:{
-          x:{ticks:{color:'#5a7099',font:{family:'Barlow Condensed',size:10}},grid:{color:'rgba(26,45,90,0.3)'}},
-          y:{ticks:{color:'#5a7099',font:{family:'Barlow Condensed',size:10}},grid:{color:'rgba(26,45,90,0.3)'}}
-        }
-      }
-    });
-  },50);
-}
-
-// ============================================================
-//  PLAYER PHYSICAL PROFILE — GPS history per player
-// ============================================================
-function renderPlayerGpsProfile(playerName, cat, containerId){
-  const el = document.getElementById(containerId);
-  if(!el) return;
-  const sessions = (gpsSessions||[])
-    .filter(s=>(!cat||s.cat===cat))
-    .map(s=>({
-      date: s.date||s.name||'',
-      name: s.name||'',
-      type: s.type||'',
-      player: (s.players||[]).find(p=>
-        p.name?.toLowerCase()===playerName.toLowerCase() ||
-        p.name?.toLowerCase().includes(playerName.split(' ').slice(-1)[0].toLowerCase())
-      )
-    }))
-    .filter(s=>s.player)
-    .sort((a,b)=>a.date.localeCompare(b.date));
-
-  if(!sessions.length){
-    el.innerHTML='<div style="color:var(--muted);font-size:11px;font-family:Barlow Condensed,sans-serif;padding:12px">Sin datos GPS para '+esc(playerName)+'</div>';
-    return;
-  }
-
-  const labels = sessions.map(s=>s.name||s.date);
-  const distData = sessions.map(s=>s.player.dist||0);
-  const mpmData  = sessions.map(s=>s.player.mpm||0);
-  const velData  = sessions.map(s=>s.player.velmax||0);
-
-  const avgDist = distData.reduce((a,b)=>a+b,0)/distData.length;
-  const avgVel  = velData.reduce((a,b)=>a+b,0)/velData.length;
-
-  el.innerHTML = `
-    <div style="font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:2px;color:var(--gold2);margin-bottom:8px">
-      📊 PERFIL FÍSICO — ${esc(playerName)}${cat?` (${cat})`:''}
-      <span style="font-size:10px;color:var(--muted);font-family:'Barlow Condensed',sans-serif;margin-left:8px">${sessions.length} sesiones · Dist. prom: ${Math.round(avgDist)}m · Vel. max prom: ${avgVel.toFixed(1)} km/h</span>
-    </div>
-    <canvas id="pp-chart-${containerId}" height="90"></canvas>`;
-
-  setTimeout(()=>{
-    const ctx = document.getElementById(`pp-chart-${containerId}`)?.getContext('2d');
-    if(!ctx) return;
-    killChart(`pp-chart-${containerId}`);
-    new Chart(ctx,{
-      type:'line',
-      data:{labels,datasets:[
-        {label:'Distancia (m)',data:distData,borderColor:'#3b82f6',backgroundColor:'rgba(59,130,246,0.1)',fill:true,tension:.3,yAxisID:'y',pointRadius:3},
-        {label:'Vel. Max (km/h)',data:velData,borderColor:'#ef4444',backgroundColor:'rgba(239,68,68,0.05)',fill:false,tension:.3,yAxisID:'y2',pointRadius:3}
-      ]},
-      options:{
-        responsive:true,animation:{duration:250},
-        plugins:{legend:{labels:{color:'#5a7099',font:{family:'Barlow Condensed',size:10}}}},
-        scales:{
-          x:{ticks:{color:'#5a7099',font:{family:'Barlow Condensed',size:9},maxRotation:45},grid:{color:'rgba(26,45,90,0.3)'}},
-          y:{position:'left',ticks:{color:'#3b82f6',font:{family:'Barlow Condensed',size:10}},grid:{color:'rgba(26,45,90,0.2)'}},
-          y2:{position:'right',ticks:{color:'#ef4444',font:{family:'Barlow Condensed',size:10}},grid:{display:false}}
-        }
-      }
-    });
-  },50);
-}
-
-// ============================================================
-//  OBJECTIVES SYSTEM — targets per category
-// ============================================================
-const objectives = {}; // objectives[cat] = {dist, mpm, velmax, sprints, rhie}
-CATEGORIES.forEach(cat=>{ objectives[cat]={dist:5000,mpm:80,velmax:28,sprints:5,rhie:40}; });
-
-function renderObjectives(cat, containerId){
-  const el = document.getElementById(containerId);
-  if(!el) return;
-  const obj = objectives[cat]||{};
-  const sessions = (gpsSessions||[]).filter(s=>s.cat===cat&&s.type==='Partido'&&s.players?.length);
-  const avgDist  = sessions.length ? sessions.reduce((a,s)=>a+s.players.reduce((x,p)=>x+(p.dist||0),0)/s.players.length,0)/sessions.length : 0;
-  const avgVel   = sessions.length ? sessions.reduce((a,s)=>a+s.players.reduce((x,p)=>Math.max(x,p.velmax||0),0),0)/sessions.length : 0;
-
-  const metric = (label, current, target, unit) => {
-    const pct = target > 0 ? Math.min(100, Math.round(current/target*100)) : 0;
-    const col = pct>=90?'var(--win)':pct>=70?'var(--gold)':'var(--loss)';
-    return `<div style="margin-bottom:8px">
-      <div style="display:flex;justify-content:space-between;font-size:10px;font-family:'Barlow Condensed',sans-serif;color:var(--muted);margin-bottom:2px">
-        <span>${label}</span><span style="color:${col}">${Math.round(current)}${unit} / ${target}${unit} (${pct}%)</span>
-      </div>
-      <div style="background:rgba(26,45,90,0.3);border-radius:3px;height:5px;overflow:hidden">
-        <div style="background:${col};height:100%;width:${pct}%;border-radius:3px;transition:width .5s"></div>
-      </div>
-    </div>`;
-  };
-
-  el.innerHTML = `
-    <div style="font-family:'Bebas Neue',sans-serif;font-size:12px;letter-spacing:2px;color:var(--muted);margin-bottom:8px">🎯 OBJETIVOS — ${cat} <span style="font-size:10px;color:var(--muted);font-family:'Barlow Condensed',sans-serif">(basado en ${sessions.length} partidos)</span></div>
-    ${metric('Distancia prom.', avgDist, obj.dist, 'm')}
-    ${metric('Vel. máx prom.',  avgVel,  obj.velmax, ' km/h')}
-    ${canEdit?`<div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap">
-      <div style="font-size:10px;color:var(--muted);font-family:'Barlow Condensed',sans-serif;width:100%">Editar objetivos:</div>
-      <label style="font-size:10px;color:var(--muted);font-family:'Barlow Condensed',sans-serif">Dist.(m): <input type="number" value="${obj.dist}" style="width:70px;background:rgba(5,8,15,0.8);border:1px solid var(--border2);border-radius:4px;color:var(--text);font-size:11px;padding:3px 6px" onchange="if(!objectives['${cat}'])objectives['${cat}']={};objectives['${cat}'].dist=+this.value;renderObjectives('${cat}','${containerId}')"></label>
-      <label style="font-size:10px;color:var(--muted);font-family:'Barlow Condensed',sans-serif">Vel.Max: <input type="number" value="${obj.velmax}" style="width:60px;background:rgba(5,8,15,0.8);border:1px solid var(--border2);border-radius:4px;color:var(--text);font-size:11px;padding:3px 6px" onchange="if(!objectives['${cat}'])objectives['${cat}']={};objectives['${cat}'].velmax=+this.value;renderObjectives('${cat}','${containerId}')"></label>
-    </div>`:''}`;
-}
-
-// ============================================================
-//  WEEKLY REPORT EXPORT
-// ============================================================
-function exportWeeklyReport(catFilter){
-  const {monday, sunday} = getWeekRange(0);
-  const fmtDate = d => d.toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'numeric'});
-  const isoDate = d => d.toISOString().slice(0,10);
-  const cats = catFilter ? [catFilter] : CATEGORIES;
-
-  let html = `<!DOCTYPE html><html><head><meta charset="utf-8">
-  <title>Reporte Semanal — ${fmtDate(monday)} al ${fmtDate(sunday)}</title>
-  <style>
-    body{font-family:Arial,sans-serif;font-size:12px;color:#222;padding:20px}
-    h1{font-size:20px;color:#c0152a;margin-bottom:4px}
-    h2{font-size:14px;color:#1a2d5a;border-bottom:2px solid #1a2d5a;padding-bottom:4px;margin-top:16px}
-    h3{font-size:12px;color:#444;margin:8px 0 4px}
-    table{width:100%;border-collapse:collapse;margin-bottom:10px;font-size:11px}
-    th{background:#1a2d5a;color:#fff;padding:4px 8px;text-align:left}
-    td{border:1px solid #ddd;padding:4px 8px}
-    .badge{display:inline-block;padding:1px 6px;border-radius:3px;font-size:10px;font-weight:bold}
-    .win{background:#dcfce7;color:#166534} .loss{background:#fee2e2;color:#991b1b} .draw{background:#fef9c3;color:#713f12}
-    .footer{margin-top:20px;font-size:10px;color:#999;text-align:center}
-  </style></head><body>
-  <img src="${document.getElementById('escudoImg')?.src||''}" style="height:40px;float:right">
-  <h1>REPORTE SEMANAL — TIGRE JUVENILES</h1>
-  <p style="color:#666;font-size:11px">${fmtDate(monday)} — ${fmtDate(sunday)}</p>`;
-
-  cats.forEach(cat=>{
-    const fixtureList = cat==='RESERVA'?RIVALS_RESERVA:RIVALS;
-    html += `<h2>${cat}</h2>`;
-
-    // Match results this week (last played match)
-    const lastMatch = fixtureList.slice().reverse().find(r=>results[cat][r.f]);
-    if(lastMatch){
-      const r=results[cat][lastMatch.f];
-      const res=getResult(r[0],r[1]);
-      html+=`<h3>Último partido — F${lastMatch.f}</h3>
-      <table><tr><th>Fecha</th><th>Resultado</th><th>Rival</th></tr>
-      <tr><td>F${lastMatch.f}</td><td class="badge ${res==='W'?'win':res==='L'?'loss':'draw'}">${r[0]} - ${r[1]}</td><td>${esc(rivalData[cat]?.[lastMatch.f]?.rival||lastMatch.r||'—')}</td></tr></table>`;
-    }
-
-    // GPS sessions this week
-    const gpsSess=(gpsSessions||[]).filter(s=>s.cat===cat&&s.date&&s.date>=isoDate(monday)&&s.date<=isoDate(sunday));
-    if(gpsSess.length){
-      html+=`<h3>Sesiones GPS (${gpsSess.length})</h3><table><tr><th>Sesión</th><th>Tipo</th><th>Jugadores</th><th>Dist. prom</th><th>Vel. max</th></tr>`;
-      gpsSess.forEach(s=>{
-        const avgD=s.players?.length?Math.round(s.players.reduce((a,p)=>a+(p.dist||0),0)/s.players.length):0;
-        const maxV=s.players?.length?(s.players.reduce((a,p)=>Math.max(a,p.velmax||0),0)).toFixed(1):0;
-        html+=`<tr><td>${esc(s.name||'—')}</td><td>${esc(s.type||'—')}</td><td>${s.players?.length||0}</td><td>${avgD}m</td><td>${maxV} km/h</td></tr>`;
-      });
-      html+='</table>';
-    }
-
-    // Gym sessions this week
-    const gymSess=(gymData[cat]||[]).filter(s=>s.date>=isoDate(monday)&&s.date<=isoDate(sunday));
-    if(gymSess.length){
-      html+=`<h3>Carga Gimnasio (${gymSess.length} sesiones)</h3><table><tr><th>Sesión</th><th>Tipo</th><th>Vol. Total (UA)</th></tr>`;
-      gymSess.forEach(s=>{
-        const vol=(s.players||[]).reduce((a,p)=>a+(p.load||0),0);
-        html+=`<tr><td>${esc(s.name||'—')}</td><td>${esc(s.tipo||'—')}</td><td>${vol}</td></tr>`;
-      });
-      html+='</table>';
-    }
-
-    // Injuries
-    const actLes=(lesiones[cat]||[]).filter(l=>l.estado==='activa');
-    if(actLes.length){
-      html+=`<h3>🩹 Lesionados (${actLes.length})</h3>`;
-      html+=actLes.map(l=>`${esc(l.name)} (${l.tipo||'?'} desde ${l.fecha||'?'})`).join(', ');
-    }
-
-    // Yellow card alerts
-    const alerts=(tarjetas[cat]||[]).filter(p=>p.amarillas>=2);
-    if(alerts.length){
-      html+=`<h3>🟨 Alertas tarjetas</h3>`;
-      html+=alerts.map(p=>`${esc(p.name)} (${p.amarillas} amarillas)`).join(', ');
-    }
-  });
-
-  html+=`<div class="footer">Generado automáticamente — Plataforma Tigre Juveniles — ${new Date().toLocaleString('es-AR')}</div>
-  </body></html>`;
-
-  const w = window.open('','_blank','width=900,height=700');
-  if(w){ w.document.write(html); w.document.close(); setTimeout(()=>w.print(),500); }
-  else showToast('Permitir ventanas emergentes para exportar');
-}
 
 // ============================================================
 //  ALERT SYSTEM — header badges
@@ -8491,270 +8341,7 @@ function amarillasEnAlerta(cat){
 function refreshAlerts(){
   const wrap = document.getElementById('alert-pills');
   if(wrap) wrap.innerHTML = '';
-}
-
-// ============================================================
-//  CARGA GIMNASIO MODULE
-// ============================================================
-function buildCargaModule(){
-  if(document.getElementById('panel-carga').innerHTML.trim()) return;
-  const p = document.getElementById('panel-carga');
-  p.innerHTML = `<div class="main">
-    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:12px">
-      <h2 style="font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:4px;color:var(--gold2)">🏋 CARGA DE ENTRENAMIENTO</h2>
-    </div>
-    <div class="cat-subtabs" id="carga-subtabs"></div>
-    <div id="carga-content" style="margin-top:12px"></div>
-  </div>`;
-  buildCatSubtabs('carga-subtabs', cat=>renderCargaCat(cat), '4TA');
-  renderCargaCat('4TA');
-}
-
-function renderCargaCat(cat){
-  const wrap = document.getElementById('carga-content');
-  if(!wrap) return;
-  const sessions = (gymData[cat]||[]).slice().sort((a,b)=>b.date.localeCompare(a.date));
-
-  const addForm = canEdit ? `
-    <div style="background:rgba(10,15,30,0.6);border:1px solid rgba(26,45,90,0.6);border-radius:10px;padding:16px;margin-bottom:16px">
-      <div style="font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:2px;color:var(--gold2);margin-bottom:12px">+ NUEVA SESIÓN DE GIMNASIO</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;margin-bottom:10px">
-        <div><label style="font-size:10px;color:var(--muted);font-family:'Barlow Condensed',sans-serif;letter-spacing:1px;display:block;margin-bottom:4px">FECHA</label>
-          <input type="date" id="gym-date-${cat}" style="width:100%;background:rgba(5,8,15,0.8);border:1px solid var(--border2);border-radius:5px;color:var(--text);font-size:12px;padding:7px 9px;font-family:'Barlow Condensed',sans-serif;box-sizing:border-box" value="${new Date().toISOString().slice(0,10)}"></div>
-        <div><label style="font-size:10px;color:var(--muted);font-family:'Barlow Condensed',sans-serif;letter-spacing:1px;display:block;margin-bottom:4px">NOMBRE SESIÓN</label>
-          <input type="text" id="gym-name-${cat}" placeholder="Ej: Fuerza MD-3" style="width:100%;background:rgba(5,8,15,0.8);border:1px solid var(--border2);border-radius:5px;color:var(--text);font-size:12px;padding:7px 9px;font-family:'Barlow Condensed',sans-serif;box-sizing:border-box"></div>
-        <div><label style="font-size:10px;color:var(--muted);font-family:'Barlow Condensed',sans-serif;letter-spacing:1px;display:block;margin-bottom:4px">TIPO</label>
-          <select id="gym-tipo-${cat}" style="width:100%;background:rgba(5,8,15,0.8);border:1px solid var(--border2);border-radius:5px;color:var(--text);font-size:12px;padding:7px 9px;font-family:'Barlow Condensed',sans-serif">
-            <option>Fuerza</option><option>Potencia</option><option>Técnica</option>
-            <option>Compensación</option><option>Prevención</option><option>Recuperación</option>
-          </select></div>
-        <div style="display:flex;align-items:flex-end">
-          <button onclick="openGymSession('${cat}')" style="width:100%;background:linear-gradient(135deg,#1a3a1a,#2a5a2a);border:1px solid #3a7a3a;border-radius:5px;color:#86efac;font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:1px;padding:8px;cursor:pointer">CARGAR JUGADORES →</button>
-        </div>
-      </div>
-    </div>` : '';
-
-  const sessionList = sessions.length ? sessions.map(s=>`
-    <div style="background:rgba(10,15,30,0.5);border:1px solid rgba(26,45,90,0.5);border-radius:8px;padding:12px;margin-bottom:8px">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
-        <div>
-          <span style="font-family:'Bebas Neue',sans-serif;font-size:15px;letter-spacing:2px;color:var(--text)">${esc(s.name)}</span>
-          <span style="font-size:11px;color:var(--muted);font-family:'Barlow Condensed',sans-serif;margin-left:8px">${s.date} · ${s.tipo||'—'}</span>
-        </div>
-        <div style="display:flex;align-items:center;gap:8px">
-          <span style="font-size:11px;color:var(--gold2);font-family:'Barlow Condensed',sans-serif">${(s.players||[]).length} jugadores · Vol. total: ${(s.players||[]).reduce((a,p)=>a+(p.load||0),0)} UA</span>
-          ${canEdit?`<button onclick="deleteGymSession('${cat}','${s.id}')" style="background:none;border:none;color:rgba(239,68,68,0.5);cursor:pointer;font-size:13px" title="Eliminar">✕</button>`:''}
-        </div>
-      </div>
-      <div style="display:flex;flex-wrap:wrap;gap:6px">
-        ${(s.players||[]).map(p=>`
-          <div style="background:rgba(26,45,90,0.3);border:1px solid rgba(26,45,90,0.5);border-radius:5px;padding:4px 8px;font-size:11px;font-family:'Barlow Condensed',sans-serif">
-            <span style="color:var(--text2)">${esc(p.name)}</span>
-            <span style="color:var(--gold2);font-weight:700;margin-left:6px">${p.load} UA</span>
-            ${p.notes?`<span style="color:var(--muted);margin-left:4px">· ${esc(p.notes)}</span>`:''}
-          </div>`).join('')}
-      </div>
-    </div>`).join('') : `<div style="text-align:center;padding:30px;color:var(--muted);font-family:'Barlow Condensed',sans-serif">Sin sesiones de gimnasio cargadas para ${cat}</div>`;
-
-  // Weekly chart container
-  const chartSection = `<div id="gym-weekly-${cat}" style="background:rgba(10,15,30,0.4);border:1px solid rgba(26,45,90,0.4);border-radius:8px;padding:12px;margin-bottom:12px"></div>`;
-  const exportBtn = canEdit ? `<button onclick="exportWeeklyReport('${cat}')" style="background:rgba(192,21,42,0.1);border:1px solid rgba(192,21,42,0.3);border-radius:5px;color:var(--red);font-family:'Bebas Neue',sans-serif;font-size:11px;letter-spacing:1px;padding:5px 10px;cursor:pointer;margin-bottom:10px">📄 EXPORTAR REPORTE SEMANAL</button>` : '';
-
-  wrap.innerHTML = addForm + exportBtn + chartSection + sessionList;
-  setTimeout(()=>renderCargaWeeklyChart(cat, `gym-weekly-${cat}`), 50);
-}
-
-function openGymSession(cat){
-  const date  = document.getElementById(`gym-date-${cat}`)?.value;
-  const name  = document.getElementById(`gym-name-${cat}`)?.value?.trim();
-  const tipo  = document.getElementById(`gym-tipo-${cat}`)?.value;
-  if(!date||!name){ showToast('⚠ Completá fecha y nombre'); return; }
-
-  // Get player list from plantel or matchData
-  const recentMatch = Object.values(matchData[cat]||{}).find(m=>m.titulares?.length);
-  const players = recentMatch
-    ? [...(recentMatch.titulares||[]), ...(recentMatch.suplentes||[])].map(p=>p.nombre)
-    : [];
-
-  const overlay = document.createElement('div');
-  overlay.id = 'gym-overlay';
-  overlay.style.cssText='position:fixed;inset:0;z-index:10000;background:rgba(5,8,15,0.9);display:flex;align-items:center;justify-content:center;overflow-y:auto;padding:20px;box-sizing:border-box';
-
-  const playerRows = players.length
-    ? players.map(n=>`<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid rgba(26,45,90,0.2)">
-        <span style="flex:1;font-size:12px;font-family:'Barlow Condensed',sans-serif;color:var(--text2,#d8e4ff)">${esc(n)}</span>
-        <input type="number" min="0" max="9999" placeholder="UA" data-player="${esc(n)}"
-          style="width:72px;background:rgba(5,8,15,0.8);border:1px solid rgba(26,45,90,0.6);border-radius:4px;color:var(--text,#fff);font-size:12px;padding:4px 7px;text-align:center">
-        <input type="text" placeholder="Nota (opcional)" data-notes="${esc(n)}"
-          style="width:140px;background:rgba(5,8,15,0.8);border:1px solid rgba(26,45,90,0.6);border-radius:4px;color:var(--text,#fff);font-size:11px;padding:4px 7px">
-      </div>`).join('')
-    : `<div style="margin-bottom:8px;font-size:11px;color:var(--muted,#5a7099);font-family:'Barlow Condensed',sans-serif">Sin jugadores en plantel — agregá manualmente:</div>
-       <textarea id="gym-manual-players" placeholder="Un jugador por línea:\nRojas Josue 450\nLuongo Alan 380" style="width:100%;height:120px;background:rgba(5,8,15,0.8);border:1px solid rgba(26,45,90,0.6);border-radius:5px;color:#d8e4ff;font-size:12px;padding:8px;font-family:'Barlow Condensed',sans-serif;resize:vertical;box-sizing:border-box"></textarea>`;
-
-  overlay.innerHTML=`<div style="background:#0a0f1e;border:1px solid #1a2d5a;border-radius:12px;padding:20px;max-width:520px;width:100%;max-height:80vh;overflow-y:auto">
-    <div style="font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:3px;color:#c9a227;margin-bottom:4px">CARGA INDIVIDUAL — ${cat}</div>
-    <div style="font-size:11px;color:#5a7099;font-family:'Barlow Condensed',sans-serif;margin-bottom:16px">${name} · ${date} · ${tipo}</div>
-    <div id="gym-player-rows">${playerRows}</div>
-    <div style="display:flex;gap:8px;margin-top:16px">
-      <button onclick="document.getElementById('gym-overlay').remove()" style="flex:1;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);border-radius:6px;color:#f87171;font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:1px;padding:9px;cursor:pointer">CANCELAR</button>
-      <button onclick="saveGymSession('${cat}','${esc(date)}','${esc(name)}','${esc(tipo)}')" style="flex:2;background:linear-gradient(135deg,#1a4a1a,#2a6a2a);border:1px solid #4a8a4a;border-radius:6px;color:#86efac;font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:1px;padding:9px;cursor:pointer">💾 GUARDAR SESIÓN</button>
-    </div>
-  </div>`;
-  document.body.appendChild(overlay);
-}
-
-function saveGymSession(cat, date, name, tipo){
-  const overlay = document.getElementById('gym-overlay');
-  const playerInputs = overlay?.querySelectorAll('input[data-player]');
-  const sessionPlayers = [];
-
-  if(playerInputs?.length){
-    playerInputs.forEach(inp=>{
-      const load = parseInt(inp.value)||0;
-      if(load > 0){
-        const notesInp = overlay.querySelector(`input[data-notes="${inp.dataset.player}"]`);
-        sessionPlayers.push({name: inp.dataset.player, load, notes: notesInp?.value||''});
-      }
-    });
-  } else {
-    const manual = overlay?.querySelector('#gym-manual-players')?.value||'';
-    manual.split('\n').forEach(line=>{
-      const m = line.trim().match(/^(.+?)\s+(\d+)\s*(.*)$/);
-      if(m) sessionPlayers.push({name: m[1].trim(), load: parseInt(m[2]), notes: m[3].trim()});
-    });
-  }
-
-  if(!sessionPlayers.length){ showToast('⚠ Cargá al menos una carga'); return; }
-  if(!gymData[cat]) gymData[cat]=[];
-  gymData[cat].push({id:'g_'+Date.now(), date, name, tipo, players: sessionPlayers});
-  overlay?.remove();
-  saveData();
-  renderCargaCat(cat);
-  refreshAlerts();
-  showToast(`✓ Sesión "${name}" guardada para ${cat}`);
-}
-
-function deleteGymSession(cat, id){
-  if(!gymData[cat]) return;
-  gymData[cat] = gymData[cat].filter(s=>s.id!==id);
-  saveData();
-  renderCargaCat(cat);
-  showToast('Sesión eliminada');
-}
-
-// ============================================================
-//  INJURY HISTORY EXTENSION
-// ============================================================
-function resolveInjuryWithHistory(cat, id, endDate){
-  const lez = (lesiones[cat]||[]).find(l=>l.id===id);
-  if(!lez) return;
-  lez.estado = 'recuperado';
-  lez.fechaFin = endDate || new Date().toISOString().slice(0,10);
-  if(!lez.historial) lez.historial = [];
-  const fechaLesion=parseFechaLesionDDMM(lez.fecha);
-  lez.historial.push({
-    tipo: lez.tipo || lez.tipo_lesion || '—',
-    nota: lez.nota||'',
-    inicio: lez.fecha || lez.fechaInicio || '—',
-    fin: lez.fechaFin,
-    diasBaja: fechaLesion ? Math.round((new Date(lez.fechaFin)-fechaLesion)/(1000*60*60*24)) : '—'
-  });
-  saveRendimiento();
-  refreshAlerts();
-}
-
-// ============================================================
-//  SEMANA MODULE — unified weekly view
-// ============================================================
-let semanaOffset = 0; // weeks offset from current
-
-function buildSemanaModule(){
-  const p = document.getElementById('panel-semana');
-  p.innerHTML = `<div class="main">
-    <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;flex-wrap:wrap">
-      <h2 style="font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:4px;color:var(--gold2);flex:1">📅 VISTA SEMANAL</h2>
-      <button onclick="semanaOffset--;renderSemana()" style="background:rgba(26,45,90,0.3);border:1px solid var(--border2);border-radius:5px;color:var(--text2);font-size:14px;padding:5px 12px;cursor:pointer">◀</button>
-      <span id="semana-label" style="font-family:'Barlow Condensed',sans-serif;font-size:14px;letter-spacing:2px;color:var(--muted);min-width:120px;text-align:center"></span>
-      <button onclick="semanaOffset++;renderSemana()" style="background:rgba(26,45,90,0.3);border:1px solid var(--border2);border-radius:5px;color:var(--text2);font-size:14px;padding:5px 12px;cursor:pointer">▶</button>
-      <button onclick="semanaOffset=0;renderSemana()" style="background:rgba(201,162,39,0.1);border:1px solid rgba(201,162,39,0.3);border-radius:5px;color:var(--gold2);font-family:'Bebas Neue',sans-serif;font-size:12px;letter-spacing:1px;padding:5px 10px;cursor:pointer">HOY</button>
-      <button onclick="exportWeeklyReport(null)" style="background:rgba(192,21,42,0.1);border:1px solid rgba(192,21,42,0.3);border-radius:5px;color:var(--red);font-family:'Bebas Neue',sans-serif;font-size:12px;letter-spacing:1px;padding:5px 10px;cursor:pointer">📄 REPORTE</button>
-    </div>
-    <div id="semana-content"></div>
-  </div>`;
-  renderSemana();
-}
-
-function getWeekRange(offset){
-  const now = new Date();
-  const day = now.getDay();
-  const monday = new Date(now);
-  monday.setDate(now.getDate() - (day===0?6:day-1) + offset*7);
-  monday.setHours(0,0,0,0);
-  const sunday = new Date(monday);
-  sunday.setDate(monday.getDate()+6);
-  return {monday, sunday};
-}
-
-function renderSemana(){
-  const {monday, sunday} = getWeekRange(semanaOffset);
-  const fmtDate = d => d.toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit'});
-  const isoDate = d => d.toISOString().slice(0,10);
-
-  const label = document.getElementById('semana-label');
-  if(label) label.textContent = `${fmtDate(monday)} – ${fmtDate(sunday)}`;
-
-  const wrap = document.getElementById('semana-content');
-  if(!wrap) return;
-
-  let html = `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px">`;
-
-  CATEGORIES.forEach(cat=>{
-    const fixtureList = cat==='RESERVA'?RIVALS_RESERVA:RIVALS;
-    const catEvents = [];
-
-    // Match results in this week's fixture (we match by fecha order, not date — show all if no date stored)
-    // GPS sessions this week
-    const gpsSess = (gpsSessions||[]).filter(s=>{
-      if(s.cat!==cat) return false;
-      if(!s.date) return false;
-      const d = new Date(s.date.split('/').reverse().join('-'));
-      return d >= monday && d <= sunday;
-    });
-    gpsSess.forEach(s=>catEvents.push({type:'gps', label:`📡 ${s.name||'GPS'}`, sub:`${s.type||'Entrenamiento'} · ${(s.players||[]).length} jug`, color:'rgba(36,80,192,0.25)', border:'rgba(36,80,192,0.5)'}));
-
-    // Gym sessions this week
-    const gymSess = (gymData[cat]||[]).filter(s=>{
-      if(!s.date) return false;
-      return s.date >= isoDate(monday) && s.date <= isoDate(sunday);
-    });
-    gymSess.forEach(s=>catEvents.push({type:'gym', label:`🏋 ${s.name||'Gimnasio'}`, sub:`${s.tipo||'—'} · ${(s.players||[]).reduce((a,p)=>a+(p.load||0),0)} UA`, color:'rgba(34,197,94,0.1)', border:'rgba(34,197,94,0.3)'}));
-
-    // Active injuries
-    const actLes = (lesiones[cat]||[]).filter(l=>l.estado==='activa');
-    if(actLes.length) catEvents.push({type:'injury', label:`🩹 ${actLes.length} lesionado${actLes.length>1?'s':''}`, sub: actLes.map(l=>l.name).join(', '), color:'rgba(239,68,68,0.1)', border:'rgba(239,68,68,0.3)'});
-
-    // Amarilla alerts
-    const alertCards = (tarjetas[cat]||[]).filter(p=>p.amarillas>=2);
-    if(alertCards.length) catEvents.push({type:'card', label:`🟨 ${alertCards.length} en alerta`, sub: alertCards.map(p=>p.name).join(', '), color:'rgba(245,158,11,0.1)', border:'rgba(245,158,11,0.3)'});
-
-    const eventsHtml = catEvents.length
-      ? catEvents.map(e=>`<div style="background:${e.color};border:1px solid ${e.border};border-radius:5px;padding:6px 9px;margin-bottom:5px">
-          <div style="font-size:12px;font-family:'Barlow Condensed',sans-serif;color:var(--text2,#d8e4ff)">${e.label}</div>
-          <div style="font-size:10px;color:var(--muted,#5a7099);font-family:'Barlow Condensed',sans-serif;margin-top:2px">${e.sub}</div>
-        </div>`).join('')
-      : `<div style="font-size:11px;color:var(--muted,#5a7099);font-family:'Barlow Condensed',sans-serif;padding:8px 0">Sin actividad registrada</div>`;
-
-    html += `<div style="background:rgba(10,15,30,0.5);border:1px solid rgba(26,45,90,0.5);border-radius:10px;padding:14px">
-      <div style="display:flex;align-items:center;gap:6px;margin-bottom:10px">
-        <span style="width:8px;height:8px;border-radius:50%;background:${CAT_COLORS[cat]};display:inline-block"></span>
-        <span style="font-family:'Bebas Neue',sans-serif;font-size:15px;letter-spacing:2px;color:var(--text)">${cat}</span>
-      </div>
-      ${eventsHtml}
-    </div>`;
-  });
-
-  html += '</div>';
-  wrap.innerHTML = html;
+  refreshConfiabilidadBadge();
 }
 
 
