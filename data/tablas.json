@@ -1,5 +1,5 @@
 {
-  "actualizado": "2026-08-29 14:47",
+  "actualizado": "2026-08-29 17:34",
   "fuente": "ligaprofesional.ar (oficial)",
   "fuente_fixture": "sabadogol.com.ar",
   "categorias": {
@@ -7,238 +7,238 @@
       {
         "pos": 1,
         "equipo": "Lanús",
-        "pts": 48,
-        "pj": 22,
-        "pg": 15,
+        "pts": 51,
+        "pj": 23,
+        "pg": 16,
         "pe": 3,
         "pp": 4,
-        "gf": 39,
-        "gc": 19,
-        "dif": 20
+        "gf": 41,
+        "gc": 20,
+        "dif": 21
       },
       {
         "pos": 2,
         "equipo": "Talleres",
-        "pts": 48,
-        "pj": 22,
-        "pg": 15,
+        "pts": 51,
+        "pj": 23,
+        "pg": 16,
         "pe": 3,
         "pp": 4,
-        "gf": 31,
-        "gc": 13,
-        "dif": 18
+        "gf": 34,
+        "gc": 14,
+        "dif": 20
       },
       {
         "pos": 3,
         "equipo": "Independiente",
-        "pts": 45,
-        "pj": 22,
-        "pg": 14,
+        "pts": 48,
+        "pj": 23,
+        "pg": 15,
         "pe": 3,
         "pp": 5,
-        "gf": 52,
-        "gc": 25,
-        "dif": 27
+        "gf": 54,
+        "gc": 26,
+        "dif": 28
       },
       {
         "pos": 4,
         "equipo": "Rosario Central",
-        "pts": 43,
-        "pj": 22,
-        "pg": 12,
+        "pts": 46,
+        "pj": 23,
+        "pg": 13,
         "pe": 7,
         "pp": 3,
-        "gf": 29,
+        "gf": 32,
         "gc": 16,
-        "dif": 13
+        "dif": 16
       },
       {
         "pos": 5,
         "equipo": "Huracán",
-        "pts": 42,
-        "pj": 22,
-        "pg": 12,
+        "pts": 45,
+        "pj": 23,
+        "pg": 13,
         "pe": 6,
         "pp": 4,
-        "gf": 35,
-        "gc": 20,
-        "dif": 15
-      },
-      {
-        "pos": 6,
-        "equipo": "Estudiantes",
-        "pts": 41,
-        "pj": 22,
-        "pg": 12,
-        "pe": 5,
-        "pp": 5,
         "gf": 38,
         "gc": 22,
         "dif": 16
       },
       {
+        "pos": 6,
+        "equipo": "Estudiantes",
+        "pts": 44,
+        "pj": 23,
+        "pg": 13,
+        "pe": 5,
+        "pp": 5,
+        "gf": 40,
+        "gc": 22,
+        "dif": 18
+      },
+      {
         "pos": 7,
-        "equipo": "Vélez",
-        "pts": 38,
-        "pj": 22,
-        "pg": 11,
+        "equipo": "Argentinos Jrs.",
+        "pts": 41,
+        "pj": 23,
+        "pg": 12,
         "pe": 5,
         "pp": 6,
-        "gf": 35,
-        "gc": 15,
-        "dif": 20
+        "gf": 40,
+        "gc": 21,
+        "dif": 19
       },
       {
         "pos": 8,
-        "equipo": "Argentinos Jrs.",
-        "pts": 38,
-        "pj": 22,
-        "pg": 11,
+        "equipo": "Boca Jrs.",
+        "pts": 41,
+        "pj": 23,
+        "pg": 10,
+        "pe": 11,
+        "pp": 2,
+        "gf": 31,
+        "gc": 15,
+        "dif": 16
+      },
+      {
+        "pos": 9,
+        "equipo": "Instituto",
+        "pts": 41,
+        "pj": 23,
+        "pg": 12,
         "pe": 5,
         "pp": 6,
+        "gf": 28,
+        "gc": 16,
+        "dif": 12
+      },
+      {
+        "pos": 10,
+        "equipo": "Vélez",
+        "pts": 38,
+        "pj": 23,
+        "pg": 11,
+        "pe": 5,
+        "pp": 7,
+        "gf": 36,
+        "gc": 17,
+        "dif": 19
+      },
+      {
+        "pos": 11,
+        "equipo": "Newell's",
+        "pts": 38,
+        "pj": 23,
+        "pg": 11,
+        "pe": 5,
+        "pp": 7,
         "gf": 37,
         "gc": 21,
         "dif": 16
       },
       {
-        "pos": 9,
-        "equipo": "Boca Jrs.",
-        "pts": 38,
-        "pj": 22,
-        "pg": 9,
-        "pe": 11,
-        "pp": 2,
-        "gf": 29,
-        "gc": 15,
-        "dif": 14
-      },
-      {
-        "pos": 10,
+        "pos": 12,
         "equipo": "San Lorenzo",
         "pts": 38,
-        "pj": 22,
+        "pj": 23,
         "pg": 12,
         "pe": 2,
-        "pp": 8,
+        "pp": 9,
         "gf": 38,
-        "gc": 26,
-        "dif": 12
-      },
-      {
-        "pos": 11,
-        "equipo": "Instituto",
-        "pts": 38,
-        "pj": 22,
-        "pg": 11,
-        "pe": 5,
-        "pp": 6,
-        "gf": 27,
-        "gc": 16,
-        "dif": 11
-      },
-      {
-        "pos": 12,
-        "equipo": "Atlético Tucumán",
-        "pts": 38,
-        "pj": 22,
-        "pg": 12,
-        "pe": 2,
-        "pp": 8,
-        "gf": 38,
-        "gc": 28,
-        "dif": 10
-      },
-      {
-        "pos": 13,
-        "equipo": "River Plate",
-        "pts": 37,
-        "pj": 22,
-        "pg": 11,
-        "pe": 4,
-        "pp": 7,
-        "gf": 33,
-        "gc": 17,
-        "dif": 16
-      },
-      {
-        "pos": 14,
-        "equipo": "Godoy Cruz",
-        "pts": 37,
-        "pj": 22,
-        "pg": 11,
-        "pe": 4,
-        "pp": 7,
-        "gf": 38,
-        "gc": 27,
-        "dif": 11
-      },
-      {
-        "pos": 15,
-        "equipo": "Belgrano",
-        "pts": 36,
-        "pj": 22,
-        "pg": 9,
-        "pe": 9,
-        "pp": 4,
-        "gf": 21,
-        "gc": 16,
-        "dif": 5
-      },
-      {
-        "pos": 16,
-        "equipo": "Platense",
-        "pts": 36,
-        "pj": 22,
-        "pg": 10,
-        "pe": 6,
-        "pp": 6,
-        "gf": 26,
-        "gc": 23,
-        "dif": 3
-      },
-      {
-        "pos": 17,
-        "equipo": "Newell's",
-        "pts": 35,
-        "pj": 22,
-        "pg": 10,
-        "pe": 5,
-        "pp": 7,
-        "gf": 30,
-        "gc": 21,
+        "gc": 29,
         "dif": 9
       },
       {
-        "pos": 18,
-        "equipo": "Tigre",
-        "pts": 34,
-        "pj": 22,
-        "pg": 10,
+        "pos": 13,
+        "equipo": "Atlético Tucumán",
+        "pts": 38,
+        "pj": 23,
+        "pg": 12,
+        "pe": 2,
+        "pp": 9,
+        "gf": 38,
+        "gc": 31,
+        "dif": 7
+      },
+      {
+        "pos": 14,
+        "equipo": "River Plate",
+        "pts": 37,
+        "pj": 23,
+        "pg": 11,
         "pe": 4,
         "pp": 8,
-        "gf": 33,
-        "gc": 23,
-        "dif": 10
+        "gf": 34,
+        "gc": 20,
+        "dif": 14
+      },
+      {
+        "pos": 15,
+        "equipo": "Tigre",
+        "pts": 37,
+        "pj": 23,
+        "pg": 11,
+        "pe": 4,
+        "pp": 8,
+        "gf": 37,
+        "gc": 25,
+        "dif": 12
+      },
+      {
+        "pos": 16,
+        "equipo": "Godoy Cruz",
+        "pts": 37,
+        "pj": 23,
+        "pg": 11,
+        "pe": 4,
+        "pp": 8,
+        "gf": 40,
+        "gc": 31,
+        "dif": 9
+      },
+      {
+        "pos": 17,
+        "equipo": "Belgrano",
+        "pts": 37,
+        "pj": 23,
+        "pg": 9,
+        "pe": 10,
+        "pp": 4,
+        "gf": 23,
+        "gc": 18,
+        "dif": 5
+      },
+      {
+        "pos": 18,
+        "equipo": "Platense",
+        "pts": 36,
+        "pj": 23,
+        "pg": 10,
+        "pe": 6,
+        "pp": 7,
+        "gf": 26,
+        "gc": 25,
+        "dif": 1
       },
       {
         "pos": 19,
         "equipo": "Gimnasia LP",
         "pts": 33,
-        "pj": 22,
+        "pj": 23,
         "pg": 8,
         "pe": 9,
-        "pp": 5,
-        "gf": 25,
-        "gc": 15,
-        "dif": 10
+        "pp": 6,
+        "gf": 26,
+        "gc": 18,
+        "dif": 8
       },
       {
         "pos": 20,
         "equipo": "Ferro",
-        "pts": 30,
-        "pj": 22,
+        "pts": 31,
+        "pj": 23,
         "pg": 9,
-        "pe": 3,
+        "pe": 4,
         "pp": 10,
         "gf": 31,
         "gc": 34,
@@ -248,165 +248,165 @@
         "pos": 21,
         "equipo": "Defensa y Justicia",
         "pts": 28,
-        "pj": 22,
+        "pj": 23,
         "pg": 7,
         "pe": 7,
-        "pp": 8,
+        "pp": 9,
         "gf": 33,
-        "gc": 29,
-        "dif": 4
+        "gc": 32,
+        "dif": 1
       },
       {
         "pos": 22,
         "equipo": "Colón",
-        "pts": 27,
-        "pj": 22,
+        "pts": 28,
+        "pj": 23,
         "pg": 7,
-        "pe": 6,
+        "pe": 7,
         "pp": 9,
-        "gf": 27,
-        "gc": 29,
+        "gf": 29,
+        "gc": 31,
         "dif": -2
       },
       {
         "pos": 23,
-        "equipo": "Gimnasia MZA",
+        "equipo": "Racing",
         "pts": 27,
-        "pj": 22,
-        "pg": 6,
-        "pe": 9,
-        "pp": 7,
-        "gf": 16,
-        "gc": 24,
-        "dif": -8
+        "pj": 23,
+        "pg": 7,
+        "pe": 6,
+        "pp": 10,
+        "gf": 33,
+        "gc": 28,
+        "dif": 5
       },
       {
         "pos": 24,
-        "equipo": "Aldosivi",
-        "pts": 25,
-        "pj": 22,
-        "pg": 7,
-        "pe": 4,
-        "pp": 11,
-        "gf": 26,
-        "gc": 37,
-        "dif": -11
+        "equipo": "Gimnasia MZA",
+        "pts": 27,
+        "pj": 23,
+        "pg": 6,
+        "pe": 9,
+        "pp": 8,
+        "gf": 17,
+        "gc": 26,
+        "dif": -9
       },
       {
         "pos": 25,
-        "equipo": "Racing",
-        "pts": 24,
-        "pj": 22,
-        "pg": 6,
-        "pe": 6,
-        "pp": 10,
-        "gf": 29,
-        "gc": 27,
-        "dif": 2
+        "equipo": "Aldosivi",
+        "pts": 25,
+        "pj": 23,
+        "pg": 7,
+        "pe": 4,
+        "pp": 12,
+        "gf": 27,
+        "gc": 40,
+        "dif": -13
       },
       {
         "pos": 26,
-        "equipo": "Sarmiento",
-        "pts": 24,
-        "pj": 22,
-        "pg": 5,
-        "pe": 9,
-        "pp": 8,
-        "gf": 23,
-        "gc": 25,
-        "dif": -2
+        "equipo": "Quilmes",
+        "pts": 25,
+        "pj": 23,
+        "pg": 7,
+        "pe": 4,
+        "pp": 12,
+        "gf": 17,
+        "gc": 37,
+        "dif": -20
       },
       {
         "pos": 27,
-        "equipo": "Unión",
+        "equipo": "Sarmiento",
         "pts": 24,
-        "pj": 22,
-        "pg": 6,
-        "pe": 6,
-        "pp": 10,
-        "gf": 20,
-        "gc": 26,
-        "dif": -6
+        "pj": 23,
+        "pg": 5,
+        "pe": 9,
+        "pp": 9,
+        "gf": 25,
+        "gc": 28,
+        "dif": -3
       },
       {
         "pos": 28,
-        "equipo": "Quilmes",
-        "pts": 22,
-        "pj": 22,
+        "equipo": "Unión",
+        "pts": 24,
+        "pj": 23,
         "pg": 6,
-        "pe": 4,
-        "pp": 12,
-        "gf": 15,
-        "gc": 36,
-        "dif": -21
+        "pe": 6,
+        "pp": 11,
+        "gf": 20,
+        "gc": 27,
+        "dif": -7
       },
       {
         "pos": 29,
         "equipo": "Barracas Central",
-        "pts": 20,
-        "pj": 22,
-        "pg": 5,
+        "pts": 23,
+        "pj": 23,
+        "pg": 6,
         "pe": 5,
         "pp": 12,
-        "gf": 16,
+        "gf": 19,
         "gc": 33,
-        "dif": -17
+        "dif": -14
       },
       {
         "pos": 30,
-        "equipo": "Central Córdoba",
-        "pts": 20,
-        "pj": 22,
-        "pg": 5,
-        "pe": 5,
-        "pp": 12,
-        "gf": 22,
-        "gc": 41,
-        "dif": -19
+        "equipo": "Dep. Riestra",
+        "pts": 22,
+        "pj": 23,
+        "pg": 6,
+        "pe": 4,
+        "pp": 13,
+        "gf": 23,
+        "gc": 34,
+        "dif": -11
       },
       {
         "pos": 31,
-        "equipo": "Dep. Riestra",
-        "pts": 19,
-        "pj": 22,
+        "equipo": "Central Córdoba",
+        "pts": 20,
+        "pj": 23,
         "pg": 5,
-        "pe": 4,
+        "pe": 5,
         "pp": 13,
-        "gf": 20,
-        "gc": 33,
-        "dif": -13
+        "gf": 22,
+        "gc": 48,
+        "dif": -26
       },
       {
         "pos": 32,
         "equipo": "Atlético Rafaela",
         "pts": 18,
-        "pj": 22,
+        "pj": 23,
         "pg": 4,
         "pe": 6,
-        "pp": 12,
+        "pp": 13,
         "gf": 23,
-        "gc": 47,
-        "dif": -24
+        "gc": 49,
+        "dif": -26
       },
       {
         "pos": 33,
         "equipo": "Estudiantes RC",
         "pts": 16,
-        "pj": 22,
+        "pj": 23,
         "pg": 4,
         "pe": 4,
-        "pp": 14,
-        "gf": 24,
-        "gc": 58,
-        "dif": -34
+        "pp": 15,
+        "gf": 25,
+        "gc": 60,
+        "dif": -35
       },
       {
         "pos": 34,
         "equipo": "Banfield",
-        "pts": 13,
-        "pj": 22,
+        "pts": 14,
+        "pj": 23,
         "pg": 3,
-        "pe": 4,
+        "pe": 5,
         "pp": 15,
         "gf": 15,
         "gc": 43,
@@ -416,25 +416,25 @@
         "pos": 35,
         "equipo": "Indepte. Rivadavia",
         "pts": 11,
-        "pj": 22,
+        "pj": 23,
         "pg": 2,
         "pe": 5,
-        "pp": 15,
-        "gf": 16,
-        "gc": 36,
-        "dif": -20
+        "pp": 16,
+        "gf": 17,
+        "gc": 40,
+        "dif": -23
       },
       {
         "pos": 36,
         "equipo": "San Martin SJ",
-        "pts": 3,
-        "pj": 22,
-        "pg": 0,
+        "pts": 6,
+        "pj": 23,
+        "pg": 1,
         "pe": 3,
         "pp": 19,
-        "gf": 12,
-        "gc": 66,
-        "dif": -54
+        "gf": 15,
+        "gc": 67,
+        "dif": -52
       }
     ],
     "5TA": [
@@ -18778,26 +18778,7 @@
       "gc": 39
     }
   },
-  "rival_alertas": {
-    "6TA": {
-      "fecha": 23,
-      "rival": "GODOY CRUZ A.T. (MENDOZA)",
-      "goleador": {
-        "nombre": "NOSEDA, MARIANO",
-        "goles": 7
-      },
-      "amarillas_riesgo": []
-    },
-    "9NA": {
-      "fecha": 23,
-      "rival": "GODOY CRUZ A.T. (MENDOZA)",
-      "goleador": {
-        "nombre": "GIACOMELLI, TIZIANO",
-        "goles": 5
-      },
-      "amarillas_riesgo": []
-    }
-  },
+  "rival_alertas": {},
   "fixture_futdetail": {
     "4TA": {
       "23": {
@@ -20795,6 +20776,16 @@
   "jugadores_futdetail": {
     "4TA": [
       {
+        "jugador": "Cáceres Thomas",
+        "convocatorias": 13,
+        "partidos_titular": 12,
+        "minutos_jugados": 843,
+        "goles": 0,
+        "asistencias": 0,
+        "tarjeta_amarilla": 1,
+        "tarjeta_roja": 0
+      },
+      {
         "jugador": "Saravia Roman",
         "convocatorias": 3,
         "partidos_titular": 3,
@@ -20813,16 +20804,6 @@
         "asistencias": 1,
         "tarjeta_amarilla": 0,
         "tarjeta_roja": 2
-      },
-      {
-        "jugador": "Leguizamon Maximo",
-        "convocatorias": 1,
-        "partidos_titular": 1,
-        "minutos_jugados": 90,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
       },
       {
         "jugador": "Andrusisen Lautaro",
@@ -20852,6 +20833,16 @@
         "goles": 0,
         "asistencias": 0,
         "tarjeta_amarilla": 2,
+        "tarjeta_roja": 0
+      },
+      {
+        "jugador": "Leguizamon Maximo",
+        "convocatorias": 1,
+        "partidos_titular": 1,
+        "minutos_jugados": 90,
+        "goles": 0,
+        "asistencias": 0,
+        "tarjeta_amarilla": 0,
         "tarjeta_roja": 0
       },
       {
@@ -20885,10 +20876,10 @@
         "tarjeta_roja": 0
       },
       {
-        "jugador": "Cáceres Thomas",
-        "convocatorias": 13,
-        "partidos_titular": 12,
-        "minutos_jugados": 843,
+        "jugador": "Ordoñez Ignacio",
+        "convocatorias": 10,
+        "partidos_titular": 9,
+        "minutos_jugados": 632,
         "goles": 0,
         "asistencias": 0,
         "tarjeta_amarilla": 1,
@@ -20902,16 +20893,6 @@
         "goles": 2,
         "asistencias": 0,
         "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Ordoñez Ignacio",
-        "convocatorias": 10,
-        "partidos_titular": 9,
-        "minutos_jugados": 632,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 1,
         "tarjeta_roja": 0
       },
       {
@@ -20975,6 +20956,16 @@
         "tarjeta_roja": 0
       },
       {
+        "jugador": "Alvaro Navoni",
+        "convocatorias": 8,
+        "partidos_titular": 7,
+        "minutos_jugados": 575,
+        "goles": 0,
+        "asistencias": 0,
+        "tarjeta_amarilla": 0,
+        "tarjeta_roja": 0
+      },
+      {
         "jugador": "Benítez Cristian",
         "convocatorias": 18,
         "partidos_titular": 13,
@@ -20999,16 +20990,6 @@
         "convocatorias": 2,
         "partidos_titular": 1,
         "minutos_jugados": 110,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Alvaro Navoni",
-        "convocatorias": 8,
-        "partidos_titular": 7,
-        "minutos_jugados": 575,
         "goles": 0,
         "asistencias": 0,
         "tarjeta_amarilla": 0,
@@ -21055,16 +21036,6 @@
         "tarjeta_roja": 0
       },
       {
-        "jugador": "Mansilla Nehemias",
-        "convocatorias": 9,
-        "partidos_titular": 0,
-        "minutos_jugados": 103,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
         "jugador": "Figueredo Benjamin",
         "convocatorias": 8,
         "partidos_titular": 5,
@@ -21075,21 +21046,21 @@
         "tarjeta_roja": 0
       },
       {
-        "jugador": "López Facundo",
-        "convocatorias": 8,
-        "partidos_titular": 3,
-        "minutos_jugados": 275,
+        "jugador": "Mansilla Nehemias",
+        "convocatorias": 9,
+        "partidos_titular": 0,
+        "minutos_jugados": 103,
         "goles": 0,
         "asistencias": 0,
         "tarjeta_amarilla": 0,
         "tarjeta_roja": 0
       },
       {
-        "jugador": "Copes Tomas",
-        "convocatorias": 16,
-        "partidos_titular": 2,
-        "minutos_jugados": 303,
-        "goles": 1,
+        "jugador": "López Facundo",
+        "convocatorias": 8,
+        "partidos_titular": 3,
+        "minutos_jugados": 275,
+        "goles": 0,
         "asistencias": 0,
         "tarjeta_amarilla": 0,
         "tarjeta_roja": 0
@@ -21105,11 +21076,11 @@
         "tarjeta_roja": 0
       },
       {
-        "jugador": "González Kevin",
-        "convocatorias": 5,
-        "partidos_titular": 1,
-        "minutos_jugados": 105,
-        "goles": 0,
+        "jugador": "Copes Tomas",
+        "convocatorias": 16,
+        "partidos_titular": 2,
+        "minutos_jugados": 303,
+        "goles": 1,
         "asistencias": 0,
         "tarjeta_amarilla": 0,
         "tarjeta_roja": 0
@@ -21119,6 +21090,16 @@
         "convocatorias": 18,
         "partidos_titular": 7,
         "minutos_jugados": 405,
+        "goles": 0,
+        "asistencias": 0,
+        "tarjeta_amarilla": 0,
+        "tarjeta_roja": 0
+      },
+      {
+        "jugador": "González Kevin",
+        "convocatorias": 5,
+        "partidos_titular": 1,
+        "minutos_jugados": 105,
         "goles": 0,
         "asistencias": 0,
         "tarjeta_amarilla": 0,
@@ -21147,26 +21128,6 @@
     ],
     "5TA": [
       {
-        "jugador": "Luque Gonzalo",
-        "convocatorias": 9,
-        "partidos_titular": 5,
-        "minutos_jugados": 361,
-        "goles": 1,
-        "asistencias": 0,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Wirz Axel",
-        "convocatorias": 17,
-        "partidos_titular": 17,
-        "minutos_jugados": 1420,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 5,
-        "tarjeta_roja": 0
-      },
-      {
         "jugador": "Pereyra Manuel",
         "convocatorias": 4,
         "partidos_titular": 2,
@@ -21194,6 +21155,26 @@
         "goles": 1,
         "asistencias": 0,
         "tarjeta_amarilla": 1,
+        "tarjeta_roja": 0
+      },
+      {
+        "jugador": "Luque Gonzalo",
+        "convocatorias": 9,
+        "partidos_titular": 5,
+        "minutos_jugados": 361,
+        "goles": 1,
+        "asistencias": 0,
+        "tarjeta_amarilla": 0,
+        "tarjeta_roja": 0
+      },
+      {
+        "jugador": "Wirz Axel",
+        "convocatorias": 17,
+        "partidos_titular": 17,
+        "minutos_jugados": 1420,
+        "goles": 0,
+        "asistencias": 0,
+        "tarjeta_amarilla": 5,
         "tarjeta_roja": 0
       },
       {
@@ -21317,21 +21298,21 @@
         "tarjeta_roja": 0
       },
       {
-        "jugador": "Samper Joaquin",
-        "convocatorias": 3,
-        "partidos_titular": 0,
-        "minutos_jugados": 65,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
         "jugador": "Crotto Ivo",
         "convocatorias": 3,
         "partidos_titular": 0,
         "minutos_jugados": 40,
         "goles": 1,
+        "asistencias": 0,
+        "tarjeta_amarilla": 0,
+        "tarjeta_roja": 0
+      },
+      {
+        "jugador": "Samper Joaquin",
+        "convocatorias": 3,
+        "partidos_titular": 0,
+        "minutos_jugados": 65,
+        "goles": 0,
         "asistencias": 0,
         "tarjeta_amarilla": 0,
         "tarjeta_roja": 0
@@ -21362,46 +21343,6 @@
         "partidos_titular": 5,
         "minutos_jugados": 523,
         "goles": 1,
-        "asistencias": 0,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Petry Uriel",
-        "convocatorias": 11,
-        "partidos_titular": 0,
-        "minutos_jugados": 13,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Sosena Fausto",
-        "convocatorias": 1,
-        "partidos_titular": 0,
-        "minutos_jugados": 0,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Ricaldi Ian",
-        "convocatorias": 12,
-        "partidos_titular": 1,
-        "minutos_jugados": 244,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Hernandez Emanuel",
-        "convocatorias": 3,
-        "partidos_titular": 0,
-        "minutos_jugados": 50,
-        "goles": 0,
         "asistencias": 0,
         "tarjeta_amarilla": 0,
         "tarjeta_roja": 0
@@ -21447,10 +21388,40 @@
         "tarjeta_roja": 0
       },
       {
-        "jugador": "Barrios Cristian",
+        "jugador": "Petry Uriel",
+        "convocatorias": 11,
+        "partidos_titular": 0,
+        "minutos_jugados": 13,
+        "goles": 0,
+        "asistencias": 0,
+        "tarjeta_amarilla": 0,
+        "tarjeta_roja": 0
+      },
+      {
+        "jugador": "Sosena Fausto",
         "convocatorias": 1,
         "partidos_titular": 0,
         "minutos_jugados": 0,
+        "goles": 0,
+        "asistencias": 0,
+        "tarjeta_amarilla": 0,
+        "tarjeta_roja": 0
+      },
+      {
+        "jugador": "Ricaldi Ian",
+        "convocatorias": 12,
+        "partidos_titular": 1,
+        "minutos_jugados": 244,
+        "goles": 0,
+        "asistencias": 0,
+        "tarjeta_amarilla": 0,
+        "tarjeta_roja": 0
+      },
+      {
+        "jugador": "Hernandez Emanuel",
+        "convocatorias": 3,
+        "partidos_titular": 0,
+        "minutos_jugados": 50,
         "goles": 0,
         "asistencias": 0,
         "tarjeta_amarilla": 0,
@@ -21470,6 +21441,16 @@
         "jugador": "Feversani Bautista",
         "convocatorias": 1,
         "partidos_titular": 1,
+        "minutos_jugados": 0,
+        "goles": 0,
+        "asistencias": 0,
+        "tarjeta_amarilla": 0,
+        "tarjeta_roja": 0
+      },
+      {
+        "jugador": "Barrios Cristian",
+        "convocatorias": 1,
+        "partidos_titular": 0,
         "minutos_jugados": 0,
         "goles": 0,
         "asistencias": 0,
@@ -21586,6 +21567,66 @@
         "goles": 0,
         "asistencias": 0,
         "tarjeta_amarilla": 0,
+        "tarjeta_roja": 0
+      },
+      {
+        "jugador": "Delgado Francisco",
+        "convocatorias": 19,
+        "partidos_titular": 14,
+        "minutos_jugados": 1208,
+        "goles": 1,
+        "asistencias": 2,
+        "tarjeta_amarilla": 4,
+        "tarjeta_roja": 1
+      },
+      {
+        "jugador": "Brandy German",
+        "convocatorias": 6,
+        "partidos_titular": 0,
+        "minutos_jugados": 50,
+        "goles": 1,
+        "asistencias": 0,
+        "tarjeta_amarilla": 0,
+        "tarjeta_roja": 0
+      },
+      {
+        "jugador": "Camba Rocco",
+        "convocatorias": 11,
+        "partidos_titular": 1,
+        "minutos_jugados": 11,
+        "goles": 0,
+        "asistencias": 0,
+        "tarjeta_amarilla": 0,
+        "tarjeta_roja": 0
+      },
+      {
+        "jugador": "Mallmann Félix",
+        "convocatorias": 20,
+        "partidos_titular": 11,
+        "minutos_jugados": 999,
+        "goles": 3,
+        "asistencias": 3,
+        "tarjeta_amarilla": 1,
+        "tarjeta_roja": 0
+      },
+      {
+        "jugador": "Serapio Ignacio",
+        "convocatorias": 5,
+        "partidos_titular": 0,
+        "minutos_jugados": 17,
+        "goles": 0,
+        "asistencias": 0,
+        "tarjeta_amarilla": 0,
+        "tarjeta_roja": 0
+      },
+      {
+        "jugador": "Acosta Jonathan",
+        "convocatorias": 12,
+        "partidos_titular": 7,
+        "minutos_jugados": 649,
+        "goles": 1,
+        "asistencias": 0,
+        "tarjeta_amarilla": 3,
         "tarjeta_roja": 0
       },
       {
@@ -21756,66 +21797,6 @@
         "goles": 0,
         "asistencias": 0,
         "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Delgado Francisco",
-        "convocatorias": 19,
-        "partidos_titular": 14,
-        "minutos_jugados": 1208,
-        "goles": 1,
-        "asistencias": 2,
-        "tarjeta_amarilla": 4,
-        "tarjeta_roja": 1
-      },
-      {
-        "jugador": "Brandy German",
-        "convocatorias": 6,
-        "partidos_titular": 0,
-        "minutos_jugados": 50,
-        "goles": 1,
-        "asistencias": 0,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Camba Rocco",
-        "convocatorias": 11,
-        "partidos_titular": 1,
-        "minutos_jugados": 11,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Mallmann Félix",
-        "convocatorias": 20,
-        "partidos_titular": 11,
-        "minutos_jugados": 999,
-        "goles": 3,
-        "asistencias": 3,
-        "tarjeta_amarilla": 1,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Serapio Ignacio",
-        "convocatorias": 5,
-        "partidos_titular": 0,
-        "minutos_jugados": 17,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Acosta Jonathan",
-        "convocatorias": 12,
-        "partidos_titular": 7,
-        "minutos_jugados": 649,
-        "goles": 1,
-        "asistencias": 0,
-        "tarjeta_amarilla": 3,
         "tarjeta_roja": 0
       }
     ],
@@ -22061,6 +22042,16 @@
         "tarjeta_roja": 0
       },
       {
+        "jugador": "Guglielmo Lisandro",
+        "convocatorias": 1,
+        "partidos_titular": 0,
+        "minutos_jugados": 35,
+        "goles": 0,
+        "asistencias": 0,
+        "tarjeta_amarilla": 0,
+        "tarjeta_roja": 0
+      },
+      {
         "jugador": "Burela Santino",
         "convocatorias": 28,
         "partidos_titular": 14,
@@ -22135,16 +22126,6 @@
         "convocatorias": 22,
         "partidos_titular": 10,
         "minutos_jugados": 799,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Guglielmo Lisandro",
-        "convocatorias": 1,
-        "partidos_titular": 0,
-        "minutos_jugados": 35,
         "goles": 0,
         "asistencias": 0,
         "tarjeta_amarilla": 0,
@@ -22261,7 +22242,7 @@
         "tarjeta_roja": 0
       },
       {
-        "jugador": "Cuba Gio",
+        "jugador": "Gonzalez Leonardo Fabian",
         "convocatorias": 1,
         "partidos_titular": 0,
         "minutos_jugados": 32,
@@ -22271,7 +22252,7 @@
         "tarjeta_roja": 0
       },
       {
-        "jugador": "Gonzalez Leonardo Fabian",
+        "jugador": "Cuba Gio",
         "convocatorias": 1,
         "partidos_titular": 0,
         "minutos_jugados": 32,
@@ -22302,26 +22283,6 @@
       }
     ],
     "8VA": [
-      {
-        "jugador": "Navarro Valentin",
-        "convocatorias": 14,
-        "partidos_titular": 12,
-        "minutos_jugados": 634,
-        "goles": 0,
-        "asistencias": 1,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Conte Ian",
-        "convocatorias": 12,
-        "partidos_titular": 8,
-        "minutos_jugados": 529,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
       {
         "jugador": "Reynoso Tomas",
         "convocatorias": 12,
@@ -22363,6 +22324,26 @@
         "tarjeta_roja": 0
       },
       {
+        "jugador": "Navarro Valentin",
+        "convocatorias": 14,
+        "partidos_titular": 12,
+        "minutos_jugados": 634,
+        "goles": 0,
+        "asistencias": 1,
+        "tarjeta_amarilla": 0,
+        "tarjeta_roja": 0
+      },
+      {
+        "jugador": "Conte Ian",
+        "convocatorias": 12,
+        "partidos_titular": 8,
+        "minutos_jugados": 529,
+        "goles": 0,
+        "asistencias": 0,
+        "tarjeta_amarilla": 0,
+        "tarjeta_roja": 0
+      },
+      {
         "jugador": "Mosqueda Ernesto Jesús",
         "convocatorias": 8,
         "partidos_titular": 7,
@@ -22393,16 +22374,6 @@
         "tarjeta_roja": 1
       },
       {
-        "jugador": "Galeano Joaquin",
-        "convocatorias": 7,
-        "partidos_titular": 6,
-        "minutos_jugados": 360,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 1,
-        "tarjeta_roja": 0
-      },
-      {
         "jugador": "Cocozza Maximo",
         "convocatorias": 15,
         "partidos_titular": 15,
@@ -22420,6 +22391,16 @@
         "goles": 0,
         "asistencias": 1,
         "tarjeta_amarilla": 0,
+        "tarjeta_roja": 0
+      },
+      {
+        "jugador": "Galeano Joaquin",
+        "convocatorias": 7,
+        "partidos_titular": 6,
+        "minutos_jugados": 360,
+        "goles": 0,
+        "asistencias": 0,
+        "tarjeta_amarilla": 1,
         "tarjeta_roja": 0
       },
       {
@@ -22483,16 +22464,6 @@
         "tarjeta_roja": 0
       },
       {
-        "jugador": "Fernández leis Gabriel",
-        "convocatorias": 8,
-        "partidos_titular": 8,
-        "minutos_jugados": 365,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 1,
-        "tarjeta_roja": 0
-      },
-      {
         "jugador": "Simone  Pedro",
         "convocatorias": 5,
         "partidos_titular": 5,
@@ -22503,33 +22474,13 @@
         "tarjeta_roja": 0
       },
       {
-        "jugador": "Monzon Tiziano",
-        "convocatorias": 11,
-        "partidos_titular": 11,
-        "minutos_jugados": 330,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Garcia Bautista",
-        "convocatorias": 10,
+        "jugador": "Fernández leis Gabriel",
+        "convocatorias": 8,
         "partidos_titular": 8,
-        "minutos_jugados": 185,
+        "minutos_jugados": 365,
         "goles": 0,
         "asistencias": 0,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Arias Bonilla  Nicolás Geremias",
-        "convocatorias": 5,
-        "partidos_titular": 4,
-        "minutos_jugados": 155,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 0,
+        "tarjeta_amarilla": 1,
         "tarjeta_roja": 0
       },
       {
@@ -22613,6 +22564,36 @@
         "tarjeta_roja": 0
       },
       {
+        "jugador": "Monzon Tiziano",
+        "convocatorias": 11,
+        "partidos_titular": 11,
+        "minutos_jugados": 330,
+        "goles": 0,
+        "asistencias": 0,
+        "tarjeta_amarilla": 0,
+        "tarjeta_roja": 0
+      },
+      {
+        "jugador": "Garcia Bautista",
+        "convocatorias": 10,
+        "partidos_titular": 8,
+        "minutos_jugados": 185,
+        "goles": 0,
+        "asistencias": 0,
+        "tarjeta_amarilla": 0,
+        "tarjeta_roja": 0
+      },
+      {
+        "jugador": "Arias Bonilla  Nicolás Geremias",
+        "convocatorias": 5,
+        "partidos_titular": 4,
+        "minutos_jugados": 155,
+        "goles": 0,
+        "asistencias": 0,
+        "tarjeta_amarilla": 0,
+        "tarjeta_roja": 0
+      },
+      {
         "jugador": "Rios Mateo",
         "convocatorias": 13,
         "partidos_titular": 10,
@@ -22620,16 +22601,6 @@
         "goles": 0,
         "asistencias": 1,
         "tarjeta_amarilla": 4,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Celiz Teo",
-        "convocatorias": 20,
-        "partidos_titular": 14,
-        "minutos_jugados": 525,
-        "goles": 1,
-        "asistencias": 0,
-        "tarjeta_amarilla": 0,
         "tarjeta_roja": 0
       },
       {
@@ -22673,14 +22644,14 @@
         "tarjeta_roja": 0
       },
       {
-        "jugador": "Bin Justin",
-        "convocatorias": 13,
-        "partidos_titular": 10,
-        "minutos_jugados": 275,
+        "jugador": "Celiz Teo",
+        "convocatorias": 20,
+        "partidos_titular": 14,
+        "minutos_jugados": 525,
         "goles": 1,
         "asistencias": 0,
-        "tarjeta_amarilla": 2,
-        "tarjeta_roja": 1
+        "tarjeta_amarilla": 0,
+        "tarjeta_roja": 0
       },
       {
         "jugador": "Lagos Benjamin",
@@ -22691,6 +22662,16 @@
         "asistencias": 0,
         "tarjeta_amarilla": 0,
         "tarjeta_roja": 0
+      },
+      {
+        "jugador": "Bin Justin",
+        "convocatorias": 13,
+        "partidos_titular": 10,
+        "minutos_jugados": 275,
+        "goles": 1,
+        "asistencias": 0,
+        "tarjeta_amarilla": 2,
+        "tarjeta_roja": 1
       },
       {
         "jugador": "Blanco Dylan Alex",
@@ -22815,6 +22796,26 @@
         "tarjeta_roja": 0
       },
       {
+        "jugador": "Vargas Valentino",
+        "convocatorias": 5,
+        "partidos_titular": 0,
+        "minutos_jugados": 151,
+        "goles": 0,
+        "asistencias": 0,
+        "tarjeta_amarilla": 0,
+        "tarjeta_roja": 0
+      },
+      {
+        "jugador": "Pesolilla Ian",
+        "convocatorias": 10,
+        "partidos_titular": 6,
+        "minutos_jugados": 280,
+        "goles": 0,
+        "asistencias": 2,
+        "tarjeta_amarilla": 0,
+        "tarjeta_roja": 0
+      },
+      {
         "jugador": "Enrique Ian",
         "convocatorias": 19,
         "partidos_titular": 13,
@@ -22855,41 +22856,81 @@
         "tarjeta_roja": 0
       },
       {
-        "jugador": "Vargas Valentino",
-        "convocatorias": 5,
-        "partidos_titular": 0,
-        "minutos_jugados": 151,
+        "jugador": "Torrecilla Enzo Francisco",
+        "convocatorias": 18,
+        "partidos_titular": 11,
+        "minutos_jugados": 858,
         "goles": 0,
         "asistencias": 0,
         "tarjeta_amarilla": 0,
         "tarjeta_roja": 0
       },
       {
-        "jugador": "Pesolilla Ian",
-        "convocatorias": 10,
-        "partidos_titular": 6,
-        "minutos_jugados": 280,
-        "goles": 0,
+        "jugador": "Agorreca Ignacio",
+        "convocatorias": 22,
+        "partidos_titular": 20,
+        "minutos_jugados": 1383,
+        "goles": 2,
         "asistencias": 2,
+        "tarjeta_amarilla": 3,
+        "tarjeta_roja": 0
+      },
+      {
+        "jugador": "Sanchez Benjamin",
+        "convocatorias": 15,
+        "partidos_titular": 9,
+        "minutos_jugados": 512,
+        "goles": 0,
+        "asistencias": 1,
         "tarjeta_amarilla": 0,
         "tarjeta_roja": 0
       },
       {
-        "jugador": "Gomez Zaracho Octavio",
-        "convocatorias": 23,
-        "partidos_titular": 19,
-        "minutos_jugados": 1218,
+        "jugador": "Villalba Bogado Gustavo",
+        "convocatorias": 20,
+        "partidos_titular": 12,
+        "minutos_jugados": 930,
+        "goles": 1,
+        "asistencias": 1,
+        "tarjeta_amarilla": 2,
+        "tarjeta_roja": 0
+      },
+      {
+        "jugador": "Mora Bautista",
+        "convocatorias": 22,
+        "partidos_titular": 20,
+        "minutos_jugados": 1279,
         "goles": 1,
         "asistencias": 0,
-        "tarjeta_amarilla": 6,
-        "tarjeta_roja": 2
+        "tarjeta_amarilla": 1,
+        "tarjeta_roja": 1
       },
       {
-        "jugador": "Peludero Mateo",
-        "convocatorias": 17,
-        "partidos_titular": 11,
-        "minutos_jugados": 620,
-        "goles": 0,
+        "jugador": "Zapata Alejo",
+        "convocatorias": 20,
+        "partidos_titular": 20,
+        "minutos_jugados": 1161,
+        "goles": 2,
+        "asistencias": 3,
+        "tarjeta_amarilla": 2,
+        "tarjeta_roja": 0
+      },
+      {
+        "jugador": "Gomez Joaquin",
+        "convocatorias": 22,
+        "partidos_titular": 16,
+        "minutos_jugados": 1100,
+        "goles": 3,
+        "asistencias": 1,
+        "tarjeta_amarilla": 5,
+        "tarjeta_roja": 0
+      },
+      {
+        "jugador": "Olocco Mikeas",
+        "convocatorias": 22,
+        "partidos_titular": 13,
+        "minutos_jugados": 881,
+        "goles": 4,
         "asistencias": 0,
         "tarjeta_amarilla": 0,
         "tarjeta_roja": 0
@@ -22915,24 +22956,24 @@
         "tarjeta_roja": 1
       },
       {
-        "jugador": "Ortiz Leonardo",
-        "convocatorias": 16,
-        "partidos_titular": 14,
-        "minutos_jugados": 816,
+        "jugador": "Gomez Zaracho Octavio",
+        "convocatorias": 23,
+        "partidos_titular": 19,
+        "minutos_jugados": 1218,
+        "goles": 1,
+        "asistencias": 0,
+        "tarjeta_amarilla": 6,
+        "tarjeta_roja": 2
+      },
+      {
+        "jugador": "Peludero Mateo",
+        "convocatorias": 17,
+        "partidos_titular": 11,
+        "minutos_jugados": 620,
         "goles": 0,
         "asistencias": 0,
         "tarjeta_amarilla": 0,
         "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Ibañez Bastian",
-        "convocatorias": 20,
-        "partidos_titular": 18,
-        "minutos_jugados": 1179,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 1
       },
       {
         "jugador": "Lopez Tomas",
@@ -22955,100 +22996,30 @@
         "tarjeta_roja": 0
       },
       {
-        "jugador": "Sanchez Benjamin",
-        "convocatorias": 15,
-        "partidos_titular": 9,
-        "minutos_jugados": 512,
+        "jugador": "Ortiz Leonardo",
+        "convocatorias": 16,
+        "partidos_titular": 14,
+        "minutos_jugados": 816,
         "goles": 0,
-        "asistencias": 1,
+        "asistencias": 0,
         "tarjeta_amarilla": 0,
         "tarjeta_roja": 0
       },
       {
-        "jugador": "Villalba Bogado Gustavo",
+        "jugador": "Ibañez Bastian",
         "convocatorias": 20,
-        "partidos_titular": 12,
-        "minutos_jugados": 930,
-        "goles": 1,
-        "asistencias": 1,
-        "tarjeta_amarilla": 2,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Torrecilla Enzo Francisco",
-        "convocatorias": 18,
-        "partidos_titular": 11,
-        "minutos_jugados": 858,
+        "partidos_titular": 18,
+        "minutos_jugados": 1179,
         "goles": 0,
         "asistencias": 0,
         "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Agorreca Ignacio",
-        "convocatorias": 22,
-        "partidos_titular": 20,
-        "minutos_jugados": 1383,
-        "goles": 2,
-        "asistencias": 2,
-        "tarjeta_amarilla": 3,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Gomez Joaquin",
-        "convocatorias": 22,
-        "partidos_titular": 16,
-        "minutos_jugados": 1100,
-        "goles": 3,
-        "asistencias": 1,
-        "tarjeta_amarilla": 5,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Olocco Mikeas",
-        "convocatorias": 22,
-        "partidos_titular": 13,
-        "minutos_jugados": 881,
-        "goles": 4,
-        "asistencias": 0,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Mora Bautista",
-        "convocatorias": 22,
-        "partidos_titular": 20,
-        "minutos_jugados": 1279,
-        "goles": 1,
-        "asistencias": 0,
-        "tarjeta_amarilla": 1,
         "tarjeta_roja": 1
-      },
-      {
-        "jugador": "Zapata Alejo",
-        "convocatorias": 20,
-        "partidos_titular": 20,
-        "minutos_jugados": 1161,
-        "goles": 2,
-        "asistencias": 3,
-        "tarjeta_amarilla": 2,
-        "tarjeta_roja": 0
       },
       {
         "jugador": "Baccaro Santino",
         "convocatorias": 14,
         "partidos_titular": 4,
         "minutos_jugados": 394,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Vargas Felipe",
-        "convocatorias": 1,
-        "partidos_titular": 0,
-        "minutos_jugados": 22,
         "goles": 0,
         "asistencias": 0,
         "tarjeta_amarilla": 0,
@@ -23072,6 +23043,26 @@
         "goles": 1,
         "asistencias": 1,
         "tarjeta_amarilla": 0,
+        "tarjeta_roja": 0
+      },
+      {
+        "jugador": "Vargas Felipe",
+        "convocatorias": 1,
+        "partidos_titular": 0,
+        "minutos_jugados": 22,
+        "goles": 0,
+        "asistencias": 0,
+        "tarjeta_amarilla": 0,
+        "tarjeta_roja": 0
+      },
+      {
+        "jugador": "Soto Mateo",
+        "convocatorias": 24,
+        "partidos_titular": 15,
+        "minutos_jugados": 1136,
+        "goles": 0,
+        "asistencias": 1,
+        "tarjeta_amarilla": 4,
         "tarjeta_roja": 0
       },
       {
@@ -23105,16 +23096,6 @@
         "tarjeta_roja": 0
       },
       {
-        "jugador": "Soto Mateo",
-        "convocatorias": 24,
-        "partidos_titular": 15,
-        "minutos_jugados": 1136,
-        "goles": 0,
-        "asistencias": 1,
-        "tarjeta_amarilla": 4,
-        "tarjeta_roja": 0
-      },
-      {
         "jugador": "Duarte Gaston",
         "convocatorias": 23,
         "partidos_titular": 17,
@@ -23135,16 +23116,6 @@
         "tarjeta_roja": 0
       },
       {
-        "jugador": "Echevarrieta Bautista",
-        "convocatorias": 20,
-        "partidos_titular": 12,
-        "minutos_jugados": 654,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
         "jugador": "Prado Lautaro",
         "convocatorias": 19,
         "partidos_titular": 13,
@@ -23152,6 +23123,16 @@
         "goles": 1,
         "asistencias": 2,
         "tarjeta_amarilla": 2,
+        "tarjeta_roja": 0
+      },
+      {
+        "jugador": "Echevarrieta Bautista",
+        "convocatorias": 20,
+        "partidos_titular": 12,
+        "minutos_jugados": 654,
+        "goles": 0,
+        "asistencias": 0,
+        "tarjeta_amarilla": 0,
         "tarjeta_roja": 0
       }
     ]
@@ -23886,7 +23867,9 @@
   "errores": [
     "statfutbol 4TA: Formato de sintesis inesperado (equipos/columnas)",
     "statfutbol 5TA: Formato de sintesis inesperado (equipos/columnas)",
+    "statfutbol 6TA: Formato de sintesis inesperado (equipos/columnas)",
     "statfutbol 7MA: Formato de sintesis inesperado (equipos/columnas)",
-    "statfutbol 8VA: Formato de sintesis inesperado (equipos/columnas)"
+    "statfutbol 8VA: Formato de sintesis inesperado (equipos/columnas)",
+    "statfutbol 9NA: Formato de sintesis inesperado (equipos/columnas)"
   ]
 }
