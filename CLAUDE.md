@@ -999,17 +999,50 @@ mostraban local/visitante al revés:
   `condicionCat('7MA',21)` → 'V', coincide con el resultado real ya
   confirmado para el LVV).
 
+**CORRECCIÓN IMPORTANTE (2026-08-29):** gran parte de las fases descriptas
+más arriba en este archivo (Fase 6-8: parser de PDF de Catapult con
+`gpsBuildFieldMap`/`gpsAliasedName`, 16 métricas, perfil de posición,
+sparklines, rediseño de PLANTEL al estilo "BL GPS Performance" con hub de
+2 columnas, módulos CARGA/SEMANA, etc.) **no existen en el `index.html`
+real** — se verificó con grep en todo el archivo y no aparece ninguna de
+esas funciones. El archivo termina en la línea ~8266 con un módulo GPS
+mínimo sin terminar: solo estado (`gpsSessions`), un loader de PDF.js y un
+comentario "AI EXTRACTION via Claude API" sin ninguna función de
+extracción real todavía. Esa descripción extensa correspondía a otra
+sesión/rama que nunca se mergeó a este repo (ver también
+`project_comet-redesign-2026-08` en la memoria de Claude, que ya había
+detectado el mismo desfasaje). No confiar en las fases GPS/PLANTEL
+descriptas arriba sin volver a verificar contra el código real primero.
+
+**Limpieza de código muerto — módulo PLANTEL viejo (COMPLETA, 2026-08-30):**
+revisando el archivo completo se confirmó que el módulo PLANTEL original
+(fichas manuales con foto/DNI/domicilio: `buildPlantelModule`,
+`renderPlantel`, `openFichaModal`, `players[cat]`, `db.ref('plantel')`)
+quedó **totalmente inalcanzable** desde la reestructuración de Fase 1 (no
+existe ningún `<div id="panel-plantel">` en el HTML ni entrada en la nav) —
+mismo patrón que el módulo GPS viejo borrado en su momento. Se confirmó
+cruzando cada función/variable (`players`, `POSITIONS`, `PIERNAS`,
+`editingPlayer`, etc.) sin ningún llamador fuera de ese bloque, y se borró
+entero: ~370 líneas de JS + ~350 líneas de CSS (`.plantel-toolbar`,
+`.player-card`, `.ficha-*`, etc.) + el CSS del módulo GPS visual que nunca
+llegó a usarse (`.gps-subtabs`, `.gps-upload-zone`, etc. — ~95 líneas, sin
+tocar el `gpsSessions`/PDF.js loader que sí sigue activo como scaffold).
+Verificado en la app real (sin login, y por consola) que nada quedó roto:
+`condicionCat`/`renderPlantelTab`/`plantelFutdetail` siguen funcionando,
+`buildPlantelModule`/`players` ya no existen.
+
 **Pendiente / a futuro:**
-- Si futdetail sigue sin traer a Josué Rojas / Cristian Lezcano dentro del
-  plantel de 4ta, confirmar con el club si corresponde revisar la carga en
-  futdetail (no es algo que se arregle desde acá).
-- Si en algún momento aparece un PDF de partido con el mismo problema de
-  encabezados que el de Racing (Dist/Mts x Min/Vel Max/Acc/Dcc sin
-  reconocer), vale la pena revisar `gpsBuildFieldMap` en serio en vez de
-  reconstruir a mano — por ahora fue un caso único.
-- Decidir si conviene recuperar CARGA (gimnasio) y/o SEMANA — ver arriba.
-- Ya se encontró y arregló el hueco de `"gps"` en las reglas de Firebase;
-  igual vale la pena que el usuario chequee alguna vez si hay otro nodo con
-  el mismo problema (algo agregado a la app sin agregar su regla).
-- Si te interesa respaldar también plantel/rendimiento/gps, crear el
-  usuario "viewer" dedicado y cargar los secrets (ver arriba).
+- Si futdetail sigue sin traer algún jugador dentro de un plantel,
+  confirmar con el club si corresponde revisar la carga en futdetail (no
+  es algo que se arregle desde acá).
+- Auditoría de reglas de Firebase (pedida 2026-08-29, no se pudo completar
+  sin acceso a la consola): los nodos raíz que la app realmente usa hoy son
+  `users`, `stats`, `plantel`, `gps`, `temporadaActiva`,
+  `temporadas_cerradas`, `roles_taken` (confirmado por grep de
+  `db.ref('...')` en `index.html`). Falta que el usuario confirme en
+  Firebase Console que los 7 tienen `.read`/`.write` condicionados al rol
+  correspondiente — en particular `roles_taken` y `temporadas_cerradas`,
+  que no se habían chequeado antes.
+- Crear el usuario "viewer" dedicado para que `backup_firebase.py` también
+  respalde plantel/rendimiento/gps — descartado a pedido expreso del
+  usuario (2026-08-29): "eso no lo vamos a hacer".
