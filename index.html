@@ -1003,6 +1003,15 @@ let aliasJugadoresComet = {};
 let recordatoriosOmitidos = {};
 const plantelFutdetail = {}; // plantelFutdetail[cat] = [{nombre,posicion,edad,altura,peso,pie,valoracion,foto,id}] (desde futdetail)
 CATEGORIES.forEach(cat => { plantelFutdetail[cat] = []; });
+// jugadoresArchivados[cat] = [nombres] -- jugadores que ya no están en el
+// club: se ocultan del plantel/tarjetas/comparativas activos, pero sus
+// estadísticas de temporada (goleadores, jugadores, matchData) NO se tocan,
+// quedan disponibles para consultar. Nunca se borra nada, solo se filtra la
+// vista -- mismo criterio que recordatoriosOmitidos.
+let jugadoresArchivados = {};
+function estaArchivado(cat, nombre){
+  return (jugadoresArchivados[cat]||[]).some(n=>normNombreOrdenIndependiente(n)===normNombreOrdenIndependiente(nombre));
+}
 
 // ── ID único de jugador ──────────────────────────────────────
 // Determinístico a partir del nombre (slug) — no hace falta guardar nada
@@ -1261,6 +1270,7 @@ function initFirebase(){
               if(p.jugadores?.[cat]) jugadoresStats[cat] = p.jugadores[cat];
               if(p.plantel?.[cat]) plantelFutdetail[cat] = p.plantel[cat];
               if(cat==='RESERVA'&&p.rivalData?.['RESERVA']) Object.assign(rivalData['RESERVA'], p.rivalData['RESERVA']);
+              if(p.jugadoresArchivados) jugadoresArchivados = p.jugadoresArchivados;
             });
             assignPlayerIds();
             // RESERVA_S2 (2do semestre)
@@ -1363,7 +1373,7 @@ function saveData(){
     // guardado normal (cargar un resultado, un link, un gol) BORRARÍA todo
     // lo subido de COMET, porque saveData() hace un .set() del nodo entero,
     // no un merge parcial. Mismo motivo para aliasJugadoresComet.
-    const payload={results:{},links:{},goleadores:{},rivalData:rivalData,matchData:matchData,gymData:gymData,jugadores:{},plantel:{},chequeoSemanal:chequeoSemanal,aliasJugadores:aliasJugadores,aliasJugadoresComet:aliasJugadoresComet,recordatoriosOmitidos:recordatoriosOmitidos,partidos:partidos};
+    const payload={results:{},links:{},goleadores:{},rivalData:rivalData,matchData:matchData,gymData:gymData,jugadores:{},plantel:{},chequeoSemanal:chequeoSemanal,aliasJugadores:aliasJugadores,aliasJugadoresComet:aliasJugadoresComet,recordatoriosOmitidos:recordatoriosOmitidos,partidos:partidos,jugadoresArchivados:jugadoresArchivados};
     CATEGORIES.forEach(cat=>{
       payload.results[cat]={};
       payload.links[cat]={};
@@ -1425,6 +1435,7 @@ function loadData(){
             Object.assign(rivalData['RESERVA'], p.rivalData['RESERVA']);
           }
         });
+        if(p.jugadoresArchivados) jugadoresArchivados = p.jugadoresArchivados;
         assignPlayerIds();
         // Load RESERVA_S2 (2do semestre) — clave separada, no forma parte de CATEGORIES
         const c2='RESERVA_S2';
@@ -1967,7 +1978,7 @@ function renderStatsGeneral(content){
 
     <div id="gen-posicion"></div>
 
-    ${seccionTitulo('rendgen-general', 'RENDIMIENTO GENERAL', bloqueSliderHTML('general'))}
+    ${seccionTitulo('rendgen-general', 'ESTADÍSTICAS POR BLOQUE — GENERAL', bloqueSliderHTML('general'))}
     <div id="sec-rendgen-general"${seccionEstiloInicial('rendgen-general')}>
       ${buildRendimientoGeneralHTML(calcStatsAll, '4TA', GENERAL_CATS)}
     </div>
@@ -2775,18 +2786,12 @@ function renderStatsSingle(cat, content){
       </table></div>
     </div>
 
-    ${(currentRole && currentRole.startsWith('cat_') && CONFIABILIDAD_CATS.includes(cat)) ? `
-    ${seccionTitulo('rivalstats-'+dataCat, 'ESTADÍSTICAS PRÓXIMO RIVAL')}
-    <div id="sec-rivalstats-${dataCat}"${seccionEstiloInicial('rivalstats-'+dataCat)}>
-      <div id="rival-stats-detalle-${dataCat}"></div>
-    </div>` : ''}
-
-    ${seccionTitulo('rendcat-'+dataCat, 'RENDIMIENTO', isReserva?'':bloqueSliderHTML('cat'))}
+    ${seccionTitulo('rendcat-'+dataCat, 'ESTADÍSTICAS POR BLOQUE', isReserva?'':bloqueSliderHTML('cat'))}
     <div id="sec-rendcat-${dataCat}"${seccionEstiloInicial('rendcat-'+dataCat)}>
       <div id="bloque-cat-${dataCat}"></div>
     </div>
 
-    ${isReserva?'':`${seccionTitulo('sistema-'+dataCat, 'RENDIMIENTO POR SISTEMA TÁCTICO')}
+    ${isReserva?'':`${seccionTitulo('sistema-'+dataCat, 'ESTADÍSTICAS POR SISTEMA')}
     <div id="sec-sistema-${dataCat}"${seccionEstiloInicial('sistema-'+dataCat)}>
       <div id="sistema-${dataCat}"></div>
     </div>`}
@@ -2800,6 +2805,12 @@ function renderStatsSingle(cat, content){
     <div id="sec-tablalpf-${cat}"${seccionEstiloInicial('tablalpf-'+cat)}>
       <div id="tabla-lpf-${cat}"></div>
     </div>
+
+    ${(currentRole && currentRole.startsWith('cat_') && CONFIABILIDAD_CATS.includes(cat)) ? `
+    ${seccionTitulo('rivalstats-'+dataCat, 'ESTADÍSTICAS PRÓXIMO RIVAL')}
+    <div id="sec-rivalstats-${dataCat}"${seccionEstiloInicial('rivalstats-'+dataCat)}>
+      <div id="rival-stats-detalle-${dataCat}"></div>
+    </div>` : ''}
   `;
 
   // Semestre switch (solo RESERVA)
@@ -4705,7 +4716,7 @@ function rosterColValue(p, key){
 }
 
 function renderRosterCat(cat, content){
-  const roster=plantelFutdetail[cat]||[];
+  const roster=(plantelFutdetail[cat]||[]).filter(p=>!estaArchivado(cat, p.nombre));
   const statsPorNombre={};
   (jugadoresStats[cat]||[]).forEach(j=>{ statsPorNombre[normNombre(j.jugador)]=j; });
 
@@ -5455,6 +5466,7 @@ function startPublicListener(){
     if(p.chequeoSemanal) chequeoSemanal = p.chequeoSemanal;
     if(p.aliasJugadores) aliasJugadores = p.aliasJugadores;
     if(p.aliasJugadoresComet) aliasJugadoresComet = p.aliasJugadoresComet;
+    if(p.jugadoresArchivados) jugadoresArchivados = p.jugadoresArchivados;
     if(p.recordatoriosOmitidos) recordatoriosOmitidos = p.recordatoriosOmitidos;
     refreshActiveModule();
   });
