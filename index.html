@@ -884,12 +884,18 @@ const RIVALS = [
   {f:33,r:'ESTUDIANTES LP',c:'L'},{f:34,r:'DEFENSA Y JUSTICIA',c:'V'},
   {f:35,r:'ATL. TUCUMÁN',c:'V'},
 ];
-// Equivalencia de nombres entre 3 fuentes para el mismo club -- cada una lo
-// escribe distinto: RIVALS (a mano, arriba), sabadogol (TABLA_DATA.fixture_completo,
-// nombres en mayúsculas sin tildes) y la tabla oficial LPF (TABLA_DATA.categorias).
-// Hace falta para "Estadísticas próximo rival" (ver generarEstadisticasRival):
-// cruzar los últimos partidos del rival y su fila en la tabla de posiciones.
-// "escudo" es el archivo en escudos/ (subidos a mano por Javi).
+// Equivalencia de nombres entre 2 fuentes para el mismo club -- cada una lo
+// escribe distinto: RIVALS (a mano, arriba, mayúsculas sin tildes) y la
+// tabla oficial LPF (TABLA_DATA.categorias y, desde 2026-08-31, también
+// TABLA_DATA.fixture_completo -- antes salía de sabadogol.com.ar, sacada
+// por poca confiabilidad, quedaba varios días atrás con los resultados
+// reales). Hace falta para "Estadísticas próximo rival" (ver
+// generarEstadisticasRival): cruzar los últimos partidos del rival y su
+// fila en la tabla de posiciones -- las dos cosas matchean ahora contra
+// "lpf" (antes fixture_completo matcheaba contra "sabadogol", un nombre
+// distinto; ese campo queda solo para no reescribir las 33 líneas de abajo,
+// pero ya no se usa para matchear nada). "escudo" es el archivo en
+// escudos/ (subidos a mano por Javi).
 const RIVAL_INFO = {
   'IND. RIVADAVIA':    {escudo:'independienteriv.png', sabadogol:'INDEPENDIENTE RIV',      lpf:'Indepte. Rivadavia'},
   'FERRO':             {escudo:'ferro.png',            sabadogol:'FERRO C.O.',             lpf:'Ferro'},
@@ -927,13 +933,13 @@ const RIVAL_INFO = {
   'DEFENSA Y JUSTICIA':{escudo:'defensa.png',          sabadogol:'DEF. Y JUSTICIA',        lpf:'Defensa y Justicia'},
   'ATL. TUCUMÁN':      {escudo:'atleticotucuman.png',  sabadogol:'ATLETICO TUCUMAN',       lpf:'Atlético Tucumán'},
 };
-// Reverso (nombre sabadogol -> escudo) para dibujar el escudo del RIVAL del
+// Reverso (nombre LPF -> escudo) para dibujar el escudo del RIVAL del
 // rival en "últimos resultados" (ej. a quién le ganó Godoy Cruz esa fecha).
-const ESCUDO_POR_SABADOGOL = {};
-const NOMBRE_POR_SABADOGOL = {};
+const ESCUDO_POR_LPF = {};
+const NOMBRE_POR_LPF = {};
 Object.entries(RIVAL_INFO).forEach(([nombre,v])=>{
-  ESCUDO_POR_SABADOGOL[v.sabadogol]=v.escudo;
-  NOMBRE_POR_SABADOGOL[v.sabadogol]=nombre;
+  ESCUDO_POR_LPF[v.lpf]=v.escudo;
+  NOMBRE_POR_LPF[v.lpf]=nombre;
 });
 
 // Fecha de calendario real de cada fecha del Torneo Juveniles 2026 (fijo
@@ -2067,7 +2073,8 @@ function youtubeId(url){
 
 function calcConfiabilidad(){
   // Partido por partido: mi carga (results) vs LIGA (fixture scrapeado de
-  // sabadogol.com.ar) vs futdetail (panel privado del club). Reemplaza al
+  // ligaprofesional.ar, la fuente oficial) vs futdetail (panel privado del
+  // club). Reemplaza al
   // viejo "chequeo semanal" externo — esto corre solo, sin depender de que
   // alguien lo cargue a mano. Si futdetail todavía no está configurado, la
   // comparación sigue funcionando con las dos fuentes que sí haya.
@@ -3847,10 +3854,23 @@ function cometResolvePlayer(cat, nombreComet){
     if(p) return {id:p.id, nombre:p.nombre, ambiguo:false};
   }
   const cometWords = new Set(cometNameWords(nombreComet));
-  const candidatos = (plantelFutdetail[cat]||[]).filter(p=>{
+  const buscar = roster => roster.filter(p=>{
     const pw = cometNameWords(p.nombre);
     return pw.length>0 && pw.every(w=>cometWords.has(w));
   });
+  let candidatos = buscar(plantelFutdetail[cat]||[]);
+  // Jugadores que suben o bajan de categoría para completar un partido
+  // (ej. un arquero de 5ta que va de suplente a 4ta) no están en el plantel
+  // de la categoría del informe -- si no aparece nadie ahí, se busca en el
+  // resto del club. El id es el mismo en todas las categorías (no incluye
+  // la categoría a propósito, ver assignPlayerIds), así que sus goles/
+  // tarjetas de ese partido igual quedan bien identificados como suyos.
+  if(candidatos.length===0){
+    CATEGORIES.forEach(otraCat=>{
+      if(otraCat===cat || candidatos.length) return;
+      candidatos = buscar(plantelFutdetail[otraCat]||[]);
+    });
+  }
   if(candidatos.length===1) return {id:candidatos[0].id, nombre:candidatos[0].nombre, ambiguo:false};
   return {id:null, nombre:null, ambiguo:true, candidatos:candidatos.map(c=>c.nombre)};
 }
@@ -5400,20 +5420,20 @@ function renderTablaLPF(cat, containerId){
   });
 }
 
-// Tabla LPF de Reserva (Proyección): datos fijos, ambos torneos apilados,
-// el que está en curso (Clausura) arriba y el anterior (Apertura) debajo.
-// Tabla LPF de Reserva (Proyección): datos automáticos (scraper), misma
-// fuente que ya usa el fixture de las juveniles — sabadogol.com.ar, porque
-// la LPF oficial ya no sirve una tabla estática para Reserva (todo lo
-// renderiza un widget de Opta por JS). Se muestran las dos zonas de cada
-// torneo (la de Tigre y la otra), igual que antes.
+// Tabla LPF de Reserva (Proyección): datos automáticos (scraper), ambos
+// torneos apilados, el que está en curso (Clausura) arriba y el anterior
+// (Apertura) debajo. Fuente statfutbol.com.ar (desde 2026-08-31; antes
+// sabadogol.com.ar, sacada por poca confiabilidad) porque la LPF oficial no
+// sirve una tabla estática para Reserva (todo lo renderiza un widget de
+// Opta por JS). Se muestran las dos zonas de cada torneo (la de Tigre y la
+// otra).
 function renderTablaReserva(containerId){
   const el=document.getElementById(containerId);
   if(!el) return;
   loadTablaData().then(()=>{
     const orden=['RESERVA_CLA','RESERVA_APE'];
     const upd=TABLA_DATA&&TABLA_DATA.actualizado
-      ? `Actualizado: ${TABLA_DATA.actualizado} · sabadogol.com.ar` : '';
+      ? `Actualizado: ${TABLA_DATA.actualizado} · statfutbol.com.ar` : '';
     el.innerHTML=orden.map(key=>{
       const data=(TABLA_DATA&&TABLA_DATA.categorias&&TABLA_DATA.categorias[key])||null;
       const label=TABLA_LABELS[key]||key;
@@ -6033,9 +6053,8 @@ function pdfSectionJugadores(cat){
 // Se dibuja a mano sobre <canvas> (sin SVG ni librerías externas): los
 // escudos son archivos propios en escudos/, del mismo origen que la app,
 // así el canvas nunca queda "contaminado" por una imagen de otro sitio
-// (lo que pasaría si se enlazaran directo los escudos de sabadogol, que no
-// mandan header CORS -- por eso ese scrapeo los descarga y los guarda
-// embebidos en tablas.json en vez de solo la URL).
+// (pasaría si se enlazaran directo escudos de un sitio externo sin header
+// CORS -- por eso siempre son estos archivos locales, nunca una URL).
 
 // Próxima fecha sin resultado cargado en `results[cat]`, con la condición
 // de Tigre esa fecha (reusa condicionCat, ya contempla las menores -- acá
@@ -6064,8 +6083,8 @@ function ultimosPartidosRival(cat, rivalNombre, condicion, cant){
   const out=[];
   for(const f of fechas){
     for(const p of fc[f]){
-      if((condicion===null||condicion==='L') && p.local===info.sabadogol) out.push({fecha:f, rivalDe:p.visitante, gf:p.gl, gc:p.gv, cond:'L'});
-      else if((condicion===null||condicion==='V') && p.visitante===info.sabadogol) out.push({fecha:f, rivalDe:p.local, gf:p.gv, gc:p.gl, cond:'V'});
+      if((condicion===null||condicion==='L') && p.local===info.lpf) out.push({fecha:f, rivalDe:p.visitante, gf:p.gl, gc:p.gv, cond:'L'});
+      else if((condicion===null||condicion==='V') && p.visitante===info.lpf) out.push({fecha:f, rivalDe:p.local, gf:p.gv, gc:p.gl, cond:'V'});
       if(out.length>=cant) return out.reverse(); // más viejo primero al mostrarlos
     }
   }
@@ -6081,8 +6100,8 @@ function partidoMasRecienteRival(cat, rivalNombre){
   const fechas = Object.keys(fc).map(Number).sort((a,b)=>b-a);
   for(const f of fechas){
     for(const p of fc[f]){
-      if(p.local===info.sabadogol) return {fecha:f, cond:'L', rivalDe:p.visitante, gf:p.gl, gc:p.gv};
-      if(p.visitante===info.sabadogol) return {fecha:f, cond:'V', rivalDe:p.local, gf:p.gv, gc:p.gl};
+      if(p.local===info.lpf) return {fecha:f, cond:'L', rivalDe:p.visitante, gf:p.gl, gc:p.gv};
+      if(p.visitante===info.lpf) return {fecha:f, cond:'V', rivalDe:p.local, gf:p.gv, gc:p.gl};
     }
   }
   return null;
@@ -6281,9 +6300,9 @@ async function dibujarTarjetaRival({cat, prox, info, ultimos, ultimosLabel, reci
     cargarImagen('escudos/'+info.escudo),
     cargarImagen(document.getElementById('escudoImg')?.src),
     cargarImagen('escudos/LIGA.png'),
-    ...ultimos.map(p=>cargarImagen(ESCUDO_POR_SABADOGOL[p.rivalDe] ? 'escudos/'+ESCUDO_POR_SABADOGOL[p.rivalDe] : null)),
+    ...ultimos.map(p=>cargarImagen(ESCUDO_POR_LPF[p.rivalDe] ? 'escudos/'+ESCUDO_POR_LPF[p.rivalDe] : null)),
   ]);
-  const escudoReciente = reciente ? await cargarImagen(ESCUDO_POR_SABADOGOL[reciente.rivalDe] ? 'escudos/'+ESCUDO_POR_SABADOGOL[reciente.rivalDe] : null) : null;
+  const escudoReciente = reciente ? await cargarImagen(ESCUDO_POR_LPF[reciente.rivalDe] ? 'escudos/'+ESCUDO_POR_LPF[reciente.rivalDe] : null) : null;
 
   // 16:9 (1280x720) a pedido de Javi, para que ocupe mejor la pantalla en
   // presentaciones. El contenido (tabla + hasta 4 resultados) casi siempre
@@ -6386,7 +6405,7 @@ async function dibujarTarjetaRival({cat, prox, info, ultimos, ultimosLabel, reci
     const escImg=escudosResultados[i];
     if(escImg){ ctx.drawImage(escImg, tx, ry+(rowH2visual-28)/2, 28, 28); tx+=36; }
     ctx.font="14px 'Barlow', sans-serif"; ctx.fillStyle=TXT2;
-    ctx.fillText(`Fecha ${p.fecha} vs ${NOMBRE_POR_SABADOGOL[p.rivalDe]||p.rivalDe} · ${p.cond==='L'?'LOCAL':'VISIT.'}`, tx, ry+rowH2visual/2-7);
+    ctx.fillText(`Fecha ${p.fecha} vs ${NOMBRE_POR_LPF[p.rivalDe]||p.rivalDe} · ${p.cond==='L'?'LOCAL':'VISIT.'}`, tx, ry+rowH2visual/2-7);
     ctx.font="700 17px 'Barlow', sans-serif"; ctx.fillStyle=TXT;
     ctx.fillText(`${p.gf}-${p.gc}`, leftX+colW-170, ry+rowH2visual/2-8);
     const bw=80;
@@ -6410,7 +6429,7 @@ async function dibujarTarjetaRival({cat, prox, info, ultimos, ultimosLabel, reci
     let tx=rightX+18;
     if(escudoReciente){ ctx.drawImage(escudoReciente, tx, cy-2, 26, 26); tx+=34; }
     ctx.font="15px 'Barlow', sans-serif"; ctx.fillStyle=TXT2;
-    ctx.fillText('vs '+(NOMBRE_POR_SABADOGOL[reciente.rivalDe]||reciente.rivalDe), tx, cy+5);
+    ctx.fillText('vs '+(NOMBRE_POR_LPF[reciente.rivalDe]||reciente.rivalDe), tx, cy+5);
     cy+=42;
     ctx.font="700 36px 'Barlow Condensed', sans-serif"; ctx.fillStyle=WHITE;
     ctx.fillText(`${reciente.gf} - ${reciente.gc}`, rightX+18, cy);
@@ -7161,10 +7180,16 @@ async function generarPDFCategoria(cat){
 // click en el nombre dentro de la tabla de PLANTEL.
 function abrirPerfilJugador(cat, nombre){
   const roster = plantelFutdetail[cat]||[];
-  const jugador = roster.find(p=>p.nombre===nombre);
+  // Match por palabras ordenadas alfabéticamente, no por igualdad exacta:
+  // el nombre puede llegar acá con otro formato ("APELLIDO, NOMBRE" desde
+  // Goleadores) que nunca va a ser igual char-a-char al del plantel
+  // ("Apellido Nombre") -- mismo criterio que ya usa esMismoJugador más
+  // abajo para citaciones, ahora aplicado también a los datos de arriba.
+  const nombreOI = normNombreOrdenIndependiente(nombre);
+  const jugador = roster.find(p=>p.nombre===nombre) || roster.find(p=>normNombreOrdenIndependiente(p.nombre)===nombreOI);
   const statsPorNombre={};
-  (jugadoresStats[cat]||[]).forEach(j=>{ statsPorNombre[normNombre(j.jugador)]=j; });
-  const s = statsPorNombre[normNombre(nombre)]||{};
+  (jugadoresStats[cat]||[]).forEach(j=>{ statsPorNombre[normNombreOrdenIndependiente(j.jugador)]=j; });
+  const s = statsPorNombre[nombreOI]||{};
 
   const golData = golesEfectivos(cat).find(g=>g.name===nombre
     || normNombreOrdenIndependiente(g.name)===normNombreOrdenIndependiente(nombre));
