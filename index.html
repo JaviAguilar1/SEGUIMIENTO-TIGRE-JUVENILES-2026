@@ -3107,6 +3107,7 @@ function abrirVideoEmbebido(url, titulo){
 // PLANTEL: roster + comparar jugadores (ya existentes, mudados acá) +
 // rendimiento físico (Catapult, nuevo).
 function renderPlantelTab(cat, tabEl){
+  if(seccionColapsada['roster-tabla-'+cat]===undefined) seccionColapsada['roster-tabla-'+cat]=false;
   tabEl.innerHTML = `
     ${seccionTitulo('roster-tabla-'+cat, `📋 TABLA DE PLANTEL · <span style="color:${CAT_COLORS[cat]}">${cat}</span>`)}
     <div id="sec-roster-tabla-${cat}"${seccionEstiloInicial('roster-tabla-'+cat)}>
