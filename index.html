@@ -7419,18 +7419,27 @@ function amarillasEnAlerta(cat){
   const AMARILLAS_ALERTA = 4;
   const AMARILLAS_SUSPENSION = 5; // a la 5ta amarilla se cumple 1 fecha y el conteo arranca de cero
   const porJugador = {}; // id -> {nombre, count}
-  Object.values(partidos[cat]||{}).forEach(partido=>{
+  // El conteo es por CICLO, no por total de temporada: se reinicia en cero
+  // apenas el jugador es expulsado (roja directa o doble amarilla), o al
+  // llegar a la 5ta amarilla acumulada -- en los dos casos ya cumplió una
+  // suspensión y el conteo relevante es el que lleva desde ahí, no el
+  // acumulado entero. Por eso hace falta procesar los partidos en orden
+  // cronológico (por fecha), no en el orden en que estén en Firebase.
+  const fechasOrdenadas = Object.keys(partidos[cat]||{}).map(Number).sort((a,b)=>a-b);
+  fechasOrdenadas.forEach(fecha=>{
+    const partido = partidos[cat][fecha];
     (partido.amarillas||[]).forEach(a=>{
       if(!a.id) return;
       if(!porJugador[a.id]) porJugador[a.id]={nombre:plantelNombreDeId(cat,a.id)||a.nombre, count:0};
       porJugador[a.id].count++;
     });
+    const expulsados = new Set((partido.rojas||[]).map(r=>r.id).filter(Boolean));
+    Object.keys(porJugador).forEach(id=>{
+      if(porJugador[id].count>=AMARILLAS_SUSPENSION || expulsados.has(id)) porJugador[id].count=0;
+    });
   });
-  // El aviso es por CICLO, no por total de temporada: si ya cumplió una
-  // suspensión (5, 10, 15... amarillas), el conteo relevante es el que
-  // lleva desde esa última suspensión, no el acumulado entero.
   return Object.values(porJugador)
-    .map(p=>({...p, ciclo: p.count % AMARILLAS_SUSPENSION}))
+    .map(p=>({...p, ciclo: p.count}))
     .filter(p=>p.ciclo>=AMARILLAS_ALERTA);
 }
 // El pill "N en alerta" del header se sacó a pedido de Javi -- el mismo
