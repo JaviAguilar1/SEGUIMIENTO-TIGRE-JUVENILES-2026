@@ -7180,16 +7180,22 @@ async function generarPDFCategoria(cat){
 // click en el nombre dentro de la tabla de PLANTEL.
 function abrirPerfilJugador(cat, nombre){
   const roster = plantelFutdetail[cat]||[];
-  // Match por palabras ordenadas alfabéticamente, no por igualdad exacta:
-  // el nombre puede llegar acá con otro formato ("APELLIDO, NOMBRE" desde
-  // Goleadores) que nunca va a ser igual char-a-char al del plantel
-  // ("Apellido Nombre") -- mismo criterio que ya usa esMismoJugador más
-  // abajo para citaciones, ahora aplicado también a los datos de arriba.
-  const nombreOI = normNombreOrdenIndependiente(nombre);
-  const jugador = roster.find(p=>p.nombre===nombre) || roster.find(p=>normNombreOrdenIndependiente(p.nombre)===nombreOI);
+  // Match por subconjunto de palabras, no por igualdad exacta: el nombre
+  // puede llegar acá en otro formato ("APELLIDO, NOMBRE" desde Goleadores,
+  // sin segundos nombres) que nunca va a ser igual al del plantel
+  // ("Apellido Nombre Segundo") -- mismo criterio que cometResolvePlayer
+  // usa para matchear informes de COMET contra el plantel.
+  const nombreWords = cometNameWords(nombre);
+  const sonMismoJugador = otro => {
+    const otroWords = cometNameWords(otro);
+    return otroWords.length>0 && nombreWords.length>0 &&
+      (otroWords.every(w=>nombreWords.includes(w)) || nombreWords.every(w=>otroWords.includes(w)));
+  };
+  const jugador = roster.find(p=>p.nombre===nombre) || roster.find(p=>sonMismoJugador(p.nombre));
   const statsPorNombre={};
   (jugadoresStats[cat]||[]).forEach(j=>{ statsPorNombre[normNombreOrdenIndependiente(j.jugador)]=j; });
-  const s = statsPorNombre[nombreOI]||{};
+  const jStat = (jugadoresStats[cat]||[]).find(j=>sonMismoJugador(j.jugador));
+  const s = statsPorNombre[normNombreOrdenIndependiente(nombre)] || jStat || {};
 
   const golData = golesEfectivos(cat).find(g=>g.name===nombre
     || normNombreOrdenIndependiente(g.name)===normNombreOrdenIndependiente(nombre));

@@ -13,7 +13,6 @@ la tabla, el script termina con codigo != 0 y NO sobrescribe el JSON
 existente (asi la app sigue mostrando el ultimo dato bueno).
 """
 
-import base64
 import json
 import os
 import re
@@ -36,43 +35,29 @@ FUENTES = {
 }
 
 # Reserva ("Proyeccion" en la web oficial). A diferencia de las juveniles,
-# estas paginas ya NO traen ninguna <table> embebida (confirmado 2026-08-18):
-# todo se dibuja con un <opta-widget> por JS, ni siquiera hay un iframe de
-# DataFactory como antes. Por eso la tabla de posiciones de Reserva sale de
-# sabadogol.com.ar (parse_reserva_tabla), la misma fuente que ya se usa para
-# el fixture partido a partido de las juveniles -- el mismo POST a
-# fixture.php trae, ademas del fixture, las tablas de posiciones de las dos
-# zonas del torneo. "c" identifica el torneo (dos por temporada: Apertura y
-# Clausura); "t" no afecta la respuesta (probado con varios valores, siempre
-# devuelve el mismo contenido), asi que se manda un valor fijo cualquiera.
-FIXTURE_RESERVA_C = {
-    "RESERVA_APE": "2",   # Proyeccion Apertura
-    "RESERVA_CLA": "26",  # Proyeccion Clausura
+# estas paginas ya NO traen ninguna <table> embebida (confirmado 2026-08-18,
+# re-chequeado 2026-08-31: sigue igual): todo se dibuja con un <opta-widget>
+# por JS. Por eso la tabla de posiciones de Reserva sale de statfutbol.com.ar
+# (fetch_statfutbol_reserva_zona), que tiene una pagina estatica por zona y
+# por torneo (confirmado con datos reales: Tigre en Zona A en los dos
+# torneos). A diferencia de sabadogol (fuente vieja, sacada por poca
+# confiabilidad -- se quedaba atras varios dias con los resultados), acá no
+# hace falta detectar la zona por proximidad de texto: cada URL es una zona.
+RESERVA_ZONA_URLS = {
+    "RESERVA_APE": {
+        "Zona A": "afaposicionescopaapA2026Resolucion.php",
+        "Zona B": "afaposicionescopaapB2026Resolucion.php",
+    },
+    "RESERVA_CLA": {
+        "Zona A": "afaposicionescopaclA2026Resolucion.php",
+        "Zona B": "afaposicionescopaclB2026Resolucion.php",
+    },
 }
 
 OUT_PATH = "data/tablas.json"
 
 HEADERS = {
     "User-Agent": "Mozilla/5.0 (compatible; TigreJuvenilesBot/1.0; +github-actions)"
-}
-
-# Resultado por fecha de Tigre (partido por partido): fuente sabadogol.com.ar.
-# La LPF oficial no sirve esto en HTML plano (lo carga con JS via un widget de
-# terceros que no se puede scrapear simple), pero sabadogol.com.ar muestra el
-# mismo fixture en una tabla comun. FIXTURE_URL recibe por POST el anio (a),
-# la categoria (c=6 es "Juveniles LPF") y el torneo puntual (t), que ya viene
-# separado por division (a diferencia de "d", que es redundante con "t" pero
-# lo mandamos igual porque el form original lo espera).
-FIXTURE_URL = "https://sabadogol.com.ar/fixture.php"
-FIXTURE_ANIO = "3"     # 2026
-FIXTURE_CAT = "6"      # Juveniles LPF
-FIXTURE_TORNEOS = {
-    "4TA": ("3", "5"),
-    "5TA": ("4", "9"),
-    "6TA": ("5", "10"),
-    "7MA": ("6", "11"),
-    "8VA": ("7", "12"),
-    "9NA": ("8", "13"),
 }
 
 # Nombre oficial en la web  ->  como queremos mostrarlo (normalizamos "Tigre")
@@ -95,114 +80,93 @@ def fetch_post(url: str, data: dict) -> str:
         return resp.read().decode("utf-8", errors="replace")
 
 
-def fetch_bytes(url: str) -> bytes:
-    req = urllib.request.Request(url, headers=HEADERS)
-    with urllib.request.urlopen(req, timeout=30) as resp:
-        return resp.read()
-
-
 def _quitar_tags(s: str) -> str:
     return re.sub(r"<[^>]+>", "", s).strip()
 
 
-def parse_fixture_cat(html: str):
+def parse_lpf_fixture_completo(html: str):
     """
-    Extrae, de una respuesta de sabadogol.com.ar/fixture.php, los partidos de
-    TIGRE fecha por fecha. La pagina trae las 35 fechas en una sola respuesta
-    (pestanas que ya vienen todas armadas en el HTML), cada una precedida por
-    un comentario "<!-- N -->" con el numero de fecha.
-    Devuelve dict {fecha:int -> {"gf":int,"gc":int,"rival":str}}.
-    Partidos todavia no jugados (sin marcador "N - N") se omiten.
+    Extrae TODOS los partidos ya jugados de cada fecha (los de Tigre y los de
+    los demas equipos) de la misma pagina de ligaprofesional.ar que ya usa
+    parse_tabla para la tabla de posiciones -- no hace falta un pedido HTTP
+    aparte. Reemplaza a la vieja fuente sabadogol.com.ar (sacada por poca
+    confiabilidad: se quedaba atras varios dias con los resultados reales,
+    confirmado comparando contra la LPF oficial y statfutbol.com.ar el
+    2026-08-31).
+
+    La pagina arma el fixture con pestañas "Fecha 1".."Fecha 35" (widget
+    Elementor/ElementsKit): un <table class="...tablepress-fixture"> por
+    fecha, dentro de un <div class="tab-pane" id="content-XXXX"> propio. El
+    numero de fecha no viaja en las filas de la tabla, asi que se arma
+    cruzando cada pestaña (data-ekit-handler-id="fecha-N", con
+    data-target="#content-XXXX" apuntando a su panel) contra el panel que
+    tiene ese mismo id -- NO por orden de aparicion: confirmado con un caso
+    real (2026-08-31, 9NA) que el pedido HTTP a veces devuelve un panel de
+    menos que otras (probable variacion de cache del lado de la Liga, no
+    algo que dependa de nuestro request) -- matchear por id evita asignarle
+    a una fecha la tabla de otra cuando eso pasa; esa fecha simplemente
+    queda afuera de este pedido puntual (se completa sola en el proximo).
+
+    Devuelve {fecha:int -> [{"local":str,"visitante":str,"gl":int,"gv":int}, ...]}.
+    Partidos sin marcador (todavia no jugados, celda de gol vacia) se omiten.
     """
-    partes = re.split(r"<!--\s*(\d+)\s*-->", html)
+    nav_pairs = re.findall(
+        r'data-ekit-handler-id="fecha-(\d+)"[^>]*data-target="#(content-[0-9a-f]+)"', html)
+    panel_ids = re.split(r'id="(content-[0-9a-f]+)" role="tabpanel"', html)
+    paneles = dict(zip(panel_ids[1::2], panel_ids[2::2]))  # content_id -> html despues del panel
+    if not nav_pairs or not paneles:
+        raise ValueError("no se encontraron pestañas ni paneles de fixture")
+
     out = {}
-    # partes[0] es lo anterior a la primera fecha; despues alterna numero/bloque
-    for i in range(1, len(partes), 2):
-        try:
-            fecha = int(partes[i])
-        except ValueError:
-            continue
-        bloque = partes[i + 1]
-        m = re.search(r'<table class="table">(.*?)</table>', bloque, re.DOTALL)
+    for fecha_str, content_id in nav_pairs:
+        panel_html = paneles.get(content_id)
+        if not panel_html:
+            continue  # panel de esta fecha no vino en esta respuesta puntual
+        m = re.search(
+            r'<table id="tablepress-\d+" class="tablepress tablepress-id-\d+ tablepress-fixture">(.*?)</table>',
+            panel_html, re.DOTALL)
         if not m:
             continue
+        fecha = int(fecha_str)
+        tabla_html = m.group(1)
         filas = re.findall(
-            r'<tr>\s*<td class="text-end[^"]*"[^>]*>(.*?)</td>\s*'
-            r'<td[^>]*><div[^>]*>([^<]*)</div></td>\s*'
-            r'<td class="text-start[^"]*"[^>]*>(.*?)</td>\s*</tr>',
-            m.group(1), re.DOTALL)
-        for local_raw, marcador, visitante_raw in filas:
-            local = _quitar_tags(local_raw)
-            visitante = _quitar_tags(visitante_raw)
-            es_local = "TIGRE" in local.upper()
-            es_visitante = "TIGRE" in visitante.upper()
-            if not (es_local or es_visitante):
-                continue
-            gm = re.match(r"^\s*(\d+)\s*-\s*(\d+)\s*$", marcador.strip())
-            if not gm:
+            r'<td class="column-1">.*?</td>\s*<td class="column-2">(.*?)</td>\s*'
+            r'<td class="column-3">.*?</td>\s*<td class="column-4">(.*?)</td>\s*'
+            r'<td class="column-5">.*?</td>\s*<td class="column-6">(.*?)</td>\s*'
+            r'<td class="column-7">.*?</td>\s*<td class="column-8">(.*?)</td>',
+            tabla_html, re.DOTALL)
+        partidos = []
+        for local_raw, gl_raw, gv_raw, visitante_raw in filas:
+            gl_raw, gv_raw = _quitar_tags(gl_raw), _quitar_tags(gv_raw)
+            if not (gl_raw.isdigit() and gv_raw.isdigit()):
                 continue  # todavia no jugado
-            g1, g2 = int(gm.group(1)), int(gm.group(2))
-            if es_local:
-                out[fecha] = {"gf": g1, "gc": g2, "rival": visitante}
-            else:
-                out[fecha] = {"gf": g2, "gc": g1, "rival": local}
+            partidos.append({
+                "local": norm_equipo(_quitar_tags(local_raw)),
+                "visitante": norm_equipo(_quitar_tags(visitante_raw)),
+                "gl": int(gl_raw),
+                "gv": int(gv_raw),
+            })
+        if partidos:
+            out[fecha] = partidos
+    if not out:
+        raise ValueError("no se pudo parsear ningun partido jugado")
     return out
 
 
-def parse_fixture_completo(html: str):
-    """
-    Extrae TODOS los partidos ya jugados de cada fecha (los de Tigre y los
-    de los demas equipos), de la misma respuesta que ya usa parse_fixture_cat
-    -- no hace falta un pedido HTTP aparte. Sirve para calcular, por ejemplo,
-    los ultimos resultados de un rival puntual (no solo los de Tigre), como
-    para armar el analisis previo a un partido.
-    De paso, saca la URL del escudo de cada equipo (sabadogol pone un <img>
-    pegado al nombre en cada celda) -- se junta en un dict aparte porque el
-    escudo de un equipo es siempre el mismo, no depende de la fecha.
-    Devuelve una tupla (partidos, escudos):
-      partidos: {fecha:int -> [{"local":str,"visitante":str,"gl":int,"gv":int}, ...]}
-      escudos: {nombre_equipo:str -> url_relativa:str}
-    Partidos sin marcador "N - N" (todavia no jugados) se omiten.
-    """
-    partes = re.split(r"<!--\s*(\d+)\s*-->", html)
+def fixture_tigre_desde_completo(fixture_completo: dict):
+    """Aisla los partidos de TIGRE de un fixture_completo (parse_lpf_fixture_
+    completo) en el shape que espera resultado["fixture"]:
+    {fecha:int -> {"gf":int,"gc":int,"rival":str}}."""
     out = {}
-    escudos = {}
-    for i in range(1, len(partes), 2):
-        try:
-            fecha = int(partes[i])
-        except ValueError:
-            continue
-        bloque = partes[i + 1]
-        m = re.search(r'<table class="table">(.*?)</table>', bloque, re.DOTALL)
-        if not m:
-            continue
-        filas = re.findall(
-            r'<tr>\s*<td class="text-end[^"]*"[^>]*>(.*?)</td>\s*'
-            r'<td[^>]*><div[^>]*>([^<]*)</div></td>\s*'
-            r'<td class="text-start[^"]*"[^>]*>(.*?)</td>\s*</tr>',
-            m.group(1), re.DOTALL)
-        partidos = []
-        for local_raw, marcador, visitante_raw in filas:
-            gm = re.match(r"^\s*(\d+)\s*-\s*(\d+)\s*$", marcador.strip())
-            if not gm:
-                continue  # todavia no jugado
-            local = norm_equipo(_quitar_tags(local_raw))
-            visitante = norm_equipo(_quitar_tags(visitante_raw))
-            partidos.append({
-                "local": local,
-                "visitante": visitante,
-                "gl": int(gm.group(1)),
-                "gv": int(gm.group(2)),
-            })
-            for nombre, celda_raw in ((local, local_raw), (visitante, visitante_raw)):
-                if nombre in escudos:
-                    continue
-                m_esc = re.search(r'<img[^>]+src="([^"]+)"', celda_raw)
-                if m_esc:
-                    escudos[nombre] = m_esc.group(1).strip()
-        if partidos:
-            out[fecha] = partidos
-    return out, escudos
+    for fecha, partidos in fixture_completo.items():
+        for p in partidos:
+            es_local = p["local"].upper() == "TIGRE"
+            es_visitante = p["visitante"].upper() == "TIGRE"
+            if es_local:
+                out[fecha] = {"gf": p["gl"], "gc": p["gv"], "rival": p["visitante"]}
+            elif es_visitante:
+                out[fecha] = {"gf": p["gv"], "gc": p["gl"], "rival": p["local"]}
+    return out
 
 
 # ── futdetail (panel privado del club) ──────────────────────────────────
@@ -851,16 +815,25 @@ def _filas_desde_tabla_html(tabla_html: str):
     filas = re.findall(r"<tr\b[^>]*>(.*?)</tr>", tabla_html, re.IGNORECASE | re.DOTALL)
     out = []
     for fila in filas:
-        celdas = re.findall(r"<t[dh]\b[^>]*>(.*?)</t[dh]>", fila, re.IGNORECASE | re.DOTALL)
-        celdas = [re.sub(r"<[^>]+>", "", c).replace("&nbsp;", " ").strip() for c in celdas]
-        if len(celdas) < 10:
+        celdas_raw = re.findall(r"<t[dh]\b[^>]*>(.*?)</t[dh]>", fila, re.IGNORECASE | re.DOTALL)
+        if len(celdas_raw) < 10:
             continue
-        pos_raw = celdas[0].replace("°", "").strip()
+        def _limpiar(c):
+            return re.sub(r"<[^>]+>", "", c).replace("&nbsp;", " ").strip()
+        pos_raw = _limpiar(celdas_raw[0]).replace("°", "").strip()
         if not re.match(r"^\d+$", pos_raw):
             continue
-        equipo = norm_equipo(celdas[1])
+        # La celda de equipo a veces trae dos versiones pegadas (ej.
+        # statfutbol: <span class="pc">RIVER PLATE</span><span
+        # class="celu">RIV</span>, una para PC y otra abreviada para
+        # celular -- CSS oculta una segun el viewport, pero las dos quedan
+        # en el HTML crudo). Si esta la version "pc" se usa esa; si no, el
+        # texto entero de la celda (formato de la LPF, sin este split).
+        m_pc = re.search(r'class="pc">([^<]*)</span>', celdas_raw[1])
+        equipo = norm_equipo(m_pc.group(1) if m_pc else _limpiar(celdas_raw[1]))
         if not equipo:
             continue
+        celdas = [_limpiar(c) for c in celdas_raw]
         try:
             out.append({
                 "pos": int(pos_raw), "equipo": equipo,
@@ -874,69 +847,28 @@ def _filas_desde_tabla_html(tabla_html: str):
     return out
 
 
-def _filas_posiciones_sin_dif(tabla_html: str):
-    """Como _filas_desde_tabla_html, pero para el formato de sabadogol.com.ar
-    (Reserva): 9 columnas, POS/EQUIPO/PTS/PJ/G/E/P/GF/GC, sin columna DIF
-    (se calcula GF-GC)."""
-    filas = re.findall(r"<tr\b[^>]*>(.*?)</tr>", tabla_html, re.IGNORECASE | re.DOTALL)
-    out = []
-    for fila in filas:
-        celdas = re.findall(r"<t[dh]\b[^>]*>(.*?)</t[dh]>", fila, re.IGNORECASE | re.DOTALL)
-        celdas = [re.sub(r"<[^>]+>", "", c).replace("&nbsp;", " ").strip() for c in celdas]
-        if len(celdas) < 9:
-            continue
-        pos_raw = celdas[0].replace("°", "").strip()
-        if not re.match(r"^\d+$", pos_raw):
-            continue
-        equipo = norm_equipo(celdas[1])
-        if not equipo:
-            continue
-        try:
-            gf, gc = int(celdas[7]), int(celdas[8])
-            out.append({
-                "pos": int(pos_raw), "equipo": equipo,
-                "pts": int(celdas[2]), "pj": int(celdas[3]),
-                "pg": int(celdas[4]), "pe": int(celdas[5]), "pp": int(celdas[6]),
-                "gf": gf, "gc": gc, "dif": gf - gc,
-            })
-        except (ValueError, IndexError):
-            continue
-    return out
-
-
-def parse_reserva_tabla(html: str):
+def fetch_statfutbol_reserva_zona(path: str):
     """
-    Extrae la tabla de posiciones de Reserva (Proyeccion) desde la misma
-    respuesta de sabadogol.com.ar/fixture.php que ya sirve el fixture
-    partido a partido -- esa pagina trae, ademas de los resultados por
-    fecha, una <table> por zona del torneo con "POSICIONES" como primera
-    fila (confirmado con la pagina real: son las dos secciones colapsables
-    "COPA PROYECCION. Zona A."/"Zona B.").
-    Para saber a que zona pertenece cada tabla se busca, en el HTML crudo,
-    cual de las dos etiquetas "Zona A"/"Zona B" aparece mas cerca ANTES de
-    esa tabla (confirmado: la etiqueta precede a su tabla correspondiente).
-    Devuelve {"Zona A": [filas], "Zona B": [filas]} -- puede faltar una
-    zona si el torneo todavia no la tiene armada. Lanza ValueError si no
-    encuentra ninguna tabla de posiciones.
+    Tabla de posiciones de una zona de Reserva (Proyeccion), desde
+    statfutbol.com.ar (reemplaza a sabadogol.com.ar, sacada por poca
+    confiabilidad: se quedaba atras varios dias con los resultados reales).
+    A diferencia de la LPF oficial (que para Proyeccion sigue siendo un
+    widget de Opta por JS, sin tabla en el HTML -- re-chequeado 2026-08-31),
+    statfutbol tiene una pagina estatica POR ZONA (no hace falta detectar la
+    zona por texto cercano como con sabadogol: cada URL ya es una sola
+    zona), con las mismas 10 primeras columnas que el resto de las tablas de
+    posiciones de la app (POS/EQUIPO/PTS/PJ/G/E/P/GF/GC/Dif, mas PG/VI al
+    final que no usamos) -- confirmado con datos reales, Tigre en Zona A en
+    los dos torneos.
     """
-    zonas = {}
-    for m in re.finditer(r"<table\b[^>]*>(.*?)</table>", html, re.IGNORECASE | re.DOTALL):
-        body = m.group(1)
-        filas_raw = re.findall(r"<tr\b[^>]*>(.*?)</tr>", body, re.IGNORECASE | re.DOTALL)
-        if not filas_raw:
-            continue
-        primera = re.sub(r"<[^>]+>", "", filas_raw[0]).strip().upper()
-        if primera != "POSICIONES":
-            continue
-        antes = html[:m.start()]
-        pos_a, pos_b = antes.rfind("Zona A"), antes.rfind("Zona B")
-        zona = "Zona A" if pos_a > pos_b else "Zona B"
-        filas = _filas_posiciones_sin_dif(body)
-        if filas:
-            zonas[zona] = filas
-    if not zonas:
-        raise ValueError("No se encontro ninguna tabla de posiciones (fila 'POSICIONES')")
-    return zonas
+    html = fetch(STATFUTBOL_BASE + path)
+    m = re.search(r"<table\b[^>]*>(.*?)</table>", html, re.IGNORECASE | re.DOTALL)
+    if not m:
+        raise ValueError("no se encontro ninguna <table> en la pagina")
+    filas = _filas_desde_tabla_html(m.group(1))
+    if not filas:
+        raise ValueError("se encontro la tabla pero no se pudo parsear ninguna fila")
+    return filas
 
 
 def main():
@@ -945,10 +877,16 @@ def main():
         .astimezone(datetime.timezone(datetime.timedelta(hours=-3)))
         .strftime("%Y-%m-%d %H:%M"),
         "fuente": "ligaprofesional.ar (oficial)",
-        "fuente_fixture": "sabadogol.com.ar",
+        "fuente_fixture": "ligaprofesional.ar (oficial)",
+        "fuente_reserva": "statfutbol.com.ar",
         "categorias": {},
     }
     errores = []
+    # De paso que se pide cada pagina de la LPF para la tabla de posiciones,
+    # se saca tambien el fixture completo (mismo HTML, sin pedido aparte) --
+    # ver parse_lpf_fixture_completo. Reemplaza a la vieja fuente sabadogol.
+    resultado["fixture"] = {}
+    resultado["fixture_completo"] = {}
     for cat, url in FUENTES.items():
         try:
             html = fetch(url)
@@ -958,58 +896,35 @@ def main():
         except Exception as e:  # noqa
             errores.append(f"{cat}: {e}")
             print(f"[ERROR] {cat}: {e}", file=sys.stderr)
+            continue  # sin el HTML no se puede sacar el fixture tampoco
 
-    # Reserva (Proyeccion): tabla de posiciones desde sabadogol.com.ar (ver
-    # parse_reserva_tabla). Que falle una de estas NO debe afectar a las
-    # juveniles: se captura por separado.
-    for cat, c_val in FIXTURE_RESERVA_C.items():
         try:
-            html = fetch_post(FIXTURE_URL, {"a": FIXTURE_ANIO, "c": c_val, "d": "", "t": "2"})
-            zonas = parse_reserva_tabla(html)
-            resultado["categorias"][cat] = {"zonas": zonas}
-            print(f"[OK] {cat}: {', '.join(f'{z} ({len(f)} equipos)' for z, f in zonas.items())}")
-        except Exception as e:  # noqa
-            errores.append(f"{cat}: {e}")
-            print(f"[ERROR] {cat}: {e}", file=sys.stderr)
-
-    # Resultados de Tigre partido por partido (4TA-9NA), fuente sabadogol.com.ar.
-    # Independiente de la tabla de posiciones: si esto falla, no afecta lo de arriba.
-    resultado["fixture"] = {}
-    resultado["fixture_completo"] = {}
-    escudos_urls = {}  # nombre_equipo -> url relativa (el mismo equipo repite escudo en todas las categorias)
-    for cat, (d, t) in FIXTURE_TORNEOS.items():
-        try:
-            html = fetch_post(FIXTURE_URL, {"a": FIXTURE_ANIO, "c": FIXTURE_CAT, "d": d, "t": t})
-            partidos = parse_fixture_cat(html)
-            if not partidos:
-                raise ValueError("no se encontro ningun partido de Tigre")
-            resultado["fixture"][cat] = partidos
-            print(f"[OK] fixture {cat}: {len(partidos)} fechas")
-            fc, escudos_cat = parse_fixture_completo(html)
+            fc = parse_lpf_fixture_completo(html)
             resultado["fixture_completo"][cat] = fc
-            for nombre, url in escudos_cat.items():
-                escudos_urls.setdefault(nombre, url)
             print(f"[OK] fixture_completo {cat}: {len(fc)} fechas")
+            partidos_tigre = fixture_tigre_desde_completo(fc)
+            if not partidos_tigre:
+                raise ValueError("no se encontro ningun partido de Tigre")
+            resultado["fixture"][cat] = partidos_tigre
+            print(f"[OK] fixture {cat}: {len(partidos_tigre)} fechas")
         except Exception as e:  # noqa
             errores.append(f"fixture {cat}: {e}")
             print(f"[ERROR] fixture {cat}: {e}", file=sys.stderr)
 
-    # Escudos de los equipos (sacados de sabadogol.com.ar, ver parse_fixture_completo).
-    # Se descargan una sola vez por equipo y se guardan embebidos en base64 --
-    # sabadogol no manda header CORS, asi que si la app los enlazara directo
-    # por URL, exportar la tarjeta de "proximo rival" a PNG con canvas
-    # fallaria (canvas "contaminado" por una imagen de otro origen). Que
-    # falle un escudo puntual no debe romper el resto del scraping.
-    resultado["escudos"] = {}
-    for nombre, url_rel in escudos_urls.items():
-        try:
-            url_abs = urllib.parse.urljoin(FIXTURE_URL, url_rel)
-            img_bytes = fetch_bytes(url_abs)
-            ext = url_rel.rsplit(".", 1)[-1].split("?")[0].lower() or "gif"
-            resultado["escudos"][nombre] = f"data:image/{ext};base64," + base64.b64encode(img_bytes).decode("ascii")
-        except Exception as e:  # noqa
-            print(f"[AVISO] escudo {nombre}: {e}", file=sys.stderr)
-    print(f"[OK] escudos: {len(resultado['escudos'])}/{len(escudos_urls)} equipos")
+    # Reserva (Proyeccion): tabla de posiciones desde statfutbol.com.ar (ver
+    # fetch_statfutbol_reserva_zona). Cada zona es una URL separada, asi que
+    # puede faltar una sola sin perder la otra ni afectar a las juveniles.
+    for cat, zonas_urls in RESERVA_ZONA_URLS.items():
+        zonas = {}
+        for zona, path in zonas_urls.items():
+            try:
+                zonas[zona] = fetch_statfutbol_reserva_zona(path)
+            except Exception as e:  # noqa
+                errores.append(f"{cat} {zona}: {e}")
+                print(f"[ERROR] {cat} {zona}: {e}", file=sys.stderr)
+        if zonas:
+            resultado["categorias"][cat] = {"zonas": zonas}
+            print(f"[OK] {cat}: {', '.join(f'{z} ({len(f)} equipos)' for z, f in zonas.items())}")
 
     # Segunda fuente publica para el cruce de Confiabilidad (fila de Tigre:
     # PJ/PG/PE/PP/GF/GC). No necesita credenciales, siempre se intenta.
@@ -1128,17 +1043,18 @@ def main():
     else:
         print("[AVISO] BL_USER/BL_PASS no configurados, se omite BL GPS Performance")
 
-    # Salvaguarda: si Zona A y Zona B de un mismo torneo de reserva salieron
-    # IDENTICAS, es casi seguro que la deteccion de zona por posicion de la
-    # etiqueta "Zona A"/"Zona B" en el HTML fallo (ver parse_reserva_tabla) y
-    # las dos tablas terminaron con el mismo contenido. Avisar fuerte en vez
-    # de mostrar datos duplicados sin que se note.
+    # Salvaguarda: Zona A y Zona B de un mismo torneo de reserva salen de dos
+    # URLs distintas de statfutbol (fetch_statfutbol_reserva_zona), asi que
+    # no deberian coincidir nunca -- si salen IDENTICAS es señal de que
+    # statfutbol sirvio el mismo contenido para las dos (ej. un redirect o un
+    # cambio de URL). Avisar fuerte en vez de mostrar datos duplicados sin
+    # que se note.
     for cat in ("RESERVA_APE", "RESERVA_CLA"):
         zonas = (resultado["categorias"].get(cat) or {}).get("zonas", {})
         za, zb = zonas.get("Zona A"), zonas.get("Zona B")
         if za and zb and za == zb:
-            aviso = (f"{cat}: Zona A y Zona B salieron identicas -- la deteccion de "
-                      "zona por posicion de etiqueta probablemente fallo. Revisar parse_reserva_tabla.")
+            aviso = (f"{cat}: Zona A y Zona B salieron identicas -- revisar si "
+                      "statfutbol cambio esas URLs.")
             print(f"[AVISO] {aviso}", file=sys.stderr)
             resultado["avisos"] = resultado.get("avisos", []) + [aviso]
 
