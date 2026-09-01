@@ -1,5 +1,5 @@
 {
-  "actualizado": "2026-09-01 01:44",
+  "actualizado": "2026-09-01 01:57",
   "fuente": "ligaprofesional.ar (oficial)",
   "fuente_fixture": "ligaprofesional.ar (oficial)",
   "fuente_reserva": "statfutbol.com.ar",
@@ -19324,7 +19324,16 @@
         "nombre": "WENDNAGEL, BENJAMIN",
         "goles": 6
       },
-      "amarillas_riesgo": []
+      "amarillas_riesgo": [
+        {
+          "nombre": "VERA, ALEJANDRO DANIEL",
+          "amarillas": 4
+        },
+        {
+          "nombre": "NUPIERI, LUCA",
+          "amarillas": 4
+        }
+      ]
     },
     "5TA": {
       "fecha": 24,
@@ -19333,7 +19342,28 @@
         "nombre": "STENTA SAMELNIK, THIAGO",
         "goles": 8
       },
-      "amarillas_riesgo": []
+      "amarillas_riesgo": [
+        {
+          "nombre": "RAIMUNDO, SANTIAGO TOMAS",
+          "amarillas": 4
+        },
+        {
+          "nombre": "GUZMAN, ISAIAS WALDO",
+          "amarillas": 4
+        },
+        {
+          "nombre": "STENTA SAMELNIK, THIAGO",
+          "amarillas": 4
+        },
+        {
+          "nombre": "CHIARELLO, RENZO NICOLAS",
+          "amarillas": 4
+        },
+        {
+          "nombre": "GALVAN, SANTIAGO NICOLAS",
+          "amarillas": 4
+        }
+      ]
     },
     "6TA": {
       "fecha": 24,
@@ -19342,7 +19372,16 @@
         "nombre": "GONZALEZ CARIA, FRANCISCO",
         "goles": 5
       },
-      "amarillas_riesgo": []
+      "amarillas_riesgo": [
+        {
+          "nombre": "BATALLAN, BENICIO RAMIRO",
+          "amarillas": 4
+        },
+        {
+          "nombre": "CORTES, TIZIANO BENJAMIN",
+          "amarillas": 4
+        }
+      ]
     },
     "7MA": {
       "fecha": 24,
@@ -19351,7 +19390,20 @@
         "nombre": "FOLINO, BENJAMIN",
         "goles": 6
       },
-      "amarillas_riesgo": []
+      "amarillas_riesgo": [
+        {
+          "nombre": "INSAURRALDE SCATENA, THIAGO MAXIMILIANO",
+          "amarillas": 4
+        },
+        {
+          "nombre": "SAGARZAZU, IAGO",
+          "amarillas": 4
+        },
+        {
+          "nombre": "AUBRY, LAUTARO SEBASTIAN",
+          "amarillas": 4
+        }
+      ]
     },
     "8VA": {
       "fecha": 24,
@@ -19360,7 +19412,12 @@
         "nombre": "SERRA, FELIPE",
         "goles": 6
       },
-      "amarillas_riesgo": []
+      "amarillas_riesgo": [
+        {
+          "nombre": "CARMONA, BAUTISTA BENJAMIN",
+          "amarillas": 4
+        }
+      ]
     },
     "9NA": {
       "fecha": 24,
