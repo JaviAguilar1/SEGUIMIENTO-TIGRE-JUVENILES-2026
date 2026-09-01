@@ -7367,31 +7367,13 @@ function abrirPerfilJugador(cat, nombre){
   const jStat = (jugadoresStats[cat]||[]).find(j=>sonMismoJugador(j.jugador));
   const s = statsPorNombre[normNombreOrdenIndependiente(nombre)] || jStat || {};
 
-  // Goles: golesEfectivos ya da manual+COMET por fecha (COMET gana si esa
-  // fecha tiene informe) -- acá se reagrupan por fecha (si metió 2 goles el
-  // mismo partido, antes salían como dos líneas separadas) y se les suma
-  // el escudo del rival de esa fecha (mismo fixture -- RIVALS -- que usa el
-  // resto de la app para mayores/menores).
-  const golData = golesEfectivos(cat).find(g=>g.name===nombre
-    || normNombreOrdenIndependiente(g.name)===normNombreOrdenIndependiente(nombre));
-  const golesPorFecha={};
-  (golData?.fechas||[]).forEach(str=>{
-    const m = str.match(/^F(\d+)(?:\s*\((\d+)'(?:\s*P)?\))?$/);
-    if(!m) return;
-    (golesPorFecha[parseInt(m[1])]=golesPorFecha[parseInt(m[1])]||[]).push(m[2]||null);
-  });
+  // Escudo del rival de una fecha (mismo fixture -- RIVALS -- que usa el
+  // resto de la app para mayores/menores), usado en "Partidos jugados".
   const escudoDeFecha = fecha=>{
     const rivalCanon = RIVALS.find(x=>x.f===fecha)?.r;
     const archivo = rivalCanon ? RIVAL_INFO[rivalCanon]?.escudo : null;
     return archivo ? `<img src="escudos/${archivo}" style="width:18px;height:18px;object-fit:contain;border-radius:50%;flex-shrink:0" alt="">` : '';
   };
-  const golesFilas = Object.keys(golesPorFecha).length
-    ? Object.keys(golesPorFecha).map(Number).sort((a,b)=>a-b).map(fecha=>{
-        const minutos = golesPorFecha[fecha].filter(Boolean).map(mm=>`(${mm}')`).join('');
-        return `<div style="display:flex;align-items:center;gap:8px;background:var(--surface2);border-radius:8px;padding:8px 10px;margin-bottom:6px">
-          ${escudoDeFecha(fecha)}<span style="font-size:13px">Fecha ${fecha}${minutos?' '+minutos:''}</span></div>`;
-      }).join('')
-    : `<div style="color:var(--muted);font-size:12px;padding:6px 0">Sin goles registrados</div>`;
 
   // Mismo criterio de "palabras ordenadas alfabeticamente" que ya se usa
   // para emparejar nombres entre fuentes distintas en el resto de la app
@@ -7511,11 +7493,9 @@ function abrirPerfilJugador(cat, nombre){
           <div style="font-size:10px;color:var(--muted);text-transform:uppercase">${label}</div>
           <div style="font-size:18px;font-weight:700;color:var(--gold2)">${val||0}</div></div>`).join('')}
     </div>
-    <div style="font-size:11px;color:var(--muted);margin-bottom:10px">Convoc./titular: tus citaciones · minutos/amarillas: COMET, completado con futdetail donde falte informe. Goles: ver más abajo. Entró de banco: ${vecesEntroDeBanco} · Salió: ${vecesSalio}</div>
+    <div style="font-size:11px;color:var(--muted);margin-bottom:10px">Convoc./titular: tus citaciones · minutos/amarillas: COMET, completado con futdetail donde falte informe. Goles: ver arriba (radar) y en Partidos jugados. Entró de banco: ${vecesEntroDeBanco} · Salió: ${vecesSalio}</div>
     <div class="st"><div class="stbar"></div>🗓️ PARTIDOS JUGADOS</div>
     ${partidosJugadosHTML}
-    <div class="st" style="margin-top:14px"><div class="stbar"></div>⚽ GOLES</div>
-    ${golesFilas}
   </div>`;
   document.body.appendChild(m);
 
