@@ -7310,16 +7310,26 @@ function abrirPerfilJugador(cat, nombre){
     const fecha=parseInt(fechaStr,10);
     const enTit=(d.titulares||[]).find(esMismoJugador);
     const enSup=(d.suplentes||[]).find(esMismoJugador);
-    if(enTit){ vecesTitular++; if(enTit.minutoSalida!=null) vecesSalio++; }
-    if(enSup){ vecesBanco++; if(enSup.minutoEntrada!=null) vecesEntroDeBanco++; }
+    if(enTit) vecesTitular++;
+    if(enSup) vecesBanco++;
     if(!enTit && !enSup) return;
     const partido=(partidos[cat]||{})[fecha];
     const eventos=[];
     if(partido && idJ!=null){
-      // Minutos de esa fecha según COMET: titular sin salida = jugó entero;
-      // suplente sin entrada = no llegó a entrar (0').
-      if(enTit) minCometSum += enTit.minutoSalida!=null ? enTit.minutoSalida : DURACION_PARTIDO;
-      else if(enSup && enSup.minutoEntrada!=null) minCometSum += DURACION_PARTIDO-enSup.minutoEntrada;
+      // "Entró"/"Salió" y los minutos exactos salen del informe de COMET
+      // (partido.titulares/suplentes), no de la citación -- la citación es
+      // la lista declarada ANTES del partido, nunca tiene el minuto real de
+      // entrada/salida. Titular/en banco (arriba) sí quedan de la citación,
+      // que cubre el 100% de las fechas.
+      const titComet=(partido.titulares||[]).find(x=>x.id===idJ);
+      const supComet=(partido.suplentes||[]).find(x=>x.id===idJ);
+      if(titComet){
+        if(titComet.minutoSalida!=null) vecesSalio++;
+        minCometSum += titComet.minutoSalida!=null ? titComet.minutoSalida : DURACION_PARTIDO;
+      } else if(supComet && supComet.minutoEntrada!=null){
+        vecesEntroDeBanco++;
+        minCometSum += DURACION_PARTIDO-supComet.minutoEntrada;
+      }
       (partido.goles||[]).filter(g=>g.id===idJ).forEach(g=>{ golCometSum++; eventos.push(`⚽${g.minuto}'${g.penal?' (P)':''}`); });
       (partido.amarillas||[]).filter(a=>a.id===idJ).forEach(a=>{ amCometSum++; eventos.push(`🟨${a.minuto}'`); });
       (partido.rojas||[]).filter(a=>a.id===idJ).forEach(a=>{ rojCometSum++; eventos.push(`🟥${a.minuto}'`); });
