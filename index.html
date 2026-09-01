@@ -7253,11 +7253,31 @@ function abrirPerfilJugador(cat, nombre){
   const jStat = (jugadoresStats[cat]||[]).find(j=>sonMismoJugador(j.jugador));
   const s = statsPorNombre[normNombreOrdenIndependiente(nombre)] || jStat || {};
 
+  // Goles: golesEfectivos ya da manual+COMET por fecha (COMET gana si esa
+  // fecha tiene informe) -- acá se reagrupan por fecha (si metió 2 goles el
+  // mismo partido, antes salían como dos líneas separadas) y se les suma
+  // el escudo del rival de esa fecha (mismo fixture -- RIVALS -- que usa el
+  // resto de la app para mayores/menores).
   const golData = golesEfectivos(cat).find(g=>g.name===nombre
     || normNombreOrdenIndependiente(g.name)===normNombreOrdenIndependiente(nombre));
-  const golesFilas = (golData?.fechas||[]).length
-    ? golData.fechas.map(f=>`<tr><td>${esc(f)}</td></tr>`).join('')
-    : `<tr><td style="color:var(--muted)">Sin goles registrados</td></tr>`;
+  const golesPorFecha={};
+  (golData?.fechas||[]).forEach(str=>{
+    const m = str.match(/^F(\d+)(?:\s*\((\d+)'(?:\s*P)?\))?$/);
+    if(!m) return;
+    (golesPorFecha[parseInt(m[1])]=golesPorFecha[parseInt(m[1])]||[]).push(m[2]||null);
+  });
+  const escudoDeFecha = fecha=>{
+    const rivalCanon = RIVALS.find(x=>x.f===fecha)?.r;
+    const archivo = rivalCanon ? ESCUDO_POR_LPF[rivalCanon] : null;
+    return archivo ? `<img src="escudos/${archivo}" style="width:18px;height:18px;object-fit:contain;border-radius:50%;flex-shrink:0" alt="">` : '';
+  };
+  const golesFilas = Object.keys(golesPorFecha).length
+    ? Object.keys(golesPorFecha).map(Number).sort((a,b)=>a-b).map(fecha=>{
+        const minutos = golesPorFecha[fecha].filter(Boolean).map(mm=>`(${mm}')`).join('');
+        return `<div style="display:flex;align-items:center;gap:8px;background:var(--surface2);border-radius:8px;padding:8px 10px;margin-bottom:6px">
+          ${escudoDeFecha(fecha)}<span style="font-size:13px">Fecha ${fecha}${minutos?' '+minutos:''}</span></div>`;
+      }).join('')
+    : `<div style="color:var(--muted);font-size:12px;padding:6px 0">Sin goles registrados</div>`;
 
   // Mismo criterio de "palabras ordenadas alfabeticamente" que ya se usa
   // para emparejar nombres entre fuentes distintas en el resto de la app
@@ -7281,8 +7301,11 @@ function abrirPerfilJugador(cat, nombre){
   // independiente" que usa el resto de la app para cruzar fuentes distintas.
   const nombreNorm = normNombreOrdenIndependiente(nombre);
   const esMismoJugador = p => (jugador?.id!=null && p.id===jugador.id) || normNombreOrdenIndependiente(p.nombre)===nombreNorm;
+  const idJ = jugador?.id!=null ? jugador.id : null;
+  const DURACION_PARTIDO = 90; // partidos de COMET son de 90' (confirmado con el reglamento del torneo)
   let vecesTitular=0, vecesBanco=0, vecesEntroDeBanco=0, vecesSalio=0;
-  const partidosJugados=[]; // {fecha, rival, cond, res:[gf,gc], rol, eventos:[..chips]}
+  let minCometSum=0, golCometSum=0, amCometSum=0, rojCometSum=0;
+  const partidosJugados=[]; // {fecha, rival, cond, res:[gf,gc], eventos:[..chips]}
   Object.entries(matchData[cat]||{}).forEach(([fechaStr,d])=>{
     const fecha=parseInt(fechaStr,10);
     const enTit=(d.titulares||[]).find(esMismoJugador);
@@ -7290,28 +7313,38 @@ function abrirPerfilJugador(cat, nombre){
     if(enTit){ vecesTitular++; if(enTit.minutoSalida!=null) vecesSalio++; }
     if(enSup){ vecesBanco++; if(enSup.minutoEntrada!=null) vecesEntroDeBanco++; }
     if(!enTit && !enSup) return;
-    const rol = enTit ? (enTit.minutoSalida!=null?`Titular · salió ${enTit.minutoSalida}'`:'Titular')
-      : (enSup.minutoEntrada!=null?`Entró ${enSup.minutoEntrada}'`:'Banco');
     const partido=(partidos[cat]||{})[fecha];
-    const idJ = jugador?.id!=null ? jugador.id : null;
     const eventos=[];
     if(partido && idJ!=null){
-      (partido.goles||[]).filter(g=>g.id===idJ).forEach(g=>eventos.push(`⚽${g.minuto}'${g.penal?' (P)':''}`));
-      (partido.amarillas||[]).filter(a=>a.id===idJ).forEach(a=>eventos.push(`🟨${a.minuto}'`));
-      (partido.rojas||[]).filter(a=>a.id===idJ).forEach(a=>eventos.push(`🟥${a.minuto}'`));
+      // Minutos de esa fecha según COMET: titular sin salida = jugó entero;
+      // suplente sin entrada = no llegó a entrar (0').
+      if(enTit) minCometSum += enTit.minutoSalida!=null ? enTit.minutoSalida : DURACION_PARTIDO;
+      else if(enSup && enSup.minutoEntrada!=null) minCometSum += DURACION_PARTIDO-enSup.minutoEntrada;
+      (partido.goles||[]).filter(g=>g.id===idJ).forEach(g=>{ golCometSum++; eventos.push(`⚽${g.minuto}'${g.penal?' (P)':''}`); });
+      (partido.amarillas||[]).filter(a=>a.id===idJ).forEach(a=>{ amCometSum++; eventos.push(`🟨${a.minuto}'`); });
+      (partido.rojas||[]).filter(a=>a.id===idJ).forEach(a=>{ rojCometSum++; eventos.push(`🟥${a.minuto}'`); });
     }
-    partidosJugados.push({fecha, rival:d.rival||'—', cond:condicionCat(cat,fecha), res:results[cat]?.[fecha]||null, rol, eventos});
+    partidosJugados.push({fecha, rival:d.rival||'—', cond:condicionCat(cat,fecha), res:results[cat]?.[fecha]||null, eventos});
   });
   partidosJugados.sort((a,b)=>a.fecha-b.fecha);
+  // Minutos/goles/amarillas/rojas: gana COMET (más preciso, partido a
+  // partido), pero como no cubre el 100% de las fechas, si futdetail (que
+  // sí es acumulado de toda la temporada) da un número más alto, se usa ese
+  // -- nunca mostrar de menos por una fecha sin informe de COMET cargado.
+  const convocatorias = vecesTitular+vecesBanco;
+  const minutosFinal = Math.max(minCometSum, parseInt(s.minutos_jugados)||0);
+  const golesFinal = Math.max(golCometSum, parseInt(s.goles)||0);
+  const amarillasFinal = Math.max(amCometSum, parseInt(s.tarjeta_amarilla)||0);
+  const rojasFinal = Math.max(rojCometSum, parseInt(s.tarjeta_roja)||0);
   const partidosJugadosHTML = partidosJugados.length
-    ? `<div class="table-wrap"><table><thead><tr><th>F</th><th>Rival</th><th>Res.</th><th>Rol</th><th>Eventos</th></tr></thead><tbody>
+    ? `<div class="table-wrap"><table><thead><tr><th>F</th><th>Rival</th><th>Res.</th><th>Eventos</th></tr></thead><tbody>
         ${partidosJugados.map(pj=>{
           const condTxt = pj.cond==='L'?'L':pj.cond==='V'?'V':'';
           const r = pj.res;
           const resTxt = (r && r[0]!=null && r[1]!=null) ? `${r[0]}-${r[1]}` : '—';
           const resColor = r ? (getResult(r[0],r[1])==='W'?'var(--win)':getResult(r[0],r[1])==='D'?'var(--draw)':'var(--loss)') : 'var(--muted)';
-          return `<tr><td>F${pj.fecha}</td><td>${esc(pj.rival)}${condTxt?` <span class="cond-badge cond-${pj.cond}" style="font-size:9px">${condTxt}</span>`:''}</td>
-            <td style="color:${resColor};font-weight:700">${resTxt}</td><td style="font-size:11px">${esc(pj.rol)}</td>
+          return `<tr><td>F${pj.fecha}</td><td style="display:flex;align-items:center;gap:6px">${escudoDeFecha(pj.fecha)}${esc(pj.rival)}${condTxt?` <span class="cond-badge cond-${pj.cond}" style="font-size:9px">${condTxt}</span>`:''}</td>
+            <td style="color:${resColor};font-weight:700">${resTxt}</td>
             <td style="font-size:11px">${pj.eventos.join(' ')||'—'}</td></tr>`;
         }).join('')}
       </tbody></table></div>`
@@ -7326,24 +7359,17 @@ function abrirPerfilJugador(cat, nombre){
     <h2 style="text-align:center">${esc(nombre)}</h2>
     <p style="text-align:center">${esc(jugador?.posicion||'—')} · ${esc(cat)}</p>
     <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:14px 0">
-      ${[['Convoc.',s.convocatorias],['Titular',s.partidos_titular],['Minutos',s.minutos_jugados],
-         ['Goles',s.goles],['Asist.',s.asistencias],['Amar.',s.tarjeta_amarilla],['Roja',s.tarjeta_roja]]
+      ${[['Convoc.',convocatorias],['Titular',vecesTitular],['Minutos',minutosFinal],
+         ['Goles',golesFinal],['Asist.',s.asistencias],['Amar.',amarillasFinal],['Roja',rojasFinal],['En banco',vecesBanco]]
         .map(([label,val])=>`<div style="background:var(--surface2);border-radius:8px;padding:8px;text-align:center">
           <div style="font-size:10px;color:var(--muted);text-transform:uppercase">${label}</div>
           <div style="font-size:18px;font-weight:700;color:var(--gold2)">${val||0}</div></div>`).join('')}
     </div>
-    <div class="st"><div class="stbar"></div>📋 CITACIONES</div>
-    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:10px 0">
-      ${[['Titular',vecesTitular],['Entró de banco',vecesEntroDeBanco],['Salió',vecesSalio]]
-        .map(([label,val])=>`<div style="background:var(--surface2);border-radius:8px;padding:8px;text-align:center">
-          <div style="font-size:10px;color:var(--muted);text-transform:uppercase">${label}</div>
-          <div style="font-size:18px;font-weight:700;color:var(--gold2)">${val}</div></div>`).join('')}
-    </div>
-    <div style="font-size:11px;color:var(--muted);margin-bottom:6px">En banco (citado, no siempre entró): ${vecesBanco}</div>
+    <div style="font-size:11px;color:var(--muted);margin-bottom:10px">Convoc./titular/en banco: tus citaciones · minutos/goles/tarjetas: COMET, completado con futdetail donde falte informe · asistencias: futdetail. Entró de banco: ${vecesEntroDeBanco} · Salió: ${vecesSalio}</div>
     <div class="st"><div class="stbar"></div>🗓️ PARTIDOS JUGADOS</div>
     ${partidosJugadosHTML}
     <div class="st" style="margin-top:14px"><div class="stbar"></div>⚽ GOLES</div>
-    <div class="table-wrap"><table><tbody>${golesFilas}</tbody></table></div>
+    ${golesFilas}
     <div class="st" style="margin-top:14px"><div class="stbar"></div>📡 RENDIMIENTO FÍSICO (BL)</div>
     ${gpsHTML}
   </div>`;
