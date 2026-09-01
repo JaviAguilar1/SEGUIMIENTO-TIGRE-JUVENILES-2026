@@ -619,9 +619,18 @@ def fetch_statfutbol_fixture(catnum):
         idm = re.search(r'name="idPartido" value="(\d+)"', celdas[8])
         if not (jm and local and visita and fm and idm):
             continue
+        jugado = score not in ("", ".-.")
+        # El score viene como "GF_LOCAL-GF_VISITA" (ej. "TIGRE 3-1 LANUS" =
+        # 3 para Tigre) -- confirmado con datos reales 2026-09-01.
+        gf_local = gf_visita = None
+        if jugado:
+            sm = re.match(r"(\d+)\s*-\s*(\d+)", score)
+            if sm:
+                gf_local, gf_visita = int(sm.group(1)), int(sm.group(2))
         out.append({
             "jornada": int(jm.group(1)), "local": local, "visita": visita,
-            "jugado": score not in ("", ".-."), "fecha_iso": fm.group(1), "id_partido": idm.group(1),
+            "jugado": jugado, "gf_local": gf_local, "gf_visita": gf_visita,
+            "fecha_iso": fm.group(1), "id_partido": idm.group(1),
         })
     return out
 
@@ -1001,6 +1010,30 @@ def main():
         except Exception as e:  # noqa
             errores.append(f"statfutbol jugadores {cat}: {e}")
             print(f"[ERROR] statfutbol jugadores {cat}: {e}", file=sys.stderr)
+
+    # Resultado de Tigre partido por partido segun statfutbol -- mismo uso
+    # que rival_alertas (fetch_statfutbol_fixture ya lo trae con el gol de
+    # cada lado, agregado 2026-09-01). Se guarda por jornada para que
+    # Confiabilidad lo pueda mostrar como referencia externa (COMET > Liga
+    # oficial > futdetail siguen siendo las fuentes que definen "la verdad";
+    # esto es solo un cuarto punto de comparacion, no gana empates).
+    resultado["statfutbol_resultados"] = {}
+    for cat, catnum in STATFUTBOL_CATNUM.items():
+        try:
+            fixture = fetch_statfutbol_fixture(catnum)
+            propios = {}
+            for p in fixture:
+                if not p["jugado"] or p["gf_local"] is None:
+                    continue
+                if p["local"] == "TIGRE":
+                    propios[p["jornada"]] = {"gf": p["gf_local"], "gc": p["gf_visita"], "rival": p["visita"]}
+                elif p["visita"] == "TIGRE":
+                    propios[p["jornada"]] = {"gf": p["gf_visita"], "gc": p["gf_local"], "rival": p["local"]}
+            resultado["statfutbol_resultados"][cat] = propios
+            print(f"[OK] statfutbol resultados {cat}: {len(propios)} fechas")
+        except Exception as e:  # noqa
+            errores.append(f"statfutbol resultados {cat}: {e}")
+            print(f"[ERROR] statfutbol resultados {cat}: {e}", file=sys.stderr)
 
     # Resultados de Tigre partido por partido segun futdetail (panel privado).
     # Necesita FUTDETAIL_USER / FUTDETAIL_PASS como variables de entorno (las
