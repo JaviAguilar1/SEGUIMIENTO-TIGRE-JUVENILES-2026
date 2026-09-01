@@ -2072,40 +2072,55 @@ function youtubeId(url){
 }
 
 function calcConfiabilidad(){
-  // Partido por partido: mi carga (results) vs LIGA (fixture scrapeado de
-  // ligaprofesional.ar, la fuente oficial) vs futdetail (panel privado del
-  // club). Reemplaza al
-  // viejo "chequeo semanal" externo — esto corre solo, sin depender de que
-  // alguien lo cargue a mano. Si futdetail todavía no está configurado, la
-  // comparación sigue funcionando con las dos fuentes que sí haya.
-  const partidoMismatches=[]; // {cat, fecha, mio, liga, fut, rival}
+  // Partido por partido: mi carga (results) vs la "verdad" según prioridad
+  // COMET > LIGA oficial (fixture scrapeado de ligaprofesional.ar) >
+  // futdetail (panel privado del club) — el primero que tenga dato para esa
+  // fecha gana. statfutbol se muestra aparte, solo como referencia externa
+  // (no participa de la prioridad, no dispara el aviso por sí solo).
+  const partidoMismatches=[]; // {cat, fecha, mio, verdad, fuenteVerdad, sf, rival}
   CONFIABILIDAD_CATS.forEach(cat=>{
     const fixtureLiga=(TABLA_DATA&&TABLA_DATA.fixture&&TABLA_DATA.fixture[cat])||{};
     const fixtureFut=(TABLA_DATA&&TABLA_DATA.fixture_futdetail&&TABLA_DATA.fixture_futdetail[cat])||{};
-    const fechas=new Set([...Object.keys(fixtureLiga), ...Object.keys(fixtureFut)]);
+    const sfResultados=(TABLA_DATA&&TABLA_DATA.statfutbol_resultados&&TABLA_DATA.statfutbol_resultados[cat])||{};
+    const fechas=new Set([...Object.keys(fixtureLiga), ...Object.keys(fixtureFut), ...Object.keys(sfResultados)]);
     fechas.forEach(fechaStr=>{
       const fecha=parseInt(fechaStr);
+      const comet=partidos[cat]?.[fecha]||null;
       const liga=fixtureLiga[fechaStr]||null;
       const fut=fixtureFut[fechaStr]||null;
+      const sf=sfResultados[fechaStr]||null;
       const mio=results[cat]?.[fecha]||null;
       const mioStr=mio?`${mio[0]}-${mio[1]}`:null;
+      const cometStr=comet?`${comet.golesTigre}-${comet.golesRival}`:null;
       const ligaStr=liga?`${liga.gf}-${liga.gc}`:null;
       const futStr=fut?`${fut.gf}-${fut.gc}`:null;
-      const presentes=[mioStr,ligaStr,futStr].filter(v=>v!==null);
-      const todosIguales=presentes.every(v=>v===presentes[0]);
-      if(presentes.length>=2 && !todosIguales){
-        partidoMismatches.push({cat, fecha, mio:mioStr||'—', liga:ligaStr||'—', fut:futStr||'—', rival:(liga||fut||{}).rival||''});
+      const sfStr=sf?`${sf.gf}-${sf.gc}`:null;
+      const [verdad, fuenteVerdad]=cometStr?[cometStr,'COMET']:ligaStr?[ligaStr,'LIGA']:futStr?[futStr,'futdetail']:[null,null];
+      if(mioStr && verdad && mioStr!==verdad){
+        partidoMismatches.push({cat, fecha, mio:mioStr, verdad, fuenteVerdad, sf:sfStr||'—', rival:(comet||liga||fut||sf||{}).rival||''});
       }
     });
   });
 
+  // Equipo: mi planilla vs LPF oficial (prioridad 2, después de COMET —
+  // pero COMET es partido a partido, no da un acumulado de temporada, así
+  // que acá no participa). Se sacó "parenlapelota" (fuente vieja, ver nota
+  // en el LEEME del scraper) y se sumó statfutbol, calculado sumando
+  // resultado por resultado desde statfutbol_resultados — es la fuente de
+  // menor prioridad de las 4, solo referencia.
   const equipoMismatches=[]; // {cat, campo, mio, valor, fuente}
   CONFIABILIDAD_CATS.forEach(cat=>{
     const mio=calcStats(cat,1,35);
     const filas=(TABLA_DATA&&TABLA_DATA.categorias&&TABLA_DATA.categorias[cat])||[];
     const lpf=filas.find(f=>/tigre/i.test(f.equipo));
-    const pln=(TABLA_DATA&&TABLA_DATA.tigre_parenlapelota&&TABLA_DATA.tigre_parenlapelota[cat])||null;
-    [['LPF oficial',lpf],['parenlapelota',pln]].forEach(([fuente,fila])=>{
+    const sfResultados=(TABLA_DATA&&TABLA_DATA.statfutbol_resultados&&TABLA_DATA.statfutbol_resultados[cat])||{};
+    const sfPartidos=Object.values(sfResultados);
+    const sf=sfPartidos.length ? {
+      pj: sfPartidos.length,
+      pg: sfPartidos.filter(p=>p.gf>p.gc).length,
+      gf: sfPartidos.reduce((a,p)=>a+p.gf,0),
+    } : null;
+    [['LPF oficial',lpf],['statfutbol',sf]].forEach(([fuente,fila])=>{
       if(!fila) return; // todavía sin datos de esa fuente para esta categoría
       if(mio.pj!==fila.pj) equipoMismatches.push({cat, campo:'PJ', mio:mio.pj, valor:fila.pj, fuente});
       if(mio.pg!==fila.pg) equipoMismatches.push({cat, campo:'PG', mio:mio.pg, valor:fila.pg, fuente});
@@ -2140,11 +2155,24 @@ function calcConfiabilidad(){
       futGoles[key]=(futGoles[key]||0)+(parseInt(j.goles)||0);
       nombreOriginal[key]=nombreOriginal[key]||j.jugador;
     });
+    // statfutbol como referencia externa (no participa de la prioridad,
+    // solo se muestra al lado) — match por subconjunto de palabras porque
+    // statfutbol trae "APELLIDO, Nombre" con acentos/orden propio.
+    const sfJugadores=(TABLA_DATA&&TABLA_DATA.statfutbol_jugadores&&TABLA_DATA.statfutbol_jugadores[cat])||[];
+    const sfGolesDe=nombre=>{
+      const w=cometNameWords(nombre);
+      const cand=sfJugadores.filter(j=>{
+        const jw=cometNameWords(j.nombre);
+        return jw.length>0 && w.length>0 && (jw.every(x=>w.includes(x)) || w.every(x=>jw.includes(x)));
+      });
+      return cand.length===1 ? cand[0].gol : null;
+    };
     new Set([...Object.keys(misGoles), ...Object.keys(futGoles)]).forEach(key=>{
       const mio=misGoles[key]||0, fut=futGoles[key]||0;
       if(mio!==fut){
         const soloEn = !(key in misGoles) ? 'futdetail' : !(key in futGoles) ? 'mia' : 'ambas';
-        golesMismatches.push({cat, jugador:nombreOriginal[key], mio, fut, key, soloEn});
+        const sf=sfGolesDe(nombreOriginal[key]);
+        golesMismatches.push({cat, jugador:nombreOriginal[key], mio, fut, sf, key, soloEn});
       }
     });
   });
@@ -2335,7 +2363,7 @@ function renderConfiabilidad(containerId){
     if(total===0 && recordatorios.length===0){
       el.innerHTML=`<div style="text-align:center;padding:20px;color:var(--win);
         font-family:'Barlow Condensed',sans-serif;font-size:13px;letter-spacing:1px">
-        ✓ Todo coincide entre tu planilla, LPF oficial y futdetail
+        ✓ Todo coincide entre tu planilla, COMET, LIGA oficial y futdetail
       </div>`;
       return;
     }
@@ -2381,11 +2409,11 @@ function renderConfiabilidad(containerId){
 
     if(partidoMismatches.length){
       html+=`<div style="font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:1px;color:var(--muted);margin-bottom:6px">
-        RESULTADOS POR PARTIDO · mi planilla vs LIGA vs futdetail
+        RESULTADOS POR PARTIDO · mi planilla vs COMET/LIGA/futdetail (gana en ese orden) · statfutbol de referencia
       </div>`;
       html+=partidoMismatches.map(m=>row(
         `<b style="color:${CAT_COLORS[m.cat]}">${m.cat} F${m.fecha}</b>${m.rival?' vs '+esc(m.rival):''}`,
-        `Mi planilla: <b>${m.mio}</b> · LIGA: <b>${m.liga}</b> · futdetail: <b>${m.fut}</b>`
+        `Mi planilla: <b>${m.mio}</b> · ${esc(m.fuenteVerdad)}: <b>${m.verdad}</b> · statfutbol: <b>${m.sf}</b>`
       )).join('');
     }
 
@@ -2395,7 +2423,7 @@ function renderConfiabilidad(containerId){
         border-radius:6px;padding:4px 10px;font-family:Barlow Condensed,sans-serif;font-size:11px;
         letter-spacing:1px;cursor:pointer;white-space:nowrap">→ VER RESULTADOS</button>`;
       html+=`<div style="font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:1px;color:var(--muted);margin:14px 0 6px">
-        EQUIPO · mi planilla vs LPF oficial / parenlapelota</div>`;
+        EQUIPO · mi planilla vs LPF oficial / statfutbol</div>`;
       html+=equipoMismatches.map(m=>row(
         `<b style="color:${CAT_COLORS[m.cat]}">${m.cat}</b> · ${m.campo}`,
         `Mi planilla: <b>${m.mio}</b> · ${m.fuente}: <b>${m.valor}</b>`,
@@ -2405,7 +2433,7 @@ function renderConfiabilidad(containerId){
 
     if(golesMismatches.length){
       html+=`<div style="font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:1px;color:var(--muted);margin:14px 0 6px">
-        GOLES POR JUGADOR · mi carga vs futdetail</div>`;
+        GOLES POR JUGADOR · mi carga (con COMET) vs futdetail · statfutbol de referencia</div>`;
       html+=golesMismatches.map(m=>{
         let vincularHTML='';
         // Si aparece solo de un lado, puede ser el mismo jugador escrito
@@ -2429,7 +2457,7 @@ function renderConfiabilidad(containerId){
         }
         return row(
           `<b style="color:${CAT_COLORS[m.cat]}">${m.cat}</b> · ${esc(m.jugador)}`,
-          `Mi carga: <b>${m.mio}</b> · futdetail: <b>${m.fut}</b>${vincularHTML}`,
+          `Mi carga: <b>${m.mio}</b> · futdetail: <b>${m.fut}</b>${m.sf!=null?` · statfutbol: <b>${m.sf}</b>`:''}${vincularHTML}`,
           irGoleadoresBtn(m.cat)
         );
       }).join('');
@@ -5218,17 +5246,27 @@ let TABLA_DATA = null;
 // crudo de la LPF (TABLA_DATA.categorias) — no toca "results"/calcStats,
 // que ya está bien porque sale de tu propia planilla.
 const CORRECCIONES_TABLA_LPF = [
-  {cat:'6TA', gf:1, dif:1, motivo:'LPF omitió un gol de Tigre vs River (F13); sabadogol sí lo tiene. Confirmado 2026-08-15.'},
+  {cat:'6TA', gf:1, dif:1, fecha:13, gfFecha:1, gcFecha:2,
+   motivo:'LPF omitió un gol de Tigre vs River (F13); sabadogol y statfutbol sí lo tienen (1-2). Confirmado 2026-08-15, re-confirmado con statfutbol 2026-09-01.'},
 ];
 function aplicarCorreccionesTablaLPF(data){
   if(!data || !data.categorias) return data;
   CORRECCIONES_TABLA_LPF.forEach(c=>{
     const fila=(data.categorias[c.cat]||[]).find(f=>/tigre/i.test(f.equipo));
-    if(!fila) return;
-    if(c.gf)  fila.gf  += c.gf;
-    if(c.gc)  fila.gc  += c.gc;
-    if(c.dif) fila.dif += c.dif;
-    if(c.pts) fila.pts += c.pts;
+    if(fila){
+      if(c.gf)  fila.gf  += c.gf;
+      if(c.gc)  fila.gc  += c.gc;
+      if(c.dif) fila.dif += c.dif;
+      if(c.pts) fila.pts += c.pts;
+    }
+    // Mismo error también en el fixture partido a partido (usado por
+    // Confiabilidad para "resultado por partido") -- corregir ahí también,
+    // si no la alerta de esa fecha puntual sigue apareciendo aunque la
+    // tabla de posiciones ya esté bien.
+    if(c.fecha!=null && data.fixture && data.fixture[c.cat] && data.fixture[c.cat][c.fecha]){
+      data.fixture[c.cat][c.fecha].gf = c.gfFecha;
+      data.fixture[c.cat][c.fecha].gc = c.gcFecha;
+    }
   });
   return data;
 }
