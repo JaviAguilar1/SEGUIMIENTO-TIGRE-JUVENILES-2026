@@ -5292,12 +5292,37 @@ function completarLinksDesdeFutdetail(data){
 // editor, esto los compara contra lo ya guardado y sube solo lo que cambió
 // -- mismo criterio que completarLinksDesdeFutdetail, pero esto sí escribe
 // directo (no espera a que otra cosa dispare un saveData()).
+// Jugadores duplicados en futdetail (misma persona con dos fichas propias,
+// confirmado con el club, que todavía no lo unificó de su lado): se
+// fusionan solos cada vez que llega data fresca, tanto si futdetail manda
+// las dos fichas juntas (se suman los números) como si por ahora solo
+// carga en una de las dos (se renombra directo a la canónica). Sacar esta
+// entrada de la lista el día que el club confirme que ya lo unificó.
+const FUSIONES_JUGADORES_DUPLICADOS = {
+  '8VA': [{alias:'Fino Amadeo Benjamin', canonico:'Fino Amadeo'}],
+};
+function aplicarFusionesDuplicados(cat, lista, campoNombre){
+  const fusiones = FUSIONES_JUGADORES_DUPLICADOS[cat];
+  if(!fusiones || !lista) return lista;
+  fusiones.forEach(({alias, canonico})=>{
+    const idxAlias = lista.findIndex(x=>x[campoNombre]===alias);
+    if(idxAlias<0) return;
+    const idxCanon = lista.findIndex(x=>x[campoNombre]===canonico);
+    if(idxCanon<0){ lista[idxAlias][campoNombre]=canonico; return; }
+    const a=lista[idxAlias], c=lista[idxCanon];
+    ['convocatorias','partidos_titular','minutos_jugados','goles','asistencias','tarjeta_amarilla','tarjeta_roja'].forEach(campo=>{
+      if(typeof a[campo]==='number') c[campo]=(c[campo]||0)+a[campo];
+    });
+    lista.splice(idxAlias,1);
+  });
+  return lista;
+}
 function sincronizarJugadoresDesdeFutdetail(){
   if(!canEdit || !fbReady) return;
   const fresh=TABLA_DATA && TABLA_DATA.jugadores_futdetail;
   if(!fresh) return;
   Object.keys(fresh).forEach(cat=>{
-    const nuevo=fresh[cat];
+    const nuevo=aplicarFusionesDuplicados(cat, fresh[cat], 'jugador');
     if(!nuevo || !nuevo.length) return;
     if(JSON.stringify(nuevo)===JSON.stringify(jugadoresStats[cat])) return;
     jugadoresStats[cat]=nuevo;
@@ -5316,7 +5341,7 @@ function sincronizarPlantelDesdeFutdetail(){
   const fresh=TABLA_DATA && TABLA_DATA.plantel_futdetail;
   if(!fresh) return;
   Object.keys(fresh).forEach(cat=>{
-    const nuevo=fresh[cat];
+    const nuevo=aplicarFusionesDuplicados(cat, fresh[cat], 'nombre');
     if(!nuevo || !nuevo.length) return;
     if(JSON.stringify(nuevo)===JSON.stringify(plantelFutdetail[cat])) return;
     plantelFutdetail[cat]=nuevo;
