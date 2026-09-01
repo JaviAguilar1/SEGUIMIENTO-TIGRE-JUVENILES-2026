@@ -2148,7 +2148,12 @@ function calcConfiabilidad(){
     // Usa golesEfectivos (carga manual + COMET, COMET gana por fecha) en vez
     // de la carga manual sola — así compara lo que de verdad se ve en
     // pantalla contra futdetail, no un número viejo que COMET ya reemplazó.
-    golesEfectivos(cat, fechasExcluidasGoles(cat)).forEach(g=>{
+    // Sin excluir fechas acá (a diferencia de golesCometMismatches): esto
+    // suma el TOTAL de temporada, la Fecha 3 (Hacoaj) ya viene bien resuelta
+    // en golesEfectivos y excluirla solo restaba goles reales (caso real:
+    // González Santino, 2026-09-01 -- su gol de F3 desaparecía de "mi carga"
+    // acá y la alerta contra futdetail nunca podía cerrar).
+    golesEfectivos(cat).forEach(g=>{
       const key=keyDe(g.name);
       misGoles[key]=(misGoles[key]||0)+g.goals;
       nombreOriginal[key]=nombreOriginal[key]||g.name;
@@ -7385,12 +7390,33 @@ function abrirPerfilJugador(cat, nombre){
     .split(/\s+/).filter(Boolean).sort().join(' ');
   const blEntry = Object.entries(blPlayers).find(([n])=>ordenIndep(n)===ordenIndep(nombre));
   const blMatches = blEntry ? (blEntry[1].match||[]) : [];
-  const gpsHTML = blMatches.length
-    ? `<div class="table-wrap"><table><thead><tr><th>Fecha</th><th>Rival</th><th>Min</th><th>Dist. Total (m)</th></tr></thead><tbody>
-        ${blMatches.slice().sort((a,b)=>(blFechaNum(a.fecha)||0)-(blFechaNum(b.fecha)||0))
-          .map(m=>`<tr><td>${esc(m.fecha||'')}</td><td>${esc(m.opp||'')}</td><td>${m.min??'—'}</td><td>${m.metrics?.[0]??'—'}</td></tr>`).join('')}
-      </tbody></table></div>`
-    : `<div style="color:var(--muted);font-size:12px;padding:6px 0">Sin datos de rendimiento físico todavía — se completa solo cuando Brian cargue en BL GPS Performance.</div>`;
+
+  // Radar de arriba de la ficha: goles y minutos son 100% propios (tasa
+  // sobre las convocatorias del jugador, nunca comparado contra nadie);
+  // sprints/vel. máxima/mts por partido salen de BL GPS Performance si ya
+  // hay carga -- reemplaza a la vieja sección "RENDIMIENTO FÍSICO (BL)"
+  // (una tabla partido a partido que quedaba redundante con esto).
+  const radarGoles = convocatorias ? Math.round(golesFinal/convocatorias*100) : 0;
+  const radarMinutos = convocatorias ? Math.round(minutosFinal/(convocatorias*90)*100) : 0;
+  const gpsNums = i => blMatches.map(m=>m.metrics?.[i]).filter(v=>v!=null).map(Number);
+  const gpsProm = i => { const n=gpsNums(i); return n.length ? n.reduce((a,b)=>a+b,0)/n.length : null; };
+  const gpsMax  = i => { const n=gpsNums(i); return n.length ? Math.max(...n) : null; };
+  const sprintsProm = gpsProm(5), velMax = gpsMax(6), mtsProm = gpsProm(0);
+  // Techos fijos solo para poder dibujar estos 3 ejes en la misma escala
+  // 0-100 que goles/minutos -- no es una comparación contra nadie.
+  const radarSprints = sprintsProm!=null ? Math.min(100, Math.round(sprintsProm/15*100)) : 0;
+  const radarVelMax  = velMax!=null      ? Math.min(100, Math.round(velMax/34*100))      : 0;
+  const radarMts     = mtsProm!=null     ? Math.min(100, Math.round(mtsProm/11000*100))  : 0;
+  const hayGps = blMatches.length>0;
+  const radarHTML = `
+    <div style="position:relative;width:100%;height:240px;margin:6px 0">
+      <canvas id="radar-perfil-jugador" role="img" aria-label="Radar de ${esc(nombre)}: goles y minutos jugados sobre sus propias convocatorias${hayGps?', mas sprints, velocidad maxima y metros por partido de BL GPS Performance':' -- sprints, velocidad maxima y metros por partido todavia pendientes de carga GPS'}"></canvas>
+    </div>
+    <div style="display:flex;flex-wrap:wrap;justify-content:center;gap:14px;font-size:10.5px;color:var(--muted);margin-bottom:${hayGps?'10':'2'}px">
+      <span style="display:flex;align-items:center;gap:4px"><span style="width:8px;height:8px;border-radius:50%;background:#2a78d6"></span>Dato real</span>
+      ${hayGps?'':'<span style="display:flex;align-items:center;gap:4px"><span style="width:8px;height:8px;border-radius:50%;background:var(--muted)"></span>Pendiente (GPS)</span>'}
+    </div>
+    ${hayGps?'':'<div style="font-size:10.5px;color:var(--muted);text-align:center;margin-bottom:14px">Sprints, Vel. máxima y Mts/partido se completan solos cuando Brian cargue en BL GPS Performance.</div>'}`;
 
   // Cruza contra matchData (citaciones) de TODAS las fechas de la categoría
   // -- veces titular, veces entró desde el banco, veces salió. Match por id
@@ -7466,22 +7492,57 @@ function abrirPerfilJugador(cat, nombre){
     <button class="m-cancel" onclick="document.getElementById('perfil-jugador-modal').remove()" style="float:right">✕</button>
     <h2 style="text-align:center">${esc(nombre)}</h2>
     <p style="text-align:center">${esc(jugador?.posicion||'—')} · ${esc(cat)}</p>
+    ${radarHTML}
     <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:14px 0">
-      ${[['Convoc.',convocatorias],['Titular',vecesTitular],['Minutos',minutosFinal],
-         ['Goles',golesFinal],['Asist.',s.asistencias],['Amar.',amarillasFinal],['Roja',rojasFinal],['En banco',vecesBanco]]
+      ${[['Convoc.',convocatorias],['Titular',vecesTitular],['Minutos',minutosFinal],['Amar.',amarillasFinal]]
         .map(([label,val])=>`<div style="background:var(--surface2);border-radius:8px;padding:8px;text-align:center">
           <div style="font-size:10px;color:var(--muted);text-transform:uppercase">${label}</div>
           <div style="font-size:18px;font-weight:700;color:var(--gold2)">${val||0}</div></div>`).join('')}
     </div>
-    <div style="font-size:11px;color:var(--muted);margin-bottom:10px">Convoc./titular/en banco: tus citaciones · minutos/goles/tarjetas: COMET, completado con futdetail donde falte informe · asistencias: futdetail. Entró de banco: ${vecesEntroDeBanco} · Salió: ${vecesSalio}</div>
+    <div style="font-size:11px;color:var(--muted);margin-bottom:10px">Convoc./titular: tus citaciones · minutos/amarillas: COMET, completado con futdetail donde falte informe. Goles: ver más abajo. Entró de banco: ${vecesEntroDeBanco} · Salió: ${vecesSalio}</div>
     <div class="st"><div class="stbar"></div>🗓️ PARTIDOS JUGADOS</div>
     ${partidosJugadosHTML}
     <div class="st" style="margin-top:14px"><div class="stbar"></div>⚽ GOLES</div>
     ${golesFilas}
-    <div class="st" style="margin-top:14px"><div class="stbar"></div>📡 RENDIMIENTO FÍSICO (BL)</div>
-    ${gpsHTML}
   </div>`;
   document.body.appendChild(m);
+
+  killChart('radar-perfil-jugador');
+  new Chart(document.getElementById('radar-perfil-jugador'), {
+    type: 'radar',
+    data: {
+      labels: [
+        ['Goles', `${golesFinal} · ${radarGoles}% conv.`],
+        ['Minutos jugados', `${minutosFinal}' · ${radarMinutos}%`],
+        ['Sprints', sprintsProm!=null ? `${sprintsProm.toFixed(1)}/partido` : 'pendiente'],
+        ['Vel. máxima', velMax!=null ? `${velMax} km/h` : 'pendiente'],
+        ['Mts/partido', mtsProm!=null ? `${Math.round(mtsProm)} m` : 'pendiente']
+      ],
+      datasets: [{
+        label: nombre,
+        data: [radarGoles, radarMinutos, radarSprints, radarVelMax, radarMts],
+        borderColor: '#2a78d6',
+        backgroundColor: 'rgba(42,120,214,0.15)',
+        pointBackgroundColor: hayGps ? '#2a78d6' : ['#2a78d6','#2a78d6','#5a7099','#5a7099','#5a7099'],
+        pointRadius: 5,
+        borderWidth: 2
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        r: {
+          min: 0, max: 100,
+          ticks: { display: false, stepSize: 25 },
+          grid: { color: 'rgba(90,112,153,0.25)' },
+          angleLines: { color: 'rgba(90,112,153,0.25)' },
+          pointLabels: { color: '#a8c0e8', font: { size: 10.5 } }
+        }
+      }
+    }
+  });
 }
 
 function exportFichaJugador(cat, nombre){
