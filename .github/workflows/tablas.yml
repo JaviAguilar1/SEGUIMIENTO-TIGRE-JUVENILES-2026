@@ -22,6 +22,14 @@ jobs:
         with:
           python-version: "3.12"
 
+      # Arregla errores de "self-signed certificate" que a veces tira la
+      # imagen de Ubuntu del runner al conectar a HTTPS (paquete
+      # ca-certificates desactualizado en la imagen, no es un problema de
+      # los sitios de origen -- confirmado 2026-09-01 conectando a los
+      # mismos sitios desde otra red sin problema).
+      - name: Actualizar certificados CA
+        run: sudo apt-get update -qq && sudo apt-get install -y --reinstall ca-certificates && sudo update-ca-certificates
+
       # continue-on-error: si alguna fuente fallo, el script sale con error
       # (para que quede registrado), pero igual queremos commitear el dato
       # parcial que si funciono -- por eso el paso siguiente corre igual.
