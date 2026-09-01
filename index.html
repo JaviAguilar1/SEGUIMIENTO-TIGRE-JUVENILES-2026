@@ -3461,13 +3461,25 @@ async function parseCitacionRaw(file, catHint) {
       // con el correcto) — se marca con warn:true todo lo que no matchea con
       // nadie del plantel real, en vez de mostrarlo como si fuera seguro.
       const rosterPorNombre = {};
-      (plantelFutdetail[detectedCat]||[]).forEach(p=>{ rosterPorNombre[normNombreOrdenIndependiente(p.nombre)]=p; });
+      const roster = plantelFutdetail[detectedCat]||[];
+      roster.forEach(p=>{ rosterPorNombre[normNombreOrdenIndependiente(p.nombre)]=p; });
       // id del plantel (Fase 1) para cada titular/suplente que sí matcheó —
       // así la vista de citación puede cruzar goles/tarjetas/cambios de
       // COMET (que también vienen con id) sin comparar nombres de nuevo.
+      // Si no matchea exacto, se prueba por subconjunto de palabras (mismo
+      // criterio que cometResolvePlayer): el PDF puede traer el nombre sin
+      // segundos nombres que el plantel sí tiene, o al revés.
       const tagWarn = arr => arr.map(p=>{
-        const match = rosterPorNombre[normNombreOrdenIndependiente(p.nombre)];
-        return {...p, warn: Object.keys(rosterPorNombre).length>0 && !match, id: match?match.id:null};
+        let match = rosterPorNombre[normNombreOrdenIndependiente(p.nombre)];
+        if(!match){
+          const pw = cometNameWords(p.nombre);
+          const candidatos = roster.filter(r=>{
+            const rw = cometNameWords(r.nombre);
+            return rw.length>0 && pw.length>0 && (rw.every(w=>pw.includes(w)) || pw.every(w=>rw.includes(w)));
+          });
+          if(candidatos.length===1) match = candidatos[0];
+        }
+        return {...p, warn: roster.length>0 && !match, id: match?match.id:null};
       });
 
       results_parsed[detectedCat] = {titulares: tagWarn(titulares), suplentes: tagWarn(suplentes), rival};
