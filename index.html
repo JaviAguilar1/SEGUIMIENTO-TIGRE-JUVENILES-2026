@@ -3478,6 +3478,21 @@ async function parseCitacionRaw(file, catHint) {
             return rw.length>0 && pw.length>0 && (rw.every(w=>pw.includes(w)) || pw.every(w=>rw.includes(w)));
           });
           if(candidatos.length===1) match = candidatos[0];
+          // Jugador de otra categoría citado para completar el plantel de
+          // este partido (ej. un arquero de 5ta subiendo a 4ta) -- si no
+          // aparece nadie en la categoría de la fecha, se busca en el resto
+          // del club antes de rendirse. Mismo criterio que cometResolvePlayer.
+          if(!match){
+            for(const otraCat of CATEGORIES){
+              if(otraCat===detectedCat || match) continue;
+              const otroRoster = plantelFutdetail[otraCat]||[];
+              const cand2 = otroRoster.filter(r=>{
+                const rw = cometNameWords(r.nombre);
+                return rw.length>0 && pw.length>0 && (rw.every(w=>pw.includes(w)) || pw.every(w=>rw.includes(w)));
+              });
+              if(cand2.length===1) match = cand2[0];
+            }
+          }
         }
         return {...p, warn: roster.length>0 && !match, id: match?match.id:null};
       });
