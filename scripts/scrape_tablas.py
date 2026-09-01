@@ -654,9 +654,13 @@ def fetch_statfutbol_plantel(catnum, team_id):
     return out
 
 
-def fetch_statfutbol_sintesis_amarillas(catnum, id_partido, team_id_objetivo, equipos):
-    """Devuelve los nombres de jugadores del equipo team_id_objetivo que se
-    amonestaron (amarilla) en ese partido puntual."""
+def fetch_statfutbol_sintesis_tarjetas(catnum, id_partido, team_id_objetivo, equipos):
+    """Devuelve {nombre: {'amarilla': bool, 'roja': bool}} para los
+    jugadores del equipo team_id_objetivo en ese partido puntual. Devuelve
+    {} (sin marcar error) si la sintesis todavia no esta publicada del lado
+    de statfutbol -- pasa seguido con el partido mas reciente, la tabla
+    viene vacia (sin nombre de equipo ni jugadores), no es un cambio de
+    formato."""
     html = fetch_post(f"{STATFUTBOL_BASE}sintesispartido{catnum}2026.php",
                        {"idPartido": id_partido, "fixGL": "0", "fixGV": "0"})
     # ojo: "encabezado-equipo" tambien aparece en el <style> inline mas
@@ -664,7 +668,7 @@ def fetch_statfutbol_sintesis_amarillas(catnum, id_partido, team_id_objetivo, eq
     idx = html.find('<th class="encabezado-equipo"')
     idx2 = html.find("</table>", idx)
     if idx < 0 or idx2 < 0:
-        raise ValueError("No se encontro la tabla de sintesis")
+        return {}
     bloque = html[idx:idx2]
     # "1 gol" (singular) vs "2 goles" (plural) -- statfutbol usa las dos. El
     # nombre del equipo puede traer su propio parentesis (ej. "GODOY CRUZ
@@ -674,27 +678,65 @@ def fetch_statfutbol_sintesis_amarillas(catnum, id_partido, team_id_objetivo, eq
     nombres_equipo = re.findall(r'encabezado-equipo">.*?;(.+?)\s*\(\d+ gol(?:es)?\)\s*</th>', bloque)
     tds = re.findall(r'<td class="jugadores-equipo"[^>]*>(.*?)</td>', bloque, re.DOTALL)
     if len(nombres_equipo) != 2 or len(tds) != 2:
-        raise ValueError("Formato de sintesis inesperado (equipos/columnas)")
-    nombre_objetivo = next((n for eid, n in equipos if eid == team_id_objetivo), None)
+        return {}
     lado = None
     for i, ne in enumerate(nombres_equipo):
         m = statfutbol_match_equipo(ne, equipos)
         if m and m[0] == team_id_objetivo:
             lado = i
     if lado is None:
-        raise ValueError(f"No pude identificar de que lado esta el equipo {nombre_objetivo!r} en la sintesis")
+        return {}
     spans = re.findall(r'<span class="linea-jugador">(.*?)</span>', tds[lado], re.DOTALL)
-    amonestados = []
+    eventos = {}
     for sp in spans:
         iconos = re.findall(r'<i class="([^"]+)"[^>]*?style="color:([^;"]+)', sp)
-        if not any("fa-square" in cls and color == "yellow" for cls, color in iconos):
+        amarilla = any("fa-square" in cls and color == "yellow" for cls, color in iconos)
+        roja = any("fa-square" in cls and color == "red" for cls, color in iconos)
+        if not (amarilla or roja):
             continue
         texto = re.sub(r"<form.*?</form>", "", sp, flags=re.DOTALL)
         texto = re.sub(r"<i.*?</i>|<i[^>]*/?>", "", texto, flags=re.DOTALL)
         nombre = re.sub(r"^\s*\d+\.\s*", "", texto).strip()
         if nombre:
-            amonestados.append(nombre)
-    return amonestados
+            eventos[nombre] = {"amarilla": amarilla, "roja": roja}
+    return eventos
+
+
+AMARILLAS_ALERTA = 4
+AMARILLAS_SUSPENSION = 5
+
+
+def calcular_riesgo_suspension(catnum, team_id, team_nombre, equipos, fixture):
+    """Recorre TODOS los partidos jugados por team_id en la temporada, en
+    orden cronologico, y arma el conteo VIGENTE de amarillas por jugador --
+    no el acumulado bruto, sino el que queda despues de reiniciar en cero
+    cada vez que el jugador fue expulsado (roja directa o doble amarilla) o
+    llego a la 5ta amarilla acumulada. Mismo criterio que amarillasEnAlerta()
+    en index.html para nuestros propios jugadores (caso Juarez Nahuel,
+    2026-09-01: 4 amarillas brutas pero el conteo real era 2 porque una
+    fecha tuvo roja en el medio). Devuelve los que estan en riesgo (ciclo
+    actual >= 4), listos para jugarnos la 5ta."""
+    nombre_corto = team_nombre.split(" (")[0]
+    partidos_equipo = [p for p in fixture if p["jugado"] and (
+        p["local"] == nombre_corto or p["visita"] == nombre_corto
+        or statfutbol_match_equipo(p["local"], equipos) == (team_id, team_nombre)
+        or statfutbol_match_equipo(p["visita"], equipos) == (team_id, team_nombre)
+    )]
+    partidos_equipo.sort(key=lambda p: p["fecha_iso"])
+    conteo = {}
+    for p in partidos_equipo:
+        try:
+            eventos = fetch_statfutbol_sintesis_tarjetas(catnum, p["id_partido"], team_id, equipos)
+        except Exception:  # noqa -- un partido puntual con la pagina rota no debe tirar abajo toda la temporada
+            eventos = {}
+        for nombre, ev in eventos.items():
+            if ev["amarilla"]:
+                conteo[nombre] = conteo.get(nombre, 0) + 1
+        for nombre in list(conteo.keys()):
+            expulsado = eventos.get(nombre, {}).get("roja", False)
+            if conteo[nombre] >= AMARILLAS_SUSPENSION or expulsado:
+                conteo[nombre] = 0
+    return [{"nombre": n, "amarillas": c} for n, c in conteo.items() if c >= AMARILLAS_ALERTA]
 
 
 def calcular_alerta_rival(cat, catnum):
@@ -720,33 +762,8 @@ def calcular_alerta_rival(cat, catnum):
     if not plantel:
         raise ValueError(f"Plantel vacio para {team_nombre!r}")
     goleador = max(plantel, key=lambda j: j["gol"])
-    am_por_nombre = {j["nombre"]: j["am"] for j in plantel}
 
-    # Ultimo partido JUGADO del rival antes de enfrentarnos (no necesariamente
-    # la fecha anterior a la nuestra -- el rival puede tener fechas libres/
-    # reprogramadas distintas a las nuestras).
-    partidos_rival = [p for p in fixture if p["jugado"] and (p["local"] == team_nombre.split(" (")[0]
-                       or p["visita"] == team_nombre.split(" (")[0]
-                       or statfutbol_match_equipo(p["local"], equipos) == match
-                       or statfutbol_match_equipo(p["visita"], equipos) == match)]
-    partidos_rival.sort(key=lambda p: p["fecha_iso"])
-    ultimo = partidos_rival[-1] if partidos_rival else None
-
-    riesgo = []
-    if ultimo:
-        # El partido puede ya figurar como jugado en el fixture pero todavia
-        # no tener su sintesis cargada del lado de statfutbol (confirmado
-        # 2026-09-01: la tabla viene vacia, sin nombre de equipo ni
-        # jugadores, no es un cambio de formato) -- en ese caso no hay
-        # amonestados que avisar todavia, no es un error real.
-        try:
-            amonestados = fetch_statfutbol_sintesis_amarillas(catnum, ultimo["id_partido"], team_id, equipos)
-        except ValueError:
-            amonestados = []
-        for nombre in amonestados:
-            am_total = am_por_nombre.get(nombre)
-            if am_total is not None and am_total > 0 and am_total % 5 == 0:
-                riesgo.append({"nombre": nombre, "amarillas": am_total})
+    riesgo = calcular_riesgo_suspension(catnum, team_id, team_nombre, equipos, fixture)
 
     return {
         "fecha": proximo["jornada"],
