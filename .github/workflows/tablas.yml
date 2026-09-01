@@ -1,11 +1,12 @@
 name: Actualizar tablas LPF
 
-# Corre solo, sin intervencion manual.
+# El cron automatico se desactivo el 2026-09-01: la tarea programada en la
+# PC del club (Documents\futdetail_scraper, cada 4hs) ya cubre esto -- Liga,
+# fixture, Reserva, Paren la Pelota y futdetail -- y sube directo a Firebase/
+# al repo. Este workflow queda solo para forzar una corrida a mano si hiciera
+# falta ("Run workflow").
 on:
-  schedule:
-    # Cada 30 minutos, todos los dias (UTC)
-    - cron: "*/30 * * * *"
-  workflow_dispatch: {}   # boton "Run workflow" por si queres forzar una actualizacion
+  workflow_dispatch: {}
 
 permissions:
   contents: write   # necesario para que la Action commitee el JSON
