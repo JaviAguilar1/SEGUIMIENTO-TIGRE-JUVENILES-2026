@@ -1,5 +1,5 @@
 {
-  "actualizado": "2026-09-01 01:30",
+  "actualizado": "2026-09-01 01:44",
   "fuente": "ligaprofesional.ar (oficial)",
   "fuente_fixture": "ligaprofesional.ar (oficial)",
   "fuente_reserva": "statfutbol.com.ar",
@@ -2607,7 +2607,887 @@
         "gc": 76,
         "dif": -65
       }
-    ]
+    ],
+    "RESERVA_APE": {
+      "zonas": {
+        "Zona A": [
+          {
+            "pos": 1,
+            "equipo": "VELEZ",
+            "pts": 44,
+            "pj": 18,
+            "pg": 14,
+            "pe": 2,
+            "pp": 2,
+            "gf": 40,
+            "gc": 11,
+            "dif": 29
+          },
+          {
+            "pos": 2,
+            "equipo": "RIVER PLATE",
+            "pts": 31,
+            "pj": 18,
+            "pg": 9,
+            "pe": 4,
+            "pp": 5,
+            "gf": 24,
+            "gc": 17,
+            "dif": 7
+          },
+          {
+            "pos": 3,
+            "equipo": "RACING CLUB",
+            "pts": 30,
+            "pj": 18,
+            "pg": 8,
+            "pe": 6,
+            "pp": 4,
+            "gf": 27,
+            "gc": 23,
+            "dif": 4
+          },
+          {
+            "pos": 4,
+            "equipo": "ATL. TUCUMAN",
+            "pts": 30,
+            "pj": 18,
+            "pg": 9,
+            "pe": 3,
+            "pp": 6,
+            "gf": 26,
+            "gc": 25,
+            "dif": 1
+          },
+          {
+            "pos": 5,
+            "equipo": "UNION (SF)",
+            "pts": 29,
+            "pj": 18,
+            "pg": 7,
+            "pe": 8,
+            "pp": 3,
+            "gf": 23,
+            "gc": 19,
+            "dif": 4
+          },
+          {
+            "pos": 6,
+            "equipo": "ARGENTINOS JRS",
+            "pts": 28,
+            "pj": 18,
+            "pg": 7,
+            "pe": 7,
+            "pp": 4,
+            "gf": 24,
+            "gc": 18,
+            "dif": 6
+          },
+          {
+            "pos": 7,
+            "equipo": "TALLERES (C)",
+            "pts": 26,
+            "pj": 18,
+            "pg": 7,
+            "pe": 5,
+            "pp": 6,
+            "gf": 27,
+            "gc": 21,
+            "dif": 6
+          },
+          {
+            "pos": 8,
+            "equipo": "CENTRAL",
+            "pts": 26,
+            "pj": 18,
+            "pg": 7,
+            "pe": 5,
+            "pp": 6,
+            "gf": 25,
+            "gc": 22,
+            "dif": 3
+          },
+          {
+            "pos": 9,
+            "equipo": "INSTITUTO (C)",
+            "pts": 24,
+            "pj": 18,
+            "pg": 5,
+            "pe": 9,
+            "pp": 4,
+            "gf": 20,
+            "gc": 21,
+            "dif": -1
+          },
+          {
+            "pos": 10,
+            "equipo": "SAN LORENZO",
+            "pts": 24,
+            "pj": 18,
+            "pg": 6,
+            "pe": 6,
+            "pp": 6,
+            "gf": 22,
+            "gc": 24,
+            "dif": -2
+          },
+          {
+            "pos": 11,
+            "equipo": "GIMNASIA (LP)",
+            "pts": 23,
+            "pj": 18,
+            "pg": 6,
+            "pe": 5,
+            "pp": 7,
+            "gf": 19,
+            "gc": 17,
+            "dif": 2
+          },
+          {
+            "pos": 12,
+            "equipo": "GIMNASIA (M)",
+            "pts": 23,
+            "pj": 18,
+            "pg": 6,
+            "pe": 5,
+            "pp": 7,
+            "gf": 16,
+            "gc": 19,
+            "dif": -3
+          },
+          {
+            "pos": 13,
+            "equipo": "BANFIELD",
+            "pts": 23,
+            "pj": 18,
+            "pg": 6,
+            "pe": 5,
+            "pp": 7,
+            "gf": 14,
+            "gc": 18,
+            "dif": -4
+          },
+          {
+            "pos": 14,
+            "equipo": "ALDOSIVI (MDP)",
+            "pts": 18,
+            "pj": 18,
+            "pg": 5,
+            "pe": 3,
+            "pp": 10,
+            "gf": 17,
+            "gc": 28,
+            "dif": -11
+          },
+          {
+            "pos": 15,
+            "equipo": "BARRACAS CTRAL",
+            "pts": 17,
+            "pj": 18,
+            "pg": 4,
+            "pe": 5,
+            "pp": 9,
+            "gf": 11,
+            "gc": 24,
+            "dif": -13
+          },
+          {
+            "pos": 16,
+            "equipo": "SARMIENTO (J)",
+            "pts": 16,
+            "pj": 18,
+            "pg": 4,
+            "pe": 4,
+            "pp": 10,
+            "gf": 16,
+            "gc": 26,
+            "dif": -10
+          },
+          {
+            "pos": 17,
+            "equipo": "TIGRE",
+            "pts": 16,
+            "pj": 18,
+            "pg": 4,
+            "pe": 4,
+            "pp": 10,
+            "gf": 15,
+            "gc": 25,
+            "dif": -10
+          },
+          {
+            "pos": 18,
+            "equipo": "GODOY CRUZ (M)",
+            "pts": 15,
+            "pj": 18,
+            "pg": 4,
+            "pe": 3,
+            "pp": 11,
+            "gf": 20,
+            "gc": 30,
+            "dif": -10
+          }
+        ],
+        "Zona B": [
+          {
+            "pos": 1,
+            "equipo": "BOCA JRS",
+            "pts": 36,
+            "pj": 18,
+            "pg": 11,
+            "pe": 3,
+            "pp": 4,
+            "gf": 33,
+            "gc": 11,
+            "dif": 22
+          },
+          {
+            "pos": 2,
+            "equipo": "INDEPENDIENTE",
+            "pts": 36,
+            "pj": 18,
+            "pg": 11,
+            "pe": 3,
+            "pp": 4,
+            "gf": 36,
+            "gc": 16,
+            "dif": 20
+          },
+          {
+            "pos": 3,
+            "equipo": "LANUS",
+            "pts": 35,
+            "pj": 18,
+            "pg": 11,
+            "pe": 2,
+            "pp": 5,
+            "gf": 39,
+            "gc": 24,
+            "dif": 15
+          },
+          {
+            "pos": 4,
+            "equipo": "NEWELLS",
+            "pts": 34,
+            "pj": 18,
+            "pg": 10,
+            "pe": 4,
+            "pp": 4,
+            "gf": 26,
+            "gc": 16,
+            "dif": 10
+          },
+          {
+            "pos": 5,
+            "equipo": "QUILMES",
+            "pts": 33,
+            "pj": 18,
+            "pg": 10,
+            "pe": 3,
+            "pp": 5,
+            "gf": 20,
+            "gc": 12,
+            "dif": 8
+          },
+          {
+            "pos": 6,
+            "equipo": "DEF Y JUSTICIA",
+            "pts": 32,
+            "pj": 18,
+            "pg": 9,
+            "pe": 5,
+            "pp": 4,
+            "gf": 38,
+            "gc": 24,
+            "dif": 14
+          },
+          {
+            "pos": 7,
+            "equipo": "ESTUDIANTES (LP)",
+            "pts": 28,
+            "pj": 18,
+            "pg": 8,
+            "pe": 4,
+            "pp": 6,
+            "gf": 25,
+            "gc": 16,
+            "dif": 9
+          },
+          {
+            "pos": 8,
+            "equipo": "BELGRANO (C)",
+            "pts": 27,
+            "pj": 18,
+            "pg": 8,
+            "pe": 3,
+            "pp": 7,
+            "gf": 27,
+            "gc": 29,
+            "dif": -2
+          },
+          {
+            "pos": 9,
+            "equipo": "HURACAN",
+            "pts": 26,
+            "pj": 18,
+            "pg": 7,
+            "pe": 5,
+            "pp": 6,
+            "gf": 23,
+            "gc": 17,
+            "dif": 6
+          },
+          {
+            "pos": 10,
+            "equipo": "PLATENSE",
+            "pts": 26,
+            "pj": 18,
+            "pg": 7,
+            "pe": 5,
+            "pp": 6,
+            "gf": 17,
+            "gc": 20,
+            "dif": -3
+          },
+          {
+            "pos": 11,
+            "equipo": "RIESTRA",
+            "pts": 25,
+            "pj": 18,
+            "pg": 7,
+            "pe": 4,
+            "pp": 7,
+            "gf": 25,
+            "gc": 18,
+            "dif": 7
+          },
+          {
+            "pos": 12,
+            "equipo": "IND.RIVADAVIA (M)",
+            "pts": 24,
+            "pj": 18,
+            "pg": 7,
+            "pe": 3,
+            "pp": 8,
+            "gf": 23,
+            "gc": 23,
+            "dif": 0
+          },
+          {
+            "pos": 13,
+            "equipo": "FERRO",
+            "pts": 22,
+            "pj": 18,
+            "pg": 6,
+            "pe": 4,
+            "pp": 8,
+            "gf": 20,
+            "gc": 23,
+            "dif": -3
+          },
+          {
+            "pos": 14,
+            "equipo": "C.CORDOBA(SDE)",
+            "pts": 19,
+            "pj": 18,
+            "pg": 5,
+            "pe": 4,
+            "pp": 9,
+            "gf": 21,
+            "gc": 33,
+            "dif": -12
+          },
+          {
+            "pos": 15,
+            "equipo": "COLON",
+            "pts": 18,
+            "pj": 18,
+            "pg": 5,
+            "pe": 3,
+            "pp": 10,
+            "gf": 15,
+            "gc": 23,
+            "dif": -8
+          },
+          {
+            "pos": 16,
+            "equipo": "ATL. RAFAELA",
+            "pts": 12,
+            "pj": 18,
+            "pg": 3,
+            "pe": 3,
+            "pp": 12,
+            "gf": 21,
+            "gc": 36,
+            "dif": -15
+          },
+          {
+            "pos": 17,
+            "equipo": "ESTUDIANTES (RC)",
+            "pts": 11,
+            "pj": 18,
+            "pg": 2,
+            "pe": 5,
+            "pp": 11,
+            "gf": 9,
+            "gc": 32,
+            "dif": -23
+          },
+          {
+            "pos": 18,
+            "equipo": "SAN MARTIN (SJ)",
+            "pts": 8,
+            "pj": 18,
+            "pg": 2,
+            "pe": 2,
+            "pp": 14,
+            "gf": 16,
+            "gc": 59,
+            "dif": -43
+          }
+        ]
+      }
+    },
+    "RESERVA_CLA": {
+      "zonas": {
+        "Zona A": [
+          {
+            "pos": 1,
+            "equipo": "RIVER PLATE",
+            "pts": 12,
+            "pj": 6,
+            "pg": 3,
+            "pe": 3,
+            "pp": 0,
+            "gf": 12,
+            "gc": 4,
+            "dif": 8
+          },
+          {
+            "pos": 2,
+            "equipo": "SARMIENTO (JUNIN)",
+            "pts": 12,
+            "pj": 6,
+            "pg": 3,
+            "pe": 3,
+            "pp": 0,
+            "gf": 5,
+            "gc": 1,
+            "dif": 4
+          },
+          {
+            "pos": 3,
+            "equipo": "SAN LORENZO",
+            "pts": 11,
+            "pj": 6,
+            "pg": 3,
+            "pe": 2,
+            "pp": 1,
+            "gf": 8,
+            "gc": 2,
+            "dif": 6
+          },
+          {
+            "pos": 4,
+            "equipo": "ROSARIO CENTRAL",
+            "pts": 10,
+            "pj": 6,
+            "pg": 2,
+            "pe": 4,
+            "pp": 0,
+            "gf": 10,
+            "gc": 7,
+            "dif": 3
+          },
+          {
+            "pos": 5,
+            "equipo": "TALLERES (CORDOBA)",
+            "pts": 10,
+            "pj": 6,
+            "pg": 2,
+            "pe": 4,
+            "pp": 0,
+            "gf": 6,
+            "gc": 4,
+            "dif": 2
+          },
+          {
+            "pos": 6,
+            "equipo": "GIMNASIA Y ESGRIMA (LP)",
+            "pts": 9,
+            "pj": 6,
+            "pg": 2,
+            "pe": 3,
+            "pp": 1,
+            "gf": 6,
+            "gc": 3,
+            "dif": 3
+          },
+          {
+            "pos": 7,
+            "equipo": "INSTITUTO (CORDOBA)",
+            "pts": 9,
+            "pj": 6,
+            "pg": 2,
+            "pe": 3,
+            "pp": 1,
+            "gf": 8,
+            "gc": 6,
+            "dif": 2
+          },
+          {
+            "pos": 8,
+            "equipo": "GIMNASIA Y ESGRIMA (MENDOZA)",
+            "pts": 9,
+            "pj": 6,
+            "pg": 3,
+            "pe": 0,
+            "pp": 3,
+            "gf": 8,
+            "gc": 8,
+            "dif": 0
+          },
+          {
+            "pos": 9,
+            "equipo": "VELEZ SARSFIELD",
+            "pts": 8,
+            "pj": 6,
+            "pg": 2,
+            "pe": 2,
+            "pp": 2,
+            "gf": 5,
+            "gc": 3,
+            "dif": 2
+          },
+          {
+            "pos": 10,
+            "equipo": "TIGRE",
+            "pts": 7,
+            "pj": 6,
+            "pg": 2,
+            "pe": 1,
+            "pp": 3,
+            "gf": 7,
+            "gc": 9,
+            "dif": -2
+          },
+          {
+            "pos": 11,
+            "equipo": "UNION (SF)",
+            "pts": 6,
+            "pj": 6,
+            "pg": 0,
+            "pe": 6,
+            "pp": 0,
+            "gf": 5,
+            "gc": 5,
+            "dif": 0
+          },
+          {
+            "pos": 12,
+            "equipo": "ALDOSIVI (MAR DEL PLATA)",
+            "pts": 6,
+            "pj": 6,
+            "pg": 1,
+            "pe": 3,
+            "pp": 2,
+            "gf": 3,
+            "gc": 5,
+            "dif": -2
+          },
+          {
+            "pos": 13,
+            "equipo": "GODOY CRUZ A.T. (MENDOZA)",
+            "pts": 6,
+            "pj": 6,
+            "pg": 1,
+            "pe": 3,
+            "pp": 2,
+            "gf": 4,
+            "gc": 7,
+            "dif": -3
+          },
+          {
+            "pos": 14,
+            "equipo": "ARGENTINOS JUNIORS",
+            "pts": 5,
+            "pj": 6,
+            "pg": 1,
+            "pe": 2,
+            "pp": 3,
+            "gf": 2,
+            "gc": 5,
+            "dif": -3
+          },
+          {
+            "pos": 15,
+            "equipo": "BANFIELD",
+            "pts": 5,
+            "pj": 6,
+            "pg": 1,
+            "pe": 2,
+            "pp": 3,
+            "gf": 5,
+            "gc": 9,
+            "dif": -4
+          },
+          {
+            "pos": 16,
+            "equipo": "ATL. TUCUMAN",
+            "pts": 5,
+            "pj": 6,
+            "pg": 1,
+            "pe": 2,
+            "pp": 3,
+            "gf": 3,
+            "gc": 8,
+            "dif": -5
+          },
+          {
+            "pos": 17,
+            "equipo": "RACING CLUB",
+            "pts": 4,
+            "pj": 6,
+            "pg": 0,
+            "pe": 4,
+            "pp": 2,
+            "gf": 7,
+            "gc": 11,
+            "dif": -4
+          },
+          {
+            "pos": 18,
+            "equipo": "BARRACAS CENTRAL",
+            "pts": 3,
+            "pj": 6,
+            "pg": 0,
+            "pe": 3,
+            "pp": 3,
+            "gf": 4,
+            "gc": 11,
+            "dif": -7
+          }
+        ],
+        "Zona B": [
+          {
+            "pos": 1,
+            "equipo": "INDEPENDIENTE",
+            "pts": 16,
+            "pj": 6,
+            "pg": 5,
+            "pe": 1,
+            "pp": 0,
+            "gf": 18,
+            "gc": 4,
+            "dif": 14
+          },
+          {
+            "pos": 2,
+            "equipo": "LANUS",
+            "pts": 13,
+            "pj": 6,
+            "pg": 4,
+            "pe": 1,
+            "pp": 1,
+            "gf": 9,
+            "gc": 4,
+            "dif": 5
+          },
+          {
+            "pos": 3,
+            "equipo": "ESTUDIANTES (LP)",
+            "pts": 11,
+            "pj": 6,
+            "pg": 3,
+            "pe": 2,
+            "pp": 1,
+            "gf": 12,
+            "gc": 6,
+            "dif": 6
+          },
+          {
+            "pos": 4,
+            "equipo": "BOCA JUNIORS",
+            "pts": 11,
+            "pj": 6,
+            "pg": 3,
+            "pe": 2,
+            "pp": 1,
+            "gf": 9,
+            "gc": 4,
+            "dif": 5
+          },
+          {
+            "pos": 5,
+            "equipo": "BELGRANO (CORDOBA)",
+            "pts": 11,
+            "pj": 6,
+            "pg": 3,
+            "pe": 2,
+            "pp": 1,
+            "gf": 6,
+            "gc": 6,
+            "dif": 0
+          },
+          {
+            "pos": 6,
+            "equipo": "ESTUDIANTES (RIO CUARTO - CORDOBA)",
+            "pts": 9,
+            "pj": 6,
+            "pg": 2,
+            "pe": 3,
+            "pp": 1,
+            "gf": 4,
+            "gc": 3,
+            "dif": 1
+          },
+          {
+            "pos": 7,
+            "equipo": "ATL. RAFAELA",
+            "pts": 9,
+            "pj": 6,
+            "pg": 2,
+            "pe": 3,
+            "pp": 1,
+            "gf": 6,
+            "gc": 6,
+            "dif": 0
+          },
+          {
+            "pos": 8,
+            "equipo": "SAN MARTIN (SAN JUAN)",
+            "pts": 9,
+            "pj": 6,
+            "pg": 2,
+            "pe": 3,
+            "pp": 1,
+            "gf": 6,
+            "gc": 9,
+            "dif": -3
+          },
+          {
+            "pos": 9,
+            "equipo": "RIESTRA",
+            "pts": 8,
+            "pj": 6,
+            "pg": 2,
+            "pe": 2,
+            "pp": 2,
+            "gf": 8,
+            "gc": 7,
+            "dif": 1
+          },
+          {
+            "pos": 10,
+            "equipo": "QUILMES",
+            "pts": 8,
+            "pj": 6,
+            "pg": 2,
+            "pe": 2,
+            "pp": 2,
+            "gf": 5,
+            "gc": 5,
+            "dif": 0
+          },
+          {
+            "pos": 11,
+            "equipo": "CENTRAL CORDOBA (SANTIAGO DEL ESTERO)",
+            "pts": 8,
+            "pj": 6,
+            "pg": 2,
+            "pe": 2,
+            "pp": 2,
+            "gf": 4,
+            "gc": 5,
+            "dif": -1
+          },
+          {
+            "pos": 12,
+            "equipo": "NEWELLS OLD BOYS",
+            "pts": 6,
+            "pj": 6,
+            "pg": 1,
+            "pe": 3,
+            "pp": 2,
+            "gf": 5,
+            "gc": 7,
+            "dif": -2
+          },
+          {
+            "pos": 13,
+            "equipo": "COLON",
+            "pts": 5,
+            "pj": 6,
+            "pg": 1,
+            "pe": 2,
+            "pp": 3,
+            "gf": 4,
+            "gc": 8,
+            "dif": -4
+          },
+          {
+            "pos": 14,
+            "equipo": "HURACAN",
+            "pts": 4,
+            "pj": 6,
+            "pg": 1,
+            "pe": 1,
+            "pp": 4,
+            "gf": 3,
+            "gc": 5,
+            "dif": -2
+          },
+          {
+            "pos": 15,
+            "equipo": "DEFENSA Y JUSTICIA",
+            "pts": 4,
+            "pj": 6,
+            "pg": 0,
+            "pe": 4,
+            "pp": 2,
+            "gf": 8,
+            "gc": 11,
+            "dif": -3
+          },
+          {
+            "pos": 16,
+            "equipo": "INDEPENDIENTE RIVADAVIA (MENDOZA)",
+            "pts": 4,
+            "pj": 6,
+            "pg": 1,
+            "pe": 1,
+            "pp": 4,
+            "gf": 5,
+            "gc": 9,
+            "dif": -4
+          },
+          {
+            "pos": 17,
+            "equipo": "FERROCARRIL OESTE",
+            "pts": 4,
+            "pj": 6,
+            "pg": 1,
+            "pe": 1,
+            "pp": 4,
+            "gf": 5,
+            "gc": 13,
+            "dif": -8
+          },
+          {
+            "pos": 18,
+            "equipo": "PLATENSE",
+            "pts": 3,
+            "pj": 6,
+            "pg": 0,
+            "pe": 3,
+            "pp": 3,
+            "gf": 1,
+            "gc": 6,
+            "dif": -5
+          }
+        ]
+      }
+    }
   },
   "fixture": {
     "4TA": {
@@ -18436,765 +19316,1104 @@
       "gc": 40
     }
   },
-  "rival_alertas": {},
-  "fixture_futdetail": {},
-  "jugadores_futdetail": {},
-  "plantel_futdetail": {},
-  "bl_gps": {
-    "players": {
-      "IGNACIO ORDOÑEZ": {
-        "pos": "VOL",
-        "match": [
-          {
-            "fecha": "FECHA 1",
-            "opp": "VS INDEPENDIENTE RIVADAVIA",
-            "min": 126,
-            "metrics": [
-              9080,
-              73.85,
-              548,
-              374,
-              215,
-              10,
-              30.2,
-              24,
-              32,
-              69,
-              39,
-              4.3,
-              6.7,
-              0.19,
-              2.968,
-              1.706,
-              885
-            ]
-          },
-          {
-            "fecha": "FECHA 2",
-            "opp": "VS FERRO",
-            "min": 111,
-            "metrics": [
-              8673,
-              79.35,
-              513,
-              420,
-              190,
-              10,
-              30.1,
-              20,
-              33,
-              65,
-              40,
-              4.6,
-              7.2,
-              0.18,
-              3.784,
-              1.712,
-              833
-            ]
-          }
-        ]
+  "rival_alertas": {
+    "4TA": {
+      "fecha": 24,
+      "rival": "PLATENSE",
+      "goleador": {
+        "nombre": "WENDNAGEL, BENJAMIN",
+        "goles": 6
       },
-      "ALVARO NAVONI": {
-        "pos": "VOL CTR",
-        "match": [
-          {
-            "fecha": "FECHA 1",
-            "opp": "VS INDEPENDIENTE RIVADAVIA",
-            "min": 62,
-            "metrics": [
-              3698,
-              61,
-              117,
-              79,
-              29,
-              3,
-              27.2,
-              10,
-              12,
-              29,
-              20,
-              4.9,
-              4.5,
-              0.161,
-              1.274,
-              0.468,
-              371
-            ]
-          },
-          {
-            "fecha": "FECHA 2",
-            "opp": "VS FERRO",
-            "min": 111,
-            "metrics": [
-              9281,
-              85.1,
-              470,
-              342,
-              99,
-              5,
-              30.1,
-              16,
-              35,
-              60,
-              32,
-              4.4,
-              5.8,
-              0.144,
-              3.081,
-              0.892,
-              975
-            ]
-          }
-        ]
+      "amarillas_riesgo": []
+    },
+    "5TA": {
+      "fecha": 24,
+      "rival": "PLATENSE",
+      "goleador": {
+        "nombre": "STENTA SAMELNIK, THIAGO",
+        "goles": 8
       },
-      "CRISTIAN BENITEZ": {
-        "pos": "VOL",
-        "match": [
-          {
-            "fecha": "FECHA 1",
-            "opp": "VS INDEPENDIENTE RIVADAVIA",
-            "min": 62,
-            "metrics": [
-              3782,
-              62.34,
-              216,
-              212,
-              54,
-              4,
-              27.2,
-              9,
-              23,
-              29,
-              21,
-              3.6,
-              6.2,
-              0.145,
-              3.419,
-              0.871,
-              416
-            ]
-          },
-          {
-            "fecha": "FECHA 2",
-            "opp": "VS FERRO",
-            "min": 58,
-            "metrics": [
-              4417,
-              77.58,
-              301,
-              159,
-              68,
-              2,
-              27.9,
-              19,
-              20,
-              39,
-              25,
-              3.9,
-              5.4,
-              0.328,
-              2.741,
-              1.172,
-              490
-            ]
-          }
-        ]
+      "amarillas_riesgo": []
+    },
+    "6TA": {
+      "fecha": 24,
+      "rival": "PLATENSE",
+      "goleador": {
+        "nombre": "GONZALEZ CARIA, FRANCISCO",
+        "goles": 5
       },
-      "FELIPE FREDES": {
-        "pos": "VOL",
-        "match": [
-          {
-            "fecha": "FECHA 1",
-            "opp": "VS INDEPENDIENTE RIVADAVIA",
-            "min": 126,
-            "metrics": [
-              7473,
-              61.95,
-              469,
-              409,
-              108,
-              5,
-              29.2,
-              20,
-              43,
-              75,
-              44,
-              4.1,
-              5.6,
-              0.159,
-              3.246,
-              0.857,
-              759
-            ]
-          },
-          {
-            "fecha": "FECHA 2",
-            "opp": "VS FERRO",
-            "min": 111,
-            "metrics": [
-              6974,
-              63.33,
-              339,
-              318,
-              123,
-              7,
-              28,
-              18,
-              37,
-              69,
-              38,
-              4.3,
-              5.4,
-              0.162,
-              2.865,
-              1.108,
-              764
-            ]
-          }
-        ]
+      "amarillas_riesgo": []
+    },
+    "7MA": {
+      "fecha": 24,
+      "rival": "PLATENSE",
+      "goleador": {
+        "nombre": "FOLINO, BENJAMIN",
+        "goles": 6
       },
-      "TOMAS CACERES": {
-        "pos": "VOL CTR",
-        "match": [
-          {
-            "fecha": "FECHA 1",
-            "opp": "VS INDEPENDIENTE RIVADAVIA",
-            "min": 126,
-            "metrics": [
-              9810,
-              82.08,
-              414,
-              251,
-              50,
-              3,
-              28.9,
-              30,
-              37,
-              84,
-              43,
-              4.4,
-              5.1,
-              0.238,
-              1.992,
-              0.397,
-              992
-            ]
-          },
-          {
-            "fecha": "FECHA 2",
-            "opp": "VS FERRO",
-            "min": 111,
-            "metrics": [
-              5904,
-              54.1,
-              352,
-              158,
-              53,
-              5,
-              27.3,
-              18,
-              16,
-              45,
-              25,
-              4.2,
-              4.3,
-              0.162,
-              1.423,
-              0.477,
-              609
-            ]
-          }
-        ]
+      "amarillas_riesgo": []
+    },
+    "8VA": {
+      "fecha": 24,
+      "rival": "PLATENSE",
+      "goleador": {
+        "nombre": "SERRA, FELIPE",
+        "goles": 6
       },
-      "IÑAKI AGUIRRE": {
-        "pos": "DFC",
-        "match": [
-          {
-            "fecha": "FECHA 1",
-            "opp": "VS INDEPENDIENTE RIVADAVIA",
-            "min": 126,
-            "metrics": [
-              9694,
-              81.11,
-              264,
-              173,
-              28,
-              2,
-              27.8,
-              22,
-              21,
-              77,
-              36,
-              3.8,
-              4.8,
-              0.175,
-              1.373,
-              0.222,
-              823
-            ]
-          },
-          {
-            "fecha": "FECHA 2",
-            "opp": "VS FERRO",
-            "min": 111,
-            "metrics": [
-              9503,
-              87.42,
-              253,
-              148,
-              54,
-              3,
-              27.8,
-              11,
-              20,
-              66,
-              31,
-              4.3,
-              5.6,
-              0.099,
-              1.333,
-              0.486,
-              788
-            ]
-          }
-        ]
+      "amarillas_riesgo": []
+    },
+    "9NA": {
+      "fecha": 24,
+      "rival": "PLATENSE",
+      "goleador": {
+        "nombre": "ESCALANTE, EMANUEL NICOLAS",
+        "goles": 4
       },
-      "AGUSTIN LUNA": {
-        "pos": "LAT",
-        "match": [
-          {
-            "fecha": "FECHA 1",
-            "opp": "VS INDEPENDIENTE RIVADAVIA",
-            "min": 126,
-            "metrics": [
-              10870,
-              91.01,
-              539,
-              305,
-              120,
-              7,
-              29.5,
-              59,
-              41,
-              117,
-              55,
-              7.3,
-              5.4,
-              0.468,
-              2.421,
-              0.952,
-              1085
-            ]
-          },
-          {
-            "fecha": "FECHA 2",
-            "opp": "VS FERRO",
-            "min": 111,
-            "metrics": [
-              9536,
-              87.73,
-              533,
-              315,
-              146,
-              6,
-              29,
-              25,
-              39,
-              100,
-              47,
-              4.2,
-              7.5,
-              0.225,
-              2.838,
-              1.315,
-              919
-            ]
-          }
-        ]
-      },
-      "ALEX GONZALEZ": {
-        "pos": "LAT",
-        "match": [
-          {
-            "fecha": "FECHA 1",
-            "opp": "VS INDEPENDIENTE RIVADAVIA",
-            "min": 126,
-            "metrics": [
-              10206,
-              85.83,
-              677,
-              443,
-              99,
-              4,
-              30.9,
-              24,
-              30,
-              101,
-              47,
-              4.4,
-              6.3,
-              0.19,
-              3.516,
-              0.786,
-              978
-            ]
-          },
-          {
-            "fecha": "FECHA 2",
-            "opp": "VS FERRO",
-            "min": 111,
-            "metrics": [
-              7254,
-              68.88,
-              279,
-              98,
-              22,
-              2,
-              27,
-              13,
-              21,
-              62,
-              28,
-              4.6,
-              6.6,
-              0.117,
-              0.883,
-              0.198,
-              919
-            ]
-          }
-        ]
-      },
-      "SANTINO GONZALEZ": {
-        "pos": "DC",
-        "match": [
-          {
-            "fecha": "FECHA 1",
-            "opp": "VS INDEPENDIENTE RIVADAVIA",
-            "min": 126,
-            "metrics": [
-              6804,
-              56.84,
-              279,
-              210,
-              88,
-              6,
-              29.4,
-              33,
-              37,
-              56,
-              33,
-              4.3,
-              5,
-              0.262,
-              1.667,
-              0.698,
-              700
-            ]
-          },
-          {
-            "fecha": "FECHA 2",
-            "opp": "VS FERRO",
-            "min": 111,
-            "metrics": [
-              9694,
-              87.7,
-              343,
-              425,
-              130,
-              7,
-              30,
-              38,
-              40,
-              81,
-              52,
-              4.3,
-              5.3,
-              0.342,
-              3.829,
-              1.171,
-              1002
-            ]
-          }
-        ]
-      },
-      "ALAN LUENGO": {
-        "pos": "DFC",
-        "match": [
-          {
-            "fecha": "FECHA 1",
-            "opp": "VS INDEPENDIENTE RIVADAVIA",
-            "min": 126,
-            "metrics": [
-              9130,
-              76.39,
-              357,
-              195,
-              53,
-              3,
-              29.2,
-              14,
-              22,
-              72,
-              33,
-              3.9,
-              5.2,
-              0.111,
-              1.548,
-              0.421,
-              819
-            ]
-          },
-          {
-            "fecha": "FECHA 2",
-            "opp": "VS FERRO",
-            "min": 111,
-            "metrics": [
-              8688,
-              78.6,
-              328,
-              140,
-              35,
-              3,
-              27.5,
-              21,
-              23,
-              60,
-              32,
-              4.2,
-              4.8,
-              0.189,
-              1.261,
-              0.315,
-              774
-            ]
-          }
-        ]
-      },
-      "JOSUE ROJAS": {
-        "pos": "LAT",
-        "match": [
-          {
-            "fecha": "FECHA 1",
-            "opp": "VS INDEPENDIENTE RIVADAVIA",
-            "min": 126,
-            "metrics": [
-              6578,
-              54.92,
-              247,
-              148,
-              41,
-              3,
-              26.7,
-              10,
-              22,
-              53,
-              29,
-              3.8,
-              4.7,
-              0.079,
-              1.175,
-              0.325,
-              771
-            ]
-          }
-        ]
-      },
-      "LAUTARO PANNONI": {
-        "pos": "VOL",
-        "match": [
-          {
-            "fecha": "FECHA 1",
-            "opp": "VS INDEPENDIENTE RIVADAVIA",
-            "min": 126,
-            "metrics": [
-              10262,
-              86.05,
-              514,
-              284,
-              124,
-              7,
-              29.7,
-              22,
-              31,
-              90,
-              54,
-              4.3,
-              6.3,
-              0.175,
-              2.254,
-              0.984,
-              1052
-            ]
-          },
-          {
-            "fecha": "FECHA 2",
-            "opp": "VS FERRO",
-            "min": 111,
-            "metrics": [
-              7380,
-              67.67,
-              399,
-              284,
-              59,
-              3,
-              28.9,
-              14,
-              26,
-              69,
-              32,
-              4.1,
-              5.3,
-              0.126,
-              2.559,
-              0.532,
-              723
-            ]
-          }
-        ]
-      },
-      "TOMAS MAYER": {
-        "pos": "DC",
-        "match": [
-          {
-            "fecha": "FECHA 1",
-            "opp": "VS INDEPENDIENTE RIVADAVIA",
-            "min": 62,
-            "metrics": [
-              2,
-              0.03,
-              0,
-              0,
-              0,
-              0,
-              0.3,
-              0,
-              0,
-              0,
-              0,
-              0,
-              0,
-              0,
-              0,
-              0,
-              14
-            ]
-          },
-          {
-            "fecha": "FECHA 2",
-            "opp": "VS FERRO",
-            "min": 58,
-            "metrics": [
-              2478,
-              45.59,
-              84,
-              66,
-              22,
-              2,
-              28.2,
-              8,
-              9,
-              24,
-              11,
-              4.3,
-              5,
-              0.138,
-              1.138,
-              0.379,
-              304
-            ]
-          }
-        ]
-      },
-      "TOMAS COPES": {
-        "pos": "VOL",
-        "match": [
-          {
-            "fecha": "FECHA 2",
-            "opp": "VS FERRO",
-            "min": 58,
-            "metrics": [
-              3078,
-              54.27,
-              135,
-              68,
-              5,
-              0,
-              25.9,
-              5,
-              7,
-              19,
-              13,
-              4.1,
-              5.6,
-              0.086,
-              1.172,
-              0.086,
-              299
-            ]
-          }
-        ]
-      },
-      "BENJAMIN FIGUEREDO": {
-        "pos": "VOL",
-        "match": [
-          {
-            "fecha": "FECHA 2",
-            "opp": "VS FERRO",
-            "min": 58,
-            "metrics": [
-              1918,
-              33.95,
-              114,
-              65,
-              42,
-              2,
-              28.7,
-              3,
-              8,
-              20,
-              5,
-              4.2,
-              5.8,
-              0.052,
-              1.121,
-              0.724,
-              204
-            ]
-          }
-        ]
-      }
+      "amarillas_riesgo": []
     }
   },
-  "errores": [
-    "RESERVA_APE Zona A: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: self-signed certificate (_ssl.c:1010)>",
-    "RESERVA_APE Zona B: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: self-signed certificate (_ssl.c:1010)>",
-    "RESERVA_CLA Zona A: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: self-signed certificate (_ssl.c:1010)>",
-    "RESERVA_CLA Zona B: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: self-signed certificate (_ssl.c:1010)>",
-    "statfutbol 4TA: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: self-signed certificate (_ssl.c:1010)>",
-    "statfutbol 5TA: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: self-signed certificate (_ssl.c:1010)>",
-    "statfutbol 6TA: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: self-signed certificate (_ssl.c:1010)>",
-    "statfutbol 7MA: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: self-signed certificate (_ssl.c:1010)>",
-    "statfutbol 8VA: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: self-signed certificate (_ssl.c:1010)>",
-    "statfutbol 9NA: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: self-signed certificate (_ssl.c:1010)>",
-    "futdetail 4TA: Expecting value: line 1 column 1 (char 0)",
-    "futdetail 5TA: Expecting value: line 1 column 1 (char 0)",
-    "futdetail 6TA: Expecting value: line 1 column 1 (char 0)",
-    "futdetail 7MA: Expecting value: line 1 column 1 (char 0)",
-    "futdetail 8VA: Expecting value: line 1 column 1 (char 0)",
-    "futdetail 9NA: Expecting value: line 1 column 1 (char 0)",
-    "futdetail estadisticas 4TA: Expecting value: line 1 column 1 (char 0) -- respuesta cruda: '<!DOCTYPE html>\\n<html lang=\"en\">\\n<head>\\n  <meta charset=\"utf8\">\\n  <meta name=\"viewport\" content=\"width=device-width,initial-scale=1.0\">\\n  <script>\\n      (function(){\\n          setTimeout(function(){\\n '",
-    "futdetail estadisticas 5TA: Expecting value: line 1 column 1 (char 0) -- respuesta cruda: '<!DOCTYPE html>\\n<html lang=\"en\">\\n<head>\\n  <meta charset=\"utf8\">\\n  <meta name=\"viewport\" content=\"width=device-width,initial-scale=1.0\">\\n  <script>\\n      (function(){\\n          setTimeout(function(){\\n '",
-    "futdetail estadisticas 6TA: Expecting value: line 1 column 1 (char 0) -- respuesta cruda: '<!DOCTYPE html>\\n<html lang=\"en\">\\n<head>\\n  <meta charset=\"utf8\">\\n  <meta name=\"viewport\" content=\"width=device-width,initial-scale=1.0\">\\n  <script>\\n      (function(){\\n          setTimeout(function(){\\n '",
-    "futdetail estadisticas 7MA: Expecting value: line 1 column 1 (char 0) -- respuesta cruda: '<!DOCTYPE html>\\n<html lang=\"en\">\\n<head>\\n  <meta charset=\"utf8\">\\n  <meta name=\"viewport\" content=\"width=device-width,initial-scale=1.0\">\\n  <script>\\n      (function(){\\n          setTimeout(function(){\\n '",
-    "futdetail estadisticas 8VA: Expecting value: line 1 column 1 (char 0) -- respuesta cruda: '<!DOCTYPE html>\\n<html lang=\"en\">\\n<head>\\n  <meta charset=\"utf8\">\\n  <meta name=\"viewport\" content=\"width=device-width,initial-scale=1.0\">\\n  <script>\\n      (function(){\\n          setTimeout(function(){\\n '",
-    "futdetail estadisticas 9NA: Expecting value: line 1 column 1 (char 0) -- respuesta cruda: '<!DOCTYPE html>\\n<html lang=\"en\">\\n<head>\\n  <meta charset=\"utf8\">\\n  <meta name=\"viewport\" content=\"width=device-width,initial-scale=1.0\">\\n  <script>\\n      (function(){\\n          setTimeout(function(){\\n '",
-    "futdetail plantel 4TA: Expecting value: line 1 column 1 (char 0)",
-    "futdetail plantel 5TA: Expecting value: line 1 column 1 (char 0)",
-    "futdetail plantel 6TA: Expecting value: line 1 column 1 (char 0)",
-    "futdetail plantel 7MA: Expecting value: line 1 column 1 (char 0)",
-    "futdetail plantel 8VA: Expecting value: line 1 column 1 (char 0)",
-    "futdetail plantel 9NA: Expecting value: line 1 column 1 (char 0)"
-  ]
+  "statfutbol_jugadores": {
+    "4TA": [
+      {
+        "nombre": "AFONSO, NICOLAS",
+        "gol": 0,
+        "am": 3
+      },
+      {
+        "nombre": "AGUIRRE ARAMBURU, IÑAKI",
+        "gol": 0,
+        "am": 4
+      },
+      {
+        "nombre": "ANDRUSISEN, JORDAN LAUTARO",
+        "gol": 3,
+        "am": 2
+      },
+      {
+        "nombre": "BENITEZ, CRISTIAN ALEJANDRO",
+        "gol": 3,
+        "am": 4
+      },
+      {
+        "nombre": "BENITEZ, LAUTARO AGUSTIN",
+        "gol": 1,
+        "am": 1
+      },
+      {
+        "nombre": "BRUNO, LAUTARO JEREMIAS",
+        "gol": 0,
+        "am": 0
+      },
+      {
+        "nombre": "CACERES, THOMAS EDUARDO",
+        "gol": 0,
+        "am": 2
+      },
+      {
+        "nombre": "COPES, TOMAS",
+        "gol": 1,
+        "am": 1
+      },
+      {
+        "nombre": "ENRIQUEZ PETRY, URIEL AGUSTIN",
+        "gol": 0,
+        "am": 0
+      },
+      {
+        "nombre": "FARES, HAMDAN GHALEB",
+        "gol": 0,
+        "am": 0
+      },
+      {
+        "nombre": "FERREYRA, RODRIGO TOMAS",
+        "gol": 4,
+        "am": 1
+      },
+      {
+        "nombre": "FIGUEREDO, BENJAMIN",
+        "gol": 1,
+        "am": 0
+      },
+      {
+        "nombre": "FREDES, FELIPE BENJAMIN",
+        "gol": 5,
+        "am": 2
+      },
+      {
+        "nombre": "GOMEZ, LUKA THIAGO",
+        "gol": 2,
+        "am": 0
+      },
+      {
+        "nombre": "GONZALEZ, ALEX EMANUEL",
+        "gol": 0,
+        "am": 4
+      },
+      {
+        "nombre": "GONZALEZ, KEVIN SERGIO LIONEL",
+        "gol": 0,
+        "am": 0
+      },
+      {
+        "nombre": "GONZALEZ, SANTINO MARCO ANTONIO",
+        "gol": 7,
+        "am": 2
+      },
+      {
+        "nombre": "HILLAIRET, YAIR NATANAEL",
+        "gol": 0,
+        "am": 3
+      },
+      {
+        "nombre": "LEGUIZAMON, MAXIMO LEONEL",
+        "gol": 0,
+        "am": 0
+      },
+      {
+        "nombre": "LESZCZUK, BRANDON DANIEL",
+        "gol": 3,
+        "am": 0
+      },
+      {
+        "nombre": "LEZCANO, CRISTIAN LEONEL",
+        "gol": 0,
+        "am": 0
+      },
+      {
+        "nombre": "LOPEZ, FACUNDO IVAN",
+        "gol": 0,
+        "am": 0
+      },
+      {
+        "nombre": "LUNA SEMINO, AGUSTIN",
+        "gol": 0,
+        "am": 0
+      },
+      {
+        "nombre": "LUONGO, ALAN EZEQUIEL",
+        "gol": 1,
+        "am": 3
+      },
+      {
+        "nombre": "MANSILLA, NEHEMIAS EZEQUIEL",
+        "gol": 0,
+        "am": 0
+      },
+      {
+        "nombre": "MAYER, TOMAS ALEJANDRO",
+        "gol": 0,
+        "am": 0
+      },
+      {
+        "nombre": "MEDINA, TIZIANO AGUSTIN",
+        "gol": 0,
+        "am": 0
+      },
+      {
+        "nombre": "MOLAS, LUCAS GABRIEL",
+        "gol": 0,
+        "am": 0
+      },
+      {
+        "nombre": "NAVONI, ALVARO",
+        "gol": 0,
+        "am": 1
+      },
+      {
+        "nombre": "ORDOÑEZ, IGNACIO ARIEL",
+        "gol": 0,
+        "am": 2
+      },
+      {
+        "nombre": "PANNONI, LAUTARO BENJAMIN",
+        "gol": 2,
+        "am": 5
+      },
+      {
+        "nombre": "PEREYRA SALERNO, MANUEL",
+        "gol": 0,
+        "am": 0
+      },
+      {
+        "nombre": "PEREZ, GASTON IGNACIO",
+        "gol": 0,
+        "am": 0
+      },
+      {
+        "nombre": "RAMOS LAHITTE, BAUTISTA",
+        "gol": 0,
+        "am": 0
+      },
+      {
+        "nombre": "ROJAS, ELIAS JOSUE",
+        "gol": 0,
+        "am": 2
+      },
+      {
+        "nombre": "RUIZ, SANTIAGO AGUSTIN",
+        "gol": 0,
+        "am": 1
+      },
+      {
+        "nombre": "SARAVIA, ROMAN LIONEL",
+        "gol": 0,
+        "am": 3
+      },
+      {
+        "nombre": "ZALAZAR FUENTES, BENJAMIN TOBIAS",
+        "gol": 0,
+        "am": 0
+      },
+      {
+        "nombre": "ZERDA, SANTIAGO LIONEL",
+        "gol": 0,
+        "am": 0
+      }
+    ],
+    "5TA": [
+      {
+        "nombre": "ADAMOVSKY TAU, FELIPE",
+        "gol": 0,
+        "am": 2
+      },
+      {
+        "nombre": "BARRIOS BARRIOS, CRISTIAN ARIEL",
+        "gol": 1,
+        "am": 0
+      },
+      {
+        "nombre": "CAMBA CHEMIN, ROCCO",
+        "gol": 0,
+        "am": 0
+      },
+      {
+        "nombre": "CANULLO, JUAN MARTIN",
+        "gol": 0,
+        "am": 1
+      },
+      {
+        "nombre": "CLAUSER BLANCO, RAMIRO",
+        "gol": 0,
+        "am": 1
+      },
+      {
+        "nombre": "CORDOBA, FABRICIO SANTIAGO",
+        "gol": 1,
+        "am": 1
+      },
+      {
+        "nombre": "CROTTO CARLINI, IVO SANTINO",
+        "gol": 1,
+        "am": 0
+      },
+      {
+        "nombre": "CROTTO, NICOLAS",
+        "gol": 3,
+        "am": 0
+      },
+      {
+        "nombre": "DAVIES SOTELO, BENJAMIN AYRTON",
+        "gol": 0,
+        "am": 0
+      },
+      {
+        "nombre": "DEMONTE FALCONIER, TOMAS",
+        "gol": 0,
+        "am": 0
+      },
+      {
+        "nombre": "ENRIQUEZ PETRY, URIEL AGUSTIN",
+        "gol": 0,
+        "am": 0
+      },
+      {
+        "nombre": "FEVERSANI, BAUTISTA",
+        "gol": 0,
+        "am": 0
+      },
+      {
+        "nombre": "GALESIO, SANTINO",
+        "gol": 1,
+        "am": 0
+      },
+      {
+        "nombre": "GONZALEZ, LAUTARO EZEQUIEL",
+        "gol": 0,
+        "am": 1
+      },
+      {
+        "nombre": "HERNANDEZ RUGILO, EMANUEL",
+        "gol": 0,
+        "am": 0
+      },
+      {
+        "nombre": "JUAREZ, GUSTAVO NAHUEL",
+        "gol": 0,
+        "am": 3
+      },
+      {
+        "nombre": "LEDESMA, GONZALO EMMANUEL",
+        "gol": 3,
+        "am": 4
+      },
+      {
+        "nombre": "LETIZIA PEYRET, IGNACIO TOMAS",
+        "gol": 10,
+        "am": 2
+      },
+      {
+        "nombre": "LLERA, MARIANO",
+        "gol": 1,
+        "am": 5
+      },
+      {
+        "nombre": "LUQUE, GONZALO OMAR",
+        "gol": 1,
+        "am": 1
+      },
+      {
+        "nombre": "MIÑO, ESTEBAN ROMAN",
+        "gol": 4,
+        "am": 9
+      },
+      {
+        "nombre": "MOYANO, JERONIMO THOMAS",
+        "gol": 0,
+        "am": 2
+      },
+      {
+        "nombre": "PEREYRA SALERNO, MANUEL",
+        "gol": 0,
+        "am": 1
+      },
+      {
+        "nombre": "PEREZ BERTOLA, JOAQUIN",
+        "gol": 1,
+        "am": 0
+      },
+      {
+        "nombre": "POBLETE, MATIAS LUIS",
+        "gol": 0,
+        "am": 4
+      },
+      {
+        "nombre": "RICALDI, IAN LIONEL",
+        "gol": 0,
+        "am": 0
+      },
+      {
+        "nombre": "RIVAS ROJAS, MARCO ANTONIO",
+        "gol": 0,
+        "am": 0
+      },
+      {
+        "nombre": "RODRIGUEZ ZENTNER, THIAGO",
+        "gol": 2,
+        "am": 5
+      },
+      {
+        "nombre": "SAMPER, JOAQUIN MANUEL",
+        "gol": 0,
+        "am": 1
+      },
+      {
+        "nombre": "SOSENA, FAUSTO",
+        "gol": 0,
+        "am": 0
+      },
+      {
+        "nombre": "VARGAS, THIAGO NAHUEL",
+        "gol": 0,
+        "am": 0
+      },
+      {
+        "nombre": "VERA LORENZO, CONRADO",
+        "gol": 1,
+        "am": 0
+      },
+      {
+        "nombre": "VILLANUEVA, JUAN ROMAN",
+        "gol": 0,
+        "am": 2
+      },
+      {
+        "nombre": "WIRZ, AXEL LEANDRO",
+        "gol": 1,
+        "am": 7
+      },
+      {
+        "nombre": "ZERDA, SANTIAGO LIONEL",
+        "gol": 0,
+        "am": 2
+      }
+    ],
+    "6TA": [
+      {
+        "nombre": "ACOSTA, JONATHAN SALVADOR",
+        "gol": 1,
+        "am": 4
+      },
+      {
+        "nombre": "AMBIELA, MARIO EMILIO",
+        "gol": 7,
+        "am": 4
+      },
+      {
+        "nombre": "BRANDY, GERMAN",
+        "gol": 1,
+        "am": 0
+      },
+      {
+        "nombre": "BRUNO, LAUTARO JEREMIAS",
+        "gol": 0,
+        "am": 0
+      },
+      {
+        "nombre": "CALDERON, ROMAN",
+        "gol": 1,
+        "am": 3
+      },
+      {
+        "nombre": "CAMBA CHEMIN, ROCCO",
+        "gol": 0,
+        "am": 0
+      },
+      {
+        "nombre": "COLLADO, LAUTARO DAVID",
+        "gol": 0,
+        "am": 0
+      },
+      {
+        "nombre": "CORTES, ADRIAN MAXIMILIANO",
+        "gol": 6,
+        "am": 3
+      },
+      {
+        "nombre": "DAVIES SOTELO, BENJAMIN AYRTON",
+        "gol": 0,
+        "am": 0
+      },
+      {
+        "nombre": "DECHIARA, FRANCESCO",
+        "gol": 0,
+        "am": 1
+      },
+      {
+        "nombre": "DELGADO, FRANCISCO NEHUEN",
+        "gol": 1,
+        "am": 3
+      },
+      {
+        "nombre": "FERNANDEZ, MATIAS JERONIMO",
+        "gol": 2,
+        "am": 5
+      },
+      {
+        "nombre": "GOMEZ, SANTIAGO NAHUEL",
+        "gol": 0,
+        "am": 3
+      },
+      {
+        "nombre": "IBAÑEZ, TIZIANO GUILLERMO",
+        "gol": 0,
+        "am": 0
+      },
+      {
+        "nombre": "LIZARDIA, BAUTISTA ALEJANDRO",
+        "gol": 1,
+        "am": 0
+      },
+      {
+        "nombre": "LUNA, ALEJO",
+        "gol": 0,
+        "am": 0
+      },
+      {
+        "nombre": "MALLMANN, FELIX",
+        "gol": 3,
+        "am": 2
+      },
+      {
+        "nombre": "MARCHETTI, ALEX IVAN",
+        "gol": 0,
+        "am": 1
+      },
+      {
+        "nombre": "MAURIÑO, OCTAVIO",
+        "gol": 0,
+        "am": 0
+      },
+      {
+        "nombre": "MORALEJO, SANTIAGO OSCAR",
+        "gol": 2,
+        "am": 0
+      },
+      {
+        "nombre": "MUCHIUTTI, VALENTINO",
+        "gol": 0,
+        "am": 0
+      },
+      {
+        "nombre": "NUÑEZ PERALTA, JONATHAN DARIO",
+        "gol": 0,
+        "am": 2
+      },
+      {
+        "nombre": "ORTIZ PEREYRA, IGNACIO EMANUEL",
+        "gol": 1,
+        "am": 3
+      },
+      {
+        "nombre": "PARRA, MATIAS MANUEL",
+        "gol": 0,
+        "am": 0
+      },
+      {
+        "nombre": "POMAR, SANTINO",
+        "gol": 1,
+        "am": 2
+      },
+      {
+        "nombre": "ROMERO, AURELIANO BENICIO",
+        "gol": 1,
+        "am": 0
+      },
+      {
+        "nombre": "SCHENONE, ELIAS NEHUEN",
+        "gol": 2,
+        "am": 1
+      },
+      {
+        "nombre": "SCUNGIO, SEBASTIAN",
+        "gol": 0,
+        "am": 1
+      },
+      {
+        "nombre": "SERAPIO, IGNACIO MARTIN",
+        "gol": 0,
+        "am": 0
+      },
+      {
+        "nombre": "SIGEL, BRUNO NAHUEL",
+        "gol": 0,
+        "am": 0
+      },
+      {
+        "nombre": "SOSENA, FAUSTO",
+        "gol": 0,
+        "am": 0
+      },
+      {
+        "nombre": "TORRES, DAVID EZEQUIEL",
+        "gol": 0,
+        "am": 1
+      },
+      {
+        "nombre": "UMERES, AGUSTIN ALEJANDRO",
+        "gol": 1,
+        "am": 1
+      },
+      {
+        "nombre": "ZARZA, QUIMEY IVAN",
+        "gol": 0,
+        "am": 0
+      }
+    ],
+    "7MA": [
+      {
+        "nombre": "ALMIRON, SEBASTIAN ROMAN",
+        "gol": 1,
+        "am": 1
+      },
+      {
+        "nombre": "ARIAS BONILLA, NICOLAS GEREMIAS",
+        "gol": 0,
+        "am": 0
+      },
+      {
+        "nombre": "ASTESANA BARROSO, JUAN VALENTINO",
+        "gol": 0,
+        "am": 1
+      },
+      {
+        "nombre": "BALTAZAR, ALEJANDRO EMANUEL RAMON",
+        "gol": 8,
+        "am": 5
+      },
+      {
+        "nombre": "BARRIOS, BAUTISTA NICOLAS",
+        "gol": 0,
+        "am": 1
+      },
+      {
+        "nombre": "BURELA, SANTINO TOMAS",
+        "gol": 0,
+        "am": 0
+      },
+      {
+        "nombre": "CASTRO, MATIAS LEONEL",
+        "gol": 0,
+        "am": 0
+      },
+      {
+        "nombre": "CORE, VALENTINO",
+        "gol": 0,
+        "am": 0
+      },
+      {
+        "nombre": "DI SIPIO, AGUSTIN MARCELO",
+        "gol": 1,
+        "am": 0
+      },
+      {
+        "nombre": "DOMINGUEZ, BAUTISTA",
+        "gol": 1,
+        "am": 4
+      },
+      {
+        "nombre": "FREDES, TIAGO",
+        "gol": 13,
+        "am": 3
+      },
+      {
+        "nombre": "GAGLIARDO, PEDRO TOMAS",
+        "gol": 0,
+        "am": 0
+      },
+      {
+        "nombre": "GAITAN, VALENTIN",
+        "gol": 0,
+        "am": 6
+      },
+      {
+        "nombre": "GODOY, GONZALO EZEQUIEL",
+        "gol": 0,
+        "am": 1
+      },
+      {
+        "nombre": "GONZALEZ JENICEK, SANTINO",
+        "gol": 2,
+        "am": 2
+      },
+      {
+        "nombre": "HERRERA, THIAGO LEANDRO",
+        "gol": 4,
+        "am": 2
+      },
+      {
+        "nombre": "INSAURRALDE, IHAN HUMBERTO",
+        "gol": 0,
+        "am": 0
+      },
+      {
+        "nombre": "LAMANNA, FABRIZIO MARTIN",
+        "gol": 3,
+        "am": 1
+      },
+      {
+        "nombre": "LEVY PEREZ DE MEDINA, THIAGO",
+        "gol": 2,
+        "am": 1
+      },
+      {
+        "nombre": "LOVISI, LUCIANO BENJAMIN",
+        "gol": 0,
+        "am": 0
+      },
+      {
+        "nombre": "MANCUELLO, TOBIAS",
+        "gol": 0,
+        "am": 4
+      },
+      {
+        "nombre": "MARINI, TOMAS",
+        "gol": 0,
+        "am": 4
+      },
+      {
+        "nombre": "MATURANO, BENJAMIN ARIEL",
+        "gol": 0,
+        "am": 0
+      },
+      {
+        "nombre": "MENA BRICEÑO, SEBASTIAN",
+        "gol": 1,
+        "am": 0
+      },
+      {
+        "nombre": "MOLINA, RAMIRO LUIS",
+        "gol": 0,
+        "am": 2
+      },
+      {
+        "nombre": "MONTOYA, FRANCISCO JAVIER",
+        "gol": 0,
+        "am": 2
+      },
+      {
+        "nombre": "OLEA LOPEZ, SEBASTIAN JUAN DE DIOS",
+        "gol": 1,
+        "am": 5
+      },
+      {
+        "nombre": "OMANN, JUAN IGNACIO",
+        "gol": 0,
+        "am": 0
+      },
+      {
+        "nombre": "PRIETO, ALEXANDER NAIM",
+        "gol": 0,
+        "am": 0
+      },
+      {
+        "nombre": "PUCHI, SANTINO OSCAR",
+        "gol": 0,
+        "am": 2
+      },
+      {
+        "nombre": "PUCILL, MATEO",
+        "gol": 0,
+        "am": 0
+      },
+      {
+        "nombre": "SALA, VALENTINO",
+        "gol": 0,
+        "am": 0
+      },
+      {
+        "nombre": "SODERO MC CORMACK, SANTINO",
+        "gol": 8,
+        "am": 0
+      },
+      {
+        "nombre": "TREJO, NICOLAS SEBASTIAN",
+        "gol": 0,
+        "am": 0
+      }
+    ],
+    "8VA": [
+      {
+        "nombre": "AQUILUE SALGADO, SANTIAGO",
+        "gol": 4,
+        "am": 2
+      },
+      {
+        "nombre": "ARIAS BONILLA, NICOLAS GEREMIAS",
+        "gol": 0,
+        "am": 0
+      },
+      {
+        "nombre": "BERON, SANTIAGO DEMIS",
+        "gol": 2,
+        "am": 2
+      },
+      {
+        "nombre": "BIN, JUSTIN NELSON",
+        "gol": 3,
+        "am": 1
+      },
+      {
+        "nombre": "BLANCO, DYLAN ALEX",
+        "gol": 0,
+        "am": 0
+      },
+      {
+        "nombre": "CABRERA, LUCA RAMIRO",
+        "gol": 1,
+        "am": 9
+      },
+      {
+        "nombre": "CELIZ, TEO BENJAMIN",
+        "gol": 0,
+        "am": 0
+      },
+      {
+        "nombre": "CONTE, IAN ALEXANDER",
+        "gol": 0,
+        "am": 0
+      },
+      {
+        "nombre": "CUBA GALEANO, OSCAR GIOVANNI",
+        "gol": 0,
+        "am": 0
+      },
+      {
+        "nombre": "DE OLIVERA, ELIAS JOAQUIN",
+        "gol": 0,
+        "am": 0
+      },
+      {
+        "nombre": "FINO, AMADEO BENJAMIN",
+        "gol": 1,
+        "am": 1
+      },
+      {
+        "nombre": "GALEANO, JOAQUIN EZEQUIEL",
+        "gol": 0,
+        "am": 0
+      },
+      {
+        "nombre": "GARCIA, BAUTISTA FRANCISCO",
+        "gol": 0,
+        "am": 0
+      },
+      {
+        "nombre": "GUGLIELMO, LISANDRO",
+        "gol": 0,
+        "am": 0
+      },
+      {
+        "nombre": "INOSTROZA LEIVA, BASTIAN ALADINO DE LA CRUZ",
+        "gol": 2,
+        "am": 7
+      },
+      {
+        "nombre": "LAGOS, BENJAMIN EZEQUIAS",
+        "gol": 2,
+        "am": 0
+      },
+      {
+        "nombre": "MAGUNA LOPEZ, PEDRO VALENTIN",
+        "gol": 0,
+        "am": 0
+      },
+      {
+        "nombre": "MERLOS GALEANO, LAUTARO BENJAMIN",
+        "gol": 0,
+        "am": 4
+      },
+      {
+        "nombre": "MOSQUEDA, ERNESTO JESUS",
+        "gol": 0,
+        "am": 0
+      },
+      {
+        "nombre": "NAVARRO, VALENTIN EZEQUIEL",
+        "gol": 0,
+        "am": 0
+      },
+      {
+        "nombre": "NORIEGA, MATEO",
+        "gol": 0,
+        "am": 1
+      },
+      {
+        "nombre": "PUNOS, TIZIANO JEREMIAS",
+        "gol": 1,
+        "am": 1
+      },
+      {
+        "nombre": "RADAELLI, MANUEL",
+        "gol": 0,
+        "am": 3
+      },
+      {
+        "nombre": "REYES, JOSE LUIS REINERIO",
+        "gol": 0,
+        "am": 0
+      },
+      {
+        "nombre": "REYNOSO, TOMAS GABRIEL",
+        "gol": 1,
+        "am": 10
+      },
+      {
+        "nombre": "RIOS, LUCAS MATEO",
+        "gol": 0,
+        "am": 0
+      },
+      {
+        "nombre": "RODRIGUEZ, JOSUE FRANCISCO",
+        "gol": 0,
+        "am": 2
+      },
+      {
+        "nombre": "RUIZ ULLUA, DAVID",
+        "gol": 0,
+        "am": 0
+      },
+      {
+        "nombre": "SARAGOZA, RAMIRO JONATAN  JOSUE",
+        "gol": 2,
+        "am": 3
+      },
+      {
+        "nombre": "SIMONE GUTIERREZ, PEDRO",
+        "gol": 0,
+        "am": 0
+      },
+      {
+        "nombre": "TOBLER, BAUTISTA",
+        "gol": 0,
+        "am": 1
+      }
+    ],
+    "9NA": [
+      {
+        "nombre": "AGORRECA, IGNACIO CARLOS",
+        "gol": 1,
+        "am": 3
+      },
+      {
+        "nombre": "ALVARENGA, ADRIANO MARTIN",
+        "gol": 1,
+        "am": 0
+      },
+      {
+        "nombre": "ARCE MIÑO, AXEL     IAN LEONEL",
+        "gol": 0,
+        "am": 0
+      },
+      {
+        "nombre": "BACCARO, SANTINO BENJAMIN",
+        "gol": 0,
+        "am": 0
+      },
+      {
+        "nombre": "BAIGORRIA, NICOLAS NAHUEL",
+        "gol": 0,
+        "am": 0
+      },
+      {
+        "nombre": "BECERRA, LIONEL",
+        "gol": 0,
+        "am": 0
+      },
+      {
+        "nombre": "BOJORGE, IAN BENJAMIN",
+        "gol": 0,
+        "am": 1
+      },
+      {
+        "nombre": "CUBILLA, JONATHAN DAVID",
+        "gol": 0,
+        "am": 0
+      },
+      {
+        "nombre": "DIAZ OLIVA, SANTIAGO",
+        "gol": 1,
+        "am": 1
+      },
+      {
+        "nombre": "DOS SANTOS, ALEXANDER BAYRON",
+        "gol": 0,
+        "am": 0
+      },
+      {
+        "nombre": "DUARTE, GASTON EMANUEL",
+        "gol": 0,
+        "am": 7
+      },
+      {
+        "nombre": "DUARTE, GONZALO ISAIAS",
+        "gol": 0,
+        "am": 1
+      },
+      {
+        "nombre": "ECHEVARRIETA, BAUTISTA BENJAMIN",
+        "gol": 0,
+        "am": 0
+      },
+      {
+        "nombre": "ENRIQUE, IAN AIRTON",
+        "gol": 0,
+        "am": 3
+      },
+      {
+        "nombre": "GOMEZ ZARRACHO, OCTAVIO",
+        "gol": 0,
+        "am": 2
+      },
+      {
+        "nombre": "GOMEZ, JOAQUIN",
+        "gol": 3,
+        "am": 8
+      },
+      {
+        "nombre": "HOLM, IAN NATANAEL",
+        "gol": 1,
+        "am": 0
+      },
+      {
+        "nombre": "IBAÑEZ, BASTIAN LAUTARO",
+        "gol": 0,
+        "am": 0
+      },
+      {
+        "nombre": "LOPEZ, TOMAS",
+        "gol": 0,
+        "am": 0
+      },
+      {
+        "nombre": "MAIDANA ZAPATA, LAUTARO GUZMAN",
+        "gol": 0,
+        "am": 0
+      },
+      {
+        "nombre": "MONZON, IAN BAUTISTA",
+        "gol": 1,
+        "am": 0
+      },
+      {
+        "nombre": "MORA, BAUTISTA SEBASTIAN",
+        "gol": 1,
+        "am": 0
+      },
+      {
+        "nombre": "NUDI PRADO, LAUTARO FRANCISCO",
+        "gol": 0,
+        "am": 0
+      },
+      {
+        "nombre": "NUÑEZ, TIZIANO ENRIQUE",
+        "gol": 3,
+        "am": 2
+      },
+      {
+        "nombre": "OLOCCO, MIKEAS DIDIER",
+        "gol": 4,
+        "am": 0
+      },
+      {
+        "nombre": "ORTIZ, LEONARDO ARIEL",
+        "gol": 0,
+        "am": 0
+      },
+      {
+        "nombre": "PELUDERO, MATEO",
+        "gol": 0,
+        "am": 0
+      },
+      {
+        "nombre": "SANCHEZ BATTISTA, BENJAMIN EMMANUEL",
+        "gol": 0,
+        "am": 0
+      },
+      {
+        "nombre": "SOTO, MATEO JOSE",
+        "gol": 0,
+        "am": 4
+      },
+      {
+        "nombre": "TORRECILLA, ENZO FRANCISCO",
+        "gol": 0,
+        "am": 1
+      },
+      {
+        "nombre": "TULIS, FEDERICO ORLANDO",
+        "gol": 1,
+        "am": 3
+      },
+      {
+        "nombre": "VILLALBA BOGADO, GUSTAVO",
+        "gol": 2,
+        "am": 4
+      },
+      {
+        "nombre": "ZAPATA, ALEJO SANTINO",
+        "gol": 3,
+        "am": 3
+      }
+    ]
+  }
 }
