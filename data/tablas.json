@@ -1,5 +1,5 @@
 {
-  "actualizado": "2026-09-01 01:57",
+  "actualizado": "2026-09-01 02:33",
   "fuente": "ligaprofesional.ar (oficial)",
   "fuente_fixture": "ligaprofesional.ar (oficial)",
   "fuente_reserva": "statfutbol.com.ar",
@@ -20472,5 +20472,709 @@
         "am": 3
       }
     ]
+  },
+  "statfutbol_resultados": {
+    "4TA": {
+      "1": {
+        "gf": 1,
+        "gc": 0,
+        "rival": "IND.RIVADAVIA (M)"
+      },
+      "2": {
+        "gf": 0,
+        "gc": 1,
+        "rival": "FERRO"
+      },
+      "3": {
+        "gf": 2,
+        "gc": 4,
+        "rival": "LANUS"
+      },
+      "4": {
+        "gf": 2,
+        "gc": 3,
+        "rival": "INDEPENDIENTE"
+      },
+      "5": {
+        "gf": 2,
+        "gc": 0,
+        "rival": "NEWELLS"
+      },
+      "6": {
+        "gf": 4,
+        "gc": 0,
+        "rival": "SAN MARTIN (SJ)"
+      },
+      "7": {
+        "gf": 0,
+        "gc": 1,
+        "rival": "ARGENTINOS JRS"
+      },
+      "8": {
+        "gf": 0,
+        "gc": 2,
+        "rival": "INSTITUTO (C)"
+      },
+      "9": {
+        "gf": 2,
+        "gc": 0,
+        "rival": "TALLERES (C)"
+      },
+      "10": {
+        "gf": 2,
+        "gc": 2,
+        "rival": "ESTUDIANTES (RC)"
+      },
+      "11": {
+        "gf": 2,
+        "gc": 0,
+        "rival": "BARRACAS CTRAL"
+      },
+      "12": {
+        "gf": 3,
+        "gc": 1,
+        "rival": "QUILMES"
+      },
+      "13": {
+        "gf": 0,
+        "gc": 2,
+        "rival": "RIVER PLATE"
+      },
+      "14": {
+        "gf": 0,
+        "gc": 1,
+        "rival": "UNION (SF)"
+      },
+      "15": {
+        "gf": 1,
+        "gc": 2,
+        "rival": "SAN LORENZO"
+      },
+      "16": {
+        "gf": 1,
+        "gc": 1,
+        "rival": "GIMNASIA (LP)"
+      },
+      "17": {
+        "gf": 5,
+        "gc": 0,
+        "rival": "C.CORDOBA(SDE)"
+      },
+      "18": {
+        "gf": 0,
+        "gc": 0,
+        "rival": "GIMNASIA (M)"
+      },
+      "19": {
+        "gf": 2,
+        "gc": 1,
+        "rival": "VELEZ"
+      },
+      "20": {
+        "gf": 2,
+        "gc": 1,
+        "rival": "BANFIELD"
+      },
+      "21": {
+        "gf": 2,
+        "gc": 1,
+        "rival": "RACING CLUB"
+      },
+      "22": {
+        "gf": 0,
+        "gc": 0,
+        "rival": "CENTRAL"
+      },
+      "23": {
+        "gf": 4,
+        "gc": 2,
+        "rival": "GODOY CRUZ (M)"
+      }
+    },
+    "5TA": {
+      "1": {
+        "gf": 2,
+        "gc": 0,
+        "rival": "IND.RIVADAVIA (M)"
+      },
+      "2": {
+        "gf": 0,
+        "gc": 0,
+        "rival": "FERRO"
+      },
+      "3": {
+        "gf": 0,
+        "gc": 3,
+        "rival": "LANUS"
+      },
+      "4": {
+        "gf": 0,
+        "gc": 0,
+        "rival": "INDEPENDIENTE"
+      },
+      "5": {
+        "gf": 1,
+        "gc": 1,
+        "rival": "NEWELLS"
+      },
+      "6": {
+        "gf": 4,
+        "gc": 0,
+        "rival": "SAN MARTIN (SJ)"
+      },
+      "7": {
+        "gf": 1,
+        "gc": 2,
+        "rival": "ARGENTINOS JRS"
+      },
+      "8": {
+        "gf": 2,
+        "gc": 0,
+        "rival": "INSTITUTO (C)"
+      },
+      "9": {
+        "gf": 2,
+        "gc": 2,
+        "rival": "TALLERES (C)"
+      },
+      "10": {
+        "gf": 2,
+        "gc": 2,
+        "rival": "ESTUDIANTES (RC)"
+      },
+      "11": {
+        "gf": 2,
+        "gc": 1,
+        "rival": "BARRACAS CTRAL"
+      },
+      "12": {
+        "gf": 1,
+        "gc": 0,
+        "rival": "QUILMES"
+      },
+      "13": {
+        "gf": 0,
+        "gc": 2,
+        "rival": "RIVER PLATE"
+      },
+      "14": {
+        "gf": 1,
+        "gc": 1,
+        "rival": "UNION (SF)"
+      },
+      "15": {
+        "gf": 0,
+        "gc": 0,
+        "rival": "SAN LORENZO"
+      },
+      "16": {
+        "gf": 0,
+        "gc": 2,
+        "rival": "GIMNASIA (LP)"
+      },
+      "17": {
+        "gf": 3,
+        "gc": 0,
+        "rival": "C.CORDOBA(SDE)"
+      },
+      "18": {
+        "gf": 1,
+        "gc": 3,
+        "rival": "GIMNASIA (M)"
+      },
+      "19": {
+        "gf": 1,
+        "gc": 2,
+        "rival": "VELEZ"
+      },
+      "20": {
+        "gf": 3,
+        "gc": 0,
+        "rival": "BANFIELD"
+      },
+      "21": {
+        "gf": 5,
+        "gc": 1,
+        "rival": "RACING CLUB"
+      },
+      "22": {
+        "gf": 0,
+        "gc": 2,
+        "rival": "CENTRAL"
+      },
+      "23": {
+        "gf": 1,
+        "gc": 2,
+        "rival": "GODOY CRUZ (M)"
+      }
+    },
+    "6TA": {
+      "1": {
+        "gf": 3,
+        "gc": 1,
+        "rival": "IND.RIVADAVIA (M)"
+      },
+      "2": {
+        "gf": 1,
+        "gc": 1,
+        "rival": "FERRO"
+      },
+      "3": {
+        "gf": 0,
+        "gc": 7,
+        "rival": "LANUS"
+      },
+      "4": {
+        "gf": 1,
+        "gc": 3,
+        "rival": "INDEPENDIENTE"
+      },
+      "5": {
+        "gf": 3,
+        "gc": 1,
+        "rival": "NEWELLS"
+      },
+      "6": {
+        "gf": 4,
+        "gc": 4,
+        "rival": "SAN MARTIN (SJ)"
+      },
+      "7": {
+        "gf": 1,
+        "gc": 2,
+        "rival": "ARGENTINOS JRS"
+      },
+      "8": {
+        "gf": 2,
+        "gc": 1,
+        "rival": "INSTITUTO (C)"
+      },
+      "9": {
+        "gf": 1,
+        "gc": 2,
+        "rival": "TALLERES (C)"
+      },
+      "10": {
+        "gf": 1,
+        "gc": 1,
+        "rival": "ESTUDIANTES (RC)"
+      },
+      "11": {
+        "gf": 2,
+        "gc": 1,
+        "rival": "BARRACAS CTRAL"
+      },
+      "12": {
+        "gf": 1,
+        "gc": 1,
+        "rival": "QUILMES"
+      },
+      "13": {
+        "gf": 1,
+        "gc": 2,
+        "rival": "RIVER PLATE"
+      },
+      "14": {
+        "gf": 1,
+        "gc": 4,
+        "rival": "UNION (SF)"
+      },
+      "15": {
+        "gf": 2,
+        "gc": 5,
+        "rival": "SAN LORENZO"
+      },
+      "16": {
+        "gf": 1,
+        "gc": 2,
+        "rival": "GIMNASIA (LP)"
+      },
+      "17": {
+        "gf": 1,
+        "gc": 1,
+        "rival": "C.CORDOBA(SDE)"
+      },
+      "18": {
+        "gf": 0,
+        "gc": 0,
+        "rival": "GIMNASIA (M)"
+      },
+      "19": {
+        "gf": 2,
+        "gc": 3,
+        "rival": "VELEZ"
+      },
+      "20": {
+        "gf": 1,
+        "gc": 3,
+        "rival": "BANFIELD"
+      },
+      "21": {
+        "gf": 1,
+        "gc": 5,
+        "rival": "RACING CLUB"
+      },
+      "22": {
+        "gf": 1,
+        "gc": 5,
+        "rival": "CENTRAL"
+      },
+      "23": {
+        "gf": 1,
+        "gc": 3,
+        "rival": "GODOY CRUZ (M)"
+      }
+    },
+    "7MA": {
+      "1": {
+        "gf": 3,
+        "gc": 3,
+        "rival": "IND.RIVADAVIA (M)"
+      },
+      "2": {
+        "gf": 3,
+        "gc": 1,
+        "rival": "FERRO"
+      },
+      "3": {
+        "gf": 4,
+        "gc": 4,
+        "rival": "LANUS"
+      },
+      "4": {
+        "gf": 1,
+        "gc": 2,
+        "rival": "INDEPENDIENTE"
+      },
+      "5": {
+        "gf": 2,
+        "gc": 0,
+        "rival": "NEWELLS"
+      },
+      "6": {
+        "gf": 3,
+        "gc": 0,
+        "rival": "SAN MARTIN (SJ)"
+      },
+      "7": {
+        "gf": 2,
+        "gc": 3,
+        "rival": "ARGENTINOS JRS"
+      },
+      "8": {
+        "gf": 3,
+        "gc": 0,
+        "rival": "INSTITUTO (C)"
+      },
+      "9": {
+        "gf": 2,
+        "gc": 4,
+        "rival": "TALLERES (C)"
+      },
+      "10": {
+        "gf": 2,
+        "gc": 2,
+        "rival": "ESTUDIANTES (RC)"
+      },
+      "11": {
+        "gf": 0,
+        "gc": 0,
+        "rival": "BARRACAS CTRAL"
+      },
+      "12": {
+        "gf": 1,
+        "gc": 1,
+        "rival": "QUILMES"
+      },
+      "13": {
+        "gf": 1,
+        "gc": 4,
+        "rival": "RIVER PLATE"
+      },
+      "14": {
+        "gf": 2,
+        "gc": 3,
+        "rival": "UNION (SF)"
+      },
+      "15": {
+        "gf": 2,
+        "gc": 2,
+        "rival": "SAN LORENZO"
+      },
+      "16": {
+        "gf": 2,
+        "gc": 0,
+        "rival": "GIMNASIA (LP)"
+      },
+      "17": {
+        "gf": 2,
+        "gc": 0,
+        "rival": "C.CORDOBA(SDE)"
+      },
+      "18": {
+        "gf": 4,
+        "gc": 0,
+        "rival": "GIMNASIA (M)"
+      },
+      "19": {
+        "gf": 1,
+        "gc": 3,
+        "rival": "VELEZ"
+      },
+      "20": {
+        "gf": 1,
+        "gc": 0,
+        "rival": "BANFIELD"
+      },
+      "21": {
+        "gf": 3,
+        "gc": 3,
+        "rival": "RACING CLUB"
+      },
+      "22": {
+        "gf": 1,
+        "gc": 1,
+        "rival": "CENTRAL"
+      },
+      "23": {
+        "gf": 0,
+        "gc": 0,
+        "rival": "GODOY CRUZ (M)"
+      }
+    },
+    "8VA": {
+      "1": {
+        "gf": 2,
+        "gc": 1,
+        "rival": "IND.RIVADAVIA (M)"
+      },
+      "2": {
+        "gf": 2,
+        "gc": 2,
+        "rival": "FERRO"
+      },
+      "3": {
+        "gf": 0,
+        "gc": 2,
+        "rival": "LANUS"
+      },
+      "4": {
+        "gf": 0,
+        "gc": 4,
+        "rival": "INDEPENDIENTE"
+      },
+      "5": {
+        "gf": 1,
+        "gc": 0,
+        "rival": "NEWELLS"
+      },
+      "6": {
+        "gf": 3,
+        "gc": 0,
+        "rival": "SAN MARTIN (SJ)"
+      },
+      "7": {
+        "gf": 1,
+        "gc": 1,
+        "rival": "ARGENTINOS JRS"
+      },
+      "8": {
+        "gf": 1,
+        "gc": 1,
+        "rival": "INSTITUTO (C)"
+      },
+      "9": {
+        "gf": 0,
+        "gc": 1,
+        "rival": "TALLERES (C)"
+      },
+      "10": {
+        "gf": 1,
+        "gc": 1,
+        "rival": "ESTUDIANTES (RC)"
+      },
+      "11": {
+        "gf": 0,
+        "gc": 3,
+        "rival": "BARRACAS CTRAL"
+      },
+      "12": {
+        "gf": 3,
+        "gc": 1,
+        "rival": "QUILMES"
+      },
+      "13": {
+        "gf": 0,
+        "gc": 7,
+        "rival": "RIVER PLATE"
+      },
+      "14": {
+        "gf": 3,
+        "gc": 1,
+        "rival": "UNION (SF)"
+      },
+      "15": {
+        "gf": 0,
+        "gc": 1,
+        "rival": "SAN LORENZO"
+      },
+      "16": {
+        "gf": 0,
+        "gc": 1,
+        "rival": "GIMNASIA (LP)"
+      },
+      "17": {
+        "gf": 1,
+        "gc": 0,
+        "rival": "C.CORDOBA(SDE)"
+      },
+      "18": {
+        "gf": 1,
+        "gc": 1,
+        "rival": "GIMNASIA (M)"
+      },
+      "19": {
+        "gf": 0,
+        "gc": 0,
+        "rival": "VELEZ"
+      },
+      "20": {
+        "gf": 0,
+        "gc": 1,
+        "rival": "BANFIELD"
+      },
+      "21": {
+        "gf": 0,
+        "gc": 0,
+        "rival": "RACING CLUB"
+      },
+      "22": {
+        "gf": 0,
+        "gc": 3,
+        "rival": "CENTRAL"
+      },
+      "23": {
+        "gf": 2,
+        "gc": 1,
+        "rival": "GODOY CRUZ (M)"
+      }
+    },
+    "9NA": {
+      "1": {
+        "gf": 2,
+        "gc": 3,
+        "rival": "IND.RIVADAVIA (M)"
+      },
+      "2": {
+        "gf": 1,
+        "gc": 2,
+        "rival": "FERRO"
+      },
+      "3": {
+        "gf": 0,
+        "gc": 4,
+        "rival": "LANUS"
+      },
+      "4": {
+        "gf": 3,
+        "gc": 2,
+        "rival": "INDEPENDIENTE"
+      },
+      "5": {
+        "gf": 0,
+        "gc": 3,
+        "rival": "NEWELLS"
+      },
+      "6": {
+        "gf": 2,
+        "gc": 2,
+        "rival": "SAN MARTIN (SJ)"
+      },
+      "7": {
+        "gf": 1,
+        "gc": 2,
+        "rival": "ARGENTINOS JRS"
+      },
+      "8": {
+        "gf": 0,
+        "gc": 0,
+        "rival": "INSTITUTO (C)"
+      },
+      "9": {
+        "gf": 1,
+        "gc": 1,
+        "rival": "TALLERES (C)"
+      },
+      "10": {
+        "gf": 0,
+        "gc": 0,
+        "rival": "ESTUDIANTES (RC)"
+      },
+      "11": {
+        "gf": 1,
+        "gc": 3,
+        "rival": "BARRACAS CTRAL"
+      },
+      "12": {
+        "gf": 2,
+        "gc": 0,
+        "rival": "QUILMES"
+      },
+      "13": {
+        "gf": 0,
+        "gc": 2,
+        "rival": "RIVER PLATE"
+      },
+      "14": {
+        "gf": 1,
+        "gc": 1,
+        "rival": "UNION (SF)"
+      },
+      "15": {
+        "gf": 1,
+        "gc": 2,
+        "rival": "SAN LORENZO"
+      },
+      "16": {
+        "gf": 0,
+        "gc": 0,
+        "rival": "GIMNASIA (LP)"
+      },
+      "17": {
+        "gf": 0,
+        "gc": 0,
+        "rival": "C.CORDOBA(SDE)"
+      },
+      "18": {
+        "gf": 4,
+        "gc": 1,
+        "rival": "GIMNASIA (M)"
+      },
+      "19": {
+        "gf": 0,
+        "gc": 3,
+        "rival": "VELEZ"
+      },
+      "20": {
+        "gf": 1,
+        "gc": 5,
+        "rival": "BANFIELD"
+      },
+      "21": {
+        "gf": 1,
+        "gc": 2,
+        "rival": "RACING CLUB"
+      },
+      "22": {
+        "gf": 1,
+        "gc": 1,
+        "rival": "CENTRAL"
+      },
+      "23": {
+        "gf": 2,
+        "gc": 1,
+        "rival": "GODOY CRUZ (M)"
+      }
+    }
   }
 }
