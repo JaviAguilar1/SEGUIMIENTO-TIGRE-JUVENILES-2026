@@ -2136,11 +2136,20 @@ function calcConfiabilidad(){
     // coma y acentos para que crucen bien.
     const normComparable=s=>(s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'')
       .replace(/,/g,' ').replace(/\s+/g,' ').trim();
+    // Si el nombre matchea a alguien del plantel (por subconjunto de
+    // palabras, mismo criterio que cometResolvePlayer), la clave es su id
+    // -- así "Cortes Adrian maximiliano" y "CORTES, MAXIMILIANO" se suman
+    // como un solo jugador en vez de aparecer como dos filas separadas.
+    // Si no matchea a nadie, cae al string normalizado de siempre.
+    const keyDe=nombre=>{
+      const p=matchPlantel(cat, nombre);
+      return p ? 'id:'+p.id : normComparable(nombre);
+    };
     // Usa golesEfectivos (carga manual + COMET, COMET gana por fecha) en vez
     // de la carga manual sola — así compara lo que de verdad se ve en
     // pantalla contra futdetail, no un número viejo que COMET ya reemplazó.
     golesEfectivos(cat, fechasExcluidasGoles(cat)).forEach(g=>{
-      const key=normComparable(g.name);
+      const key=keyDe(g.name);
       misGoles[key]=(misGoles[key]||0)+g.goals;
       nombreOriginal[key]=nombreOriginal[key]||g.name;
     });
@@ -2151,7 +2160,7 @@ function calcConfiabilidad(){
     const futGoles={};
     (jugadoresStats[cat]||[]).forEach(j=>{
       const keyOriginal=normComparable(j.jugador);
-      const key=alias[keyOriginal]||keyOriginal;
+      const key=alias[keyOriginal]||keyDe(j.jugador);
       futGoles[key]=(futGoles[key]||0)+(parseInt(j.goles)||0);
       nombreOriginal[key]=nombreOriginal[key]||j.jugador;
     });
@@ -3831,6 +3840,19 @@ function cometNorm(s){
 function cometNameWords(s){
   return (s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'')
     .replace(/[^a-z\s]/g,' ').split(/\s+/).filter(Boolean);
+}
+// Busca a qué jugador del plantel de esa categoría corresponde un nombre
+// que puede venir en otro formato (con/sin segundos nombres, con/sin coma)
+// -- por subconjunto de palabras, mismo criterio que cometResolvePlayer.
+// Devuelve null si no hay ningún candidato único.
+function matchPlantel(cat, nombre){
+  const w = cometNameWords(nombre);
+  if(!w.length) return null;
+  const cand = (plantelFutdetail[cat]||[]).filter(p=>{
+    const pw = cometNameWords(p.nombre);
+    return pw.length>0 && (pw.every(x=>w.includes(x)) || w.every(x=>pw.includes(x)));
+  });
+  return cand.length===1 ? cand[0] : null;
 }
 
 // COMET da el nombre completo, con segundos nombres que el plantel muchas
