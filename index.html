@@ -1248,6 +1248,14 @@ function initFirebase(){
           // Remove login wall if still present (returning user with active session)
           const wall = document.getElementById('login-wall');
           if(wall){ wall.style.transition='opacity .3s'; wall.style.opacity='0'; setTimeout(()=>wall.remove(),300); }
+          // Cambio de contraseña obligatorio (una sola vez): si al crear la
+          // cuenta a mano en Firebase Console se dejó `mustChangePassword:
+          // true` en users/{uid}, se bloquea la app con una pantalla propia
+          // hasta que la cambie -- así se le puede dar una clave provisoria
+          // (ej. "Tigre123") sin que quede como clave definitiva.
+          db.ref('users/'+user.uid+'/mustChangePassword').once('value').then(snap=>{
+            if(snap.val()) mostrarCambioPasswordObligatorio(user);
+          });
           // Real-time role listener
           db.ref('users/'+user.uid+'/role').on('value', snap=>{
             currentRole = snap.val() || 'viewer';
@@ -5367,6 +5375,72 @@ function doWallLogin(){
       if(errEl)  errEl.style.display='block';
       if(loadEl) loadEl.style.display='none';
       if(btn)    btn.disabled=false;
+    });
+}
+
+// Pantalla de cambio de contraseña obligatorio (primer login con una clave
+// provisoria) -- mismo estilo visual que el login-wall, pero sin botón de
+// cancelar: no se puede usar la app hasta cambiarla.
+function mostrarCambioPasswordObligatorio(user){
+  if(document.getElementById('force-pass-wall')) return; // ya está mostrada
+  const wall = document.createElement('div');
+  wall.id = 'force-pass-wall';
+  wall.style.cssText = [
+    'position:fixed;inset:0;z-index:10000',
+    'background:linear-gradient(160deg,#05080f 0%,#0a0f1e 40%,#0d1528 100%)',
+    'display:flex;flex-direction:column;align-items:center;justify-content:center'
+  ].join(';');
+  wall.innerHTML = `
+    <div style="text-align:center;padding:0 20px;max-width:380px;width:100%">
+      <h1 style="font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:3px;
+        color:#fff;margin-bottom:8px">CAMBIÁ TU CONTRASEÑA</h1>
+      <p style="font-family:'Barlow',sans-serif;font-size:13px;color:#a8c0e8;margin-bottom:24px">
+        Es la primera vez que entrás con esta cuenta -- elegí una contraseña nueva antes de seguir.</p>
+      <div style="background:rgba(10,15,30,0.8);border:1px solid #1a2d5a;border-radius:14px;
+        padding:28px 24px;box-shadow:0 8px 40px rgba(0,0,0,0.5)">
+        <input id="fp-pass1" type="password" placeholder="Nueva contraseña (mínimo 6 caracteres)"
+          style="width:100%;background:rgba(5,8,15,0.8);border:1px solid #1a2d5a;
+          border-radius:8px;color:#d8e4ff;font-size:14px;padding:11px 14px;
+          font-family:'Barlow',sans-serif;outline:none;margin-bottom:10px;box-sizing:border-box">
+        <input id="fp-pass2" type="password" placeholder="Repetí la contraseña"
+          style="width:100%;background:rgba(5,8,15,0.8);border:1px solid #1a2d5a;
+          border-radius:8px;color:#d8e4ff;font-size:14px;padding:11px 14px;
+          font-family:'Barlow',sans-serif;outline:none;margin-bottom:16px;box-sizing:border-box">
+        <button id="fp-btn" onclick="confirmarCambioPasswordObligatorio()"
+          style="width:100%;background:linear-gradient(135deg,#c0152a,#e01830);
+          border:none;border-radius:8px;color:#fff;font-family:'Bebas Neue',sans-serif;
+          font-size:16px;letter-spacing:3px;padding:12px;cursor:pointer">GUARDAR Y ENTRAR</button>
+        <div id="fp-err" style="display:none;color:#ef4444;font-family:'Barlow Condensed',sans-serif;
+          font-size:12px;letter-spacing:1px;margin-top:10px"></div>
+      </div>
+    </div>`;
+  document.body.appendChild(wall);
+  wall._user = user;
+  const pass2 = document.getElementById('fp-pass2');
+  if(pass2) pass2.addEventListener('keydown', e=>{ if(e.key==='Enter') confirmarCambioPasswordObligatorio(); });
+}
+function confirmarCambioPasswordObligatorio(){
+  const wall = document.getElementById('force-pass-wall');
+  const user = wall?._user;
+  const p1 = document.getElementById('fp-pass1')?.value || '';
+  const p2 = document.getElementById('fp-pass2')?.value || '';
+  const errEl = document.getElementById('fp-err');
+  const showErr = msg => { if(errEl){ errEl.textContent=msg; errEl.style.display='block'; } };
+  if(!user) return;
+  if(p1.length<6){ showErr('La contraseña tiene que tener al menos 6 caracteres.'); return; }
+  if(p1!==p2){ showErr('Las dos contraseñas no coinciden.'); return; }
+  const btn = document.getElementById('fp-btn');
+  if(btn) btn.disabled=true;
+  user.updatePassword(p1)
+    .then(()=>db.ref('users/'+user.uid+'/mustChangePassword').remove())
+    .then(()=>{ wall.remove(); })
+    .catch(e=>{
+      if(btn) btn.disabled=false;
+      if(e.code==='auth/requires-recent-login'){
+        showErr('Por seguridad, tenés que volver a iniciar sesión para cambiar la contraseña. Salí y entrá de nuevo.');
+      } else {
+        showErr('No se pudo guardar la contraseña. Probá de nuevo.');
+      }
     });
 }
 
