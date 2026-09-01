@@ -7442,27 +7442,44 @@ function abrirPerfilJugador(cat, nombre){
   // sprints/vel. máxima/mts por partido salen de BL GPS Performance si ya
   // hay carga -- reemplaza a la vieja sección "RENDIMIENTO FÍSICO (BL)"
   // (una tabla partido a partido que quedaba redundante con esto).
-  const radarGoles = convocatorias ? Math.round(golesFinal/convocatorias*100) : 0;
-  const radarMinutos = convocatorias ? Math.round(minutosFinal/(convocatorias*90)*100) : 0;
-  const gpsNums = i => blMatches.map(m=>m.metrics?.[i]).filter(v=>v!=null).map(Number);
-  const gpsProm = i => { const n=gpsNums(i); return n.length ? n.reduce((a,b)=>a+b,0)/n.length : null; };
-  const gpsMax  = i => { const n=gpsNums(i); return n.length ? Math.max(...n) : null; };
-  const sprintsProm = gpsProm(5), velMax = gpsMax(6), mtsProm = gpsProm(0);
-  // Techos fijos solo para poder dibujar estos 3 ejes en la misma escala
-  // 0-100 que goles/minutos -- no es una comparación contra nadie.
-  const radarSprints = sprintsProm!=null ? Math.min(100, Math.round(sprintsProm/15*100)) : 0;
-  const radarVelMax  = velMax!=null      ? Math.min(100, Math.round(velMax/34*100))      : 0;
-  const radarMts     = mtsProm!=null     ? Math.min(100, Math.round(mtsProm/11000*100))  : 0;
+  // Referencia = el mejor dato del plantel de esta categoría en cada
+  // métrica (no un techo inventado) -- así el radar responde "qué tan
+  // cerca está de la vara más alta del propio plantel", no una tasa fija
+  // sin contexto. Goles/Minutos salen de jugadoresStats (mismo dato que ya
+  // se ve en la tabla de PLANTEL); Sprints/Vel. máxima/Mts por partido
+  // salen de BL GPS Performance, entre los jugadores de esta categoría que
+  // ya tengan carga.
+  const statsCat = jugadoresStats[cat]||[];
+  const refGoles = statsCat.reduce((max,j)=>Math.max(max, parseInt(j.goles)||0), 0);
+  const refMinutos = statsCat.reduce((max,j)=>Math.max(max, parseInt(j.minutos_jugados)||0), 0);
+  const gpsNumsDe = (p,i) => (p.match||[]).map(m=>m.metrics?.[i]).filter(v=>v!=null).map(Number);
+  const gpsPromDe = (p,i) => { const n=gpsNumsDe(p,i); return n.length ? n.reduce((a,b)=>a+b,0)/n.length : null; };
+  const gpsMaxDe  = (p,i) => { const n=gpsNumsDe(p,i); return n.length ? Math.max(...n) : null; };
+  const sprintsProm = gpsPromDe(blEntry?blEntry[1]:{}, 5);
+  const velMax = gpsMaxDe(blEntry?blEntry[1]:{}, 6);
+  const mtsProm = gpsPromDe(blEntry?blEntry[1]:{}, 0);
+  let refSprints=0, refVelMax=0, refMts=0;
+  Object.values(blPlayersDeCategoria(cat)).forEach(p=>{
+    const sp=gpsPromDe(p,5), vm=gpsMaxDe(p,6), mt=gpsPromDe(p,0);
+    if(sp!=null) refSprints=Math.max(refSprints, sp);
+    if(vm!=null) refVelMax =Math.max(refVelMax, vm);
+    if(mt!=null) refMts    =Math.max(refMts, mt);
+  });
+  const radarGoles   = refGoles   ? Math.min(100, Math.round(golesFinal/refGoles*100)) : 0;
+  const radarMinutos = refMinutos ? Math.min(100, Math.round(minutosFinal/refMinutos*100)) : 0;
+  const radarSprints = (refSprints && sprintsProm!=null) ? Math.min(100, Math.round(sprintsProm/refSprints*100)) : 0;
+  const radarVelMax  = (refVelMax  && velMax!=null)      ? Math.min(100, Math.round(velMax/refVelMax*100))      : 0;
+  const radarMts     = (refMts     && mtsProm!=null)     ? Math.min(100, Math.round(mtsProm/refMts*100))       : 0;
   const hayGps = blMatches.length>0;
   const radarHTML = `
     <div style="position:relative;width:100%;height:240px;margin:6px 0">
-      <canvas id="radar-perfil-jugador" role="img" aria-label="Radar de ${esc(nombre)}: goles y minutos jugados sobre sus propias convocatorias${hayGps?', mas sprints, velocidad maxima y metros por partido de BL GPS Performance':' -- sprints, velocidad maxima y metros por partido todavia pendientes de carga GPS'}"></canvas>
+      <canvas id="radar-perfil-jugador" role="img" aria-label="Radar de ${esc(nombre)}: cada eje es el porcentaje respecto al mejor dato del plantel de ${esc(cat)} en goles, minutos jugados${hayGps?', sprints, velocidad maxima y metros por partido':''}${hayGps?'':' -- sprints, velocidad maxima y metros por partido todavia pendientes de carga GPS'}"></canvas>
     </div>
-    <div style="display:flex;flex-wrap:wrap;justify-content:center;gap:14px;font-size:10.5px;color:var(--muted);margin-bottom:${hayGps?'10':'2'}px">
+    <div style="display:flex;flex-wrap:wrap;justify-content:center;gap:14px;font-size:10.5px;color:var(--muted);margin-bottom:6px">
       <span style="display:flex;align-items:center;gap:4px"><span style="width:8px;height:8px;border-radius:50%;background:#2a78d6"></span>Dato real</span>
       ${hayGps?'':'<span style="display:flex;align-items:center;gap:4px"><span style="width:8px;height:8px;border-radius:50%;background:var(--muted)"></span>Pendiente (GPS)</span>'}
     </div>
-    ${hayGps?'':'<div style="font-size:10.5px;color:var(--muted);text-align:center;margin-bottom:14px">Sprints, Vel. máxima y Mts/partido se completan solos cuando Brian cargue en BL GPS Performance.</div>'}`;
+    <div style="font-size:10.5px;color:var(--muted);text-align:center;margin-bottom:14px">Cada eje es el % respecto al mejor dato del plantel de ${esc(cat)} en esa métrica.${hayGps?'':' Sprints, Vel. máxima y Mts/partido se completan solos cuando Brian cargue en BL GPS Performance.'}</div>`;
 
   const partidosJugadosHTML = partidosJugados.length
     ? `<div class="table-wrap"><table><thead><tr><th>F</th><th>Rival</th><th>Res.</th><th>Eventos</th></tr></thead><tbody>
@@ -7504,11 +7521,11 @@ function abrirPerfilJugador(cat, nombre){
     type: 'radar',
     data: {
       labels: [
-        ['Goles', `${golesFinal} · ${radarGoles}% conv.`],
-        ['Minutos jugados', `${minutosFinal}' · ${radarMinutos}%`],
-        ['Sprints', sprintsProm!=null ? `${sprintsProm.toFixed(1)}/partido` : 'pendiente'],
-        ['Vel. máxima', velMax!=null ? `${velMax} km/h` : 'pendiente'],
-        ['Mts/partido', mtsProm!=null ? `${Math.round(mtsProm)} m` : 'pendiente']
+        ['Goles', `${golesFinal} · ${radarGoles}% del máx.`],
+        ['Minutos jugados', `${minutosFinal}' · ${radarMinutos}% del máx.`],
+        ['Sprints', sprintsProm!=null ? `${sprintsProm.toFixed(1)}/partido · ${radarSprints}%` : 'pendiente'],
+        ['Vel. máxima', velMax!=null ? `${velMax} km/h · ${radarVelMax}%` : 'pendiente'],
+        ['Mts/partido', mtsProm!=null ? `${Math.round(mtsProm)} m · ${radarMts}%` : 'pendiente']
       ],
       datasets: [{
         label: nombre,
