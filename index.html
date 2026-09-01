@@ -5267,7 +5267,10 @@ function completarLinksDesdeFutdetail(data){
 // carga en una de las dos (se renombra directo a la canónica). Sacar esta
 // entrada de la lista el día que el club confirme que ya lo unificó.
 const FUSIONES_JUGADORES_DUPLICADOS = {
-  '8VA': [{alias:'Fino Amadeo Benjamin', canonico:'Fino Amadeo'}],
+  '8VA': [
+    {alias:'Fino Amadeo Benjamin', canonico:'Fino Amadeo'},
+    {alias:'Arias Bonilla  Nicolás Geremias ', canonico:'Arias Nicolas'},
+  ],
 };
 function aplicarFusionesDuplicados(cat, lista, campoNombre){
   const fusiones = FUSIONES_JUGADORES_DUPLICADOS[cat];
