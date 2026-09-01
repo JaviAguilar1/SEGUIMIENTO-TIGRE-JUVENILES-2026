@@ -734,7 +734,15 @@ def calcular_alerta_rival(cat, catnum):
 
     riesgo = []
     if ultimo:
-        amonestados = fetch_statfutbol_sintesis_amarillas(catnum, ultimo["id_partido"], team_id, equipos)
+        # El partido puede ya figurar como jugado en el fixture pero todavia
+        # no tener su sintesis cargada del lado de statfutbol (confirmado
+        # 2026-09-01: la tabla viene vacia, sin nombre de equipo ni
+        # jugadores, no es un cambio de formato) -- en ese caso no hay
+        # amonestados que avisar todavia, no es un error real.
+        try:
+            amonestados = fetch_statfutbol_sintesis_amarillas(catnum, ultimo["id_partido"], team_id, equipos)
+        except ValueError:
+            amonestados = []
         for nombre in amonestados:
             am_total = am_por_nombre.get(nombre)
             if am_total is not None and am_total > 0 and am_total % 5 == 0:
@@ -956,6 +964,26 @@ def main():
         except Exception as e:  # noqa
             errores.append(f"statfutbol {cat}: {e}")
             print(f"[ERROR] statfutbol {cat}: {e}", file=sys.stderr)
+
+    # Goles y amarillas de TIGRE (no del rival) segun statfutbol -- 4ta
+    # fuente para comparar contra mi carga/COMET/futdetail (a pedido del
+    # usuario 2026-09-01, prioridad mas baja de las 4: COMET > Liga oficial >
+    # futdetail > statfutbol). Reusa fetch_statfutbol_plantel, que ya trae el
+    # acumulado de temporada por jugador (gol/am) calculado por el sitio.
+    resultado["statfutbol_jugadores"] = {}
+    for cat, catnum in STATFUTBOL_CATNUM.items():
+        try:
+            equipos = fetch_statfutbol_equipos(catnum)
+            match = statfutbol_match_equipo("TIGRE", equipos)
+            if not match:
+                raise ValueError("No se encontro a Tigre en el listado de planteles")
+            team_id, _ = match
+            plantel = fetch_statfutbol_plantel(catnum, team_id)
+            resultado["statfutbol_jugadores"][cat] = plantel
+            print(f"[OK] statfutbol jugadores {cat}: {len(plantel)} jugadores")
+        except Exception as e:  # noqa
+            errores.append(f"statfutbol jugadores {cat}: {e}")
+            print(f"[ERROR] statfutbol jugadores {cat}: {e}", file=sys.stderr)
 
     # Resultados de Tigre partido por partido segun futdetail (panel privado).
     # Necesita FUTDETAIL_USER / FUTDETAIL_PASS como variables de entorno (las
