@@ -7268,7 +7268,7 @@ function abrirPerfilJugador(cat, nombre){
   });
   const escudoDeFecha = fecha=>{
     const rivalCanon = RIVALS.find(x=>x.f===fecha)?.r;
-    const archivo = rivalCanon ? ESCUDO_POR_LPF[rivalCanon] : null;
+    const archivo = rivalCanon ? RIVAL_INFO[rivalCanon]?.escudo : null;
     return archivo ? `<img src="escudos/${archivo}" style="width:18px;height:18px;object-fit:contain;border-radius:50%;flex-shrink:0" alt="">` : '';
   };
   const golesFilas = Object.keys(golesPorFecha).length
