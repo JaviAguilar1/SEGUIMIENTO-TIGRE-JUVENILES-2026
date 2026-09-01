@@ -2191,6 +2191,17 @@ function calcConfiabilidad(){
     });
   });
 
+  // Caso conocido y permanente: futdetail tiene mal contado el gol de
+  // Gonzalez Santino (4TA) de la Fecha 3 (el partido cortado en dos
+  // canchas, Hacoaj) y no hay forma de arreglarlo desde acá -- el número
+  // real y correcto es 7, coincide con COMET, statfutbol y la ficha del
+  // jugador. Sin este filtro la alerta nunca podía cerrar porque compara
+  // contra un dato de futdetail que va a seguir mal. Confirmado 2026-09-01.
+  const esGolesMismatchConocido = m => m.cat==='4TA' && /gonzalez santino/i.test(m.jugador||'');
+  for(let i=golesMismatches.length-1; i>=0; i--){
+    if(esGolesMismatchConocido(golesMismatches[i])) golesMismatches.splice(i,1);
+  }
+
   // Links: mi carga (links) vs futdetail, para los 4 tipos que cruzan
   // (Partido, Resumen Goles, Análisis Propio, Próximo Rival ← Análisis
   // Rival de futdetail). Si los dos tienen algo cargado pero distinto, es
