@@ -711,7 +711,6 @@ def fetch_statfutbol_sintesis_tarjetas(catnum, id_partido, team_id_objetivo, equ
     return eventos
 
 
-AMARILLAS_ALERTA = 4
 AMARILLAS_SUSPENSION = 5
 
 
@@ -719,12 +718,16 @@ def calcular_riesgo_suspension(catnum, team_id, team_nombre, equipos, fixture):
     """Recorre TODOS los partidos jugados por team_id en la temporada, en
     orden cronologico, y arma el conteo VIGENTE de amarillas por jugador --
     no el acumulado bruto, sino el que queda despues de reiniciar en cero
-    cada vez que el jugador fue expulsado (roja directa o doble amarilla) o
-    llego a la 5ta amarilla acumulada. Mismo criterio que amarillasEnAlerta()
-    en index.html para nuestros propios jugadores (caso Juarez Nahuel,
-    2026-09-01: 4 amarillas brutas pero el conteo real era 2 porque una
-    fecha tuvo roja en el medio). Devuelve los que estan en riesgo (ciclo
-    actual >= 4), listos para jugarnos la 5ta."""
+    cada vez que el jugador llego a la 5ta amarilla acumulada o fue
+    expulsado (roja directa o doble amarilla). Mismo criterio de "ciclo"
+    que amarillasEnAlerta() en index.html para nuestros propios jugadores.
+
+    A diferencia de antes, esto YA NO devuelve a los que estan "en riesgo"
+    (4 amarillas, podrian llegar a la 5ta en cualquier partido) -- eso no
+    servia como aviso util (Javi, 2026-09-01: "hoy me muestra varios con 4,
+    eso no me sirve"). Ahora solo devuelve a los que llegaron JUSTO a la
+    5ta amarilla en el ULTIMO partido jugado por el rival -- esos si estan
+    confirmados afuera del partido que nos toca jugar."""
     nombre_corto = team_nombre.split(" (")[0]
     partidos_equipo = [p for p in fixture if p["jugado"] and (
         p["local"] == nombre_corto or p["visita"] == nombre_corto
@@ -733,7 +736,9 @@ def calcular_riesgo_suspension(catnum, team_id, team_nombre, equipos, fixture):
     )]
     partidos_equipo.sort(key=lambda p: p["fecha_iso"])
     conteo = {}
-    for p in partidos_equipo:
+    suspendidos_ultimo_partido = []
+    for idx, p in enumerate(partidos_equipo):
+        es_ultimo = idx == len(partidos_equipo) - 1
         try:
             eventos = fetch_statfutbol_sintesis_tarjetas(catnum, p["id_partido"], team_id, equipos)
         except Exception:  # noqa -- un partido puntual con la pagina rota no debe tirar abajo toda la temporada
@@ -742,10 +747,13 @@ def calcular_riesgo_suspension(catnum, team_id, team_nombre, equipos, fixture):
             if ev["amarilla"]:
                 conteo[nombre] = conteo.get(nombre, 0) + 1
         for nombre in list(conteo.keys()):
+            llego_a_la_5ta = conteo[nombre] >= AMARILLAS_SUSPENSION
             expulsado = eventos.get(nombre, {}).get("roja", False)
-            if conteo[nombre] >= AMARILLAS_SUSPENSION or expulsado:
+            if llego_a_la_5ta or expulsado:
                 conteo[nombre] = 0
-    return [{"nombre": n, "amarillas": c} for n, c in conteo.items() if c >= AMARILLAS_ALERTA]
+                if es_ultimo and llego_a_la_5ta:
+                    suspendidos_ultimo_partido.append({"nombre": nombre, "amarillas": AMARILLAS_SUSPENSION})
+    return suspendidos_ultimo_partido
 
 
 def calcular_alerta_rival(cat, catnum):

@@ -2664,8 +2664,11 @@ function buildCatTabsHTML(){
   // próximo rival" se les muestra directo adentro de ESTADÍSTICAS (ver
   // renderStatsSingle).
   const esDT = currentRole && currentRole.startsWith('cat_');
-  const tabs = [ {id:'resultados', label:'📊 ESTADÍSTICAS'}, {id:'plantel', label:'👥 PLANTEL'}, {id:'rendimiento', label:'🏃 RENDIMIENTO'},
-    ...(esDT ? [] : [{id:'videoanalisis', label:'▶ VIDEOANÁLISIS'}]) ];
+  // Orden pedido por Javi (2026-09-01): Estadísticas, Rendimiento,
+  // Videoanálisis (si corresponde), Plantel al final -- mismo orden sirve
+  // para admin y DT, porque el DT ya no ve Videoanálisis de por sí.
+  const tabs = [ {id:'resultados', label:'📊 ESTADÍSTICAS'}, {id:'rendimiento', label:'🏃 RENDIMIENTO'},
+    ...(esDT ? [] : [{id:'videoanalisis', label:'▶ VIDEOANÁLISIS'}]), {id:'plantel', label:'👥 PLANTEL'} ];
   return `<div style="display:flex;gap:8px;margin:10px 0 4px;">
     ${tabs.map(t=>{
       const active = catActiveTab===t.id;
@@ -2866,7 +2869,7 @@ function renderStatsSingle(cat, content){
       <div id="tabla-lpf-${cat}"></div>
     </div>
 
-    ${(currentRole && currentRole.startsWith('cat_') && CONFIABILIDAD_CATS.includes(cat)) ? `
+    ${(currentRole && currentRole.startsWith('cat_') && GENERAL_CATS.includes(cat)) ? `
     ${seccionTitulo('rivalstats-'+dataCat, 'ESTADÍSTICAS PRÓXIMO RIVAL')}
     <div id="sec-rivalstats-${dataCat}"${seccionEstiloInicial('rivalstats-'+dataCat)}>
       <div id="rival-stats-detalle-${dataCat}"></div>
@@ -2892,7 +2895,7 @@ function renderStatsSingle(cat, content){
     ? bloqueComparativaHTML((from,to)=>calcStats(dataCat,from,to), dataCat)
     : buildRendimientoGeneralHTML((from,to)=>calcStats(dataCat,from,to), dataCat, [cat]);
   if(!isReserva) document.getElementById(`sistema-${dataCat}`).innerHTML = buildSistemaTacticoHTML(dataCat);
-  if(currentRole && currentRole.startsWith('cat_') && CONFIABILIDAD_CATS.includes(cat)) renderRivalStatsDetalle(dataCat, cat);
+  if(currentRole && currentRole.startsWith('cat_') && GENERAL_CATS.includes(cat)) renderRivalStatsDetalle(dataCat, cat);
   renderGoleadores(dataCat);
   if(isReserva) renderTablaReserva(`tabla-lpf-${cat}`);
   else renderTablaLPF(cat, `tabla-lpf-${cat}`);
@@ -2910,7 +2913,12 @@ function renderStatsSingle(cat, content){
 function renderVideoanalisisTab(cat, tabEl){
   const isReserva = cat === 'RESERVA';
   const dataCat = isReserva ? (reservaSemestre===2 ? 'RESERVA_S2' : 'RESERVA') : cat;
-  const conRival = CONFIABILIDAD_CATS.includes(cat); // mismo alcance que ya tenían Portada/Estadísticas de rival
+  // Portada/Estadísticas de rival: antes limitado a CONFIABILIDAD_CATS
+  // (4TA/5TA/6TA) sin necesidad real -- los datos de base (fixture, tabla
+  // LPF, rival_alertas de statfutbol) ya se descargan para las 6
+  // categorías juveniles por igual. Se extiende a GENERAL_CATS (4TA-9NA,
+  // sin RESERVA, que no tiene este fixture) a pedido de Javi, 2026-09-01.
+  const conRival = GENERAL_CATS.includes(cat);
 
   tabEl.innerHTML = `
     ${seccionTitulo('va-propios-'+dataCat, `🟦 ANÁLISIS PROPIOS · <span style="color:${CAT_COLORS[cat]}">${cat}</span>`)}
@@ -6457,7 +6465,12 @@ async function dibujarTarjetaRival({cat, prox, info, ultimos, ultimosLabel, reci
   const mostrarGoleador = !!(incluirGoleador && alerta);
   const mostrarAmarillas = !!(incluirAmarillas && alerta);
   const mostrarExtra = mostrarGoleador || mostrarAmarillas;
-  const EXTRA_H = 38 + 130 + 30;
+  // Goleador/5ta amarilla van apilados en la columna derecha, debajo de
+  // "partido más reciente" (antes eran una fila aparte de ancho completo,
+  // pisando espacio que ya estaba libre a la derecha -- a pedido de Javi,
+  // 2026-09-01, con una referencia visual de otra app).
+  const CARD_H2=100, GAP_BOXES=14;
+  const stackH2 = 30 + 38 + (mostrarGoleador?CARD_H2+GAP_BOXES:0) + (mostrarAmarillas?CARD_H2:0);
 
   // Fondo más azulado (var(--surface3) de la app) en vez de var(--bg) --
   // a pedido de Javi, se veía "demasiado negro" comparado con la
@@ -6482,7 +6495,13 @@ async function dibujarTarjetaRival({cat, prox, info, ultimos, ultimosLabel, reci
   const W=1280, pad=40, rowH=48, rowH2=58;
   const rowsN=Math.max(ultimos.length,1);
   const MARGEN_MINIMO=50;
-  const contenidoHastaDivisor = pad + 56 + 76 + 36 + rowH + rowH*2 + 32 + 38 + rowsN*rowH2 + 42 + (mostrarExtra?EXTRA_H:0);
+  const cardH=180; // alto de la tarjeta "partido más reciente"
+  // La columna izquierda (últimos resultados) y la derecha (partido más
+  // reciente + goleador/5ta amarilla apilados) crecen por separado -- el
+  // alto de la placa lo define la que quede más alta de las dos.
+  const colIzqH = rowsN*rowH2;
+  const colDerH = cardH + (mostrarExtra ? stackH2 : 0);
+  const contenidoHastaDivisor = pad + 56 + 76 + 36 + rowH + rowH*2 + 32 + 38 + Math.max(colIzqH, colDerH) + 42;
   const H = Math.max(720, contenidoHastaDivisor + MARGEN_MINIMO);
 
   // Se dibuja al triple de resolución (SCALE=3) y se escala el contexto --
@@ -6588,7 +6607,6 @@ async function dibujarTarjetaRival({cat, prox, info, ultimos, ultimosLabel, reci
   // Achicada y alineada con la primera fila de "últimos resultados" (antes
   // arrancaba a la altura del título "ÚLTIMOS RESULTADOS" y quedaba enorme
   // comparada con lo que muestra adentro).
-  const cardH=180;
   ctxRoundRect(ctx, rightX, cardTop, colW, cardH, 12);
   ctx.fillStyle=SURF; ctx.fill(); ctx.strokeStyle=BORDER; ctx.lineWidth=1; ctx.stroke();
   let cy=cardTop+18;
@@ -6615,30 +6633,33 @@ async function dibujarTarjetaRival({cat, prox, info, ultimos, ultimosLabel, reci
     ctx.fillText('Sin partidos registrados todavía.', rightX+18, cy);
   }
 
-  y=ry+42;
-
   // Goleador del rival + alerta de 5ta amarilla (statfutbol.com.ar, ver
   // calcular_alerta_rival en scrape_tablas.py) -- opcional, según los
-  // checkboxes "incluir goleador"/"incluir amarillas" del panel.
+  // checkboxes "incluir goleador"/"incluir amarillas" del panel. Van
+  // apilados en la columna derecha, justo debajo de "partido más
+  // reciente" (mismo ancho colW) en vez de una fila aparte de ancho
+  // completo -- ahí es donde sobraba espacio (referencia visual, Javi
+  // 2026-09-01).
+  let yDer = cardTop + cardH;
   if(mostrarExtra){
-    ctx.fillStyle=RED; ctx.fillRect(pad,y,4,20);
+    yDer += 30;
+    ctx.fillStyle=RED; ctx.fillRect(rightX,yDer,4,20);
     ctx.font="700 14px 'Barlow Condensed', sans-serif"; ctx.fillStyle=GOLD;
-    ctx.fillText('GOLEADOR Y DISCIPLINA', pad+16, y+2);
-    y+=38;
+    ctx.fillText('GOLEADOR Y DISCIPLINA', rightX+16, yDer+2);
+    yDer+=38;
 
-    const cardH2=130;
-    const cajaTexto = (x, w, titulo, lineas) => {
-      ctxRoundRect(ctx, x, y, w, cardH2, 12);
+    const cajaTexto = (y0, titulo, lineas) => {
+      ctxRoundRect(ctx, rightX, y0, colW, CARD_H2, 12);
       ctx.fillStyle=SURF; ctx.fill(); ctx.strokeStyle=BORDER; ctx.lineWidth=1; ctx.stroke();
-      let cy=y+18;
-      ctx.font="700 13px 'Barlow', sans-serif"; ctx.fillStyle=GOLD;
-      ctx.fillText(titulo, x+18, cy);
-      cy+=30;
+      let cy=y0+16;
+      ctx.font="700 12px 'Barlow', sans-serif"; ctx.fillStyle=GOLD;
+      ctx.fillText(titulo, rightX+16, cy);
+      cy+=24;
       lineas.forEach(l=>{
-        ctx.font = l.bold ? "700 22px 'Barlow Condensed', sans-serif" : "14px 'Barlow', sans-serif";
+        ctx.font = l.bold ? "700 18px 'Barlow Condensed', sans-serif" : "13px 'Barlow', sans-serif";
         ctx.fillStyle = l.color || TXT2;
-        ctx.fillText(l.texto, x+18, cy);
-        cy += l.bold ? 30 : 22;
+        ctx.fillText(l.texto, rightX+16, cy);
+        cy += l.bold ? 24 : 19;
       });
     };
     const lineasGoleador = alerta.goleador
@@ -6648,16 +6669,14 @@ async function dibujarTarjetaRival({cat, prox, info, ultimos, ultimosLabel, reci
       ? alerta.amarillas_riesgo.map(a=>({texto:a.nombre+' ('+a.amarillas+')', color:DRAW}))
       : [{texto:'Ningún jugador llegó a la 5ta amarilla en el partido previo.', color:WIN}];
 
-    if(mostrarGoleador && mostrarAmarillas){
-      cajaTexto(leftX, colW, 'GOLEADOR DEL EQUIPO', lineasGoleador);
-      cajaTexto(rightX, colW, '5TA AMARILLA', lineasAmarillas);
-    } else if(mostrarGoleador){
-      cajaTexto(leftX, W-2*pad, 'GOLEADOR DEL EQUIPO', lineasGoleador);
-    } else {
-      cajaTexto(leftX, W-2*pad, '5TA AMARILLA', lineasAmarillas);
-    }
-    y += cardH2 + 30;
+    if(mostrarGoleador){ cajaTexto(yDer, 'GOLEADOR DEL EQUIPO', lineasGoleador); yDer += CARD_H2+GAP_BOXES; }
+    if(mostrarAmarillas){ cajaTexto(yDer, '5TA AMARILLA', lineasAmarillas); yDer += CARD_H2; }
   }
+
+  // El divisor final va debajo de lo que quede más abajo entre las dos
+  // columnas (últimos resultados a la izquierda, partido reciente +
+  // goleador/amarillas a la derecha).
+  y = Math.max(ry+10, yDer+22);
 
   ctx.strokeStyle=BORDER; ctx.lineWidth=1; ctx.setLineDash([4,4]);
   ctx.beginPath(); ctx.moveTo(pad,y); ctx.lineTo(W-pad,y); ctx.stroke(); ctx.setLineDash([]);
