@@ -3237,18 +3237,28 @@ function renderRendimientoTab(tabEl, cat){
 }
 
 function blCruceFormHTML(cat){
+  return `
+    <div style="display:flex;gap:8px;margin-bottom:12px">
+      <button type="button" id="bl-mode-cmp" class="cat-subtab-btn" onclick="blSetMode('cmp')"
+        style="flex:1;padding:8px;border-radius:8px;border:1px solid var(--border2);background:rgba(5,8,15,0.5);color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-weight:700;letter-spacing:1px;font-size:12px;cursor:pointer;">COMPARAR JUGADORES</button>
+      <button type="button" id="bl-mode-rank" class="cat-subtab-btn" onclick="blSetMode('rank')"
+        style="flex:1;padding:8px;border-radius:8px;border:1px solid var(--border2);background:rgba(5,8,15,0.5);color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-weight:700;letter-spacing:1px;font-size:12px;cursor:pointer;">RANKING POR MÉTRICA</button>
+      <button type="button" id="bl-mode-perfil" class="cat-subtab-btn" onclick="blSetMode('perfil')"
+        style="flex:1;padding:8px;border-radius:8px;border:1px solid var(--border2);background:rgba(5,8,15,0.5);color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-weight:700;letter-spacing:1px;font-size:12px;cursor:pointer;">PERFIL INDIVIDUAL</button>
+    </div>
+    <div id="bl-cruce-body"></div>`;
+}
+
+// Formulario de "Comparar jugadores" / "Ranking por métrica" -- sin cambios
+// de fondo, solo separado del HTML de arriba para poder alternar con el
+// formulario (bien distinto) de "Perfil individual".
+function blCmpRankFormHTML(cat){
   const nombres = Object.keys(blPlayersDeCategoria(cat)).sort();
   const jugOpts = nombres.map(n=>`<option value="${esc(n)}">${esc(n)}</option>`).join('');
   const metOpts = BL_METRICAS.map(m=>`<option value="${m.i}">${m.label} (${m.unit})</option>`).join('');
   return `
-    <div style="display:flex;gap:8px;margin-bottom:12px">
-      <button type="button" id="bl-mode-cmp" class="cat-subtab-btn" onclick="blSetMode('cmp')"
-        style="flex:1;padding:8px;border-radius:8px;border:1px solid var(--gold);background:linear-gradient(135deg,#3a2a08,#1a1206);color:var(--gold);font-family:'Barlow Condensed',sans-serif;font-weight:700;letter-spacing:1px;font-size:12px;cursor:pointer;">COMPARAR JUGADORES</button>
-      <button type="button" id="bl-mode-rank" class="cat-subtab-btn" onclick="blSetMode('rank')"
-        style="flex:1;padding:8px;border-radius:8px;border:1px solid var(--border2);background:rgba(5,8,15,0.5);color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-weight:700;letter-spacing:1px;font-size:12px;cursor:pointer;">RANKING POR MÉTRICA</button>
-    </div>
     <div style="display:grid;grid-template-columns:1fr 1fr auto;gap:10px;align-items:end;margin-bottom:12px">
-      <div id="bl-jug-wrap">
+      <div id="bl-jug-wrap" style="display:${blMode==='cmp'?'':'none'}">
         <label style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;display:block;margin-bottom:4px">Jugadores (Ctrl/Cmd+clic para varios)</label>
         <select id="bl-jugadores" multiple size="6" style="width:100%;background:rgba(5,8,15,.8);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:12px;padding:6px;">${jugOpts}</select>
       </div>
@@ -3260,22 +3270,110 @@ function blCruceFormHTML(cat){
       </div>
       <button type="button" onclick="runBlCruce()"
         style="background:var(--red);border:none;border-radius:6px;color:#fff;font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:1px;padding:10px 18px;cursor:pointer;">BUSCAR</button>
-    </div>`;
+    </div>
+    <div id="bl-cruce-result"></div>`;
 }
+
+// Formulario de "Perfil individual" (Fase A) -- elegís un jugador y se arma
+// solo, sin fechas/métrica/buscar (a diferencia de comparar/ranking, acá no
+// hace falta elegir nada más).
+function blPerfilFormHTML(cat){
+  const nombres = Object.keys(blPlayersDeCategoria(cat)).sort();
+  const jugOpts = nombres.map(n=>`<option value="${esc(n)}">${esc(n)}</option>`).join('');
+  return `
+    <div style="margin-bottom:16px">
+      <label style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;display:block;margin-bottom:4px">Jugador</label>
+      <select id="bl-perfil-jugador" onchange="renderBlPerfil()" style="width:100%;background:rgba(5,8,15,.8);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:13px;padding:8px 10px;">
+        <option value="">— Elegí un jugador —</option>
+        ${jugOpts}
+      </select>
+    </div>
+    <div id="bl-perfil-content"></div>`;
+}
+function wireBlPerfilForm(){ renderBlPerfil(); }
 
 let blMode = 'cmp';
 function blSetMode(m){
   blMode = m;
-  document.getElementById('bl-jug-wrap').style.display = m==='cmp' ? '' : 'none';
-  ['cmp','rank'].forEach(x=>{
+  ['cmp','rank','perfil'].forEach(x=>{
     const btn = document.getElementById('bl-mode-'+x);
     const on = x===m;
     btn.style.borderColor = on?'var(--gold)':'var(--border2)';
     btn.style.background  = on?'linear-gradient(135deg,#3a2a08,#1a1206)':'rgba(5,8,15,0.5)';
     btn.style.color       = on?'var(--gold)':'var(--muted)';
   });
+  const body = document.getElementById('bl-cruce-body');
+  if(m==='perfil'){
+    body.innerHTML = blPerfilFormHTML(blCruceCat);
+    wireBlPerfilForm();
+  } else {
+    body.innerHTML = blCmpRankFormHTML(blCruceCat);
+  }
 }
 function wireBlCruceForm(){ blSetMode(blMode); }
+
+// Métrica destacada arriba del todo del perfil individual, "fijable" a mano
+// (máx. 4, clic en cualquier tarjeta de la grilla de abajo la agrega/saca).
+// Default pedido por el usuario: Dist Total, Mts/min, Sprints, Top Speed
+// (índices de BL_METRICAS).
+let blPerfilPinned = [0, 1, 5, 6];
+function blPerfilTogglePin(i){
+  const idx = blPerfilPinned.indexOf(i);
+  if(idx>-1) blPerfilPinned.splice(idx,1);
+  else {
+    blPerfilPinned.push(i);
+    if(blPerfilPinned.length>4) blPerfilPinned.shift();
+  }
+  renderBlPerfil();
+}
+// Mejor marca de un jugador para una métrica, y en qué fecha/rival salió --
+// mismo criterio que BL ("dato máximo registrado por métrica").
+function blPerfilMetricaMax(p, i){
+  let best = null;
+  (p.match||[]).forEach(r=>{
+    const v = r.metrics ? r.metrics[i] : null;
+    if(v==null) return;
+    if(best==null || Number(v) > best.v) best = {v:Number(v), fecha: blFechaNum(r.fecha), opp: r.opp||''};
+  });
+  return best;
+}
+function renderBlPerfil(){
+  const sel = document.getElementById('bl-perfil-jugador');
+  const cont = document.getElementById('bl-perfil-content');
+  if(!sel || !cont) return;
+  const nombre = sel.value;
+  if(!nombre){ cont.innerHTML = `<div style="color:var(--muted);font-size:12px;padding:12px 0">Elegí un jugador para ver su perfil.</div>`; return; }
+  const p = blPlayers[nombre];
+  if(!p){ cont.innerHTML = `<div style="color:var(--muted);font-size:12px;padding:12px 0">No hay datos de este jugador.</div>`; return; }
+
+  const iniciales = nombre.split(' ').filter(Boolean).map(w=>w[0]).slice(0,2).join('').toUpperCase();
+  const registros = (p.match||[]).length;
+  const metricas = BL_METRICAS.map(m=>({...m, best: blPerfilMetricaMax(p, m.i)}));
+
+  const cardHTML = (m, pinned) => !m.best ? '' : `
+    <div onclick="blPerfilTogglePin(${m.i})" style="cursor:pointer;background:${pinned?'var(--surface2)':'var(--surface)'};border:1px solid ${pinned?'var(--gold)':'var(--border)'};border-radius:8px;padding:${pinned?'12px':'10px'};position:relative;${pinned?'text-align:center':''}">
+      ${pinned?'<div style="position:absolute;top:6px;right:8px;font-size:11px;color:var(--gold)">📌</div>':(blPerfilPinned.includes(m.i)?'<div style="position:absolute;top:6px;right:8px;font-size:10px;color:var(--gold)">📌</div>':'')}
+      ${pinned?'':`<div style="font-size:10px;color:var(--muted);font-family:'Barlow Condensed',sans-serif">${esc(m.label.toUpperCase())}${m.unit!=='#'?` (${esc(m.unit)})`:''}</div>`}
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:${pinned?'26px':'18px'};color:${(pinned||blPerfilPinned.includes(m.i))?'var(--gold2)':'var(--text)'}">${m.best.v.toFixed(m.best.v%1?1:0)}</div>
+      ${pinned?`<div style="font-size:10px;color:var(--muted);letter-spacing:1px;font-family:'Barlow Condensed',sans-serif;margin-top:2px">${esc(m.label.toUpperCase())}${m.unit!=='#'?` (${esc(m.unit)})`:''}</div>`:`<div style="font-size:9px;color:var(--muted)">F${m.best.fecha}${m.best.opp?` · vs ${esc(m.best.opp)}`:''}</div>`}
+    </div>`;
+
+  const pinnedCards = blPerfilPinned.map(i=>metricas.find(m=>m.i===i)).filter(Boolean).map(m=>cardHTML(m,true)).join('');
+  const gridCards = metricas.map(m=>cardHTML(m,false)).join('');
+
+  cont.innerHTML = `
+    <div style="display:flex;align-items:center;gap:12px;padding:14px;background:var(--surface);border:1px solid var(--border);border-radius:10px;margin-bottom:14px">
+      <div style="width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold2));display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:17px;color:#1a1206;flex-shrink:0">${esc(iniciales)}</div>
+      <div style="flex:1">
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:1px;color:#fff">${esc(nombre.toUpperCase())}</div>
+        <div style="font-size:12px;color:var(--text2);font-family:'Barlow Condensed',sans-serif">${p.pos?esc(p.pos)+' · ':''}${blCruceCat} · ${registros} registro${registros===1?'':'s'}</div>
+      </div>
+    </div>
+    <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;font-family:'Barlow Condensed',sans-serif">📌 Tocá cualquier métrica de abajo para fijarla acá arriba (máx. 4)</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-bottom:18px">${pinnedCards}</div>
+    <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;font-family:'Barlow Condensed',sans-serif">Dato máximo registrado por métrica</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px">${gridCards}</div>`;
+}
 
 function blFechasSeleccionadas(){
   const raw = (document.getElementById('bl-fechas').value||'').trim();
