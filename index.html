@@ -7847,9 +7847,13 @@ function amarillasEnAlerta(cat){
       if(porJugador[id].count>=AMARILLAS_SUSPENSION || expulsados.has(id)) porJugador[id].count=0;
     });
   });
-  return Object.values(porJugador)
-    .map(p=>({...p, ciclo: p.count}))
-    .filter(p=>p.ciclo>=AMARILLAS_ALERTA);
+  // Solo jugadores que siguen en el plantel actual -- uno que ya se fue no
+  // va a sumar más amarillas y no afecta al equipo hoy, aunque su carga
+  // histórica de tarjetas se mantenga intacta (Javi, 2026-09-02, caso
+  // Poblete Matías en 5TA).
+  return Object.entries(porJugador)
+    .map(([id,p])=>({...p, ciclo: p.count, id}))
+    .filter(p=>p.ciclo>=AMARILLAS_ALERTA && plantelNombreDeId(cat,p.id)!=null);
 }
 // El pill "N en alerta" del header se sacó a pedido de Javi -- el mismo
 // aviso (4+ amarillas, riesgo de suspensión) ya se ve adentro de cada
