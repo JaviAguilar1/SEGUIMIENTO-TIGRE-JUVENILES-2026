@@ -6539,12 +6539,11 @@ async function dibujarTarjetaRival({cat, prox, info, ultimos, ultimosLabel, reci
   const mostrarGoleador = !!(incluirGoleador && alerta);
   const mostrarAmarillas = !!(incluirAmarillas && alerta);
   const mostrarExtra = mostrarGoleador || mostrarAmarillas;
-  // Goleador/5ta amarilla van apilados en la columna derecha, debajo de
-  // "partido más reciente" (antes eran una fila aparte de ancho completo,
-  // pisando espacio que ya estaba libre a la derecha -- a pedido de Javi,
-  // 2026-09-01, con una referencia visual de otra app).
-  const CARD_H2=100, GAP_BOXES=14;
-  const stackH2 = 30 + 38 + (mostrarGoleador?CARD_H2+GAP_BOXES:0) + (mostrarAmarillas?CARD_H2:0);
+  // Goleador/5ta amarilla van DENTRO de la tarjeta "partido más reciente"
+  // (a la derecha del resultado, con su propio espacio libre) en vez de
+  // agregar alto nuevo a la placa -- así el límite inferior (alineado con
+  // "últimos resultados") nunca se mueve, tenga o no tenga esta info
+  // (Javi, 2026-09-02).
 
   // Fondo más azulado (var(--surface3) de la app) en vez de var(--bg) --
   // a pedido de Javi, se veía "demasiado negro" comparado con la
@@ -6574,7 +6573,7 @@ async function dibujarTarjetaRival({cat, prox, info, ultimos, ultimosLabel, reci
   // reciente + goleador/5ta amarilla apilados) crecen por separado -- el
   // alto de la placa lo define la que quede más alta de las dos.
   const colIzqH = rowsN*rowH2;
-  const colDerH = cardH + (mostrarExtra ? stackH2 : 0);
+  const colDerH = cardH;
   const contenidoHastaDivisor = pad + 56 + 76 + 36 + rowH + rowH*2 + 32 + 38 + Math.max(colIzqH, colDerH) + 42;
   const H = Math.max(720, contenidoHastaDivisor + MARGEN_MINIMO);
 
@@ -6709,48 +6708,74 @@ async function dibujarTarjetaRival({cat, prox, info, ultimos, ultimosLabel, reci
 
   // Goleador del rival + alerta de 5ta amarilla (statfutbol.com.ar, ver
   // calcular_alerta_rival en scrape_tablas.py) -- opcional, según los
-  // checkboxes "incluir goleador"/"incluir amarillas" del panel. Van
-  // apilados en la columna derecha, justo debajo de "partido más
-  // reciente" (mismo ancho colW) en vez de una fila aparte de ancho
-  // completo -- ahí es donde sobraba espacio (referencia visual, Javi
-  // 2026-09-01).
-  let yDer = cardTop + cardH;
+  // checkboxes "incluir goleador"/"incluir amarillas" del panel. Se
+  // dibujan DENTRO de la misma tarjeta "partido más reciente", a la
+  // derecha de su contenido (línea vertical separadora), usando el
+  // espacio libre que ya tenía la tarjeta -- así nunca crece el alto de
+  // la placa (Javi, 2026-09-02: "no se puede pasar hacia abajo de la
+  // línea", el límite ya establecido por últimos resultados/la tarjeta
+  // se mantiene siempre igual).
   if(mostrarExtra){
-    yDer += 30;
-    ctx.fillStyle=RED; ctx.fillRect(rightX,yDer,4,20);
-    ctx.font="700 14px 'Barlow Condensed', sans-serif"; ctx.fillStyle=GOLD;
-    ctx.fillText('GOLEADOR Y DISCIPLINA', rightX+16, yDer+2);
-    yDer+=38;
+    // Arranca debajo del título "PARTIDO MÁS RECIENTE · FECHA N" (cardTop+46,
+    // misma altura donde ya arranca "vs EST") -- si el separador empezaba
+    // desde arriba de todo, el título (ancho variable, con el número de
+    // fecha) se superponía con "GOLEADOR" (Javi, 2026-09-02).
+    const topY = cardTop + 46, botY = cardTop + cardH - 16;
+    const divX = rightX + 230;
+    const padInterno = 16;
+    ctx.strokeStyle=BORDER; ctx.lineWidth=1;
+    ctx.beginPath(); ctx.moveTo(divX, topY); ctx.lineTo(divX, botY); ctx.stroke();
 
-    const cajaTexto = (y0, titulo, lineas) => {
-      ctxRoundRect(ctx, rightX, y0, colW, CARD_H2, 12);
-      ctx.fillStyle=SURF; ctx.fill(); ctx.strokeStyle=BORDER; ctx.lineWidth=1; ctx.stroke();
-      let cy=y0+16;
-      ctx.font="700 12px 'Barlow', sans-serif"; ctx.fillStyle=GOLD;
-      ctx.fillText(titulo, rightX+16, cy);
-      cy+=24;
-      lineas.forEach(l=>{
-        ctx.font = l.bold ? "700 18px 'Barlow Condensed', sans-serif" : "13px 'Barlow', sans-serif";
-        ctx.fillStyle = l.color || TXT2;
-        ctx.fillText(l.texto, rightX+16, cy);
-        cy += l.bold ? 24 : 19;
-      });
+    const ex = divX + padInterno;
+    const mid = (topY + botY) / 2;
+
+    const drawGoleador = (y0) => {
+      let cy=y0+padInterno;
+      ctx.font="700 10px 'Barlow', sans-serif"; ctx.fillStyle=GOLD;
+      ctx.fillText('GOLEADOR', ex, cy); cy+=17;
+      if(alerta.goleador){
+        ctx.font="700 14px 'Barlow Condensed', sans-serif"; ctx.fillStyle=TXT;
+        ctx.fillText(alerta.goleador.nombre.split(',')[0], ex, cy); cy+=18;
+        ctx.font="11px 'Barlow', sans-serif"; ctx.fillStyle=MUTED;
+        ctx.fillText(alerta.goleador.goles+' goles', ex, cy);
+      } else {
+        ctx.font="11px 'Barlow', sans-serif"; ctx.fillStyle=MUTED;
+        ctx.fillText('Sin datos.', ex, cy);
+      }
     };
-    const lineasGoleador = alerta.goleador
-      ? [{texto:alerta.goleador.nombre, bold:true, color:TXT}, {texto:alerta.goleador.goles+' goles', color:MUTED}]
-      : [{texto:'Sin datos todavía.', color:MUTED}];
-    const lineasAmarillas = (alerta.amarillas_riesgo && alerta.amarillas_riesgo.length)
-      ? alerta.amarillas_riesgo.map(a=>({texto:a.nombre+' ('+a.amarillas+')', color:DRAW}))
-      : [{texto:'Ningún jugador llegó a la 5ta amarilla en el partido previo.', color:WIN}];
+    const drawAmarillas = (y0) => {
+      let cy=y0+padInterno;
+      ctx.font="700 10px 'Barlow', sans-serif"; ctx.fillStyle=GOLD;
+      ctx.fillText('5TA AMARILLA', ex, cy); cy+=17;
+      const lista = alerta.amarillas_riesgo||[];
+      if(lista.length){
+        lista.slice(0,3).forEach(a=>{
+          ctx.font="11px 'Barlow', sans-serif"; ctx.fillStyle=DRAW;
+          ctx.fillText(a.nombre.split(',')[0]+' ('+a.amarillas+')', ex, cy);
+          cy+=16;
+        });
+      } else {
+        ctx.font="11px 'Barlow', sans-serif"; ctx.fillStyle=WIN;
+        ctx.fillText('Nadie en riesgo.', ex, cy);
+      }
+    };
 
-    if(mostrarGoleador){ cajaTexto(yDer, 'GOLEADOR DEL EQUIPO', lineasGoleador); yDer += CARD_H2+GAP_BOXES; }
-    if(mostrarAmarillas){ cajaTexto(yDer, '5TA AMARILLA', lineasAmarillas); yDer += CARD_H2; }
+    if(mostrarGoleador && mostrarAmarillas){
+      drawGoleador(topY - padInterno);
+      ctx.beginPath(); ctx.moveTo(divX+padInterno, mid); ctx.lineTo(rightX+colW-padInterno, mid); ctx.stroke();
+      drawAmarillas(mid - padInterno);
+    } else if(mostrarGoleador){
+      drawGoleador((topY+botY)/2 - 40);
+    } else {
+      drawAmarillas((topY+botY)/2 - 40);
+    }
   }
 
   // El divisor final va debajo de lo que quede más abajo entre las dos
-  // columnas (últimos resultados a la izquierda, partido reciente +
-  // goleador/amarillas a la derecha).
-  y = Math.max(ry+10, yDer+22);
+  // columnas (últimos resultados a la izquierda, partido reciente a la
+  // derecha) -- el mismo límite de siempre, sin importar si se muestra
+  // goleador/disciplina o no.
+  y = Math.max(ry+10, cardTop+cardH+22);
 
   ctx.strokeStyle=BORDER; ctx.lineWidth=1; ctx.setLineDash([4,4]);
   ctx.beginPath(); ctx.moveTo(pad,y); ctx.lineTo(W-pad,y); ctx.stroke(); ctx.setLineDash([]);
