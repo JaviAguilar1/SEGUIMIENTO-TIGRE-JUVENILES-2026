@@ -54,6 +54,26 @@ RESERVA_ZONA_URLS = {
     },
 }
 
+# Fixture/planteles/sintesis de Reserva (Apertura y Clausura) -- mismo tipo
+# de dato que ya se saca de statfutbol para las juveniles (STATFUTBOL_CATNUM),
+# pero con URLs literales por torneo en vez de un "catnum" que se pueda
+# interpolar (confirmado navegando el sitio, 2026-09-02; Javi pidio traer
+# "todos los datos que se puedan automatizar" para Reserva). RESERVA_APE
+# mapea al 1er semestre de la app (results['RESERVA']), RESERVA_CLA al 2do
+# (results['RESERVA_S2']), mismo criterio que reservaSemestre en index.html.
+RESERVA_TORNEOS = {
+    "RESERVA_APE": {
+        "fixture": "afafixturecopaape2026Resolucion.php",
+        "planteles_base": "afaplantelesCALP2026",
+        "sintesis": "sintesispartidocopaape2026.php",
+    },
+    "RESERVA_CLA": {
+        "fixture": "afafixturecopacla2026Resolucion.php",
+        "planteles_base": "afaplantelesCCLP2026",
+        "sintesis": "sintesispartidocopacla2026.php",
+    },
+}
+
 OUT_PATH = "data/tablas.json"
 
 HEADERS = {
@@ -1176,15 +1196,19 @@ def fetch_statfutbol_plantel(catnum, team_id):
     return out
 
 
-def fetch_statfutbol_sintesis_tarjetas(catnum, id_partido, team_id_objetivo, equipos):
+def fetch_statfutbol_sintesis_tarjetas(sintesis_url, id_partido, team_id_objetivo, equipos):
     """Devuelve {nombre: {'amarilla': bool, 'roja': bool}} para los
     jugadores del equipo team_id_objetivo en ese partido puntual. Devuelve
     {} (sin marcar error) si la sintesis todavia no esta publicada del lado
     de statfutbol -- pasa seguido con el partido mas reciente, la tabla
     viene vacia (sin nombre de equipo ni jugadores), no es un cambio de
-    formato."""
-    html = fetch_post(f"{STATFUTBOL_BASE}sintesispartido{catnum}2026.php",
-                       {"idPartido": id_partido, "fixGL": "0", "fixGV": "0"})
+    formato.
+
+    sintesis_url es la URL completa (antes era "catnum" y se armaba aca
+    mismo "sintesispartido{catnum}2026.php" -- se movio a parametro para
+    poder reusar esta misma funcion con las URLs irregulares de Reserva,
+    que no siguen el patron de catnum de las juveniles)."""
+    html = fetch_post(sintesis_url, {"idPartido": id_partido, "fixGL": "0", "fixGV": "0"})
     # ojo: "encabezado-equipo" tambien aparece en el <style> inline mas
     # arriba en la pagina -- hay que buscar el <th>, no el string suelto.
     idx = html.find('<th class="encabezado-equipo"')
@@ -1224,16 +1248,16 @@ def fetch_statfutbol_sintesis_tarjetas(catnum, id_partido, team_id_objetivo, equ
     return eventos
 
 
-def fetch_statfutbol_sintesis_completa(catnum, id_partido, team_id_objetivo, equipos):
+def fetch_statfutbol_sintesis_completa(sintesis_url, id_partido, team_id_objetivo, equipos):
     """Igual que fetch_statfutbol_sintesis_tarjetas, pero ademas cuenta
     goles (no solo amarilla/roja) -- para completar partidos/matchData
     cuando no hay planilla de COMET cargada para esa fecha (Javi,
     2026-09-02: "prioridad comet, si no hay planilla, traer el dato de la
     pagina"). Devuelve {nombre: {"goles": n, "amarilla": bool, "roja":
     bool}}, solo con jugadores que tuvieron algun evento (se omiten los que
-    no metieron gol ni vieron tarjeta, para no inflar el resultado)."""
-    html = fetch_post(f"{STATFUTBOL_BASE}sintesispartido{catnum}2026.php",
-                       {"idPartido": id_partido, "fixGL": "0", "fixGV": "0"})
+    no metieron gol ni vieron tarjeta, para no inflar el resultado).
+    sintesis_url: ver comentario en fetch_statfutbol_sintesis_tarjetas."""
+    html = fetch_post(sintesis_url, {"idPartido": id_partido, "fixGL": "0", "fixGV": "0"})
     idx = html.find('<th class="encabezado-equipo"')
     idx2 = html.find("</table>", idx)
     if idx < 0 or idx2 < 0:
@@ -1274,7 +1298,7 @@ def fetch_statfutbol_sintesis_completa(catnum, id_partido, team_id_objetivo, equ
 AMARILLAS_SUSPENSION = 5
 
 
-def calcular_riesgo_suspension(catnum, team_id, team_nombre, equipos, fixture):
+def calcular_riesgo_suspension(sintesis_url, team_id, team_nombre, equipos, fixture):
     """Recorre TODOS los partidos jugados por team_id en la temporada, en
     orden cronologico, y arma el conteo VIGENTE de amarillas por jugador --
     no el acumulado bruto, sino el que queda despues de reiniciar en cero
@@ -1300,7 +1324,7 @@ def calcular_riesgo_suspension(catnum, team_id, team_nombre, equipos, fixture):
     for idx, p in enumerate(partidos_equipo):
         es_ultimo = idx == len(partidos_equipo) - 1
         try:
-            eventos = fetch_statfutbol_sintesis_tarjetas(catnum, p["id_partido"], team_id, equipos)
+            eventos = fetch_statfutbol_sintesis_tarjetas(sintesis_url, p["id_partido"], team_id, equipos)
         except Exception:  # noqa -- un partido puntual con la pagina rota no debe tirar abajo toda la temporada
             eventos = {}
         for nombre, ev in eventos.items():
@@ -1340,7 +1364,8 @@ def calcular_alerta_rival(cat, catnum):
         raise ValueError(f"Plantel vacio para {team_nombre!r}")
     goleador = max(plantel, key=lambda j: j["gol"])
 
-    riesgo = calcular_riesgo_suspension(catnum, team_id, team_nombre, equipos, fixture)
+    riesgo = calcular_riesgo_suspension(f"{STATFUTBOL_BASE}sintesispartido{catnum}2026.php",
+                                         team_id, team_nombre, equipos, fixture)
 
     return {
         "fecha": proximo["jornada"],
@@ -1473,6 +1498,139 @@ def fetch_statfutbol_reserva_zona(path: str):
     return filas
 
 
+def fetch_statfutbol_reserva_fixture(fixture_path):
+    """Fixture completo de un torneo de Reserva (Apertura o Clausura),
+    zonas A y B juntas en la misma pagina (trae una columna de zona de mas
+    respecto al fixture de las juveniles).
+
+    OJO -- confirmado con datos reales, 2026-09-02: Apertura y Clausura
+    vienen de plantillas HTML DISTINTAS del lado de statfutbol:
+      - Apertura: nombre de equipo en <span class="pc">, resultado en UNA
+        celda combinada "GL-GV", fecha ISO en una celda oculta (d-none)
+        aparte de la fecha visible DD-MM.
+      - Clausura: nombre de equipo pegado a un "&nbsp;" (sin span.pc), GL y
+        GV en dos celdas separadas, fecha ISO directa (sin celda oculta).
+      - Partido no jugado: en Apertura el resultado no matchea "N-N"; en
+        Clausura las celdas de gol traen literalmente "." (confirmado).
+    Se detecta el formato por fila (la de Apertura siempre trae
+    class="pc") en vez de asumir uno solo, para no romper si el torneo que
+    todavia no arranco/temrino usa el otro molde."""
+    html = fetch(STATFUTBOL_BASE + fixture_path)
+    filas = re.findall(r'<tr class="trConsult[^"]*">(.*?)</tr>', html, re.DOTALL)
+    out = []
+    for fila in filas:
+        celdas = re.findall(r"<td[^>]*>(.*?)</td>", fila, re.DOTALL)
+
+        def equipo_pc(c):
+            m = re.search(r'class="pc">([^<]*)</span>', c)
+            return m.group(1).strip() if m else None
+
+        def equipo_nbsp(c):
+            m = re.search(r"&nbsp;\s*([^<]+)", c)
+            return re.sub(r"\s+", " ", m.group(1)).strip() if m else None
+
+        try:
+            if 'class="pc"' in fila:
+                if len(celdas) < 10:
+                    continue
+                jm = re.match(r"\s*(\d+)", re.sub(r"<[^>]+>", "", celdas[1]))
+                zona = re.sub(r"<[^>]+>", "", celdas[2]).strip()
+                local, visita = equipo_pc(celdas[3]), equipo_pc(celdas[5])
+                score = re.sub(r"<[^>]+>", "", celdas[4]).strip()
+                fm = re.search(r"(\d{4}-\d{2}-\d{2})", celdas[7])
+                idm = re.search(r'name="idPartido" value="(\d+)"', celdas[9])
+                if not (jm and zona and local and visita and fm and idm):
+                    continue
+                sm = re.match(r"(\d+)\s*-\s*(\d+)", score)
+                jugado = bool(sm)
+                gf_local, gf_visita = (int(sm.group(1)), int(sm.group(2))) if sm else (None, None)
+            else:
+                if len(celdas) < 9:
+                    continue
+                jm = re.match(r"\s*(\d+)", re.sub(r"<[^>]+>", "", celdas[0]))
+                zona = re.sub(r"<[^>]+>", "", celdas[1]).strip()
+                local, visita = equipo_nbsp(celdas[2]), equipo_nbsp(celdas[4])
+                gl_raw = re.sub(r"<[^>]+>", "", celdas[3]).strip()
+                gv_raw = re.sub(r"<[^>]+>", "", celdas[5]).strip()
+                fm = re.search(r"(\d{4}-\d{2}-\d{2})", celdas[6])
+                idm = re.search(r'name="idPartido" value="(\d+)"', celdas[8])
+                if not (jm and zona and local and visita and fm and idm):
+                    continue
+                jugado = gl_raw not in ("", ".") and gv_raw not in ("", ".")
+                gf_local = int(gl_raw) if jugado else None
+                gf_visita = int(gv_raw) if jugado else None
+        except (ValueError, IndexError):
+            continue
+
+        out.append({
+            "jornada": int(jm.group(1)), "zona": zona, "local": local, "visita": visita,
+            "jugado": jugado, "gf_local": gf_local, "gf_visita": gf_visita,
+            "fecha_iso": fm.group(1), "id_partido": idm.group(1),
+        })
+    return out
+
+
+def fetch_statfutbol_reserva_equipos(planteles_base):
+    """Lista (id, nombre) del selector 'Elija un equipo' de PLANTELES de
+    Reserva -- mismo formato que fetch_statfutbol_equipos, URL literal."""
+    html = fetch(f"{STATFUTBOL_BASE}{planteles_base}.php")
+    opts = re.findall(r'<option value="(\d+)">\s*([^<]+?)\s*</option>', html)
+    return [(v, n.strip()) for v, n in opts]
+
+
+def fetch_statfutbol_reserva_plantel(planteles_base, team_id):
+    """Plantel de Reserva de un equipo, acumulado de temporada por jugador
+    -- mismo formato/columnas que fetch_statfutbol_plantel (confirmado con
+    datos reales de Tigre, 2026-09-02), URL literal en vez de catnum."""
+    html = fetch_post(f"{STATFUTBOL_BASE}{planteles_base}Resolucion.php", {"player": team_id})
+    filas = re.findall(r'<tr class="trConsultParaJugadores">(.*?)</tr>', html, re.DOTALL)
+    out = []
+    for fila in filas:
+        nombre_m = re.search(r'jugador-pc">([^<]*)</span>', fila)
+        celdas = re.findall(r"<td[^>]*>(.*?)</td>", fila, re.DOTALL)
+        if not nombre_m or len(celdas) < 5:
+            continue
+        try:
+            gol = int(re.sub(r"<[^>]+>", "", celdas[3]).strip())
+            am = int(re.sub(r"<[^>]+>", "", celdas[4]).strip())
+        except (ValueError, IndexError):
+            continue
+        out.append({"nombre": nombre_m.group(1).strip(), "gol": gol, "am": am})
+    return out
+
+
+def calcular_alerta_rival_reserva(torneo_cfg):
+    """Igual que calcular_alerta_rival, pero para un torneo de Reserva --
+    usa las URLs literales de RESERVA_TORNEOS en vez del catnum de las
+    juveniles. torneo_cfg es un valor de RESERVA_TORNEOS (dict con
+    fixture/planteles_base/sintesis)."""
+    fixture = fetch_statfutbol_reserva_fixture(torneo_cfg["fixture"])
+    proximo = next((p for p in fixture if not p["jugado"] and (p["local"] == "TIGRE" or p["visita"] == "TIGRE")), None)
+    if not proximo:
+        return None
+    rival_nombre_fx = proximo["visita"] if proximo["local"] == "TIGRE" else proximo["local"]
+
+    equipos = fetch_statfutbol_reserva_equipos(torneo_cfg["planteles_base"])
+    match = statfutbol_match_equipo(rival_nombre_fx, equipos)
+    if not match:
+        raise ValueError(f"No pude identificar al equipo rival {rival_nombre_fx!r} en el listado de planteles de Reserva")
+    team_id, team_nombre = match
+
+    plantel = fetch_statfutbol_reserva_plantel(torneo_cfg["planteles_base"], team_id)
+    if not plantel:
+        raise ValueError(f"Plantel vacio para {team_nombre!r} (Reserva)")
+    goleador = max(plantel, key=lambda j: j["gol"])
+
+    riesgo = calcular_riesgo_suspension(STATFUTBOL_BASE + torneo_cfg["sintesis"], team_id, team_nombre, equipos, fixture)
+
+    return {
+        "fecha": proximo["jornada"],
+        "rival": team_nombre,
+        "goleador": {"nombre": goleador["nombre"], "goles": goleador["gol"]} if goleador["gol"] > 0 else None,
+        "amarillas_riesgo": riesgo,
+    }
+
+
 def main():
     resultado = {
         "actualizado": datetime.datetime.now(datetime.timezone.utc)
@@ -1602,7 +1760,8 @@ def main():
             for p in fixture:
                 if not p["jugado"] or (p["local"] != "TIGRE" and p["visita"] != "TIGRE"):
                     continue
-                eventos = fetch_statfutbol_sintesis_completa(catnum, p["id_partido"], team_id, equipos)
+                eventos = fetch_statfutbol_sintesis_completa(f"{STATFUTBOL_BASE}sintesispartido{catnum}2026.php",
+                                                               p["id_partido"], team_id, equipos)
                 if eventos:
                     por_fecha[p["jornada"]] = eventos
             resultado["statfutbol_partidos"][cat] = por_fecha
@@ -1634,6 +1793,57 @@ def main():
         except Exception as e:  # noqa
             errores.append(f"statfutbol resultados {cat}: {e}")
             print(f"[ERROR] statfutbol resultados {cat}: {e}", file=sys.stderr)
+
+    # Reserva (Apertura/Clausura): mismos 3 datos de arriba (resultados
+    # propios, alerta de proximo rival, plantel propio) pero con las URLs
+    # literales de RESERVA_TORNEOS -- a pedido de Javi, 2026-09-02 ("traer
+    # todos los datos que se puedan automatizar" para Reserva). RESERVA_APE
+    # se guarda como "RESERVA" (1er semestre de la app) y RESERVA_CLA como
+    # "RESERVA_S2" (2do semestre), mismo criterio que reservaSemestre en
+    # index.html.
+    RESERVA_TORNEO_A_CAT = {"RESERVA_APE": "RESERVA", "RESERVA_CLA": "RESERVA_S2"}
+    for torneo, cfg in RESERVA_TORNEOS.items():
+        cat = RESERVA_TORNEO_A_CAT[torneo]
+        try:
+            fixture_r = fetch_statfutbol_reserva_fixture(cfg["fixture"])
+            propios = {}
+            for p in fixture_r:
+                if not p["jugado"] or p["gf_local"] is None:
+                    continue
+                if p["local"] == "TIGRE":
+                    propios[p["jornada"]] = {"gf": p["gf_local"], "gc": p["gf_visita"], "rival": p["visita"]}
+                elif p["visita"] == "TIGRE":
+                    propios[p["jornada"]] = {"gf": p["gf_visita"], "gc": p["gf_local"], "rival": p["local"]}
+            resultado["statfutbol_resultados"][cat] = propios
+            print(f"[OK] statfutbol resultados {cat}: {len(propios)} fechas")
+        except Exception as e:  # noqa
+            errores.append(f"statfutbol resultados {cat}: {e}")
+            print(f"[ERROR] statfutbol resultados {cat}: {e}", file=sys.stderr)
+
+        try:
+            alerta = calcular_alerta_rival_reserva(cfg)
+            if alerta:
+                resultado["rival_alertas"][cat] = alerta
+                print(f"[OK] statfutbol {cat}: rival {alerta['rival']}, "
+                      f"{len(alerta['amarillas_riesgo'])} en riesgo de suspension")
+            else:
+                print(f"[OK] statfutbol {cat}: sin proximo partido pendiente")
+        except Exception as e:  # noqa
+            errores.append(f"statfutbol {cat}: {e}")
+            print(f"[ERROR] statfutbol {cat}: {e}", file=sys.stderr)
+
+        try:
+            equipos_r = fetch_statfutbol_reserva_equipos(cfg["planteles_base"])
+            match = statfutbol_match_equipo("TIGRE", equipos_r)
+            if not match:
+                raise ValueError("No se encontro a Tigre en el listado de planteles de Reserva")
+            team_id_r, _ = match
+            plantel_r = fetch_statfutbol_reserva_plantel(cfg["planteles_base"], team_id_r)
+            resultado["statfutbol_jugadores"][cat] = plantel_r
+            print(f"[OK] statfutbol jugadores {cat}: {len(plantel_r)} jugadores")
+        except Exception as e:  # noqa
+            errores.append(f"statfutbol jugadores {cat}: {e}")
+            print(f"[ERROR] statfutbol jugadores {cat}: {e}", file=sys.stderr)
 
     # Resultados de Tigre partido por partido segun futdetail (panel privado).
     # Necesita FUTDETAIL_USER / FUTDETAIL_PASS como variables de entorno (las
