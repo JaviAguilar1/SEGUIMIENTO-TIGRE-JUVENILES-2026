@@ -1224,6 +1224,53 @@ def fetch_statfutbol_sintesis_tarjetas(catnum, id_partido, team_id_objetivo, equ
     return eventos
 
 
+def fetch_statfutbol_sintesis_completa(catnum, id_partido, team_id_objetivo, equipos):
+    """Igual que fetch_statfutbol_sintesis_tarjetas, pero ademas cuenta
+    goles (no solo amarilla/roja) -- para completar partidos/matchData
+    cuando no hay planilla de COMET cargada para esa fecha (Javi,
+    2026-09-02: "prioridad comet, si no hay planilla, traer el dato de la
+    pagina"). Devuelve {nombre: {"goles": n, "amarilla": bool, "roja":
+    bool}}, solo con jugadores que tuvieron algun evento (se omiten los que
+    no metieron gol ni vieron tarjeta, para no inflar el resultado)."""
+    html = fetch_post(f"{STATFUTBOL_BASE}sintesispartido{catnum}2026.php",
+                       {"idPartido": id_partido, "fixGL": "0", "fixGV": "0"})
+    idx = html.find('<th class="encabezado-equipo"')
+    idx2 = html.find("</table>", idx)
+    if idx < 0 or idx2 < 0:
+        return {}
+    bloque = html[idx:idx2]
+    nombres_equipo = re.findall(r'encabezado-equipo">.*?;(.+?)\s*\(\d+ gol(?:es)?\)\s*</th>', bloque)
+    tds = re.findall(r'<td class="jugadores-equipo"[^>]*>(.*?)</td>', bloque, re.DOTALL)
+    if len(nombres_equipo) != 2 or len(tds) != 2:
+        return {}
+    lado = None
+    for i, ne in enumerate(nombres_equipo):
+        m = statfutbol_match_equipo(ne, equipos)
+        if m and m[0] == team_id_objetivo:
+            lado = i
+    if lado is None:
+        return {}
+    spans = re.findall(r'<span class="linea-jugador">(.*?)</span>', tds[lado], re.DOTALL)
+    eventos = {}
+    for sp in spans:
+        # El icono de gol (fa-futbol) NO trae style="color:..." (a
+        # diferencia de las tarjetas) -- por eso se busca la clase sola,
+        # aparte del regex de color que ya usaba fetch_statfutbol_sintesis_tarjetas.
+        clases = re.findall(r'<i class="([^"]+)"', sp)
+        goles = sum(1 for c in clases if "fa-futbol" in c)
+        colores = re.findall(r'<i class="([^"]+)"[^>]*?style="color:([^;"]+)', sp)
+        amarilla = any("fa-square" in cls and color == "yellow" for cls, color in colores)
+        roja = any("fa-square" in cls and color == "red" for cls, color in colores)
+        if not (goles or amarilla or roja):
+            continue
+        texto = re.sub(r"<form.*?</form>", "", sp, flags=re.DOTALL)
+        texto = re.sub(r"<i.*?</i>|<i[^>]*/?>", "", texto, flags=re.DOTALL)
+        nombre = re.sub(r"^\s*\d+\.\s*", "", texto).strip()
+        if nombre:
+            eventos[nombre] = {"goles": goles, "amarilla": amarilla, "roja": roja}
+    return eventos
+
+
 AMARILLAS_SUSPENSION = 5
 
 
@@ -1531,6 +1578,38 @@ def main():
         except Exception as e:  # noqa
             errores.append(f"statfutbol jugadores {cat}: {e}")
             print(f"[ERROR] statfutbol jugadores {cat}: {e}", file=sys.stderr)
+
+    # Goles/amarillas/rojas de TIGRE partido por partido, jugador por
+    # jugador, segun la sintesis de cada partido en statfutbol -- respaldo
+    # para completar partidos/matchData (stats/partidos/{cat}/{fecha}) en
+    # las fechas donde todavia no se cargo la planilla de COMET (a pedido
+    # de Javi, 2026-09-02: "prioridad comet, si no hay planilla, traer el
+    # dato de la pagina"). No decide ACA si hace falta completar o no --
+    # eso lo resuelve subir_a_firebase.py mirando si esa fecha ya tiene
+    # datos en Firebase antes de escribir nada (nunca pisa una carga real).
+    # Un pedido HTTP por partido jugado (~20 por categoria) -- mas lento que
+    # el resto de statfutbol pero son datos que valen la pena.
+    resultado["statfutbol_partidos"] = {}
+    for cat, catnum in STATFUTBOL_CATNUM.items():
+        try:
+            equipos = fetch_statfutbol_equipos(catnum)
+            match = statfutbol_match_equipo("TIGRE", equipos)
+            if not match:
+                raise ValueError("No se encontro a Tigre en el listado de planteles")
+            team_id, _ = match
+            fixture = fetch_statfutbol_fixture(catnum)
+            por_fecha = {}
+            for p in fixture:
+                if not p["jugado"] or (p["local"] != "TIGRE" and p["visita"] != "TIGRE"):
+                    continue
+                eventos = fetch_statfutbol_sintesis_completa(catnum, p["id_partido"], team_id, equipos)
+                if eventos:
+                    por_fecha[p["jornada"]] = eventos
+            resultado["statfutbol_partidos"][cat] = por_fecha
+            print(f"[OK] statfutbol partidos {cat}: {len(por_fecha)} fechas con datos")
+        except Exception as e:  # noqa
+            errores.append(f"statfutbol partidos {cat}: {e}")
+            print(f"[ERROR] statfutbol partidos {cat}: {e}", file=sys.stderr)
 
     # Resultado de Tigre partido por partido segun statfutbol -- mismo uso
     # que rival_alertas (fetch_statfutbol_fixture ya lo trae con el gol de
