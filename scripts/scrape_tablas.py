@@ -537,6 +537,20 @@ CATAPULT_PLANTEL_SNAPSHOT = json.loads(r'''
 {"4TA":["Ruiz Santiago","Leguizamon Maximo","Ramos Bautista","Rojas Josue","Luongo Alan","Aguirre Iñaki","Saravia Roman","Medina Tiziano","González Kevin","López Facundo","Luna Agustin","Molas Lucas","González Alex","Benitez Lautaro","Fredes Felipe","Perez Gaston","Alvaro Navoni","Cáceres Thomas","Copes Tomas","González Tobías","Benítez Cristian","Mansilla Nehemias","Fares Hamdan","Ordoñez Ignacio","Pannoni Lautaro","Zalazar Benjamín","Afonso Nicolas","Pesolilla Roman","Leszczuk  Brandon","Medina Alejandro","Lezcano Cristian Leonel","Hillairet Yair","Figueredo Benjamin","Gonzalez Santino","Andrusisen Lautaro","Gómez Luka","Mayer Tomas","Lezcano Alan","Ferreyra Rodrigo"],"5TA":["Pereyra Manuel","Zerda Santiago Lionel","Petry Uriel","Cordoba Santiago","Feversani Bautista","Moyano Jerónimo","Samper Joaquin","Wirz Axel","Demonte Tomas","Luque Gonzalo","Adamovsky Felipe ","Canullo Juan","Rodriguez Agustín","Ledesma Gonzalo","Juarez Nahuel","Llera Mariano","Rodriguez Thiago","Poblete Matias","Barrios Cristian ","Crotto Ivo","Crotto Nicolas","Clauser Ramiro","Vargas Thiago","Perez Joaquin","Gonzalez Tomas","Gonzalez Lautaro","Ricaldi Ian","Hernandez Emanuel","Vera Conrado","Miño Roman","Galesio Santino","Rivas Marco","Letizia Ignacio","Villanueva Román"],"6TA":["Sosena Fausto","Camba Rocco","Bruno Lautaro","Sotelo Benjamín ","Scungio Sebastian","Ortiz Ignacio","Moralejo Santiago","Luna Alejo","Muchiutti Valentino","Umeres Agustin","Torres David","Fernandez Jerónimo","Marchetti Ivan","Belmonte Agustín","Gomez Santiago","Mauriño Octavio","Romero Benicio","Nuñez Jonathan","Delgado Francisco","Cortes Adrian maximiliano","Calderon Roman","Schenone Elias","Serapio Ignacio","Brandy German","Pomar Santino","Collado Lautaro","Acosta Jonathan","Parra Matias","Mallmann Félix","Ibañez Tiziano","Zarza Quimey","Lizardia Bautista","Dechiara Francesco","Ambiela Emilio","Sigel Bruno"],"7MA":["Martinez Giuliano","Maturano Benjamin","Montoya Francisco","Castro Matias","Conte Maximiliano","Pucill Mateo","Insaurralde Ihan","Marini Tomas","Dominguez Bautista","Gonzalez Santino","Levy Thiago","Soberon Isaias","Lopez Sebastian","Burela Santino","Lovisi Luciano","Gaitan Valentin","Mancuello Tobias","Lamanna Fabrizio","Almiron Sebastian","Omann Juan Ignacio","Jara Juan","Molina Ramiro","Core Valentino","Di Sipio Agustin","Puchi Santino","Mena Sebastian","Herrera Thiago","Lopez Dionel","Fredes Tiago","Barrios Bautista","Trejo Nicolas","Gagliardo Pedro Tomas","Sodero Santino","Baltazar Alejandro Emanuel","Sala Valentino","Cazal Fernandez Gustavo Alberto","Gallardo Dylan","Godoy Gonzalo","Prieto Alexander","Astesana Valentino"],"8VA":["Arias Nicolas","Reinoso Patricio","Mosqueda Ernesto Jesús ","Monzon Tiziano","Garcia Bautista","Inostroza Bastian","Sanchez Mathias","Tobler Bautista","Meza Luca ","Fino Amadeo","Merlos Galeano Lautaro Benjamin ","Simone  Pedro ","De Olivera Elias","Reinoso Martiniano","Rodríguez  Josué Francisco","Zelaya Franco","Navarro Valentin","Reyes Jose","Noriega Mateo","Rios Mateo","Fernández leis Gabriel ","Cabrera Luca","Radaelli Manuel","Gonzalia Bautista","Gonzalez Leonardo Fabian","Reynoso Tomas","Maguna Pedro","Blanco Dylan Alex","Celiz Teo","Martinuccio Bautista","Punos Tiziano","Galeano Joaquin","Beron Santiago","Aquilue Santiago","Guglielmo Lisandro","Conte Ian","Ruiz Ullua David ","Saragoza Ramiro ","Bin Justin","Lagos Benjamin","Cuba Gio","Bustamante Alan","Chmea Roque","Cocozza Maximo"],"9NA":["Echevarrieta Bautista ","Torrecilla Enzo Francisco","Vargas Valentino","Baccaro Santino","Peludero Mateo","Ibañez Bastian","Vargas Felipe","Mora Bautista","Duarte Gaston ","Cubilla Jonathan","Gomez Zaracho Octavio","Alvarenga Martin Adriano","Lopez Tomas","Soto Mateo","Sanchez Benjamin","Tulis Federico ","Becerra Lionel","Diaz Oliva Santiago","Baigorria Nicolás Nahuel","Enrique Ian","Agorreca Ignacio","Prado Lautaro","Arce Miño  Axel ","Villalba Bogado Gustavo","Diaz Francisco Roman","Dominic Tomassi Benjamin","Pesolilla Ian","Gomez Joaquin","Capozucca Benjamin","Duarte Gonzalo Isaias ","Holm Ian","Bojorge Benjamin","Zapata Alejo","Maidana Lautaro","Dos Santos  Bayron ","Ortiz Leonardo","Monzon Ian ","Marquez  Marcos Bautista","Denis Galli Sebastian","Nuñez Tiziano ","Olocco Mikeas"]}
 ''')
 
+# Citaciones reales (titulares+suplentes) por categoria/fecha -- exportado
+# desde matchData en Firebase (2026-09-02). Es la fuente MAS confiable para
+# saber en que categoria jugo un jugador una fecha puntual (a diferencia
+# del plantel general, que solo dice de que categoria es "normalmente" --
+# no alcanza para detectar a alguien que jugo prestado en otra categoria
+# ESE partido, ej. Adamovsky en la F23 de 4TA). Archivo aparte (no un
+# string en este .py) por el tamaño; se refresca a mano de vez en cuando.
+_CITACIONES_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "catapult_citaciones_snapshot.json")
+try:
+    with open(_CITACIONES_PATH, "r", encoding="utf-8") as _f:
+        CATAPULT_CITACIONES_SNAPSHOT = json.load(_f)
+except FileNotFoundError:
+    CATAPULT_CITACIONES_SNAPSHOT = {}
+
 # Nombres de Catapult que en realidad son la MISMA persona que otro nombre
 # ya en el plantel real, pero con una diferencia real de letras (no
 # alcanza con reordenar palabras) -- confirmado a mano (Javi, 2026-09-02):
@@ -550,13 +564,13 @@ CATAPULT_ALIAS_NOMBRE = {
     "cuba giovanni": "Cuba Gio",
 }
 
-# Excepciones puntuales: partidos donde un jugador jugo "prestado" en OTRA
-# categoria (no la suya real) -- confirmado por Javi 2026-09-02 via
-# citacion: Adamovsky (5TA) jugo la F23 con 4TA. Clave = (nombre
-# normalizado, "F<numero>"), valor = categoria real para ESE registro.
-CATAPULT_CATEGORIA_EXCEPCION = {
-    ("adamovsky felipe", "F23"): "4TA",
-}
+# Excepciones puntuales a mano (ultimo recurso): partidos donde un jugador
+# jugo "prestado" en OTRA categoria, para casos donde la citacion real no
+# esta cargada o no alcanza a resolverlo sola. El caso conocido (Adamovsky
+# F23 con 4TA) ya lo resuelve solo _catapult_categoria_por_citacion() cruzando
+# contra catapult_citaciones_snapshot.json, asi que por ahora queda vacio --
+# clave = (nombre normalizado, "F<numero>"), valor = categoria real.
+CATAPULT_CATEGORIA_EXCEPCION = {}
 
 
 def _catapult_norm_nombre(s):
@@ -632,6 +646,49 @@ def _catapult_resolver_categoria(nombre_norm, categoria_por_nombre):
     if mejor_score >= 0.84 and len(mejor_cats) == 1:
         return next(iter(mejor_cats))
     return None
+
+
+def _catapult_citaciones_por_cat_fecha():
+    """{(categoria, fecha_num): set(nombres normalizados)} a partir de
+    CATAPULT_CITACIONES_SNAPSHOT -- se arma una sola vez por corrida."""
+    out = {}
+    for cat, fechas in CATAPULT_CITACIONES_SNAPSHOT.items():
+        for fecha_str, nombres in fechas.items():
+            try:
+                fecha_num = int(fecha_str)
+            except ValueError:
+                continue
+            out[(cat, fecha_num)] = {_catapult_norm_nombre(n) for n in nombres if n}
+    return out
+
+
+def _catapult_categoria_por_citacion(nombre_norm, fecha_num, citaciones_por_cat_fecha):
+    """
+    La fuente MAS confiable para la categoria de UN registro puntual: se
+    fija quien jugo esa fecha exacta (todas las categorias, no solo la
+    "normal" del jugador) segun la citacion real. Resuelve automaticamente
+    casos de "jugo prestado" (ej. Adamovsky en la F23 de 4TA) sin necesitar
+    una excepcion a mano por cada caso. Solo devuelve algo si hay una
+    UNICA categoria cuya citacion de esa fecha lo tiene (exacto o por
+    subconjunto de palabras, mismo criterio de tolerancia que el resto);
+    si es ambiguo o no aparece en ninguna, no resuelve nada (se cae al
+    resto de las reglas)."""
+    palabras = set(nombre_norm.split())
+    if not palabras:
+        return None
+    candidatos = set()
+    for (cat, f), nombres_norm in citaciones_por_cat_fecha.items():
+        if f != fecha_num:
+            continue
+        if nombre_norm in nombres_norm:
+            candidatos.add(cat)
+            continue
+        for cn in nombres_norm:
+            cn_palabras = set(cn.split())
+            if palabras <= cn_palabras or cn_palabras <= palabras:
+                candidatos.add(cat)
+                break
+    return next(iter(candidatos)) if len(candidatos) == 1 else None
 
 
 # Las 16 metricas del CSV/PDF de Catapult, en el mismo orden que
@@ -797,6 +854,7 @@ def fetch_catapult_players(email: str, password: str, plantel_por_cat=None):
     """
     opener, cj = catapult_login(email, password)
     categoria_por_nombre = _catapult_categoria_por_nombre(plantel_por_cat)
+    citaciones_por_cat_fecha = _catapult_citaciones_por_cat_fecha()
     avisados_sin_plantel = set()
 
     teams = catapult_get(opener, f"{CATAPULT_API_BASE}/teams")
@@ -880,7 +938,12 @@ def fetch_catapult_players(email: str, password: str, plantel_por_cat=None):
             if nombre_norm in CATAPULT_ALIAS_NOMBRE:
                 nombre = CATAPULT_ALIAS_NOMBRE[nombre_norm]
                 nombre_norm = _catapult_norm_nombre(nombre)
+            # Orden de confianza: excepcion a mano > citacion real de ESA
+            # fecha (sabe si jugo prestado en otra categoria puntual) >
+            # plantel general exacto > plantel general con tolerancia.
             cat_real = CATAPULT_CATEGORIA_EXCEPCION.get((nombre_norm, f"F{fecha_num}"))
+            if cat_real is None:
+                cat_real = _catapult_categoria_por_citacion(nombre_norm, fecha_num, citaciones_por_cat_fecha)
             if cat_real is None:
                 cat_real = categoria_por_nombre.get(nombre_norm)
             if cat_real is None:
