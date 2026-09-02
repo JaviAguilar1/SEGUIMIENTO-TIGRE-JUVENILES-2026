@@ -537,10 +537,9 @@ CATAPULT_STATS_PARAMS = [
 
 
 # Fecha de calendario real de cada fecha del Torneo Juveniles 2026 -- copia
-# de FECHA_CALENDARIO en index.html (mismo fixture oficial de la LPF).
-# Solo vale para 4TA-9NA: RESERVA juega otro torneo (Copa Proyeccion), con
-# su propio calendario, así que no se valida contra esto (ver
-# _catapult_fecha_coincide_calendario).
+# de FECHA_CALENDARIO en index.html (mismo fixture oficial de la LPF). Solo
+# vale para 4TA-9NA -- RESERVA juega otro torneo (Copa Proyeccion), por eso
+# no se procesa GPS para RESERVA (ver fetch_catapult_players).
 CATAPULT_FECHA_CALENDARIO = {
     1: (2026, 3, 14), 2: (2026, 3, 21), 3: (2026, 3, 28),
     4: (2026, 4, 2), 5: (2026, 4, 11), 6: (2026, 4, 18), 7: (2026, 4, 25),
@@ -553,43 +552,20 @@ CATAPULT_FECHA_CALENDARIO = {
     32: (2026, 11, 7), 33: (2026, 11, 14), 34: (2026, 11, 21),
     35: (2026, 12, 5),
 }
-# Tolerancia generosa (partidos postergados, o partidos con "segundo tiempo"
-# en otra fecha -- caso real confirmado: F3 de 5TA se completó 18 días
-# después en otra cancha) sin dejar pasar datos de temporadas viejas que
-# quedaron en Catapult con el mismo nombre "F<numero>" (confirmado con datos
-# reales: 6TA tenía actividades "F24" a "F31" de la temporada 2025, no de
-# esta).
-CATAPULT_TOLERANCIA_DIAS = 25
-
-
-def _catapult_fecha_coincide_calendario(fecha, start_time):
-    """True si la fecha jugada (según start_time, timestamp unix) cae
-    razonablemente cerca de la fecha oficial del fixture para ese numero de
-    fecha. Si no hay start_time o la fecha no esta en el calendario, no se
-    puede validar -- se deja pasar (no todos los numeros de fecha estan en
-    CATAPULT_FECHA_CALENDARIO, ej. RESERVA nunca)."""
-    esperado = CATAPULT_FECHA_CALENDARIO.get(fecha)
-    if not esperado or not start_time:
-        return True
-    real = datetime.datetime.fromtimestamp(start_time, datetime.timezone(datetime.timedelta(hours=-3)))
-    esp = datetime.datetime(*esperado, tzinfo=datetime.timezone(datetime.timedelta(hours=-3)))
-    return abs((real - esp).days) <= CATAPULT_TOLERANCIA_DIAS
-
-
-def _catapult_fecha_valida(nombre_actividad):
-    """
-    El nombre de la actividad en Catapult debería empezar con "F<numero>"
-    (ej. "F 23- 4ta vs Godoy Cruz"), pero algunos partidos viejos (sobre
-    todo de 4TA) se cargaron sin ese prefijo, solo "4ta vs Independiente".
-    Un regex simple de \\d+ sobre el nombre entero agarraba el "4" de "4ta"
-    como si fuera la fecha -- confirmado con datos reales cruzando contra
-    el fixture (matchFechaPorRival en index.html): "4ta Partido vs Ferro"
-    daba fecha 4 por este bug, cuando la fecha real era la 2. Por eso solo
-    se confia en el numero si el nombre EMPIEZA con "F<numero>" -- si no,
-    se descarta ese partido entero (mejor perder un dato que guardarlo con
-    la fecha equivocada).
-    """
-    return bool(re.match(r"\s*f\s*\d+", nombre_actividad or "", re.IGNORECASE))
+# Invertido (dia -> fecha) para buscar por dia real jugado, no por lo que
+# diga el nombre en Catapult -- a pedido de Javi (2026-09-02): en vez de
+# confiar en "F<numero>" del nombre (poco confiable: hay partidos viejos
+# sin ese prefijo, y actividades de la temporada 2025 que quedaron con el
+# mismo nombre "F24".."F31" que esta), se recorre el fixture fecha por
+# fecha, se calcula que dia de calendario le toca, y se busca en Catapult
+# que actividad se jugo ESE dia exacto. Si ninguna actividad coincide con
+# el dia de una fecha, esa fecha simplemente no tiene GPS cargado todavia
+# -- no se inventa nada.
+CATAPULT_DIA_A_FECHA = {v: k for k, v in CATAPULT_FECHA_CALENDARIO.items()}
+AR_TZ = datetime.timezone(datetime.timedelta(hours=-3))
+# Cualquier actividad de antes de esta fecha es de una temporada vieja que
+# quedo en Catapult -- se descarta sin mirar nada mas (Javi, 2026-09-02).
+CATAPULT_TEMPORADA_DESDE = datetime.date(2026, 1, 14)
 
 
 def _catapult_xsrf(cj):
@@ -673,6 +649,12 @@ def fetch_catapult_players(email: str, password: str):
     cientos de entrenamientos de por medio (7 categorias x hasta 100 cada
     una) el scraper tardaba mas de 20 minutos. El nombre SI viene en el
     listado, sin pedidos extra.
+
+    RESERVA no se procesa (a pedido de Javi): juega otro torneo, sin
+    fixture confiable acá para cruzar. El numero de fecha de cada partido
+    NO sale de leer el nombre (poco confiable, ver CATAPULT_DIA_A_FECHA
+    mas arriba) -- se calcula el dia de calendario real de cada fecha del
+    fixture y se busca que actividad de Catapult se jugo justo ESE dia.
     """
     opener, cj = catapult_login(email, password)
 
@@ -680,7 +662,7 @@ def fetch_catapult_players(email: str, password: str):
     team_ids_por_cat = {}
     for t in teams:
         cat = CATAPULT_TEAMS.get(t.get("name"))
-        if cat:
+        if cat and cat != "RESERVA":
             team_ids_por_cat[cat] = t["id"]
 
     out = {}
@@ -688,7 +670,31 @@ def fetch_catapult_players(email: str, password: str):
         actividades = catapult_get(opener, f"{CATAPULT_API_BASE}/activities"
                                     f"?page=1&page_size=100&sort=-start_time&deleted=0&team_ids={team_id}")
 
-        partidos = [a["id"] for a in actividades if " vs " in (a.get("name") or "")]
+        # Por cada actividad-partido, se busca a que fecha del fixture le
+        # corresponde el dia real en que se jugo (no lo que diga el
+        # nombre). Actividades de antes del arranque de temporada se
+        # descartan derecho (quedaron de un año anterior); actividades
+        # cuyo dia no coincide con NINGUNA fecha del fixture tambien se
+        # descartan (amistosos, partidos internos, etc.).
+        fecha_por_activity_id = {}
+        for a in actividades:
+            if " vs " not in (a.get("name") or ""):
+                continue
+            ts = a.get("start_time")
+            if not ts:
+                continue
+            dia = datetime.datetime.fromtimestamp(ts, AR_TZ).date()
+            if dia < CATAPULT_TEMPORADA_DESDE:
+                continue
+            fecha_num = CATAPULT_DIA_A_FECHA.get((dia.year, dia.month, dia.day))
+            if fecha_num is None:
+                print(f"[AVISO] Catapult {cat}: '{a.get('name')}' se jugo el {dia.strftime('%d/%m/%Y')}, "
+                      f"un dia que no coincide con ninguna fecha del fixture -- se descarta (amistoso, "
+                      f"partido interno, etc.).", file=sys.stderr)
+                continue
+            fecha_por_activity_id[a["id"]] = fecha_num
+
+        partidos = list(fecha_por_activity_id.keys())
         if not partidos:
             continue
 
@@ -702,33 +708,13 @@ def fetch_catapult_players(email: str, password: str):
         }
 
         filas = catapult_stats_post(opener, cj, partidos)
-        avisados = set()
         for fila in filas:
             nombre = fila.get("athlete_name")
             if not nombre:
                 continue
-            act_nombre = fila.get("activity_name") or ""
-            if not _catapult_fecha_valida(act_nombre):
-                if act_nombre not in avisados:
-                    avisados.add(act_nombre)
-                    print(f"[AVISO] Catapult {cat}: '{act_nombre}' no tiene el numero de fecha en "
-                          f"el nombre (no empieza con \"F<numero>\") -- se descarta ese partido para "
-                          f"no arriesgar una fecha equivocada. Renombrala en Catapult para que se "
-                          f"levante sola la proxima vez.", file=sys.stderr)
+            fecha_num = fecha_por_activity_id.get(fila.get("activity_id"))
+            if fecha_num is None:
                 continue
-            # RESERVA juega otro torneo (Copa Proyeccion, calendario propio)
-            # -- no se valida contra el fixture de 4TA-9NA.
-            if cat != "RESERVA":
-                m = re.match(r"\s*f\s*(\d+)", act_nombre, re.IGNORECASE)
-                fecha_num = int(m.group(1)) if m else None
-                if fecha_num and not _catapult_fecha_coincide_calendario(fecha_num, fila.get("start_time")):
-                    if act_nombre not in avisados:
-                        avisados.add(act_nombre)
-                        print(f"[AVISO] Catapult {cat}: '{act_nombre}' dice ser la fecha {fecha_num} pero "
-                              f"se jugo muy lejos de esa fecha en el fixture real -- probablemente es un "
-                              f"partido de otra temporada que quedo con el mismo nombre en Catapult. Se "
-                              f"descarta.", file=sys.stderr)
-                    continue
             minutos = round((fila.get("total_duration") or 0) / 60)
             rival = (fila.get("activity_name") or "").split(" vs ")[-1].strip()
             acel_mas3 = fila.get("gen2_acceleration_band8_total_effort_count") or 0
@@ -749,7 +735,7 @@ def fetch_catapult_players(email: str, password: str):
             cat_out = out.setdefault(cat, {})
             cat_out.setdefault(nombre, {"pos": posiciones.get(nombre, ""), "match": []})
             cat_out[nombre]["match"].append({
-                "fecha": fila.get("activity_name") or "",
+                "fecha": f"F{fecha_num}",
                 "opp": rival,
                 "min": minutos,
                 "metrics": metrics,
