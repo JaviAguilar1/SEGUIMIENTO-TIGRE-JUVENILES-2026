@@ -536,6 +536,46 @@ CATAPULT_STATS_PARAMS = [
 ]
 
 
+# Fecha de calendario real de cada fecha del Torneo Juveniles 2026 -- copia
+# de FECHA_CALENDARIO en index.html (mismo fixture oficial de la LPF).
+# Solo vale para 4TA-9NA: RESERVA juega otro torneo (Copa Proyeccion), con
+# su propio calendario, así que no se valida contra esto (ver
+# _catapult_fecha_coincide_calendario).
+CATAPULT_FECHA_CALENDARIO = {
+    1: (2026, 3, 14), 2: (2026, 3, 21), 3: (2026, 3, 28),
+    4: (2026, 4, 2), 5: (2026, 4, 11), 6: (2026, 4, 18), 7: (2026, 4, 25),
+    8: (2026, 5, 2), 9: (2026, 5, 9), 10: (2026, 5, 16), 11: (2026, 5, 23), 12: (2026, 5, 30),
+    13: (2026, 6, 6), 14: (2026, 6, 13), 15: (2026, 6, 20), 16: (2026, 6, 27),
+    17: (2026, 7, 4), 18: (2026, 7, 11),
+    19: (2026, 8, 1), 20: (2026, 8, 8), 21: (2026, 8, 15), 22: (2026, 8, 22), 23: (2026, 8, 29),
+    24: (2026, 9, 5), 25: (2026, 9, 12), 26: (2026, 9, 19), 27: (2026, 9, 26),
+    28: (2026, 10, 3), 29: (2026, 10, 10), 30: (2026, 10, 24), 31: (2026, 10, 31),
+    32: (2026, 11, 7), 33: (2026, 11, 14), 34: (2026, 11, 21),
+    35: (2026, 12, 5),
+}
+# Tolerancia generosa (partidos postergados, o partidos con "segundo tiempo"
+# en otra fecha -- caso real confirmado: F3 de 5TA se completó 18 días
+# después en otra cancha) sin dejar pasar datos de temporadas viejas que
+# quedaron en Catapult con el mismo nombre "F<numero>" (confirmado con datos
+# reales: 6TA tenía actividades "F24" a "F31" de la temporada 2025, no de
+# esta).
+CATAPULT_TOLERANCIA_DIAS = 25
+
+
+def _catapult_fecha_coincide_calendario(fecha, start_time):
+    """True si la fecha jugada (según start_time, timestamp unix) cae
+    razonablemente cerca de la fecha oficial del fixture para ese numero de
+    fecha. Si no hay start_time o la fecha no esta en el calendario, no se
+    puede validar -- se deja pasar (no todos los numeros de fecha estan en
+    CATAPULT_FECHA_CALENDARIO, ej. RESERVA nunca)."""
+    esperado = CATAPULT_FECHA_CALENDARIO.get(fecha)
+    if not esperado or not start_time:
+        return True
+    real = datetime.datetime.fromtimestamp(start_time, datetime.timezone(datetime.timedelta(hours=-3)))
+    esp = datetime.datetime(*esperado, tzinfo=datetime.timezone(datetime.timedelta(hours=-3)))
+    return abs((real - esp).days) <= CATAPULT_TOLERANCIA_DIAS
+
+
 def _catapult_fecha_valida(nombre_actividad):
     """
     El nombre de la actividad en Catapult debería empezar con "F<numero>"
@@ -676,6 +716,19 @@ def fetch_catapult_players(email: str, password: str):
                           f"no arriesgar una fecha equivocada. Renombrala en Catapult para que se "
                           f"levante sola la proxima vez.", file=sys.stderr)
                 continue
+            # RESERVA juega otro torneo (Copa Proyeccion, calendario propio)
+            # -- no se valida contra el fixture de 4TA-9NA.
+            if cat != "RESERVA":
+                m = re.match(r"\s*f\s*(\d+)", act_nombre, re.IGNORECASE)
+                fecha_num = int(m.group(1)) if m else None
+                if fecha_num and not _catapult_fecha_coincide_calendario(fecha_num, fila.get("start_time")):
+                    if act_nombre not in avisados:
+                        avisados.add(act_nombre)
+                        print(f"[AVISO] Catapult {cat}: '{act_nombre}' dice ser la fecha {fecha_num} pero "
+                              f"se jugo muy lejos de esa fecha en el fixture real -- probablemente es un "
+                              f"partido de otra temporada que quedo con el mismo nombre en Catapult. Se "
+                              f"descarta.", file=sys.stderr)
+                    continue
             minutos = round((fila.get("total_duration") or 0) / 60)
             rival = (fila.get("activity_name") or "").split(" vs ")[-1].strip()
             acel_mas3 = fila.get("gen2_acceleration_band8_total_effort_count") or 0
