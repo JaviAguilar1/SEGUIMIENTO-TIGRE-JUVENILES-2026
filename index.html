@@ -1215,6 +1215,17 @@ function getBlocks(cat){
   return b;
 }
 function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+// Sufijo "N'" de un minuto de gol/tarjeta -- vacío si no hay minuto cargado
+// (en vez de imprimir "undefined'" como pasaba antes).
+function minSuf(m){ return m!=null ? m+"'" : ''; }
+// Redondeo fijo a 2 decimales para métricas de GPS -- enteros quedan
+// enteros, solo lo que tiene fracción se recorta a 2 decimales (ej.
+// 30.14665 -> "30.15"), a diferencia del criterio viejo (1 decimal fijo).
+function fmtGps(v){
+  if(v==null) return '—';
+  const n = Number(v);
+  return Number.isInteger(n) ? String(n) : n.toFixed(2);
+}
 
 /** Non-blocking confirm dialog — replaces native confirm() */
 function confirmAction(msg, onYes, btnLabel){
@@ -2129,7 +2140,10 @@ function calcConfiabilidad(){
       const sf=sfResultados[fechaStr]||null;
       const mio=results[cat]?.[fecha]||null;
       const mioStr=mio?`${mio[0]}-${mio[1]}`:null;
-      const cometStr=comet?`${comet.golesTigre}-${comet.golesRival}`:null;
+      // comet puede existir con el resto del informe cargado (goles, amarillas...)
+      // pero sin resultado final (golesTigre/golesRival vacíos) -- sin este chequeo
+      // se mostraba "COMET: undefined-undefined" en vez de caer a LIGA/futdetail.
+      const cometStr=(comet && comet.golesTigre!=null && comet.golesRival!=null)?`${comet.golesTigre}-${comet.golesRival}`:null;
       const ligaStr=liga?`${liga.gf}-${liga.gc}`:null;
       const futStr=fut?`${fut.gf}-${fut.gc}`:null;
       const sfStr=sf?`${sf.gf}-${sf.gc}`:null;
@@ -3424,7 +3438,7 @@ function renderBlPerfil(){
     <div onclick="blPerfilTogglePin(${m.i})" style="cursor:pointer;background:${pinned?'var(--surface2)':'var(--surface)'};border:1px solid ${pinned?'var(--gold)':'var(--border)'};border-radius:8px;padding:${pinned?'12px':'10px'};position:relative;${pinned?'text-align:center':''}">
       ${pinned?'<div style="position:absolute;top:6px;right:8px;font-size:11px;color:var(--gold)">📌</div>':(blPerfilPinned.includes(m.i)?'<div style="position:absolute;top:6px;right:8px;font-size:10px;color:var(--gold)">📌</div>':'')}
       ${pinned?'':`<div style="font-size:10px;color:var(--muted);font-family:'Barlow Condensed',sans-serif">${esc(m.label.toUpperCase())}${m.unit!=='#'?` (${esc(m.unit)})`:''}</div>`}
-      <div style="font-family:'Bebas Neue',sans-serif;font-size:${pinned?'26px':'18px'};color:${(pinned||blPerfilPinned.includes(m.i))?'var(--gold2)':'var(--text)'}">${m.best.v.toFixed(m.best.v%1?1:0)}</div>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:${pinned?'26px':'18px'};color:${(pinned||blPerfilPinned.includes(m.i))?'var(--gold2)':'var(--text)'}">${fmtGps(m.best.v)}</div>
       ${pinned?`<div style="font-size:10px;color:var(--muted);letter-spacing:1px;font-family:'Barlow Condensed',sans-serif;margin-top:2px">${esc(m.label.toUpperCase())}${m.unit!=='#'?` (${esc(m.unit)})`:''}</div>`:`<div style="font-size:9px;color:var(--muted)">F${m.best.fecha}${m.best.opp?` · vs ${esc(m.best.opp)}`:''}</div>`}
     </div>`;
 
@@ -3474,10 +3488,10 @@ function runBlCruce(){
       const vals = fechas.map(f=>{
         const r = byFecha[f];
         const v = r && r.metrics ? r.metrics[met.i] : null;
-        return `<td style="text-align:center">${v!=null?Number(v).toFixed(v%1?1:0):'—'}</td>`;
+        return `<td style="text-align:center">${v!=null?fmtGps(v):'—'}</td>`;
       });
       const nums = fechas.map(f=>byFecha[f]?.metrics?.[met.i]).filter(v=>v!=null).map(Number);
-      const prom = nums.length ? (nums.reduce((a,b)=>a+b,0)/nums.length).toFixed(1) : '—';
+      const prom = nums.length ? fmtGps(nums.reduce((a,b)=>a+b,0)/nums.length) : '—';
       return `<tr><td class="cat-cell">${esc(n)}</td>${vals.join('')}<td style="text-align:center;color:var(--gold2);font-weight:700">${prom}</td></tr>`;
     }).join('');
     out.innerHTML = `<div class="gen-table-wrap"><table class="gen-table">
@@ -3663,7 +3677,7 @@ function renderGpsPerfil(){
     <div onclick="gpsPerfilTogglePin(${m.i})" style="cursor:pointer;background:${pinned?'var(--surface2)':'var(--surface)'};border:1px solid ${pinned?'var(--gold)':'var(--border)'};border-radius:8px;padding:${pinned?'12px':'10px'};position:relative;${pinned?'text-align:center':''}">
       ${pinned?'<div style="position:absolute;top:6px;right:8px;font-size:11px;color:var(--gold)">📌</div>':(gpsPerfilPinned.includes(m.i)?'<div style="position:absolute;top:6px;right:8px;font-size:10px;color:var(--gold)">📌</div>':'')}
       ${pinned?'':`<div style="font-size:10px;color:var(--muted);font-family:'Barlow Condensed',sans-serif">${esc(m.label.toUpperCase())}${m.unit!=='#'?` (${esc(m.unit)})`:''}</div>`}
-      <div style="font-family:'Bebas Neue',sans-serif;font-size:${pinned?'26px':'18px'};color:${(pinned||gpsPerfilPinned.includes(m.i))?'var(--gold2)':'var(--text)'}">${m.best.v.toFixed(m.best.v%1?1:0)}</div>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:${pinned?'26px':'18px'};color:${(pinned||gpsPerfilPinned.includes(m.i))?'var(--gold2)':'var(--text)'}">${fmtGps(m.best.v)}</div>
       ${pinned?`<div style="font-size:10px;color:var(--muted);letter-spacing:1px;font-family:'Barlow Condensed',sans-serif;margin-top:2px">${esc(m.label.toUpperCase())}${m.unit!=='#'?` (${esc(m.unit)})`:''}</div>`:`<div style="font-size:9px;color:var(--muted)">F${m.best.fecha}${m.best.opp?` · vs ${esc(m.best.opp)}`:''}</div>`}
     </div>`;
 
@@ -3713,10 +3727,10 @@ function runGpsCruce(){
       const vals = fechas.map(f=>{
         const r = byFecha[f];
         const v = r && r.metrics ? r.metrics[met.i] : null;
-        return `<td style="text-align:center">${v!=null?Number(v).toFixed(v%1?1:0):'—'}</td>`;
+        return `<td style="text-align:center">${v!=null?fmtGps(v):'—'}</td>`;
       });
       const nums = fechas.map(f=>byFecha[f]?.metrics?.[met.i]).filter(v=>v!=null).map(Number);
-      const prom = nums.length ? (nums.reduce((a,b)=>a+b,0)/nums.length).toFixed(1) : '—';
+      const prom = nums.length ? fmtGps(nums.reduce((a,b)=>a+b,0)/nums.length) : '—';
       return `<tr><td class="cat-cell">${esc(n)}</td>${vals.join('')}<td style="text-align:center;color:var(--gold2);font-weight:700">${prom}</td></tr>`;
     }).join('');
     out.innerHTML = `<div class="gen-table-wrap"><table class="gen-table">
@@ -4519,14 +4533,33 @@ async function parseCometPdf(file, cat){
 
   // ── Resolver nombres contra el plantel actual (id de la Fase 1) ──
   const warnings = [];
-  if(titularesRaw.length!==11) warnings.push(`Se esperaban 11 titulares, se encontraron ${titularesRaw.length}.`);
   const resolvePlayers = arr => arr.map(p=>{
     const r = cometResolvePlayer(categoria, p.nombre);
     if(!r.id) warnings.push(`"${p.nombre}" (dorsal ${p.dorsal}) no matchea con un único jugador del plantel de ${categoria}${r.candidatos&&r.candidatos.length?' (candidatos: '+r.candidatos.join(', ')+')':''}.`);
     return {...p, id:r.id};
   });
-  const titulares = resolvePlayers(titularesRaw);
+  let titulares = resolvePlayers(titularesRaw);
   const suplentes = resolvePlayers(suplentesRaw);
+
+  // Si COMET trajo menos de 11 titulares (informe oficial incompleto, ej.
+  // dorsales sin cargar), completar con la planilla de citación de esta
+  // misma fecha -- pero SOLO si todos los que COMET sí encontró coinciden
+  // con alguien de esa citación (confirma que es el mismo partido real, no
+  // una fecha mal detectada). A pedido de Javi, 2026-09-01.
+  if(titulares.length < 11){
+    const citTit = (matchData[categoria]?.[fecha]?.titulares)||[];
+    const citResueltos = citTit.map(c=>({...c, id: cometResolvePlayer(categoria, c.nombre).id}));
+    const todosCoinciden = titulares.length>0 && titulares.every(p=>p.id!=null && citResueltos.some(c=>c.id===p.id));
+    if(todosCoinciden){
+      const idsTenemos = new Set(titulares.map(p=>p.id));
+      const faltantes = citResueltos.filter(c=>c.id!=null && !idsTenemos.has(c.id));
+      if(faltantes.length){
+        faltantes.forEach(f=>titulares.push({dorsal:f.num??null, nombre:f.nombre, id:f.id, ar:false, cp:false, minutoSalida:null, minutoEntrada:null}));
+        warnings.push(`COMET traía ${titularesRaw.length} titulares -- se completaron ${faltantes.length} más (${faltantes.map(f=>f.nombre).join(', ')}) desde la planilla de citación de esta fecha.`);
+      }
+    }
+  }
+  if(titulares.length!==11) warnings.push(`Se esperaban 11 titulares, se encontraron ${titulares.length}.`);
 
   const porNombre = {};
   titulares.concat(suplentes).forEach(p=>{ porNombre[normNombreOrdenIndependiente(p.nombre)] = p; });
@@ -4818,11 +4851,11 @@ function abrirCitacionView(cat, fecha){
     if(!id) return [];
     const chips=[];
     (partido.goles||[]).filter(g=>g.id===id).forEach(g=>chips.push(
-      `<span title="Gol${g.penal?' de penal':''} · ${g.minuto}'" style="color:var(--gold2)">⚽${g.minuto}'${g.penal?' (P)':''}</span>`));
+      `<span title="Gol${g.penal?' de penal':''} · ${minSuf(g.minuto)}" style="color:var(--gold2)">⚽${minSuf(g.minuto)}${g.penal?' (P)':''}</span>`));
     (partido.amarillas||[]).filter(a=>a.id===id).forEach(a=>chips.push(
-      `<span title="Amarilla · ${a.minuto}'">🟨${a.minuto}'</span>`));
+      `<span title="Amarilla · ${minSuf(a.minuto)}">🟨${minSuf(a.minuto)}</span>`));
     (partido.rojas||[]).filter(a=>a.id===id).forEach(a=>chips.push(
-      `<span title="Roja · ${a.minuto}'">🟥${a.minuto}'</span>`));
+      `<span title="Roja · ${minSuf(a.minuto)}">🟥${minSuf(a.minuto)}</span>`));
     if(esTitular){
       const t=(partido.titulares||[]).find(x=>x.id===id);
       if(t?.minutoSalida!=null) chips.push(`<span title="Salió · ${t.minutoSalida}'" style="color:var(--muted)">↓${t.minutoSalida}'</span>`);
@@ -4856,11 +4889,11 @@ function abrirCitacionView(cat, fecha){
     if(!id) return [];
     const chips=[];
     (partido.goles||[]).filter(g=>g.id===id).forEach(g=>chips.push(
-      `<span title="Gol${g.penal?' de penal':''} · ${g.minuto}'" style="color:var(--gold2)">⚽${g.minuto}'${g.penal?' (P)':''}</span>`));
+      `<span title="Gol${g.penal?' de penal':''} · ${minSuf(g.minuto)}" style="color:var(--gold2)">⚽${minSuf(g.minuto)}${g.penal?' (P)':''}</span>`));
     (partido.amarillas||[]).filter(a=>a.id===id).forEach(a=>chips.push(
-      `<span title="Amarilla · ${a.minuto}'">🟨${a.minuto}'</span>`));
+      `<span title="Amarilla · ${minSuf(a.minuto)}">🟨${minSuf(a.minuto)}</span>`));
     (partido.rojas||[]).filter(a=>a.id===id).forEach(a=>chips.push(
-      `<span title="Roja · ${a.minuto}'">🟥${a.minuto}'</span>`));
+      `<span title="Roja · ${minSuf(a.minuto)}">🟥${minSuf(a.minuto)}</span>`));
     return chips;
   };
   const cambiosAgrupadosHTML = (titulares, suplentes) => {
@@ -7854,9 +7887,9 @@ function abrirPerfilJugador(cat, nombre){
         vecesEntroDeBanco++;
         minCometSum += DURACION_PARTIDO-supComet.minutoEntrada;
       }
-      (partido.goles||[]).filter(g=>g.id===idJ).forEach(g=>{ golCometSum++; eventos.push(`⚽${g.minuto}'${g.penal?' (P)':''}`); });
-      (partido.amarillas||[]).filter(a=>a.id===idJ).forEach(a=>{ amCometSum++; eventos.push(`🟨${a.minuto}'`); });
-      (partido.rojas||[]).filter(a=>a.id===idJ).forEach(a=>{ rojCometSum++; eventos.push(`🟥${a.minuto}'`); });
+      (partido.goles||[]).filter(g=>g.id===idJ).forEach(g=>{ golCometSum++; eventos.push(`⚽${minSuf(g.minuto)}${g.penal?' (P)':''}`); });
+      (partido.amarillas||[]).filter(a=>a.id===idJ).forEach(a=>{ amCometSum++; eventos.push(`🟨${minSuf(a.minuto)}`); });
+      (partido.rojas||[]).filter(a=>a.id===idJ).forEach(a=>{ rojCometSum++; eventos.push(`🟥${minSuf(a.minuto)}`); });
     }
     partidosJugados.push({fecha, rival:d.rival||'—', cond:condicionCat(cat,fecha), res:results[cat]?.[fecha]||null, eventos});
   });
@@ -7880,9 +7913,11 @@ function abrirPerfilJugador(cat, nombre){
   // métrica (no un techo inventado) -- así el radar responde "qué tan
   // cerca está de la vara más alta del propio plantel", no una tasa fija
   // sin contexto. Goles/Minutos salen de jugadoresStats (mismo dato que ya
-  // se ve en la tabla de PLANTEL); Sprints/Vel. máxima/Mts por partido
+  // se ve en la tabla de PLANTEL); Sprints/Vel. máxima/Mts por minuto
   // salen de BL GPS Performance, entre los jugadores de esta categoría que
-  // ya tengan carga.
+  // ya tengan carga. Mts/min (no Dist. Total cruda) para que un suplente
+  // que jugó menos minutos no quede siempre por debajo de un titular solo
+  // por haber corrido menos metros en total -- a pedido de Javi, 2026-09-01.
   const statsCat = jugadoresStats[cat]||[];
   const refGoles = statsCat.reduce((max,j)=>Math.max(max, parseInt(j.goles)||0), 0);
   const refMinutos = statsCat.reduce((max,j)=>Math.max(max, parseInt(j.minutos_jugados)||0), 0);
@@ -7891,7 +7926,7 @@ function abrirPerfilJugador(cat, nombre){
   const gpsMaxDe  = (p,i) => { const n=gpsNumsDe(p,i); return n.length ? Math.max(...n) : null; };
   const sprintsProm = gpsPromDe({match:gpsMatches}, 5);
   const velMax = gpsMaxDe({match:gpsMatches}, 6);
-  const mtsProm = gpsPromDe({match:gpsMatches}, 0);
+  const mtsProm = gpsPromDe({match:gpsMatches}, 1);
   // Referencia (mejor dato del plantel): por cada jugador de la categoría,
   // se usa Catapult si tiene carga, sino BL -- mismo criterio de preferencia
   // que arriba, jugador por jugador.
@@ -7904,7 +7939,7 @@ function abrirPerfilJugador(cat, nombre){
   nombresConGps.forEach(n=>{
     const cEntry = catapultCat[n], bEntry = blCat[n];
     const matches = (cEntry && cEntry.match.length) ? cEntry.match : (bEntry ? bEntry.match : []);
-    const sp=gpsPromDe({match:matches},5), vm=gpsMaxDe({match:matches},6), mt=gpsPromDe({match:matches},0);
+    const sp=gpsPromDe({match:matches},5), vm=gpsMaxDe({match:matches},6), mt=gpsPromDe({match:matches},1);
     if(sp!=null) refSprints=Math.max(refSprints, sp);
     if(vm!=null) refVelMax =Math.max(refVelMax, vm);
     if(mt!=null) refMts    =Math.max(refMts, mt);
@@ -7917,13 +7952,13 @@ function abrirPerfilJugador(cat, nombre){
   const hayGps = gpsMatches.length>0;
   const radarHTML = `
     <div style="position:relative;width:100%;height:240px;margin:6px 0">
-      <canvas id="radar-perfil-jugador" role="img" aria-label="Radar de ${esc(nombre)}: cada eje es el porcentaje respecto al mejor dato del plantel de ${esc(cat)} en goles, minutos jugados${hayGps?', sprints, velocidad maxima y metros por partido':''}${hayGps?'':' -- sprints, velocidad maxima y metros por partido todavia pendientes de carga GPS'}"></canvas>
+      <canvas id="radar-perfil-jugador" role="img" aria-label="Radar de ${esc(nombre)}: cada eje es el porcentaje respecto al mejor dato del plantel de ${esc(cat)} en goles, minutos jugados${hayGps?', sprints, velocidad maxima y metros por minuto':''}${hayGps?'':' -- sprints, velocidad maxima y metros por minuto todavia pendientes de carga GPS'}"></canvas>
     </div>
     <div style="display:flex;flex-wrap:wrap;justify-content:center;gap:14px;font-size:10.5px;color:var(--muted);margin-bottom:6px">
       <span style="display:flex;align-items:center;gap:4px"><span style="width:8px;height:8px;border-radius:50%;background:#2a78d6"></span>Dato real</span>
       ${hayGps?'':'<span style="display:flex;align-items:center;gap:4px"><span style="width:8px;height:8px;border-radius:50%;background:var(--muted)"></span>Pendiente (GPS)</span>'}
     </div>
-    <div style="font-size:10.5px;color:var(--muted);text-align:center;margin-bottom:14px">Cada eje es el % respecto al mejor dato del plantel de ${esc(cat)} en esa métrica.${hayGps?'':' Sprints, Vel. máxima y Mts/partido se completan solos cuando Brian cargue en BL GPS Performance.'}</div>`;
+    <div style="font-size:10.5px;color:var(--muted);text-align:center;margin-bottom:14px">Cada eje es el % respecto al mejor dato del plantel de ${esc(cat)} en esa métrica.${hayGps?'':' Sprints, Vel. máxima y Mts/min se completan solos cuando Brian cargue en BL GPS Performance.'}</div>`;
 
   const partidosJugadosHTML = partidosJugados.length
     ? `<div class="table-wrap"><table><thead><tr><th>F</th><th>Rival</th><th>Res.</th><th>Eventos</th></tr></thead><tbody>
@@ -7967,9 +8002,9 @@ function abrirPerfilJugador(cat, nombre){
       labels: [
         ['Goles', `${golesFinal} · ${radarGoles}% del máx.`],
         ['Minutos jugados', `${minutosFinal}' · ${radarMinutos}% del máx.`],
-        ['Sprints', sprintsProm!=null ? `${sprintsProm.toFixed(1)}/partido · ${radarSprints}%` : 'pendiente'],
-        ['Vel. máxima', velMax!=null ? `${velMax} km/h · ${radarVelMax}%` : 'pendiente'],
-        ['Mts/partido', mtsProm!=null ? `${Math.round(mtsProm)} m · ${radarMts}%` : 'pendiente']
+        ['Sprints', sprintsProm!=null ? `${fmtGps(sprintsProm)}/partido · ${radarSprints}%` : 'pendiente'],
+        ['Vel. máxima', velMax!=null ? `${fmtGps(velMax)} km/h · ${radarVelMax}%` : 'pendiente'],
+        ['Mts/min', mtsProm!=null ? `${fmtGps(mtsProm)} m/min · ${radarMts}%` : 'pendiente']
       ],
       datasets: [{
         label: nombre,
