@@ -1018,6 +1018,31 @@ let jugadoresArchivados = {};
 function estaArchivado(cat, nombre){
   return (jugadoresArchivados[cat]||[]).some(n=>normNombreOrdenIndependiente(n)===normNombreOrdenIndependiente(nombre));
 }
+// Archivar/desarchivar -- mecanismo ya existía (guardado/cargado desde
+// Firebase) pero no tenía ningún botón en la UI para usarlo (encontrado al
+// investigar por qué un jugador que ya no está en el club seguía apareciendo
+// en la alerta de 4+ amarillas, Javi 2026-09-02, caso Poblete Matías 5TA).
+function archivarJugador(cat, nombre){
+  if(!canEdit) return;
+  if(!confirm(`¿Archivar a ${nombre}? Deja de aparecer en el plantel activo, tarjetas y alertas -- sus estadísticas de la temporada quedan guardadas igual, se puede restaurar cuando quieras.`)) return;
+  jugadoresArchivados[cat] = jugadoresArchivados[cat] || [];
+  if(!estaArchivado(cat, nombre)) jugadoresArchivados[cat].push(nombre);
+  if(fbReady && db) db.ref('stats/jugadoresArchivados').set(jugadoresArchivados)
+    .catch(e=>console.warn('archivarJugador error:',e));
+  showToast('📦 ARCHIVADO');
+  renderRosterCat(cat, document.getElementById(`roster-content-${cat}`));
+  refreshAlerts();
+}
+function desarchivarJugador(cat, nombre){
+  if(!canEdit) return;
+  jugadoresArchivados[cat] = (jugadoresArchivados[cat]||[])
+    .filter(n=>normNombreOrdenIndependiente(n)!==normNombreOrdenIndependiente(nombre));
+  if(fbReady && db) db.ref('stats/jugadoresArchivados').set(jugadoresArchivados)
+    .catch(e=>console.warn('desarchivarJugador error:',e));
+  showToast('↩️ RESTAURADO');
+  renderRosterCat(cat, document.getElementById(`roster-content-${cat}`));
+  refreshAlerts();
+}
 
 // ── ID único de jugador ──────────────────────────────────────
 // Determinístico a partir del nombre (slug) — no hace falta guardar nada
@@ -5174,6 +5199,22 @@ function blTopSpeedInfo(cat, nombre){
   const best = matches.reduce((a,b)=> b.metrics[6]>a.metrics[6] ? b : a);
   return {velmax: best.metrics[6], fecha: blFechaNum(best.fecha)};
 }
+// Mismo cálculo que blTopSpeedInfo pero sobre catapultPlayers (ya viene
+// separado por categoría, no hace falta cruzar contra todas). Se prefiere
+// por sobre BL en la tarjeta -- Catapult directo es la fuente que se va a
+// mantener activa de acá en adelante (Javi, 2026-09-02).
+function catapultTopSpeedInfo(cat, nombre){
+  const nn = normNombreOrdenIndependiente(nombre);
+  const entry = Object.entries(catapultPlayers[cat]||{}).find(([n])=>normNombreOrdenIndependiente(n)===nn);
+  if(!entry) return null;
+  const matches = (entry[1].match||[]).filter(m=>m.metrics && m.metrics[6]!=null);
+  if(!matches.length) return null;
+  const best = matches.reduce((a,b)=> b.metrics[6]>a.metrics[6] ? b : a);
+  return {velmax: best.metrics[6], fecha: blFechaNum(best.fecha)};
+}
+function topSpeedInfo(cat, nombre){
+  return catapultTopSpeedInfo(cat, nombre) || blTopSpeedInfo(cat, nombre);
+}
 
 // Tarjeta resumen de un jugador -- pensada para verse de a varias juntas
 // (grilla), a diferencia de la Ficha completa (abrirPerfilJugador, con
@@ -5186,7 +5227,7 @@ function tarjetaJugadorHTML(cat, p){
   const golData = golesEfectivos(cat).find(g=>g.name===nombre
     || normNombreOrdenIndependiente(g.name)===normNombreOrdenIndependiente(nombre));
   const golesFilas = (golData?.fechas||[]).slice(0,3);
-  const top = blTopSpeedInfo(cat, nombre);
+  const top = topSpeedInfo(cat, nombre);
   return `<div class="tarjeta-jugador" onclick="abrirPerfilJugador('${cat}','${esc(nombre).replace(/'/g,"\\'")}')"
     style="cursor:pointer;background:linear-gradient(135deg,var(--surface2),rgba(5,8,15,0.6));border:1px solid var(--border2);border-radius:12px;overflow:hidden">
     <div style="display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--border2)">
@@ -5229,7 +5270,7 @@ async function dibujarTarjetaJugador(cat, nombre){
   const golData = golesEfectivos(cat).find(g=>g.name===nombre
     || normNombreOrdenIndependiente(g.name)===normNombreOrdenIndependiente(nombre));
   const golesFilas = (golData?.fechas||[]).slice(0,4);
-  const top = blTopSpeedInfo(cat, nombre);
+  const top = topSpeedInfo(cat, nombre);
 
   const BG='#111e38', GOLD='#f0c040', GOLD2='#e0bc4a', TXT='#e8edf7', TXT2='#a8c0e8', MUTED='#8aa0cc', BORDER='#3a5090';
   const W=900, H=700, pad=48, SCALE=3;
@@ -5432,17 +5473,28 @@ function renderRosterTable(cat, merged){
       <td>${s.asistencias||0}</td>
       <td style="color:var(--draw)">${s.tarjeta_amarilla||0}</td>
       <td style="color:var(--loss)">${s.tarjeta_roja||0}</td>
-      <td><button class="btn-ficha-jugador" data-nombre="${esc(p.nombre||'')}" title="Exportar ficha en PDF"
+      <td style="white-space:nowrap">
+        <button class="btn-ficha-jugador" data-nombre="${esc(p.nombre||'')}" title="Exportar ficha en PDF"
         style="background:none;border:1px solid var(--border2);border-radius:5px;color:var(--gold2);
-        font-size:13px;padding:3px 9px;cursor:pointer">📄</button></td>
+        font-size:13px;padding:3px 9px;cursor:pointer">📄</button>
+        ${canEdit?`<button class="btn-archivar-jugador" data-nombre="${esc(p.nombre||'')}" title="Archivar (ya no está en el club)"
+        style="background:none;border:1px solid var(--border2);border-radius:5px;color:var(--muted);
+        font-size:13px;padding:3px 9px;cursor:pointer;margin-left:4px">📦</button>`:''}
+      </td>
     </tr>`;
   }).join('');
+
+  const archivados = jugadoresArchivados[cat]||[];
+  const archivadosHTML = (canEdit && archivados.length) ? `
+    <div style="margin-top:10px;font-size:11px;color:var(--muted);font-family:'Barlow Condensed',sans-serif">
+      Archivados: ${archivados.map(n=>`${esc(n)} <a href="#" class="link-desarchivar" data-nombre="${esc(n)}" style="color:var(--gold2)">↩ restaurar</a>`).join(' &nbsp;·&nbsp; ')}
+    </div>` : '';
 
   const wrap=document.getElementById(`roster-table-${cat}`);
   wrap.innerHTML=`<div class="table-wrap"><table>
       <thead><tr>${headHTML}<th>PDF</th></tr></thead>
       <tbody>${rows}</tbody>
-    </table></div>`;
+    </table></div>${archivadosHTML}`;
 
   wrap.querySelectorAll('th[data-key]').forEach(th=>{
     th.addEventListener('click',()=>{
@@ -5455,6 +5507,12 @@ function renderRosterTable(cat, merged){
   });
   wrap.querySelectorAll('.btn-ficha-jugador').forEach(btn=>{
     btn.addEventListener('click',()=>exportFichaJugador(cat, btn.dataset.nombre));
+  });
+  wrap.querySelectorAll('.btn-archivar-jugador').forEach(btn=>{
+    btn.addEventListener('click',()=>archivarJugador(cat, btn.dataset.nombre));
+  });
+  wrap.querySelectorAll('.link-desarchivar').forEach(a=>{
+    a.addEventListener('click',(ev)=>{ ev.preventDefault(); desarchivarJugador(cat, a.dataset.nombre); });
   });
 }
 
@@ -8097,13 +8155,16 @@ function amarillasEnAlerta(cat){
       if(porJugador[id].count>=AMARILLAS_SUSPENSION || expulsados.has(id)) porJugador[id].count=0;
     });
   });
-  // Solo jugadores que siguen en el plantel actual -- uno que ya se fue no
-  // va a sumar más amarillas y no afecta al equipo hoy, aunque su carga
-  // histórica de tarjetas se mantenga intacta (Javi, 2026-09-02, caso
-  // Poblete Matías en 5TA).
+  // Solo jugadores que siguen en el plantel actual y no fueron archivados
+  // a mano -- uno que ya se fue no va a sumar más amarillas y no afecta al
+  // equipo hoy, aunque su carga histórica de tarjetas se mantenga intacta
+  // (Javi, 2026-09-02, caso Poblete Matías en 5TA -- seguía apareciendo
+  // porque futdetail todavía no lo había sacado de su propio plantel; el
+  // filtro por plantelFutdetail solo no alcanza, hace falta también poder
+  // archivarlo a mano con el botón nuevo de PLANTEL).
   return Object.entries(porJugador)
     .map(([id,p])=>({...p, ciclo: p.count, id}))
-    .filter(p=>p.ciclo>=AMARILLAS_ALERTA && plantelNombreDeId(cat,p.id)!=null);
+    .filter(p=>p.ciclo>=AMARILLAS_ALERTA && plantelNombreDeId(cat,p.id)!=null && !estaArchivado(cat, p.nombre));
 }
 // El pill "N en alerta" del header se sacó a pedido de Javi -- el mismo
 // aviso (4+ amarillas, riesgo de suspensión) ya se ve adentro de cada
