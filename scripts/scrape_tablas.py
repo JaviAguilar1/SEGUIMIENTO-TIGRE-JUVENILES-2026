@@ -517,6 +517,123 @@ CATAPULT_TEAMS = {
     "Tigre Reserva": "RESERVA",
 }
 
+# Catapult arma sus PROPIOS "equipos" (team_id) con un roster que le
+# pertenece a Catapult, no al club -- queda desactualizado (jugadores que
+# cambiaron de categoria durante la temporada, o que ya ni siquiera estan
+# en el club) y NO hay que confiar en el para decidir la categoria de cada
+# jugador (confirmado con datos reales, Javi 2026-09-02: Catapult tenia a
+# Agustin Luna, Axel Wirz, Feversani y Adamovsky -- todos de otra
+# categoria real -- adentro del equipo "6ta", y a Iriart/Dalessandro
+# Davalos, que ya no estan en el club). La categoria real de cada jugador
+# sale del plantel de futdetail (mismo criterio que ya usa el resto de la
+# app, ver plantelFutdetail en index.html) -- si un jugador no aparece en
+# NINGUN plantel real, se descarta (no se muestra su GPS).
+#
+# Snapshot de emergencia (2026-09-02) por si en esta corrida no se pudo
+# scrapear futdetail (FUTDETAIL_USER/PASS no configurados) -- fetch_catapult_players
+# usa el plantel recien scrapeado en esta misma corrida si esta disponible,
+# y cae a este snapshot fijo si no. Conviene refrescarlo de vez en cuando.
+CATAPULT_PLANTEL_SNAPSHOT = json.loads(r'''
+{"4TA":["Ruiz Santiago","Leguizamon Maximo","Ramos Bautista","Rojas Josue","Luongo Alan","Aguirre Iñaki","Saravia Roman","Medina Tiziano","González Kevin","López Facundo","Luna Agustin","Molas Lucas","González Alex","Benitez Lautaro","Fredes Felipe","Perez Gaston","Alvaro Navoni","Cáceres Thomas","Copes Tomas","González Tobías","Benítez Cristian","Mansilla Nehemias","Fares Hamdan","Ordoñez Ignacio","Pannoni Lautaro","Zalazar Benjamín","Afonso Nicolas","Pesolilla Roman","Leszczuk  Brandon","Medina Alejandro","Lezcano Cristian Leonel","Hillairet Yair","Figueredo Benjamin","Gonzalez Santino","Andrusisen Lautaro","Gómez Luka","Mayer Tomas","Lezcano Alan","Ferreyra Rodrigo"],"5TA":["Pereyra Manuel","Zerda Santiago Lionel","Petry Uriel","Cordoba Santiago","Feversani Bautista","Moyano Jerónimo","Samper Joaquin","Wirz Axel","Demonte Tomas","Luque Gonzalo","Adamovsky Felipe ","Canullo Juan","Rodriguez Agustín","Ledesma Gonzalo","Juarez Nahuel","Llera Mariano","Rodriguez Thiago","Poblete Matias","Barrios Cristian ","Crotto Ivo","Crotto Nicolas","Clauser Ramiro","Vargas Thiago","Perez Joaquin","Gonzalez Tomas","Gonzalez Lautaro","Ricaldi Ian","Hernandez Emanuel","Vera Conrado","Miño Roman","Galesio Santino","Rivas Marco","Letizia Ignacio","Villanueva Román"],"6TA":["Sosena Fausto","Camba Rocco","Bruno Lautaro","Sotelo Benjamín ","Scungio Sebastian","Ortiz Ignacio","Moralejo Santiago","Luna Alejo","Muchiutti Valentino","Umeres Agustin","Torres David","Fernandez Jerónimo","Marchetti Ivan","Belmonte Agustín","Gomez Santiago","Mauriño Octavio","Romero Benicio","Nuñez Jonathan","Delgado Francisco","Cortes Adrian maximiliano","Calderon Roman","Schenone Elias","Serapio Ignacio","Brandy German","Pomar Santino","Collado Lautaro","Acosta Jonathan","Parra Matias","Mallmann Félix","Ibañez Tiziano","Zarza Quimey","Lizardia Bautista","Dechiara Francesco","Ambiela Emilio","Sigel Bruno"],"7MA":["Martinez Giuliano","Maturano Benjamin","Montoya Francisco","Castro Matias","Conte Maximiliano","Pucill Mateo","Insaurralde Ihan","Marini Tomas","Dominguez Bautista","Gonzalez Santino","Levy Thiago","Soberon Isaias","Lopez Sebastian","Burela Santino","Lovisi Luciano","Gaitan Valentin","Mancuello Tobias","Lamanna Fabrizio","Almiron Sebastian","Omann Juan Ignacio","Jara Juan","Molina Ramiro","Core Valentino","Di Sipio Agustin","Puchi Santino","Mena Sebastian","Herrera Thiago","Lopez Dionel","Fredes Tiago","Barrios Bautista","Trejo Nicolas","Gagliardo Pedro Tomas","Sodero Santino","Baltazar Alejandro Emanuel","Sala Valentino","Cazal Fernandez Gustavo Alberto","Gallardo Dylan","Godoy Gonzalo","Prieto Alexander","Astesana Valentino"],"8VA":["Arias Nicolas","Reinoso Patricio","Mosqueda Ernesto Jesús ","Monzon Tiziano","Garcia Bautista","Inostroza Bastian","Sanchez Mathias","Tobler Bautista","Meza Luca ","Fino Amadeo","Merlos Galeano Lautaro Benjamin ","Simone  Pedro ","De Olivera Elias","Reinoso Martiniano","Rodríguez  Josué Francisco","Zelaya Franco","Navarro Valentin","Reyes Jose","Noriega Mateo","Rios Mateo","Fernández leis Gabriel ","Cabrera Luca","Radaelli Manuel","Gonzalia Bautista","Gonzalez Leonardo Fabian","Reynoso Tomas","Maguna Pedro","Blanco Dylan Alex","Celiz Teo","Martinuccio Bautista","Punos Tiziano","Galeano Joaquin","Beron Santiago","Aquilue Santiago","Guglielmo Lisandro","Conte Ian","Ruiz Ullua David ","Saragoza Ramiro ","Bin Justin","Lagos Benjamin","Cuba Gio","Bustamante Alan","Chmea Roque","Cocozza Maximo"],"9NA":["Echevarrieta Bautista ","Torrecilla Enzo Francisco","Vargas Valentino","Baccaro Santino","Peludero Mateo","Ibañez Bastian","Vargas Felipe","Mora Bautista","Duarte Gaston ","Cubilla Jonathan","Gomez Zaracho Octavio","Alvarenga Martin Adriano","Lopez Tomas","Soto Mateo","Sanchez Benjamin","Tulis Federico ","Becerra Lionel","Diaz Oliva Santiago","Baigorria Nicolás Nahuel","Enrique Ian","Agorreca Ignacio","Prado Lautaro","Arce Miño  Axel ","Villalba Bogado Gustavo","Diaz Francisco Roman","Dominic Tomassi Benjamin","Pesolilla Ian","Gomez Joaquin","Capozucca Benjamin","Duarte Gonzalo Isaias ","Holm Ian","Bojorge Benjamin","Zapata Alejo","Maidana Lautaro","Dos Santos  Bayron ","Ortiz Leonardo","Monzon Ian ","Marquez  Marcos Bautista","Denis Galli Sebastian","Nuñez Tiziano ","Olocco Mikeas"]}
+''')
+
+# Nombres de Catapult que en realidad son la MISMA persona que otro nombre
+# ya en el plantel real, pero con una diferencia real de letras (no
+# alcanza con reordenar palabras) -- confirmado a mano (Javi, 2026-09-02):
+# "Panonni" en Catapult es un typo de "Pannoni". Clave = nombre normalizado
+# tal cual sale de Catapult, valor = nombre "canonico" a usar en su lugar
+# (se renormaliza igual despues).
+CATAPULT_ALIAS_NOMBRE = {
+    "lautaro panonni": "Lautaro Pannoni",
+    # "Gio" (apodo) vs "Giovanni" (nombre completo en Catapult) -- muy
+    # distintos en longitud para que el parecido de texto los matchee solo.
+    "cuba giovanni": "Cuba Gio",
+}
+
+# Excepciones puntuales: partidos donde un jugador jugo "prestado" en OTRA
+# categoria (no la suya real) -- confirmado por Javi 2026-09-02 via
+# citacion: Adamovsky (5TA) jugo la F23 con 4TA. Clave = (nombre
+# normalizado, "F<numero>"), valor = categoria real para ESE registro.
+CATAPULT_CATEGORIA_EXCEPCION = {
+    ("adamovsky felipe", "F23"): "4TA",
+}
+
+
+def _catapult_norm_nombre(s):
+    """Igual que normNombreOrdenIndependiente en index.html: minuscula, sin
+    acentos, solo letras, palabras ordenadas alfabeticamente -- asi el
+    orden de nombre/apellido no importa al comparar dos fuentes distintas."""
+    import unicodedata
+    s = unicodedata.normalize("NFD", (s or "").lower())
+    s = "".join(c for c in s if unicodedata.category(c) != "Mn")
+    s = re.sub(r"[^a-z\s]", " ", s)
+    return " ".join(sorted(w for w in s.split() if w))
+
+
+def _catapult_categoria_por_nombre(plantel_por_cat):
+    """{nombre_normalizado: categoria} a partir del plantel real (el
+    scrapeado en esta misma corrida si esta disponible, sino el snapshot)."""
+    fuente = plantel_por_cat or CATAPULT_PLANTEL_SNAPSHOT
+    out = {}
+    for cat, jugadores in fuente.items():
+        for j in jugadores:
+            nombre = j.get("nombre") if isinstance(j, dict) else j
+            n = _catapult_norm_nombre(nombre)
+            if n:
+                out[n] = cat
+    return out
+
+
+def _catapult_resolver_categoria(nombre_norm, categoria_por_nombre):
+    """
+    Busca la categoria real de un nombre ya normalizado, con 3 niveles de
+    tolerancia (se prueban en orden, se usa el primero que matchee).
+    Encontrado revisando los descartes reales: la comparacion EXACTA sola
+    dejaba afuera a la mayoria de los jugadores actuales, no solo a los que
+    se fueron del club -- Catapult casi nunca escribe el nombre completo
+    (le faltan segundos nombres/apellidos que si estan en el plantel real)
+    y a veces tiene una letra distinta (typos ya conocidos del proyecto:
+    "Luengo"/"Luongo", "Hillaret"/"Hillairet", ademas de otros nuevos como
+    "Cáceres Tomás"/"Cáceres Thomas", "Gio Cuba"/"Cuba Gio") (Javi,
+    2026-09-02).
+
+    1. Exacto (ya viene resuelto antes de llamar a esto).
+    2. Subconjunto de palabras: si TODAS las palabras del nombre de
+       Catapult aparecen en el nombre del plantel (o al reves), es la
+       misma persona con nombre incompleto de un lado -- solo se acepta
+       si da una UNICA coincidencia en todo el plantel (si hay mas de una,
+       queda ambiguo y no se resuelve, mejor no adivinar).
+    3. Parecido de texto (typos de una letra): SequenceMatcher sobre el
+       string normalizado completo, umbral alto (0.84) y tambien exige
+       coincidencia unica.
+    """
+    palabras = set(nombre_norm.split())
+    if not palabras:
+        return None
+
+    candidatos_subset = []
+    for cand_norm, cat in categoria_por_nombre.items():
+        cand_palabras = set(cand_norm.split())
+        if palabras <= cand_palabras or cand_palabras <= palabras:
+            candidatos_subset.append(cat)
+    if len(set(candidatos_subset)) == 1:
+        return candidatos_subset[0]
+    if len(set(candidatos_subset)) > 1:
+        return None  # ambiguo -- mas de un jugador real matchea por subconjunto
+
+    import difflib
+    mejor_score, mejor_cats = 0.0, set()
+    for cand_norm, cat in categoria_por_nombre.items():
+        score = difflib.SequenceMatcher(None, nombre_norm, cand_norm).ratio()
+        if score > mejor_score:
+            mejor_score, mejor_cats = score, {cat}
+        elif score == mejor_score:
+            mejor_cats.add(cat)
+    if mejor_score >= 0.84 and len(mejor_cats) == 1:
+        return next(iter(mejor_cats))
+    return None
+
+
 # Las 16 metricas del CSV/PDF de Catapult, en el mismo orden que
 # BL_METRICAS en index.html (indice a indice, para que el frontend no
 # necesite ningun mapeo propio) -- el NOMBRE de campo real de
@@ -649,7 +766,7 @@ def catapult_stats_post(opener, cj, activity_ids):
     return json.loads(resp.read().decode("utf-8", errors="replace"))
 
 
-def fetch_catapult_players(email: str, password: str):
+def fetch_catapult_players(email: str, password: str, plantel_por_cat=None):
     """
     Devuelve {categoria: {nombre: {"pos":..., "match":[{"fecha","opp",
     "min","metrics":[...]},...]}}} -- una capa mas que fetch_bl_players
@@ -679,6 +796,8 @@ def fetch_catapult_players(email: str, password: str):
     fixture y se busca que actividad de Catapult se jugo justo ESE dia.
     """
     opener, cj = catapult_login(email, password)
+    categoria_por_nombre = _catapult_categoria_por_nombre(plantel_por_cat)
+    avisados_sin_plantel = set()
 
     teams = catapult_get(opener, f"{CATAPULT_API_BASE}/teams")
     team_ids_por_cat = {}
@@ -700,7 +819,20 @@ def fetch_catapult_players(email: str, password: str):
         # descartan (amistosos, partidos internos, etc.).
         fecha_por_activity_id = {}
         for a in actividades:
-            if " vs " not in (a.get("name") or ""):
+            nombre_act = a.get("name") or ""
+            # Normalmente es " vs Rival" en el nombre, pero se confirmo un
+            # caso real ("F 22- 4ta division", el partido real de la fecha
+            # 22 vs Rosario Central) sin "vs" -- caia afuera del filtro
+            # aunque tuviera datos reales de jugadores. "division" sirve
+            # como señal alternativa, PERO tambien aparece en nombres de
+            # entrenamiento tipo "4ta division md -4" ("md" = "match day",
+            # notacion estandar para dias relativos a un partido) -- se
+            # excluyen esos explicitamente (Javi, 2026-09-02).
+            es_partido = " vs " in nombre_act or (
+                re.search(r"divisi[oó]n", nombre_act, re.IGNORECASE)
+                and not re.search(r"\bmd\b", nombre_act, re.IGNORECASE)
+            )
+            if not es_partido:
                 continue
             ts = a.get("start_time")
             if not ts:
@@ -737,8 +869,33 @@ def fetch_catapult_players(email: str, password: str):
             fecha_num = fecha_por_activity_id.get(fila.get("activity_id"))
             if fecha_num is None:
                 continue
+
+            # La categoria NUNCA sale del equipo de Catapult (cat) -- sale
+            # del plantel real. Se aplica primero el alias de nombre mal
+            # escrito (typo real, no solo orden de palabras), despues la
+            # excepcion puntual (jugador que jugo prestado en otra
+            # categoria ESA fecha), y si no aparece en NINGUN plantel real
+            # se descarta entero (ya no esta en el club).
+            nombre_norm = _catapult_norm_nombre(nombre)
+            if nombre_norm in CATAPULT_ALIAS_NOMBRE:
+                nombre = CATAPULT_ALIAS_NOMBRE[nombre_norm]
+                nombre_norm = _catapult_norm_nombre(nombre)
+            cat_real = CATAPULT_CATEGORIA_EXCEPCION.get((nombre_norm, f"F{fecha_num}"))
+            if cat_real is None:
+                cat_real = categoria_por_nombre.get(nombre_norm)
+            if cat_real is None:
+                cat_real = _catapult_resolver_categoria(nombre_norm, categoria_por_nombre)
+            if cat_real is None:
+                if nombre not in avisados_sin_plantel:
+                    avisados_sin_plantel.add(nombre)
+                    print(f"[AVISO] Catapult: '{nombre}' (equipo '{cat}' en Catapult) no aparece en "
+                          f"ningun plantel real -- se descarta su GPS (ya no esta en el club, o el "
+                          f"nombre no matchea).", file=sys.stderr)
+                continue
+
             minutos = round((fila.get("total_duration") or 0) / 60)
-            rival = (fila.get("activity_name") or "").split(" vs ")[-1].strip()
+            act_nombre = fila.get("activity_name") or ""
+            rival = act_nombre.split(" vs ")[-1].strip() if " vs " in act_nombre else ""
             acel_mas3 = fila.get("gen2_acceleration_band8_total_effort_count") or 0
             m25 = fila.get("velocity_band8_total_distance") or 0
             metrics = [
@@ -754,14 +911,21 @@ def fetch_catapult_players(email: str, password: str):
                 round(m25 / minutos, 2) if minutos else 0,
                 fila.get("total_player_load"),
             ]
-            cat_out = out.setdefault(cat, {})
+            cat_out = out.setdefault(cat_real, {})
             cat_out.setdefault(nombre, {"pos": posiciones.get(nombre, ""), "match": []})
-            cat_out[nombre]["match"].append({
-                "fecha": f"F{fecha_num}",
-                "opp": rival,
-                "min": minutos,
-                "metrics": metrics,
-            })
+            registro = {"fecha": f"F{fecha_num}", "opp": rival, "min": minutos, "metrics": metrics}
+            # A veces hay DOS actividades distintas en Catapult para el
+            # mismo partido real (confirmado: "F9 - 4ta vs Talleres Cba" y
+            # "F9- 4ta vs talleres" el mismo dia, cargas duplicadas del
+            # lado de Catapult) -- si un jugador ya tiene un registro de
+            # esa misma fecha, se queda con el que tenga mas minutos (mas
+            # completo) en vez de guardar los dos (Javi, 2026-09-02).
+            previos = cat_out[nombre]["match"]
+            existente = next((r for r in previos if r["fecha"] == registro["fecha"]), None)
+            if existente is None:
+                previos.append(registro)
+            elif registro["min"] > existente["min"]:
+                previos[previos.index(existente)] = registro
 
     return out
 
@@ -1423,7 +1587,8 @@ def main():
     password_catapult = os.environ.get("CATAPULT_PASS")
     if usuario_catapult and password_catapult:
         try:
-            jugadores_catapult = fetch_catapult_players(usuario_catapult, password_catapult)
+            jugadores_catapult = fetch_catapult_players(
+                usuario_catapult, password_catapult, plantel_por_cat=resultado.get("plantel_futdetail"))
             resultado["catapult_gps"] = {"players": jugadores_catapult}
             total_jug = sum(len(v) for v in jugadores_catapult.values())
             print(f"[OK] Catapult OpenField: {total_jug} jugadores en {len(jugadores_catapult)} categorias")
