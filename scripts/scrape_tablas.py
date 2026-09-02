@@ -536,6 +536,22 @@ CATAPULT_STATS_PARAMS = [
 ]
 
 
+def _catapult_fecha_valida(nombre_actividad):
+    """
+    El nombre de la actividad en Catapult debería empezar con "F<numero>"
+    (ej. "F 23- 4ta vs Godoy Cruz"), pero algunos partidos viejos (sobre
+    todo de 4TA) se cargaron sin ese prefijo, solo "4ta vs Independiente".
+    Un regex simple de \\d+ sobre el nombre entero agarraba el "4" de "4ta"
+    como si fuera la fecha -- confirmado con datos reales cruzando contra
+    el fixture (matchFechaPorRival en index.html): "4ta Partido vs Ferro"
+    daba fecha 4 por este bug, cuando la fecha real era la 2. Por eso solo
+    se confia en el numero si el nombre EMPIEZA con "F<numero>" -- si no,
+    se descarta ese partido entero (mejor perder un dato que guardarlo con
+    la fecha equivocada).
+    """
+    return bool(re.match(r"\s*f\s*\d+", nombre_actividad or "", re.IGNORECASE))
+
+
 def _catapult_xsrf(cj):
     for c in cj:
         if c.name == "XSRF-TOKEN":
@@ -646,9 +662,19 @@ def fetch_catapult_players(email: str, password: str):
         }
 
         filas = catapult_stats_post(opener, cj, partidos)
+        avisados = set()
         for fila in filas:
             nombre = fila.get("athlete_name")
             if not nombre:
+                continue
+            act_nombre = fila.get("activity_name") or ""
+            if not _catapult_fecha_valida(act_nombre):
+                if act_nombre not in avisados:
+                    avisados.add(act_nombre)
+                    print(f"[AVISO] Catapult {cat}: '{act_nombre}' no tiene el numero de fecha en "
+                          f"el nombre (no empieza con \"F<numero>\") -- se descarta ese partido para "
+                          f"no arriesgar una fecha equivocada. Renombrala en Catapult para que se "
+                          f"levante sola la proxima vez.", file=sys.stderr)
                 continue
             minutos = round((fila.get("total_duration") or 0) / 60)
             rival = (fila.get("activity_name") or "").split(" vs ")[-1].strip()
