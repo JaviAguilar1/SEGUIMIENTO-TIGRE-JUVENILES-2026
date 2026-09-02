@@ -480,6 +480,186 @@ def fetch_bl_players(email: str, password: str):
     return out
 
 
+# ── Catapult OpenField directo ───────────────────────────────────────────
+# Alternativa a BL GPS Performance: en vez de depender de que alguien suba
+# el CSV a la app de Brian, se loguea directo en Catapult y se baja la
+# metrica del propio partido. Mismo shape de salida que fetch_bl_players
+# (catapult_gps.players en vez de bl_gps.players) A PROPOSITO -- Javi pidio
+# un modulo aparte en la app para poder comparar los dos antes de decidir
+# con cual quedarse (2026-09-02), asi que ninguno de los dos se toca ni se
+# fusiona todavia.
+CATAPULT_API_BASE = "https://backend-us.openfield.catapultsports.com/api/v6"
+# El login NO es en us.openfield.catapultsports.com pese a que el <form> de
+# esa pagina apunte ahi -- ese host es solo el static hosting de la SPA
+# (confirmado: un POST ahi da 405 "MethodNotAllowed" de CloudFront/S3). El
+# JS de la pagina en realidad manda el login al dominio de la API.
+CATAPULT_LOGIN_URL = "https://backend-us.openfield.catapultsports.com/login"
+
+# Nombre del equipo en Catapult -> categoria en la app (confirmado con
+# GET /api/v6/teams en una sesion real).
+CATAPULT_TEAMS = {
+    "Tigre 4ta División": "4TA",
+    "Tigre 5ta División": "5TA",
+    "Tigre 6ta División": "6TA",
+    "Tigre 7ma División": "7MA",
+    "Tigre 8va División": "8VA",
+    "Tigre 9na División": "9NA",
+    "Tigre Reserva": "RESERVA",
+}
+
+# Las 16 metricas del CSV/PDF de Catapult, en el mismo orden que
+# BL_METRICAS en index.html (indice a indice, para que el frontend no
+# necesite ningun mapeo propio) -- el NOMBRE de campo real de
+# /api/v6/stats se confirmo a mano cruzando los numeros contra la tabla
+# "Reporte detallado" real de un partido (Tomas Caceres, F23 vs Godoy
+# Cruz: 57min/5425m/94.77mpm/241-173-45m/2 sprints/28.1kmh/13-17
+# acc-dcc/0 rhie), asi que estan verificados, no adivinados.
+CATAPULT_STATS_PARAMS = [
+    "athlete_id", "athlete_name", "activity_id", "activity_name",
+    "total_duration", "average_distance_session", "meterage_per_minute",
+    "velocity_band6_total_distance", "velocity_band7_total_distance", "velocity_band8_total_distance",
+    "gen2_velocity_band8_total_effort_count", "max_vel",
+    "gen2_acceleration_band8_total_effort_count", "gen2_acceleration_band1_total_effort_count",
+    "gen2_acceleration_band2_total_effort_count", "rhie_total_bouts",
+    "max_effort_acceleration", "max_effort_deceleration",
+    "high_speed_distance_per_minute", "total_player_load",
+]
+
+
+def _catapult_xsrf(cj):
+    for c in cj:
+        if c.name == "XSRF-TOKEN":
+            return urllib.parse.unquote(c.value)
+    return None
+
+
+def catapult_login(email: str, password: str):
+    """Inicia sesion en Catapult OpenField (cookie) y devuelve un opener
+    listo para pegarle a la API. Catapult usa Laravel Sanctum (SPA auth):
+    primero hay que pedir GET /sanctum/csrf-cookie (en el dominio de la
+    API, backend-us...) para que el servidor mande la cookie XSRF-TOKEN
+    (domain=.openfield.catapultsports.com, por eso sirve tambien para
+    us.openfield...) -- la pagina de login normal NO la manda por si sola,
+    la pide via JS al cargar (confirmado en vivo con curl plano: sin este
+    paso, el POST a /login siempre da 419 "CSRF token mismatch"). Despues
+    se manda esa cookie de vuelta como header X-XSRF-TOKEN en el POST."""
+    cj = http.cookiejar.CookieJar()
+    opener = urllib.request.build_opener(urllib.request.HTTPCookieProcessor(cj))
+    opener.open(urllib.request.Request(f"{CATAPULT_API_BASE.rsplit('/api', 1)[0]}/sanctum/csrf-cookie",
+                                        headers=HEADERS), timeout=30)
+
+    xsrf = _catapult_xsrf(cj)
+    if not xsrf:
+        raise RuntimeError("no se pudo obtener la cookie XSRF-TOKEN de Catapult")
+
+    body = json.dumps({"name": email, "password": password}).encode()
+    headers = dict(HEADERS)
+    headers.update({"Content-Type": "application/json", "Accept": "application/json", "X-XSRF-TOKEN": xsrf})
+    try:
+        opener.open(urllib.request.Request(CATAPULT_LOGIN_URL, data=body, headers=headers), timeout=30)
+    except urllib.error.HTTPError as e:
+        detalle = e.read().decode("utf-8", errors="replace")[:200]
+        raise RuntimeError(f"login Catapult invalido: {detalle}") from e
+    return opener, cj
+
+
+def catapult_get(opener, url):
+    req = urllib.request.Request(url, headers=HEADERS)
+    return json.loads(opener.open(req, timeout=30).read().decode("utf-8", errors="replace"))
+
+
+def catapult_stats_post(opener, cj, activity_ids):
+    """POST /api/v6/stats agrupado por atleta+actividad -- una fila por
+    jugador que jugo alguna de las actividades pedidas."""
+    body = json.dumps({
+        "filters": [{"name": "activity_id", "comparison": "=", "values": activity_ids}],
+        "group_by": ["athlete", "activity"],
+        "parameters": CATAPULT_STATS_PARAMS,
+        "sorting": ["athlete_name"],
+        "source": "cached_stats",
+    }).encode()
+    headers = dict(HEADERS)
+    headers.update({"Content-Type": "application/json", "Accept": "application/json",
+                     "X-XSRF-TOKEN": _catapult_xsrf(cj)})
+    resp = opener.open(urllib.request.Request(f"{CATAPULT_API_BASE}/stats", data=body, headers=headers), timeout=30)
+    return json.loads(resp.read().decode("utf-8", errors="replace"))
+
+
+def fetch_catapult_players(email: str, password: str):
+    """
+    Devuelve {nombre: {"pos":..., "match":[{"fecha","opp","min","metrics":
+    [...]},...]}} -- mismo shape que fetch_bl_players, pero leido directo
+    de Catapult OpenField (sin pasar por la app de Brian). Solo partidos
+    (tag "MD" de tipo DayCode sin sufijo -- los entrenamientos vienen con
+    "MD-1".."MD-5" y se descartan, mismo alcance que BL: "la app de Tigre
+    solo cruza datos de partido").
+    """
+    opener, cj = catapult_login(email, password)
+
+    teams = catapult_get(opener, f"{CATAPULT_API_BASE}/teams")
+    team_ids_por_cat = {}
+    for t in teams:
+        cat = CATAPULT_TEAMS.get(t.get("name"))
+        if cat:
+            team_ids_por_cat[cat] = t["id"]
+
+    out = {}
+    for cat, team_id in team_ids_por_cat.items():
+        actividades = catapult_get(opener, f"{CATAPULT_API_BASE}/activities"
+                                    f"?page=1&page_size=100&sort=-start_time&deleted=0&team_ids={team_id}")
+
+        partidos = []
+        for a in actividades:
+            detalle = catapult_get(opener, f"{CATAPULT_API_BASE}/activities/{a['id']}?include=all")[0]
+            tags = detalle.get("activity_tags") or []
+            es_partido = any(t.get("tag_type_name") == "DayCode" and t.get("tag_name") == "MD" for t in tags)
+            if es_partido:
+                partidos.append(a["id"])
+        if not partidos:
+            continue
+
+        # Posiciones: se sacan del roster del partido mas reciente (el
+        # primero de la lista, ya viene ordenada -start_time) -- no cambian
+        # de un partido a otro dentro de la misma temporada.
+        roster = catapult_get(opener, f"{CATAPULT_API_BASE}/activities/{partidos[0]}/athletes")
+        posiciones = {
+            f"{r.get('first_name', '')} {r.get('last_name', '')}".strip(): r.get("position_name", "")
+            for r in roster
+        }
+
+        filas = catapult_stats_post(opener, cj, partidos)
+        for fila in filas:
+            nombre = fila.get("athlete_name")
+            if not nombre:
+                continue
+            minutos = round((fila.get("total_duration") or 0) / 60)
+            rival = (fila.get("activity_name") or "").split(" vs ")[-1].strip()
+            acel_mas3 = fila.get("gen2_acceleration_band8_total_effort_count") or 0
+            m25 = fila.get("velocity_band8_total_distance") or 0
+            metrics = [
+                fila.get("average_distance_session"), fila.get("meterage_per_minute"),
+                fila.get("velocity_band6_total_distance"), fila.get("velocity_band7_total_distance"),
+                m25, fila.get("gen2_velocity_band8_total_effort_count"),
+                fila.get("max_vel"), acel_mas3,
+                fila.get("gen2_acceleration_band1_total_effort_count"),
+                fila.get("gen2_acceleration_band2_total_effort_count"), fila.get("rhie_total_bouts"),
+                fila.get("max_effort_acceleration"), fila.get("max_effort_deceleration"),
+                round(acel_mas3 / minutos, 2) if minutos else 0,
+                fila.get("high_speed_distance_per_minute"),
+                round(m25 / minutos, 2) if minutos else 0,
+                fila.get("total_player_load"),
+            ]
+            out.setdefault(nombre, {"pos": posiciones.get(nombre, ""), "match": []})
+            out[nombre]["match"].append({
+                "fecha": fila.get("activity_name") or "",
+                "opp": rival,
+                "min": minutos,
+                "metrics": metrics,
+            })
+
+    return out
+
+
 # ── parenlapelota.com.ar (segunda fuente publica para 4TA-9NA) ──────────
 # Next.js con render en el servidor -- la tabla de posiciones ya viene
 # armada en el HTML de la respuesta, sin JS ni login (confirmado con un
@@ -1128,6 +1308,23 @@ def main():
             print(f"[ERROR] BL GPS Performance: {e}", file=sys.stderr)
     else:
         print("[AVISO] BL_USER/BL_PASS no configurados, se omite BL GPS Performance")
+
+    # Catapult OpenField directo -- modulo aparte de BL GPS Performance
+    # (ver fetch_catapult_players), pensado para comparar los dos antes de
+    # decidir con cual quedarse. Opcional: si no estan las credenciales
+    # configuradas se saltea sin romper el resto.
+    usuario_catapult = os.environ.get("CATAPULT_USER")
+    password_catapult = os.environ.get("CATAPULT_PASS")
+    if usuario_catapult and password_catapult:
+        try:
+            jugadores_catapult = fetch_catapult_players(usuario_catapult, password_catapult)
+            resultado["catapult_gps"] = {"players": jugadores_catapult}
+            print(f"[OK] Catapult OpenField: {len(jugadores_catapult)} jugadores")
+        except Exception as e:  # noqa
+            errores.append(f"Catapult OpenField: {e}")
+            print(f"[ERROR] Catapult OpenField: {e}", file=sys.stderr)
+    else:
+        print("[AVISO] CATAPULT_USER/CATAPULT_PASS no configurados, se omite Catapult OpenField")
 
     # Salvaguarda: Zona A y Zona B de un mismo torneo de reserva salen de dos
     # URLs distintas de statfutbol (fetch_statfutbol_reserva_zona), asi que
