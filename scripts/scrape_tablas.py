@@ -483,17 +483,27 @@ def fetch_bl_players(email: str, password: str):
 # ── Catapult OpenField directo ───────────────────────────────────────────
 # Alternativa a BL GPS Performance: en vez de depender de que alguien suba
 # el CSV a la app de Brian, se loguea directo en Catapult y se baja la
-# metrica del propio partido. Mismo shape de salida que fetch_bl_players
-# (catapult_gps.players en vez de bl_gps.players) A PROPOSITO -- Javi pidio
-# un modulo aparte en la app para poder comparar los dos antes de decidir
-# con cual quedarse (2026-09-02), asi que ninguno de los dos se toca ni se
-# fusiona todavia.
+# metrica del propio partido. Salida en catapult_gps.players, separado por
+# categoria (a diferencia de bl_gps.players, que es plano -- ver el porque
+# en fetch_catapult_players) A PROPOSITO -- Javi pidio un modulo aparte en
+# la app para poder comparar los dos antes de decidir con cual quedarse
+# (2026-09-02), asi que ninguno de los dos se toca ni se fusiona todavia.
 CATAPULT_API_BASE = "https://backend-us.openfield.catapultsports.com/api/v6"
 # El login NO es en us.openfield.catapultsports.com pese a que el <form> de
 # esa pagina apunte ahi -- ese host es solo el static hosting de la SPA
 # (confirmado: un POST ahi da 405 "MethodNotAllowed" de CloudFront/S3). El
 # JS de la pagina en realidad manda el login al dominio de la API.
 CATAPULT_LOGIN_URL = "https://backend-us.openfield.catapultsports.com/login"
+# Sanctum exige que la request "parezca" venir de la SPA -- sin Referer/
+# Origin, hasta con la cookie de sesion bien mandada, el middleware
+# EnsureFrontendRequestsAreStateful no la reconoce como pedido stateful y
+# cae a 401 "Unauthenticated." (confirmado en vivo con credenciales
+# reales: agregar estos dos headers fue lo que lo resolvio).
+CATAPULT_HEADERS = dict(HEADERS)
+CATAPULT_HEADERS.update({
+    "Referer": "https://us.openfield.catapultsports.com/",
+    "Origin": "https://us.openfield.catapultsports.com",
+})
 
 # Nombre del equipo en Catapult -> categoria en la app (confirmado con
 # GET /api/v6/teams en una sesion real).
@@ -546,14 +556,14 @@ def catapult_login(email: str, password: str):
     cj = http.cookiejar.CookieJar()
     opener = urllib.request.build_opener(urllib.request.HTTPCookieProcessor(cj))
     opener.open(urllib.request.Request(f"{CATAPULT_API_BASE.rsplit('/api', 1)[0]}/sanctum/csrf-cookie",
-                                        headers=HEADERS), timeout=30)
+                                        headers=CATAPULT_HEADERS), timeout=30)
 
     xsrf = _catapult_xsrf(cj)
     if not xsrf:
         raise RuntimeError("no se pudo obtener la cookie XSRF-TOKEN de Catapult")
 
     body = json.dumps({"name": email, "password": password}).encode()
-    headers = dict(HEADERS)
+    headers = dict(CATAPULT_HEADERS)
     headers.update({"Content-Type": "application/json", "Accept": "application/json", "X-XSRF-TOKEN": xsrf})
     try:
         opener.open(urllib.request.Request(CATAPULT_LOGIN_URL, data=body, headers=headers), timeout=30)
@@ -564,7 +574,7 @@ def catapult_login(email: str, password: str):
 
 
 def catapult_get(opener, url):
-    req = urllib.request.Request(url, headers=HEADERS)
+    req = urllib.request.Request(url, headers=CATAPULT_HEADERS)
     return json.loads(opener.open(req, timeout=30).read().decode("utf-8", errors="replace"))
 
 
@@ -578,7 +588,7 @@ def catapult_stats_post(opener, cj, activity_ids):
         "sorting": ["athlete_name"],
         "source": "cached_stats",
     }).encode()
-    headers = dict(HEADERS)
+    headers = dict(CATAPULT_HEADERS)
     headers.update({"Content-Type": "application/json", "Accept": "application/json",
                      "X-XSRF-TOKEN": _catapult_xsrf(cj)})
     resp = opener.open(urllib.request.Request(f"{CATAPULT_API_BASE}/stats", data=body, headers=headers), timeout=30)
@@ -587,12 +597,26 @@ def catapult_stats_post(opener, cj, activity_ids):
 
 def fetch_catapult_players(email: str, password: str):
     """
-    Devuelve {nombre: {"pos":..., "match":[{"fecha","opp","min","metrics":
-    [...]},...]}} -- mismo shape que fetch_bl_players, pero leido directo
-    de Catapult OpenField (sin pasar por la app de Brian). Solo partidos
-    (tag "MD" de tipo DayCode sin sufijo -- los entrenamientos vienen con
-    "MD-1".."MD-5" y se descartan, mismo alcance que BL: "la app de Tigre
-    solo cruza datos de partido").
+    Devuelve {categoria: {nombre: {"pos":..., "match":[{"fecha","opp",
+    "min","metrics":[...]},...]}}} -- una capa mas que fetch_bl_players
+    (que es plano, sin categoria) A PROPOSITO: BL trackea un solo equipo,
+    pero Catapult trae las 7 categorias de Tigre juntas, y hay apellidos
+    repetidos de una categoria a otra (confirmado con datos reales) --
+    sin esta separacion, dos jugadores DISTINTOS con el mismo nombre en
+    categorias distintas terminarian compartiendo (mal) los partidos de
+    los dos. Solo partidos, mismo alcance que BL ("la app de Tigre solo
+    cruza datos de partido").
+
+    Un partido se distingue de un entrenamiento por el NOMBRE de la
+    actividad (" vs " en el medio, ej. "F 23- 4ta vs Godoy Cruz" -- los
+    entrenamientos se llaman "4ta md -4", "5ta Recuperacion
+    Compensatoria", etc., nunca con " vs "). Se probo primero mirando la
+    etiqueta DayCode="MD" de cada actividad (mas preciso en teoria), pero
+    esa etiqueta no viene en el listado de /activities -- hacia falta un
+    GET /activities/{id}?include=all por cada una para leerla, y con
+    cientos de entrenamientos de por medio (7 categorias x hasta 100 cada
+    una) el scraper tardaba mas de 20 minutos. El nombre SI viene en el
+    listado, sin pedidos extra.
     """
     opener, cj = catapult_login(email, password)
 
@@ -608,13 +632,7 @@ def fetch_catapult_players(email: str, password: str):
         actividades = catapult_get(opener, f"{CATAPULT_API_BASE}/activities"
                                     f"?page=1&page_size=100&sort=-start_time&deleted=0&team_ids={team_id}")
 
-        partidos = []
-        for a in actividades:
-            detalle = catapult_get(opener, f"{CATAPULT_API_BASE}/activities/{a['id']}?include=all")[0]
-            tags = detalle.get("activity_tags") or []
-            es_partido = any(t.get("tag_type_name") == "DayCode" and t.get("tag_name") == "MD" for t in tags)
-            if es_partido:
-                partidos.append(a["id"])
+        partidos = [a["id"] for a in actividades if " vs " in (a.get("name") or "")]
         if not partidos:
             continue
 
@@ -649,8 +667,9 @@ def fetch_catapult_players(email: str, password: str):
                 round(m25 / minutos, 2) if minutos else 0,
                 fila.get("total_player_load"),
             ]
-            out.setdefault(nombre, {"pos": posiciones.get(nombre, ""), "match": []})
-            out[nombre]["match"].append({
+            cat_out = out.setdefault(cat, {})
+            cat_out.setdefault(nombre, {"pos": posiciones.get(nombre, ""), "match": []})
+            cat_out[nombre]["match"].append({
                 "fecha": fila.get("activity_name") or "",
                 "opp": rival,
                 "min": minutos,
@@ -1319,7 +1338,8 @@ def main():
         try:
             jugadores_catapult = fetch_catapult_players(usuario_catapult, password_catapult)
             resultado["catapult_gps"] = {"players": jugadores_catapult}
-            print(f"[OK] Catapult OpenField: {len(jugadores_catapult)} jugadores")
+            total_jug = sum(len(v) for v in jugadores_catapult.values())
+            print(f"[OK] Catapult OpenField: {total_jug} jugadores en {len(jugadores_catapult)} categorias")
         except Exception as e:  # noqa
             errores.append(f"Catapult OpenField: {e}")
             print(f"[ERROR] Catapult OpenField: {e}", file=sys.stderr)

@@ -3499,13 +3499,14 @@ function runBlCruce(){
 // mirar los dos lado a lado y decidir con cuál se queda -- si el día de
 // mañana se descarta uno de los dos, conviene poder borrarlo entero sin
 // tocar el otro (2026-09-02).
+// A diferencia de blPlayersDeCategoria (BL trae UN solo equipo, sin separar
+// por categoría, así que hay que cruzar por nombre contra el plantel),
+// catapultPlayers YA viene separado por categoría desde el server
+// (fetch_catapult_players en scrape_tablas.py) -- necesario porque hay
+// apellidos repetidos de una categoría a otra y cruzar solo por nombre
+// mezclaría partidos de dos jugadores distintos (Javi, 2026-09-02).
 function catapultPlayersDeCategoria(cat){
-  const nombresRoster = new Set((plantelFutdetail[cat]||[]).map(p=>normNombreOrdenIndependiente(p.nombre)));
-  const out = {};
-  Object.entries(catapultPlayers).forEach(([nombre,p])=>{
-    if(nombresRoster.has(normNombreOrdenIndependiente(nombre))) out[nombre]=p;
-  });
-  return out;
+  return catapultPlayers[cat] || {};
 }
 
 let gpsCruceCat = null;
@@ -3626,7 +3627,7 @@ function renderGpsPerfil(){
   if(!sel || !cont) return;
   const nombre = sel.value;
   if(!nombre){ cont.innerHTML = `<div style="color:var(--muted);font-size:12px;padding:12px 0">Elegí un jugador para ver su perfil.</div>`; return; }
-  const p = catapultPlayers[nombre];
+  const p = (catapultPlayers[gpsCruceCat]||{})[nombre];
   if(!p){ cont.innerHTML = `<div style="color:var(--muted);font-size:12px;padding:12px 0">No hay datos de este jugador.</div>`; return; }
 
   const iniciales = nombre.split(' ').filter(Boolean).map(w=>w[0]).slice(0,2).join('').toUpperCase();
@@ -3670,11 +3671,12 @@ function runGpsCruce(){
   const fechasSel = gpsFechasSeleccionadas();
   const out = document.getElementById('gps-cruce-result');
 
+  const catCat = catapultPlayers[gpsCruceCat] || {};
   if(gpsMode==='cmp'){
     const jugSel = [...document.getElementById('gps-jugadores').selectedOptions].map(o=>o.value);
     if(!jugSel.length){ out.innerHTML = `<div style="color:var(--muted);font-size:12px;padding:12px 0">Elegí al menos un jugador.</div>`; return; }
     const fechasSet = new Set();
-    jugSel.forEach(n=>(catapultPlayers[n]?.match||[]).forEach(r=>{
+    jugSel.forEach(n=>(catCat[n]?.match||[]).forEach(r=>{
       const f = blFechaNum(r.fecha);
       if(f!=null && (!fechasSel || fechasSel.has(f))) fechasSet.add(f);
     }));
@@ -3682,7 +3684,7 @@ function runGpsCruce(){
     if(!fechas.length){ out.innerHTML = `<div style="color:var(--muted);font-size:12px;padding:12px 0">No hay datos para esa combinación.</div>`; return; }
     const rows = jugSel.map(n=>{
       const byFecha={};
-      (catapultPlayers[n]?.match||[]).forEach(r=>{ const f=blFechaNum(r.fecha); if(f!=null) byFecha[f]=r; });
+      (catCat[n]?.match||[]).forEach(r=>{ const f=blFechaNum(r.fecha); if(f!=null) byFecha[f]=r; });
       const vals = fechas.map(f=>{
         const r = byFecha[f];
         const v = r && r.metrics ? r.metrics[met.i] : null;
