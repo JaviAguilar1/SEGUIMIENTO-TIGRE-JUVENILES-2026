@@ -5204,8 +5204,7 @@ function blTopSpeedInfo(cat, nombre){
 // por sobre BL en la tarjeta -- Catapult directo es la fuente que se va a
 // mantener activa de acá en adelante (Javi, 2026-09-02).
 function catapultTopSpeedInfo(cat, nombre){
-  const nn = normNombreOrdenIndependiente(nombre);
-  const entry = Object.entries(catapultPlayers[cat]||{}).find(([n])=>normNombreOrdenIndependiente(n)===nn);
+  const entry = catapultResolverJugador(cat, nombre);
   if(!entry) return null;
   const matches = (entry[1].match||[]).filter(m=>m.metrics && m.metrics[6]!=null);
   if(!matches.length) return null;
@@ -7809,6 +7808,15 @@ function abrirPerfilJugador(cat, nombre){
     .split(/\s+/).filter(Boolean).sort().join(' ');
   const blEntry = Object.entries(blPlayers).find(([n])=>ordenIndep(n)===ordenIndep(nombre));
   const blMatches = blEntry ? (blEntry[1].match||[]) : [];
+  // Catapult directo, si hay -- se prefiere por sobre BL para ESTE jugador
+  // (misma lógica que topSpeedInfo en la tarjeta chica/PDF). catapultPlayers
+  // ya viene separado por categoría real, así que el cruce por nombre acá
+  // no corre riesgo de mezclar a alguien de otra categoría (Javi, 2026-09-02:
+  // esta ficha completa -- el radar -- se había quedado sin este arreglo,
+  // solo se había hecho en la tarjeta chica y el PDF).
+  const catapultEntry = catapultResolverJugador(cat, nombre);
+  const catapultMatches = catapultEntry ? (catapultEntry[1].match||[]) : [];
+  const gpsMatches = catapultMatches.length ? catapultMatches : blMatches;
 
   // Cruza contra matchData (citaciones) de TODAS las fechas de la categoría
   // -- veces titular, veces entró desde el banco, veces salió. Match por id
@@ -7881,12 +7889,22 @@ function abrirPerfilJugador(cat, nombre){
   const gpsNumsDe = (p,i) => (p.match||[]).map(m=>m.metrics?.[i]).filter(v=>v!=null).map(Number);
   const gpsPromDe = (p,i) => { const n=gpsNumsDe(p,i); return n.length ? n.reduce((a,b)=>a+b,0)/n.length : null; };
   const gpsMaxDe  = (p,i) => { const n=gpsNumsDe(p,i); return n.length ? Math.max(...n) : null; };
-  const sprintsProm = gpsPromDe(blEntry?blEntry[1]:{}, 5);
-  const velMax = gpsMaxDe(blEntry?blEntry[1]:{}, 6);
-  const mtsProm = gpsPromDe(blEntry?blEntry[1]:{}, 0);
+  const sprintsProm = gpsPromDe({match:gpsMatches}, 5);
+  const velMax = gpsMaxDe({match:gpsMatches}, 6);
+  const mtsProm = gpsPromDe({match:gpsMatches}, 0);
+  // Referencia (mejor dato del plantel): por cada jugador de la categoría,
+  // se usa Catapult si tiene carga, sino BL -- mismo criterio de preferencia
+  // que arriba, jugador por jugador.
   let refSprints=0, refVelMax=0, refMts=0;
-  Object.values(blPlayersDeCategoria(cat)).forEach(p=>{
-    const sp=gpsPromDe(p,5), vm=gpsMaxDe(p,6), mt=gpsPromDe(p,0);
+  const nombresConGps = new Set([
+    ...Object.keys(catapultPlayersDeCategoria(cat)),
+    ...Object.keys(blPlayersDeCategoria(cat)),
+  ]);
+  const catapultCat = catapultPlayersDeCategoria(cat), blCat = blPlayersDeCategoria(cat);
+  nombresConGps.forEach(n=>{
+    const cEntry = catapultCat[n], bEntry = blCat[n];
+    const matches = (cEntry && cEntry.match.length) ? cEntry.match : (bEntry ? bEntry.match : []);
+    const sp=gpsPromDe({match:matches},5), vm=gpsMaxDe({match:matches},6), mt=gpsPromDe({match:matches},0);
     if(sp!=null) refSprints=Math.max(refSprints, sp);
     if(vm!=null) refVelMax =Math.max(refVelMax, vm);
     if(mt!=null) refMts    =Math.max(refMts, mt);
@@ -7896,7 +7914,7 @@ function abrirPerfilJugador(cat, nombre){
   const radarSprints = (refSprints && sprintsProm!=null) ? Math.min(100, Math.round(sprintsProm/refSprints*100)) : 0;
   const radarVelMax  = (refVelMax  && velMax!=null)      ? Math.min(100, Math.round(velMax/refVelMax*100))      : 0;
   const radarMts     = (refMts     && mtsProm!=null)     ? Math.min(100, Math.round(mtsProm/refMts*100))       : 0;
-  const hayGps = blMatches.length>0;
+  const hayGps = gpsMatches.length>0;
   const radarHTML = `
     <div style="position:relative;width:100%;height:240px;margin:6px 0">
       <canvas id="radar-perfil-jugador" role="img" aria-label="Radar de ${esc(nombre)}: cada eje es el porcentaje respecto al mejor dato del plantel de ${esc(cat)} en goles, minutos jugados${hayGps?', sprints, velocidad maxima y metros por partido':''}${hayGps?'':' -- sprints, velocidad maxima y metros por partido todavia pendientes de carga GPS'}"></canvas>
@@ -8120,6 +8138,45 @@ async function getPdfjsLib(){
 function normNombreOrdenIndependiente(s){
   return (s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'')
     .replace(/[^a-z\s]/g,' ').split(/\s+/).filter(Boolean).sort().join(' ');
+}
+// Busca un jugador dentro de catapultPlayers[cat] tolerando lo mismo que ya
+// tolera el scraper del lado servidor (_catapult_resolver_categoria en
+// scrape_tablas.py) -- normNombreOrdenIndependiente sola solo reordena
+// palabras, no alcanza para nombres con una letra distinta entre Catapult
+// y el plantel (ej. "Miqueas Olocco" vs "Olocco Mikeas", "Cuba Giovanni" vs
+// "Cuba Gio") (Javi, 2026-09-02: la ficha completa/radar seguía sin mostrar
+// el dato de estos jugadores por esto). Devuelve [nombreEnCatapult, datos]
+// o null. 1) exacto, 2) subconjunto de palabras (nombre incompleto de un
+// lado), 3) parecido de texto (LCS) con umbral alto -- solo si hay una
+// única coincidencia en cada nivel, nunca se adivina entre varias.
+function catapultResolverJugador(cat, nombre){
+  const dict = catapultPlayers[cat] || {};
+  const nn = normNombreOrdenIndependiente(nombre);
+  if(!nn) return null;
+  const exacto = Object.entries(dict).find(([n])=>normNombreOrdenIndependiente(n)===nn);
+  if(exacto) return exacto;
+
+  const palabras = new Set(nn.split(' '));
+  const subconjunto = Object.entries(dict).filter(([n])=>{
+    const np = new Set(normNombreOrdenIndependiente(n).split(' '));
+    return [...palabras].every(w=>np.has(w)) || [...np].every(w=>palabras.has(w));
+  });
+  if(subconjunto.length===1) return subconjunto[0];
+  if(subconjunto.length>1) return null;
+
+  const lcsRatio = (a,b) => {
+    const dp = Array.from({length:a.length+1}, ()=>new Array(b.length+1).fill(0));
+    for(let i=1;i<=a.length;i++) for(let j=1;j<=b.length;j++)
+      dp[i][j] = a[i-1]===b[j-1] ? dp[i-1][j-1]+1 : Math.max(dp[i-1][j], dp[i][j-1]);
+    return (a.length+b.length) ? 2*dp[a.length][b.length]/(a.length+b.length) : 0;
+  };
+  let mejorScore=0, mejores=[];
+  Object.entries(dict).forEach(([n,v])=>{
+    const score = lcsRatio(nn, normNombreOrdenIndependiente(n));
+    if(score>mejorScore){ mejorScore=score; mejores=[[n,v]]; }
+    else if(score===mejorScore) mejores.push([n,v]);
+  });
+  return (mejorScore>=0.84 && mejores.length===1) ? mejores[0] : null;
 }
 
 
