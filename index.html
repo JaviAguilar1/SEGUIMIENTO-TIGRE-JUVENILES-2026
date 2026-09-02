@@ -6756,14 +6756,14 @@ async function dibujarTarjetaRival({cat, prox, info, ultimos, ultimosLabel, reci
         });
       } else {
         ctx.font="11px 'Barlow', sans-serif"; ctx.fillStyle=WIN;
-        ctx.fillText('Nadie en riesgo.', ex, cy);
+        ctx.fillText('Sin jugadores con 5 amarillas.', ex, cy);
       }
     };
 
     if(mostrarGoleador && mostrarAmarillas){
       drawGoleador(topY - padInterno);
       ctx.beginPath(); ctx.moveTo(divX+padInterno, mid); ctx.lineTo(rightX+colW-padInterno, mid); ctx.stroke();
-      drawAmarillas(mid - padInterno);
+      drawAmarillas(mid - padInterno + 10);
     } else if(mostrarGoleador){
       drawGoleador((topY+botY)/2 - 40);
     } else {
