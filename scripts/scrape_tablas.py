@@ -558,10 +558,32 @@ CATAPULT_FECHA_CALENDARIO = {
 # sin ese prefijo, y actividades de la temporada 2025 que quedaron con el
 # mismo nombre "F24".."F31" que esta), se recorre el fixture fecha por
 # fecha, se calcula que dia de calendario le toca, y se busca en Catapult
-# que actividad se jugo ESE dia exacto. Si ninguna actividad coincide con
-# el dia de una fecha, esa fecha simplemente no tiene GPS cargado todavia
-# -- no se inventa nada.
-CATAPULT_DIA_A_FECHA = {v: k for k, v in CATAPULT_FECHA_CALENDARIO.items()}
+# que actividad se jugo ESE dia (o el siguiente -- ver mas abajo). Si
+# ninguna actividad coincide, esa fecha simplemente no tiene GPS cargado
+# todavia -- no se inventa nada.
+#
+# Cada fecha acepta tambien el DIA SIGUIENTE al oficial: confirmado con
+# datos reales que la descarga/creacion de la sesion en Catapult a veces
+# queda fechada un dia despues del partido en si (F2 vs Ferro aparecia
+# fechada 22/3 en 4TA/6TA/7MA en vez del 21/3 oficial, mismo patron en
+# varias categorias a la vez) -- "no importa que se hayan subido los
+# datos al dia siguiente" (Javi, 2026-09-02).
+CATAPULT_DIA_A_FECHA = {}
+for _fecha, _ymd in CATAPULT_FECHA_CALENDARIO.items():
+    for _offset in (0, 1):
+        _d = datetime.date(*_ymd) + datetime.timedelta(days=_offset)
+        CATAPULT_DIA_A_FECHA[(_d.year, _d.month, _d.day)] = _fecha
+# Excepcion aparte (no es "un dia despues", es una fecha que se jugo en
+# serio en DOS dias bien distintos): la F3 vs Lanús se suspendio por
+# lluvia el 28/3 en Rincon a mitad del primer tiempo de 4TA (nunca
+# arrancaron 5TA/6TA) -- el 15/4 se completo el 2do tiempo de 4TA en
+# Hacoaj Y se jugaron completos los partidos de 5TA y 6TA de esa misma
+# fecha 3 (6TA quedo registrada en Catapult el 16/4, un dia despues, mismo
+# patron de arriba). Mismo criterio para cualquier tipo de registro, no
+# solo GPS -- ver también parseCitacionPdf/segundoTiempoDe en index.html,
+# que ya resolvía este mismo caso para las citaciones.
+CATAPULT_DIA_A_FECHA[(2026, 4, 15)] = 3
+CATAPULT_DIA_A_FECHA[(2026, 4, 16)] = 3
 AR_TZ = datetime.timezone(datetime.timedelta(hours=-3))
 # Cualquier actividad de antes de esta fecha es de una temporada vieja que
 # quedo en Catapult -- se descarta sin mirar nada mas (Javi, 2026-09-02).
