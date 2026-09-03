@@ -353,6 +353,15 @@ table tr:hover td{background:rgba(26,58,143,0.15);}
 .gol-empty{padding:16px;text-align:center;color:var(--muted);font-size:12px;
   font-family:'Barlow Condensed',sans-serif;letter-spacing:1px;}
 
+/* ── RENDIMIENTO GPS — gráficos de Informe de partido (Chart.js) ──────
+   En notebook/desktop se ven muy chicos si se dejan a una altura fija
+   pensada para celular -- more alto a partir de 900px de ancho, y de
+   nuevo un poco más en pantallas grandes (1400px+). El ancho ya lo toma
+   Chart.js solo del contenedor (100%), acá solo se define el alto. */
+.gic-chart-box{position:relative;width:100%;height:220px;box-sizing:border-box;}
+@media(min-width:900px){.gic-chart-box{height:340px;}}
+@media(min-width:1400px){.gic-chart-box{height:420px;}}
+
 /* ── GENERAL COMPARISON TABLE ───────────────────────── */
 .gen-table-wrap{overflow-x:auto;margin-bottom:24px;border-radius:10px;border:1px solid var(--border);}
 table.gen-table thead tr th{
@@ -3457,8 +3466,35 @@ function blPlayersDeCategoria(cat){
 // (fetch_catapult_players en scrape_tablas.py) -- necesario porque hay
 // apellidos repetidos de una categoría a otra y cruzar solo por nombre
 // mezclaría partidos de dos jugadores distintos (Javi, 2026-09-02).
+// Catapult guarda la posición como texto libre, tipeada a mano por quien
+// carga el plantel de cada equipo ahí -- entre categorías (y a veces entre
+// jugadores de la MISMA categoría) el mismo puesto real queda escrito
+// distinto ("VOL"/"Vol", "VOL CTR"/"Volante Central", "DFC"/"Defensa
+// Central"). Se unifican acá SOLO los casos donde no hay ninguna duda de
+// que es lo mismo -- nunca se toca el dato en Catapult, esto es solo para
+// que la app agrupe bien. "LAT" y "DC" quedan sin tocar a propósito: no
+// hay forma de saber si "LAT" es izquierdo o derecho, ni si "DC" significa
+// Defensor Central o Delantero Centro en cada caso -- fusionarlos a
+// ciegas podría mezclar jugadores de puestos reales distintos, peor que
+// dejarlos separados (Javi, 2026-09-03).
+const GPS_POS_ALIAS = {
+  'vol': 'VOL',
+  'vol ctr': 'VOL CTR',
+  'volante central': 'VOL CTR',
+  'dfc': 'DFC',
+  'defensa central': 'DFC',
+};
+function gpsNormPos(pos){
+  const p = (pos||'').trim();
+  if(!p) return p;
+  const key = p.toLowerCase().replace(/\s+/g,' ');
+  return GPS_POS_ALIAS[key] || p;
+}
 function catapultPlayersDeCategoria(cat){
-  return catapultPlayers[cat] || {};
+  const raw = catapultPlayers[cat] || {};
+  const out = {};
+  Object.entries(raw).forEach(([nombre,p])=>{ out[nombre] = {...p, pos: gpsNormPos(p.pos)}; });
+  return out;
 }
 
 let gpsCruceCat = null;
@@ -3683,7 +3719,7 @@ function gpsKpiCardHTML(label, unit, nums){
 function gpsChartWrapHTML(id, titulo){
   return `<div style="margin-bottom:22px">
     <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;font-family:'Barlow Condensed',sans-serif">${esc(titulo)}</div>
-    <div style="position:relative;height:220px"><canvas id="${id}"></canvas></div>
+    <div class="gic-chart-box"><canvas id="${id}"></canvas></div>
   </div>`;
 }
 
