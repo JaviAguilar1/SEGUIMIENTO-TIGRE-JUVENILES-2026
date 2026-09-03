@@ -716,15 +716,32 @@ def _catapult_categoria_por_citacion(nombre_norm, fecha_num, citaciones_por_cat_
 # necesite ningun mapeo propio) -- el NOMBRE de campo real de
 # /api/v6/stats se confirmo a mano cruzando los numeros contra la tabla
 # "Reporte detallado" real de un partido (Tomas Caceres, F23 vs Godoy
-# Cruz: 57min/5425m/94.77mpm/241-173-45m/2 sprints/28.1kmh/13-17
-# acc-dcc/0 rhie), asi que estan verificados, no adivinados.
+# Cruz, PDF oficial del 29/8/2026: 60min/5495m/94.47mpm/241-173-45m/
+# 2 sprints/28.1kmh/13-17 acc-dcc/4.9/-4.9 max), asi que estan
+# verificados contra el reporte oficial, no adivinados (2026-09-03).
+#
+# "rhie_total_bouts" se saco de esta lista (2026-09-03): la doc oficial
+# de Catapult confirma que los bouts de RHIE NO se pueden pedir por API
+# ("Because RHIE bouts are not available in the API...", ver
+# https://vision-projects.catapultsports.com/focus-openfield/index.html)
+# -- se calculan agrupando esfuerzos individuales de alta intensidad que
+# caen dentro de una ventana de recuperacion configurable (en Catapult,
+# esta ventana esta en 21s para este club -- ver "ESFUERZOS DE ALTA
+# INTENSIDAD DENTRO DE 21" en los PDF exportados), y esa agrupacion
+# requiere el detalle esfuerzo-por-esfuerzo con su horario exacto, que
+# la API de stats no expone (solo totales agregados por partido). Pedir
+# este campo igual no rompia nada -- la API contestaba 0 siempre, sin
+# error -- pero ese 0 es enganoso (parece un dato real, "no tuvo ningun
+# esfuerzo repetido", cuando en realidad nunca se pudo medir). Ahora
+# metrics[10] queda directamente en None (ver mas abajo) y el frontend
+# lo muestra como "no disponible" en vez de "0".
 CATAPULT_STATS_PARAMS = [
     "athlete_id", "athlete_name", "activity_id", "activity_name",
     "total_duration", "average_distance_session", "meterage_per_minute",
     "velocity_band6_total_distance", "velocity_band7_total_distance", "velocity_band8_total_distance",
     "gen2_velocity_band8_total_effort_count", "max_vel",
     "gen2_acceleration_band8_total_effort_count", "gen2_acceleration_band1_total_effort_count",
-    "gen2_acceleration_band2_total_effort_count", "rhie_total_bouts",
+    "gen2_acceleration_band2_total_effort_count",
     "max_effort_acceleration", "max_effort_deceleration",
     "high_speed_distance_per_minute", "total_player_load",
 ]
@@ -997,7 +1014,7 @@ def fetch_catapult_players(email: str, password: str, plantel_por_cat=None):
                 m25, fila.get("gen2_velocity_band8_total_effort_count"),
                 fila.get("max_vel"), acel_mas3,
                 fila.get("gen2_acceleration_band1_total_effort_count"),
-                fila.get("gen2_acceleration_band2_total_effort_count"), fila.get("rhie_total_bouts"),
+                fila.get("gen2_acceleration_band2_total_effort_count"), None,  # RHIE: no disponible por API, ver comentario de CATAPULT_STATS_PARAMS
                 fila.get("max_effort_acceleration"), fila.get("max_effort_deceleration"),
                 round(acel_mas3 / minutos, 2) if minutos else 0,
                 fila.get("high_speed_distance_per_minute"),
