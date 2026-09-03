@@ -912,6 +912,16 @@ def fetch_catapult_players(email: str, password: str, plantel_por_cat=None):
             )
             if not es_partido:
                 continue
+            # Partidos de otro torneo (Liga Metro, no el Torneo LPF que
+            # seguimos) quedan cargados en Catapult con "Liga" en el nombre
+            # del rival -- sin este filtro, si caen el mismo dia (o el
+            # siguiente) que una fecha real del fixture LPF, su GPS pisaba
+            # el de la fecha del torneo (caso real: 7MA F6 "AAAJ Rojo Liga"
+            # y F15 "San Lorenzo Liga", 2026-09-03).
+            if re.search(r"\bliga\b", nombre_act, re.IGNORECASE):
+                print(f"[AVISO] Catapult {cat}: '{a.get('name')}' parece ser de otro torneo "
+                      f"(Liga Metro) -- se descarta, no es Torneo LPF.", file=sys.stderr)
+                continue
             ts = a.get("start_time")
             if not ts:
                 continue
@@ -1185,14 +1195,15 @@ def fetch_statfutbol_plantel(catnum, team_id):
         nombre_m = re.search(r'jugador-pc">([^<]*)</span>', fila)
         celdas = re.findall(r"<td[^>]*>(.*?)</td>", fila, re.DOTALL)
         # celdas: [0]=nombre, [1]=PJ, [2]=MIN, [3]=GOL, [4]=AM, [5]=EXP, [6]=OUT, [7]=IN, [8]=boton
-        if not nombre_m or len(celdas) < 5:
+        if not nombre_m or len(celdas) < 6:
             continue
         try:
             gol = int(re.sub(r"<[^>]+>", "", celdas[3]).strip())
             am = int(re.sub(r"<[^>]+>", "", celdas[4]).strip())
+            roja = int(re.sub(r"<[^>]+>", "", celdas[5]).strip())
         except (ValueError, IndexError):
             continue
-        out.append({"nombre": nombre_m.group(1).strip(), "gol": gol, "am": am})
+        out.append({"nombre": nombre_m.group(1).strip(), "gol": gol, "am": am, "roja": roja})
     return out
 
 
@@ -1588,14 +1599,15 @@ def fetch_statfutbol_reserva_plantel(planteles_base, team_id):
     for fila in filas:
         nombre_m = re.search(r'jugador-pc">([^<]*)</span>', fila)
         celdas = re.findall(r"<td[^>]*>(.*?)</td>", fila, re.DOTALL)
-        if not nombre_m or len(celdas) < 5:
+        if not nombre_m or len(celdas) < 6:
             continue
         try:
             gol = int(re.sub(r"<[^>]+>", "", celdas[3]).strip())
             am = int(re.sub(r"<[^>]+>", "", celdas[4]).strip())
+            roja = int(re.sub(r"<[^>]+>", "", celdas[5]).strip())
         except (ValueError, IndexError):
             continue
-        out.append({"nombre": nombre_m.group(1).strip(), "gol": gol, "am": am})
+        out.append({"nombre": nombre_m.group(1).strip(), "gol": gol, "am": am, "roja": roja})
     return out
 
 

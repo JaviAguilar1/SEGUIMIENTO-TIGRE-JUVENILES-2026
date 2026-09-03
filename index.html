@@ -7978,15 +7978,26 @@ function abrirPerfilJugador(cat, nombre){
     partidosJugados.push({fecha, rival:d.rival||'—', cond:condicionCat(cat,fecha), res:results[cat]?.[fecha]||null, eventos});
   });
   partidosJugados.sort((a,b)=>a.fecha-b.fecha);
-  // Minutos/goles/amarillas/rojas: gana COMET (más preciso, partido a
-  // partido), pero como no cubre el 100% de las fechas, si futdetail (que
-  // sí es acumulado de toda la temporada) da un número más alto, se usa ese
-  // -- nunca mostrar de menos por una fecha sin informe de COMET cargado.
+  // Minutos: gana COMET (más preciso, partido a partido), pero como no
+  // cubre el 100% de las fechas, si futdetail (acumulado de toda la
+  // temporada) da un número más alto, se usa ese -- nunca mostrar de menos
+  // por una fecha sin informe de COMET cargado. OJO: futdetail no separa
+  // "Torneo LPF" de amistosos en este acumulado (a diferencia del fixture),
+  // así que para goles/tarjetas NO se usa -- un jugador con un gol en
+  // amistoso terminaba mostrando un gol de más (caso real: Schenone Elías,
+  // 6TA, 2026-09-03). En su lugar:
+  // - Goles: golesEfectivos(cat) (carga manual + COMET, ya 100% torneo,
+  //   mismo número que "Mi carga" en Confiabilidad).
+  // - Tarjetas: COMET vs. statfutbol (la tabla oficial LPF, tampoco tiene
+  //   amistosos) en vez de COMET vs. futdetail.
   const convocatorias = vecesTitular+vecesBanco;
   const minutosFinal = Math.max(minCometSum, parseInt(s.minutos_jugados)||0);
-  const golesFinal = Math.max(golCometSum, parseInt(s.goles)||0);
-  const amarillasFinal = Math.max(amCometSum, parseInt(s.tarjeta_amarilla)||0);
-  const rojasFinal = Math.max(rojCometSum, parseInt(s.tarjeta_roja)||0);
+  const geEntry = golesEfectivos(cat).find(g=>sonMismoJugador(g.name));
+  const golesFinal = geEntry ? geEntry.goals : golCometSum;
+  const sfJ = ((TABLA_DATA&&TABLA_DATA.statfutbol_jugadores&&TABLA_DATA.statfutbol_jugadores[cat])||[])
+    .find(j=>sonMismoJugador(j.nombre));
+  const amarillasFinal = Math.max(amCometSum, sfJ?(parseInt(sfJ.am)||0):0);
+  const rojasFinal = Math.max(rojCometSum, sfJ?(parseInt(sfJ.roja)||0):0);
 
   // Radar de arriba de la ficha: goles y minutos son 100% propios (tasa
   // sobre las convocatorias del jugador, nunca comparado contra nadie);
