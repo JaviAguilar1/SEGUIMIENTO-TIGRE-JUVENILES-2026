@@ -2766,6 +2766,14 @@ function renderStatsSingle(cat, content){
     </div>` : '';
 
   // Table rows
+  // RESERVA: resultado y rival "100% automáticos" desde statfutbol.com.ar
+  // (ver scrape_tablas.py, fetch_statfutbol_reserva_fixture) -- a pedido
+  // de Javi, 2026-09-02, es la única categoría sin nada de esto hasta
+  // ahora. Solo se usa como RESPALDO cuando todavía no hay nada cargado a
+  // mano (results[dataCat][r.f] / rivalData[dataCat][r.f].rival vacíos) --
+  // nunca pisa un dato ya guardado, para no perder una corrección manual
+  // vieja si alguna vez hiciera falta.
+  const statfutbolReserva = isReserva ? (TABLA_DATA?.statfutbol_resultados?.[dataCat] || null) : null;
   let rows='';
   fixtureList.forEach(r=>{
     // No block dividers for RESERVA (18 matches, no need to split)
@@ -2773,14 +2781,15 @@ function renderStatsSingle(cat, content){
       const span=3+(isLink?resultadosLinks.length:0)+(showEquipo?1:0);
       rows+=`<tr class="divider-row"><td colspan="${span}">── BLOQUE F${r.f}–F${Math.min(r.f+bloqueSize-1,35)}</td></tr>`;
     }
-    const stored=results[dataCat][r.f];
+    const autoRes = statfutbolReserva ? statfutbolReserva[r.f] : null;
+    const stored = results[dataCat][r.f] || (autoRes ? [autoRes.gf, autoRes.gc] : null);
     const gf=stored?stored[0]:'', gc=stored?stored[1]:'';
     const res=stored?getResult(stored[0],stored[1]):null;
     const pts=res==='W'?3:res==='D'?1:res==='L'?0:'—';
     const ptC=res==='W'?'var(--win)':res==='D'?'var(--draw)':res==='L'?'var(--loss)':'var(--muted)';
 
     // RESERVA: use editable rivalData, other cats use fixed RIVALS
-    const rName = isReserva ? (rivalData[dataCat][r.f]?.rival || '') : r.r;
+    const rName = isReserva ? (rivalData[dataCat][r.f]?.rival || autoRes?.rival || '') : r.r;
     const rCond = isReserva ? (rivalData[dataCat][r.f]?.cond  || 'L') : condicionCat(cat, r.f);
 
     // Rival + condición van juntos en una sola celda (antes eran dos
@@ -2890,12 +2899,39 @@ function renderStatsSingle(cat, content){
       </div>`
     : '';
 
+  // RESERVA: alerta de próximo rival (goleador + riesgo de 5ta amarilla),
+  // automática desde statfutbol.com.ar -- mismo dato/criterio que ya existe
+  // para 4TA-9NA (ver calcular_alerta_rival_reserva en scrape_tablas.py),
+  // acá como un bloque simple en vez de la placa/panel completo de
+  // "Análisis de Rival" (eso queda para más adelante si hace falta).
+  const reservaAlerta = isReserva ? (TABLA_DATA?.rival_alertas?.[dataCat] || null) : null;
+  const reservaAlertaHTML = reservaAlerta ? `
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-bottom:14px">
+      <div style="background:var(--surface2);border:1px solid var(--border2);border-radius:10px;padding:14px 16px">
+        <div style="font-size:12px;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;margin-bottom:6px">Próximo rival (F${reservaAlerta.fecha})</div>
+        <div style="font-size:17px;font-weight:700;color:var(--text)">${esc(reservaAlerta.rival)}</div>
+      </div>
+      <div style="background:var(--surface2);border:1px solid var(--border2);border-radius:10px;padding:14px 16px">
+        <div style="font-size:12px;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;margin-bottom:6px">⚽ Goleador del rival</div>
+        ${reservaAlerta.goleador
+          ? `<div style="font-size:15px;font-weight:700;color:var(--text)">${esc(reservaAlerta.goleador.nombre)}</div><div style="font-size:13px;color:var(--muted)">${reservaAlerta.goleador.goles} goles</div>`
+          : `<div style="font-size:13px;color:var(--muted)">Sin datos todavía.</div>`}
+      </div>
+      <div style="background:${reservaAlerta.amarillas_riesgo?.length?'rgba(245,158,11,0.12)':'rgba(34,197,94,0.12)'};border:1px solid ${reservaAlerta.amarillas_riesgo?.length?'rgba(245,158,11,0.45)':'rgba(34,197,94,0.4)'};border-radius:10px;padding:14px 16px">
+        <div style="font-size:12px;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;margin-bottom:6px">🟨 5ta amarilla</div>
+        ${reservaAlerta.amarillas_riesgo?.length
+          ? `<div style="font-size:14px;color:var(--draw)">${reservaAlerta.amarillas_riesgo.map(a=>esc(a.nombre)+' ('+a.amarillas+')').join('<br>')}</div>`
+          : `<div style="font-size:14px;color:var(--win)">Ningún jugador llegó a la 5ta amarilla en el partido previo.</div>`}
+      </div>
+    </div>` : '';
+
   tabEl.innerHTML=`
     ${amarillaAlertHTML}
     ${seccionTitulo('resultados-'+dataCat,
       `RESULTADOS · <span style="color:${CAT_COLORS[cat]}">${cat}</span>${isReserva?` · <span style="color:var(--gold)">${reservaSemestre===2?'2do SEMESTRE':'1er SEMESTRE'}</span>`:''}`)}
     <div id="sec-resultados-${dataCat}"${seccionEstiloInicial('resultados-'+dataCat)}>
       ${semestreSelector}
+      ${reservaAlertaHTML}
       <div class="table-wrap"><table>
         <thead>
           <tr class="thead-top">
@@ -3008,6 +3044,11 @@ function renderVideoanalisisTab(cat, tabEl){
         <div>${placaRotuloHTML('🖼️ CIERRE')}${placaCierreControlesHTML(cat, '-riv')}</div>
       </div>
 
+      ${seccionTitulo('va-riv-videos-'+dataCat, '🎥 VIDEOS DE RIVAL')}
+      <div id="sec-va-riv-videos-${dataCat}"${seccionEstiloInicial('va-riv-videos-'+dataCat)}>
+        ${videoLinksTablaRivalHTML(cat, dataCat)}
+      </div>
+
       ${seccionTitulo('va-riv-stats-'+dataCat, '📊 ESTADÍSTICAS DE RIVAL')}
       <div id="sec-va-riv-stats-${dataCat}"${seccionEstiloInicial('va-riv-stats-'+dataCat)}>
         <div id="rival-stats-detalle-${dataCat}"></div>
@@ -3016,6 +3057,7 @@ function renderVideoanalisisTab(cat, tabEl){
   `;
 
   attachTableEvents(dataCat); // mismo listener que ESTADÍSTICAS: .link-input/.score-input ya saben guardar
+  attachTableEvents(dataCat, `tbody-riv-${dataCat}`); // tabla de VIDEOS DE RIVAL, id propio
   if(conRival){
     renderPlacaPostPartidoBlock(cat);
     renderPlacaProximoRivalBlock(cat);
@@ -3080,6 +3122,48 @@ function videoLinksTablaPropiosHTML(cat, dataCat){
   return `<div class="table-wrap"><table>
       <thead><tr class="thead-sub"><th>FECHA</th><th>RIVAL</th>${headHTML}</tr></thead>
       <tbody id="tbody-${dataCat}">${rows}</tbody>
+    </table></div>`;
+}
+
+// Tabla de "Análisis de Rival" (link tipo 'prx', "Próximo Rival") -- existía
+// el tipo de link en LINK_TYPES pero nunca se armó ninguna tabla para
+// cargarlo/verlo (videoLinksTablaPropiosHTML lo excluye a propósito, "es de
+// Rival", pero no había ningún otro lugar que lo mostrara) -- reportado por
+// Javi, 2026-09-02: "no puedo ver 'análisis de rival'". Mismo patrón que
+// videoLinksTablaPropiosHTML, con un solo tipo de link.
+function videoLinksTablaRivalHTML(cat, dataCat){
+  const isReserva = cat === 'RESERVA';
+  const lt = LINK_TYPES.find(x=>x.key==='prx');
+  const fixtureList = isReserva ? (reservaSemestre===2 ? RIVALS_RESERVA_S2 : RIVALS_RESERVA) : RIVALS;
+
+  let rows = '';
+  fixtureList.forEach(r=>{
+    if(!isReserva && (r.f-1)%bloqueSize===0 && r.f>1){
+      rows += `<tr class="divider-row"><td colspan="3">── BLOQUE F${r.f}–F${Math.min(r.f+bloqueSize-1,35)}</td></tr>`;
+    }
+    const rName = isReserva ? (rivalData[dataCat][r.f]?.rival || '') : r.r;
+    const fechaCal = isReserva ? '' : fechaCalCompacta(r.f);
+    const val = links[dataCat][r.f][lt.key] || '';
+    const has = val.trim() !== '';
+    const titulo = `F${r.f} · ${lt.label}${rName?' · vs '+rName:''}`.replace(/'/g,"\\'");
+
+    rows += `<tr data-cat="${dataCat}" data-fecha="${r.f}">
+      <td class="fecha-num" style="white-space:nowrap">F${r.f}${fechaCal?` - (${fechaCal})`:''}</td>
+      <td class="rival-name" style="text-align:center">${esc(rName)||'—'}</td>
+      <td class="link-cell"><div class="link-wrap">
+        ${canEdit?`<input class="link-input" type="url" value="${esc(val)}" placeholder="${lt.label}…"
+          data-cat="${dataCat}" data-fecha="${r.f}" data-lkey="${lt.key}" title="${lt.label}">`:''}
+        <button class="link-btn${has?'':' empty'}" title="${lt.label}"
+          onclick="abrirVideoEmbebido(this.previousElementSibling&&this.previousElementSibling.classList.contains('link-input')?this.previousElementSibling.value:'${esc(val).replace(/'/g,"\\'")}','${titulo}')"
+          ${has||canEdit?'':'disabled'}
+          style="background:none;border:none;cursor:${has||canEdit?'pointer':'default'};font-size:15px;padding:2px 6px">${lt.icon}</button>
+      </div></td>
+    </tr>`;
+  });
+
+  return `<div class="table-wrap"><table>
+      <thead><tr class="thead-sub"><th>FECHA</th><th>RIVAL</th><th title="${lt.label}">${lt.icon} ${lt.label}</th></tr></thead>
+      <tbody id="tbody-riv-${dataCat}">${rows}</tbody>
     </table></div>`;
 }
 
@@ -4992,8 +5076,8 @@ function abrirCitacionView(cat, fecha){
 }
 
 // ── TABLE EVENTS ──────────────────────────────────────────────
-function attachTableEvents(cat){
-  const tbody=document.getElementById(`tbody-${cat}`);
+function attachTableEvents(cat, tbodyId){
+  const tbody=document.getElementById(tbodyId || `tbody-${cat}`);
   if(!tbody)return;
   tbody.addEventListener('change',e=>{
     if(e.target.classList.contains('score-input')){
