@@ -1356,6 +1356,7 @@ function initFirebase(){
             if(p.recordatoriosOmitidos) recordatoriosOmitidos = p.recordatoriosOmitidos;
             if(p.golesMismatchOmitidos) golesMismatchOmitidos = p.golesMismatchOmitidos;
             if(p.gpsMetricCfg) gpsMetricCfg = p.gpsMetricCfg;
+            if(p.gpsPosOverride) gpsPosOverride = p.gpsPosOverride;
             refreshActiveModule();
             setTimeout(refreshAlerts, 200);
           });
@@ -1445,7 +1446,7 @@ function saveData(){
     // guardado normal (cargar un resultado, un link, un gol) BORRARÍA todo
     // lo subido de COMET, porque saveData() hace un .set() del nodo entero,
     // no un merge parcial. Mismo motivo para aliasJugadoresComet.
-    const payload={results:{},links:{},goleadores:{},rivalData:rivalData,matchData:matchData,gymData:gymData,jugadores:{},plantel:{},chequeoSemanal:chequeoSemanal,aliasJugadores:aliasJugadores,aliasJugadoresComet:aliasJugadoresComet,recordatoriosOmitidos:recordatoriosOmitidos,golesMismatchOmitidos:golesMismatchOmitidos,partidos:partidos,jugadoresArchivados:jugadoresArchivados,gpsMetricCfg:gpsMetricCfg};
+    const payload={results:{},links:{},goleadores:{},rivalData:rivalData,matchData:matchData,gymData:gymData,jugadores:{},plantel:{},chequeoSemanal:chequeoSemanal,aliasJugadores:aliasJugadores,aliasJugadoresComet:aliasJugadoresComet,recordatoriosOmitidos:recordatoriosOmitidos,golesMismatchOmitidos:golesMismatchOmitidos,partidos:partidos,jugadoresArchivados:jugadoresArchivados,gpsMetricCfg:gpsMetricCfg,gpsPosOverride:gpsPosOverride};
     CATEGORIES.forEach(cat=>{
       payload.results[cat]={};
       payload.links[cat]={};
@@ -1522,6 +1523,7 @@ function loadData(){
         if(p.recordatoriosOmitidos) recordatoriosOmitidos = p.recordatoriosOmitidos;
         if(p.golesMismatchOmitidos) golesMismatchOmitidos = p.golesMismatchOmitidos;
         if(p.gpsMetricCfg) gpsMetricCfg = p.gpsMetricCfg;
+        if(p.gpsPosOverride) gpsPosOverride = p.gpsPosOverride;
       }
       showLoading(false); resolve();
     }).catch(e=>{console.warn('load error:',e);showLoading(false);resolve();});
@@ -3414,6 +3416,13 @@ function blFechaNum(str){
 // índices ocultos, `labels` los renombres -- clave 'm'+i (nunca un número
 // pelado: Firebase confunde un objeto con claves 0,1,2... con un array).
 let gpsMetricCfg = {order:null, hidden:[], labels:{}};
+// Corrección manual de posición por jugador de Catapult, por categoría:
+// gpsPosOverride[cat][nombreCatapult] = 'texto libre'. Pisa a futdetail (que
+// a su vez pisa al "Position" de Catapult, ver catapultPlayersDeCategoria) --
+// para cuando futdetail tampoco tiene la posición correcta o no lo tiene
+// cargado (Javi, 2026-09-03: "opcion de poder cambiar cada una de las
+// posiciones"). Se guarda en Firebase junto al resto de `stats`.
+let gpsPosOverride = {};
 function gpsMetricLabel(i){
   const custom = gpsMetricCfg.labels && gpsMetricCfg.labels['m'+i];
   return custom || BL_METRICAS[i].label;
@@ -3490,13 +3499,15 @@ function gpsNormPos(pos){
   const key = p.toLowerCase().replace(/\s+/g,' ');
   return GPS_POS_ALIAS[key] || p;
 }
-// Respaldo para 6TA/9NA (hoy): en Catapult el campo "Position" de esos dos
-// planteles está vacío para todos -- en vez de no poder agrupar nada, se usa
-// la posición real que ya tenemos de futdetail para ese mismo jugador. Es
-// solo para que ESTA app pueda mostrar/agrupar por posición -- no se sube ni
-// se guarda nada en Catapult (Javi, 2026-09-03, "no toques nada en
-// Catapult"). Mismo criterio de nombres "orden independiente" que ya usa el
-// resto de la app para cruzar entre fuentes distintas.
+// El campo "Position" que trae Catapult se ignora del todo (Javi,
+// 2026-09-03: "Ignora lo que se trae de catapult" -- ya se había visto que
+// para 6TA/9NA viene vacío para todos, y para el resto de las categorías
+// viene escrito distinto entre jugadores del mismo puesto real). La
+// posición que se muestra en ESTA app sale de futdetail (mismo cruce por
+// nombre que antes era solo el respaldo de 6TA/9NA) y, si está cargada, un
+// override manual por jugador tiene la última palabra (gpsPosOverride, ver
+// guardarGpsPosOverride) -- para cuando futdetail tampoco la tiene bien.
+// Nunca se sube ni se guarda nada en Catapult.
 function gpsPosDeFutdetail(cat, nombre){
   const nn = normNombreOrdenIndependiente(nombre);
   const enFutdetail = (plantelFutdetail[cat]||[]).find(r=>normNombreOrdenIndependiente(r.nombre)===nn);
@@ -3506,10 +3517,18 @@ function catapultPlayersDeCategoria(cat){
   const raw = catapultPlayers[cat] || {};
   const out = {};
   Object.entries(raw).forEach(([nombre,p])=>{
-    const pos = gpsNormPos(p.pos) || gpsNormPos(gpsPosDeFutdetail(cat, nombre));
+    const override = gpsPosOverride[cat]?.[nombre];
+    const pos = override || gpsNormPos(gpsPosDeFutdetail(cat, nombre));
     out[nombre] = {...p, pos};
   });
   return out;
+}
+function guardarGpsPosOverride(cat, nombre, valor){
+  if(!canEdit) return;
+  gpsPosOverride[cat] = gpsPosOverride[cat] || {};
+  const v = (valor||'').trim();
+  if(v) gpsPosOverride[cat][nombre] = v; else delete gpsPosOverride[cat][nombre];
+  saveData();
 }
 
 let gpsCruceCat = null;
@@ -3537,7 +3556,9 @@ function renderRendimientoGpsTab(tabEl, cat){
 
 function gpsCruceFormHTML(cat){
   return `
-    ${canEdit?`<div style="display:flex;justify-content:flex-end;margin-bottom:10px">
+    ${canEdit?`<div style="display:flex;justify-content:flex-end;gap:8px;margin-bottom:10px">
+      <button type="button" onclick="gpsAbrirPosiciones('${cat}')"
+        style="background:rgba(5,8,15,0.5);border:1px solid var(--border2);border-radius:6px;color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-weight:700;letter-spacing:1px;font-size:11px;padding:7px 12px;cursor:pointer;">✏️ POSICIONES</button>
       <button type="button" onclick="gpsAbrirConfigMetricas()"
         style="background:rgba(5,8,15,0.5);border:1px solid var(--border2);border-radius:6px;color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-weight:700;letter-spacing:1px;font-size:11px;padding:7px 12px;cursor:pointer;">⚙️ CONFIGURAR MÉTRICAS</button>
     </div>`:''}
@@ -4134,6 +4155,39 @@ function renderGpsPerfil(){
     ${comparacionHTML}
     <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin:22px 0 10px;font-family:'Barlow Condensed',sans-serif">📈 EVOLUCIÓN POR FECHA</div>
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px">${evolucionHTML || `<div style="color:var(--muted);font-size:12px">Hacen falta 2 o más fechas con datos para graficar la evolución.</div>`}</div>`;
+}
+
+// ============================================================
+//  POSICIONES — corrección manual por jugador (gpsPosOverride), una tabla
+//  por categoría. La posición de Catapult se ignora del todo; el valor
+//  prellenado es el de futdetail, editable acá. Ver catapultPlayersDeCategoria.
+// ============================================================
+function gpsAbrirPosiciones(cat){
+  if(!canEdit) return;
+  document.getElementById('gps-poscfg-overlay')?.remove();
+  const nombres = Object.keys(catapultPlayers[cat]||{}).sort();
+  const filaHTML = nombre => {
+    const actual = catapultPlayersDeCategoria(cat)[nombre]?.pos || '';
+    return `
+    <div style="display:flex;align-items:center;gap:8px;padding:6px 4px;border-bottom:1px solid var(--border)">
+      <span style="flex:1;font-size:12px;color:var(--text)">${esc(nombre)}</span>
+      <input type="text" value="${esc(actual)}" placeholder="Sin posición"
+        onchange="guardarGpsPosOverride('${cat}','${esc(nombre).replace(/'/g,"\\'")}', this.value); gpsSetMode(gpsMode);"
+        style="width:170px;background:rgba(5,8,15,.8);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:12px;padding:5px 8px;">
+    </div>`;
+  };
+  const ov = document.createElement('div');
+  ov.id='gps-poscfg-overlay';
+  ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px';
+  ov.innerHTML = `
+    <div style="background:#0c1220;border:1px solid var(--gold);border-radius:12px;padding:20px;max-width:420px;width:100%;max-height:80vh;overflow-y:auto">
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--gold2);margin-bottom:4px">✏️ POSICIONES · ${esc(cat)}</div>
+      <div style="font-size:11px;color:var(--muted);margin-bottom:14px">Sale de futdetail por defecto. Escribí acá para corregirla a mano — nunca se toca nada en Catapult.</div>
+      <div>${nombres.map(filaHTML).join('') || '<div style="color:var(--muted);font-size:12px">No hay jugadores de Catapult cargados en esta categoría.</div>'}</div>
+      <button type="button" onclick="document.getElementById('gps-poscfg-overlay').remove()"
+        style="width:100%;margin-top:16px;background:rgba(5,8,15,.8);border:1px solid var(--border2);border-radius:6px;color:var(--muted);font-family:'Bebas Neue',sans-serif;font-size:13px;padding:10px;cursor:pointer">CERRAR</button>
+    </div>`;
+  document.body.appendChild(ov);
 }
 
 // ============================================================
@@ -6617,6 +6671,7 @@ function startPublicListener(){
     if(p.recordatoriosOmitidos) recordatoriosOmitidos = p.recordatoriosOmitidos;
     if(p.golesMismatchOmitidos) golesMismatchOmitidos = p.golesMismatchOmitidos;
     if(p.gpsMetricCfg) gpsMetricCfg = p.gpsMetricCfg;
+    if(p.gpsPosOverride) gpsPosOverride = p.gpsPosOverride;
     refreshActiveModule();
   });
 }
