@@ -2740,10 +2740,14 @@ function renderPosicionGeneral(containerId){
 // calcStats(dataCat,from,to) para una categoría puntual. periodsCat define de
 // qué categoría se sacan los bloques (da igual el valor salvo para RESERVA).
 // Calcula las filas de "rendimiento por bloque de fechas" (dato puro, sin
-// HTML) — la usan tanto la tabla en pantalla (bloqueComparativaHTML) como
-// la del PDF exportado (pdfSectionBloque), así una corrección al cálculo
-// de períodos, al filtro de "todavía no jugó", o a cuál bloque marcar como
-// el más reciente, llega a los dos lugares a la vez en vez de a uno solo.
+// HTML) — la usan tanto la tabla en pantalla de 4TA-9NA (buildRendimiento-
+// GeneralHTML) como la del PDF exportado (pdfSectionBloque, esta última
+// también para RESERVA), así una corrección al cálculo de períodos, al
+// filtro de "todavía no jugó", o a cuál bloque marcar como el más
+// reciente, llega a los dos lugares a la vez en vez de a uno solo.
+// RESERVA no tiene "ESTADÍSTICAS POR BLOQUE" en pantalla (a pedido de
+// Javi, 2026-09-03) -- calcBloqueFilas sigue sirviendo para su export a
+// PDF nada más.
 function calcBloqueFilas(calcFn, periodsCat){
   const isReserva = periodsCat==='RESERVA'||periodsCat==='RESERVA_S2';
   const totMax = isReserva ? 18 : 35;
@@ -2753,42 +2757,6 @@ function calcBloqueFilas(calcFn, periodsCat){
   filas.forEach(f=>{ f.destacado = f.label===ultimoLabel; });
   return { filas, tot: calcFn(1,totMax) };
 }
-
-function bloqueComparativaHTML(calcFn, periodsCat){
-  const { filas, tot } = calcBloqueFilas(calcFn, periodsCat);
-
-  if(!filas.length){
-    return `<div style="text-align:center;padding:20px;color:var(--muted);
-      font-family:'Barlow Condensed',sans-serif;font-size:13px">Todavía no se jugaron partidos</div>`;
-  }
-
-  const rowsHTML=filas.map(f=>{
-    const dgC=f.s.dg>0?'var(--win)':f.s.dg<0?'var(--loss)':'var(--muted)';
-    return `<tr${f.destacado?' style="outline:2px solid var(--gold);outline-offset:-2px"':''}>
-      <td class="cat-cell">${f.label}</td>
-      <td style="color:var(--gold2);font-weight:700">${f.s.pts}</td><td>${f.s.pj}</td>
-      <td style="color:var(--win)">${f.s.pg}</td><td style="color:var(--draw)">${f.s.pe}</td>
-      <td style="color:var(--loss)">${f.s.pp}</td><td style="color:#60a5fa">${f.s.gf}</td>
-      <td style="color:#f87171">${f.s.gc}</td>
-      <td style="color:${dgC};font-weight:700">${f.s.dg>0?'+':''}${f.s.dg}</td></tr>`;
-  }).join('');
-
-  const tDgC=tot.dg>0?'var(--win)':tot.dg<0?'var(--loss)':'var(--muted)';
-  const totRow=`<tr style="background:rgba(192,21,42,0.1);font-weight:700;">
-    <td class="cat-cell" style="color:var(--gold2)">TOTAL TEMPORADA</td>
-    <td style="color:var(--gold2)">${tot.pts}</td><td>${tot.pj}</td>
-    <td style="color:var(--win)">${tot.pg}</td><td style="color:var(--draw)">${tot.pe}</td>
-    <td style="color:var(--loss)">${tot.pp}</td><td style="color:#60a5fa">${tot.gf}</td>
-    <td style="color:#f87171">${tot.gc}</td>
-    <td style="color:${tDgC}">${tot.dg>0?'+':''}${tot.dg}</td></tr>`;
-
-  return `<div class="gen-table-wrap"><table class="gen-table">
-    <thead><tr>
-      <th>BLOQUE</th><th>PTS</th><th>PJ</th><th>PG</th><th>PE</th>
-      <th>PP</th><th>GF</th><th>GC</th><th>DG</th>
-    </tr></thead><tbody>${rowsHTML}${totRow}</tbody></table></div>`;
-}
-
 
 function renderTopGoleadores(wrap){
   // Junta los goleadores de cada categoría, pero SIN mezclar entre categorías:
@@ -3280,10 +3248,10 @@ function renderStatsSingle(cat, content){
     <div class="st"><div class="stbar"></div>🗓️ FIXTURE Y RESULTADOS</div>
     <div id="fixture-cat-${dataCat}" style="margin-bottom:20px"></div>
 
-    ${seccionTitulo('rendcat-'+dataCat, '📈 ESTADÍSTICAS POR BLOQUE', isReserva?'':bloqueSliderHTML('cat'))}
+    ${isReserva?'':`${seccionTitulo('rendcat-'+dataCat, '📈 ESTADÍSTICAS POR BLOQUE', bloqueSliderHTML('cat'))}
     <div id="sec-rendcat-${dataCat}"${seccionEstiloInicial('rendcat-'+dataCat)}>
       <div id="bloque-cat-${dataCat}"></div>
-    </div>
+    </div>`}
 
     ${isReserva?'':`${seccionTitulo('sistema-'+dataCat, '📈 ESTADÍSTICAS POR SISTEMA')}
     <div id="sec-sistema-${dataCat}"${seccionEstiloInicial('sistema-'+dataCat)}>
@@ -3318,11 +3286,11 @@ function renderStatsSingle(cat, content){
   }
 
   // Events
-  if(!isReserva) wireBloqueSlider('cat', ()=>renderStatsSingle(cat, content));
-  document.getElementById(`bloque-cat-${dataCat}`).innerHTML= isReserva
-    ? bloqueComparativaHTML((from,to)=>calcStats(dataCat,from,to), dataCat)
-    : buildRendimientoGeneralHTML((from,to)=>calcStats(dataCat,from,to), dataCat, [cat]);
-  if(!isReserva) document.getElementById(`sistema-${dataCat}`).innerHTML = buildSistemaTacticoHTML(dataCat);
+  if(!isReserva){
+    wireBloqueSlider('cat', ()=>renderStatsSingle(cat, content));
+    document.getElementById(`bloque-cat-${dataCat}`).innerHTML = buildRendimientoGeneralHTML((from,to)=>calcStats(dataCat,from,to), dataCat, [cat]);
+    document.getElementById(`sistema-${dataCat}`).innerHTML = buildSistemaTacticoHTML(dataCat);
+  }
   if(currentRole && currentRole.startsWith('cat_') && GENERAL_CATS.includes(cat)) renderRivalStatsDetalle(dataCat, cat);
   renderGoleadores(dataCat);
   if(isReserva) {
@@ -5881,12 +5849,9 @@ function attachTableEvents(cat, tbodyId){
       if(results[cat][f][0]===null&&results[cat][f][1]===null)results[cat][f]=null;
       rebuildRow(cat,f);
       const bloqueEl=document.getElementById(`bloque-cat-${cat}`);
-      if(bloqueEl){
-        const isReservaCat=cat==='RESERVA'||cat==='RESERVA_S2';
-        bloqueEl.innerHTML = isReservaCat
-          ? bloqueComparativaHTML((from,to)=>calcStats(cat,from,to), cat)
-          : buildRendimientoGeneralHTML((from,to)=>calcStats(cat,from,to), cat, [cat]);
-      }
+      // Solo existe para 4TA-9NA -- RESERVA no tiene "ESTADÍSTICAS POR
+      // BLOQUE" en pantalla (a pedido de Javi, 2026-09-03).
+      if(bloqueEl) bloqueEl.innerHTML = buildRendimientoGeneralHTML((from,to)=>calcStats(cat,from,to), cat, [cat]);
       saveData();
     }
     if(e.target.classList.contains('link-input')){
