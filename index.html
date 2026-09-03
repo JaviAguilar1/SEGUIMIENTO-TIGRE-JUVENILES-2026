@@ -2906,44 +2906,97 @@ function renderResumenCategoriaFijo(cat, containerId){
   });
 }
 
-// Fixture: próxima fecha sin jugar siempre a la vista (fecha, rival,
-// condición, fecha de calendario) + el fixture completo de las 35 fechas
-// en un desplegable debajo. Usa RIVALS/condicionCat, mismos datos que ya
-// alimentan RESULTADOS -- no hace falta cargar nada nuevo. Solo para
-// 4TA-9NA (RESERVA ya tiene su fixture editable dentro de RESULTADOS,
-// con rival y condición a mano por no tener fuente automática confiable).
-function fixtureCategoriaHTML(cat, dataCat){
-  const proximo = RIVALS.find(r=>!(results[dataCat]||{})[r.f]);
+// Chevron de despliegue "pelado" (sin título/cartel al lado) -- mismo
+// motor que seccionTitulo (toggleSeccion busca los ids "chev-"/"sec-" con
+// este mismo patrón), pero para sub-bloques donde el título ya está puesto
+// aparte y no hace falta una segunda barra con texto (ej. "VER FIXTURE
+// COMPLETO"), a pedido de Javi -- "solo el ^, no hace falta el cartel".
+function chevronToggleHTML(idSeccion){
+  const colapsada=estaColapsada(idSeccion);
+  return `<div style="text-align:center;cursor:pointer;padding:2px 0 8px" onclick="toggleSeccion('${idSeccion}',event)">
+    <span id="chev-${idSeccion}" style="font-size:13px;color:var(--muted);display:inline-block;transition:transform .2s${colapsada?';transform:rotate(-90deg)':''}">▼</span>
+  </div>`;
+}
+
+// FIXTURE Y RESULTADOS: próxima fecha siempre a la vista (fecha, rival,
+// condición, fecha de calendario, y la posición del rival en la tabla
+// oficial -- reusa proximoRivalInfo/filaTablaLPF, mismo cruce que ya usa
+// "ESTADÍSTICAS PRÓXIMO RIVAL" para los DT) + el fixture completo de las
+// 35 fechas debajo, con el RESULTADO real de cada fecha ya jugada (no solo
+// "jugado/pendiente"). Async porque la fila del rival necesita la tabla
+// LPF ya descargada (loadTablaData). Solo para 4TA-9NA -- RESERVA usa
+// fixtureReservaHTML (fuente distinta, statfutbol).
+async function fixtureCategoriaHTML(cat, dataCat){
+  await loadTablaData();
+  const proximo = proximoRivalInfo(cat); // {fecha, rival, condTigre, condRival} o null
+
+  let rivalTablaHTML = '';
+  if(proximo){
+    const info = RIVAL_INFO[proximo.rival];
+    const fila = info ? filaTablaLPF(cat, info.lpf) : null;
+    if(fila){
+      const dif = fila.dif ?? fila.dg;
+      const dgC = dif>0?'var(--win)':dif<0?'var(--loss)':'var(--muted)';
+      const cell=(label,val,color)=>`<div style="text-align:center">
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:16px;color:${color||'var(--text)'}">${val}</div>
+        <div style="font-size:8px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-top:1px">${label}</div>
+      </div>`;
+      rivalTablaHTML = `<div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border2);
+        display:grid;grid-template-columns:repeat(auto-fit,minmax(44px,1fr));gap:6px">
+        ${cell('POS', fila.pos+'°', 'var(--gold2)')}
+        ${cell('PTS', fila.pts, 'var(--gold2)')}
+        ${cell('PJ', fila.pj)}
+        ${cell('PG', fila.pg, 'var(--win)')}
+        ${cell('PE', fila.pe, 'var(--draw)')}
+        ${cell('PP', fila.pp, 'var(--loss)')}
+        ${cell('GF', fila.gf, '#60a5fa')}
+        ${cell('GC', fila.gc, '#f87171')}
+        ${cell('DG', (dif>0?'+':'')+dif, dgC)}
+      </div>`;
+    }
+  }
+
   const proximoHTML = proximo ? `
-    <div style="background:var(--surface2);border:1px solid var(--border2);border-radius:10px;padding:14px 16px;margin-bottom:12px;
-      display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
-      <div>
-        <div style="font-size:11px;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;margin-bottom:4px">Próxima fecha</div>
-        <div style="font-size:17px;font-weight:700;color:var(--text)">F${proximo.f} vs ${esc(proximo.r)}
-          <span class="cond-badge cond-${condicionCat(cat,proximo.f)}" style="margin-left:6px;font-size:10px">${condicionCat(cat,proximo.f)==='L'?'LOCAL':'VISIT.'}</span>
+    <div style="background:var(--surface2);border:1px solid var(--border2);border-radius:10px;padding:14px 16px;margin-bottom:8px">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
+        <div>
+          <div style="font-size:11px;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;margin-bottom:4px">Próxima fecha</div>
+          <div style="font-size:17px;font-weight:700;color:var(--text)">F${proximo.fecha} vs ${esc(proximo.rival)}
+            <span class="cond-badge cond-${proximo.condTigre}" style="margin-left:6px;font-size:10px">${proximo.condTigre==='L'?'LOCAL':'VISIT.'}</span>
+          </div>
         </div>
+        ${fechaCalCompacta(proximo.fecha)?`<div style="font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--gold2)">${fechaCalCompacta(proximo.fecha)}</div>`:''}
       </div>
-      ${fechaCalCompacta(proximo.f)?`<div style="font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--gold2)">${fechaCalCompacta(proximo.f)}</div>`:''}
+      ${rivalTablaHTML}
     </div>` : `<div style="color:var(--muted);font-size:13px;padding:8px 0 12px">Ya se jugaron todas las fechas del fixture.</div>`;
 
   const filasHTML = RIVALS.map(r=>{
-    const jugado = !!(results[dataCat]||{})[r.f];
+    const stored = results[dataCat]?.[r.f];
     const cond = condicionCat(cat, r.f);
-    return `<tr${proximo&&proximo.f===r.f?' style="outline:2px solid var(--gold);outline-offset:-2px"':''}>
+    const resTxt = stored ? `${stored[0]} - ${stored[1]}` : 'Pendiente';
+    return `<tr${proximo&&proximo.fecha===r.f?' style="outline:2px solid var(--gold);outline-offset:-2px"':''}>
       <td class="fecha-num" style="white-space:nowrap">F${r.f}${fechaCalCompacta(r.f)?` - (${fechaCalCompacta(r.f)})`:''}</td>
       <td class="rival-name">${esc(r.r)} <span class="cond-badge cond-${cond}" style="margin-left:4px;font-size:10px">${cond==='L'?'LOCAL':'VISIT.'}</span></td>
-      <td style="text-align:center;color:${jugado?'var(--win)':'var(--muted)'}">${jugado?'✓ Jugado':'Pendiente'}</td>
+      <td style="text-align:center;font-weight:700;color:${stored?'var(--text)':'var(--muted)'}">${resTxt}</td>
     </tr>`;
   }).join('');
 
   return `${proximoHTML}
-    ${seccionTitulo('fixture-'+dataCat, 'VER FIXTURE COMPLETO')}
+    ${chevronToggleHTML('fixture-'+dataCat)}
     <div id="sec-fixture-${dataCat}"${seccionEstiloInicial('fixture-'+dataCat)}>
       <div class="table-wrap"><table>
-        <thead><tr class="thead-sub"><th>FECHA</th><th>RIVAL</th><th>ESTADO</th></tr></thead>
+        <thead><tr class="thead-sub"><th>FECHA</th><th>RIVAL</th><th>RESULTADO</th></tr></thead>
         <tbody>${filasHTML}</tbody>
       </table></div>
     </div>`;
+}
+function renderFixtureCategoria(cat, dataCat, containerId){
+  const el=document.getElementById(containerId);
+  if(!el) return;
+  fixtureCategoriaHTML(cat, dataCat).then(html=>{
+    const stillHere=document.getElementById(containerId);
+    if(stillHere) stillHere.innerHTML=html;
+  });
 }
 
 // Fixture de RESERVA: a diferencia de 4TA-9NA (fixture fijo, RIVALS), acá
@@ -2977,18 +3030,19 @@ function fixtureReservaHTML(dataCat){
 
   const filasHTML = fechas.map(f=>{
     const p=fixture[f];
+    const resTxt = p.jugado ? `${p.gf} - ${p.gc}` : 'Pendiente';
     return `<tr${proximo&&proximo.f===f?' style="outline:2px solid var(--gold);outline-offset:-2px"':''}>
       <td class="fecha-num" style="white-space:nowrap">F${f}${fechaFmt(p.fecha_iso)?` - (${fechaFmt(p.fecha_iso)})`:''}</td>
       <td class="rival-name">${esc(p.rival)} <span class="cond-badge cond-${p.cond}" style="margin-left:4px;font-size:10px">${p.cond==='L'?'LOCAL':'VISIT.'}</span></td>
-      <td style="text-align:center;color:${p.jugado?'var(--win)':'var(--muted)'}">${p.jugado?'✓ Jugado':'Pendiente'}</td>
+      <td style="text-align:center;font-weight:700;color:${p.jugado?'var(--text)':'var(--muted)'}">${resTxt}</td>
     </tr>`;
   }).join('');
 
   return `${proximoHTML}
-    ${seccionTitulo('fixture-'+dataCat, 'VER FIXTURE COMPLETO')}
+    ${chevronToggleHTML('fixture-'+dataCat)}
     <div id="sec-fixture-${dataCat}"${seccionEstiloInicial('fixture-'+dataCat)}>
       <div class="table-wrap"><table>
-        <thead><tr class="thead-sub"><th>FECHA</th><th>RIVAL</th><th>ESTADO</th></tr></thead>
+        <thead><tr class="thead-sub"><th>FECHA</th><th>RIVAL</th><th>RESULTADO</th></tr></thead>
         <tbody>${filasHTML}</tbody>
       </table></div>
     </div>`;
@@ -3217,10 +3271,8 @@ function renderStatsSingle(cat, content){
       <div id="tabla-lpf-${cat}"></div>
     </div>
 
-    <div class="st"><div class="stbar"></div>🗓️ FIXTURE</div>
-    ${isReserva
-      ? `<div id="fixture-reserva-${dataCat}" style="margin-bottom:20px"></div>`
-      : `<div style="margin-bottom:20px">${fixtureCategoriaHTML(cat, dataCat)}</div>`}
+    <div class="st"><div class="stbar"></div>🗓️ FIXTURE Y RESULTADOS</div>
+    <div id="fixture-cat-${dataCat}" style="margin-bottom:20px"></div>
 
     ${seccionTitulo('rendcat-'+dataCat, '📈 ESTADÍSTICAS POR BLOQUE', isReserva?'':bloqueSliderHTML('cat'))}
     <div id="sec-rendcat-${dataCat}"${seccionEstiloInicial('rendcat-'+dataCat)}>
@@ -3260,8 +3312,8 @@ function renderStatsSingle(cat, content){
   if(!isReserva) document.getElementById(`sistema-${dataCat}`).innerHTML = buildSistemaTacticoHTML(dataCat);
   if(currentRole && currentRole.startsWith('cat_') && GENERAL_CATS.includes(cat)) renderRivalStatsDetalle(dataCat, cat);
   renderGoleadores(dataCat);
-  if(isReserva) { renderTablaReserva(`tabla-lpf-${cat}`); renderFixtureReserva(dataCat, `fixture-reserva-${dataCat}`); }
-  else { renderTablaLPF(cat, `tabla-lpf-${cat}`); renderResumenCategoriaFijo(cat, `resumen-fijo-${dataCat}`); }
+  if(isReserva) { renderTablaReserva(`tabla-lpf-${cat}`); renderFixtureReserva(dataCat, `fixture-cat-${dataCat}`); }
+  else { renderTablaLPF(cat, `tabla-lpf-${cat}`); renderResumenCategoriaFijo(cat, `resumen-fijo-${dataCat}`); renderFixtureCategoria(cat, dataCat, `fixture-cat-${dataCat}`); }
 }
 
 // VIDEOANÁLISIS: se organiza en dos ramas -- ANÁLISIS PROPIOS (Placas de
