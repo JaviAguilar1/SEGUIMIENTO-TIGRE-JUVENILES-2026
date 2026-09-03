@@ -2867,6 +2867,85 @@ function buildCatTabsHTML(){
   </div>`;
 }
 
+// Resumen fijo de la categoría (POS/PTS/PJ/PG/PE/PP/GF/GC/DG), primero en
+// ESTADÍSTICAS, sin desplegar -- sale de la fila de Tigre en la tabla
+// oficial LPF (no de mi carga manual), así "POS" siempre tiene sentido
+// junto con el resto de los números (mismo criterio que renderPosicionGeneral
+// para la posición en la tabla general). Se completa solo cuando la tabla
+// LPF ya se descargó (loadTablaData). No aplica a RESERVA -- la tabla ahí
+// tiene otra forma (dos zonas, dos torneos, ver renderTablaReserva) y no
+// hay una única fila que resuma "la categoría".
+function renderResumenCategoriaFijo(cat, containerId){
+  const el=document.getElementById(containerId);
+  if(!el) return;
+  loadTablaData().then(()=>{
+    const filas=(TABLA_DATA&&TABLA_DATA.categorias&&TABLA_DATA.categorias[cat])||[];
+    const f=filas.find(x=>/tigre/i.test(x.equipo));
+    if(!f){
+      el.innerHTML=`<div style="padding:16px;text-align:center;color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-size:13px">
+        Todavía no hay datos de la tabla oficial para ${esc(cat)}.</div>`;
+      return;
+    }
+    const dgC=f.dif>0?'var(--win)':f.dif<0?'var(--loss)':'var(--muted)';
+    const cell=(label,val,color)=>`<div style="text-align:center">
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:22px;color:${color||'var(--text)'}">${val}</div>
+      <div style="font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-top:2px">${label}</div>
+    </div>`;
+    el.innerHTML=`<div style="background:var(--surface2);border:1px solid var(--gold);border-radius:10px;
+      padding:14px 10px;display:grid;grid-template-columns:repeat(auto-fit,minmax(56px,1fr));gap:8px">
+      ${cell('POS', f.pos+'°', 'var(--gold2)')}
+      ${cell('PTS', f.pts, 'var(--gold2)')}
+      ${cell('PJ', f.pj)}
+      ${cell('PG', f.pg, 'var(--win)')}
+      ${cell('PE', f.pe, 'var(--draw)')}
+      ${cell('PP', f.pp, 'var(--loss)')}
+      ${cell('GF', f.gf, '#60a5fa')}
+      ${cell('GC', f.gc, '#f87171')}
+      ${cell('DG', (f.dif>0?'+':'')+f.dif, dgC)}
+    </div>`;
+  });
+}
+
+// Fixture: próxima fecha sin jugar siempre a la vista (fecha, rival,
+// condición, fecha de calendario) + el fixture completo de las 35 fechas
+// en un desplegable debajo. Usa RIVALS/condicionCat, mismos datos que ya
+// alimentan RESULTADOS -- no hace falta cargar nada nuevo. Solo para
+// 4TA-9NA (RESERVA ya tiene su fixture editable dentro de RESULTADOS,
+// con rival y condición a mano por no tener fuente automática confiable).
+function fixtureCategoriaHTML(cat, dataCat){
+  const proximo = RIVALS.find(r=>!(results[dataCat]||{})[r.f]);
+  const proximoHTML = proximo ? `
+    <div style="background:var(--surface2);border:1px solid var(--border2);border-radius:10px;padding:14px 16px;margin-bottom:12px;
+      display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
+      <div>
+        <div style="font-size:11px;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;margin-bottom:4px">Próxima fecha</div>
+        <div style="font-size:17px;font-weight:700;color:var(--text)">F${proximo.f} vs ${esc(proximo.r)}
+          <span class="cond-badge cond-${condicionCat(cat,proximo.f)}" style="margin-left:6px;font-size:10px">${condicionCat(cat,proximo.f)==='L'?'LOCAL':'VISIT.'}</span>
+        </div>
+      </div>
+      ${fechaCalCompacta(proximo.f)?`<div style="font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--gold2)">${fechaCalCompacta(proximo.f)}</div>`:''}
+    </div>` : `<div style="color:var(--muted);font-size:13px;padding:8px 0 12px">Ya se jugaron todas las fechas del fixture.</div>`;
+
+  const filasHTML = RIVALS.map(r=>{
+    const jugado = !!(results[dataCat]||{})[r.f];
+    const cond = condicionCat(cat, r.f);
+    return `<tr${proximo&&proximo.f===r.f?' style="outline:2px solid var(--gold);outline-offset:-2px"':''}>
+      <td class="fecha-num" style="white-space:nowrap">F${r.f}${fechaCalCompacta(r.f)?` - (${fechaCalCompacta(r.f)})`:''}</td>
+      <td class="rival-name">${esc(r.r)} <span class="cond-badge cond-${cond}" style="margin-left:4px;font-size:10px">${cond==='L'?'LOCAL':'VISIT.'}</span></td>
+      <td style="text-align:center;color:${jugado?'var(--win)':'var(--muted)'}">${jugado?'✓ Jugado':'Pendiente'}</td>
+    </tr>`;
+  }).join('');
+
+  return `${proximoHTML}
+    ${seccionTitulo('fixture-'+dataCat, 'VER FIXTURE COMPLETO')}
+    <div id="sec-fixture-${dataCat}"${seccionEstiloInicial('fixture-'+dataCat)}>
+      <div class="table-wrap"><table>
+        <thead><tr class="thead-sub"><th>FECHA</th><th>RIVAL</th><th>ESTADO</th></tr></thead>
+        <tbody>${filasHTML}</tbody>
+      </table></div>
+    </div>`;
+}
+
 function renderStatsSingle(cat, content){
   const isReserva = cat === 'RESERVA';
   // dataCat: clave real de storage. Para RESERVA depende del semestre elegido.
@@ -3053,8 +3132,12 @@ function renderStatsSingle(cat, content){
 
   tabEl.innerHTML=`
     ${amarillaAlertHTML}
+
+    ${isReserva?'':`<div class="st"><div class="stbar"></div>📊 ESTADÍSTICAS DE LA CATEGORÍA</div>
+    <div id="resumen-fijo-${dataCat}" style="margin-bottom:20px"></div>`}
+
     ${seccionTitulo('resultados-'+dataCat,
-      `RESULTADOS · <span style="color:${CAT_COLORS[cat]}">${cat}</span>${isReserva?` · <span style="color:var(--gold)">${reservaSemestre===2?'2do SEMESTRE':'1er SEMESTRE'}</span>`:''}`)}
+      `☑️ RESULTADOS · <span style="color:${CAT_COLORS[cat]}">${cat}</span>${isReserva?` · <span style="color:var(--gold)">${reservaSemestre===2?'2do SEMESTRE':'1er SEMESTRE'}</span>`:''}`)}
     <div id="sec-resultados-${dataCat}"${seccionEstiloInicial('resultados-'+dataCat)}>
       ${semestreSelector}
       ${reservaAlertaHTML}
@@ -3071,25 +3154,28 @@ function renderStatsSingle(cat, content){
       </table></div>
     </div>
 
-    ${seccionTitulo('rendcat-'+dataCat, 'ESTADÍSTICAS POR BLOQUE', isReserva?'':bloqueSliderHTML('cat'))}
-    <div id="sec-rendcat-${dataCat}"${seccionEstiloInicial('rendcat-'+dataCat)}>
-      <div id="bloque-cat-${dataCat}"></div>
-    </div>
-
-    ${isReserva?'':`${seccionTitulo('sistema-'+dataCat, 'ESTADÍSTICAS POR SISTEMA')}
-    <div id="sec-sistema-${dataCat}"${seccionEstiloInicial('sistema-'+dataCat)}>
-      <div id="sistema-${dataCat}"></div>
-    </div>`}
-
-    ${seccionTitulo('goleadores-'+dataCat, `GOLEADORES · <span style="color:${CAT_COLORS[cat]}">${cat}</span>`)}
+    ${seccionTitulo('goleadores-'+dataCat, `⚽ GOLEADORES · <span style="color:${CAT_COLORS[cat]}">${cat}</span>`)}
     <div id="sec-goleadores-${dataCat}"${seccionEstiloInicial('goleadores-'+dataCat)}>
       <div id="goleadores-${dataCat}"></div>
     </div>
 
-    ${seccionTitulo('tablalpf-'+cat, `🏆 TABLA DE POSICIONES · LPF${isReserva?'':` · <span style="color:${CAT_COLORS[cat]}">${cat}</span>`}`)}
+    ${seccionTitulo('tablalpf-'+cat, `📋 TABLA DE POSICIONES · LPF${isReserva?'':` · <span style="color:${CAT_COLORS[cat]}">${cat}</span>`}`)}
     <div id="sec-tablalpf-${cat}"${seccionEstiloInicial('tablalpf-'+cat)}>
       <div id="tabla-lpf-${cat}"></div>
     </div>
+
+    ${isReserva?'':`<div class="st"><div class="stbar"></div>🗓️ FIXTURE</div>
+    <div style="margin-bottom:20px">${fixtureCategoriaHTML(cat, dataCat)}</div>`}
+
+    ${seccionTitulo('rendcat-'+dataCat, '📈 ESTADÍSTICAS POR BLOQUE', isReserva?'':bloqueSliderHTML('cat'))}
+    <div id="sec-rendcat-${dataCat}"${seccionEstiloInicial('rendcat-'+dataCat)}>
+      <div id="bloque-cat-${dataCat}"></div>
+    </div>
+
+    ${isReserva?'':`${seccionTitulo('sistema-'+dataCat, '📈 ESTADÍSTICAS POR SISTEMA')}
+    <div id="sec-sistema-${dataCat}"${seccionEstiloInicial('sistema-'+dataCat)}>
+      <div id="sistema-${dataCat}"></div>
+    </div>`}
 
     ${(currentRole && currentRole.startsWith('cat_') && GENERAL_CATS.includes(cat)) ? `
     ${seccionTitulo('rivalstats-'+dataCat, 'ESTADÍSTICAS PRÓXIMO RIVAL')}
@@ -3120,7 +3206,7 @@ function renderStatsSingle(cat, content){
   if(currentRole && currentRole.startsWith('cat_') && GENERAL_CATS.includes(cat)) renderRivalStatsDetalle(dataCat, cat);
   renderGoleadores(dataCat);
   if(isReserva) renderTablaReserva(`tabla-lpf-${cat}`);
-  else renderTablaLPF(cat, `tabla-lpf-${cat}`);
+  else { renderTablaLPF(cat, `tabla-lpf-${cat}`); renderResumenCategoriaFijo(cat, `resumen-fijo-${dataCat}`); }
 }
 
 // VIDEOANÁLISIS: se organiza en dos ramas -- ANÁLISIS PROPIOS (Placas de
