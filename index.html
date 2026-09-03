@@ -2470,13 +2470,13 @@ function irAGoleadores(cat){
 // (PJ/PG/GF de temporada) -- no hay una fecha puntual a la que saltar, así
 // que lleva a RESULTADOS de la categoría para repasar partido por partido.
 function irAResultados(cat){
-  seccionColapsada['resultados-'+cat]=false;
+  seccionColapsada['fixture-'+cat]=false;
   const sel=document.getElementById('stats-cat-select');
   if(sel) sel.value=cat;
   currentCategoria=cat;
   renderStatsCat(cat);
   setTimeout(()=>{
-    document.getElementById('sec-resultados-'+cat)?.scrollIntoView({behavior:'smooth', block:'start'});
+    document.getElementById('sec-fixture-'+cat)?.scrollIntoView({behavior:'smooth', block:'start'});
   }, 50);
 }
 
@@ -2926,7 +2926,11 @@ function chevronToggleHTML(idSeccion){
 // "jugado/pendiente"). Async porque la fila del rival necesita la tabla
 // LPF ya descargada (loadTablaData). Solo para 4TA-9NA -- RESERVA usa
 // fixtureReservaHTML (fuente distinta, statfutbol).
-async function fixtureCategoriaHTML(cat, dataCat){
+// resultadosTablaHTML: la tabla editable de siempre (fecha/rival/resultado/
+// citaciones) que arma renderStatsSingle -- a pedido de Javi, "Fixture y
+// Resultados" pasó a ser el ÚNICO lugar donde se ve y se edita, adentro
+// del desplegable (ya no hay una sección "RESULTADOS" aparte).
+async function fixtureCategoriaHTML(cat, dataCat, resultadosTablaHTML){
   await loadTablaData();
   const proximo = proximoRivalInfo(cat); // {fecha, rival, condTigre, condRival} o null
 
@@ -2970,32 +2974,20 @@ async function fixtureCategoriaHTML(cat, dataCat){
       ${rivalTablaHTML}
     </div>` : `<div style="color:var(--muted);font-size:13px;padding:8px 0 12px">Ya se jugaron todas las fechas del fixture.</div>`;
 
-  const filasHTML = RIVALS.map(r=>{
-    const stored = results[dataCat]?.[r.f];
-    const cond = condicionCat(cat, r.f);
-    const resTxt = stored ? `${stored[0]} - ${stored[1]}` : 'Pendiente';
-    return `<tr${proximo&&proximo.fecha===r.f?' style="outline:2px solid var(--gold);outline-offset:-2px"':''}>
-      <td class="fecha-num" style="white-space:nowrap">F${r.f}${fechaCalCompacta(r.f)?` - (${fechaCalCompacta(r.f)})`:''}</td>
-      <td class="rival-name">${esc(r.r)} <span class="cond-badge cond-${cond}" style="margin-left:4px;font-size:10px">${cond==='L'?'LOCAL':'VISIT.'}</span></td>
-      <td style="text-align:center;font-weight:700;color:${stored?'var(--text)':'var(--muted)'}">${resTxt}</td>
-    </tr>`;
-  }).join('');
-
   return `${proximoHTML}
     ${chevronToggleHTML('fixture-'+dataCat)}
     <div id="sec-fixture-${dataCat}"${seccionEstiloInicial('fixture-'+dataCat)}>
-      <div class="table-wrap"><table>
-        <thead><tr class="thead-sub"><th>FECHA</th><th>RIVAL</th><th>RESULTADO</th></tr></thead>
-        <tbody>${filasHTML}</tbody>
-      </table></div>
+      ${resultadosTablaHTML}
     </div>`;
 }
-function renderFixtureCategoria(cat, dataCat, containerId){
+function renderFixtureCategoria(cat, dataCat, containerId, resultadosTablaHTML, onReady){
   const el=document.getElementById(containerId);
   if(!el) return;
-  fixtureCategoriaHTML(cat, dataCat).then(html=>{
+  fixtureCategoriaHTML(cat, dataCat, resultadosTablaHTML).then(html=>{
     const stillHere=document.getElementById(containerId);
-    if(stillHere) stillHere.innerHTML=html;
+    if(!stillHere) return;
+    stillHere.innerHTML=html;
+    if(onReady) onReady();
   });
 }
 
@@ -3007,50 +2999,48 @@ function renderFixtureCategoria(cat, dataCat, containerId){
 // de RESULTADOS). Mismo patrón visual que fixtureCategoriaHTML, pero
 // async (necesita loadTablaData) y sin condicionCat (acá la condición
 // sale directo del fixture descargado, no hay inversión de menores).
-function fixtureReservaHTML(dataCat){
+// resultadosTablaHTML: igual que en fixtureCategoriaHTML, la tabla editable
+// de siempre -- se muestra SIEMPRE en el desplegable (incluso si el fixture
+// automático de statfutbol todavía no llegó), porque ahí es donde se carga
+// el resultado a mano.
+function fixtureReservaHTML(dataCat, resultadosTablaHTML){
   const fixture=(TABLA_DATA&&TABLA_DATA.fixture_reserva&&TABLA_DATA.fixture_reserva[dataCat])||null;
+  let proximoHTML;
   if(!fixture || !Object.keys(fixture).length){
-    return `<div style="color:var(--muted);font-size:13px;padding:8px 0">Todavía no hay fixture automático cargado para esta categoría.</div>`;
-  }
-  const fechas=Object.keys(fixture).map(Number).sort((a,b)=>a-b);
-  const proximaF=fechas.find(f=>!fixture[f].jugado);
-  const proximo=proximaF!=null ? {f:proximaF, ...fixture[proximaF]} : null;
-  const fechaFmt=iso=>{ if(!iso) return ''; const p=iso.split('-'); return p.length===3 ? `${p[2]}/${p[1]}` : ''; };
-  const proximoHTML = proximo ? `
-    <div style="background:var(--surface2);border:1px solid var(--border2);border-radius:10px;padding:14px 16px;margin-bottom:12px;
-      display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
-      <div>
-        <div style="font-size:11px;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;margin-bottom:4px">Próxima fecha</div>
-        <div style="font-size:17px;font-weight:700;color:var(--text)">F${proximo.f} vs ${esc(proximo.rival)}
-          <span class="cond-badge cond-${proximo.cond}" style="margin-left:6px;font-size:10px">${proximo.cond==='L'?'LOCAL':'VISIT.'}</span>
+    proximoHTML = `<div style="color:var(--muted);font-size:13px;padding:8px 0 12px">Todavía no hay fixture automático cargado para esta categoría.</div>`;
+  } else {
+    const fechas=Object.keys(fixture).map(Number).sort((a,b)=>a-b);
+    const proximaF=fechas.find(f=>!fixture[f].jugado);
+    const proximo=proximaF!=null ? {f:proximaF, ...fixture[proximaF]} : null;
+    const fechaFmt=iso=>{ if(!iso) return ''; const p=iso.split('-'); return p.length===3 ? `${p[2]}/${p[1]}` : ''; };
+    proximoHTML = proximo ? `
+      <div style="background:var(--surface2);border:1px solid var(--border2);border-radius:10px;padding:14px 16px;margin-bottom:8px;
+        display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
+        <div>
+          <div style="font-size:11px;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;margin-bottom:4px">Próxima fecha</div>
+          <div style="font-size:17px;font-weight:700;color:var(--text)">F${proximo.f} vs ${esc(proximo.rival)}
+            <span class="cond-badge cond-${proximo.cond}" style="margin-left:6px;font-size:10px">${proximo.cond==='L'?'LOCAL':'VISIT.'}</span>
+          </div>
         </div>
-      </div>
-      ${fechaFmt(proximo.fecha_iso)?`<div style="font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--gold2)">${fechaFmt(proximo.fecha_iso)}</div>`:''}
-    </div>` : `<div style="color:var(--muted);font-size:13px;padding:8px 0 12px">Ya se jugaron todas las fechas del fixture.</div>`;
-
-  const filasHTML = fechas.map(f=>{
-    const p=fixture[f];
-    const resTxt = p.jugado ? `${p.gf} - ${p.gc}` : 'Pendiente';
-    return `<tr${proximo&&proximo.f===f?' style="outline:2px solid var(--gold);outline-offset:-2px"':''}>
-      <td class="fecha-num" style="white-space:nowrap">F${f}${fechaFmt(p.fecha_iso)?` - (${fechaFmt(p.fecha_iso)})`:''}</td>
-      <td class="rival-name">${esc(p.rival)} <span class="cond-badge cond-${p.cond}" style="margin-left:4px;font-size:10px">${p.cond==='L'?'LOCAL':'VISIT.'}</span></td>
-      <td style="text-align:center;font-weight:700;color:${p.jugado?'var(--text)':'var(--muted)'}">${resTxt}</td>
-    </tr>`;
-  }).join('');
+        ${fechaFmt(proximo.fecha_iso)?`<div style="font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--gold2)">${fechaFmt(proximo.fecha_iso)}</div>`:''}
+      </div>` : `<div style="color:var(--muted);font-size:13px;padding:8px 0 12px">Ya se jugaron todas las fechas del fixture.</div>`;
+  }
 
   return `${proximoHTML}
     ${chevronToggleHTML('fixture-'+dataCat)}
     <div id="sec-fixture-${dataCat}"${seccionEstiloInicial('fixture-'+dataCat)}>
-      <div class="table-wrap"><table>
-        <thead><tr class="thead-sub"><th>FECHA</th><th>RIVAL</th><th>RESULTADO</th></tr></thead>
-        <tbody>${filasHTML}</tbody>
-      </table></div>
+      ${resultadosTablaHTML}
     </div>`;
 }
-function renderFixtureReserva(dataCat, containerId){
+function renderFixtureReserva(dataCat, containerId, resultadosTablaHTML, onReady){
   const el=document.getElementById(containerId);
   if(!el) return;
-  loadTablaData().then(()=>{ el.innerHTML=fixtureReservaHTML(dataCat); });
+  loadTablaData().then(()=>{
+    const stillHere=document.getElementById(containerId);
+    if(!stillHere) return;
+    stillHere.innerHTML=fixtureReservaHTML(dataCat, resultadosTablaHTML);
+    if(onReady) onReady();
+  });
 }
 
 function renderStatsSingle(cat, content){
@@ -3237,29 +3227,30 @@ function renderStatsSingle(cat, content){
       </div>
     </div>` : '';
 
+  // La tabla editable (fecha/rival/resultado/citaciones, la misma de
+  // siempre) ya no vive en su propia sección "RESULTADOS" -- a pedido de
+  // Javi, ahora es lo que se ve al desplegar "FIXTURE Y RESULTADOS" (ver
+  // fixtureCategoriaHTML/fixtureReservaHTML), debajo de la próxima fecha.
+  const resultadosTablaHTML = `
+    ${semestreSelector}
+    ${reservaAlertaHTML}
+    <div class="table-wrap"><table>
+      <thead>
+        <tr class="thead-top">
+          <th colspan="3" style="background:linear-gradient(135deg,#0a0f1e,#08111f);color:var(--muted);font-size:10px;letter-spacing:2px;">DATOS DEL PARTIDO</th>
+          ${linkGH}
+          ${showEquipo?`<th style="background:linear-gradient(135deg,#1a2a10,#0f1a08);color:#86a86a;border-top:2px solid #4a7a3a;font-size:10px;letter-spacing:2px;">👥</th>`:''}
+        </tr>
+        <tr class="thead-sub"><th>FECHA</th><th>RIVAL</th><th>RESULTADO</th>${linkSH}${showEquipo?`<th title="Equipo / Alineación">EQUIPO</th>`:''}</tr>
+      </thead>
+      <tbody id="tbody-${dataCat}">${rows}</tbody>
+    </table></div>`;
+
   tabEl.innerHTML=`
     ${amarillaAlertHTML}
 
     ${isReserva?'':`<div class="st"><div class="stbar"></div>📊 ESTADÍSTICAS DE LA CATEGORÍA</div>
     <div id="resumen-fijo-${dataCat}" style="margin-bottom:20px"></div>`}
-
-    ${seccionTitulo('resultados-'+dataCat,
-      `☑️ RESULTADOS · <span style="color:${CAT_COLORS[cat]}">${cat}</span>${isReserva?` · <span style="color:var(--gold)">${reservaSemestre===2?'2do SEMESTRE':'1er SEMESTRE'}</span>`:''}`)}
-    <div id="sec-resultados-${dataCat}"${seccionEstiloInicial('resultados-'+dataCat)}>
-      ${semestreSelector}
-      ${reservaAlertaHTML}
-      <div class="table-wrap"><table>
-        <thead>
-          <tr class="thead-top">
-            <th colspan="3" style="background:linear-gradient(135deg,#0a0f1e,#08111f);color:var(--muted);font-size:10px;letter-spacing:2px;">DATOS DEL PARTIDO</th>
-            ${linkGH}
-            ${showEquipo?`<th style="background:linear-gradient(135deg,#1a2a10,#0f1a08);color:#86a86a;border-top:2px solid #4a7a3a;font-size:10px;letter-spacing:2px;">👥</th>`:''}
-          </tr>
-          <tr class="thead-sub"><th>FECHA</th><th>RIVAL</th><th>RESULTADO</th>${linkSH}${showEquipo?`<th title="Equipo / Alineación">EQUIPO</th>`:''}</tr>
-        </thead>
-        <tbody id="tbody-${dataCat}">${rows}</tbody>
-      </table></div>
-    </div>
 
     ${seccionTitulo('goleadores-'+dataCat, `⚽ GOLEADORES · <span style="color:${CAT_COLORS[cat]}">${cat}</span>`)}
     <div id="sec-goleadores-${dataCat}"${seccionEstiloInicial('goleadores-'+dataCat)}>
@@ -3291,20 +3282,27 @@ function renderStatsSingle(cat, content){
     </div>` : ''}
   `;
 
-  // Semestre switch (solo RESERVA)
-  if(isReserva){
-    tabEl.querySelectorAll('.sem-tab').forEach(btn=>{
-      btn.addEventListener('click',()=>{
-        const sem=parseInt(btn.dataset.sem);
-        if(sem===reservaSemestre)return;
-        reservaSemestre=sem;
-        renderStatsSingle(cat, content);
+  // La tabla editable (semestre switch incluido) vive ahora adentro de
+  // FIXTURE Y RESULTADOS, que se arma async (necesita la tabla LPF para
+  // la fila del próximo rival) -- attachTableEvents/el switch de semestre
+  // se enganchan recién cuando ese HTML ya está en el DOM (ver
+  // wireResultadosEnFixture, llamado desde renderFixtureCategoria/
+  // renderFixtureReserva una vez insertado el HTML).
+  function wireResultadosEnFixture(){
+    attachTableEvents(dataCat);
+    if(isReserva){
+      tabEl.querySelectorAll('.sem-tab').forEach(btn=>{
+        btn.addEventListener('click',()=>{
+          const sem=parseInt(btn.dataset.sem);
+          if(sem===reservaSemestre)return;
+          reservaSemestre=sem;
+          renderStatsSingle(cat, content);
+        });
       });
-    });
+    }
   }
 
   // Events
-  attachTableEvents(dataCat);
   if(!isReserva) wireBloqueSlider('cat', ()=>renderStatsSingle(cat, content));
   document.getElementById(`bloque-cat-${dataCat}`).innerHTML= isReserva
     ? bloqueComparativaHTML((from,to)=>calcStats(dataCat,from,to), dataCat)
@@ -3312,8 +3310,14 @@ function renderStatsSingle(cat, content){
   if(!isReserva) document.getElementById(`sistema-${dataCat}`).innerHTML = buildSistemaTacticoHTML(dataCat);
   if(currentRole && currentRole.startsWith('cat_') && GENERAL_CATS.includes(cat)) renderRivalStatsDetalle(dataCat, cat);
   renderGoleadores(dataCat);
-  if(isReserva) { renderTablaReserva(`tabla-lpf-${cat}`); renderFixtureReserva(dataCat, `fixture-cat-${dataCat}`); }
-  else { renderTablaLPF(cat, `tabla-lpf-${cat}`); renderResumenCategoriaFijo(cat, `resumen-fijo-${dataCat}`); renderFixtureCategoria(cat, dataCat, `fixture-cat-${dataCat}`); }
+  if(isReserva) {
+    renderTablaReserva(`tabla-lpf-${cat}`);
+    renderFixtureReserva(dataCat, `fixture-cat-${dataCat}`, resultadosTablaHTML, wireResultadosEnFixture);
+  } else {
+    renderTablaLPF(cat, `tabla-lpf-${cat}`);
+    renderResumenCategoriaFijo(cat, `resumen-fijo-${dataCat}`);
+    renderFixtureCategoria(cat, dataCat, `fixture-cat-${dataCat}`, resultadosTablaHTML, wireResultadosEnFixture);
+  }
 }
 
 // VIDEOANÁLISIS: se organiza en dos ramas -- ANÁLISIS PROPIOS (Placas de
