@@ -1259,7 +1259,7 @@ function confirmAction(msg, onYes, btnLabel){
   ov.querySelector('#ca-yes').addEventListener('click',()=>{ ov.remove(); onYes(); });
 }
 function killChart(id){ const c=Chart.getChart(id); if(c)c.destroy(); }
-function chartDef(){ return{responsive:true,animation:{duration:250},plugins:{legend:{labels:{color:'#5a7099',font:{family:'Barlow Condensed',size:11}}}},scales:{x:{ticks:{color:'#5a7099',font:{family:'Barlow Condensed'}},grid:{color:'rgba(26,45,90,0.4)'}},y:{ticks:{color:'#5a7099',font:{family:'Barlow Condensed'}},grid:{color:'rgba(26,45,90,0.4)'}}}}; }
+function chartDef(){ return{responsive:true,maintainAspectRatio:false,animation:{duration:250},plugins:{legend:{labels:{color:'#5a7099',font:{family:'Barlow Condensed',size:11}}}},scales:{x:{ticks:{color:'#5a7099',font:{family:'Barlow Condensed'}},grid:{color:'rgba(26,45,90,0.4)'}},y:{ticks:{color:'#5a7099',font:{family:'Barlow Condensed'}},grid:{color:'rgba(26,45,90,0.4)'}}}}; }
 function statsHTML(s){
   const dgC=s.dg>0?'var(--win)':s.dg<0?'var(--loss)':'var(--muted)',dgS=s.dg>0?'+':'';
   return `<div class="stats-grid">
