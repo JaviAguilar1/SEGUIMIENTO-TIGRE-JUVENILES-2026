@@ -2867,42 +2867,57 @@ function buildCatTabsHTML(){
   </div>`;
 }
 
-// Resumen fijo de la categoría (POS/PTS/PJ/PG/PE/PP/GF/GC/DG), primero en
-// ESTADÍSTICAS, sin desplegar -- sale de la fila de Tigre en la tabla
-// oficial LPF (no de mi carga manual), así "POS" siempre tiene sentido
-// junto con el resto de los números (mismo criterio que renderPosicionGeneral
-// para la posición en la tabla general). Se completa solo cuando la tabla
-// LPF ya se descargó (loadTablaData). No aplica a RESERVA -- la tabla ahí
-// tiene otra forma (dos zonas, dos torneos, ver renderTablaReserva) y no
-// hay una única fila que resuma "la categoría".
+// UBICACIÓN EN LA TABLA: tarjeta fija (POS/PTS/PJ/PG/PE/PP/GF/GC/DG),
+// primero en ESTADÍSTICAS -- sale de la fila de Tigre en la tabla oficial
+// LPF (no de mi carga manual), así "POS" siempre tiene sentido junto con
+// el resto de los números (mismo criterio que renderPosicionGeneral para
+// la posición en la tabla general). Debajo, un chevron pelado despliega
+// la tabla LPF completa (antes era su propia sección "TABLA DE
+// POSICIONES", fusionada acá a pedido de Javi -- mismo criterio que
+// "FIXTURE Y RESULTADOS" con RESULTADOS). No aplica a RESERVA -- la tabla
+// ahí tiene otra forma (dos zonas, dos torneos, ver renderTablaReserva) y
+// sigue con su propia sección aparte, sin tocar.
+async function resumenCategoriaHTML(cat){
+  await loadTablaData();
+  const filas=(TABLA_DATA&&TABLA_DATA.categorias&&TABLA_DATA.categorias[cat])||[];
+  const f=filas.find(x=>/tigre/i.test(x.equipo));
+  const tarjetaHTML = !f
+    ? `<div style="padding:16px;text-align:center;color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-size:13px">
+        Todavía no hay datos de la tabla oficial para ${esc(cat)}.</div>`
+    : (()=>{
+        const dgC=f.dif>0?'var(--win)':f.dif<0?'var(--loss)':'var(--muted)';
+        const cell=(label,val,color)=>`<div style="text-align:center">
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:22px;color:${color||'var(--text)'}">${val}</div>
+          <div style="font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-top:2px">${label}</div>
+        </div>`;
+        return `<div style="background:var(--surface2);border:1px solid var(--gold);border-radius:10px;
+          padding:14px 10px;display:grid;grid-template-columns:repeat(auto-fit,minmax(56px,1fr));gap:8px">
+          ${cell('POS', f.pos+'°', 'var(--gold2)')}
+          ${cell('PTS', f.pts, 'var(--gold2)')}
+          ${cell('PJ', f.pj)}
+          ${cell('PG', f.pg, 'var(--win)')}
+          ${cell('PE', f.pe, 'var(--draw)')}
+          ${cell('PP', f.pp, 'var(--loss)')}
+          ${cell('GF', f.gf, '#60a5fa')}
+          ${cell('GC', f.gc, '#f87171')}
+          ${cell('DG', (f.dif>0?'+':'')+f.dif, dgC)}
+        </div>`;
+      })();
+
+  return `${tarjetaHTML}
+    ${chevronToggleHTML('tablalpf-'+cat)}
+    <div id="sec-tablalpf-${cat}"${seccionEstiloInicial('tablalpf-'+cat)}>
+      <div id="tabla-lpf-${cat}"></div>
+    </div>`;
+}
 function renderResumenCategoriaFijo(cat, containerId){
   const el=document.getElementById(containerId);
   if(!el) return;
-  loadTablaData().then(()=>{
-    const filas=(TABLA_DATA&&TABLA_DATA.categorias&&TABLA_DATA.categorias[cat])||[];
-    const f=filas.find(x=>/tigre/i.test(x.equipo));
-    if(!f){
-      el.innerHTML=`<div style="padding:16px;text-align:center;color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-size:13px">
-        Todavía no hay datos de la tabla oficial para ${esc(cat)}.</div>`;
-      return;
-    }
-    const dgC=f.dif>0?'var(--win)':f.dif<0?'var(--loss)':'var(--muted)';
-    const cell=(label,val,color)=>`<div style="text-align:center">
-      <div style="font-family:'Bebas Neue',sans-serif;font-size:22px;color:${color||'var(--text)'}">${val}</div>
-      <div style="font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-top:2px">${label}</div>
-    </div>`;
-    el.innerHTML=`<div style="background:var(--surface2);border:1px solid var(--gold);border-radius:10px;
-      padding:14px 10px;display:grid;grid-template-columns:repeat(auto-fit,minmax(56px,1fr));gap:8px">
-      ${cell('POS', f.pos+'°', 'var(--gold2)')}
-      ${cell('PTS', f.pts, 'var(--gold2)')}
-      ${cell('PJ', f.pj)}
-      ${cell('PG', f.pg, 'var(--win)')}
-      ${cell('PE', f.pe, 'var(--draw)')}
-      ${cell('PP', f.pp, 'var(--loss)')}
-      ${cell('GF', f.gf, '#60a5fa')}
-      ${cell('GC', f.gc, '#f87171')}
-      ${cell('DG', (f.dif>0?'+':'')+f.dif, dgC)}
-    </div>`;
+  resumenCategoriaHTML(cat).then(html=>{
+    const stillHere=document.getElementById(containerId);
+    if(!stillHere) return;
+    stillHere.innerHTML=html;
+    renderTablaLPF(cat, `tabla-lpf-${cat}`);
   });
 }
 
@@ -3249,7 +3264,7 @@ function renderStatsSingle(cat, content){
   tabEl.innerHTML=`
     ${amarillaAlertHTML}
 
-    ${isReserva?'':`<div class="st"><div class="stbar"></div>📊 ESTADÍSTICAS DE LA CATEGORÍA</div>
+    ${isReserva?'':`<div class="st"><div class="stbar"></div>📊 UBICACIÓN EN LA TABLA</div>
     <div id="resumen-fijo-${dataCat}" style="margin-bottom:20px"></div>`}
 
     ${seccionTitulo('goleadores-'+dataCat, `⚽ GOLEADORES · <span style="color:${CAT_COLORS[cat]}">${cat}</span>`)}
@@ -3257,10 +3272,10 @@ function renderStatsSingle(cat, content){
       <div id="goleadores-${dataCat}"></div>
     </div>
 
-    ${seccionTitulo('tablalpf-'+cat, `📋 TABLA DE POSICIONES · LPF${isReserva?'':` · <span style="color:${CAT_COLORS[cat]}">${cat}</span>`}`)}
+    ${isReserva?`${seccionTitulo('tablalpf-'+cat, '📋 TABLA DE POSICIONES · LPF')}
     <div id="sec-tablalpf-${cat}"${seccionEstiloInicial('tablalpf-'+cat)}>
       <div id="tabla-lpf-${cat}"></div>
-    </div>
+    </div>`:''}
 
     <div class="st"><div class="stbar"></div>🗓️ FIXTURE Y RESULTADOS</div>
     <div id="fixture-cat-${dataCat}" style="margin-bottom:20px"></div>
@@ -3314,7 +3329,6 @@ function renderStatsSingle(cat, content){
     renderTablaReserva(`tabla-lpf-${cat}`);
     renderFixtureReserva(dataCat, `fixture-cat-${dataCat}`, resultadosTablaHTML, wireResultadosEnFixture);
   } else {
-    renderTablaLPF(cat, `tabla-lpf-${cat}`);
     renderResumenCategoriaFijo(cat, `resumen-fijo-${dataCat}`);
     renderFixtureCategoria(cat, dataCat, `fixture-cat-${dataCat}`, resultadosTablaHTML, wireResultadosEnFixture);
   }
