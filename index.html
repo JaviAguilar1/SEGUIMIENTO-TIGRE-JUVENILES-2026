@@ -1022,6 +1022,50 @@ let recordatoriosOmitidos = {};
 // mismo criterio que recordatoriosOmitidos, para no tener que agregar una
 // excepción a mano en el código cada vez que aparece un caso así.
 let golesMismatchOmitidos = {};
+// correccionesNombres[cat][nombreCrudo] = "Apellido, Nombre" -- corrección manual
+// para mostrar (ver formatNombreMostrar), nunca toca el dato crudo de origen
+// (Catapult, futdetail, etc). Se carga desde Confiabilidad, para nombres que
+// no matchean con nadie del plantel (ej. typos de Catapult).
+let correccionesNombres = {};
+function guardarCorreccionNombre(cat, nombreCrudo, valor){
+  if(!canEdit) return;
+  correccionesNombres[cat] = correccionesNombres[cat] || {};
+  const v = (valor||'').trim();
+  if(v) correccionesNombres[cat][nombreCrudo] = v; else delete correccionesNombres[cat][nombreCrudo];
+  saveData();
+  showToast('💾 GUARDADO');
+  renderConfiabilidad('gen-confiabilidad');
+}
+// Formato único de nombres propios en toda la plataforma: "Apellido, Nombre".
+// 1) si ya viene con coma (ej. goleadores, que ya se tipea así), se respeta
+// tal cual. 2) corrección manual guardada (gana siempre). 3) si matchea con
+// el plantel (que guarda "Apellido Nombre" sin coma), se usa ESE nombre
+// canónico + coma. 4) sin nada de lo anterior, se supone que la ÚLTIMA
+// palabra es el apellido (formato libre tipo Catapult, "Nombre Apellido") --
+// ver nombreEsSupuesto, que marca estos casos para la alerta de Confiabilidad.
+function formatNombreMostrar(nombreCrudo, cat){
+  const n = (nombreCrudo||'').trim();
+  if(!n || n.includes(',')) return n;
+  const manual = correccionesNombres[cat]?.[n];
+  if(manual) return manual;
+  const palabras = n.split(/\s+/);
+  if(palabras.length<2) return n;
+  const nn = normNombreOrdenIndependiente(n);
+  const enPlantel = (plantelFutdetail[cat]||[]).find(p=>normNombreOrdenIndependiente(p.nombre)===nn);
+  if(enPlantel){
+    const pPal = enPlantel.nombre.trim().split(/\s+/);
+    return pPal.length<2 ? enPlantel.nombre : `${pPal[0]}, ${pPal.slice(1).join(' ')}`;
+  }
+  return `${palabras[palabras.length-1]}, ${palabras.slice(0,-1).join(' ')}`;
+}
+// ¿Este nombre se tuvo que "suponer" (sin corrección manual ni match de
+// plantel)? Lo usa Confiabilidad para armar la lista de avisos.
+function nombreEsSupuesto(nombreCrudo, cat){
+  const n = (nombreCrudo||'').trim();
+  if(!n || n.includes(',') || correccionesNombres[cat]?.[n]) return false;
+  const nn = normNombreOrdenIndependiente(n);
+  return !(plantelFutdetail[cat]||[]).some(p=>normNombreOrdenIndependiente(p.nombre)===nn);
+}
 const plantelFutdetail = {}; // plantelFutdetail[cat] = [{nombre,posicion,edad,altura,peso,pie,valoracion,foto,id}] (desde futdetail)
 CATEGORIES.forEach(cat => { plantelFutdetail[cat] = []; });
 // jugadoresArchivados[cat] = [nombres] -- jugadores que ya no están en el
@@ -1357,6 +1401,7 @@ function initFirebase(){
             if(p.golesMismatchOmitidos) golesMismatchOmitidos = p.golesMismatchOmitidos;
             if(p.gpsMetricCfg) gpsMetricCfg = p.gpsMetricCfg;
             if(p.gpsPosOverride) gpsPosOverride = p.gpsPosOverride;
+            if(p.correccionesNombres) correccionesNombres = p.correccionesNombres;
             refreshActiveModule();
             setTimeout(refreshAlerts, 200);
           });
@@ -1446,7 +1491,7 @@ function saveData(){
     // guardado normal (cargar un resultado, un link, un gol) BORRARÍA todo
     // lo subido de COMET, porque saveData() hace un .set() del nodo entero,
     // no un merge parcial. Mismo motivo para aliasJugadoresComet.
-    const payload={results:{},links:{},goleadores:{},rivalData:rivalData,matchData:matchData,gymData:gymData,jugadores:{},plantel:{},chequeoSemanal:chequeoSemanal,aliasJugadores:aliasJugadores,aliasJugadoresComet:aliasJugadoresComet,recordatoriosOmitidos:recordatoriosOmitidos,golesMismatchOmitidos:golesMismatchOmitidos,partidos:partidos,jugadoresArchivados:jugadoresArchivados,gpsMetricCfg:gpsMetricCfg,gpsPosOverride:gpsPosOverride};
+    const payload={results:{},links:{},goleadores:{},rivalData:rivalData,matchData:matchData,gymData:gymData,jugadores:{},plantel:{},chequeoSemanal:chequeoSemanal,aliasJugadores:aliasJugadores,aliasJugadoresComet:aliasJugadoresComet,recordatoriosOmitidos:recordatoriosOmitidos,golesMismatchOmitidos:golesMismatchOmitidos,partidos:partidos,jugadoresArchivados:jugadoresArchivados,gpsMetricCfg:gpsMetricCfg,gpsPosOverride:gpsPosOverride,correccionesNombres:correccionesNombres};
     CATEGORIES.forEach(cat=>{
       payload.results[cat]={};
       payload.links[cat]={};
@@ -1524,6 +1569,7 @@ function loadData(){
         if(p.golesMismatchOmitidos) golesMismatchOmitidos = p.golesMismatchOmitidos;
         if(p.gpsMetricCfg) gpsMetricCfg = p.gpsMetricCfg;
         if(p.gpsPosOverride) gpsPosOverride = p.gpsPosOverride;
+        if(p.correccionesNombres) correccionesNombres = p.correccionesNombres;
       }
       showLoading(false); resolve();
     }).catch(e=>{console.warn('load error:',e);showLoading(false);resolve();});
@@ -1841,8 +1887,8 @@ function refreshConfiabilidadBadge(){
   if(!wrap || !isAdmin) { if(wrap) wrap.innerHTML=''; return; }
   loadTablaData().then(()=>{
     if(!document.getElementById('confiabilidad-badge-wrap')) return; // se re-renderizó la pantalla mientras tanto
-    const {partidoMismatches, equipoMismatches, golesMismatches, golesCometMismatches, linkMismatches, recordatorios, citacionWarnings}=calcConfiabilidad();
-    const total=partidoMismatches.length+equipoMismatches.length+golesMismatches.length+golesCometMismatches.length+linkMismatches.length+recordatorios.length+citacionWarnings.length;
+    const {partidoMismatches, equipoMismatches, golesMismatches, golesCometMismatches, linkMismatches, recordatorios, citacionWarnings, nombresSupuestos}=calcConfiabilidad();
+    const total=partidoMismatches.length+equipoMismatches.length+golesMismatches.length+golesCometMismatches.length+linkMismatches.length+recordatorios.length+citacionWarnings.length+nombresSupuestos.length;
     const w=document.getElementById('confiabilidad-badge-wrap');
     if(!w) return;
     w.innerHTML = total>0
@@ -1884,7 +1930,7 @@ function wireBuscadorGlobalJugador(){
     }
     resWrap.innerHTML=matches.slice(0,8).map(m=>`<div class="buscador-global-item" data-cat="${m.cat}" data-nombre="${esc(m.nombre)}"
       style="padding:8px 12px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-size:13px;color:var(--text);
-      border-bottom:1px solid var(--border2)">${esc(m.nombre)} <span style="color:var(--muted);font-size:11px">· ${m.cat}${m.posicion?' · '+esc(m.posicion):''}</span></div>`).join('');
+      border-bottom:1px solid var(--border2)">${esc(formatNombreMostrar(m.nombre,m.cat))} <span style="color:var(--muted);font-size:11px">· ${m.cat}${m.posicion?' · '+esc(m.posicion):''}</span></div>`).join('');
     resWrap.style.display='';
     resWrap.querySelectorAll('.buscador-global-item').forEach(item=>{
       item.addEventListener('click',()=>{
@@ -2372,7 +2418,22 @@ function calcConfiabilidad(){
     });
   });
 
-  return {partidoMismatches, equipoMismatches, golesMismatches, golesCometMismatches, linkMismatches, recordatorios, citacionWarnings};
+  // Nombres propios sin confirmar: nombres crudos (hoy, solo Catapult trae
+  // texto libre sin cruzar contra el plantel en ningún lado) que no
+  // matchean con nadie y todavía no tienen una corrección manual guardada
+  // -- se están mostrando con la regla "se supone que la última palabra es
+  // el apellido" (ver formatNombreMostrar), que puede fallar con apellidos
+  // compuestos o, como con "Alan Luengo", con un típeo directo en la fuente.
+  const nombresSupuestos=[]; // {cat, nombreCrudo, supuesto}
+  Object.keys(catapultPlayers).forEach(cat=>{
+    Object.keys(catapultPlayers[cat]||{}).forEach(nombreCrudo=>{
+      if(nombreEsSupuesto(nombreCrudo, cat)){
+        nombresSupuestos.push({cat, nombreCrudo, supuesto:formatNombreMostrar(nombreCrudo, cat)});
+      }
+    });
+  });
+
+  return {partidoMismatches, equipoMismatches, golesMismatches, golesCometMismatches, linkMismatches, recordatorios, citacionWarnings, nombresSupuestos};
 }
 
 // Botón "REVISAR" único para toda la sección: fuerza traer la tabla LPF de
@@ -2472,8 +2533,8 @@ function renderConfiabilidad(containerId){
   const el=document.getElementById(containerId);
   if(!el) return;
   loadTablaData().then(()=>{
-    const {partidoMismatches, equipoMismatches, golesMismatches, golesCometMismatches, linkMismatches, recordatorios, citacionWarnings}=calcConfiabilidad();
-    const total=partidoMismatches.length+equipoMismatches.length+golesMismatches.length+golesCometMismatches.length+linkMismatches.length+citacionWarnings.length;
+    const {partidoMismatches, equipoMismatches, golesMismatches, golesCometMismatches, linkMismatches, recordatorios, citacionWarnings, nombresSupuestos}=calcConfiabilidad();
+    const total=partidoMismatches.length+equipoMismatches.length+golesMismatches.length+golesCometMismatches.length+linkMismatches.length+citacionWarnings.length+nombresSupuestos.length;
 
     const revisarBtn=`<button onclick="revisarConfiabilidad()"
       style="background:rgba(255,255,255,0.08);border:1px solid var(--border2);color:var(--text);
@@ -2616,9 +2677,30 @@ function renderConfiabilidad(containerId){
         CITACIONES · nombres sin coincidir con el plantel (${citacionWarnings.length})</div>`;
       html+=citacionWarnings.map(m=>row(
         `<b style="color:${CAT_COLORS[m.cat]}">${m.cat} F${m.fecha}</b>`,
-        `⚠️ ${esc(m.nombre)}`,
+        `⚠️ ${esc(formatNombreMostrar(m.nombre,m.cat))}`,
         irCitacionBtn(m.cat, m.fecha)
       )).join('');
+    }
+
+    if(nombresSupuestos.length){
+      html+=`<div style="font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:1px;color:var(--muted);margin:14px 0 6px">
+        NOMBRES SIN CONFIRMAR · Catapult, sin match con el plantel (${nombresSupuestos.length})</div>`;
+      html+=nombresSupuestos.map(m=>{
+        const inputId=('nomsup-'+m.cat+'-'+m.nombreCrudo).replace(/[^a-zA-Z0-9-]/g,'_');
+        const guardarHTML = canEdit ? `
+          <input id="${inputId}" type="text" placeholder="Nombre correcto…" value="${esc(m.supuesto)}"
+            style="background:var(--surface2);border:1px solid var(--border2);color:var(--text);
+            font-family:'Barlow Condensed',sans-serif;font-size:11px;padding:3px 6px;border-radius:4px;width:170px">
+          <button onclick="guardarCorreccionNombre('${esc(m.cat)}','${esc(m.nombreCrudo).replace(/'/g,"\\'")}',document.getElementById('${inputId}').value)"
+            style="background:rgba(26,58,143,0.25);border:1px solid var(--border2);color:var(--gold2);
+            border-radius:6px;padding:4px 8px;font-family:Barlow Condensed,sans-serif;font-size:11px;
+            letter-spacing:1px;cursor:pointer;white-space:nowrap;margin-left:4px">💾 Guardar</button>` : '';
+        return row(
+          `<b style="color:${CAT_COLORS[m.cat]}">${m.cat}</b> · "${esc(m.nombreCrudo)}"`,
+          `Se muestra como: <b>${esc(m.supuesto)}</b>`,
+          guardarHTML
+        );
+      }).join('');
     }
 
     if(recordatorios.length){
@@ -2938,7 +3020,7 @@ function renderStatsSingle(cat, content){
           🟨 JUGADORES CON 4 AMARILLAS
         </div>
         <div style="font-size:11px;font-weight:700;color:var(--text);letter-spacing:0.5px;text-transform:uppercase">
-          ${amarillaAlertCat.map(p=>esc(p.nombre)).join(' &nbsp;·&nbsp; ')}
+          ${amarillaAlertCat.map(p=>esc(formatNombreMostrar(p.nombre,cat))).join(' &nbsp;·&nbsp; ')}
         </div>
       </div>`
     : '';
@@ -3579,7 +3661,7 @@ function gpsCruceFormHTML(cat){
 
 function gpsCmpRankFormHTML(cat){
   const nombres = Object.keys(catapultPlayersDeCategoria(cat)).sort();
-  const jugOpts = nombres.map(n=>`<option value="${esc(n)}">${esc(n)}</option>`).join('');
+  const jugOpts = nombres.map(n=>`<option value="${esc(n)}">${esc(formatNombreMostrar(n,cat))}</option>`).join('');
   const metOpts = gpsVisibleMetrics().map(m=>`<option value="${m.i}">${esc(m.label)} (${esc(m.unit)})</option>`).join('');
   return `
     <div style="display:grid;grid-template-columns:1fr 1fr auto;gap:10px;align-items:end;margin-bottom:12px">
@@ -3608,7 +3690,7 @@ function gpsPerfilFormHTML(cat){
   if(!gpsPerfilPos || !posiciones.includes(gpsPerfilPos)) gpsPerfilPos = posiciones[0];
   const posOpts = posiciones.map(p=>`<option value="${esc(p)}"${p===gpsPerfilPos?' selected':''}>${esc(p)}</option>`).join('');
   const nombres = Object.entries(catapultPlayersDeCategoria(cat)).filter(([,p])=>p.pos===gpsPerfilPos).map(([n])=>n).sort();
-  const jugOpts = nombres.map(n=>`<option value="${esc(n)}">${esc(n)}</option>`).join('');
+  const jugOpts = nombres.map(n=>`<option value="${esc(n)}">${esc(formatNombreMostrar(n,cat))}</option>`).join('');
   return `
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">
       <div>
@@ -3766,7 +3848,7 @@ function gpsDrawBarra(id, regs, idxBar, labelBar, idxLine, labelLine){
   const el = document.getElementById(id);
   if(!el) return;
   const ordenados = [...regs].sort((a,b)=>(b.metrics[idxBar]||0)-(a.metrics[idxBar]||0));
-  const labels = ordenados.map(r=>r.nombre);
+  const labels = ordenados.map(r=>formatNombreMostrar(r.nombre, gpsCruceCat));
   killChart(id);
   const datasets = [{type:'bar', label:labelBar, data:ordenados.map(r=>r.metrics[idxBar]||0),
     backgroundColor:'rgba(240,192,64,.75)', borderColor:'#f0c040', borderWidth:1, yAxisID:'y'}];
@@ -3788,7 +3870,7 @@ function gpsDrawMinutos(id, regs){
   killChart(id);
   new Chart(el.getContext('2d'), {
     type:'bar',
-    data:{labels: ordenados.map(r=>r.nombre), datasets:[{label:'Minutos', data:ordenados.map(r=>r.min),
+    data:{labels: ordenados.map(r=>formatNombreMostrar(r.nombre, gpsCruceCat)), datasets:[{label:'Minutos', data:ordenados.map(r=>r.min),
       backgroundColor:'rgba(240,192,64,.75)', borderColor:'#f0c040', borderWidth:1}]},
     options: chartDef(),
   });
@@ -4101,7 +4183,7 @@ function renderGpsPerfil(){
       <div style="display:flex;align-items:center;gap:12px;padding:14px;background:var(--surface);border:1px solid var(--border);border-radius:10px;margin-bottom:14px">
         <div style="width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold2));display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:17px;color:#1a1206;flex-shrink:0">${esc(iniciales)}</div>
         <div style="flex:1">
-          <div style="font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:1px;color:#fff">${esc(nombre.toUpperCase())}</div>
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:1px;color:#fff">${esc(formatNombreMostrar(nombre,cat).toUpperCase())}</div>
           <div style="font-size:12px;color:var(--text2);font-family:'Barlow Condensed',sans-serif">${p.pos?esc(p.pos)+' · ':''}${cat} · ${registros} registro${registros===1?'':'s'}</div>
         </div>
       </div>
@@ -4114,7 +4196,7 @@ function renderGpsPerfil(){
   // 🧬 Jugador vs. perfil de su posición -- prom./máx. de la posición
   // siempre, y del jugador elegido al lado, comparando prom-con-prom y
   // máx-con-máx (nunca cruzado), con el mejor valor de cada par en dorado.
-  const apellido = nombre ? nombre.split(' ').slice(-1)[0] : '';
+  const apellido = nombre ? formatNombreMostrar(nombre,cat).split(',')[0] : '';
   const regsPos = gpsPerfilRegistros(cat, pos, null);
   const filasComparacion = gpsVisibleMetrics().map(m=>{
     const pp = gpsPerfilPromMax(regsPos, m.i);
@@ -4170,7 +4252,7 @@ function gpsAbrirPosiciones(cat){
     const actual = catapultPlayersDeCategoria(cat)[nombre]?.pos || '';
     return `
     <div style="display:flex;align-items:center;gap:8px;padding:6px 4px;border-bottom:1px solid var(--border)">
-      <span style="flex:1;font-size:12px;color:var(--text)">${esc(nombre)}</span>
+      <span style="flex:1;font-size:12px;color:var(--text)">${esc(formatNombreMostrar(nombre,cat))}</span>
       <input type="text" value="${esc(actual)}" placeholder="Sin posición"
         onchange="guardarGpsPosOverride('${cat}','${esc(nombre).replace(/'/g,"\\'")}', this.value); gpsSetMode(gpsMode);"
         style="width:170px;background:rgba(5,8,15,.8);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:12px;padding:5px 8px;">
@@ -4288,7 +4370,7 @@ function runGpsCruce(){
       });
       const nums = fechas.map(f=>byFecha[f]?.metrics?.[met.i]).filter(v=>v!=null).map(Number);
       const prom = nums.length ? fmtGps(nums.reduce((a,b)=>a+b,0)/nums.length) : '—';
-      return `<tr><td class="cat-cell">${esc(n)}</td>${vals.join('')}<td style="text-align:center;color:var(--gold2);font-weight:700">${prom}</td></tr>`;
+      return `<tr><td class="cat-cell">${esc(formatNombreMostrar(n,gpsCruceCat))}</td>${vals.join('')}<td style="text-align:center;color:var(--gold2);font-weight:700">${prom}</td></tr>`;
     }).join('');
     out.innerHTML = `<div class="gen-table-wrap"><table class="gen-table">
       <thead><tr><th>JUGADOR</th>${fechas.map(f=>`<th>F${f}</th>`).join('')}<th>PROM.</th></tr></thead>
@@ -4311,7 +4393,7 @@ function runGpsCruce(){
   if(!filas.length){ out.innerHTML = `<div style="color:var(--muted);font-size:12px;padding:12px 0">No hay datos para esa combinación.</div>`; return; }
   const rows = filas.slice(0,50).map((r,idx)=>`<tr>
       <td style="text-align:center;color:var(--muted)">${idx+1}</td>
-      <td class="cat-cell">${esc(r.nombre)}</td>
+      <td class="cat-cell">${esc(formatNombreMostrar(r.nombre,gpsCruceCat))}</td>
       <td style="text-align:center">F${r.fecha}${r.opp?` <span style="color:var(--muted);font-size:11px">vs ${esc(r.opp)}</span>`:''}</td>
       <td style="text-align:center;color:var(--gold2);font-weight:700">${r.v.toFixed(r.v%1?1:0)}</td>
     </tr>`).join('');
@@ -5325,9 +5407,9 @@ function abrirConfirmComet(cat, data){
         <div style="font-size:11px;color:var(--gold2);margin-bottom:6px">⚠ ${sinVincular.length} jugador(es) sin vincular con el plantel:</div>
         ${sinVincular.map(p=>{
           const selId=('vinc-comet-'+p.dorsal+'-'+cat).replace(/[^a-zA-Z0-9-]/g,'_');
-          const opts=roster.map(c=>`<option value="${esc(c.id)}">${esc(c.nombre)}</option>`).join('');
+          const opts=roster.map(c=>`<option value="${esc(c.id)}">${esc(formatNombreMostrar(c.nombre,cat))}</option>`).join('');
           return `<div style="display:flex;align-items:center;gap:6px;margin-bottom:5px;font-size:11px">
-            <span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${esc(p.nombre)}">#${p.dorsal} ${esc(p.nombre)}</span>
+            <span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${esc(p.nombre)}">#${p.dorsal} ${esc(formatNombreMostrar(p.nombre,cat))}</span>
             <select id="${selId}" style="background:var(--surface2,#0d1528);border:1px solid var(--border2,#243f7a);color:var(--text,#d8e4ff);font-size:11px;padding:2px 4px;border-radius:4px;max-width:130px">
               <option value="">— elegir —</option>${opts}
             </select>
@@ -5458,7 +5540,7 @@ function abrirCitacionView(cat, fecha){
   const playerRow = (p, esTitular) => `<div style="display:flex;align-items:center;gap:8px;padding:5px 8px;background:var(--surface2);border-radius:6px;margin-bottom:4px">
     <span style="font-family:'Bebas Neue',sans-serif;font-size:15px;color:var(--gold2);min-width:22px;text-align:center">${p.num||'—'}</span>
     <span style="font-family:'Barlow Condensed',sans-serif;font-size:13px;color:var(--text);cursor:pointer" title="Ver perfil"
-      onclick="document.getElementById('cit-view-overlay')?.remove();abrirPerfilJugador('${cat}','${esc(p.nombre).replace(/'/g,"\\'")}')">${esc(p.nombre)}</span>
+      onclick="document.getElementById('cit-view-overlay')?.remove();abrirPerfilJugador('${cat}','${esc(p.nombre).replace(/'/g,"\\'")}')">${esc(formatNombreMostrar(p.nombre,cat))}</span>
     ${chipsDe(p, esTitular)}
     ${p.warn?'<span title="No coincide con nadie del plantel — revisar contra el PDF original" style="margin-left:auto;font-size:13px">⚠️</span>':''}
   </div>`;
@@ -5488,7 +5570,7 @@ function abrirCitacionView(cat, fecha){
       const t=(partido.titulares||[]).find(x=>x.id===id);
       if(t?.minutoSalida!=null){
         if(!porMinuto[t.minutoSalida]) porMinuto[t.minutoSalida]={sale:[],entra:[]};
-        porMinuto[t.minutoSalida].sale.push(p.nombre);
+        porMinuto[t.minutoSalida].sale.push(formatNombreMostrar(p.nombre,cat));
       }
     });
     suplentes.forEach(p=>{
@@ -5496,7 +5578,7 @@ function abrirCitacionView(cat, fecha){
       const s=(partido.suplentes||[]).find(x=>x.id===id);
       if(s?.minutoEntrada!=null){
         if(!porMinuto[s.minutoEntrada]) porMinuto[s.minutoEntrada]={sale:[],entra:[]};
-        porMinuto[s.minutoEntrada].entra.push(p.nombre);
+        porMinuto[s.minutoEntrada].entra.push(formatNombreMostrar(p.nombre,cat));
       }
     });
     const minutos = Object.keys(porMinuto).map(Number).sort((a,b)=>a-b);
@@ -5518,7 +5600,7 @@ function abrirCitacionView(cat, fecha){
       .filter(x=>x.chips.length);
     const filasHTML = filas.map(({p,chips})=>`<div style="display:flex;align-items:center;gap:8px;padding:5px 8px;background:var(--surface2);border-radius:6px;margin-bottom:4px">
       <span style="font-family:'Bebas Neue',sans-serif;font-size:15px;color:var(--gold2);min-width:22px;text-align:center">${p.num||'—'}</span>
-      <span style="font-family:'Barlow Condensed',sans-serif;font-size:13px;color:var(--text);flex:1">${esc(p.nombre)}</span>
+      <span style="font-family:'Barlow Condensed',sans-serif;font-size:13px;color:var(--text);flex:1">${esc(formatNombreMostrar(p.nombre,cat))}</span>
       <span style="display:flex;gap:6px;font-size:10px;font-family:'Barlow Condensed',sans-serif">${chips.join('')}</span>
     </div>`).join('');
     const cambios = cambiosAgrupadosHTML(titulares, suplentes);
@@ -5854,7 +5936,7 @@ function tarjetaJugadorHTML(cat, p){
       <div style="width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,var(--gold),#8a6a10);
         display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:17px;color:#1a1206;flex-shrink:0">${esc(iniciales)}</div>
       <div style="min-width:0">
-        <div style="font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:1px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(nombre)}</div>
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:1px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(formatNombreMostrar(nombre,cat))}</div>
         <div style="font-size:11px;color:var(--muted);margin-top:2px">${esc(p.posicion||'—')} · ${cat}</div>
       </div>
     </div>
@@ -5922,7 +6004,7 @@ async function dibujarTarjetaJugador(cat, nombre){
   ctx.textAlign='left'; ctx.textBaseline='top';
 
   ctx.font="700 44px 'Bebas Neue', sans-serif"; ctx.fillStyle=TXT;
-  ctx.fillText(nombre.toUpperCase(), pad+130, y+18);
+  ctx.fillText(formatNombreMostrar(nombre,cat).toUpperCase(), pad+130, y+18);
   ctx.font="18px 'Barlow Condensed', sans-serif"; ctx.fillStyle=MUTED;
   ctx.fillText(`${jugador?.posicion||'—'} · ${cat}`, pad+130, y+68);
 
@@ -5979,7 +6061,7 @@ function buildTarjetasJugadoresHTML(cat, merged){
 // Selectores de 2-3 jugadores para comparar (tabla, una fila por métrica)
 function buildComparativaJugadoresHTML(cat, merged){
   const opts='<option value="">— Jugador —</option>'+
-    merged.map(p=>`<option value="${esc(p.nombre)}">${esc(p.nombre)}</option>`).join('');
+    merged.map(p=>`<option value="${esc(p.nombre)}">${esc(formatNombreMostrar(p.nombre,cat))}</option>`).join('');
   const selStyle=`background:var(--surface2);border:1px solid var(--border2);color:var(--text);
     font-family:'Barlow Condensed',sans-serif;font-weight:600;letter-spacing:1px;font-size:13px;
     padding:7px 12px;border-radius:6px;cursor:pointer;outline:none`;
@@ -6038,7 +6120,7 @@ function tarjetaComparativaHTML(cat, p, players){
       <div style="width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,var(--gold),#8a6a10);
         display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:17px;color:#1a1206;flex-shrink:0">${esc(iniciales)}</div>
       <div style="min-width:0">
-        <div style="font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:1px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(nombre)}</div>
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:1px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(formatNombreMostrar(nombre,cat))}</div>
         <div style="font-size:11px;color:var(--muted);margin-top:2px">${esc(p.posicion||'—')} · ${p.edad?p.edad+' años':'—'}</div>
       </div>
     </div>
@@ -6083,7 +6165,7 @@ function renderRosterTable(cat, merged){
     const s=p.stats||{};
     return `<tr data-nombre="${esc((p.nombre||'').toLowerCase())}">
       <td class="rival-name" style="cursor:pointer" onclick="abrirPerfilJugador('${cat}','${esc(p.nombre||'').replace(/'/g,"\\'")}')"
-        title="Ver perfil">${foto}${esc(p.nombre||'—')}</td>
+        title="Ver perfil">${foto}${esc(p.nombre?formatNombreMostrar(p.nombre,cat):'—')}</td>
       <td>${esc(p.posicion||'—')}</td>
       <td>${p.edad||'—'}</td>
       <td>${s.convocatorias||0}</td>
@@ -6107,7 +6189,7 @@ function renderRosterTable(cat, merged){
   const archivados = jugadoresArchivados[cat]||[];
   const archivadosHTML = (canEdit && archivados.length) ? `
     <div style="margin-top:10px;font-size:11px;color:var(--muted);font-family:'Barlow Condensed',sans-serif">
-      Archivados: ${archivados.map(n=>`${esc(n)} <a href="#" class="link-desarchivar" data-nombre="${esc(n)}" style="color:var(--gold2)">↩ restaurar</a>`).join(' &nbsp;·&nbsp; ')}
+      Archivados: ${archivados.map(n=>`${esc(formatNombreMostrar(n,cat))} <a href="#" class="link-desarchivar" data-nombre="${esc(n)}" style="color:var(--gold2)">↩ restaurar</a>`).join(' &nbsp;·&nbsp; ')}
     </div>` : '';
 
   const wrap=document.getElementById(`roster-table-${cat}`);
@@ -6672,6 +6754,7 @@ function startPublicListener(){
     if(p.golesMismatchOmitidos) golesMismatchOmitidos = p.golesMismatchOmitidos;
     if(p.gpsMetricCfg) gpsMetricCfg = p.gpsMetricCfg;
     if(p.gpsPosOverride) gpsPosOverride = p.gpsPosOverride;
+    if(p.correccionesNombres) correccionesNombres = p.correccionesNombres;
     refreshActiveModule();
   });
 }
@@ -6957,7 +7040,7 @@ function renderChecklist(){
   if(list.length===0){wrap.innerHTML=`<div style="color:var(--muted);font-size:12px;padding:10px;font-family:Barlow Condensed,sans-serif">Todavía no hay plantel cargado para ${cat}.</div>`;return;}
   wrap.innerHTML=list.map(p=>`<div class="check-player selected" onclick="toggleCheckPlayer(this)">
     <input type="checkbox" checked onclick="event.stopPropagation()">
-    <span>${esc(p.nombre)}</span>
+    <span>${esc(formatNombreMostrar(p.nombre,cat))}</span>
   </div>`).join('');
 }
 
@@ -7219,7 +7302,7 @@ function pdfSectionJugadores(cat){
   } else {
     rows=merged.map(p=>{
       const s=p.stats||{};
-      return `<tr><td>${esc(p.nombre||'—')}</td><td>${esc(p.posicion||'—')}</td>
+      return `<tr><td>${esc(p.nombre?formatNombreMostrar(p.nombre,cat):'—')}</td><td>${esc(p.posicion||'—')}</td>
         <td>${s.convocatorias||0}</td><td>${s.partidos_titular||0}</td><td>${s.minutos_jugados||0}</td>
         <td style="color:#2563eb;font-weight:700">${s.goles||0}</td><td>${s.asistencias||0}</td>
         <td>${s.tarjeta_amarilla||0} / ${s.tarjeta_roja||0}</td></tr>`;
@@ -8411,6 +8494,7 @@ function abrirPerfilJugador(cat, nombre){
       (otroWords.every(w=>nombreWords.includes(w)) || nombreWords.every(w=>otroWords.includes(w)));
   };
   const jugador = roster.find(p=>p.nombre===nombre) || roster.find(p=>sonMismoJugador(p.nombre));
+  const nombreMostrar = formatNombreMostrar(jugador?jugador.nombre:nombre, cat);
   const statsPorNombre={};
   (jugadoresStats[cat]||[]).forEach(j=>{ statsPorNombre[normNombreOrdenIndependiente(j.jugador)]=j; });
   const jStat = (jugadoresStats[cat]||[]).find(j=>sonMismoJugador(j.jugador));
@@ -8560,7 +8644,7 @@ function abrirPerfilJugador(cat, nombre){
   const hayGps = gpsMatches.length>0;
   const radarHTML = `
     <div style="position:relative;width:100%;height:240px;margin:6px 0">
-      <canvas id="radar-perfil-jugador" role="img" aria-label="Radar de ${esc(nombre)}: cada eje es el porcentaje respecto al mejor dato del plantel de ${esc(cat)} en goles, minutos jugados${hayGps?', sprints, velocidad maxima y metros por minuto':''}${hayGps?'':' -- sprints, velocidad maxima y metros por minuto todavia pendientes de carga GPS'}"></canvas>
+      <canvas id="radar-perfil-jugador" role="img" aria-label="Radar de ${esc(nombreMostrar)}: cada eje es el porcentaje respecto al mejor dato del plantel de ${esc(cat)} en goles, minutos jugados${hayGps?', sprints, velocidad maxima y metros por minuto':''}${hayGps?'':' -- sprints, velocidad maxima y metros por minuto todavia pendientes de carga GPS'}"></canvas>
     </div>
     <div style="display:flex;flex-wrap:wrap;justify-content:center;gap:14px;font-size:10.5px;color:var(--muted);margin-bottom:6px">
       <span style="display:flex;align-items:center;gap:4px"><span style="width:8px;height:8px;border-radius:50%;background:#2a78d6"></span>Dato real</span>
@@ -8588,7 +8672,7 @@ function abrirPerfilJugador(cat, nombre){
   m.id='perfil-jugador-modal'; m.className='modal-bg';
   m.innerHTML = `<div class="modal-box" style="width:460px;max-width:92vw;text-align:left;max-height:85vh;overflow:auto">
     <button class="m-cancel" onclick="document.getElementById('perfil-jugador-modal').remove()" style="float:right">✕</button>
-    <h2 style="text-align:center">${esc(nombre)}</h2>
+    <h2 style="text-align:center">${esc(nombreMostrar)}</h2>
     <p style="text-align:center">${esc(jugador?.posicion||'—')} · ${esc(cat)}</p>
     ${radarHTML}
     <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:14px 0">
@@ -8664,9 +8748,10 @@ function exportFichaJugador(cat, nombre){
     `<tr><td style="font-weight:700;color:#555">${esc(label)}</td><td style="font-weight:700">${esc(String(val))}</td></tr>`
   ).join('');
 
-  const sectionsHTML=`<div class="section-title">${esc(nombre)}</div>
+  const nombreMostrar = formatNombreMostrar(nombre, cat);
+  const sectionsHTML=`<div class="section-title">${esc(nombreMostrar)}</div>
     <table><tbody>${rows}</tbody></table>`;
-  abrirVentanaPDF(`Ficha — ${nombre}`, sectionsHTML);
+  abrirVentanaPDF(`Ficha — ${nombreMostrar}`, sectionsHTML);
 }
 
 // ── Modo 3: exportar vista GENERAL (checkboxes de secciones; Confiabilidad
