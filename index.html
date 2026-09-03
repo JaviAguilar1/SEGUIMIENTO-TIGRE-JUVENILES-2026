@@ -1007,6 +1007,12 @@ let aliasJugadoresComet = {};
 // recordatoriosOmitidos["cat_fecha_key"] = true — recordatorios de "link sin
 // cargar" que ya descartaste a propósito, para que no vuelvan a aparecer.
 let recordatoriosOmitidos = {};
+// golesMismatchOmitidos[cat][key] = true — diferencias de "GOLES POR
+// JUGADOR" en Confiabilidad que ya se revisaron a mano y no son un error
+// nuestro (ej. futdetail suma un gol de amistoso que acá no contamos) —
+// mismo criterio que recordatoriosOmitidos, para no tener que agregar una
+// excepción a mano en el código cada vez que aparece un caso así.
+let golesMismatchOmitidos = {};
 const plantelFutdetail = {}; // plantelFutdetail[cat] = [{nombre,posicion,edad,altura,peso,pie,valoracion,foto,id}] (desde futdetail)
 CATEGORIES.forEach(cat => { plantelFutdetail[cat] = []; });
 // jugadoresArchivados[cat] = [nombres] -- jugadores que ya no están en el
@@ -1339,6 +1345,7 @@ function initFirebase(){
             if(p.aliasJugadores) aliasJugadores = p.aliasJugadores;
             if(p.aliasJugadoresComet) aliasJugadoresComet = p.aliasJugadoresComet;
             if(p.recordatoriosOmitidos) recordatoriosOmitidos = p.recordatoriosOmitidos;
+            if(p.golesMismatchOmitidos) golesMismatchOmitidos = p.golesMismatchOmitidos;
             if(p.gpsMetricCfg) gpsMetricCfg = p.gpsMetricCfg;
             refreshActiveModule();
             setTimeout(refreshAlerts, 200);
@@ -1429,7 +1436,7 @@ function saveData(){
     // guardado normal (cargar un resultado, un link, un gol) BORRARÍA todo
     // lo subido de COMET, porque saveData() hace un .set() del nodo entero,
     // no un merge parcial. Mismo motivo para aliasJugadoresComet.
-    const payload={results:{},links:{},goleadores:{},rivalData:rivalData,matchData:matchData,gymData:gymData,jugadores:{},plantel:{},chequeoSemanal:chequeoSemanal,aliasJugadores:aliasJugadores,aliasJugadoresComet:aliasJugadoresComet,recordatoriosOmitidos:recordatoriosOmitidos,partidos:partidos,jugadoresArchivados:jugadoresArchivados,gpsMetricCfg:gpsMetricCfg};
+    const payload={results:{},links:{},goleadores:{},rivalData:rivalData,matchData:matchData,gymData:gymData,jugadores:{},plantel:{},chequeoSemanal:chequeoSemanal,aliasJugadores:aliasJugadores,aliasJugadoresComet:aliasJugadoresComet,recordatoriosOmitidos:recordatoriosOmitidos,golesMismatchOmitidos:golesMismatchOmitidos,partidos:partidos,jugadoresArchivados:jugadoresArchivados,gpsMetricCfg:gpsMetricCfg};
     CATEGORIES.forEach(cat=>{
       payload.results[cat]={};
       payload.links[cat]={};
@@ -1504,6 +1511,7 @@ function loadData(){
         if(p.aliasJugadores) aliasJugadores = p.aliasJugadores;
         if(p.aliasJugadoresComet) aliasJugadoresComet = p.aliasJugadoresComet;
         if(p.recordatoriosOmitidos) recordatoriosOmitidos = p.recordatoriosOmitidos;
+        if(p.golesMismatchOmitidos) golesMismatchOmitidos = p.golesMismatchOmitidos;
         if(p.gpsMetricCfg) gpsMetricCfg = p.gpsMetricCfg;
       }
       showLoading(false); resolve();
@@ -2260,7 +2268,8 @@ function calcConfiabilidad(){
   // contra un dato de futdetail que va a seguir mal. Confirmado 2026-09-01.
   const esGolesMismatchConocido = m => m.cat==='4TA' && /gonzalez santino/i.test(m.jugador||'');
   for(let i=golesMismatches.length-1; i>=0; i--){
-    if(esGolesMismatchConocido(golesMismatches[i])) golesMismatches.splice(i,1);
+    const m=golesMismatches[i];
+    if(esGolesMismatchConocido(m) || golesMismatchOmitidos[m.cat]?.[m.key]) golesMismatches.splice(i,1);
   }
 
   // Links: mi carga (links) vs futdetail, para los 4 tipos que cruzan
@@ -2434,6 +2443,20 @@ function omitirRecordatorio(dismissKey){
   renderConfiabilidad('gen-confiabilidad');
 }
 
+// Igual que omitirRecordatorio, pero para una diferencia de "GOLES POR
+// JUGADOR" que ya se revisó a mano y no es un error nuestro (ej. futdetail
+// suma un gol de un amistoso que acá no se cuenta) -- queda guardado para
+// siempre en Firebase, por categoría + jugador, sin tocar el número real.
+function omitirGolesMismatch(cat, key){
+  if(!canEdit) return;
+  golesMismatchOmitidos[cat]=golesMismatchOmitidos[cat]||{};
+  golesMismatchOmitidos[cat][key]=true;
+  if(fbReady && db) db.ref('stats/golesMismatchOmitidos').set(golesMismatchOmitidos)
+    .catch(e=>console.warn('omitirGolesMismatch error:',e));
+  showToast('👍 OMITIDO');
+  renderConfiabilidad('gen-confiabilidad');
+}
+
 function renderConfiabilidad(containerId){
   const el=document.getElementById(containerId);
   if(!el) return;
@@ -2541,10 +2564,14 @@ function renderConfiabilidad(containerId){
                 letter-spacing:1px;cursor:pointer;white-space:nowrap;margin-left:4px">🔗 Vincular</button>`;
           }
         }
+        const omitirHTML = canEdit ? `<button onclick="omitirGolesMismatch('${esc(m.cat)}','${esc(m.key)}')"
+          style="background:rgba(255,255,255,0.08);border:1px solid var(--border2);color:var(--text);
+          border-radius:6px;padding:4px 10px;font-family:Barlow Condensed,sans-serif;font-size:11px;
+          letter-spacing:1px;cursor:pointer;white-space:nowrap;margin-left:4px">👍 OMITIR</button>` : '';
         return row(
           `<b style="color:${CAT_COLORS[m.cat]}">${m.cat}</b> · ${esc(m.jugador)}`,
           `Mi carga: <b>${m.mio}</b> · futdetail: <b>${m.fut}</b>${m.sf!=null?` · statfutbol: <b>${m.sf}</b>`:''}${vincularHTML}`,
-          irGoleadoresBtn(m.cat)
+          irGoleadoresBtn(m.cat)+omitirHTML
         );
       }).join('');
     }
@@ -6537,6 +6564,7 @@ function startPublicListener(){
     if(p.aliasJugadoresComet) aliasJugadoresComet = p.aliasJugadoresComet;
     if(p.jugadoresArchivados) jugadoresArchivados = p.jugadoresArchivados;
     if(p.recordatoriosOmitidos) recordatoriosOmitidos = p.recordatoriosOmitidos;
+    if(p.golesMismatchOmitidos) golesMismatchOmitidos = p.golesMismatchOmitidos;
     if(p.gpsMetricCfg) gpsMetricCfg = p.gpsMetricCfg;
     refreshActiveModule();
   });
