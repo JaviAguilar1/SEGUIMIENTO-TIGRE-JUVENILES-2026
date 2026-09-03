@@ -1,5 +1,5 @@
 {
-  "actualizado": "2026-09-02 19:00",
+  "actualizado": "2026-09-02 23:00",
   "fuente": "ligaprofesional.ar (oficial)",
   "fuente_fixture": "ligaprofesional.ar (oficial)",
   "fuente_reserva": "statfutbol.com.ar",
@@ -3077,6 +3077,18 @@
           },
           {
             "pos": 3,
+            "equipo": "INSTITUTO (CORDOBA)",
+            "pts": 12,
+            "pj": 7,
+            "pg": 3,
+            "pe": 3,
+            "pp": 1,
+            "gf": 9,
+            "gc": 6,
+            "dif": 3
+          },
+          {
+            "pos": 4,
             "equipo": "SAN LORENZO",
             "pts": 11,
             "pj": 7,
@@ -3088,7 +3100,7 @@
             "dif": 5
           },
           {
-            "pos": 4,
+            "pos": 5,
             "equipo": "ROSARIO CENTRAL",
             "pts": 10,
             "pj": 6,
@@ -3100,28 +3112,16 @@
             "dif": 3
           },
           {
-            "pos": 5,
+            "pos": 6,
             "equipo": "TALLERES (CORDOBA)",
             "pts": 10,
-            "pj": 6,
+            "pj": 7,
             "pg": 2,
             "pe": 4,
-            "pp": 0,
-            "gf": 6,
-            "gc": 4,
-            "dif": 2
-          },
-          {
-            "pos": 6,
-            "equipo": "INSTITUTO (CORDOBA)",
-            "pts": 9,
-            "pj": 6,
-            "pg": 2,
-            "pe": 3,
             "pp": 1,
-            "gf": 8,
-            "gc": 6,
-            "dif": 2
+            "gf": 6,
+            "gc": 5,
+            "dif": 1
           },
           {
             "pos": 7,
@@ -19333,7 +19333,12 @@
         "nombre": "STENTA SAMELNIK, THIAGO",
         "goles": 8
       },
-      "amarillas_riesgo": []
+      "amarillas_riesgo": [
+        {
+          "nombre": "GUZMAN, ISAIAS WALDO",
+          "amarillas": 5
+        }
+      ]
     },
     "6TA": {
       "fecha": 24,
@@ -19351,7 +19356,12 @@
         "nombre": "FOLINO, BENJAMIN",
         "goles": 6
       },
-      "amarillas_riesgo": []
+      "amarillas_riesgo": [
+        {
+          "nombre": "AUBRY, LAUTARO SEBASTIAN",
+          "amarillas": 5
+        }
+      ]
     },
     "8VA": {
       "fecha": 24,
@@ -19383,6 +19393,11 @@
   },
   "statfutbol_jugadores": {
     "4TA": [
+      {
+        "nombre": "ADAMOVSKY TAU, FELIPE",
+        "gol": 0,
+        "am": 0
+      },
       {
         "nombre": "AFONSO, NICOLAS",
         "gol": 0,
@@ -19445,13 +19460,13 @@
       },
       {
         "nombre": "FREDES, FELIPE BENJAMIN",
-        "gol": 5,
+        "gol": 7,
         "am": 2
       },
       {
         "nombre": "GOMEZ, LUKA THIAGO",
         "gol": 2,
-        "am": 0
+        "am": 1
       },
       {
         "nombre": "GONZALEZ, ALEX EMANUEL",
@@ -19490,7 +19505,7 @@
       },
       {
         "nombre": "LOPEZ, FACUNDO IVAN",
-        "gol": 0,
+        "gol": 1,
         "am": 0
       },
       {
@@ -19501,7 +19516,7 @@
       {
         "nombre": "LUONGO, ALAN EZEQUIEL",
         "gol": 1,
-        "am": 3
+        "am": 4
       },
       {
         "nombre": "MANSILLA, NEHEMIAS EZEQUIEL",
@@ -19535,8 +19550,8 @@
       },
       {
         "nombre": "PANNONI, LAUTARO BENJAMIN",
-        "gol": 2,
-        "am": 5
+        "gol": 3,
+        "am": 6
       },
       {
         "nombre": "PEREYRA SALERNO, MANUEL",
@@ -19673,7 +19688,7 @@
       {
         "nombre": "LLERA, MARIANO",
         "gol": 1,
-        "am": 5
+        "am": 6
       },
       {
         "nombre": "LUQUE, GONZALO OMAR",
@@ -19682,8 +19697,8 @@
       },
       {
         "nombre": "MIÑO, ESTEBAN ROMAN",
-        "gol": 4,
-        "am": 9
+        "gol": 5,
+        "am": 10
       },
       {
         "nombre": "MOYANO, JERONIMO THOMAS",
@@ -19779,7 +19794,7 @@
       },
       {
         "nombre": "CALDERON, ROMAN",
-        "gol": 1,
+        "gol": 2,
         "am": 3
       },
       {
@@ -19855,7 +19870,7 @@
       {
         "nombre": "MORALEJO, SANTIAGO OSCAR",
         "gol": 2,
-        "am": 0
+        "am": 1
       },
       {
         "nombre": "MUCHIUTTI, VALENTINO",
@@ -19890,7 +19905,7 @@
       {
         "nombre": "SCHENONE, ELIAS NEHUEN",
         "gol": 2,
-        "am": 1
+        "am": 2
       },
       {
         "nombre": "SCUNGIO, SEBASTIAN",
@@ -19977,7 +19992,7 @@
       {
         "nombre": "DOMINGUEZ, BAUTISTA",
         "gol": 1,
-        "am": 4
+        "am": 5
       },
       {
         "nombre": "FREDES, TIAGO",
@@ -19992,7 +20007,7 @@
       {
         "nombre": "GAITAN, VALENTIN",
         "gol": 0,
-        "am": 6
+        "am": 7
       },
       {
         "nombre": "GODOY, GONZALO EZEQUIEL",
@@ -20058,6 +20073,11 @@
         "nombre": "MONTOYA, FRANCISCO JAVIER",
         "gol": 0,
         "am": 2
+      },
+      {
+        "nombre": "MOSQUEDA, ERNESTO JESUS",
+        "gol": 0,
+        "am": 0
       },
       {
         "nombre": "OLEA LOPEZ, SEBASTIAN JUAN DE DIOS",
@@ -20129,7 +20149,7 @@
       {
         "nombre": "CABRERA, LUCA RAMIRO",
         "gol": 1,
-        "am": 9
+        "am": 10
       },
       {
         "nombre": "CELIZ, TEO BENJAMIN",
@@ -20189,7 +20209,7 @@
       {
         "nombre": "MERLOS GALEANO, LAUTARO BENJAMIN",
         "gol": 0,
-        "am": 4
+        "am": 5
       },
       {
         "nombre": "MOSQUEDA, ERNESTO JESUS",
@@ -20224,11 +20244,11 @@
       {
         "nombre": "REYNOSO, TOMAS GABRIEL",
         "gol": 1,
-        "am": 10
+        "am": 11
       },
       {
         "nombre": "RIOS, LUCAS MATEO",
-        "gol": 0,
+        "gol": 1,
         "am": 0
       },
       {
@@ -20243,7 +20263,7 @@
       },
       {
         "nombre": "SARAGOZA, RAMIRO JONATAN  JOSUE",
-        "gol": 2,
+        "gol": 3,
         "am": 3
       },
       {
@@ -20311,7 +20331,7 @@
       {
         "nombre": "DUARTE, GASTON EMANUEL",
         "gol": 0,
-        "am": 7
+        "am": 8
       },
       {
         "nombre": "DUARTE, GONZALO ISAIAS",
@@ -20375,7 +20395,7 @@
       },
       {
         "nombre": "NUÑEZ, TIZIANO ENRIQUE",
-        "gol": 3,
+        "gol": 4,
         "am": 2
       },
       {
@@ -20415,7 +20435,7 @@
       },
       {
         "nombre": "VILLALBA BOGADO, GUSTAVO",
-        "gol": 2,
+        "gol": 3,
         "am": 4
       },
       {
@@ -21305,6 +21325,33 @@
           "amarilla": true,
           "roja": false
         }
+      },
+      "23": {
+        "LUONGO, ALAN EZEQUIEL": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "LOPEZ, FACUNDO IVAN": {
+          "goles": 1,
+          "amarilla": false,
+          "roja": false
+        },
+        "PANNONI, LAUTARO BENJAMIN": {
+          "goles": 1,
+          "amarilla": true,
+          "roja": false
+        },
+        "FREDES, FELIPE BENJAMIN": {
+          "goles": 2,
+          "amarilla": false,
+          "roja": false
+        },
+        "GOMEZ, LUKA THIAGO": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        }
       }
     },
     "5TA": {
@@ -21756,6 +21803,18 @@
           "amarilla": true,
           "roja": false
         }
+      },
+      "23": {
+        "LLERA, MARIANO": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "MIÑO, ESTEBAN ROMAN": {
+          "goles": 1,
+          "amarilla": true,
+          "roja": false
+        }
       }
     },
     "6TA": {
@@ -22170,6 +22229,16 @@
         "CALDERON, ROMAN": {
           "goles": 1,
           "amarilla": false,
+          "roja": false
+        },
+        "MORALEJO, SANTIAGO OSCAR": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "SCHENONE, ELIAS NEHUEN": {
+          "goles": 0,
+          "amarilla": true,
           "roja": false
         }
       }
@@ -22653,6 +22722,18 @@
           "amarilla": false,
           "roja": true
         }
+      },
+      "23": {
+        "DOMINGUEZ, BAUTISTA": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "GAITAN, VALENTIN": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        }
       }
     },
     "8VA": {
@@ -23005,6 +23086,33 @@
         "AQUILUE SALGADO, SANTIAGO": {
           "goles": 0,
           "amarilla": true,
+          "roja": false
+        }
+      },
+      "23": {
+        "REYNOSO, TOMAS GABRIEL": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "MERLOS GALEANO, LAUTARO BENJAMIN": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "RIOS, LUCAS MATEO": {
+          "goles": 1,
+          "amarilla": false,
+          "roja": false
+        },
+        "CABRERA, LUCA RAMIRO": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "SARAGOZA, RAMIRO JONATAN  JOSUE": {
+          "goles": 1,
+          "amarilla": false,
           "roja": false
         }
       }
@@ -23394,6 +23502,23 @@
       },
       "22": {
         "AGORRECA, IGNACIO CARLOS": {
+          "goles": 1,
+          "amarilla": false,
+          "roja": false
+        }
+      },
+      "23": {
+        "DUARTE, GASTON EMANUEL": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "VILLALBA BOGADO, GUSTAVO": {
+          "goles": 1,
+          "amarilla": false,
+          "roja": false
+        },
+        "NUÑEZ, TIZIANO ENRIQUE": {
           "goles": 1,
           "amarilla": false,
           "roja": false
