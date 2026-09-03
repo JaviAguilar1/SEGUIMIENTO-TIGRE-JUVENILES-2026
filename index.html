@@ -1339,6 +1339,7 @@ function initFirebase(){
             if(p.aliasJugadores) aliasJugadores = p.aliasJugadores;
             if(p.aliasJugadoresComet) aliasJugadoresComet = p.aliasJugadoresComet;
             if(p.recordatoriosOmitidos) recordatoriosOmitidos = p.recordatoriosOmitidos;
+            if(p.gpsMetricCfg) gpsMetricCfg = p.gpsMetricCfg;
             refreshActiveModule();
             setTimeout(refreshAlerts, 200);
           });
@@ -1428,7 +1429,7 @@ function saveData(){
     // guardado normal (cargar un resultado, un link, un gol) BORRARÍA todo
     // lo subido de COMET, porque saveData() hace un .set() del nodo entero,
     // no un merge parcial. Mismo motivo para aliasJugadoresComet.
-    const payload={results:{},links:{},goleadores:{},rivalData:rivalData,matchData:matchData,gymData:gymData,jugadores:{},plantel:{},chequeoSemanal:chequeoSemanal,aliasJugadores:aliasJugadores,aliasJugadoresComet:aliasJugadoresComet,recordatoriosOmitidos:recordatoriosOmitidos,partidos:partidos,jugadoresArchivados:jugadoresArchivados};
+    const payload={results:{},links:{},goleadores:{},rivalData:rivalData,matchData:matchData,gymData:gymData,jugadores:{},plantel:{},chequeoSemanal:chequeoSemanal,aliasJugadores:aliasJugadores,aliasJugadoresComet:aliasJugadoresComet,recordatoriosOmitidos:recordatoriosOmitidos,partidos:partidos,jugadoresArchivados:jugadoresArchivados,gpsMetricCfg:gpsMetricCfg};
     CATEGORIES.forEach(cat=>{
       payload.results[cat]={};
       payload.links[cat]={};
@@ -1503,6 +1504,7 @@ function loadData(){
         if(p.aliasJugadores) aliasJugadores = p.aliasJugadores;
         if(p.aliasJugadoresComet) aliasJugadoresComet = p.aliasJugadoresComet;
         if(p.recordatoriosOmitidos) recordatoriosOmitidos = p.recordatoriosOmitidos;
+        if(p.gpsMetricCfg) gpsMetricCfg = p.gpsMetricCfg;
       }
       showLoading(false); resolve();
     }).catch(e=>{console.warn('load error:',e);showLoading(false);resolve();});
@@ -1979,6 +1981,13 @@ function toggleSeccion(idSeccion, event){
   cont.style.display=seOculta?'none':'';
   if(chev) chev.style.transform=seOculta?'rotate(-90deg)':'none';
   seccionColapsada[idSeccion]=seOculta;
+  // Los gráficos Chart.js de "Informe de partido" (RENDIMIENTO GPS) quedan
+  // mal medidos si se dibujan con la sección todavía colapsada (canvas a
+  // alto 0) -- al recién abrirla, si ese es el modo activo, se redibujan ya
+  // con el alto real.
+  if(idSeccion==='gps-cruce' && seOculta===false && typeof gpsMode!=='undefined' && gpsMode==='informe' && typeof renderGpsInforme==='function'){
+    renderGpsInforme();
+  }
 }
 
 // ── GENERAL VIEW ─────────────────────────────────────────────
@@ -2709,7 +2718,7 @@ function renderTopGoleadores(wrap){
 // pantalla que RESULTADOS — ahora es su propia pestaña, compartida entre
 // categorías (si estabas mirando PLANTEL de 4TA y cambiás a 5TA, se queda
 // en PLANTEL).
-let catActiveTab = 'resultados'; // 'resultados' | 'plantel' | 'rendimiento' | 'rendimiento_gps' | 'videoanalisis'
+let catActiveTab = 'resultados'; // 'resultados' | 'plantel' | 'rendimiento_gps' | 'videoanalisis'
 
 function buildCatTabsHTML(){
   // Los DT (rol cat_XXX) no ven VIDEOANÁLISIS -- a cambio, "Estadísticas
@@ -2719,10 +2728,11 @@ function buildCatTabsHTML(){
   // Orden pedido por Javi (2026-09-01): Estadísticas, Rendimiento,
   // Videoanálisis (si corresponde), Plantel al final -- mismo orden sirve
   // para admin y DT, porque el DT ya no ve Videoanálisis de por sí.
-  // "RENDIMIENTO GPS" (Catapult directo) se agregó al lado de RENDIMIENTO
-  // (BL) como módulo aparte, a propósito sin fusionar -- Javi quiere
-  // comparar los dos antes de decidir con cuál se queda (2026-09-02).
-  const tabs = [ {id:'resultados', label:'📊 ESTADÍSTICAS'}, {id:'rendimiento', label:'🏃 RENDIMIENTO'},
+  // "RENDIMIENTO" (cruce con BL GPS Performance) se probó en paralelo con
+  // "RENDIMIENTO GPS" (Catapult directo) para decidir con cuál quedarse --
+  // Catapult directo ganó (más confiable, sin depender de que Brian suba
+  // nada) y el otro módulo se borró (Javi, 2026-09-03).
+  const tabs = [ {id:'resultados', label:'📊 ESTADÍSTICAS'},
     {id:'rendimiento_gps', label:'🛰️ RENDIMIENTO GPS'},
     ...(esDT ? [] : [{id:'videoanalisis', label:'▶ VIDEOANÁLISIS'}]), {id:'plantel', label:'👥 PLANTEL'} ];
   return `<div style="display:flex;gap:8px;margin:10px 0 4px;">
@@ -2868,10 +2878,6 @@ function renderStatsSingle(cat, content){
 
   if(catActiveTab==='plantel'){
     renderPlantelTab(cat, tabEl);
-    return;
-  }
-  if(catActiveTab==='rendimiento'){
-    renderRendimientoTab(tabEl, cat);
     return;
   }
   if(catActiveTab==='rendimiento_gps'){
@@ -3366,11 +3372,39 @@ function blFechaNum(str){
   return m ? parseInt(m[0],10) : null;
 }
 
-// BL GPS Performance no separa por categoría de Tigre en su propia base (un
-// solo listado de jugadores) -- acá se cruza cada nombre contra el plantel
-// real de la categoría que se está mirando (mismo criterio de nombres
-// "orden independiente" que usa el resto de la app) para no mezclar
-// jugadores de otra categoría apenas Brian suba más de una.
+// Config de "RENDIMIENTO GPS" (orden/ocultar/renombrar métricas) --
+// compartida como el resto de `stats`, editable solo por canEdit. `order` es
+// un array con los índices de BL_METRICAS en el orden elegido, `hidden` los
+// índices ocultos, `labels` los renombres -- clave 'm'+i (nunca un número
+// pelado: Firebase confunde un objeto con claves 0,1,2... con un array).
+let gpsMetricCfg = {order:null, hidden:[], labels:{}};
+function gpsMetricLabel(i){
+  const custom = gpsMetricCfg.labels && gpsMetricCfg.labels['m'+i];
+  return custom || BL_METRICAS[i].label;
+}
+// Metrica individual (para dropdowns/lookups por índice) con su label ya
+// resuelto -- nunca se oculta acá, solo se usa para mostrar UNA ya elegida.
+function gpsMetricByIdx(i){
+  return {...BL_METRICAS[i], label: gpsMetricLabel(i)};
+}
+// Lista efectiva para chips/dropdowns: orden elegido, ocultas afuera, label
+// renombrado -- las 4 vistas de "lista de métricas" (comparar/ranking, por
+// fecha, perfil) la usan; "Informe de partido" usa métricas fijas a
+// propósito y no se toca con esta config.
+function gpsVisibleMetrics(){
+  const orden = (gpsMetricCfg.order && gpsMetricCfg.order.length) ? gpsMetricCfg.order : BL_METRICAS.map(m=>m.i);
+  const ocultas = new Set(gpsMetricCfg.hidden||[]);
+  return orden.filter(i=>!ocultas.has(i)).map(i=>gpsMetricByIdx(i));
+}
+
+// renderRendimientoTab / blCruceFormHTML / blMode / runBlCruce y el resto de
+// la UI de "RENDIMIENTO (BL)" se borraron el 2026-09-03: Catapult directo
+// (RENDIMIENTO GPS, más abajo) ganó la comparación y pasa a ser la única
+// fuente activa en pantalla. Quedan sin borrar (se siguen usando como
+// respaldo en tarjetas/ficha de jugador cuando Catapult todavía no tiene
+// datos de alguien): BL_METRICAS, blFechaNum, blPlayers (variable + carga en
+// loadTablaData), blTopSpeedInfo y blPlayersDeCategoria (esta última la usa
+// también el radar de la ficha completa para la referencia del plantel).
 function blPlayersDeCategoria(cat){
   const nombresRoster = new Set((plantelFutdetail[cat]||[]).map(p=>normNombreOrdenIndependiente(p.nombre)));
   const out = {};
@@ -3378,238 +3412,6 @@ function blPlayersDeCategoria(cat){
     if(nombresRoster.has(normNombreOrdenIndependiente(nombre))) out[nombre]=p;
   });
   return out;
-}
-
-let blCruceCat = null; // categoría activa del cruce BL, para runBlCruce (sin params, atado a inputs del DOM)
-
-function renderRendimientoTab(tabEl, cat){
-  blCruceCat = cat;
-  const hayDatos = Object.keys(blPlayersDeCategoria(cat)).length > 0;
-  if(!hayDatos){
-    tabEl.innerHTML = `
-      ${seccionTitulo('bl-cruce', '🏃 RENDIMIENTO · Cruce de datos GPS (BL)')}
-      <div id="sec-bl-cruce"${seccionEstiloInicial('bl-cruce')}>
-        <div style="text-align:center;padding:20px;color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-size:13px">
-          Todavía no hay datos de BL GPS Performance cargados para ${cat} (se actualiza solo, cada 30 min, en cuanto Brian suba algo ahí).
-        </div>
-      </div>`;
-    return;
-  }
-  tabEl.innerHTML = `
-    ${seccionTitulo('bl-cruce', '🏃 RENDIMIENTO · Cruce de datos GPS (BL)')}
-    <div id="sec-bl-cruce"${seccionEstiloInicial('bl-cruce')}>
-      ${blCruceFormHTML(cat)}
-      <div id="bl-cruce-result"></div>
-    </div>`;
-  wireBlCruceForm();
-}
-
-function blCruceFormHTML(cat){
-  return `
-    <div style="display:flex;gap:8px;margin-bottom:12px">
-      <button type="button" id="bl-mode-cmp" class="cat-subtab-btn" onclick="blSetMode('cmp')"
-        style="flex:1;padding:8px;border-radius:8px;border:1px solid var(--border2);background:rgba(5,8,15,0.5);color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-weight:700;letter-spacing:1px;font-size:12px;cursor:pointer;">COMPARAR JUGADORES</button>
-      <button type="button" id="bl-mode-rank" class="cat-subtab-btn" onclick="blSetMode('rank')"
-        style="flex:1;padding:8px;border-radius:8px;border:1px solid var(--border2);background:rgba(5,8,15,0.5);color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-weight:700;letter-spacing:1px;font-size:12px;cursor:pointer;">RANKING POR MÉTRICA</button>
-      <button type="button" id="bl-mode-perfil" class="cat-subtab-btn" onclick="blSetMode('perfil')"
-        style="flex:1;padding:8px;border-radius:8px;border:1px solid var(--border2);background:rgba(5,8,15,0.5);color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-weight:700;letter-spacing:1px;font-size:12px;cursor:pointer;">PERFIL INDIVIDUAL</button>
-    </div>
-    <div id="bl-cruce-body"></div>`;
-}
-
-// Formulario de "Comparar jugadores" / "Ranking por métrica" -- sin cambios
-// de fondo, solo separado del HTML de arriba para poder alternar con el
-// formulario (bien distinto) de "Perfil individual".
-function blCmpRankFormHTML(cat){
-  const nombres = Object.keys(blPlayersDeCategoria(cat)).sort();
-  const jugOpts = nombres.map(n=>`<option value="${esc(n)}">${esc(n)}</option>`).join('');
-  const metOpts = BL_METRICAS.map(m=>`<option value="${m.i}">${m.label} (${m.unit})</option>`).join('');
-  return `
-    <div style="display:grid;grid-template-columns:1fr 1fr auto;gap:10px;align-items:end;margin-bottom:12px">
-      <div id="bl-jug-wrap" style="display:${blMode==='cmp'?'':'none'}">
-        <label style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;display:block;margin-bottom:4px">Jugadores (Ctrl/Cmd+clic para varios)</label>
-        <select id="bl-jugadores" multiple size="6" style="width:100%;background:rgba(5,8,15,.8);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:12px;padding:6px;">${jugOpts}</select>
-      </div>
-      <div>
-        <label style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;display:block;margin-bottom:4px">Fechas (ej: 5,9,13 — vacío = todas)</label>
-        <input id="bl-fechas" type="text" placeholder="Todas" style="width:100%;box-sizing:border-box;background:rgba(5,8,15,.8);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:12px;padding:8px 10px;margin-bottom:8px;">
-        <label style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;display:block;margin-bottom:4px">Métrica</label>
-        <select id="bl-metrica" style="width:100%;background:rgba(5,8,15,.8);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:12px;padding:8px 10px;">${metOpts}</select>
-      </div>
-      <button type="button" onclick="runBlCruce()"
-        style="background:var(--red);border:none;border-radius:6px;color:#fff;font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:1px;padding:10px 18px;cursor:pointer;">BUSCAR</button>
-    </div>
-    <div id="bl-cruce-result"></div>`;
-}
-
-// Formulario de "Perfil individual" (Fase A) -- elegís un jugador y se arma
-// solo, sin fechas/métrica/buscar (a diferencia de comparar/ranking, acá no
-// hace falta elegir nada más).
-function blPerfilFormHTML(cat){
-  const nombres = Object.keys(blPlayersDeCategoria(cat)).sort();
-  const jugOpts = nombres.map(n=>`<option value="${esc(n)}">${esc(n)}</option>`).join('');
-  return `
-    <div style="margin-bottom:16px">
-      <label style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;display:block;margin-bottom:4px">Jugador</label>
-      <select id="bl-perfil-jugador" onchange="renderBlPerfil()" style="width:100%;background:rgba(5,8,15,.8);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:13px;padding:8px 10px;">
-        <option value="">— Elegí un jugador —</option>
-        ${jugOpts}
-      </select>
-    </div>
-    <div id="bl-perfil-content"></div>`;
-}
-function wireBlPerfilForm(){ renderBlPerfil(); }
-
-let blMode = 'cmp';
-function blSetMode(m){
-  blMode = m;
-  ['cmp','rank','perfil'].forEach(x=>{
-    const btn = document.getElementById('bl-mode-'+x);
-    const on = x===m;
-    btn.style.borderColor = on?'var(--gold)':'var(--border2)';
-    btn.style.background  = on?'linear-gradient(135deg,#3a2a08,#1a1206)':'rgba(5,8,15,0.5)';
-    btn.style.color       = on?'var(--gold)':'var(--muted)';
-  });
-  const body = document.getElementById('bl-cruce-body');
-  if(m==='perfil'){
-    body.innerHTML = blPerfilFormHTML(blCruceCat);
-    wireBlPerfilForm();
-  } else {
-    body.innerHTML = blCmpRankFormHTML(blCruceCat);
-  }
-}
-function wireBlCruceForm(){ blSetMode(blMode); }
-
-// Métrica destacada arriba del todo del perfil individual, "fijable" a mano
-// (máx. 4, clic en cualquier tarjeta de la grilla de abajo la agrega/saca).
-// Default pedido por el usuario: Dist Total, Mts/min, Sprints, Top Speed
-// (índices de BL_METRICAS).
-let blPerfilPinned = [0, 1, 5, 6];
-function blPerfilTogglePin(i){
-  const idx = blPerfilPinned.indexOf(i);
-  if(idx>-1) blPerfilPinned.splice(idx,1);
-  else {
-    blPerfilPinned.push(i);
-    if(blPerfilPinned.length>4) blPerfilPinned.shift();
-  }
-  renderBlPerfil();
-}
-// Mejor marca de un jugador para una métrica, y en qué fecha/rival salió --
-// mismo criterio que BL ("dato máximo registrado por métrica").
-function blPerfilMetricaMax(p, i){
-  let best = null;
-  (p.match||[]).forEach(r=>{
-    const v = r.metrics ? r.metrics[i] : null;
-    if(v==null) return;
-    if(best==null || Number(v) > best.v) best = {v:Number(v), fecha: blFechaNum(r.fecha), opp: r.opp||''};
-  });
-  return best;
-}
-function renderBlPerfil(){
-  const sel = document.getElementById('bl-perfil-jugador');
-  const cont = document.getElementById('bl-perfil-content');
-  if(!sel || !cont) return;
-  const nombre = sel.value;
-  if(!nombre){ cont.innerHTML = `<div style="color:var(--muted);font-size:12px;padding:12px 0">Elegí un jugador para ver su perfil.</div>`; return; }
-  const p = blPlayers[nombre];
-  if(!p){ cont.innerHTML = `<div style="color:var(--muted);font-size:12px;padding:12px 0">No hay datos de este jugador.</div>`; return; }
-
-  const iniciales = nombre.split(' ').filter(Boolean).map(w=>w[0]).slice(0,2).join('').toUpperCase();
-  const registros = (p.match||[]).length;
-  const metricas = BL_METRICAS.map(m=>({...m, best: blPerfilMetricaMax(p, m.i)}));
-
-  const cardHTML = (m, pinned) => !m.best ? '' : `
-    <div onclick="blPerfilTogglePin(${m.i})" style="cursor:pointer;background:${pinned?'var(--surface2)':'var(--surface)'};border:1px solid ${pinned?'var(--gold)':'var(--border)'};border-radius:8px;padding:${pinned?'12px':'10px'};position:relative;${pinned?'text-align:center':''}">
-      ${pinned?'<div style="position:absolute;top:6px;right:8px;font-size:11px;color:var(--gold)">📌</div>':(blPerfilPinned.includes(m.i)?'<div style="position:absolute;top:6px;right:8px;font-size:10px;color:var(--gold)">📌</div>':'')}
-      ${pinned?'':`<div style="font-size:10px;color:var(--muted);font-family:'Barlow Condensed',sans-serif">${esc(m.label.toUpperCase())}${m.unit!=='#'?` (${esc(m.unit)})`:''}</div>`}
-      <div style="font-family:'Bebas Neue',sans-serif;font-size:${pinned?'26px':'18px'};color:${(pinned||blPerfilPinned.includes(m.i))?'var(--gold2)':'var(--text)'}">${fmtGps(m.best.v)}</div>
-      ${pinned?`<div style="font-size:10px;color:var(--muted);letter-spacing:1px;font-family:'Barlow Condensed',sans-serif;margin-top:2px">${esc(m.label.toUpperCase())}${m.unit!=='#'?` (${esc(m.unit)})`:''}</div>`:`<div style="font-size:9px;color:var(--muted)">F${m.best.fecha}${m.best.opp?` · vs ${esc(m.best.opp)}`:''}</div>`}
-    </div>`;
-
-  const pinnedCards = blPerfilPinned.map(i=>metricas.find(m=>m.i===i)).filter(Boolean).map(m=>cardHTML(m,true)).join('');
-  const gridCards = metricas.map(m=>cardHTML(m,false)).join('');
-
-  cont.innerHTML = `
-    <div style="display:flex;align-items:center;gap:12px;padding:14px;background:var(--surface);border:1px solid var(--border);border-radius:10px;margin-bottom:14px">
-      <div style="width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold2));display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:17px;color:#1a1206;flex-shrink:0">${esc(iniciales)}</div>
-      <div style="flex:1">
-        <div style="font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:1px;color:#fff">${esc(nombre.toUpperCase())}</div>
-        <div style="font-size:12px;color:var(--text2);font-family:'Barlow Condensed',sans-serif">${p.pos?esc(p.pos)+' · ':''}${blCruceCat} · ${registros} registro${registros===1?'':'s'}</div>
-      </div>
-    </div>
-    <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;font-family:'Barlow Condensed',sans-serif">📌 Tocá cualquier métrica de abajo para fijarla acá arriba (máx. 4)</div>
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-bottom:18px">${pinnedCards}</div>
-    <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;font-family:'Barlow Condensed',sans-serif">Dato máximo registrado por métrica</div>
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px">${gridCards}</div>`;
-}
-
-function blFechasSeleccionadas(){
-  const raw = (document.getElementById('bl-fechas').value||'').trim();
-  if(!raw) return null; // null = todas
-  return new Set(raw.split(',').map(s=>parseInt(s.trim(),10)).filter(n=>!isNaN(n)));
-}
-
-function runBlCruce(){
-  const metIdx = parseInt(document.getElementById('bl-metrica').value,10);
-  const met = BL_METRICAS[metIdx];
-  const fechasSel = blFechasSeleccionadas();
-  const out = document.getElementById('bl-cruce-result');
-
-  if(blMode==='cmp'){
-    const jugSel = [...document.getElementById('bl-jugadores').selectedOptions].map(o=>o.value);
-    if(!jugSel.length){ out.innerHTML = `<div style="color:var(--muted);font-size:12px;padding:12px 0">Elegí al menos un jugador.</div>`; return; }
-    // Fechas: unión de las que tenga cada jugador elegido (filtradas si hay selección)
-    const fechasSet = new Set();
-    jugSel.forEach(n=>(blPlayers[n]?.match||[]).forEach(r=>{
-      const f = blFechaNum(r.fecha);
-      if(f!=null && (!fechasSel || fechasSel.has(f))) fechasSet.add(f);
-    }));
-    const fechas = [...fechasSet].sort((a,b)=>a-b);
-    if(!fechas.length){ out.innerHTML = `<div style="color:var(--muted);font-size:12px;padding:12px 0">No hay datos para esa combinación.</div>`; return; }
-    const rows = jugSel.map(n=>{
-      const byFecha={};
-      (blPlayers[n]?.match||[]).forEach(r=>{ const f=blFechaNum(r.fecha); if(f!=null) byFecha[f]=r; });
-      const vals = fechas.map(f=>{
-        const r = byFecha[f];
-        const v = r && r.metrics ? r.metrics[met.i] : null;
-        return `<td style="text-align:center">${v!=null?fmtGps(v):'—'}</td>`;
-      });
-      const nums = fechas.map(f=>byFecha[f]?.metrics?.[met.i]).filter(v=>v!=null).map(Number);
-      const prom = nums.length ? fmtGps(nums.reduce((a,b)=>a+b,0)/nums.length) : '—';
-      return `<tr><td class="cat-cell">${esc(n)}</td>${vals.join('')}<td style="text-align:center;color:var(--gold2);font-weight:700">${prom}</td></tr>`;
-    }).join('');
-    out.innerHTML = `<div class="gen-table-wrap"><table class="gen-table">
-      <thead><tr><th>JUGADOR</th>${fechas.map(f=>`<th>F${f}</th>`).join('')}<th>PROM.</th></tr></thead>
-      <tbody>${rows}</tbody></table></div>
-      <div style="font-family:'Barlow Condensed',sans-serif;font-size:11px;color:var(--muted);margin-top:4px">${met.label} (${met.unit})</div>`;
-    return;
-  }
-
-  // Ranking: todos los jugadores DE ESTA CATEGORÍA, todas sus fechas
-  // (filtradas), la mejor marca de cada uno para esa métrica en el rango
-  // elegido.
-  const filas = [];
-  Object.entries(blPlayersDeCategoria(blCruceCat)).forEach(([nombre, p])=>{
-    (p.match||[]).forEach(r=>{
-      const f = blFechaNum(r.fecha);
-      if(f==null || (fechasSel && !fechasSel.has(f))) return;
-      const v = r.metrics ? r.metrics[met.i] : null;
-      if(v==null) return;
-      filas.push({nombre, fecha:f, opp:r.opp||'', v:Number(v)});
-    });
-  });
-  filas.sort((a,b)=>b.v-a.v);
-  if(!filas.length){ out.innerHTML = `<div style="color:var(--muted);font-size:12px;padding:12px 0">No hay datos para esa combinación.</div>`; return; }
-  const rows = filas.slice(0,50).map((r,idx)=>`<tr>
-      <td style="text-align:center;color:var(--muted)">${idx+1}</td>
-      <td class="cat-cell">${esc(r.nombre)}</td>
-      <td style="text-align:center">F${r.fecha}${r.opp?` <span style="color:var(--muted);font-size:11px">vs ${esc(r.opp)}</span>`:''}</td>
-      <td style="text-align:center;color:var(--gold2);font-weight:700">${r.v.toFixed(r.v%1?1:0)}</td>
-    </tr>`).join('');
-  out.innerHTML = `<div class="gen-table-wrap"><table class="gen-table">
-    <thead><tr><th>#</th><th>JUGADOR</th><th>FECHA</th><th>${met.label}</th></tr></thead>
-    <tbody>${rows}</tbody></table></div>
-    <div style="font-family:'Barlow Condensed',sans-serif;font-size:11px;color:var(--muted);margin-top:4px">${met.label} (${met.unit}) · top 50${filas.length>50?` de ${filas.length}`:''}</div>`;
 }
 
 // ============================================================
@@ -3657,6 +3459,10 @@ function renderRendimientoGpsTab(tabEl, cat){
 
 function gpsCruceFormHTML(cat){
   return `
+    ${canEdit?`<div style="display:flex;justify-content:flex-end;margin-bottom:10px">
+      <button type="button" onclick="gpsAbrirConfigMetricas()"
+        style="background:rgba(5,8,15,0.5);border:1px solid var(--border2);border-radius:6px;color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-weight:700;letter-spacing:1px;font-size:11px;padding:7px 12px;cursor:pointer;">⚙️ CONFIGURAR MÉTRICAS</button>
+    </div>`:''}
     <div style="display:flex;gap:8px;margin-bottom:12px">
       <button type="button" id="gps-mode-cmp" class="cat-subtab-btn" onclick="gpsSetMode('cmp')"
         style="flex:1;padding:8px;border-radius:8px;border:1px solid var(--border2);background:rgba(5,8,15,0.5);color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-weight:700;letter-spacing:1px;font-size:12px;cursor:pointer;">COMPARAR JUGADORES</button>
@@ -3664,6 +3470,10 @@ function gpsCruceFormHTML(cat){
         style="flex:1;padding:8px;border-radius:8px;border:1px solid var(--border2);background:rgba(5,8,15,0.5);color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-weight:700;letter-spacing:1px;font-size:12px;cursor:pointer;">RANKING POR MÉTRICA</button>
       <button type="button" id="gps-mode-perfil" class="cat-subtab-btn" onclick="gpsSetMode('perfil')"
         style="flex:1;padding:8px;border-radius:8px;border:1px solid var(--border2);background:rgba(5,8,15,0.5);color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-weight:700;letter-spacing:1px;font-size:12px;cursor:pointer;">PERFIL INDIVIDUAL</button>
+      <button type="button" id="gps-mode-porfecha" class="cat-subtab-btn" onclick="gpsSetMode('porfecha')"
+        style="flex:1;padding:8px;border-radius:8px;border:1px solid var(--border2);background:rgba(5,8,15,0.5);color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-weight:700;letter-spacing:1px;font-size:12px;cursor:pointer;">POR FECHA</button>
+      <button type="button" id="gps-mode-informe" class="cat-subtab-btn" onclick="gpsSetMode('informe')"
+        style="flex:1;padding:8px;border-radius:8px;border:1px solid var(--border2);background:rgba(5,8,15,0.5);color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-weight:700;letter-spacing:1px;font-size:12px;cursor:pointer;">INFORME DE PARTIDO</button>
     </div>
     <div id="gps-cruce-body"></div>`;
 }
@@ -3671,7 +3481,7 @@ function gpsCruceFormHTML(cat){
 function gpsCmpRankFormHTML(cat){
   const nombres = Object.keys(catapultPlayersDeCategoria(cat)).sort();
   const jugOpts = nombres.map(n=>`<option value="${esc(n)}">${esc(n)}</option>`).join('');
-  const metOpts = BL_METRICAS.map(m=>`<option value="${m.i}">${m.label} (${m.unit})</option>`).join('');
+  const metOpts = gpsVisibleMetrics().map(m=>`<option value="${m.i}">${esc(m.label)} (${esc(m.unit)})</option>`).join('');
   return `
     <div style="display:grid;grid-template-columns:1fr 1fr auto;gap:10px;align-items:end;margin-bottom:12px">
       <div id="gps-jug-wrap" style="display:${gpsMode==='cmp'?'':'none'}">
@@ -3690,16 +3500,30 @@ function gpsCmpRankFormHTML(cat){
     <div id="gps-cruce-result"></div>`;
 }
 
+let gpsPerfilPos = null;
 function gpsPerfilFormHTML(cat){
-  const nombres = Object.keys(catapultPlayersDeCategoria(cat)).sort();
+  const posiciones = gpsPorFechaPosiciones(cat);
+  if(!posiciones.length){
+    return `<div style="color:var(--muted);font-size:12px;padding:12px 0">Todavía no hay posiciones cargadas en el plantel de ${esc(cat)}.</div>`;
+  }
+  if(!gpsPerfilPos || !posiciones.includes(gpsPerfilPos)) gpsPerfilPos = posiciones[0];
+  const posOpts = posiciones.map(p=>`<option value="${esc(p)}"${p===gpsPerfilPos?' selected':''}>${esc(p)}</option>`).join('');
+  const nombres = Object.entries(catapultPlayersDeCategoria(cat)).filter(([,p])=>p.pos===gpsPerfilPos).map(([n])=>n).sort();
   const jugOpts = nombres.map(n=>`<option value="${esc(n)}">${esc(n)}</option>`).join('');
   return `
-    <div style="margin-bottom:16px">
-      <label style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;display:block;margin-bottom:4px">Jugador</label>
-      <select id="gps-perfil-jugador" onchange="renderGpsPerfil()" style="width:100%;background:rgba(5,8,15,.8);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:13px;padding:8px 10px;">
-        <option value="">— Elegí un jugador —</option>
-        ${jugOpts}
-      </select>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">
+      <div>
+        <label style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;display:block;margin-bottom:4px">Posición</label>
+        <select id="gps-perfil-pos" onchange="gpsPerfilPos=this.value;gpsSetMode('perfil');"
+          style="width:100%;background:rgba(5,8,15,.8);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:13px;padding:8px 10px;">${posOpts}</select>
+      </div>
+      <div>
+        <label style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;display:block;margin-bottom:4px">Jugador (opcional)</label>
+        <select id="gps-perfil-jugador" onchange="renderGpsPerfil()" style="width:100%;background:rgba(5,8,15,.8);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:13px;padding:8px 10px;">
+          <option value="">— Todo el plantel de esa posición —</option>
+          ${jugOpts}
+        </select>
+      </div>
     </div>
     <div id="gps-perfil-content"></div>`;
 }
@@ -3708,7 +3532,7 @@ function wireGpsPerfilForm(){ renderGpsPerfil(); }
 let gpsMode = 'cmp';
 function gpsSetMode(m){
   gpsMode = m;
-  ['cmp','rank','perfil'].forEach(x=>{
+  ['cmp','rank','perfil','porfecha','informe'].forEach(x=>{
     const btn = document.getElementById('gps-mode-'+x);
     const on = x===m;
     btn.style.borderColor = on?'var(--gold)':'var(--border2)';
@@ -3719,11 +3543,358 @@ function gpsSetMode(m){
   if(m==='perfil'){
     body.innerHTML = gpsPerfilFormHTML(gpsCruceCat);
     wireGpsPerfilForm();
+  } else if(m==='informe'){
+    body.innerHTML = gpsInformeFormHTML(gpsCruceCat);
+    wireGpsInformeForm();
+  } else if(m==='porfecha'){
+    body.innerHTML = gpsPorFechaFormHTML(gpsCruceCat);
+    wireGpsPorFechaForm();
   } else {
     body.innerHTML = gpsCmpRankFormHTML(gpsCruceCat);
   }
 }
 function wireGpsCruceForm(){ gpsSetMode(gpsMode); }
+
+// ============================================================
+//  INFORME DE PARTIDO — resumen visual de un partido, todo el equipo
+//  (mismo criterio que la vista equivalente de BL GPS Performance: KPIs
+//  del plantel con 60'+ jugados, y un gráfico de barras por jugador para
+//  cada métrica clave, ordenado de mayor a menor). Vive dentro del mismo
+//  módulo "RENDIMIENTO GPS" (Catapult directo), como 4to modo al lado de
+//  comparar/ranking/perfil.
+// ============================================================
+let gpsInformeFecha = null;
+let gpsInformePosFiltro = 'todas';
+let gpsInformeMinFiltro = 'todos'; // 'todos' | '85' | '6084' | '60'
+
+// Todas las fechas (con rival) que tengan al menos un jugador con carga de
+// Catapult en esta categoría, más recientes primero.
+function gpsInformeFechasDeCategoria(cat){
+  const mapa = new Map();
+  Object.values(catapultPlayersDeCategoria(cat)).forEach(p=>{
+    (p.match||[]).forEach(r=>{
+      const n = blFechaNum(r.fecha);
+      if(n!=null && !mapa.has(n)) mapa.set(n, {num:n, opp:r.opp||''});
+    });
+  });
+  return [...mapa.values()].sort((a,b)=>b.num-a.num);
+}
+
+function gpsInformeFormHTML(cat){
+  const fechas = gpsInformeFechasDeCategoria(cat);
+  if(!fechas.length){
+    return `<div style="color:var(--muted);font-size:12px;padding:12px 0">Todavía no hay partidos con datos de Catapult para ${esc(cat)}.</div>`;
+  }
+  if(gpsInformeFecha==null || !fechas.some(f=>f.num===gpsInformeFecha)) gpsInformeFecha = fechas[0].num;
+  const fechaOpts = fechas.map(f=>`<option value="${f.num}"${f.num===gpsInformeFecha?' selected':''}>F${f.num}${f.opp?' vs '+esc(f.opp):''}</option>`).join('');
+  const posiciones = [...new Set(Object.values(catapultPlayersDeCategoria(cat)).map(p=>p.pos).filter(Boolean))].sort();
+  const posOpts = posiciones.map(p=>`<option value="${esc(p)}">${esc(p)}</option>`).join('');
+  return `
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;align-items:end;margin-bottom:16px">
+      <div>
+        <label style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;display:block;margin-bottom:4px">Partido</label>
+        <select id="gps-informe-fecha" onchange="gpsInformeFecha=parseInt(this.value,10);renderGpsInforme();"
+          style="width:100%;background:rgba(5,8,15,.8);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:13px;padding:8px 10px;">${fechaOpts}</select>
+      </div>
+      <div>
+        <label style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;display:block;margin-bottom:4px">Posición</label>
+        <select id="gps-informe-pos" onchange="gpsInformePosFiltro=this.value;renderGpsInforme();"
+          style="width:100%;background:rgba(5,8,15,.8);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:13px;padding:8px 10px;">
+          <option value="todas">Todas</option>${posOpts}
+        </select>
+      </div>
+      <div>
+        <label style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;display:block;margin-bottom:4px">Minutos</label>
+        <select id="gps-informe-min" onchange="gpsInformeMinFiltro=this.value;renderGpsInforme();"
+          style="width:100%;background:rgba(5,8,15,.8);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:13px;padding:8px 10px;">
+          <option value="todos">Todos</option>
+          <option value="85">+85'</option>
+          <option value="6084">60'-84'</option>
+          <option value="60">-60'</option>
+        </select>
+      </div>
+    </div>
+    <div id="gps-informe-content"></div>`;
+}
+function wireGpsInformeForm(){ renderGpsInforme(); }
+
+// Un registro por jugador que jugó la fecha elegida, ya filtrado por
+// posición/minutos -- {nombre, pos, fecha, opp, min, metrics:[...]}.
+// Un registro por jugador que jugó esa fecha, sin filtrar todavía --
+// {nombre, pos, fecha, opp, min, metrics:[...]}. Reusado por "Informe de
+// partido" y por "Por fecha" (bandas de minutos).
+function gpsRegistrosDeFecha(cat, fecha){
+  const out = [];
+  Object.entries(catapultPlayersDeCategoria(cat)).forEach(([nombre,p])=>{
+    const r = (p.match||[]).find(m=>blFechaNum(m.fecha)===fecha);
+    if(r) out.push({nombre, pos:p.pos, ...r});
+  });
+  return out;
+}
+
+function gpsInformeRegistros(cat){
+  return gpsRegistrosDeFecha(cat, gpsInformeFecha).filter(r=>{
+    if(gpsInformePosFiltro!=='todas' && r.pos!==gpsInformePosFiltro) return false;
+    if(gpsInformeMinFiltro==='85'   && !(r.min>=85)) return false;
+    if(gpsInformeMinFiltro==='6084' && !(r.min>=60 && r.min<85)) return false;
+    if(gpsInformeMinFiltro==='60'   && !(r.min<60)) return false;
+    return true;
+  });
+}
+
+function gpsKpiCardHTML(label, unit, nums){
+  if(!nums.length) return '';
+  const prom = nums.reduce((a,b)=>a+b,0)/nums.length;
+  const min = Math.min(...nums), max = Math.max(...nums);
+  return `<div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:10px 12px">
+    <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;font-family:'Barlow Condensed',sans-serif">${esc(label)}${unit?` (${esc(unit)})`:''}</div>
+    <div style="font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--gold2)">${fmtGps(prom)}</div>
+    <div style="font-size:10px;color:var(--muted)">rango ${fmtGps(min)}–${fmtGps(max)}</div>
+  </div>`;
+}
+
+function gpsChartWrapHTML(id, titulo){
+  return `<div style="margin-bottom:22px">
+    <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;font-family:'Barlow Condensed',sans-serif">${esc(titulo)}</div>
+    <div style="position:relative;height:220px"><canvas id="${id}"></canvas></div>
+  </div>`;
+}
+
+// Barra por jugador (métrica principal) + línea opcional en eje secundario
+// (ej. distancia total en barra, m/min en línea) -- mismo patrón visual que
+// usa BL GPS Performance en su "Informe de partido".
+function gpsDrawBarra(id, regs, idxBar, labelBar, idxLine, labelLine){
+  const el = document.getElementById(id);
+  if(!el) return;
+  const ordenados = [...regs].sort((a,b)=>(b.metrics[idxBar]||0)-(a.metrics[idxBar]||0));
+  const labels = ordenados.map(r=>r.nombre);
+  killChart(id);
+  const datasets = [{type:'bar', label:labelBar, data:ordenados.map(r=>r.metrics[idxBar]||0),
+    backgroundColor:'rgba(240,192,64,.75)', borderColor:'#f0c040', borderWidth:1, yAxisID:'y'}];
+  const scales = {
+    x:{ticks:{color:'#5a7099',font:{family:'Barlow Condensed'}},grid:{display:false}},
+    y:{position:'left',ticks:{color:'#5a7099'},grid:{color:'rgba(26,45,90,0.4)'}},
+  };
+  if(idxLine!=null){
+    datasets.push({type:'line', label:labelLine, data:ordenados.map(r=>r.metrics[idxLine]||0),
+      borderColor:'#2a78d6', backgroundColor:'#2a78d6', yAxisID:'y1', tension:.3});
+    scales.y1 = {position:'right',ticks:{color:'#5a7099'},grid:{display:false}};
+  }
+  new Chart(el.getContext('2d'), {data:{labels, datasets}, options:{...chartDef(), scales}});
+}
+function gpsDrawMinutos(id, regs){
+  const el = document.getElementById(id);
+  if(!el) return;
+  const ordenados = [...regs].sort((a,b)=>b.min-a.min);
+  killChart(id);
+  new Chart(el.getContext('2d'), {
+    type:'bar',
+    data:{labels: ordenados.map(r=>r.nombre), datasets:[{label:'Minutos', data:ordenados.map(r=>r.min),
+      backgroundColor:'rgba(240,192,64,.75)', borderColor:'#f0c040', borderWidth:1}]},
+    options: chartDef(),
+  });
+}
+
+function renderGpsInforme(){
+  const cont = document.getElementById('gps-informe-content');
+  if(!cont) return;
+  const regs = gpsInformeRegistros(gpsCruceCat);
+  if(!regs.length){
+    cont.innerHTML = `<div style="color:var(--muted);font-size:12px;padding:12px 0">No hay jugadores para esa combinación de filtros.</div>`;
+    return;
+  }
+
+  const de60 = regs.filter(r=>r.min>=60);
+  const excluidos = regs.length - de60.length;
+  const numsAt = idx => de60.map(r=>r.metrics[idx]).filter(v=>v!=null).map(Number);
+  const hayPL = regs.some(r=>r.metrics[16]!=null);
+
+  const kpis = [
+    gpsKpiCardHTML('Distancia Total','m', numsAt(0)),
+    gpsKpiCardHTML('Mts/min','m/min', numsAt(1)),
+    gpsKpiCardHTML('HSR 21-25','m', numsAt(3)),
+    gpsKpiCardHTML('Sprints +25','m', numsAt(4)),
+    gpsKpiCardHTML('Top Speed','km/h', numsAt(6)),
+    gpsKpiCardHTML('Acel +3','#', numsAt(7)),
+    gpsKpiCardHTML('Desac +3','#', numsAt(8)),
+    hayPL ? gpsKpiCardHTML('Player Load','', numsAt(16)) : '',
+  ].filter(Boolean).join('');
+
+  cont.innerHTML = `
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-bottom:8px">${kpis}</div>
+    ${excluidos>0?`<div style="font-size:10px;color:var(--muted);margin-bottom:16px">Promedios calculados sobre ${de60.length} jugador${de60.length===1?'':'es'} con 60' o más (${excluidos} con menos minutos no entran en el promedio, pero sí aparecen en los gráficos de abajo).</div>`:''}
+    ${gpsChartWrapHTML('ch-gic-dist','Distancia total y m/min')}
+    ${gpsChartWrapHTML('ch-gic-hsr','HSR 21-25 y Sprints +25')}
+    ${gpsChartWrapHTML('ch-gic-vel','Top Speed y Cant. Sprints')}
+    ${gpsChartWrapHTML('ch-gic-acc','Acel +3 y Desac +3')}
+    ${hayPL?gpsChartWrapHTML('ch-gic-pl','Player Load'):''}
+    ${gpsChartWrapHTML('ch-gic-min','Minutos jugados')}`;
+
+  // Recién ahora existen los <canvas> en el DOM -- se dibujan después de
+  // insertar el HTML, nunca antes (si no, Chart.js mide un elemento que
+  // todavía no está).
+  gpsDrawBarra('ch-gic-dist', regs, 0,'Distancia total (m)', 1,'m/min');
+  gpsDrawBarra('ch-gic-hsr',  regs, 3,'HSR 21-25 (m)', 4,'Sprints +25 (m)');
+  gpsDrawBarra('ch-gic-vel',  regs, 6,'Top Speed (km/h)', 5,'Cant. Sprints');
+  gpsDrawBarra('ch-gic-acc',  regs, 7,'Acel +3', 8,'Desac +3');
+  if(hayPL) gpsDrawBarra('ch-gic-pl', regs, 16,'Player Load', null, null);
+  gpsDrawMinutos('ch-gic-min', regs);
+}
+
+// ============================================================
+//  POR FECHA — jugadores de una posición agrupados por banda de minutos
+//  (+85' / 60'-84' / -60'), una fecha puntual o todas juntas. Mismo
+//  criterio que "Informe de partido" para las bandas (agrupar por los
+//  minutos que jugó CADA UNO, no por su rol táctico).
+// ============================================================
+let gpsPFPos = null;
+let gpsPFMetIdx = 0;
+let gpsPFFecha = 'todas'; // 'todas' | numero de fecha
+
+function gpsPorFechaPosiciones(cat){
+  return [...new Set(Object.values(catapultPlayersDeCategoria(cat)).map(p=>p.pos).filter(Boolean))].sort();
+}
+function gpsBandaDe(min){ return min>=85 ? 'gt85' : (min>=60 ? 'r6084' : 'lt60'); }
+
+// Mejor valor de la métrica, por banda de minutos, de los jugadores de
+// `pos` que jugaron `fecha` -- {gt85, r6084, lt60}, null si nadie cae ahí.
+function gpsBandasDePosFecha(cat, pos, fecha, metIdx){
+  const regs = gpsRegistrosDeFecha(cat, fecha).filter(r=>pos==='todas'||r.pos===pos);
+  const out = {gt85:null, r6084:null, lt60:null};
+  regs.forEach(r=>{
+    const v = r.metrics[metIdx];
+    if(v==null) return;
+    const b = gpsBandaDe(r.min);
+    if(out[b]==null || Number(v)>out[b]) out[b]=Number(v);
+  });
+  return out;
+}
+
+// Referencia histórica de una posición para una métrica: máximo y promedio
+// del "mejor dato de cada fecha" (solo jugadores con 60'+, mismo criterio
+// de "máximos y promedios de competencia" que ya usa Perfil de posición).
+function gpsHistPos(cat, pos, metIdx){
+  const porFecha = {};
+  Object.values(catapultPlayersDeCategoria(cat)).forEach(p=>{
+    if(pos!=='todas' && p.pos!==pos) return;
+    (p.match||[]).forEach(r=>{
+      if(r.min<60) return;
+      const v = r.metrics[metIdx];
+      if(v==null) return;
+      const f = blFechaNum(r.fecha);
+      if(f==null) return;
+      if(porFecha[f]==null || Number(v)>porFecha[f]) porFecha[f]=Number(v);
+    });
+  });
+  const vals = Object.values(porFecha);
+  if(!vals.length) return null;
+  return {max: Math.max(...vals), prom: vals.reduce((a,b)=>a+b,0)/vals.length, fechas: vals.length};
+}
+
+function gpsPFBtnHTML(activo, label, onclick){
+  return `<button type="button" onclick="${onclick}"
+    style="padding:6px 12px;border-radius:999px;border:1px solid ${activo?'var(--gold)':'var(--border2)'};background:${activo?'linear-gradient(135deg,#3a2a08,#1a1206)':'rgba(5,8,15,0.5)'};color:${activo?'var(--gold)':'var(--muted)'};font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;cursor:pointer;margin:0 6px 6px 0">${label}</button>`;
+}
+
+function gpsPorFechaFormHTML(cat){
+  const posiciones = gpsPorFechaPosiciones(cat);
+  if(!posiciones.length){
+    return `<div style="color:var(--muted);font-size:12px;padding:12px 0">Todavía no hay posiciones cargadas en el plantel de ${esc(cat)} para agrupar por bandas.</div>`;
+  }
+  if(!gpsPFPos || !posiciones.includes(gpsPFPos)) gpsPFPos = posiciones[0];
+  const posOpts = posiciones.map(p=>`<option value="${esc(p)}"${p===gpsPFPos?' selected':''}>${esc(p)}</option>`).join('');
+  const metChips = gpsVisibleMetrics().map(m=>gpsPFBtnHTML(m.i===gpsPFMetIdx, esc(m.label), `gpsPFMetIdx=${m.i};renderGpsPorFecha();`)).join('');
+  const fechas = gpsInformeFechasDeCategoria(cat);
+  const fechaPills = gpsPFBtnHTML(gpsPFFecha==='todas', 'TODAS', `gpsPFFecha='todas';renderGpsPorFecha();`)
+    + fechas.map(f=>gpsPFBtnHTML(gpsPFFecha===f.num, `F${f.num}${f.opp?' vs '+esc(f.opp):''}`, `gpsPFFecha=${f.num};renderGpsPorFecha();`)).join('');
+
+  return `
+    <div style="margin-bottom:12px">
+      <label style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;display:block;margin-bottom:4px">Posición</label>
+      <select id="gps-pf-pos" onchange="gpsPFPos=this.value;renderGpsPorFecha();"
+        style="width:100%;max-width:260px;background:rgba(5,8,15,.8);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:13px;padding:8px 10px;">${posOpts}</select>
+    </div>
+    <div style="margin-bottom:10px">${metChips}</div>
+    <div style="margin-bottom:16px">${fechaPills}</div>
+    <div id="gps-pf-content"></div>`;
+}
+function wireGpsPorFechaForm(){ renderGpsPorFecha(); }
+
+function gpsPFVal(v){ return v==null ? '—' : fmtGps(v); }
+
+function renderGpsPorFecha(){
+  const cont = document.getElementById('gps-pf-content');
+  if(!cont) return;
+  const cat = gpsCruceCat, pos = gpsPFPos, metIdx = gpsPFMetIdx;
+  const met = gpsMetricByIdx(metIdx);
+  const hist = gpsHistPos(cat, pos, metIdx);
+
+  if(gpsPFFecha==='todas'){
+    const fechas = gpsInformeFechasDeCategoria(cat);
+    const filas = fechas.map(f=>{
+      const b = gpsBandasDePosFecha(cat, pos, f.num, metIdx);
+      if(b.gt85==null && b.r6084==null && b.lt60==null) return null;
+      return `<tr><td class="cat-cell">F${f.num}${f.opp?` <span style="color:var(--muted);font-size:11px">vs ${esc(f.opp)}</span>`:''}</td>
+        <td style="text-align:center">${gpsPFVal(b.gt85)}</td>
+        <td style="text-align:center">${gpsPFVal(b.r6084)}</td>
+        <td style="text-align:center">${gpsPFVal(b.lt60)}</td></tr>`;
+    }).filter(Boolean);
+    if(!filas.length){
+      cont.innerHTML = `<div style="color:var(--muted);font-size:12px;padding:12px 0">Todavía no hay datos de ${esc(pos)} para esa métrica.</div>`;
+      return;
+    }
+    cont.innerHTML = `<div class="gen-table-wrap"><table class="gen-table">
+      <thead><tr><th>FECHA</th><th>+85'</th><th>60'-84'</th><th>-60'</th></tr></thead>
+      <tbody>${filas.join('')}</tbody></table></div>
+      <div style="font-family:'Barlow Condensed',sans-serif;font-size:11px;color:var(--muted);margin-top:4px">${met.label} (${met.unit}) · mejor marca de ${esc(pos)} en cada banda de minutos</div>`;
+    return;
+  }
+
+  // Una fecha puntual: tarjeta de % vs histórico + barras por banda + grilla
+  // con la mejor marca de esa posición ese día, para las 17 métricas.
+  const b = gpsBandasDePosFecha(cat, pos, gpsPFFecha, metIdx);
+  const valoresDelDia = [b.gt85,b.r6084,b.lt60].filter(v=>v!=null);
+  const mejorDelDia = valoresDelDia.length ? Math.max(...valoresDelDia) : null;
+  const pct = (hist && hist.max && mejorDelDia!=null) ? Math.round(mejorDelDia/hist.max*100) : null;
+
+  const bandaBarraHTML = (label, val) => {
+    const pctBanda = (hist && hist.prom && val!=null) ? Math.round(val/hist.prom*100) : null;
+    return `<div style="margin-bottom:10px">
+      <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted);font-family:'Barlow Condensed',sans-serif;margin-bottom:3px">
+        <span>${label}</span><span>${gpsPFVal(val)}${pctBanda!=null?` · ${pctBanda}% vs prom.`:''}</span>
+      </div>
+      <div style="height:8px;background:rgba(255,255,255,.06);border-radius:4px;overflow:hidden">
+        <div style="height:100%;width:${pctBanda!=null?Math.min(100,pctBanda):0}%;background:linear-gradient(90deg,var(--gold),var(--gold2));transition:width .4s"></div>
+      </div>
+    </div>`;
+  };
+
+  const metricasGrid = gpsVisibleMetrics().map(m=>{
+    const bm = gpsBandasDePosFecha(cat, pos, gpsPFFecha, m.i);
+    const mejores = [bm.gt85,bm.r6084,bm.lt60].filter(v=>v!=null);
+    if(!mejores.length) return '';
+    return `<div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:8px 10px">
+      <div style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;font-family:'Barlow Condensed',sans-serif">${esc(m.label)}</div>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:17px;color:${m.i===metIdx?'var(--gold2)':'var(--text)'}">${fmtGps(Math.max(...mejores))}</div>
+    </div>`;
+  }).join('');
+
+  cont.innerHTML = `
+    <div style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:18px">
+      <div style="background:var(--surface);border:1px solid var(--gold);border-radius:10px;padding:14px 18px;min-width:170px">
+        <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;font-family:'Barlow Condensed',sans-serif">% del máx. histórico</div>
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:30px;color:var(--gold2)">${pct!=null?pct+'%':'—'}</div>
+        <div style="font-size:10px;color:var(--muted)">${hist?`Ref.: ${fmtGps(hist.max)} máx · ${fmtGps(hist.prom)} prom. (${hist.fechas} fecha${hist.fechas===1?'':'s'})`:'Sin referencia histórica todavía'}</div>
+      </div>
+      <div style="flex:1;min-width:220px">
+        ${bandaBarraHTML("+85'", b.gt85)}
+        ${bandaBarraHTML("60'-84'", b.r6084)}
+        ${bandaBarraHTML("-60'", b.lt60)}
+      </div>
+    </div>
+    <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;font-family:'Barlow Condensed',sans-serif">Mejor marca de ${esc(pos)} ese día, por métrica</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:8px">${metricasGrid}</div>`;
+}
 
 let gpsPerfilPinned = [0, 1, 5, 6];
 function gpsPerfilTogglePin(i){
@@ -3744,42 +3915,212 @@ function gpsPerfilMetricaMax(p, i){
   });
   return best;
 }
+// Todos los partidos con 60'+ de los jugadores de `pos` (o solo de `nombre`,
+// si se pasa) -- pool crudo para calcular prom./máx. "de competencia".
+function gpsPerfilRegistros(cat, pos, nombre){
+  const out = [];
+  Object.entries(catapultPlayersDeCategoria(cat)).forEach(([n,p])=>{
+    if(p.pos!==pos) return;
+    if(nombre && n!==nombre) return;
+    (p.match||[]).forEach(r=>{ if(r.min>=60) out.push(r); });
+  });
+  return out;
+}
+function gpsPerfilPromMax(regs, idx){
+  const nums = regs.map(r=>r.metrics[idx]).filter(v=>v!=null).map(Number);
+  if(!nums.length) return null;
+  return {prom: nums.reduce((a,b)=>a+b,0)/nums.length, max: Math.max(...nums)};
+}
+// Serie cronológica para el sparkline: valor propio del jugador (todos sus
+// partidos, sin filtro de minutos -- interesa su trayectoria real) o, sin
+// jugador elegido, el promedio de la posición esa fecha (solo 60'+, mismo
+// criterio "de competencia" que el resto de este módulo).
+function gpsEvolucionSerie(cat, pos, nombre, idx){
+  const porFecha = {};
+  Object.entries(catapultPlayersDeCategoria(cat)).forEach(([n,p])=>{
+    if(p.pos!==pos) return;
+    if(nombre && n!==nombre) return;
+    (p.match||[]).forEach(r=>{
+      if(!nombre && r.min<60) return;
+      const v = r.metrics[idx];
+      if(v==null) return;
+      const f = blFechaNum(r.fecha);
+      if(f==null) return;
+      if(!porFecha[f]) porFecha[f] = {sum:0, n:0, opp:r.opp||''};
+      porFecha[f].sum += Number(v); porFecha[f].n++;
+    });
+  });
+  return Object.entries(porFecha).map(([f,d])=>({fecha:+f, opp:d.opp, valor:d.sum/d.n}))
+    .sort((a,b)=>a.fecha-b.fecha);
+}
+// Mini-gráfico SVG propio (sin librerías): área + línea + promedio punteado
+// + puntos con tooltip nativo (<title>) al pasar el mouse.
+function gpsSparklineSVG(serie, unit){
+  const w=220, h=54, pad=6;
+  const vals = serie.map(s=>s.valor);
+  const min = Math.min(...vals), max = Math.max(...vals);
+  const rango = (max-min)||1;
+  const x = i => pad + i*(w-2*pad)/(serie.length-1);
+  const y = v => h-pad - (v-min)/rango*(h-2*pad);
+  const prom = vals.reduce((a,b)=>a+b,0)/vals.length;
+  const pts = serie.map((s,i)=>`${x(i)},${y(s.valor)}`).join(' ');
+  const area = `${pad},${h-pad} ${pts} ${x(serie.length-1)},${h-pad}`;
+  const puntos = serie.map((s,i)=>`<circle cx="${x(i)}" cy="${y(s.valor)}" r="2.6" fill="var(--gold2)"><title>F${s.fecha}${s.opp?' vs '+esc(s.opp):''}: ${fmtGps(s.valor)}${unit&&unit!=='#'?' '+esc(unit):''}</title></circle>`).join('');
+  return `<svg viewBox="0 0 ${w} ${h}" style="width:100%;height:${h}px;overflow:visible">
+    <polygon points="${area}" fill="rgba(240,192,64,.12)" stroke="none"/>
+    <line x1="${pad}" y1="${y(prom)}" x2="${w-pad}" y2="${y(prom)}" stroke="var(--muted)" stroke-dasharray="3,3" stroke-width="1"/>
+    <polyline points="${pts}" fill="none" stroke="var(--gold2)" stroke-width="1.6"/>
+    ${puntos}
+  </svg>`;
+}
+
 function renderGpsPerfil(){
   const sel = document.getElementById('gps-perfil-jugador');
   const cont = document.getElementById('gps-perfil-content');
   if(!sel || !cont) return;
-  const nombre = sel.value;
-  if(!nombre){ cont.innerHTML = `<div style="color:var(--muted);font-size:12px;padding:12px 0">Elegí un jugador para ver su perfil.</div>`; return; }
-  const p = (catapultPlayers[gpsCruceCat]||{})[nombre];
-  if(!p){ cont.innerHTML = `<div style="color:var(--muted);font-size:12px;padding:12px 0">No hay datos de este jugador.</div>`; return; }
+  const cat = gpsCruceCat, pos = gpsPerfilPos, nombre = sel.value || null;
+  const p = nombre ? catapultPlayersDeCategoria(cat)[nombre] : null;
 
-  const iniciales = nombre.split(' ').filter(Boolean).map(w=>w[0]).slice(0,2).join('').toUpperCase();
-  const registros = (p.match||[]).length;
-  const metricas = BL_METRICAS.map(m=>({...m, best: gpsPerfilMetricaMax(p, m.i)}));
+  let headerHTML = '';
+  if(nombre && p){
+    const iniciales = nombre.split(' ').filter(Boolean).map(w=>w[0]).slice(0,2).join('').toUpperCase();
+    const registros = (p.match||[]).length;
+    const metricas = gpsVisibleMetrics().map(m=>({...m, best: gpsPerfilMetricaMax(p, m.i)}));
 
-  const cardHTML = (m, pinned) => !m.best ? '' : `
-    <div onclick="gpsPerfilTogglePin(${m.i})" style="cursor:pointer;background:${pinned?'var(--surface2)':'var(--surface)'};border:1px solid ${pinned?'var(--gold)':'var(--border)'};border-radius:8px;padding:${pinned?'12px':'10px'};position:relative;${pinned?'text-align:center':''}">
-      ${pinned?'<div style="position:absolute;top:6px;right:8px;font-size:11px;color:var(--gold)">📌</div>':(gpsPerfilPinned.includes(m.i)?'<div style="position:absolute;top:6px;right:8px;font-size:10px;color:var(--gold)">📌</div>':'')}
-      ${pinned?'':`<div style="font-size:10px;color:var(--muted);font-family:'Barlow Condensed',sans-serif">${esc(m.label.toUpperCase())}${m.unit!=='#'?` (${esc(m.unit)})`:''}</div>`}
-      <div style="font-family:'Bebas Neue',sans-serif;font-size:${pinned?'26px':'18px'};color:${(pinned||gpsPerfilPinned.includes(m.i))?'var(--gold2)':'var(--text)'}">${fmtGps(m.best.v)}</div>
-      ${pinned?`<div style="font-size:10px;color:var(--muted);letter-spacing:1px;font-family:'Barlow Condensed',sans-serif;margin-top:2px">${esc(m.label.toUpperCase())}${m.unit!=='#'?` (${esc(m.unit)})`:''}</div>`:`<div style="font-size:9px;color:var(--muted)">F${m.best.fecha}${m.best.opp?` · vs ${esc(m.best.opp)}`:''}</div>`}
+    const cardHTML = (m, pinned) => !m.best ? '' : `
+      <div onclick="gpsPerfilTogglePin(${m.i})" style="cursor:pointer;background:${pinned?'var(--surface2)':'var(--surface)'};border:1px solid ${pinned?'var(--gold)':'var(--border)'};border-radius:8px;padding:${pinned?'12px':'10px'};position:relative;${pinned?'text-align:center':''}">
+        ${pinned?'<div style="position:absolute;top:6px;right:8px;font-size:11px;color:var(--gold)">📌</div>':(gpsPerfilPinned.includes(m.i)?'<div style="position:absolute;top:6px;right:8px;font-size:10px;color:var(--gold)">📌</div>':'')}
+        ${pinned?'':`<div style="font-size:10px;color:var(--muted);font-family:'Barlow Condensed',sans-serif">${esc(m.label.toUpperCase())}${m.unit!=='#'?` (${esc(m.unit)})`:''}</div>`}
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:${pinned?'26px':'18px'};color:${(pinned||gpsPerfilPinned.includes(m.i))?'var(--gold2)':'var(--text)'}">${fmtGps(m.best.v)}</div>
+        ${pinned?`<div style="font-size:10px;color:var(--muted);letter-spacing:1px;font-family:'Barlow Condensed',sans-serif;margin-top:2px">${esc(m.label.toUpperCase())}${m.unit!=='#'?` (${esc(m.unit)})`:''}</div>`:`<div style="font-size:9px;color:var(--muted)">F${m.best.fecha}${m.best.opp?` · vs ${esc(m.best.opp)}`:''}</div>`}
+      </div>`;
+
+    const pinnedCards = gpsPerfilPinned.map(i=>metricas.find(m=>m.i===i)).filter(Boolean).map(m=>cardHTML(m,true)).join('');
+    const gridCards = metricas.map(m=>cardHTML(m,false)).join('');
+
+    headerHTML = `
+      <div style="display:flex;align-items:center;gap:12px;padding:14px;background:var(--surface);border:1px solid var(--border);border-radius:10px;margin-bottom:14px">
+        <div style="width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold2));display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:17px;color:#1a1206;flex-shrink:0">${esc(iniciales)}</div>
+        <div style="flex:1">
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:1px;color:#fff">${esc(nombre.toUpperCase())}</div>
+          <div style="font-size:12px;color:var(--text2);font-family:'Barlow Condensed',sans-serif">${p.pos?esc(p.pos)+' · ':''}${cat} · ${registros} registro${registros===1?'':'s'}</div>
+        </div>
+      </div>
+      <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;font-family:'Barlow Condensed',sans-serif">📌 Tocá cualquier métrica de abajo para fijarla acá arriba (máx. 4)</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-bottom:18px">${pinnedCards}</div>
+      <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;font-family:'Barlow Condensed',sans-serif">Dato máximo registrado por métrica</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px">${gridCards}</div>`;
+  }
+
+  // 🧬 Jugador vs. perfil de su posición -- prom./máx. de la posición
+  // siempre, y del jugador elegido al lado, comparando prom-con-prom y
+  // máx-con-máx (nunca cruzado), con el mejor valor de cada par en dorado.
+  const apellido = nombre ? nombre.split(' ').slice(-1)[0] : '';
+  const regsPos = gpsPerfilRegistros(cat, pos, null);
+  const filasComparacion = gpsVisibleMetrics().map(m=>{
+    const pp = gpsPerfilPromMax(regsPos, m.i);
+    const pj = nombre ? gpsPerfilPromMax(gpsPerfilRegistros(cat, pos, nombre), m.i) : null;
+    if(!pp && !pj) return '';
+    const bestProm = (pj && pp) ? (pj.prom>=pp.prom?'jug':'pos') : null;
+    const bestMax  = (pj && pp) ? (pj.max >=pp.max ?'jug':'pos') : null;
+    return `<tr>
+      <td class="cat-cell">${esc(m.label)} <span style="color:var(--muted);font-size:10px">(${esc(m.unit)})</span></td>
+      <td style="text-align:center${bestProm==='pos'?';color:var(--gold2);font-weight:700':''}">${pp?fmtGps(pp.prom):'—'}</td>
+      <td style="text-align:center${bestMax==='pos'?';color:var(--gold2);font-weight:700':''}">${pp?fmtGps(pp.max):'—'}</td>
+      ${nombre?`<td style="text-align:center${bestProm==='jug'?';color:var(--gold2);font-weight:700':''}">${pj?fmtGps(pj.prom):'—'}</td>
+      <td style="text-align:center${bestMax==='jug'?';color:var(--gold2);font-weight:700':''}">${pj?fmtGps(pj.max):'—'}</td>`:''}
+    </tr>`;
+  }).filter(Boolean).join('');
+
+  const comparacionHTML = !filasComparacion
+    ? `<div style="color:var(--muted);font-size:12px;padding:12px 0">Todavía no hay datos de ${esc(pos)} para comparar (hacen falta partidos con 60' o más).</div>`
+    : `<div class="gen-table-wrap"><table class="gen-table">
+        <thead><tr><th>MÉTRICA</th><th>PROM. ${esc(pos)}</th><th>MÁX. ${esc(pos)}</th>${nombre?`<th>PROM. ${esc(apellido)}</th><th>MÁX. ${esc(apellido)}</th>`:''}</tr></thead>
+        <tbody>${filasComparacion}</tbody></table></div>
+      <div style="font-family:'Barlow Condensed',sans-serif;font-size:11px;color:var(--muted);margin-top:4px">Solo partidos con 60' o más.</div>`;
+
+  // 📈 Evolución por fecha -- sparkline por métrica (propio del jugador si
+  // hay uno elegido, si no, promedio de la posición fecha a fecha).
+  const evolucionHTML = gpsVisibleMetrics().map(m=>{
+    const serie = gpsEvolucionSerie(cat, pos, nombre, m.i);
+    if(serie.length<2) return '';
+    return `<div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:10px">
+      <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;font-family:'Barlow Condensed',sans-serif;margin-bottom:4px">${esc(m.label)}${m.unit!=='#'?` (${esc(m.unit)})`:''}</div>
+      ${gpsSparklineSVG(serie, m.unit)}
     </div>`;
-
-  const pinnedCards = gpsPerfilPinned.map(i=>metricas.find(m=>m.i===i)).filter(Boolean).map(m=>cardHTML(m,true)).join('');
-  const gridCards = metricas.map(m=>cardHTML(m,false)).join('');
+  }).filter(Boolean).join('');
 
   cont.innerHTML = `
-    <div style="display:flex;align-items:center;gap:12px;padding:14px;background:var(--surface);border:1px solid var(--border);border-radius:10px;margin-bottom:14px">
-      <div style="width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold2));display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:17px;color:#1a1206;flex-shrink:0">${esc(iniciales)}</div>
-      <div style="flex:1">
-        <div style="font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:1px;color:#fff">${esc(nombre.toUpperCase())}</div>
-        <div style="font-size:12px;color:var(--text2);font-family:'Barlow Condensed',sans-serif">${p.pos?esc(p.pos)+' · ':''}${gpsCruceCat} · ${registros} registro${registros===1?'':'s'}</div>
+    ${headerHTML}
+    <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin:${headerHTML?'18px':'0'} 0 8px;font-family:'Barlow Condensed',sans-serif">🧬 ${nombre?esc(apellido).toUpperCase()+' vs. ':''}PERFIL DE ${esc(pos.toUpperCase())}</div>
+    ${comparacionHTML}
+    <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin:22px 0 10px;font-family:'Barlow Condensed',sans-serif">📈 EVOLUCIÓN POR FECHA</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px">${evolucionHTML || `<div style="color:var(--muted);font-size:12px">Hacen falta 2 o más fechas con datos para graficar la evolución.</div>`}</div>`;
+}
+
+// ============================================================
+//  CONFIGURAR MÉTRICAS — reordenar / ocultar / renombrar las 17 métricas
+//  de BL_METRICAS. Solo afecta los selectores/listas de Comparar, Ranking,
+//  Por fecha y Perfil -- "Informe de partido" usa un set fijo a propósito
+//  (KPIs y gráficos pensados para esas métricas puntuales) y no cambia acá.
+// ============================================================
+function gpsMetCfgOrdenActual(){
+  return (gpsMetricCfg.order && gpsMetricCfg.order.length) ? gpsMetricCfg.order.slice() : BL_METRICAS.map(m=>m.i);
+}
+function gpsAbrirConfigMetricas(){
+  if(!canEdit) return;
+  document.getElementById('gps-metcfg-overlay')?.remove();
+  const orden = gpsMetCfgOrdenActual();
+  const ocultas = new Set(gpsMetricCfg.hidden||[]);
+  const filaHTML = (i, idx) => `
+    <div style="display:flex;align-items:center;gap:8px;padding:6px 4px;border-bottom:1px solid var(--border)">
+      <div style="display:flex;flex-direction:column;gap:1px">
+        <button type="button" onclick="gpsMetCfgMover(${idx},-1)" ${idx===0?'disabled':''} style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:10px;padding:0;line-height:1">▲</button>
+        <button type="button" onclick="gpsMetCfgMover(${idx},1)" ${idx===orden.length-1?'disabled':''} style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:10px;padding:0;line-height:1">▼</button>
       </div>
-    </div>
-    <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;font-family:'Barlow Condensed',sans-serif">📌 Tocá cualquier métrica de abajo para fijarla acá arriba (máx. 4)</div>
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-bottom:18px">${pinnedCards}</div>
-    <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;font-family:'Barlow Condensed',sans-serif">Dato máximo registrado por métrica</div>
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px">${gridCards}</div>`;
+      <input type="checkbox" ${ocultas.has(i)?'':'checked'} onchange="gpsMetCfgToggle(${i})">
+      <input type="text" value="${esc(gpsMetricLabel(i))}" onchange="gpsMetCfgRenombrar(${i}, this.value)"
+        style="flex:1;background:rgba(5,8,15,.8);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:12px;padding:5px 8px;">
+      <span style="font-size:10px;color:var(--muted);min-width:44px;text-align:right">${esc(BL_METRICAS[i].unit)}</span>
+    </div>`;
+  const ov = document.createElement('div');
+  ov.id='gps-metcfg-overlay';
+  ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px';
+  ov.innerHTML = `
+    <div style="background:#0c1220;border:1px solid var(--gold);border-radius:12px;padding:20px;max-width:420px;width:100%;max-height:80vh;overflow-y:auto">
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--gold2);margin-bottom:4px">⚙️ CONFIGURAR MÉTRICAS</div>
+      <div style="font-size:11px;color:var(--muted);margin-bottom:14px">Reordená con las flechas, tildá para mostrar/ocultar, y editá el nombre si querés.</div>
+      <div>${orden.map((i,idx)=>filaHTML(i,idx)).join('')}</div>
+      <button type="button" onclick="document.getElementById('gps-metcfg-overlay').remove()"
+        style="width:100%;margin-top:16px;background:rgba(5,8,15,.8);border:1px solid var(--border2);border-radius:6px;color:var(--muted);font-family:'Bebas Neue',sans-serif;font-size:13px;padding:10px;cursor:pointer">CERRAR</button>
+    </div>`;
+  document.body.appendChild(ov);
+}
+function gpsMetCfgGuardarYRedibujar(){
+  if(typeof saveData==='function') saveData();
+  gpsAbrirConfigMetricas();
+  if(gpsCruceCat) gpsSetMode(gpsMode);
+}
+function gpsMetCfgMover(idx, dir){
+  const orden = gpsMetCfgOrdenActual();
+  const j = idx+dir;
+  if(j<0||j>=orden.length) return;
+  [orden[idx],orden[j]] = [orden[j],orden[idx]];
+  gpsMetricCfg.order = orden;
+  gpsMetCfgGuardarYRedibujar();
+}
+function gpsMetCfgToggle(i){
+  const ocultas = new Set(gpsMetricCfg.hidden||[]);
+  if(ocultas.has(i)) ocultas.delete(i); else ocultas.add(i);
+  gpsMetricCfg.hidden = [...ocultas];
+  gpsMetCfgGuardarYRedibujar();
+}
+function gpsMetCfgRenombrar(i, val){
+  gpsMetricCfg.labels = gpsMetricCfg.labels || {};
+  const v = (val||'').trim();
+  if(v && v!==BL_METRICAS[i].label) gpsMetricCfg.labels['m'+i]=v; else delete gpsMetricCfg.labels['m'+i];
+  if(typeof saveData==='function') saveData();
+  if(gpsCruceCat) gpsSetMode(gpsMode);
 }
 
 function gpsFechasSeleccionadas(){
@@ -3790,7 +4131,7 @@ function gpsFechasSeleccionadas(){
 
 function runGpsCruce(){
   const metIdx = parseInt(document.getElementById('gps-metrica').value,10);
-  const met = BL_METRICAS[metIdx];
+  const met = gpsMetricByIdx(metIdx);
   const fechasSel = gpsFechasSeleccionadas();
   const out = document.getElementById('gps-cruce-result');
 
@@ -6165,6 +6506,7 @@ function startPublicListener(){
     if(p.aliasJugadoresComet) aliasJugadoresComet = p.aliasJugadoresComet;
     if(p.jugadoresArchivados) jugadoresArchivados = p.jugadoresArchivados;
     if(p.recordatoriosOmitidos) recordatoriosOmitidos = p.recordatoriosOmitidos;
+    if(p.gpsMetricCfg) gpsMetricCfg = p.gpsMetricCfg;
     refreshActiveModule();
   });
 }
