@@ -3490,10 +3490,25 @@ function gpsNormPos(pos){
   const key = p.toLowerCase().replace(/\s+/g,' ');
   return GPS_POS_ALIAS[key] || p;
 }
+// Respaldo para 6TA/9NA (hoy): en Catapult el campo "Position" de esos dos
+// planteles está vacío para todos -- en vez de no poder agrupar nada, se usa
+// la posición real que ya tenemos de futdetail para ese mismo jugador. Es
+// solo para que ESTA app pueda mostrar/agrupar por posición -- no se sube ni
+// se guarda nada en Catapult (Javi, 2026-09-03, "no toques nada en
+// Catapult"). Mismo criterio de nombres "orden independiente" que ya usa el
+// resto de la app para cruzar entre fuentes distintas.
+function gpsPosDeFutdetail(cat, nombre){
+  const nn = normNombreOrdenIndependiente(nombre);
+  const enFutdetail = (plantelFutdetail[cat]||[]).find(r=>normNombreOrdenIndependiente(r.nombre)===nn);
+  return enFutdetail ? enFutdetail.posicion : '';
+}
 function catapultPlayersDeCategoria(cat){
   const raw = catapultPlayers[cat] || {};
   const out = {};
-  Object.entries(raw).forEach(([nombre,p])=>{ out[nombre] = {...p, pos: gpsNormPos(p.pos)}; });
+  Object.entries(raw).forEach(([nombre,p])=>{
+    const pos = gpsNormPos(p.pos) || gpsNormPos(gpsPosDeFutdetail(cat, nombre));
+    out[nombre] = {...p, pos};
+  });
   return out;
 }
 
