@@ -4912,11 +4912,23 @@ async function parseCometPdf(file, cat){
   const golesRaw = [];
   if(iGoles>=0){
     const iDisc = idxWord('DISCIPLINARIO', iGoles);
-    const golesWords = sideWords(all.slice(iGoles+1, iDisc<0?iGoles+300:iDisc));
+    // Si el partido no tuvo tarjetas, COMET no imprime "DISCIPLINARIO" en la
+    // página 1 -- el corte de emergencia (+300 palabras) se pasaba de largo
+    // y agarraba también la tabla de "SUSTITUCIONES" de la página 2 (el
+    // detalle jugador-que-sale → jugador-que-entra por minuto), leyéndola
+    // como si fueran más filas de goles y armando un nombre basura con los
+    // dos jugadores pegados. Frenar también ahí si aparece antes que el
+    // límite de emergencia. Caso real que lo destapó: Fernandez Jerónimo,
+    // 6TA F3 vs Lanús, sin tarjetas ese partido (Javi, 2026-09-03).
+    const iSustDetalle = idxWord('SUSTITUCIONES', iGoles);
+    let iFinGoles = iGoles+300;
+    if(iDisc>=0) iFinGoles = Math.min(iFinGoles, iDisc);
+    if(iSustDetalle>=0) iFinGoles = Math.min(iFinGoles, iSustDetalle);
+    const golesWords = sideWords(all.slice(iGoles+1, iFinGoles));
     const rowsG = cometGroupRows(golesWords, 6);
-    rowsG.forEach(r=>{
-      const items = r.items;
-      if(!items.length || !cometMinRe.test(items[0].s)) return;
+    for(let i=0;i<rowsG.length;i++){
+      const items = rowsG[i].items;
+      if(!items.length || !cometMinRe.test(items[0].s)) continue;
       const minuto = parseInt(items[0].s);
       // "Gol de penal" es OTRO item de texto, en la misma fila que el dorsal+
       // nombre pero más a la derecha (no una fila propia debajo, como el
@@ -4925,8 +4937,23 @@ async function parseCometPdf(file, cat){
       const penal = items.slice(1).some(w=>/penal/i.test(w.s));
       const nameItems = items.slice(1).filter(w=>!/penal/i.test(w.s));
       const {dorsal, nombre} = splitDorsalNombre(nameItems);
-      golesRaw.push({minuto, dorsal, nombre, penal});
-    });
+      // "Autogol" -- igual que el motivo de una tarjeta (parseTarjetas, más
+      // abajo), COMET lo pone en una fila propia debajo del nombre, no
+      // pegado en la misma fila. Es un gol EN CONTRA del equipo del que lo
+      // marca -- no cuenta como gol a favor en su ficha de goleador (aunque
+      // el dato de COMET nunca se borra, solo se excluye de esa cuenta).
+      // Caso real que destapó esto: Fernandez Jerónimo, 6TA, F3 vs Lanús,
+      // 70' -- Confiabilidad lo tenía sumado de más (Javi, 2026-09-03).
+      let autogol = /autogol/i.test(items.slice(1).map(w=>w.s).join(' '));
+      if(!autogol && i+1<rowsG.length){
+        const nxt = rowsG[i+1];
+        if(!(nxt.items[0] && cometMinRe.test(nxt.items[0].s)) && /autogol/i.test(nxt.items.map(w=>w.s).join(' '))){
+          autogol = true;
+          i++;
+        }
+      }
+      golesRaw.push({minuto, dorsal, nombre, penal, autogol});
+    }
   }
 
   function parseTarjetas(labelRe){
@@ -5527,11 +5554,15 @@ function golesEfectivos(cat, excluirFechas){
       (partido.goles||[]).forEach(g=>{
         const name = plantelNombreDeId(cat, g.id) || g.nombre;
         if(!map[name]) map[name]={name, goals:0, fechas:[]};
-        map[name].goals+=1;
+        // Autogol: no suma al conteo de goles A FAVOR del jugador (es un gol
+        // en contra) -- el dato de COMET nunca se borra, sigue en el detalle
+        // de abajo, solo se excluye de esta cuenta (ver comentario en
+        // parseCometPdf, donde se detecta el flag).
+        if(!g.autogol) map[name].goals+=1;
         // COMET trae minuto y si fue de penal por gol -- antes se guardaba
         // pero se perdía acá, mostrando solo "F6" (sin poder ver en qué
         // minuto ni si fue penal, aunque el dato ya estaba cargado).
-        const detalle = g.minuto!=null ? `${g.minuto}'${g.penal?' P':''}` : '';
+        const detalle = g.autogol ? 'autogol' : (g.minuto!=null ? `${g.minuto}'${g.penal?' P':''}` : '');
         map[name].fechas.push(detalle ? `F${fecha} (${detalle})` : `F${fecha}`);
       });
     } else {
@@ -8313,7 +8344,13 @@ function abrirPerfilJugador(cat, nombre){
         vecesEntroDeBanco++;
         minCometSum += DURACION_PARTIDO-supComet.minutoEntrada;
       }
-      (partido.goles||[]).filter(g=>g.id===idJ).forEach(g=>{ golCometSum++; eventos.push(`⚽${minSuf(g.minuto)}${g.penal?' (P)':''}`); });
+      // Autogol no suma a golCometSum (gol en contra, no es un gol a favor
+      // del jugador) pero sigue apareciendo en la línea de tiempo de la
+      // ficha con su propio ícono, para que no desaparezca el dato.
+      (partido.goles||[]).filter(g=>g.id===idJ).forEach(g=>{
+        if(g.autogol){ eventos.push(`⚫${minSuf(g.minuto)} (autogol)`); return; }
+        golCometSum++; eventos.push(`⚽${minSuf(g.minuto)}${g.penal?' (P)':''}`);
+      });
       (partido.amarillas||[]).filter(a=>a.id===idJ).forEach(a=>{ amCometSum++; eventos.push(`🟨${minSuf(a.minuto)}`); });
       (partido.rojas||[]).filter(a=>a.id===idJ).forEach(a=>{ rojCometSum++; eventos.push(`🟥${minSuf(a.minuto)}`); });
     }
