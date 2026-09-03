@@ -55040,5 +55040,299 @@
         }
       }
     }
+  },
+  "fixture_reserva": {
+    "RESERVA": {
+      "1": {
+        "rival": "INSTITUTO (C)",
+        "cond": "V",
+        "fecha_iso": "2026-02-04",
+        "jugado": true,
+        "gf": 0,
+        "gc": 1
+      },
+      "2": {
+        "rival": "CENTRAL",
+        "cond": "V",
+        "fecha_iso": "2026-02-10",
+        "jugado": true,
+        "gf": 0,
+        "gc": 2
+      },
+      "3": {
+        "rival": "BANFIELD",
+        "cond": "L",
+        "fecha_iso": "2026-02-16",
+        "jugado": true,
+        "gf": 1,
+        "gc": 0
+      },
+      "4": {
+        "rival": "TALLERES (C)",
+        "cond": "V",
+        "fecha_iso": "2026-03-03",
+        "jugado": true,
+        "gf": 0,
+        "gc": 1
+      },
+      "5": {
+        "rival": "BARRACAS CTRAL",
+        "cond": "L",
+        "fecha_iso": "2026-03-18",
+        "jugado": true,
+        "gf": 1,
+        "gc": 1
+      },
+      "6": {
+        "rival": "GIMNASIA (M)",
+        "cond": "V",
+        "fecha_iso": "2026-03-25",
+        "jugado": true,
+        "gf": 1,
+        "gc": 2
+      },
+      "7": {
+        "rival": "GODOY CRUZ (M)",
+        "cond": "L",
+        "fecha_iso": "2026-04-01",
+        "jugado": true,
+        "gf": 2,
+        "gc": 0
+      },
+      "8": {
+        "rival": "ATL. TUCUMAN",
+        "cond": "V",
+        "fecha_iso": "2026-04-09",
+        "jugado": true,
+        "gf": 2,
+        "gc": 2
+      },
+      "9": {
+        "rival": "UNION (SF)",
+        "cond": "L",
+        "fecha_iso": "2026-04-14",
+        "jugado": true,
+        "gf": 0,
+        "gc": 0
+      },
+      "10": {
+        "rival": "DEF Y JUSTICIA",
+        "cond": "L",
+        "fecha_iso": "2026-04-21",
+        "jugado": true,
+        "gf": 0,
+        "gc": 1
+      },
+      "11": {
+        "rival": "GIMNASIA (LP)",
+        "cond": "V",
+        "fecha_iso": "2026-04-28",
+        "jugado": true,
+        "gf": 2,
+        "gc": 1
+      },
+      "12": {
+        "rival": "ALDOSIVI (MDP)",
+        "cond": "L",
+        "fecha_iso": "2026-05-07",
+        "jugado": true,
+        "gf": 2,
+        "gc": 1
+      },
+      "13": {
+        "rival": "ARGENTINOS JRS",
+        "cond": "V",
+        "fecha_iso": "2026-05-13",
+        "jugado": true,
+        "gf": 0,
+        "gc": 2
+      },
+      "14": {
+        "rival": "SARMIENTO (J)",
+        "cond": "L",
+        "fecha_iso": "2026-05-20",
+        "jugado": true,
+        "gf": 1,
+        "gc": 3
+      },
+      "15": {
+        "rival": "RACING CLUB",
+        "cond": "V",
+        "fecha_iso": "2026-05-26",
+        "jugado": true,
+        "gf": 1,
+        "gc": 2
+      },
+      "16": {
+        "rival": "RIVER PLATE",
+        "cond": "L",
+        "fecha_iso": "2026-06-02",
+        "jugado": true,
+        "gf": 0,
+        "gc": 2
+      },
+      "17": {
+        "rival": "VELEZ",
+        "cond": "V",
+        "fecha_iso": "2026-06-10",
+        "jugado": true,
+        "gf": 0,
+        "gc": 2
+      },
+      "18": {
+        "rival": "SAN LORENZO",
+        "cond": "L",
+        "fecha_iso": "2026-06-19",
+        "jugado": true,
+        "gf": 2,
+        "gc": 2
+      }
+    },
+    "RESERVA_S2": {
+      "1": {
+        "rival": "INSTITUTO (C)",
+        "cond": "L",
+        "fecha_iso": "2026-07-16",
+        "jugado": true,
+        "gf": 1,
+        "gc": 0
+      },
+      "2": {
+        "rival": "CENTRAL",
+        "cond": "L",
+        "fecha_iso": "2026-07-22",
+        "jugado": true,
+        "gf": 1,
+        "gc": 3
+      },
+      "3": {
+        "rival": "BANFIELD",
+        "cond": "V",
+        "fecha_iso": "2026-08-04",
+        "jugado": true,
+        "gf": 1,
+        "gc": 1
+      },
+      "4": {
+        "rival": "TALLERES (C)",
+        "cond": "L",
+        "fecha_iso": "2026-08-13",
+        "jugado": true,
+        "gf": 0,
+        "gc": 1
+      },
+      "5": {
+        "rival": "BARRACAS CTRAL",
+        "cond": "V",
+        "fecha_iso": "2026-08-20",
+        "jugado": true,
+        "gf": 3,
+        "gc": 1
+      },
+      "6": {
+        "rival": "GIMNASIA (M)",
+        "cond": "L",
+        "fecha_iso": "2026-08-27",
+        "jugado": true,
+        "gf": 1,
+        "gc": 3
+      },
+      "7": {
+        "rival": "GODOY CRUZ (M)",
+        "cond": "V",
+        "fecha_iso": "2026-09-02",
+        "jugado": true,
+        "gf": 2,
+        "gc": 2
+      },
+      "8": {
+        "rival": "ATL. TUCUMAN",
+        "cond": "L",
+        "fecha_iso": "2026-09-09",
+        "jugado": false,
+        "gf": null,
+        "gc": null
+      },
+      "9": {
+        "rival": "UNION (SF)",
+        "cond": "V",
+        "fecha_iso": "2026-09-16",
+        "jugado": false,
+        "gf": null,
+        "gc": null
+      },
+      "10": {
+        "rival": "DEF Y JUSTICIA",
+        "cond": "V",
+        "fecha_iso": "2026-09-23",
+        "jugado": false,
+        "gf": null,
+        "gc": null
+      },
+      "11": {
+        "rival": "GIMNASIA (LP)",
+        "cond": "L",
+        "fecha_iso": "2026-09-30",
+        "jugado": false,
+        "gf": null,
+        "gc": null
+      },
+      "12": {
+        "rival": "ALDOSIVI (MDP)",
+        "cond": "V",
+        "fecha_iso": "2026-10-07",
+        "jugado": false,
+        "gf": null,
+        "gc": null
+      },
+      "13": {
+        "rival": "ARGENTINOS JRS",
+        "cond": "L",
+        "fecha_iso": "2026-10-14",
+        "jugado": false,
+        "gf": null,
+        "gc": null
+      },
+      "14": {
+        "rival": "SARMIENTO (J)",
+        "cond": "V",
+        "fecha_iso": "2026-10-21",
+        "jugado": false,
+        "gf": null,
+        "gc": null
+      },
+      "15": {
+        "rival": "RACING CLUB",
+        "cond": "L",
+        "fecha_iso": "2026-10-28",
+        "jugado": false,
+        "gf": null,
+        "gc": null
+      },
+      "16": {
+        "rival": "RIVER PLATE",
+        "cond": "V",
+        "fecha_iso": "2026-11-04",
+        "jugado": false,
+        "gf": null,
+        "gc": null
+      },
+      "17": {
+        "rival": "VELEZ",
+        "cond": "L",
+        "fecha_iso": "2026-11-11",
+        "jugado": false,
+        "gf": null,
+        "gc": null
+      },
+      "18": {
+        "rival": "SAN LORENZO",
+        "cond": "V",
+        "fecha_iso": "2026-11-18",
+        "jugado": false,
+        "gf": null,
+        "gc": null
+      }
+    }
   }
 }
