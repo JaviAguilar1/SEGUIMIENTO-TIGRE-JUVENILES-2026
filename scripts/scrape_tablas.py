@@ -1831,6 +1831,7 @@ def main():
     # "RESERVA_S2" (2do semestre), mismo criterio que reservaSemestre en
     # index.html.
     RESERVA_TORNEO_A_CAT = {"RESERVA_APE": "RESERVA", "RESERVA_CLA": "RESERVA_S2"}
+    resultado["fixture_reserva"] = {}
     for torneo, cfg in RESERVA_TORNEOS.items():
         cat = RESERVA_TORNEO_A_CAT[torneo]
         try:
@@ -1845,6 +1846,28 @@ def main():
                     propios[p["jornada"]] = {"gf": p["gf_visita"], "gc": p["gf_local"], "rival": p["local"]}
             resultado["statfutbol_resultados"][cat] = propios
             print(f"[OK] statfutbol resultados {cat}: {len(propios)} fechas")
+
+            # Fixture completo (jugados y pendientes) de los partidos de
+            # Tigre -- a diferencia de "propios" de arriba (solo resultados
+            # ya jugados, usado como respaldo de RESULTADOS), esto alimenta
+            # la seccion FIXTURE de la app (proxima fecha + calendario
+            # completo), que necesita ver tambien los partidos que todavia
+            # no se jugaron. Mismos datos ya traidos por fetch_statfutbol_
+            # reserva_fixture, no hace falta pedirlos de nuevo.
+            fixture_tigre = {}
+            for p in fixture_r:
+                if p["local"] == "TIGRE":
+                    fixture_tigre[p["jornada"]] = {
+                        "rival": p["visita"], "cond": "L", "fecha_iso": p["fecha_iso"], "jugado": p["jugado"],
+                        "gf": p["gf_local"], "gc": p["gf_visita"],
+                    }
+                elif p["visita"] == "TIGRE":
+                    fixture_tigre[p["jornada"]] = {
+                        "rival": p["local"], "cond": "V", "fecha_iso": p["fecha_iso"], "jugado": p["jugado"],
+                        "gf": p["gf_visita"], "gc": p["gf_local"],
+                    }
+            resultado["fixture_reserva"][cat] = fixture_tigre
+            print(f"[OK] statfutbol fixture reserva {cat}: {len(fixture_tigre)} fechas")
         except Exception as e:  # noqa
             errores.append(f"statfutbol resultados {cat}: {e}")
             print(f"[ERROR] statfutbol resultados {cat}: {e}", file=sys.stderr)

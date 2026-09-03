@@ -2946,6 +2946,59 @@ function fixtureCategoriaHTML(cat, dataCat){
     </div>`;
 }
 
+// Fixture de RESERVA: a diferencia de 4TA-9NA (fixture fijo, RIVALS), acá
+// sale de statfutbol.com.ar (fetch_statfutbol_reserva_fixture en
+// scrape_tablas.py, campo TABLA_DATA.fixture_reserva[dataCat]) -- ese
+// campo trae los partidos de Tigre YA JUGADOS Y PENDIENTES (a diferencia
+// de statfutbol_resultados, que solo guarda los jugados, para el respaldo
+// de RESULTADOS). Mismo patrón visual que fixtureCategoriaHTML, pero
+// async (necesita loadTablaData) y sin condicionCat (acá la condición
+// sale directo del fixture descargado, no hay inversión de menores).
+function fixtureReservaHTML(dataCat){
+  const fixture=(TABLA_DATA&&TABLA_DATA.fixture_reserva&&TABLA_DATA.fixture_reserva[dataCat])||null;
+  if(!fixture || !Object.keys(fixture).length){
+    return `<div style="color:var(--muted);font-size:13px;padding:8px 0">Todavía no hay fixture automático cargado para esta categoría.</div>`;
+  }
+  const fechas=Object.keys(fixture).map(Number).sort((a,b)=>a-b);
+  const proximaF=fechas.find(f=>!fixture[f].jugado);
+  const proximo=proximaF!=null ? {f:proximaF, ...fixture[proximaF]} : null;
+  const fechaFmt=iso=>{ if(!iso) return ''; const p=iso.split('-'); return p.length===3 ? `${p[2]}/${p[1]}` : ''; };
+  const proximoHTML = proximo ? `
+    <div style="background:var(--surface2);border:1px solid var(--border2);border-radius:10px;padding:14px 16px;margin-bottom:12px;
+      display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
+      <div>
+        <div style="font-size:11px;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;margin-bottom:4px">Próxima fecha</div>
+        <div style="font-size:17px;font-weight:700;color:var(--text)">F${proximo.f} vs ${esc(proximo.rival)}
+          <span class="cond-badge cond-${proximo.cond}" style="margin-left:6px;font-size:10px">${proximo.cond==='L'?'LOCAL':'VISIT.'}</span>
+        </div>
+      </div>
+      ${fechaFmt(proximo.fecha_iso)?`<div style="font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--gold2)">${fechaFmt(proximo.fecha_iso)}</div>`:''}
+    </div>` : `<div style="color:var(--muted);font-size:13px;padding:8px 0 12px">Ya se jugaron todas las fechas del fixture.</div>`;
+
+  const filasHTML = fechas.map(f=>{
+    const p=fixture[f];
+    return `<tr${proximo&&proximo.f===f?' style="outline:2px solid var(--gold);outline-offset:-2px"':''}>
+      <td class="fecha-num" style="white-space:nowrap">F${f}${fechaFmt(p.fecha_iso)?` - (${fechaFmt(p.fecha_iso)})`:''}</td>
+      <td class="rival-name">${esc(p.rival)} <span class="cond-badge cond-${p.cond}" style="margin-left:4px;font-size:10px">${p.cond==='L'?'LOCAL':'VISIT.'}</span></td>
+      <td style="text-align:center;color:${p.jugado?'var(--win)':'var(--muted)'}">${p.jugado?'✓ Jugado':'Pendiente'}</td>
+    </tr>`;
+  }).join('');
+
+  return `${proximoHTML}
+    ${seccionTitulo('fixture-'+dataCat, 'VER FIXTURE COMPLETO')}
+    <div id="sec-fixture-${dataCat}"${seccionEstiloInicial('fixture-'+dataCat)}>
+      <div class="table-wrap"><table>
+        <thead><tr class="thead-sub"><th>FECHA</th><th>RIVAL</th><th>ESTADO</th></tr></thead>
+        <tbody>${filasHTML}</tbody>
+      </table></div>
+    </div>`;
+}
+function renderFixtureReserva(dataCat, containerId){
+  const el=document.getElementById(containerId);
+  if(!el) return;
+  loadTablaData().then(()=>{ el.innerHTML=fixtureReservaHTML(dataCat); });
+}
+
 function renderStatsSingle(cat, content){
   const isReserva = cat === 'RESERVA';
   // dataCat: clave real de storage. Para RESERVA depende del semestre elegido.
@@ -3164,8 +3217,10 @@ function renderStatsSingle(cat, content){
       <div id="tabla-lpf-${cat}"></div>
     </div>
 
-    ${isReserva?'':`<div class="st"><div class="stbar"></div>🗓️ FIXTURE</div>
-    <div style="margin-bottom:20px">${fixtureCategoriaHTML(cat, dataCat)}</div>`}
+    <div class="st"><div class="stbar"></div>🗓️ FIXTURE</div>
+    ${isReserva
+      ? `<div id="fixture-reserva-${dataCat}" style="margin-bottom:20px"></div>`
+      : `<div style="margin-bottom:20px">${fixtureCategoriaHTML(cat, dataCat)}</div>`}
 
     ${seccionTitulo('rendcat-'+dataCat, '📈 ESTADÍSTICAS POR BLOQUE', isReserva?'':bloqueSliderHTML('cat'))}
     <div id="sec-rendcat-${dataCat}"${seccionEstiloInicial('rendcat-'+dataCat)}>
@@ -3205,7 +3260,7 @@ function renderStatsSingle(cat, content){
   if(!isReserva) document.getElementById(`sistema-${dataCat}`).innerHTML = buildSistemaTacticoHTML(dataCat);
   if(currentRole && currentRole.startsWith('cat_') && GENERAL_CATS.includes(cat)) renderRivalStatsDetalle(dataCat, cat);
   renderGoleadores(dataCat);
-  if(isReserva) renderTablaReserva(`tabla-lpf-${cat}`);
+  if(isReserva) { renderTablaReserva(`tabla-lpf-${cat}`); renderFixtureReserva(dataCat, `fixture-reserva-${dataCat}`); }
   else { renderTablaLPF(cat, `tabla-lpf-${cat}`); renderResumenCategoriaFijo(cat, `resumen-fijo-${dataCat}`); }
 }
 
