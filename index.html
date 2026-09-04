@@ -1233,6 +1233,35 @@ function calcStatsAll(from,to){
   GENERAL_CATS.forEach(cat=>{const s=calcStats(cat,from,to);pj+=s.pj;pg+=s.pg;pe+=s.pe;pp+=s.pp;gf+=s.gf;gc+=s.gc;});
   return{pj,pg,pe,pp,gf,gc,dg:gf-gc,pts:pg*3+pe};
 }
+// Elo propio de Tigre por categoría: arranca cada equipo en 1500 y va
+// ajustando según el resultado de cada partido (ganarle a uno más fuerte
+// suma más que ganarle a uno más débil), usando TABLA_DATA.fixture_completo
+// -- el fixture oficial de la LPF con TODOS los partidos de TODOS los
+// equipos de la categoría (no solo los de Tigre), fecha a fecha. Se
+// recalcula siempre desde cero con los partidos de la temporada actual, así
+// que el reset de fin de año sale solo (temporada siguiente = fixture
+// nuevo, sin nada que resetear a mano).
+function calcElo(cat){
+  const K=20, BASE=1500;
+  const fc=(TABLA_DATA&&TABLA_DATA.fixture_completo&&TABLA_DATA.fixture_completo[cat])||{};
+  const fechas=Object.keys(fc).map(Number).sort((a,b)=>a-b);
+  const elo={};
+  const getElo=eq=>elo[eq]!=null?elo[eq]:(elo[eq]=BASE);
+  const tigreHist=[];
+  fechas.forEach(f=>{
+    (fc[f]||[]).forEach(p=>{
+      const rl=getElo(p.local), rv=getElo(p.visitante);
+      const el=1/(1+Math.pow(10,(rv-rl)/400));
+      let sl; if(p.gl>p.gv)sl=1; else if(p.gl<p.gv)sl=0; else sl=0.5;
+      elo[p.local]=rl+K*(sl-el);
+      elo[p.visitante]=rv+K*((1-sl)-(1-el));
+    });
+    if(elo['Tigre']!=null) tigreHist.push({fecha:f, elo:Math.round(elo['Tigre'])});
+  });
+  const ranking=Object.entries(elo).map(([equipo,val])=>({equipo,elo:Math.round(val)})).sort((a,b)=>b.elo-a.elo);
+  const tigrePos=ranking.findIndex(r=>r.equipo==='Tigre')+1;
+  return {ranking, tigreHist, tigrePos, total:ranking.length};
+}
 function getPeriodos(cat){
   if(cat==='RESERVA'||cat==='RESERVA_S2'){
     // Dynamically find last N played matches
@@ -2889,6 +2918,37 @@ function renderResumenCategoriaFijo(cat, containerId){
   });
 }
 
+// Sección ELO: no se muestra la tabla completa de las 36 equipos (mucho
+// para algo que rara vez se va a mirar) -- solo la evolución de Tigre fecha
+// a fecha y su puesto actual en el ranking de la categoría, a pedido de
+// Javi, 2026-09-03 ("no hace falta la tabla completa, con eso alcanza").
+async function renderEloCat(cat, containerId){
+  await loadTablaData();
+  const el=document.getElementById(containerId);
+  if(!el) return;
+  const {tigreHist, tigrePos, total}=calcElo(cat);
+  if(!tigreHist.length){
+    el.innerHTML=`<div style="color:var(--muted);font-size:13px;padding:6px 0">Todavía no hay partidos jugados en el fixture oficial de la LPF para calcular el Elo.</div>`;
+    return;
+  }
+  const actual=tigreHist[tigreHist.length-1].elo;
+  const canvasId=`elo-canvas-${containerId}`;
+  el.innerHTML=`
+    <div style="display:flex;align-items:baseline;gap:18px;flex-wrap:wrap;margin-bottom:12px">
+      <div><div style="font-family:'Bebas Neue',sans-serif;font-size:32px;color:var(--gold2);line-height:1">${actual}</div>
+        <div style="font-size:10px;color:var(--muted);letter-spacing:1px;text-transform:uppercase">Elo actual</div></div>
+      <div style="font-size:13px;color:var(--text2)">Puesto <b style="color:var(--gold2)">${tigrePos}°</b> de ${total} en el ranking Elo de la categoría</div>
+    </div>
+    <div class="gic-chart-box"><canvas id="${canvasId}"></canvas></div>`;
+  killChart(canvasId);
+  new Chart(document.getElementById(canvasId).getContext('2d'), {
+    type:'line',
+    data:{labels:tigreHist.map(h=>'F'+h.fecha), datasets:[{label:'Elo Tigre', data:tigreHist.map(h=>h.elo),
+      borderColor:'#f0c040', backgroundColor:'rgba(240,192,64,.15)', fill:true, tension:.25, pointRadius:3}]},
+    options: chartDef(),
+  });
+}
+
 // Chevron de despliegue "pelado" (sin título/cartel al lado) -- mismo
 // motor que seccionTitulo (toggleSeccion busca los ids "chev-"/"sec-" con
 // este mismo patrón), pero para sub-bloques donde el título ya está puesto
@@ -3248,6 +3308,11 @@ function renderStatsSingle(cat, content){
     <div class="st"><div class="stbar"></div>🗓️ FIXTURE Y RESULTADOS</div>
     <div id="fixture-cat-${dataCat}" style="margin-bottom:20px"></div>
 
+    ${isReserva?'':`${seccionTitulo('elo-'+dataCat, `📈 ELO · <span style="color:${CAT_COLORS[cat]}">${cat}</span>`)}
+    <div id="sec-elo-${dataCat}"${seccionEstiloInicial('elo-'+dataCat)}>
+      <div id="elo-${dataCat}"></div>
+    </div>`}
+
     ${isReserva?'':`${seccionTitulo('rendcat-'+dataCat, '📈 ESTADÍSTICAS POR BLOQUE', bloqueSliderHTML('cat'))}
     <div id="sec-rendcat-${dataCat}"${seccionEstiloInicial('rendcat-'+dataCat)}>
       <div id="bloque-cat-${dataCat}"></div>
@@ -3290,6 +3355,7 @@ function renderStatsSingle(cat, content){
     wireBloqueSlider('cat', ()=>renderStatsSingle(cat, content));
     document.getElementById(`bloque-cat-${dataCat}`).innerHTML = buildRendimientoGeneralHTML((from,to)=>calcStats(dataCat,from,to), dataCat, [cat]);
     document.getElementById(`sistema-${dataCat}`).innerHTML = buildSistemaTacticoHTML(dataCat);
+    renderEloCat(cat, `elo-${dataCat}`);
   }
   if(currentRole && currentRole.startsWith('cat_') && GENERAL_CATS.includes(cat)) renderRivalStatsDetalle(dataCat, cat);
   renderGoleadores(dataCat);
