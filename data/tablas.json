@@ -1,5 +1,5 @@
 {
-  "actualizado": "2026-09-03 11:00",
+  "actualizado": "2026-09-03 23:00",
   "fuente": "ligaprofesional.ar (oficial)",
   "fuente_fixture": "ligaprofesional.ar (oficial)",
   "fuente_reserva": "statfutbol.com.ar",
@@ -3065,6 +3065,18 @@
           },
           {
             "pos": 2,
+            "equipo": "ROSARIO CENTRAL",
+            "pts": 13,
+            "pj": 7,
+            "pg": 3,
+            "pe": 4,
+            "pp": 0,
+            "gf": 12,
+            "gc": 8,
+            "dif": 4
+          },
+          {
+            "pos": 3,
             "equipo": "SARMIENTO (JUNIN)",
             "pts": 13,
             "pj": 7,
@@ -3076,7 +3088,7 @@
             "dif": 4
           },
           {
-            "pos": 3,
+            "pos": 4,
             "equipo": "INSTITUTO (CORDOBA)",
             "pts": 12,
             "pj": 7,
@@ -3088,7 +3100,7 @@
             "dif": 3
           },
           {
-            "pos": 4,
+            "pos": 5,
             "equipo": "SAN LORENZO",
             "pts": 11,
             "pj": 7,
@@ -3098,18 +3110,6 @@
             "gf": 9,
             "gc": 4,
             "dif": 5
-          },
-          {
-            "pos": 5,
-            "equipo": "ROSARIO CENTRAL",
-            "pts": 10,
-            "pj": 6,
-            "pg": 2,
-            "pe": 4,
-            "pp": 0,
-            "gf": 10,
-            "gc": 7,
-            "dif": 3
           },
           {
             "pos": 6,
@@ -3151,13 +3151,13 @@
             "pos": 9,
             "equipo": "GIMNASIA Y ESGRIMA (MENDOZA)",
             "pts": 9,
-            "pj": 6,
+            "pj": 7,
             "pg": 3,
             "pe": 0,
-            "pp": 3,
-            "gf": 8,
-            "gc": 8,
-            "dif": 0
+            "pp": 4,
+            "gf": 9,
+            "gc": 10,
+            "dif": -1
           },
           {
             "pos": 10,
@@ -3173,6 +3173,18 @@
           },
           {
             "pos": 11,
+            "equipo": "BANFIELD",
+            "pts": 8,
+            "pj": 7,
+            "pg": 2,
+            "pe": 2,
+            "pp": 3,
+            "gf": 7,
+            "gc": 9,
+            "dif": -2
+          },
+          {
+            "pos": 12,
             "equipo": "ATL. TUCUMAN",
             "pts": 8,
             "pj": 7,
@@ -3184,7 +3196,7 @@
             "dif": -4
           },
           {
-            "pos": 12,
+            "pos": 13,
             "equipo": "UNION (SF)",
             "pts": 7,
             "pj": 7,
@@ -3196,7 +3208,7 @@
             "dif": 0
           },
           {
-            "pos": 13,
+            "pos": 14,
             "equipo": "ALDOSIVI (MAR DEL PLATA)",
             "pts": 7,
             "pj": 7,
@@ -3208,7 +3220,7 @@
             "dif": -2
           },
           {
-            "pos": 14,
+            "pos": 15,
             "equipo": "GODOY CRUZ A.T. (MENDOZA)",
             "pts": 7,
             "pj": 7,
@@ -3220,7 +3232,7 @@
             "dif": -3
           },
           {
-            "pos": 15,
+            "pos": 16,
             "equipo": "ARGENTINOS JUNIORS",
             "pts": 6,
             "pj": 7,
@@ -3232,7 +3244,7 @@
             "dif": -3
           },
           {
-            "pos": 16,
+            "pos": 17,
             "equipo": "RACING CLUB",
             "pts": 5,
             "pj": 7,
@@ -3244,28 +3256,16 @@
             "dif": -4
           },
           {
-            "pos": 17,
-            "equipo": "BANFIELD",
-            "pts": 5,
-            "pj": 6,
-            "pg": 1,
-            "pe": 2,
-            "pp": 3,
-            "gf": 5,
-            "gc": 9,
-            "dif": -4
-          },
-          {
             "pos": 18,
             "equipo": "BARRACAS CENTRAL",
             "pts": 3,
-            "pj": 6,
+            "pj": 7,
             "pg": 0,
             "pe": 3,
-            "pp": 3,
+            "pp": 4,
             "gf": 4,
-            "gc": 11,
-            "dif": -7
+            "gc": 13,
+            "dif": -9
           }
         ],
         "Zona B": [
@@ -3307,6 +3307,18 @@
           },
           {
             "pos": 4,
+            "equipo": "BOCA JUNIORS",
+            "pts": 14,
+            "pj": 7,
+            "pg": 4,
+            "pe": 2,
+            "pp": 1,
+            "gf": 10,
+            "gc": 4,
+            "dif": 6
+          },
+          {
+            "pos": 5,
             "equipo": "ESTUDIANTES (RIO CUARTO - CORDOBA)",
             "pts": 12,
             "pj": 7,
@@ -3318,7 +3330,7 @@
             "dif": 2
           },
           {
-            "pos": 5,
+            "pos": 6,
             "equipo": "ATL. RAFAELA",
             "pts": 12,
             "pj": 7,
@@ -3328,18 +3340,6 @@
             "gf": 8,
             "gc": 7,
             "dif": 1
-          },
-          {
-            "pos": 6,
-            "equipo": "BOCA JUNIORS",
-            "pts": 11,
-            "pj": 6,
-            "pg": 3,
-            "pe": 2,
-            "pp": 1,
-            "gf": 9,
-            "gc": 4,
-            "dif": 5
           },
           {
             "pos": 7,
@@ -3381,28 +3381,52 @@
             "pos": 10,
             "equipo": "QUILMES",
             "pts": 8,
-            "pj": 6,
+            "pj": 7,
             "pg": 2,
             "pe": 2,
-            "pp": 2,
+            "pp": 3,
             "gf": 5,
-            "gc": 5,
-            "dif": 0
+            "gc": 6,
+            "dif": -1
           },
           {
             "pos": 11,
             "equipo": "CENTRAL CORDOBA (SANTIAGO DEL ESTERO)",
             "pts": 8,
-            "pj": 6,
+            "pj": 7,
             "pg": 2,
             "pe": 2,
-            "pp": 2,
-            "gf": 4,
-            "gc": 5,
-            "dif": -1
+            "pp": 3,
+            "gf": 5,
+            "gc": 10,
+            "dif": -5
           },
           {
             "pos": 12,
+            "equipo": "HURACAN",
+            "pts": 7,
+            "pj": 7,
+            "pg": 2,
+            "pe": 1,
+            "pp": 4,
+            "gf": 8,
+            "gc": 6,
+            "dif": 2
+          },
+          {
+            "pos": 13,
+            "equipo": "DEFENSA Y JUSTICIA",
+            "pts": 7,
+            "pj": 7,
+            "pg": 1,
+            "pe": 4,
+            "pp": 2,
+            "gf": 12,
+            "gc": 11,
+            "dif": 1
+          },
+          {
+            "pos": 14,
             "equipo": "NEWELLS OLD BOYS",
             "pts": 6,
             "pj": 7,
@@ -3414,7 +3438,7 @@
             "dif": -4
           },
           {
-            "pos": 13,
+            "pos": 15,
             "equipo": "COLON",
             "pts": 5,
             "pj": 7,
@@ -3426,43 +3450,7 @@
             "dif": -5
           },
           {
-            "pos": 14,
-            "equipo": "HURACAN",
-            "pts": 4,
-            "pj": 6,
-            "pg": 1,
-            "pe": 1,
-            "pp": 4,
-            "gf": 3,
-            "gc": 5,
-            "dif": -2
-          },
-          {
-            "pos": 15,
-            "equipo": "DEFENSA Y JUSTICIA",
-            "pts": 4,
-            "pj": 6,
-            "pg": 0,
-            "pe": 4,
-            "pp": 2,
-            "gf": 8,
-            "gc": 11,
-            "dif": -3
-          },
-          {
             "pos": 16,
-            "equipo": "INDEPENDIENTE RIVADAVIA (MENDOZA)",
-            "pts": 4,
-            "pj": 6,
-            "pg": 1,
-            "pe": 1,
-            "pp": 4,
-            "gf": 5,
-            "gc": 9,
-            "dif": -4
-          },
-          {
-            "pos": 17,
             "equipo": "PLATENSE",
             "pts": 4,
             "pj": 7,
@@ -3472,6 +3460,18 @@
             "gf": 2,
             "gc": 7,
             "dif": -5
+          },
+          {
+            "pos": 17,
+            "equipo": "INDEPENDIENTE RIVADAVIA (MENDOZA)",
+            "pts": 4,
+            "pj": 7,
+            "pg": 1,
+            "pe": 1,
+            "pp": 5,
+            "gf": 5,
+            "gc": 13,
+            "dif": -8
           },
           {
             "pos": 18,
@@ -24656,6 +24656,300 @@
       }
     }
   },
+  "fixture_reserva": {
+    "RESERVA": {
+      "1": {
+        "rival": "INSTITUTO (C)",
+        "cond": "V",
+        "fecha_iso": "2026-02-04",
+        "jugado": true,
+        "gf": 0,
+        "gc": 1
+      },
+      "2": {
+        "rival": "CENTRAL",
+        "cond": "V",
+        "fecha_iso": "2026-02-10",
+        "jugado": true,
+        "gf": 0,
+        "gc": 2
+      },
+      "3": {
+        "rival": "BANFIELD",
+        "cond": "L",
+        "fecha_iso": "2026-02-16",
+        "jugado": true,
+        "gf": 1,
+        "gc": 0
+      },
+      "4": {
+        "rival": "TALLERES (C)",
+        "cond": "V",
+        "fecha_iso": "2026-03-03",
+        "jugado": true,
+        "gf": 0,
+        "gc": 1
+      },
+      "5": {
+        "rival": "BARRACAS CTRAL",
+        "cond": "L",
+        "fecha_iso": "2026-03-18",
+        "jugado": true,
+        "gf": 1,
+        "gc": 1
+      },
+      "6": {
+        "rival": "GIMNASIA (M)",
+        "cond": "V",
+        "fecha_iso": "2026-03-25",
+        "jugado": true,
+        "gf": 1,
+        "gc": 2
+      },
+      "7": {
+        "rival": "GODOY CRUZ (M)",
+        "cond": "L",
+        "fecha_iso": "2026-04-01",
+        "jugado": true,
+        "gf": 2,
+        "gc": 0
+      },
+      "8": {
+        "rival": "ATL. TUCUMAN",
+        "cond": "V",
+        "fecha_iso": "2026-04-09",
+        "jugado": true,
+        "gf": 2,
+        "gc": 2
+      },
+      "9": {
+        "rival": "UNION (SF)",
+        "cond": "L",
+        "fecha_iso": "2026-04-14",
+        "jugado": true,
+        "gf": 0,
+        "gc": 0
+      },
+      "10": {
+        "rival": "DEF Y JUSTICIA",
+        "cond": "L",
+        "fecha_iso": "2026-04-21",
+        "jugado": true,
+        "gf": 0,
+        "gc": 1
+      },
+      "11": {
+        "rival": "GIMNASIA (LP)",
+        "cond": "V",
+        "fecha_iso": "2026-04-28",
+        "jugado": true,
+        "gf": 2,
+        "gc": 1
+      },
+      "12": {
+        "rival": "ALDOSIVI (MDP)",
+        "cond": "L",
+        "fecha_iso": "2026-05-07",
+        "jugado": true,
+        "gf": 2,
+        "gc": 1
+      },
+      "13": {
+        "rival": "ARGENTINOS JRS",
+        "cond": "V",
+        "fecha_iso": "2026-05-13",
+        "jugado": true,
+        "gf": 0,
+        "gc": 2
+      },
+      "14": {
+        "rival": "SARMIENTO (J)",
+        "cond": "L",
+        "fecha_iso": "2026-05-20",
+        "jugado": true,
+        "gf": 1,
+        "gc": 3
+      },
+      "15": {
+        "rival": "RACING CLUB",
+        "cond": "V",
+        "fecha_iso": "2026-05-26",
+        "jugado": true,
+        "gf": 1,
+        "gc": 2
+      },
+      "16": {
+        "rival": "RIVER PLATE",
+        "cond": "L",
+        "fecha_iso": "2026-06-02",
+        "jugado": true,
+        "gf": 0,
+        "gc": 2
+      },
+      "17": {
+        "rival": "VELEZ",
+        "cond": "V",
+        "fecha_iso": "2026-06-10",
+        "jugado": true,
+        "gf": 0,
+        "gc": 2
+      },
+      "18": {
+        "rival": "SAN LORENZO",
+        "cond": "L",
+        "fecha_iso": "2026-06-19",
+        "jugado": true,
+        "gf": 2,
+        "gc": 2
+      }
+    },
+    "RESERVA_S2": {
+      "1": {
+        "rival": "INSTITUTO (C)",
+        "cond": "L",
+        "fecha_iso": "2026-07-16",
+        "jugado": true,
+        "gf": 1,
+        "gc": 0
+      },
+      "2": {
+        "rival": "CENTRAL",
+        "cond": "L",
+        "fecha_iso": "2026-07-22",
+        "jugado": true,
+        "gf": 1,
+        "gc": 3
+      },
+      "3": {
+        "rival": "BANFIELD",
+        "cond": "V",
+        "fecha_iso": "2026-08-04",
+        "jugado": true,
+        "gf": 1,
+        "gc": 1
+      },
+      "4": {
+        "rival": "TALLERES (C)",
+        "cond": "L",
+        "fecha_iso": "2026-08-13",
+        "jugado": true,
+        "gf": 0,
+        "gc": 1
+      },
+      "5": {
+        "rival": "BARRACAS CTRAL",
+        "cond": "V",
+        "fecha_iso": "2026-08-20",
+        "jugado": true,
+        "gf": 3,
+        "gc": 1
+      },
+      "6": {
+        "rival": "GIMNASIA (M)",
+        "cond": "L",
+        "fecha_iso": "2026-08-27",
+        "jugado": true,
+        "gf": 1,
+        "gc": 3
+      },
+      "7": {
+        "rival": "GODOY CRUZ (M)",
+        "cond": "V",
+        "fecha_iso": "2026-09-02",
+        "jugado": true,
+        "gf": 2,
+        "gc": 2
+      },
+      "8": {
+        "rival": "ATL. TUCUMAN",
+        "cond": "L",
+        "fecha_iso": "2026-09-09",
+        "jugado": false,
+        "gf": null,
+        "gc": null
+      },
+      "9": {
+        "rival": "UNION (SF)",
+        "cond": "V",
+        "fecha_iso": "2026-09-16",
+        "jugado": false,
+        "gf": null,
+        "gc": null
+      },
+      "10": {
+        "rival": "DEF Y JUSTICIA",
+        "cond": "V",
+        "fecha_iso": "2026-09-23",
+        "jugado": false,
+        "gf": null,
+        "gc": null
+      },
+      "11": {
+        "rival": "GIMNASIA (LP)",
+        "cond": "L",
+        "fecha_iso": "2026-09-30",
+        "jugado": false,
+        "gf": null,
+        "gc": null
+      },
+      "12": {
+        "rival": "ALDOSIVI (MDP)",
+        "cond": "V",
+        "fecha_iso": "2026-10-07",
+        "jugado": false,
+        "gf": null,
+        "gc": null
+      },
+      "13": {
+        "rival": "ARGENTINOS JRS",
+        "cond": "L",
+        "fecha_iso": "2026-10-14",
+        "jugado": false,
+        "gf": null,
+        "gc": null
+      },
+      "14": {
+        "rival": "SARMIENTO (J)",
+        "cond": "V",
+        "fecha_iso": "2026-10-21",
+        "jugado": false,
+        "gf": null,
+        "gc": null
+      },
+      "15": {
+        "rival": "RACING CLUB",
+        "cond": "L",
+        "fecha_iso": "2026-10-28",
+        "jugado": false,
+        "gf": null,
+        "gc": null
+      },
+      "16": {
+        "rival": "RIVER PLATE",
+        "cond": "V",
+        "fecha_iso": "2026-11-04",
+        "jugado": false,
+        "gf": null,
+        "gc": null
+      },
+      "17": {
+        "rival": "VELEZ",
+        "cond": "L",
+        "fecha_iso": "2026-11-11",
+        "jugado": false,
+        "gf": null,
+        "gc": null
+      },
+      "18": {
+        "rival": "SAN LORENZO",
+        "cond": "V",
+        "fecha_iso": "2026-11-18",
+        "jugado": false,
+        "gf": null,
+        "gc": null
+      }
+    }
+  },
   "bl_gps": {
     "players": {
       "IGNACIO ORDOÑEZ": {
@@ -27500,30 +27794,6 @@
               ]
             },
             {
-              "fecha": "F23",
-              "opp": "Godoy Cruz",
-              "min": 94,
-              "metrics": [
-                9014.15869,
-                96.23657,
-                323.59999,
-                203.75,
-                62.34,
-                4,
-                28.59348,
-                22,
-                19,
-                52,
-                null,
-                3.87779,
-                -5.29974,
-                0.23,
-                11.661138576512455,
-                0.66,
-                835.48035
-              ]
-            },
-            {
               "fecha": "F6",
               "opp": "Smsj",
               "min": 98,
@@ -27670,30 +27940,6 @@
                 8.817790674466623,
                 1.08,
                 711.93933
-              ]
-            },
-            {
-              "fecha": "F23",
-              "opp": "Godoy Cruz",
-              "min": 94,
-              "metrics": [
-                9184.31152,
-                98.05315,
-                404.47,
-                343.31,
-                140.31,
-                4,
-                31.07281,
-                28,
-                30,
-                59,
-                null,
-                4.18893,
-                -5.99767,
-                0.3,
-                14.446975088967971,
-                1.49,
-                844.03287
               ]
             }
           ]
@@ -27921,30 +28167,6 @@
                 2.29,
                 805.44635
               ]
-            },
-            {
-              "fecha": "F23",
-              "opp": "Godoy Cruz",
-              "min": 40,
-              "metrics": [
-                3974.85913,
-                101.53329,
-                178.48,
-                122.23,
-                48.97,
-                3,
-                30.24443,
-                16,
-                11,
-                20,
-                null,
-                4.04072,
-                -4.139,
-                0.4,
-                13.622412666436357,
-                1.22,
-                435.78543
-              ]
             }
           ]
         },
@@ -28045,30 +28267,6 @@
                 25.10469540137191,
                 1.4,
                 226.42941
-              ]
-            },
-            {
-              "fecha": "F23",
-              "opp": "Godoy Cruz",
-              "min": 21,
-              "metrics": [
-                2399.0271,
-                116.12316,
-                126.94,
-                90.53,
-                53.71,
-                3,
-                28.58382,
-                7,
-                12,
-                23,
-                null,
-                4.27697,
-                -4.42964,
-                0.33,
-                20.755267998321987,
-                2.56,
-                293.72668
               ]
             },
             {
@@ -28290,30 +28488,6 @@
                 15.021903406490422,
                 0.74,
                 803.39072
-              ]
-            },
-            {
-              "fecha": "F23",
-              "opp": "Godoy Cruz",
-              "min": 94,
-              "metrics": [
-                10197.4458,
-                108.86953,
-                460.34999,
-                379.05,
-                134.25999,
-                7,
-                28.95701,
-                33,
-                35,
-                69,
-                null,
-                4.47841,
-                -6.07757,
-                0.35,
-                15.407829074733096,
-                1.43,
-                1153.8526
               ]
             },
             {
@@ -28567,30 +28741,6 @@
               ]
             },
             {
-              "fecha": "F23",
-              "opp": "Godoy Cruz",
-              "min": 74,
-              "metrics": [
-                6153.06104,
-                83.16483,
-                206.85,
-                78.86,
-                22.3,
-                2,
-                27.33115,
-                5,
-                16,
-                39,
-                null,
-                3.71399,
-                -4.41261,
-                0.07,
-                7.137804729702332,
-                0.3,
-                646.97302
-              ]
-            },
-            {
               "fecha": "F9",
               "opp": "Talleres Cba",
               "min": 61,
@@ -28792,8 +28942,8 @@
               "opp": "Godoy Cruz",
               "min": 65,
               "metrics": [
-                6395.91064,
-                98.99437,
+                6395.97607,
+                98.99538,
                 252.16,
                 179.94,
                 54.84,
@@ -28808,7 +28958,7 @@
                 0.18,
                 13.25577255947974,
                 0.84,
-                844.15112
+                844.15596
               ]
             },
             {
@@ -28864,30 +29014,6 @@
         "Gastón Pérez": {
           "pos": "Volante Central",
           "match": [
-            {
-              "fecha": "F23",
-              "opp": "Godoy Cruz",
-              "min": 40,
-              "metrics": [
-                3832.07129,
-                98.64269,
-                97.28,
-                54.55,
-                24.59,
-                1,
-                27.81879,
-                7,
-                13,
-                15,
-                null,
-                4.24773,
-                -4.69661,
-                0.17,
-                8.449202312523672,
-                0.61,
-                460.99799
-              ]
-            },
             {
               "fecha": "F9",
               "opp": "Talleres Cba",
@@ -29980,30 +30106,6 @@
               ]
             },
             {
-              "fecha": "F23",
-              "opp": "Godoy Cruz",
-              "min": 74,
-              "metrics": [
-                8197.07031,
-                110.20851,
-                349.97001,
-                311.69,
-                150.94,
-                9,
-                30.72629,
-                26,
-                38,
-                60,
-                null,
-                4.36511,
-                -5.05323,
-                0.35,
-                16.700137048000414,
-                2.04,
-                887.3797
-              ]
-            },
-            {
               "fecha": "F4",
               "opp": "Independiente",
               "min": 110,
@@ -30153,30 +30255,6 @@
           "pos": "LAT",
           "match": [
             {
-              "fecha": "F23",
-              "opp": "Godoy Cruz",
-              "min": 56,
-              "metrics": [
-                5270.22803,
-                94.65265,
-                210.43999,
-                113.15,
-                14.5,
-                1,
-                27.73352,
-                18,
-                21,
-                35,
-                null,
-                4.12573,
-                -5.22914,
-                0.32,
-                10.30286322355857,
-                0.26,
-                493.84079
-              ]
-            },
-            {
               "fecha": "F7",
               "opp": "a.a.a.j",
               "min": 59,
@@ -30282,8 +30360,8 @@
               "opp": "Godoy Cruz",
               "min": 20,
               "metrics": [
-                2367.27612,
-                116.79966,
+                2367.34131,
+                116.80288,
                 133.25999,
                 114.66,
                 99.32,
@@ -30298,7 +30376,7 @@
                 0.15,
                 22.536695584958103,
                 4.97,
-                255.28059
+                255.28284
               ]
             },
             {
@@ -30858,30 +30936,6 @@
                 0.57,
                 452.96921
               ]
-            },
-            {
-              "fecha": "F23",
-              "opp": "Godoy Cruz",
-              "min": 94,
-              "metrics": [
-                7578.36011,
-                80.90776,
-                118.63,
-                70.08,
-                13.4,
-                0,
-                26.16456,
-                9,
-                9,
-                27,
-                null,
-                4.11373,
-                -5.09032,
-                0.1,
-                4.227330960854092,
-                0.14,
-                898.03949
-              ]
             }
           ]
         },
@@ -31259,30 +31313,6 @@
               ]
             },
             {
-              "fecha": "F23",
-              "opp": "Godoy Cruz",
-              "min": 57,
-              "metrics": [
-                5424.7876,
-                94.76522,
-                241.1,
-                173.47,
-                45.24,
-                2,
-                28.14164,
-                13,
-                17,
-                42,
-                null,
-                4.88367,
-                -4.89008,
-                0.23,
-                12.797226007057262,
-                0.79,
-                727.76099
-              ]
-            },
-            {
               "fecha": "F6",
               "opp": "Smsj",
               "min": 98,
@@ -31408,30 +31438,6 @@
               ]
             },
             {
-              "fecha": "F23",
-              "opp": "Godoy Cruz",
-              "min": 31,
-              "metrics": [
-                3214.77612,
-                107.28616,
-                177.82001,
-                190.89999,
-                65.72,
-                3,
-                28.92891,
-                6,
-                19,
-                29,
-                null,
-                4.0282,
-                -4.19442,
-                0.19,
-                22.10934596053461,
-                2.12,
-                317.71594
-              ]
-            },
-            {
               "fecha": "F8",
               "opp": "Instituto",
               "min": 58,
@@ -31511,30 +31517,6 @@
               ]
             },
             {
-              "fecha": "F23",
-              "opp": "Godoy Cruz",
-              "min": 94,
-              "metrics": [
-                9698.19873,
-                103.53949,
-                336.08,
-                246.91,
-                53.49,
-                4,
-                28.39461,
-                23,
-                31,
-                69,
-                null,
-                4.2072,
-                -5.4199,
-                0.24,
-                11.516583736654804,
-                0.57,
-                1003.66019
-              ]
-            },
-            {
               "fecha": "F7",
               "opp": "a.a.a.j",
               "min": 107,
@@ -31580,6 +31562,30 @@
                 6.307186419957046,
                 0.2,
                 764.12726
+              ]
+            },
+            {
+              "fecha": "F23",
+              "opp": "Godoy Cruz",
+              "min": 52,
+              "metrics": [
+                5085.33545,
+                97.16675,
+                161.69001,
+                71.88,
+                44.06,
+                2,
+                29.94005,
+                0,
+                1,
+                21,
+                null,
+                3.67696,
+                -4.31511,
+                0.0,
+                9.350895397382944,
+                0.85,
+                521.08348
               ]
             },
             {
@@ -36726,30 +36732,6 @@
               ]
             },
             {
-              "fecha": "F23",
-              "opp": "Godoy Cruz",
-              "min": 75,
-              "metrics": [
-                7202.09619,
-                97.6668,
-                174.08,
-                115.27,
-                84.31,
-                5,
-                28.72455,
-                11,
-                19,
-                36,
-                null,
-                4.40914,
-                -5.93802,
-                0.15,
-                8.707424857370468,
-                1.12,
-                761.01605
-              ]
-            },
-            {
               "fecha": "F3",
               "opp": "Lanús",
               "min": 92,
@@ -36969,60 +36951,12 @@
                 1.48,
                 969.98276
               ]
-            },
-            {
-              "fecha": "F23",
-              "opp": "Godoy Cruz",
-              "min": 94,
-              "metrics": [
-                7323.14014,
-                79.6731,
-                137.22,
-                40.83,
-                2.28,
-                0,
-                25.06486,
-                12,
-                12,
-                43,
-                null,
-                5.00528,
-                -4.26218,
-                0.13,
-                3.961582323592302,
-                0.02,
-                849.26318
-              ]
             }
           ]
         },
         "Conrado Vera": {
           "pos": "LAT",
           "match": [
-            {
-              "fecha": "F23",
-              "opp": "Godoy Cruz",
-              "min": 48,
-              "metrics": [
-                5876.16357,
-                121.7017,
-                244.05,
-                208.53,
-                73.08,
-                3,
-                29.15557,
-                22,
-                28,
-                43,
-                null,
-                3.99492,
-                -5.2948,
-                0.46,
-                18.571626026924406,
-                1.52,
-                577.28589
-              ]
-            },
             {
               "fecha": "F3",
               "opp": "Lanús",
@@ -37667,8 +37601,8 @@
               "opp": "Godoy Cruz",
               "min": 70,
               "metrics": [
-                7858.10254,
-                112.05398,
+                7858.57153,
+                112.06066,
                 588.51001,
                 219.95,
                 114.81,
@@ -37683,7 +37617,7 @@
                 0.24,
                 22.459698883229912,
                 1.64,
-                893.65558
+                893.69452
               ]
             },
             {
@@ -37953,30 +37887,6 @@
                 16.88846063006301,
                 1.07,
                 1144.59546
-              ]
-            },
-            {
-              "fecha": "F23",
-              "opp": "Godoy Cruz",
-              "min": 85,
-              "metrics": [
-                8896.18408,
-                104.45127,
-                374.91,
-                300.73,
-                158.84,
-                8,
-                29.39283,
-                27,
-                38,
-                64,
-                null,
-                4.61898,
-                -5.52465,
-                0.32,
-                15.73217696233445,
-                1.87,
-                947.66473
               ]
             },
             {
@@ -38371,30 +38281,6 @@
                 0.18383438343834385,
                 0.0,
                 1117.51343
-              ]
-            },
-            {
-              "fecha": "F23",
-              "opp": "Godoy Cruz",
-              "min": 94,
-              "metrics": [
-                8851.82666,
-                94.6382,
-                216.96001,
-                189.62,
-                205.06,
-                11,
-                31.34939,
-                30,
-                17,
-                60,
-                null,
-                4.66592,
-                -4.7197,
-                0.32,
-                10.295473984319317,
-                2.18,
-                918.82443
               ]
             },
             {
@@ -39340,30 +39226,6 @@
               ]
             },
             {
-              "fecha": "F23",
-              "opp": "Godoy Cruz",
-              "min": 45,
-              "metrics": [
-                5053.15137,
-                111.67185,
-                327.62,
-                158.56,
-                31.47,
-                2,
-                26.74407,
-                11,
-                15,
-                47,
-                null,
-                4.17777,
-                -4.16786,
-                0.24,
-                20.161988729281767,
-                0.7,
-                552.64026
-              ]
-            },
-            {
               "fecha": "F3",
               "opp": "Lanús",
               "min": 69,
@@ -39926,30 +39788,6 @@
               ]
             },
             {
-              "fecha": "F23",
-              "opp": "Godoy Cruz",
-              "min": 94,
-              "metrics": [
-                9455.8335,
-                101.09587,
-                384.78,
-                156.62,
-                48,
-                2,
-                31.4863,
-                39,
-                10,
-                37,
-                null,
-                5.83484,
-                -5.01104,
-                0.41,
-                12.72316475409836,
-                0.51,
-                958.27182
-              ]
-            },
-            {
               "fecha": "F4",
               "opp": "Independiente",
               "min": 100,
@@ -40123,30 +39961,6 @@
               ]
             },
             {
-              "fecha": "F23",
-              "opp": "Godoy Cruz",
-              "min": 45,
-              "metrics": [
-                4481.61328,
-                99.04118,
-                248.71001,
-                212.48,
-                108.59,
-                6,
-                28.83986,
-                16,
-                16,
-                31,
-                null,
-                4.2485,
-                -5.26699,
-                0.36,
-                17.925525303867406,
-                2.41,
-                410.71844
-              ]
-            },
-            {
               "fecha": "F8",
               "opp": "Instituto",
               "min": 30,
@@ -40245,30 +40059,6 @@
                 17.420558231683632,
                 0.21,
                 337.25638
-              ]
-            },
-            {
-              "fecha": "F23",
-              "opp": "Godoy Cruz",
-              "min": 8,
-              "metrics": [
-                987.13605,
-                121.19286,
-                65.78,
-                20.05,
-                29.71,
-                1,
-                30.84296,
-                3,
-                3,
-                11,
-                null,
-                4.082,
-                -4.32856,
-                0.38,
-                24.448855149270532,
-                3.71,
-                110.10127
               ]
             },
             {
@@ -40617,8 +40407,8 @@
               "opp": "Godoy Cruz",
               "min": 94,
               "metrics": [
-                8410.33447,
-                89.91804,
+                8410.49585,
+                89.91977,
                 307.14999,
                 270.75999,
                 177.16,
@@ -40633,7 +40423,7 @@
                 0.24,
                 11.859729044903778,
                 1.88,
-                832.86942
+                832.87521
               ]
             },
             {
@@ -41653,30 +41443,6 @@
                 14.724032403240326,
                 1.39,
                 1153.89038
-              ]
-            },
-            {
-              "fecha": "F23",
-              "opp": "Godoy Cruz",
-              "min": 48,
-              "metrics": [
-                2443.95703,
-                50.87867,
-                117.21,
-                160.45,
-                28.83,
-                1,
-                27.84768,
-                9,
-                13,
-                15,
-                null,
-                4.90086,
-                -5.34481,
-                0.19,
-                8.269105971694856,
-                0.6,
-                267.76141
               ]
             },
             {
@@ -55038,300 +54804,6 @@
             }
           ]
         }
-      }
-    }
-  },
-  "fixture_reserva": {
-    "RESERVA": {
-      "1": {
-        "rival": "INSTITUTO (C)",
-        "cond": "V",
-        "fecha_iso": "2026-02-04",
-        "jugado": true,
-        "gf": 0,
-        "gc": 1
-      },
-      "2": {
-        "rival": "CENTRAL",
-        "cond": "V",
-        "fecha_iso": "2026-02-10",
-        "jugado": true,
-        "gf": 0,
-        "gc": 2
-      },
-      "3": {
-        "rival": "BANFIELD",
-        "cond": "L",
-        "fecha_iso": "2026-02-16",
-        "jugado": true,
-        "gf": 1,
-        "gc": 0
-      },
-      "4": {
-        "rival": "TALLERES (C)",
-        "cond": "V",
-        "fecha_iso": "2026-03-03",
-        "jugado": true,
-        "gf": 0,
-        "gc": 1
-      },
-      "5": {
-        "rival": "BARRACAS CTRAL",
-        "cond": "L",
-        "fecha_iso": "2026-03-18",
-        "jugado": true,
-        "gf": 1,
-        "gc": 1
-      },
-      "6": {
-        "rival": "GIMNASIA (M)",
-        "cond": "V",
-        "fecha_iso": "2026-03-25",
-        "jugado": true,
-        "gf": 1,
-        "gc": 2
-      },
-      "7": {
-        "rival": "GODOY CRUZ (M)",
-        "cond": "L",
-        "fecha_iso": "2026-04-01",
-        "jugado": true,
-        "gf": 2,
-        "gc": 0
-      },
-      "8": {
-        "rival": "ATL. TUCUMAN",
-        "cond": "V",
-        "fecha_iso": "2026-04-09",
-        "jugado": true,
-        "gf": 2,
-        "gc": 2
-      },
-      "9": {
-        "rival": "UNION (SF)",
-        "cond": "L",
-        "fecha_iso": "2026-04-14",
-        "jugado": true,
-        "gf": 0,
-        "gc": 0
-      },
-      "10": {
-        "rival": "DEF Y JUSTICIA",
-        "cond": "L",
-        "fecha_iso": "2026-04-21",
-        "jugado": true,
-        "gf": 0,
-        "gc": 1
-      },
-      "11": {
-        "rival": "GIMNASIA (LP)",
-        "cond": "V",
-        "fecha_iso": "2026-04-28",
-        "jugado": true,
-        "gf": 2,
-        "gc": 1
-      },
-      "12": {
-        "rival": "ALDOSIVI (MDP)",
-        "cond": "L",
-        "fecha_iso": "2026-05-07",
-        "jugado": true,
-        "gf": 2,
-        "gc": 1
-      },
-      "13": {
-        "rival": "ARGENTINOS JRS",
-        "cond": "V",
-        "fecha_iso": "2026-05-13",
-        "jugado": true,
-        "gf": 0,
-        "gc": 2
-      },
-      "14": {
-        "rival": "SARMIENTO (J)",
-        "cond": "L",
-        "fecha_iso": "2026-05-20",
-        "jugado": true,
-        "gf": 1,
-        "gc": 3
-      },
-      "15": {
-        "rival": "RACING CLUB",
-        "cond": "V",
-        "fecha_iso": "2026-05-26",
-        "jugado": true,
-        "gf": 1,
-        "gc": 2
-      },
-      "16": {
-        "rival": "RIVER PLATE",
-        "cond": "L",
-        "fecha_iso": "2026-06-02",
-        "jugado": true,
-        "gf": 0,
-        "gc": 2
-      },
-      "17": {
-        "rival": "VELEZ",
-        "cond": "V",
-        "fecha_iso": "2026-06-10",
-        "jugado": true,
-        "gf": 0,
-        "gc": 2
-      },
-      "18": {
-        "rival": "SAN LORENZO",
-        "cond": "L",
-        "fecha_iso": "2026-06-19",
-        "jugado": true,
-        "gf": 2,
-        "gc": 2
-      }
-    },
-    "RESERVA_S2": {
-      "1": {
-        "rival": "INSTITUTO (C)",
-        "cond": "L",
-        "fecha_iso": "2026-07-16",
-        "jugado": true,
-        "gf": 1,
-        "gc": 0
-      },
-      "2": {
-        "rival": "CENTRAL",
-        "cond": "L",
-        "fecha_iso": "2026-07-22",
-        "jugado": true,
-        "gf": 1,
-        "gc": 3
-      },
-      "3": {
-        "rival": "BANFIELD",
-        "cond": "V",
-        "fecha_iso": "2026-08-04",
-        "jugado": true,
-        "gf": 1,
-        "gc": 1
-      },
-      "4": {
-        "rival": "TALLERES (C)",
-        "cond": "L",
-        "fecha_iso": "2026-08-13",
-        "jugado": true,
-        "gf": 0,
-        "gc": 1
-      },
-      "5": {
-        "rival": "BARRACAS CTRAL",
-        "cond": "V",
-        "fecha_iso": "2026-08-20",
-        "jugado": true,
-        "gf": 3,
-        "gc": 1
-      },
-      "6": {
-        "rival": "GIMNASIA (M)",
-        "cond": "L",
-        "fecha_iso": "2026-08-27",
-        "jugado": true,
-        "gf": 1,
-        "gc": 3
-      },
-      "7": {
-        "rival": "GODOY CRUZ (M)",
-        "cond": "V",
-        "fecha_iso": "2026-09-02",
-        "jugado": true,
-        "gf": 2,
-        "gc": 2
-      },
-      "8": {
-        "rival": "ATL. TUCUMAN",
-        "cond": "L",
-        "fecha_iso": "2026-09-09",
-        "jugado": false,
-        "gf": null,
-        "gc": null
-      },
-      "9": {
-        "rival": "UNION (SF)",
-        "cond": "V",
-        "fecha_iso": "2026-09-16",
-        "jugado": false,
-        "gf": null,
-        "gc": null
-      },
-      "10": {
-        "rival": "DEF Y JUSTICIA",
-        "cond": "V",
-        "fecha_iso": "2026-09-23",
-        "jugado": false,
-        "gf": null,
-        "gc": null
-      },
-      "11": {
-        "rival": "GIMNASIA (LP)",
-        "cond": "L",
-        "fecha_iso": "2026-09-30",
-        "jugado": false,
-        "gf": null,
-        "gc": null
-      },
-      "12": {
-        "rival": "ALDOSIVI (MDP)",
-        "cond": "V",
-        "fecha_iso": "2026-10-07",
-        "jugado": false,
-        "gf": null,
-        "gc": null
-      },
-      "13": {
-        "rival": "ARGENTINOS JRS",
-        "cond": "L",
-        "fecha_iso": "2026-10-14",
-        "jugado": false,
-        "gf": null,
-        "gc": null
-      },
-      "14": {
-        "rival": "SARMIENTO (J)",
-        "cond": "V",
-        "fecha_iso": "2026-10-21",
-        "jugado": false,
-        "gf": null,
-        "gc": null
-      },
-      "15": {
-        "rival": "RACING CLUB",
-        "cond": "L",
-        "fecha_iso": "2026-10-28",
-        "jugado": false,
-        "gf": null,
-        "gc": null
-      },
-      "16": {
-        "rival": "RIVER PLATE",
-        "cond": "V",
-        "fecha_iso": "2026-11-04",
-        "jugado": false,
-        "gf": null,
-        "gc": null
-      },
-      "17": {
-        "rival": "VELEZ",
-        "cond": "L",
-        "fecha_iso": "2026-11-11",
-        "jugado": false,
-        "gf": null,
-        "gc": null
-      },
-      "18": {
-        "rival": "SAN LORENZO",
-        "cond": "V",
-        "fecha_iso": "2026-11-18",
-        "jugado": false,
-        "gf": null,
-        "gc": null
       }
     }
   }
