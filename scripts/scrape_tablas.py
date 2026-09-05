@@ -860,6 +860,62 @@ def catapult_stats_post(opener, cj, activity_ids):
     return json.loads(resp.read().decode("utf-8", errors="replace"))
 
 
+def _catapult_actividades_partido(actividades, cat):
+    """Filtra la lista de actividades (de /activities) a los partidos reales
+    del Torneo LPF, devolviendo {activity_id: fecha_num}. Extraido de
+    fetch_catapult_players para reusarlo en scripts de exportacion (ver
+    export_catapult_csv.py) sin duplicar la logica de filtro.
+
+    Por cada actividad-partido, se busca a que fecha del fixture le
+    corresponde el dia real en que se jugo (no lo que diga el nombre).
+    Actividades de antes del arranque de temporada se descartan derecho
+    (quedaron de un año anterior); actividades cuyo dia no coincide con
+    NINGUNA fecha del fixture tambien se descartan (amistosos, partidos
+    internos, etc.).
+    """
+    fecha_por_activity_id = {}
+    for a in actividades:
+        nombre_act = a.get("name") or ""
+        # Normalmente es " vs Rival" en el nombre, pero se confirmo un
+        # caso real ("F 22- 4ta division", el partido real de la fecha
+        # 22 vs Rosario Central) sin "vs" -- caia afuera del filtro
+        # aunque tuviera datos reales de jugadores. "division" sirve
+        # como señal alternativa, PERO tambien aparece en nombres de
+        # entrenamiento tipo "4ta division md -4" ("md" = "match day",
+        # notacion estandar para dias relativos a un partido) -- se
+        # excluyen esos explicitamente (Javi, 2026-09-02).
+        es_partido = " vs " in nombre_act or (
+            re.search(r"divisi[oó]n", nombre_act, re.IGNORECASE)
+            and not re.search(r"\bmd\b", nombre_act, re.IGNORECASE)
+        )
+        if not es_partido:
+            continue
+        # Partidos de otro torneo (Liga Metro, no el Torneo LPF que
+        # seguimos) quedan cargados en Catapult con "Liga" en el nombre
+        # del rival -- sin este filtro, si caen el mismo dia (o el
+        # siguiente) que una fecha real del fixture LPF, su GPS pisaba
+        # el de la fecha del torneo (caso real: 7MA F6 "AAAJ Rojo Liga"
+        # y F15 "San Lorenzo Liga", 2026-09-03).
+        if re.search(r"\bliga\b", nombre_act, re.IGNORECASE):
+            print(f"[AVISO] Catapult {cat}: '{a.get('name')}' parece ser de otro torneo "
+                  f"(Liga Metro) -- se descarta, no es Torneo LPF.", file=sys.stderr)
+            continue
+        ts = a.get("start_time")
+        if not ts:
+            continue
+        dia = datetime.datetime.fromtimestamp(ts, AR_TZ).date()
+        if dia < CATAPULT_TEMPORADA_DESDE:
+            continue
+        fecha_num = CATAPULT_DIA_A_FECHA.get((dia.year, dia.month, dia.day))
+        if fecha_num is None:
+            print(f"[AVISO] Catapult {cat}: '{a.get('name')}' se jugo el {dia.strftime('%d/%m/%Y')}, "
+                  f"un dia que no coincide con ninguna fecha del fixture -- se descarta (amistoso, "
+                  f"partido interno, etc.).", file=sys.stderr)
+            continue
+        fecha_por_activity_id[a["id"]] = fecha_num
+    return fecha_por_activity_id
+
+
 def fetch_catapult_players(email: str, password: str, plantel_por_cat=None):
     """
     Devuelve {categoria: {nombre: {"pos":..., "match":[{"fecha","opp",
@@ -905,53 +961,7 @@ def fetch_catapult_players(email: str, password: str, plantel_por_cat=None):
     for cat, team_id in team_ids_por_cat.items():
         actividades = catapult_get(opener, f"{CATAPULT_API_BASE}/activities"
                                     f"?page=1&page_size=100&sort=-start_time&deleted=0&team_ids={team_id}")
-
-        # Por cada actividad-partido, se busca a que fecha del fixture le
-        # corresponde el dia real en que se jugo (no lo que diga el
-        # nombre). Actividades de antes del arranque de temporada se
-        # descartan derecho (quedaron de un año anterior); actividades
-        # cuyo dia no coincide con NINGUNA fecha del fixture tambien se
-        # descartan (amistosos, partidos internos, etc.).
-        fecha_por_activity_id = {}
-        for a in actividades:
-            nombre_act = a.get("name") or ""
-            # Normalmente es " vs Rival" en el nombre, pero se confirmo un
-            # caso real ("F 22- 4ta division", el partido real de la fecha
-            # 22 vs Rosario Central) sin "vs" -- caia afuera del filtro
-            # aunque tuviera datos reales de jugadores. "division" sirve
-            # como señal alternativa, PERO tambien aparece en nombres de
-            # entrenamiento tipo "4ta division md -4" ("md" = "match day",
-            # notacion estandar para dias relativos a un partido) -- se
-            # excluyen esos explicitamente (Javi, 2026-09-02).
-            es_partido = " vs " in nombre_act or (
-                re.search(r"divisi[oó]n", nombre_act, re.IGNORECASE)
-                and not re.search(r"\bmd\b", nombre_act, re.IGNORECASE)
-            )
-            if not es_partido:
-                continue
-            # Partidos de otro torneo (Liga Metro, no el Torneo LPF que
-            # seguimos) quedan cargados en Catapult con "Liga" en el nombre
-            # del rival -- sin este filtro, si caen el mismo dia (o el
-            # siguiente) que una fecha real del fixture LPF, su GPS pisaba
-            # el de la fecha del torneo (caso real: 7MA F6 "AAAJ Rojo Liga"
-            # y F15 "San Lorenzo Liga", 2026-09-03).
-            if re.search(r"\bliga\b", nombre_act, re.IGNORECASE):
-                print(f"[AVISO] Catapult {cat}: '{a.get('name')}' parece ser de otro torneo "
-                      f"(Liga Metro) -- se descarta, no es Torneo LPF.", file=sys.stderr)
-                continue
-            ts = a.get("start_time")
-            if not ts:
-                continue
-            dia = datetime.datetime.fromtimestamp(ts, AR_TZ).date()
-            if dia < CATAPULT_TEMPORADA_DESDE:
-                continue
-            fecha_num = CATAPULT_DIA_A_FECHA.get((dia.year, dia.month, dia.day))
-            if fecha_num is None:
-                print(f"[AVISO] Catapult {cat}: '{a.get('name')}' se jugo el {dia.strftime('%d/%m/%Y')}, "
-                      f"un dia que no coincide con ninguna fecha del fixture -- se descarta (amistoso, "
-                      f"partido interno, etc.).", file=sys.stderr)
-                continue
-            fecha_por_activity_id[a["id"]] = fecha_num
+        fecha_por_activity_id = _catapult_actividades_partido(actividades, cat)
 
         partidos = list(fecha_por_activity_id.keys())
         if not partidos:
@@ -1036,6 +1046,162 @@ def fetch_catapult_players(email: str, password: str, plantel_por_cat=None):
                 previos.append(registro)
             elif registro["min"] > existente["min"]:
                 previos[previos.index(existente)] = registro
+
+    return out
+
+
+def catapult_activity_athletes(opener, activity_id):
+    """GET /activities/{id}/athletes -- el roster REAL de quienes jugaron
+    esa actividad (con dispositivo puesto), sacado de los datos crudos.
+
+    A proposito NO se usa /stats (source=cached_stats, lo que usa
+    catapult_stats_post/fetch_catapult_players de arriba) para esto: esa
+    cache puede estar incompleta si Catapult todavia no "horneo" del todo
+    la actividad -- confirmado en vivo (2026-09-05): la F23 de 4TA vs
+    Godoy Cruz tiene process_status=unprocessed, y /stats solo devolvia 2
+    de los 15 jugadores reales, mientras que este endpoint (y /efforts
+    por atleta) ya tienen los datos crudos completos igual. NO se toca
+    fetch_catapult_players con este hallazgo todavia -- es un cambio mas
+    grande (afecta a las 6 categorias en produccion) que se evalua aparte."""
+    return catapult_get(opener, f"{CATAPULT_API_BASE}/activities/{activity_id}/athletes")
+
+
+def catapult_activity_periods(opener, activity_id):
+    """GET /activities/{id} -- trae 'periods' (nombre + start_time/end_time
+    en Unix de cada tiempo del partido). Es el mismo dato que hasta ahora
+    se calibraba a mano mirando el reloj quemado en el video (ver sesion
+    Focus/OpenField del 2026-09-05) -- de aca sale automatico."""
+    data = catapult_get(opener, f"{CATAPULT_API_BASE}/activities/{activity_id}")
+    return data.get("periods") or []
+
+
+def catapult_efforts_por_atleta(opener, cj, activity_id, athlete_id, min_kmh=25):
+    """Esfuerzos de velocidad de un atleta en una actividad, ya limpios:
+    la API los da en METROS POR SEGUNDO (no km/h) y separados por banda de
+    velocidad (7 y 8) -- un mismo sprint que cruza las dos bandas aparece
+    como DOS filas con tiempos superpuestos. Se convierte a km/h, se
+    funden las filas solapadas (mismo sprint) y se filtra por min_kmh (el
+    criterio de "sprint" que ya usa el club, 25 km/h). Validado en vivo
+    contra los 11 sprints de Pannoni en la F23 que ya se habian sacado a
+    mano de OpenField Cloud: coincide exacto (misma hora, duracion,
+    velocidad y distancia en los 11)."""
+    qs = urllib.parse.urlencode({"effort_types": "velocity", "velocity_bands": "7,8"})
+    url = f"{CATAPULT_API_BASE}/activities/{activity_id}/athletes/{athlete_id}/efforts?{qs}"
+    headers = dict(CATAPULT_HEADERS)
+    xsrf = _catapult_xsrf(cj)
+    if xsrf:
+        headers["X-XSRF-TOKEN"] = xsrf
+    data = catapult_get(opener, url)
+    raw = sorted((data[0].get("data") or {}).get("velocity_efforts") or [] if data else [],
+                 key=lambda e: e.get("start_time") or 0)
+
+    merged = []
+    for e in raw:
+        last = merged[-1] if merged else None
+        if last is not None and (e.get("start_time") or 0) <= (last["end_time"] or 0) + 0.5:
+            last["end_time"] = max(last["end_time"], e.get("end_time") or 0)
+            last["max_velocity"] = max(last["max_velocity"], e.get("max_velocity") or 0)
+            last["distance"] = max(last["distance"], e.get("distance") or 0)
+        else:
+            merged.append({
+                "start_time": e.get("start_time"), "end_time": e.get("end_time") or e.get("start_time"),
+                "max_velocity": e.get("max_velocity") or 0, "distance": e.get("distance") or 0,
+            })
+
+    out = []
+    for e in merged:
+        max_kmh = round((e["max_velocity"] or 0) * 3.6, 2)
+        if max_kmh < min_kmh:
+            continue
+        out.append({
+            "start": e["start_time"],
+            "dur": round((e["end_time"] or 0) - (e["start_time"] or 0), 2),
+            "vel": max_kmh,
+            "dist": round(e["distance"] or 0, 2),
+        })
+    return out
+
+
+def fetch_catapult_efforts(email: str, password: str, cats, existentes=None, min_kmh=25):
+    """Esfuerzos individuales (sprints, >=min_kmh) por jugador y fecha, mas
+    los horarios reales de cada periodo (para calibrar despues el salto a
+    video) -- pensado para "clic en la metrica destacada -> ver el
+    momento en video", complementario a fetch_catapult_players (que solo
+    trae totales de sesion, sin hora de cada esfuerzo puntual).
+
+    Solo procesa las categorias en `cats` (hoy: ["4TA"], a proposito --
+    cada partido son muchos pedidos de a un jugador por vez, mas caro que
+    el resto del scraper). INCREMENTAL: si `existentes` (el
+    catapult_efforts de la corrida anterior) ya tiene una fecha resuelta
+    para una categoria, se la saltea entera -- así las corridas de rutina
+    (cada 4hs) no vuelven a pedir partidos viejos, solo el que sea nuevo.
+
+    No toca fetch_catapult_players ni catapult_gps -- pipeline separado a
+    proposito (mismo criterio que bl_gps vs catapult_gps, ver comentario
+    de fetch_catapult_players)."""
+    opener, cj = catapult_login(email, password)
+    existentes = existentes or {}
+
+    teams = catapult_get(opener, f"{CATAPULT_API_BASE}/teams")
+    team_ids_por_cat = {CATAPULT_TEAMS.get(t.get("name")): t["id"] for t in teams
+                         if CATAPULT_TEAMS.get(t.get("name")) in cats}
+
+    out = {}
+    for cat, team_id in team_ids_por_cat.items():
+        actividades = catapult_get(opener, f"{CATAPULT_API_BASE}/activities"
+                                    f"?page=1&page_size=100&sort=-start_time&deleted=0&team_ids={team_id}")
+        fecha_por_activity_id = _catapult_actividades_partido(actividades, cat)
+        nombre_por_activity_id = {a["id"]: a.get("name") or "" for a in actividades}
+
+        activities_por_fecha = {}
+        for activity_id, fecha_num in fecha_por_activity_id.items():
+            activities_por_fecha.setdefault(fecha_num, []).append(activity_id)
+
+        cat_prev = (existentes.get(cat) or {})
+        cat_out = dict(cat_prev)  # arranca con lo viejo, solo se pisan las fechas nuevas
+        nuevas = 0
+        for fecha_num, activity_ids in activities_por_fecha.items():
+            fecha_key = f"F{fecha_num}"
+            if fecha_key in cat_prev:
+                continue  # ya resuelta en una corrida anterior, no se vuelve a pedir
+
+            rival = ""
+            for aid in activity_ids:
+                nombre_act = nombre_por_activity_id.get(aid, "")
+                if " vs " in nombre_act:
+                    rival = nombre_act.split(" vs ")[-1].strip()
+                    break
+
+            jugadores_roster = {}  # nombre -> (activity_id, athlete_id)
+            periodos = []
+            for aid in activity_ids:
+                for atl in catapult_activity_athletes(opener, aid):
+                    nombre = f"{atl.get('first_name', '')} {atl.get('last_name', '')}".strip()
+                    if nombre and atl.get("id"):
+                        jugadores_roster.setdefault(nombre, (aid, atl["id"]))
+                for p in catapult_activity_periods(opener, aid):
+                    periodos.append({"name": p.get("name"), "start": p.get("start_time"), "end": p.get("end_time")})
+
+            jugadores_out = {}
+            for nombre, (aid, athlete_id) in jugadores_roster.items():
+                nombre_norm = _catapult_norm_nombre(nombre)
+                if nombre_norm in CATAPULT_ALIAS_NOMBRE:
+                    nombre = CATAPULT_ALIAS_NOMBRE[nombre_norm]
+                # No se descarta si no matchea el plantel (a diferencia de
+                # fetch_catapult_players) -- acá alcanza con haber jugado
+                # esa actividad, el filtro de categoria real ya lo hizo
+                # _catapult_actividades_partido/team_id al elegir la
+                # actividad. Igual se deja constancia en el nombre tal cual
+                # vino de Catapult para que el matcheo en la app (mismo
+                # criterio que gpsAliasedName) lo pueda resolver despues.
+                jugadores_out[nombre] = catapult_efforts_por_atleta(opener, cj, aid, athlete_id, min_kmh)
+
+            cat_out[fecha_key] = {"opp": rival, "periodos": periodos, "jugadores": jugadores_out}
+            nuevas += 1
+
+        if nuevas:
+            print(f"[OK] Catapult efforts {cat}: {nuevas} fecha(s) nueva(s) procesada(s)")
+        out[cat] = cat_out
 
     return out
 
@@ -1671,6 +1837,19 @@ def main():
         "categorias": {},
     }
     errores = []
+
+    # Para el modo incremental de fetch_catapult_efforts: si ya existe un
+    # data/tablas.json de una corrida anterior, se rescata su
+    # catapult_efforts para no volver a pedir partidos ya procesados. Si
+    # no existe el archivo (primera corrida) o esta corrupto, arranca
+    # vacio sin romper nada -- es solo una optimizacion, no una fuente de
+    # verdad.
+    catapult_efforts_previos = {}
+    try:
+        with open(OUT_PATH, "r", encoding="utf-8") as f:
+            catapult_efforts_previos = json.load(f).get("catapult_efforts") or {}
+    except Exception:  # noqa
+        pass
     # De paso que se pide cada pagina de la LPF para la tabla de posiciones,
     # se saca tambien el fixture completo (mismo HTML, sin pedido aparte) --
     # ver parse_lpf_fixture_completo. Reemplaza a la vieja fuente sabadogol.
@@ -1999,6 +2178,28 @@ def main():
         except Exception as e:  # noqa
             errores.append(f"Catapult OpenField: {e}")
             print(f"[ERROR] Catapult OpenField: {e}", file=sys.stderr)
+
+        # Esfuerzos individuales (sprints con hora real) + periodos, para
+        # "clic en la metrica destacada -> ver el momento en video" (ver
+        # fetch_catapult_efforts). Pipeline aparte de catapult_gps de
+        # arriba, a proposito: no se toca lo que ya funciona en produccion.
+        # Solo 4TA por ahora (piloto, Javi 2026-09-05) -- sumar mas
+        # categorias despues es agregar el nombre a esta lista, nada mas.
+        CATAPULT_EFFORTS_CATS = ["4TA"]
+        try:
+            efforts = fetch_catapult_efforts(
+                usuario_catapult, password_catapult, CATAPULT_EFFORTS_CATS,
+                existentes=catapult_efforts_previos)
+            resultado["catapult_efforts"] = efforts
+            total_fechas = sum(len(v) for v in efforts.values())
+            print(f"[OK] Catapult efforts: {total_fechas} fecha(s) en {len(efforts)} categoria(s)")
+        except Exception as e:  # noqa
+            errores.append(f"Catapult efforts: {e}")
+            print(f"[ERROR] Catapult efforts: {e}", file=sys.stderr)
+            # Si esta corrida fallo, no se pierde lo que ya estaba
+            # guardado de corridas anteriores.
+            if catapult_efforts_previos:
+                resultado["catapult_efforts"] = catapult_efforts_previos
     else:
         print("[AVISO] CATAPULT_USER/CATAPULT_PASS no configurados, se omite Catapult OpenField")
 
