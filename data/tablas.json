@@ -1,5 +1,5 @@
 {
-  "actualizado": "2026-09-06 10:35",
+  "actualizado": "2026-09-06 11:00",
   "fuente": "ligaprofesional.ar (oficial)",
   "fuente_fixture": "ligaprofesional.ar (oficial)",
   "fuente_reserva": "statfutbol.com.ar",
@@ -4185,6 +4185,11 @@
         "gf": 1,
         "gc": 1,
         "rival": "Rosario Central"
+      },
+      "24": {
+        "gf": 0,
+        "gc": 0,
+        "rival": "Platense"
       }
     }
   },
@@ -19262,6 +19267,116 @@
           "visitante": "Barracas Central",
           "gl": 0,
           "gv": 0
+        }
+      ],
+      "24": [
+        {
+          "local": "Aldosivi",
+          "visitante": "Defensa y Justicia",
+          "gl": 0,
+          "gv": 2
+        },
+        {
+          "local": "Boca Jrs.",
+          "visitante": "Dep. Riestra",
+          "gl": 2,
+          "gv": 1
+        },
+        {
+          "local": "Colón",
+          "visitante": "Atlético Rafaela",
+          "gl": 1,
+          "gv": 0
+        },
+        {
+          "local": "Huracán",
+          "visitante": "Belgrano",
+          "gl": 0,
+          "gv": 3
+        },
+        {
+          "local": "Estudiantes",
+          "visitante": "Sarmiento",
+          "gl": 0,
+          "gv": 0
+        },
+        {
+          "local": "Tigre",
+          "visitante": "Platense",
+          "gl": 0,
+          "gv": 0
+        },
+        {
+          "local": "Atlético Tucumán",
+          "visitante": "Godoy Cruz",
+          "gl": 2,
+          "gv": 0
+        },
+        {
+          "local": "Indepte. Rivadavia",
+          "visitante": "Rosario Central",
+          "gl": 1,
+          "gv": 2
+        },
+        {
+          "local": "Ferro",
+          "visitante": "Racing",
+          "gl": 0,
+          "gv": 1
+        },
+        {
+          "local": "Lanús",
+          "visitante": "Banfield",
+          "gl": 3,
+          "gv": 6
+        },
+        {
+          "local": "Independiente",
+          "visitante": "Vélez",
+          "gl": 0,
+          "gv": 1
+        },
+        {
+          "local": "Newell&#8217;s",
+          "visitante": "Gimnasia MZA",
+          "gl": 2,
+          "gv": 1
+        },
+        {
+          "local": "San Martin SJ",
+          "visitante": "Central Córdoba",
+          "gl": 1,
+          "gv": 1
+        },
+        {
+          "local": "Argentinos Jrs.",
+          "visitante": "Gimnasia LP",
+          "gl": 0,
+          "gv": 0
+        },
+        {
+          "local": "Instituto",
+          "visitante": "San Lorenzo",
+          "gl": 1,
+          "gv": 3
+        },
+        {
+          "local": "Talleres",
+          "visitante": "Unión",
+          "gl": 0,
+          "gv": 1
+        },
+        {
+          "local": "Estudiantes RC",
+          "visitante": "River Plate",
+          "gl": 0,
+          "gv": 0
+        },
+        {
+          "local": "Barracas Central",
+          "visitante": "Quilmes",
+          "gl": 1,
+          "gv": 1
         }
       ]
     }
