@@ -1,5 +1,5 @@
 {
-  "actualizado": "2026-09-06 11:00",
+  "actualizado": "2026-09-06 14:35",
   "fuente": "ligaprofesional.ar (oficial)",
   "fuente_fixture": "ligaprofesional.ar (oficial)",
   "fuente_reserva": "statfutbol.com.ar",
@@ -3605,6 +3605,11 @@
         "gf": 4,
         "gc": 2,
         "rival": "Godoy Cruz"
+      },
+      "24": {
+        "gf": 1,
+        "gc": 0,
+        "rival": "Platense"
       }
     },
     "5TA": {
@@ -3722,6 +3727,11 @@
         "gf": 1,
         "gc": 2,
         "rival": "Godoy Cruz"
+      },
+      "24": {
+        "gf": 0,
+        "gc": 0,
+        "rival": "Platense"
       }
     },
     "6TA": {
@@ -3839,6 +3849,11 @@
         "gf": 1,
         "gc": 3,
         "rival": "Godoy Cruz"
+      },
+      "24": {
+        "gf": 1,
+        "gc": 0,
+        "rival": "Platense"
       }
     },
     "7MA": {
@@ -3956,6 +3971,11 @@
         "gf": 0,
         "gc": 0,
         "rival": "Godoy Cruz"
+      },
+      "24": {
+        "gf": 0,
+        "gc": 0,
+        "rival": "Platense"
       }
     },
     "8VA": {
@@ -4073,6 +4093,11 @@
         "gf": 2,
         "gc": 1,
         "rival": "Godoy Cruz"
+      },
+      "24": {
+        "gf": 2,
+        "gc": 0,
+        "rival": "Platense"
       }
     },
     "9NA": {
@@ -6724,6 +6749,116 @@
           "gl": 1,
           "gv": 3
         }
+      ],
+      "24": [
+        {
+          "local": "Defensa y Justicia",
+          "visitante": "Aldosivi",
+          "gl": 2,
+          "gv": 4
+        },
+        {
+          "local": "Dep. Riestra",
+          "visitante": "Boca Jrs.",
+          "gl": 1,
+          "gv": 2
+        },
+        {
+          "local": "Atlético Rafaela",
+          "visitante": "Colón",
+          "gl": 1,
+          "gv": 1
+        },
+        {
+          "local": "Belgrano",
+          "visitante": "Huracán",
+          "gl": 0,
+          "gv": 2
+        },
+        {
+          "local": "Sarmiento",
+          "visitante": "Estudiantes",
+          "gl": 1,
+          "gv": 1
+        },
+        {
+          "local": "Platense",
+          "visitante": "Tigre",
+          "gl": 0,
+          "gv": 1
+        },
+        {
+          "local": "Godoy Cruz",
+          "visitante": "Atlético Tucumán",
+          "gl": 2,
+          "gv": 0
+        },
+        {
+          "local": "Rosario Central",
+          "visitante": "Indepte. Rivadavia",
+          "gl": 1,
+          "gv": 0
+        },
+        {
+          "local": "Racing",
+          "visitante": "Ferro",
+          "gl": 1,
+          "gv": 0
+        },
+        {
+          "local": "Banfield",
+          "visitante": "Lanús",
+          "gl": 0,
+          "gv": 0
+        },
+        {
+          "local": "Vélez",
+          "visitante": "Independiente",
+          "gl": 0,
+          "gv": 2
+        },
+        {
+          "local": "Gimnasia MZA",
+          "visitante": "Newell&#8217;s",
+          "gl": 0,
+          "gv": 3
+        },
+        {
+          "local": "Central Córdoba",
+          "visitante": "San Martin SJ",
+          "gl": 2,
+          "gv": 3
+        },
+        {
+          "local": "Gimnasia LP",
+          "visitante": "Argentinos Jrs.",
+          "gl": 1,
+          "gv": 2
+        },
+        {
+          "local": "San Lorenzo",
+          "visitante": "Instituto",
+          "gl": 2,
+          "gv": 1
+        },
+        {
+          "local": "Unión",
+          "visitante": "Talleres",
+          "gl": 0,
+          "gv": 1
+        },
+        {
+          "local": "River Plate",
+          "visitante": "Estudiantes RC",
+          "gl": 6,
+          "gv": 0
+        },
+        {
+          "local": "Quilmes",
+          "visitante": "Barracas Central",
+          "gl": 1,
+          "gv": 2
+        }
       ]
     },
     "5TA": {
@@ -9247,6 +9382,116 @@
         {
           "local": "Aldosivi",
           "visitante": "Dep. Riestra",
+          "gl": 1,
+          "gv": 1
+        }
+      ],
+      "24": [
+        {
+          "local": "Defensa y Justicia",
+          "visitante": "Aldosivi",
+          "gl": 1,
+          "gv": 2
+        },
+        {
+          "local": "Dep. Riestra",
+          "visitante": "Boca Jrs.",
+          "gl": 0,
+          "gv": 0
+        },
+        {
+          "local": "Atlético Rafaela",
+          "visitante": "Colón",
+          "gl": 3,
+          "gv": 2
+        },
+        {
+          "local": "Belgrano",
+          "visitante": "Huracán",
+          "gl": 2,
+          "gv": 0
+        },
+        {
+          "local": "Sarmiento",
+          "visitante": "Estudiantes",
+          "gl": 1,
+          "gv": 4
+        },
+        {
+          "local": "Platense",
+          "visitante": "Tigre",
+          "gl": 0,
+          "gv": 0
+        },
+        {
+          "local": "Godoy Cruz",
+          "visitante": "Atlético Tucumán",
+          "gl": 3,
+          "gv": 0
+        },
+        {
+          "local": "Rosario Central",
+          "visitante": "Indepte. Rivadavia",
+          "gl": 3,
+          "gv": 0
+        },
+        {
+          "local": "Racing",
+          "visitante": "Ferro",
+          "gl": 0,
+          "gv": 1
+        },
+        {
+          "local": "Banfield",
+          "visitante": "Lanús",
+          "gl": 0,
+          "gv": 3
+        },
+        {
+          "local": "Vélez",
+          "visitante": "Independiente",
+          "gl": 3,
+          "gv": 1
+        },
+        {
+          "local": "Gimnasia MZA",
+          "visitante": "Newell&#8217;s",
+          "gl": 0,
+          "gv": 0
+        },
+        {
+          "local": "Central Córdoba",
+          "visitante": "San Martin SJ",
+          "gl": 1,
+          "gv": 1
+        },
+        {
+          "local": "Gimnasia LP",
+          "visitante": "Argentinos Jrs.",
+          "gl": 2,
+          "gv": 0
+        },
+        {
+          "local": "San Lorenzo",
+          "visitante": "Instituto",
+          "gl": 2,
+          "gv": 0
+        },
+        {
+          "local": "Unión",
+          "visitante": "Talleres",
+          "gl": 1,
+          "gv": 0
+        },
+        {
+          "local": "River Plate",
+          "visitante": "Estudiantes RC",
+          "gl": 6,
+          "gv": 1
+        },
+        {
+          "local": "Quilmes",
+          "visitante": "Barracas Central",
           "gl": 1,
           "gv": 1
         }
@@ -11782,6 +12027,116 @@
           "gl": 1,
           "gv": 0
         }
+      ],
+      "24": [
+        {
+          "local": "Defensa y Justicia",
+          "visitante": "Aldosivi",
+          "gl": 0,
+          "gv": 0
+        },
+        {
+          "local": "Dep. Riestra",
+          "visitante": "Boca Jrs.",
+          "gl": 0,
+          "gv": 3
+        },
+        {
+          "local": "Atlético Rafaela",
+          "visitante": "Colón",
+          "gl": 2,
+          "gv": 1
+        },
+        {
+          "local": "Belgrano",
+          "visitante": "Huracán",
+          "gl": 1,
+          "gv": 2
+        },
+        {
+          "local": "Sarmiento",
+          "visitante": "Estudiantes",
+          "gl": 1,
+          "gv": 1
+        },
+        {
+          "local": "Platense",
+          "visitante": "Tigre",
+          "gl": 0,
+          "gv": 1
+        },
+        {
+          "local": "Godoy Cruz",
+          "visitante": "Atlético Tucumán",
+          "gl": 4,
+          "gv": 0
+        },
+        {
+          "local": "Rosario Central",
+          "visitante": "Indepte. Rivadavia",
+          "gl": 3,
+          "gv": 1
+        },
+        {
+          "local": "Racing",
+          "visitante": "Ferro",
+          "gl": 0,
+          "gv": 1
+        },
+        {
+          "local": "Banfield",
+          "visitante": "Lanús",
+          "gl": 2,
+          "gv": 1
+        },
+        {
+          "local": "Vélez",
+          "visitante": "Independiente",
+          "gl": 2,
+          "gv": 0
+        },
+        {
+          "local": "Gimnasia MZA",
+          "visitante": "Newell&#8217;s",
+          "gl": 0,
+          "gv": 3
+        },
+        {
+          "local": "Central Córdoba",
+          "visitante": "San Martin SJ",
+          "gl": 2,
+          "gv": 1
+        },
+        {
+          "local": "Gimnasia LP",
+          "visitante": "Argentinos Jrs.",
+          "gl": 2,
+          "gv": 1
+        },
+        {
+          "local": "San Lorenzo",
+          "visitante": "Instituto",
+          "gl": 0,
+          "gv": 1
+        },
+        {
+          "local": "Unión",
+          "visitante": "Talleres",
+          "gl": 1,
+          "gv": 1
+        },
+        {
+          "local": "River Plate",
+          "visitante": "Estudiantes RC",
+          "gl": 6,
+          "gv": 0
+        },
+        {
+          "local": "Quilmes",
+          "visitante": "Barracas Central",
+          "gl": 0,
+          "gv": 0
+        }
       ]
     },
     "7MA": {
@@ -14314,6 +14669,116 @@
           "gl": 5,
           "gv": 2
         }
+      ],
+      "24": [
+        {
+          "local": "Aldosivi",
+          "visitante": "Defensa y Justicia",
+          "gl": 2,
+          "gv": 4
+        },
+        {
+          "local": "Boca Jrs.",
+          "visitante": "Dep. Riestra",
+          "gl": 3,
+          "gv": 1
+        },
+        {
+          "local": "Colón",
+          "visitante": "Atlético Rafaela",
+          "gl": 2,
+          "gv": 0
+        },
+        {
+          "local": "Huracán",
+          "visitante": "Belgrano",
+          "gl": 3,
+          "gv": 0
+        },
+        {
+          "local": "Estudiantes",
+          "visitante": "Sarmiento",
+          "gl": 2,
+          "gv": 0
+        },
+        {
+          "local": "Tigre",
+          "visitante": "Platense",
+          "gl": 0,
+          "gv": 0
+        },
+        {
+          "local": "Atlético Tucumán",
+          "visitante": "Godoy Cruz",
+          "gl": 0,
+          "gv": 1
+        },
+        {
+          "local": "Indepte. Rivadavia",
+          "visitante": "Rosario Central",
+          "gl": 0,
+          "gv": 0
+        },
+        {
+          "local": "Ferro",
+          "visitante": "Racing",
+          "gl": 0,
+          "gv": 1
+        },
+        {
+          "local": "Lanús",
+          "visitante": "Banfield",
+          "gl": 0,
+          "gv": 0
+        },
+        {
+          "local": "Independiente",
+          "visitante": "Vélez",
+          "gl": 0,
+          "gv": 0
+        },
+        {
+          "local": "Newell&#8217;s",
+          "visitante": "Gimnasia MZA",
+          "gl": 1,
+          "gv": 0
+        },
+        {
+          "local": "San Martin SJ",
+          "visitante": "Central Córdoba",
+          "gl": 0,
+          "gv": 1
+        },
+        {
+          "local": "Argentinos Jrs.",
+          "visitante": "Gimnasia LP",
+          "gl": 1,
+          "gv": 1
+        },
+        {
+          "local": "Instituto",
+          "visitante": "San Lorenzo",
+          "gl": 1,
+          "gv": 1
+        },
+        {
+          "local": "Talleres",
+          "visitante": "Unión",
+          "gl": 5,
+          "gv": 0
+        },
+        {
+          "local": "Estudiantes RC",
+          "visitante": "River Plate",
+          "gl": 1,
+          "gv": 0
+        },
+        {
+          "local": "Barracas Central",
+          "visitante": "Quilmes",
+          "gl": 2,
+          "gv": 1
+        }
       ]
     },
     "8VA": {
@@ -16845,6 +17310,116 @@
           "visitante": "Aldosivi",
           "gl": 0,
           "gv": 0
+        }
+      ],
+      "24": [
+        {
+          "local": "Aldosivi",
+          "visitante": "Defensa y Justicia",
+          "gl": 5,
+          "gv": 1
+        },
+        {
+          "local": "Boca Jrs.",
+          "visitante": "Dep. Riestra",
+          "gl": 0,
+          "gv": 0
+        },
+        {
+          "local": "Colón",
+          "visitante": "Atlético Rafaela",
+          "gl": 3,
+          "gv": 2
+        },
+        {
+          "local": "Huracán",
+          "visitante": "Belgrano",
+          "gl": 1,
+          "gv": 3
+        },
+        {
+          "local": "Estudiantes",
+          "visitante": "Sarmiento",
+          "gl": 2,
+          "gv": 1
+        },
+        {
+          "local": "Tigre",
+          "visitante": "Platense",
+          "gl": 2,
+          "gv": 0
+        },
+        {
+          "local": "Atlético Tucumán",
+          "visitante": "Godoy Cruz",
+          "gl": 0,
+          "gv": 3
+        },
+        {
+          "local": "Indepte. Rivadavia",
+          "visitante": "Rosario Central",
+          "gl": 1,
+          "gv": 1
+        },
+        {
+          "local": "Ferro",
+          "visitante": "Racing",
+          "gl": 2,
+          "gv": 0
+        },
+        {
+          "local": "Lanús",
+          "visitante": "Banfield",
+          "gl": 1,
+          "gv": 1
+        },
+        {
+          "local": "Independiente",
+          "visitante": "Vélez",
+          "gl": 3,
+          "gv": 1
+        },
+        {
+          "local": "Newell&#8217;s",
+          "visitante": "Gimnasia MZA",
+          "gl": 1,
+          "gv": 0
+        },
+        {
+          "local": "San Martin SJ",
+          "visitante": "Central Córdoba",
+          "gl": 0,
+          "gv": 0
+        },
+        {
+          "local": "Argentinos Jrs.",
+          "visitante": "Gimnasia LP",
+          "gl": 0,
+          "gv": 2
+        },
+        {
+          "local": "Instituto",
+          "visitante": "San Lorenzo",
+          "gl": 0,
+          "gv": 3
+        },
+        {
+          "local": "Talleres",
+          "visitante": "Unión",
+          "gl": 1,
+          "gv": 2
+        },
+        {
+          "local": "Estudiantes RC",
+          "visitante": "River Plate",
+          "gl": 2,
+          "gv": 4
+        },
+        {
+          "local": "Barracas Central",
+          "visitante": "Quilmes",
+          "gl": 1,
+          "gv": 5
         }
       ]
     },
