@@ -1,5 +1,5 @@
 {
-  "actualizado": "2026-09-12 15:00",
+  "actualizado": "2026-09-13 17:20",
   "fuente": "ligaprofesional.ar (oficial)",
   "fuente_fixture": "ligaprofesional.ar (oficial)",
   "fuente_reserva": "statfutbol.com.ar",
@@ -8,178 +8,178 @@
       {
         "pos": 1,
         "equipo": "Talleres",
-        "pts": 54,
-        "pj": 24,
-        "pg": 17,
+        "pts": 57,
+        "pj": 25,
+        "pg": 18,
         "pe": 3,
         "pp": 4,
-        "gf": 35,
-        "gc": 14,
-        "dif": 21
+        "gf": 38,
+        "gc": 15,
+        "dif": 23
       },
       {
         "pos": 2,
         "equipo": "Lanús",
         "pts": 52,
-        "pj": 24,
+        "pj": 25,
         "pg": 16,
         "pe": 4,
-        "pp": 4,
-        "gf": 41,
-        "gc": 20,
-        "dif": 21
+        "pp": 5,
+        "gf": 42,
+        "gc": 23,
+        "dif": 19
       },
       {
         "pos": 3,
-        "equipo": "Independiente",
-        "pts": 51,
-        "pj": 24,
-        "pg": 16,
-        "pe": 3,
-        "pp": 5,
-        "gf": 56,
-        "gc": 26,
-        "dif": 30
+        "equipo": "Rosario Central",
+        "pts": 52,
+        "pj": 25,
+        "pg": 15,
+        "pe": 7,
+        "pp": 3,
+        "gf": 36,
+        "gc": 18,
+        "dif": 18
       },
       {
         "pos": 4,
-        "equipo": "Rosario Central",
-        "pts": 49,
-        "pj": 24,
-        "pg": 14,
-        "pe": 7,
-        "pp": 3,
-        "gf": 33,
-        "gc": 16,
-        "dif": 17
+        "equipo": "Independiente",
+        "pts": 51,
+        "pj": 25,
+        "pg": 16,
+        "pe": 3,
+        "pp": 6,
+        "gf": 57,
+        "gc": 28,
+        "dif": 29
       },
       {
         "pos": 5,
         "equipo": "Huracán",
-        "pts": 48,
-        "pj": 24,
-        "pg": 14,
+        "pts": 51,
+        "pj": 25,
+        "pg": 15,
         "pe": 6,
         "pp": 4,
-        "gf": 40,
-        "gc": 22,
-        "dif": 18
-      },
-      {
-        "pos": 6,
-        "equipo": "Estudiantes",
-        "pts": 45,
-        "pj": 24,
-        "pg": 13,
-        "pe": 6,
-        "pp": 5,
-        "gf": 41,
-        "gc": 23,
-        "dif": 18
-      },
-      {
-        "pos": 7,
-        "equipo": "Argentinos Jrs.",
-        "pts": 44,
-        "pj": 24,
-        "pg": 13,
-        "pe": 5,
-        "pp": 6,
         "gf": 42,
         "gc": 22,
         "dif": 20
       },
       {
-        "pos": 8,
+        "pos": 6,
         "equipo": "Boca Jrs.",
-        "pts": 44,
-        "pj": 24,
-        "pg": 11,
+        "pts": 47,
+        "pj": 25,
+        "pg": 12,
         "pe": 11,
         "pp": 2,
-        "gf": 33,
+        "gf": 34,
         "gc": 16,
-        "dif": 17
+        "dif": 18
+      },
+      {
+        "pos": 7,
+        "equipo": "Estudiantes",
+        "pts": 46,
+        "pj": 25,
+        "pg": 13,
+        "pe": 7,
+        "pp": 5,
+        "gf": 43,
+        "gc": 25,
+        "dif": 18
+      },
+      {
+        "pos": 8,
+        "equipo": "Argentinos Jrs.",
+        "pts": 44,
+        "pj": 25,
+        "pg": 13,
+        "pe": 5,
+        "pp": 7,
+        "gf": 42,
+        "gc": 23,
+        "dif": 19
       },
       {
         "pos": 9,
-        "equipo": "Newell's",
-        "pts": 41,
-        "pj": 24,
-        "pg": 12,
+        "equipo": "Instituto",
+        "pts": 44,
+        "pj": 25,
+        "pg": 13,
         "pe": 5,
+        "pp": 7,
+        "gf": 32,
+        "gc": 18,
+        "dif": 14
+      },
+      {
+        "pos": 10,
+        "equipo": "Newell's",
+        "pts": 42,
+        "pj": 25,
+        "pg": 12,
+        "pe": 6,
         "pp": 7,
         "gf": 40,
         "gc": 21,
         "dif": 19
       },
       {
-        "pos": 10,
-        "equipo": "Instituto",
+        "pos": 11,
+        "equipo": "Tigre",
         "pts": 41,
-        "pj": 24,
+        "pj": 25,
         "pg": 12,
         "pe": 5,
-        "pp": 7,
-        "gf": 29,
-        "gc": 18,
-        "dif": 11
-      },
-      {
-        "pos": 11,
-        "equipo": "San Lorenzo",
-        "pts": 41,
-        "pj": 24,
-        "pg": 13,
-        "pe": 2,
-        "pp": 9,
-        "gf": 40,
-        "gc": 30,
-        "dif": 10
+        "pp": 8,
+        "gf": 39,
+        "gc": 26,
+        "dif": 13
       },
       {
         "pos": 12,
-        "equipo": "River Plate",
-        "pts": 40,
-        "pj": 24,
-        "pg": 12,
-        "pe": 4,
-        "pp": 8,
-        "gf": 40,
-        "gc": 20,
-        "dif": 20
+        "equipo": "San Lorenzo",
+        "pts": 41,
+        "pj": 25,
+        "pg": 13,
+        "pe": 2,
+        "pp": 10,
+        "gf": 41,
+        "gc": 33,
+        "dif": 8
       },
       {
         "pos": 13,
-        "equipo": "Tigre",
+        "equipo": "River Plate",
         "pts": 40,
-        "pj": 24,
+        "pj": 25,
         "pg": 12,
         "pe": 4,
-        "pp": 8,
-        "gf": 38,
-        "gc": 25,
-        "dif": 13
+        "pp": 9,
+        "gf": 40,
+        "gc": 22,
+        "dif": 18
       },
       {
         "pos": 14,
         "equipo": "Godoy Cruz",
         "pts": 40,
-        "pj": 24,
+        "pj": 25,
         "pg": 12,
         "pe": 4,
-        "pp": 8,
-        "gf": 42,
-        "gc": 31,
-        "dif": 11
+        "pp": 9,
+        "gf": 43,
+        "gc": 33,
+        "dif": 10
       },
       {
         "pos": 15,
         "equipo": "Vélez",
-        "pts": 38,
-        "pj": 24,
+        "pts": 39,
+        "pj": 25,
         "pg": 11,
-        "pe": 5,
+        "pe": 6,
         "pp": 8,
         "gf": 36,
         "gc": 19,
@@ -187,255 +187,255 @@
       },
       {
         "pos": 16,
-        "equipo": "Atlético Tucumán",
-        "pts": 38,
-        "pj": 24,
-        "pg": 12,
-        "pe": 2,
-        "pp": 10,
-        "gf": 38,
-        "gc": 33,
-        "dif": 5
+        "equipo": "Platense",
+        "pts": 39,
+        "pj": 25,
+        "pg": 11,
+        "pe": 6,
+        "pp": 8,
+        "gf": 30,
+        "gc": 28,
+        "dif": 2
       },
       {
         "pos": 17,
-        "equipo": "Belgrano",
-        "pts": 37,
-        "pj": 24,
-        "pg": 9,
-        "pe": 10,
-        "pp": 5,
-        "gf": 23,
-        "gc": 20,
+        "equipo": "Atlético Tucumán",
+        "pts": 38,
+        "pj": 25,
+        "pg": 12,
+        "pe": 2,
+        "pp": 11,
+        "gf": 40,
+        "gc": 37,
         "dif": 3
       },
       {
         "pos": 18,
-        "equipo": "Platense",
-        "pts": 36,
-        "pj": 24,
-        "pg": 10,
-        "pe": 6,
-        "pp": 8,
-        "gf": 26,
-        "gc": 26,
-        "dif": 0
+        "equipo": "Belgrano",
+        "pts": 38,
+        "pj": 25,
+        "pg": 9,
+        "pe": 11,
+        "pp": 5,
+        "gf": 25,
+        "gc": 22,
+        "dif": 3
       },
       {
         "pos": 19,
-        "equipo": "Gimnasia LP",
+        "equipo": "Racing",
         "pts": 33,
-        "pj": 24,
-        "pg": 8,
-        "pe": 9,
-        "pp": 7,
-        "gf": 27,
-        "gc": 20,
-        "dif": 7
+        "pj": 25,
+        "pg": 9,
+        "pe": 6,
+        "pp": 10,
+        "gf": 37,
+        "gc": 29,
+        "dif": 8
       },
       {
         "pos": 20,
-        "equipo": "Ferro",
-        "pts": 31,
-        "pj": 24,
-        "pg": 9,
-        "pe": 4,
-        "pp": 11,
-        "gf": 31,
-        "gc": 35,
-        "dif": -4
+        "equipo": "Gimnasia LP",
+        "pts": 33,
+        "pj": 25,
+        "pg": 8,
+        "pe": 9,
+        "pp": 8,
+        "gf": 27,
+        "gc": 23,
+        "dif": 4
       },
       {
         "pos": 21,
-        "equipo": "Racing",
-        "pts": 30,
-        "pj": 24,
+        "equipo": "Defensa y Justicia",
+        "pts": 31,
+        "pj": 25,
         "pg": 8,
-        "pe": 6,
+        "pe": 7,
         "pp": 10,
-        "gf": 34,
-        "gc": 28,
-        "dif": 6
+        "gf": 37,
+        "gc": 37,
+        "dif": 0
       },
       {
         "pos": 22,
-        "equipo": "Colón",
-        "pts": 29,
-        "pj": 24,
-        "pg": 7,
-        "pe": 8,
-        "pp": 9,
-        "gf": 30,
-        "gc": 32,
-        "dif": -2
+        "equipo": "Ferro",
+        "pts": 31,
+        "pj": 25,
+        "pg": 9,
+        "pe": 4,
+        "pp": 12,
+        "gf": 33,
+        "gc": 38,
+        "dif": -5
       },
       {
         "pos": 23,
-        "equipo": "Defensa y Justicia",
-        "pts": 28,
-        "pj": 24,
+        "equipo": "Gimnasia MZA",
+        "pts": 30,
+        "pj": 25,
         "pg": 7,
-        "pe": 7,
-        "pp": 10,
-        "gf": 35,
-        "gc": 36,
-        "dif": -1
-      },
-      {
-        "pos": 24,
-        "equipo": "Aldosivi",
-        "pts": 28,
-        "pj": 24,
-        "pg": 8,
-        "pe": 4,
-        "pp": 12,
-        "gf": 31,
-        "gc": 42,
+        "pe": 9,
+        "pp": 9,
+        "gf": 18,
+        "gc": 29,
         "dif": -11
       },
       {
-        "pos": 25,
-        "equipo": "Gimnasia MZA",
-        "pts": 27,
-        "pj": 24,
-        "pg": 6,
-        "pe": 9,
-        "pp": 9,
-        "gf": 17,
-        "gc": 29,
-        "dif": -12
-      },
-      {
-        "pos": 26,
-        "equipo": "Barracas Central",
-        "pts": 26,
-        "pj": 24,
+        "pos": 24,
+        "equipo": "Colón",
+        "pts": 29,
+        "pj": 25,
         "pg": 7,
-        "pe": 5,
-        "pp": 12,
-        "gf": 21,
-        "gc": 34,
-        "dif": -13
-      },
-      {
-        "pos": 27,
-        "equipo": "Sarmiento",
-        "pts": 25,
-        "pj": 24,
-        "pg": 5,
-        "pe": 10,
-        "pp": 9,
-        "gf": 26,
-        "gc": 29,
+        "pe": 8,
+        "pp": 10,
+        "gf": 30,
+        "gc": 33,
         "dif": -3
       },
       {
-        "pos": 28,
-        "equipo": "Quilmes",
-        "pts": 25,
-        "pj": 24,
-        "pg": 7,
+        "pos": 25,
+        "equipo": "Barracas Central",
+        "pts": 29,
+        "pj": 25,
+        "pg": 8,
+        "pe": 5,
+        "pp": 12,
+        "gf": 23,
+        "gc": 34,
+        "dif": -11
+      },
+      {
+        "pos": 26,
+        "equipo": "Aldosivi",
+        "pts": 28,
+        "pj": 25,
+        "pg": 8,
         "pe": 4,
         "pp": 13,
-        "gf": 18,
-        "gc": 39,
-        "dif": -21
+        "gf": 31,
+        "gc": 43,
+        "dif": -12
+      },
+      {
+        "pos": 27,
+        "equipo": "Unión",
+        "pts": 27,
+        "pj": 25,
+        "pg": 7,
+        "pe": 6,
+        "pp": 12,
+        "gf": 23,
+        "gc": 28,
+        "dif": -5
+      },
+      {
+        "pos": 28,
+        "equipo": "Sarmiento",
+        "pts": 26,
+        "pj": 25,
+        "pg": 5,
+        "pe": 11,
+        "pp": 9,
+        "gf": 27,
+        "gc": 30,
+        "dif": -3
       },
       {
         "pos": 29,
-        "equipo": "Unión",
-        "pts": 24,
-        "pj": 24,
-        "pg": 6,
-        "pe": 6,
-        "pp": 12,
-        "gf": 20,
-        "gc": 28,
-        "dif": -8
+        "equipo": "Dep. Riestra",
+        "pts": 25,
+        "pj": 25,
+        "pg": 7,
+        "pe": 4,
+        "pp": 14,
+        "gf": 25,
+        "gc": 36,
+        "dif": -11
       },
       {
         "pos": 30,
-        "equipo": "Dep. Riestra",
-        "pts": 22,
-        "pj": 24,
-        "pg": 6,
+        "equipo": "Quilmes",
+        "pts": 25,
+        "pj": 25,
+        "pg": 7,
         "pe": 4,
         "pp": 14,
-        "gf": 24,
-        "gc": 36,
-        "dif": -12
+        "gf": 19,
+        "gc": 41,
+        "dif": -22
       },
       {
         "pos": 31,
         "equipo": "Central Córdoba",
-        "pts": 20,
-        "pj": 24,
-        "pg": 5,
+        "pts": 23,
+        "pj": 25,
+        "pg": 6,
         "pe": 5,
         "pp": 14,
-        "gf": 24,
+        "gf": 25,
         "gc": 51,
-        "dif": -27
+        "dif": -26
       },
       {
         "pos": 32,
         "equipo": "Atlético Rafaela",
         "pts": 19,
-        "pj": 24,
+        "pj": 25,
         "pg": 4,
         "pe": 7,
-        "pp": 13,
+        "pp": 14,
         "gf": 24,
-        "gc": 50,
-        "dif": -26
+        "gc": 52,
+        "dif": -28
       },
       {
         "pos": 33,
-        "equipo": "Estudiantes RC",
-        "pts": 16,
-        "pj": 24,
+        "equipo": "Banfield",
+        "pts": 18,
+        "pj": 25,
         "pg": 4,
-        "pe": 4,
-        "pp": 16,
-        "gf": 25,
-        "gc": 66,
-        "dif": -41
+        "pe": 6,
+        "pp": 15,
+        "gf": 17,
+        "gc": 44,
+        "dif": -27
       },
       {
         "pos": 34,
-        "equipo": "Banfield",
-        "pts": 15,
-        "pj": 24,
-        "pg": 3,
-        "pe": 6,
-        "pp": 15,
-        "gf": 15,
-        "gc": 43,
-        "dif": -28
+        "equipo": "Estudiantes RC",
+        "pts": 16,
+        "pj": 25,
+        "pg": 4,
+        "pe": 4,
+        "pp": 17,
+        "gf": 25,
+        "gc": 69,
+        "dif": -44
       },
       {
         "pos": 35,
         "equipo": "Indepte. Rivadavia",
-        "pts": 11,
-        "pj": 24,
-        "pg": 2,
+        "pts": 14,
+        "pj": 25,
+        "pg": 3,
         "pe": 5,
         "pp": 17,
-        "gf": 17,
-        "gc": 41,
-        "dif": -24
+        "gf": 19,
+        "gc": 42,
+        "dif": -23
       },
       {
         "pos": 36,
         "equipo": "San Martin SJ",
         "pts": 9,
-        "pj": 24,
+        "pj": 25,
         "pg": 2,
         "pe": 3,
-        "pp": 19,
+        "pp": 20,
         "gf": 18,
-        "gc": 69,
-        "dif": -51
+        "gc": 70,
+        "dif": -52
       }
     ],
     "5TA": [
@@ -443,393 +443,393 @@
         "pos": 1,
         "equipo": "Rosario Central",
         "pts": 66,
-        "pj": 24,
+        "pj": 25,
         "pg": 21,
         "pe": 3,
-        "pp": 0,
+        "pp": 1,
         "gf": 50,
-        "gc": 8,
-        "dif": 42
+        "gc": 10,
+        "dif": 40
       },
       {
         "pos": 2,
         "equipo": "Vélez",
-        "pts": 57,
-        "pj": 24,
-        "pg": 18,
+        "pts": 60,
+        "pj": 25,
+        "pg": 19,
         "pe": 3,
         "pp": 3,
-        "gf": 67,
+        "gf": 68,
         "gc": 23,
-        "dif": 44
+        "dif": 45
       },
       {
         "pos": 3,
-        "equipo": "River Plate",
-        "pts": 54,
-        "pj": 24,
-        "pg": 17,
+        "equipo": "Lanús",
+        "pts": 57,
+        "pj": 25,
+        "pg": 18,
         "pe": 3,
         "pp": 4,
-        "gf": 65,
-        "gc": 25,
-        "dif": 40
+        "gf": 57,
+        "gc": 20,
+        "dif": 37
       },
       {
         "pos": 4,
-        "equipo": "Lanús",
-        "pts": 54,
-        "pj": 24,
+        "equipo": "River Plate",
+        "pts": 55,
+        "pj": 25,
         "pg": 17,
-        "pe": 3,
+        "pe": 4,
         "pp": 4,
-        "gf": 53,
-        "gc": 19,
-        "dif": 34
+        "gf": 66,
+        "gc": 26,
+        "dif": 40
       },
       {
         "pos": 5,
         "equipo": "Newell's",
         "pts": 52,
-        "pj": 24,
+        "pj": 25,
         "pg": 15,
         "pe": 7,
-        "pp": 2,
+        "pp": 3,
         "gf": 52,
-        "gc": 25,
-        "dif": 27
+        "gc": 26,
+        "dif": 26
       },
       {
         "pos": 6,
         "equipo": "Argentinos Jrs.",
-        "pts": 47,
-        "pj": 24,
-        "pg": 14,
+        "pts": 50,
+        "pj": 25,
+        "pg": 15,
         "pe": 5,
         "pp": 5,
-        "gf": 35,
-        "gc": 21,
-        "dif": 14
+        "gf": 37,
+        "gc": 22,
+        "dif": 15
       },
       {
         "pos": 7,
         "equipo": "Belgrano",
-        "pts": 44,
-        "pj": 24,
-        "pg": 13,
+        "pts": 47,
+        "pj": 25,
+        "pg": 14,
         "pe": 5,
         "pp": 6,
-        "gf": 36,
-        "gc": 23,
-        "dif": 13
+        "gf": 38,
+        "gc": 24,
+        "dif": 14
       },
       {
         "pos": 8,
         "equipo": "Boca Jrs.",
-        "pts": 42,
-        "pj": 24,
-        "pg": 12,
+        "pts": 45,
+        "pj": 25,
+        "pg": 13,
         "pe": 6,
         "pp": 6,
-        "gf": 52,
+        "gf": 57,
         "gc": 21,
-        "dif": 31
+        "dif": 36
       },
       {
         "pos": 9,
-        "equipo": "San Lorenzo",
-        "pts": 41,
+        "equipo": "Talleres",
+        "pts": 43,
         "pj": 24,
-        "pg": 12,
-        "pe": 5,
+        "pg": 13,
+        "pe": 4,
         "pp": 7,
-        "gf": 41,
-        "gc": 31,
-        "dif": 10
+        "gf": 56,
+        "gc": 26,
+        "dif": 30
       },
       {
         "pos": 10,
-        "equipo": "Talleres",
-        "pts": 40,
-        "pj": 23,
+        "equipo": "San Lorenzo",
+        "pts": 41,
+        "pj": 25,
         "pg": 12,
-        "pe": 4,
-        "pp": 7,
-        "gf": 52,
-        "gc": 25,
-        "dif": 27
+        "pe": 5,
+        "pp": 8,
+        "gf": 42,
+        "gc": 35,
+        "dif": 7
       },
       {
         "pos": 11,
         "equipo": "Independiente",
-        "pts": 37,
-        "pj": 24,
-        "pg": 9,
+        "pts": 40,
+        "pj": 25,
+        "pg": 10,
         "pe": 10,
         "pp": 5,
-        "gf": 38,
+        "gf": 42,
         "gc": 28,
-        "dif": 10
+        "dif": 14
       },
       {
         "pos": 12,
         "equipo": "Gimnasia LP",
-        "pts": 37,
-        "pj": 24,
-        "pg": 10,
+        "pts": 40,
+        "pj": 25,
+        "pg": 11,
         "pe": 7,
         "pp": 7,
-        "gf": 35,
+        "gf": 36,
         "gc": 31,
-        "dif": 4
+        "dif": 5
       },
       {
         "pos": 13,
         "equipo": "Huracán",
-        "pts": 37,
-        "pj": 24,
-        "pg": 11,
+        "pts": 40,
+        "pj": 25,
+        "pg": 12,
         "pe": 4,
         "pp": 9,
-        "gf": 29,
+        "gf": 32,
         "gc": 28,
-        "dif": 1
+        "dif": 4
       },
       {
         "pos": 14,
-        "equipo": "Racing",
-        "pts": 34,
-        "pj": 24,
-        "pg": 10,
-        "pe": 4,
-        "pp": 10,
-        "gf": 46,
-        "gc": 44,
-        "dif": 2
+        "equipo": "Atlético Tucumán",
+        "pts": 35,
+        "pj": 25,
+        "pg": 9,
+        "pe": 8,
+        "pp": 8,
+        "gf": 35,
+        "gc": 41,
+        "dif": -6
       },
       {
         "pos": 15,
-        "equipo": "Estudiantes",
-        "pts": 33,
-        "pj": 24,
-        "pg": 8,
-        "pe": 9,
-        "pp": 7,
-        "gf": 39,
-        "gc": 30,
-        "dif": 9
+        "equipo": "Racing",
+        "pts": 34,
+        "pj": 25,
+        "pg": 10,
+        "pe": 4,
+        "pp": 11,
+        "gf": 47,
+        "gc": 48,
+        "dif": -1
       },
       {
         "pos": 16,
-        "equipo": "Tigre",
-        "pts": 32,
-        "pj": 24,
+        "equipo": "Estudiantes",
+        "pts": 33,
+        "pj": 25,
         "pg": 8,
-        "pe": 8,
+        "pe": 9,
         "pp": 8,
-        "gf": 32,
-        "gc": 26,
-        "dif": 6
+        "gf": 40,
+        "gc": 32,
+        "dif": 8
       },
       {
         "pos": 17,
-        "equipo": "Banfield",
-        "pts": 32,
-        "pj": 24,
+        "equipo": "Tigre",
+        "pts": 33,
+        "pj": 25,
         "pg": 8,
-        "pe": 8,
+        "pe": 9,
         "pp": 8,
-        "gf": 30,
-        "gc": 32,
-        "dif": -2
+        "gf": 36,
+        "gc": 30,
+        "dif": 6
       },
       {
         "pos": 18,
-        "equipo": "Platense",
+        "equipo": "Banfield",
         "pts": 32,
-        "pj": 24,
+        "pj": 25,
         "pg": 8,
         "pe": 8,
-        "pp": 8,
+        "pp": 9,
+        "gf": 30,
+        "gc": 36,
+        "dif": -6
+      },
+      {
+        "pos": 19,
+        "equipo": "Platense",
+        "pts": 32,
+        "pj": 25,
+        "pg": 8,
+        "pe": 8,
+        "pp": 9,
+        "gf": 36,
+        "gc": 46,
+        "dif": -10
+      },
+      {
+        "pos": 20,
+        "equipo": "Ferro",
+        "pts": 31,
+        "pj": 25,
+        "pg": 8,
+        "pe": 7,
+        "pp": 10,
         "gf": 35,
         "gc": 42,
         "dif": -7
       },
       {
-        "pos": 19,
-        "equipo": "Atlético Tucumán",
-        "pts": 32,
-        "pj": 24,
-        "pg": 8,
-        "pe": 8,
-        "pp": 8,
-        "gf": 31,
-        "gc": 40,
-        "dif": -9
-      },
-      {
-        "pos": 20,
+        "pos": 21,
         "equipo": "Instituto",
         "pts": 28,
-        "pj": 24,
+        "pj": 25,
         "pg": 7,
         "pe": 7,
-        "pp": 10,
+        "pp": 11,
         "gf": 26,
-        "gc": 30,
-        "dif": -4
-      },
-      {
-        "pos": 21,
-        "equipo": "Quilmes",
-        "pts": 28,
-        "pj": 24,
-        "pg": 7,
-        "pe": 7,
-        "pp": 10,
-        "gf": 28,
-        "gc": 37,
-        "dif": -9
+        "gc": 31,
+        "dif": -5
       },
       {
         "pos": 22,
-        "equipo": "Ferro",
+        "equipo": "Quilmes",
         "pts": 28,
-        "pj": 24,
+        "pj": 25,
         "pg": 7,
         "pe": 7,
-        "pp": 10,
-        "gf": 33,
-        "gc": 42,
-        "dif": -9
+        "pp": 11,
+        "gf": 28,
+        "gc": 40,
+        "dif": -12
       },
       {
         "pos": 23,
-        "equipo": "Godoy Cruz",
-        "pts": 26,
-        "pj": 24,
-        "pg": 7,
-        "pe": 5,
-        "pp": 12,
-        "gf": 33,
-        "gc": 35,
-        "dif": -2
-      },
-      {
-        "pos": 24,
         "equipo": "Colón",
-        "pts": 26,
-        "pj": 24,
+        "pts": 27,
+        "pj": 25,
         "pg": 7,
-        "pe": 5,
+        "pe": 6,
         "pp": 12,
         "gf": 38,
         "gc": 43,
         "dif": -5
       },
       {
-        "pos": 25,
+        "pos": 24,
         "equipo": "Sarmiento",
-        "pts": 26,
-        "pj": 24,
+        "pts": 27,
+        "pj": 25,
         "pg": 6,
-        "pe": 8,
+        "pe": 9,
         "pp": 10,
-        "gf": 25,
-        "gc": 36,
+        "gf": 29,
+        "gc": 40,
         "dif": -11
+      },
+      {
+        "pos": 25,
+        "equipo": "Godoy Cruz",
+        "pts": 26,
+        "pj": 25,
+        "pg": 7,
+        "pe": 5,
+        "pp": 13,
+        "gf": 33,
+        "gc": 36,
+        "dif": -3
       },
       {
         "pos": 26,
         "equipo": "Barracas Central",
-        "pts": 25,
-        "pj": 24,
+        "pts": 26,
+        "pj": 25,
         "pg": 6,
-        "pe": 7,
+        "pe": 8,
         "pp": 11,
-        "gf": 23,
-        "gc": 35,
+        "gf": 24,
+        "gc": 36,
         "dif": -12
       },
       {
         "pos": 27,
-        "equipo": "Aldosivi",
-        "pts": 24,
-        "pj": 24,
-        "pg": 5,
-        "pe": 9,
-        "pp": 10,
-        "gf": 25,
-        "gc": 47,
-        "dif": -22
+        "equipo": "Defensa y Justicia",
+        "pts": 26,
+        "pj": 25,
+        "pg": 6,
+        "pe": 8,
+        "pp": 11,
+        "gf": 33,
+        "gc": 45,
+        "dif": -12
       },
       {
         "pos": 28,
-        "equipo": "Atlético Rafaela",
+        "equipo": "Aldosivi",
         "pts": 24,
-        "pj": 24,
-        "pg": 6,
-        "pe": 6,
-        "pp": 12,
-        "gf": 32,
-        "gc": 61,
-        "dif": -29
+        "pj": 25,
+        "pg": 5,
+        "pe": 9,
+        "pp": 11,
+        "gf": 25,
+        "gc": 52,
+        "dif": -27
       },
       {
         "pos": 29,
-        "equipo": "Defensa y Justicia",
-        "pts": 23,
-        "pj": 24,
-        "pg": 5,
-        "pe": 8,
-        "pp": 11,
-        "gf": 30,
-        "gc": 45,
-        "dif": -15
+        "equipo": "Atlético Rafaela",
+        "pts": 24,
+        "pj": 25,
+        "pg": 6,
+        "pe": 6,
+        "pp": 13,
+        "gf": 32,
+        "gc": 64,
+        "dif": -32
       },
       {
         "pos": 30,
-        "equipo": "Unión",
-        "pts": 22,
-        "pj": 24,
-        "pg": 4,
-        "pe": 10,
-        "pp": 10,
-        "gf": 28,
-        "gc": 41,
-        "dif": -13
+        "equipo": "Indepte. Rivadavia",
+        "pts": 23,
+        "pj": 25,
+        "pg": 5,
+        "pe": 8,
+        "pp": 12,
+        "gf": 26,
+        "gc": 38,
+        "dif": -12
       },
       {
         "pos": 31,
-        "equipo": "Indepte. Rivadavia",
-        "pts": 20,
-        "pj": 24,
+        "equipo": "Unión",
+        "pts": 22,
+        "pj": 25,
         "pg": 4,
-        "pe": 8,
-        "pp": 12,
-        "gf": 25,
-        "gc": 38,
-        "dif": -13
+        "pe": 10,
+        "pp": 11,
+        "gf": 28,
+        "gc": 43,
+        "dif": -15
       },
       {
         "pos": 32,
         "equipo": "Gimnasia MZA",
         "pts": 18,
-        "pj": 24,
+        "pj": 25,
         "pg": 3,
         "pe": 9,
-        "pp": 12,
-        "gf": 25,
-        "gc": 53,
-        "dif": -28
+        "pp": 13,
+        "gf": 26,
+        "gc": 55,
+        "dif": -29
       },
       {
         "pos": 33,
         "equipo": "Dep. Riestra",
-        "pts": 16,
-        "pj": 24,
+        "pts": 17,
+        "pj": 25,
         "pg": 2,
-        "pe": 10,
+        "pe": 11,
         "pp": 12,
         "gf": 18,
         "gc": 35,
@@ -837,615 +837,615 @@
       },
       {
         "pos": 34,
-        "equipo": "Central Córdoba",
-        "pts": 14,
-        "pj": 24,
-        "pg": 2,
+        "equipo": "San Martin SJ",
+        "pts": 17,
+        "pj": 25,
+        "pg": 3,
         "pe": 8,
         "pp": 14,
         "gf": 24,
-        "gc": 56,
-        "dif": -32
+        "gc": 57,
+        "dif": -33
       },
       {
         "pos": 35,
-        "equipo": "San Martin SJ",
-        "pts": 14,
-        "pj": 24,
-        "pg": 2,
-        "pe": 8,
-        "pp": 14,
-        "gf": 22,
-        "gc": 56,
-        "dif": -34
+        "equipo": "Estudiantes RC",
+        "pts": 15,
+        "pj": 25,
+        "pg": 3,
+        "pe": 6,
+        "pp": 16,
+        "gf": 19,
+        "gc": 58,
+        "dif": -39
       },
       {
         "pos": 36,
-        "equipo": "Estudiantes RC",
-        "pts": 12,
-        "pj": 24,
+        "equipo": "Central Córdoba",
+        "pts": 14,
+        "pj": 25,
         "pg": 2,
-        "pe": 6,
-        "pp": 16,
-        "gf": 17,
+        "pe": 8,
+        "pp": 15,
+        "gf": 25,
         "gc": 58,
-        "dif": -41
+        "dif": -33
       }
     ],
     "6TA": [
       {
         "pos": 1,
         "equipo": "Lanús",
-        "pts": 53,
-        "pj": 24,
-        "pg": 16,
+        "pts": 56,
+        "pj": 25,
+        "pg": 17,
         "pe": 5,
         "pp": 3,
-        "gf": 63,
-        "gc": 23,
-        "dif": 40
+        "gf": 68,
+        "gc": 24,
+        "dif": 44
       },
       {
         "pos": 2,
         "equipo": "Belgrano",
-        "pts": 52,
-        "pj": 24,
-        "pg": 16,
+        "pts": 55,
+        "pj": 25,
+        "pg": 17,
         "pe": 4,
         "pp": 4,
-        "gf": 48,
-        "gc": 16,
-        "dif": 32
+        "gf": 51,
+        "gc": 17,
+        "dif": 34
       },
       {
         "pos": 3,
         "equipo": "Rosario Central",
-        "pts": 50,
-        "pj": 24,
-        "pg": 15,
+        "pts": 53,
+        "pj": 25,
+        "pg": 16,
         "pe": 5,
         "pp": 4,
-        "gf": 53,
+        "gf": 56,
         "gc": 24,
-        "dif": 29
+        "dif": 32
       },
       {
         "pos": 4,
-        "equipo": "Vélez",
-        "pts": 49,
-        "pj": 24,
+        "equipo": "Talleres",
+        "pts": 52,
+        "pj": 25,
         "pg": 15,
-        "pe": 4,
-        "pp": 5,
+        "pe": 7,
+        "pp": 3,
+        "gf": 41,
+        "gc": 15,
+        "dif": 26
+      },
+      {
+        "pos": 5,
+        "equipo": "Unión",
+        "pts": 49,
+        "pj": 25,
+        "pg": 14,
+        "pe": 7,
+        "pp": 4,
         "gf": 51,
         "gc": 25,
         "dif": 26
       },
       {
-        "pos": 5,
-        "equipo": "Talleres",
-        "pts": 49,
-        "pj": 24,
-        "pg": 14,
-        "pe": 7,
-        "pp": 3,
-        "gf": 40,
-        "gc": 15,
-        "dif": 25
-      },
-      {
         "pos": 6,
-        "equipo": "Banfield",
+        "equipo": "Vélez",
         "pts": 49,
-        "pj": 24,
-        "pg": 14,
-        "pe": 7,
-        "pp": 3,
-        "gf": 49,
-        "gc": 25,
-        "dif": 24
+        "pj": 25,
+        "pg": 15,
+        "pe": 4,
+        "pp": 6,
+        "gf": 51,
+        "gc": 26,
+        "dif": 25
       },
       {
         "pos": 7,
         "equipo": "Boca Jrs.",
-        "pts": 48,
-        "pj": 24,
+        "pts": 49,
+        "pj": 25,
         "pg": 15,
-        "pe": 3,
+        "pe": 4,
         "pp": 6,
-        "gf": 48,
-        "gc": 24,
-        "dif": 24
-      },
-      {
-        "pos": 8,
-        "equipo": "Unión",
-        "pts": 46,
-        "pj": 24,
-        "pg": 13,
-        "pe": 7,
-        "pp": 4,
         "gf": 49,
         "gc": 25,
         "dif": 24
       },
       {
+        "pos": 8,
+        "equipo": "Banfield",
+        "pts": 49,
+        "pj": 25,
+        "pg": 14,
+        "pe": 7,
+        "pp": 4,
+        "gf": 49,
+        "gc": 26,
+        "dif": 23
+      },
+      {
         "pos": 9,
         "equipo": "Independiente",
-        "pts": 45,
-        "pj": 24,
-        "pg": 13,
+        "pts": 48,
+        "pj": 25,
+        "pg": 14,
         "pe": 6,
         "pp": 5,
-        "gf": 54,
+        "gf": 55,
         "gc": 19,
-        "dif": 35
+        "dif": 36
       },
       {
         "pos": 10,
         "equipo": "Platense",
-        "pts": 43,
-        "pj": 24,
-        "pg": 12,
+        "pts": 46,
+        "pj": 25,
+        "pg": 13,
         "pe": 7,
         "pp": 5,
-        "gf": 24,
+        "gf": 27,
         "gc": 12,
-        "dif": 12
+        "dif": 15
       },
       {
         "pos": 11,
-        "equipo": "River Plate",
-        "pts": 42,
-        "pj": 24,
+        "equipo": "Argentinos Jrs.",
+        "pts": 45,
+        "pj": 25,
         "pg": 13,
-        "pe": 3,
-        "pp": 8,
-        "gf": 55,
-        "gc": 27,
-        "dif": 28
+        "pe": 6,
+        "pp": 6,
+        "gf": 43,
+        "gc": 37,
+        "dif": 6
       },
       {
         "pos": 12,
-        "equipo": "San Lorenzo",
+        "equipo": "River Plate",
         "pts": 42,
-        "pj": 24,
-        "pg": 11,
-        "pe": 9,
-        "pp": 4,
-        "gf": 40,
-        "gc": 21,
-        "dif": 19
+        "pj": 25,
+        "pg": 13,
+        "pe": 3,
+        "pp": 9,
+        "gf": 56,
+        "gc": 29,
+        "dif": 27
       },
       {
         "pos": 13,
-        "equipo": "Estudiantes",
+        "equipo": "San Lorenzo",
         "pts": 42,
-        "pj": 24,
+        "pj": 25,
         "pg": 11,
         "pe": 9,
-        "pp": 4,
-        "gf": 43,
-        "gc": 25,
+        "pp": 5,
+        "gf": 40,
+        "gc": 22,
         "dif": 18
       },
       {
         "pos": 14,
-        "equipo": "Argentinos Jrs.",
+        "equipo": "Estudiantes",
         "pts": 42,
-        "pj": 24,
-        "pg": 12,
-        "pe": 6,
-        "pp": 6,
-        "gf": 42,
-        "gc": 37,
-        "dif": 5
+        "pj": 25,
+        "pg": 11,
+        "pe": 9,
+        "pp": 5,
+        "gf": 44,
+        "gc": 28,
+        "dif": 16
       },
       {
         "pos": 15,
         "equipo": "Newell's",
-        "pts": 36,
-        "pj": 24,
-        "pg": 10,
+        "pts": 39,
+        "pj": 25,
+        "pg": 11,
         "pe": 6,
         "pp": 8,
-        "gf": 43,
+        "gf": 44,
         "gc": 36,
-        "dif": 7
+        "dif": 8
       },
       {
         "pos": 16,
         "equipo": "Huracán",
-        "pts": 35,
-        "pj": 24,
-        "pg": 8,
+        "pts": 38,
+        "pj": 25,
+        "pg": 9,
         "pe": 11,
         "pp": 5,
-        "gf": 34,
+        "gf": 36,
         "gc": 27,
-        "dif": 7
+        "dif": 9
       },
       {
         "pos": 17,
         "equipo": "Gimnasia LP",
-        "pts": 35,
-        "pj": 24,
-        "pg": 9,
+        "pts": 38,
+        "pj": 25,
+        "pg": 10,
         "pe": 8,
         "pp": 7,
-        "gf": 25,
+        "gf": 26,
         "gc": 25,
-        "dif": 0
+        "dif": 1
       },
       {
         "pos": 18,
-        "equipo": "Racing",
-        "pts": 34,
-        "pj": 24,
+        "equipo": "Godoy Cruz",
+        "pts": 36,
+        "pj": 25,
         "pg": 9,
-        "pe": 7,
-        "pp": 8,
-        "gf": 40,
+        "pe": 9,
+        "pp": 7,
+        "gf": 35,
         "gc": 31,
-        "dif": 9
+        "dif": 4
       },
       {
         "pos": 19,
-        "equipo": "Godoy Cruz",
-        "pts": 33,
-        "pj": 24,
-        "pg": 8,
-        "pe": 9,
-        "pp": 7,
-        "gf": 32,
-        "gc": 31,
-        "dif": 1
+        "equipo": "Racing",
+        "pts": 34,
+        "pj": 25,
+        "pg": 9,
+        "pe": 7,
+        "pp": 9,
+        "gf": 41,
+        "gc": 36,
+        "dif": 5
       },
       {
         "pos": 20,
         "equipo": "Sarmiento",
-        "pts": 32,
-        "pj": 24,
+        "pts": 33,
+        "pj": 25,
         "pg": 9,
-        "pe": 5,
+        "pe": 6,
         "pp": 10,
-        "gf": 42,
-        "gc": 40,
+        "gf": 43,
+        "gc": 41,
         "dif": 2
       },
       {
         "pos": 21,
         "equipo": "Instituto",
         "pts": 32,
-        "pj": 24,
+        "pj": 25,
         "pg": 9,
         "pe": 5,
-        "pp": 10,
+        "pp": 11,
         "gf": 44,
-        "gc": 44,
-        "dif": 0
+        "gc": 45,
+        "dif": -1
       },
       {
         "pos": 22,
+        "equipo": "Barracas Central",
+        "pts": 27,
+        "pj": 25,
+        "pg": 5,
+        "pe": 12,
+        "pp": 8,
+        "gf": 24,
+        "gc": 28,
+        "dif": -4
+      },
+      {
+        "pos": 23,
+        "equipo": "Defensa y Justicia",
+        "pts": 27,
+        "pj": 25,
+        "pg": 6,
+        "pe": 9,
+        "pp": 10,
+        "gf": 28,
+        "gc": 34,
+        "dif": -6
+      },
+      {
+        "pos": 24,
         "equipo": "Ferro",
         "pts": 27,
-        "pj": 24,
+        "pj": 25,
         "pg": 8,
         "pe": 3,
+        "pp": 14,
+        "gf": 24,
+        "gc": 44,
+        "dif": -20
+      },
+      {
+        "pos": 25,
+        "equipo": "Colón",
+        "pts": 26,
+        "pj": 25,
+        "pg": 7,
+        "pe": 5,
         "pp": 13,
+        "gf": 29,
+        "gc": 46,
+        "dif": -17
+      },
+      {
+        "pos": 26,
+        "equipo": "Atlético Tucumán",
+        "pts": 25,
+        "pj": 25,
+        "pg": 7,
+        "pe": 4,
+        "pp": 14,
+        "gf": 25,
+        "gc": 49,
+        "dif": -24
+      },
+      {
+        "pos": 27,
+        "equipo": "Quilmes",
+        "pts": 22,
+        "pj": 25,
+        "pg": 4,
+        "pe": 10,
+        "pp": 11,
         "gf": 24,
         "gc": 41,
         "dif": -17
       },
       {
-        "pos": 23,
-        "equipo": "Defensa y Justicia",
-        "pts": 26,
-        "pj": 24,
-        "pg": 6,
-        "pe": 8,
-        "pp": 10,
-        "gf": 27,
-        "gc": 33,
-        "dif": -6
-      },
-      {
-        "pos": 24,
-        "equipo": "Atlético Tucumán",
-        "pts": 25,
-        "pj": 24,
-        "pg": 7,
-        "pe": 4,
-        "pp": 13,
-        "gf": 25,
-        "gc": 46,
-        "dif": -21
-      },
-      {
-        "pos": 25,
-        "equipo": "Barracas Central",
-        "pts": 24,
-        "pj": 24,
-        "pg": 4,
-        "pe": 12,
-        "pp": 8,
-        "gf": 22,
-        "gc": 27,
-        "dif": -5
-      },
-      {
-        "pos": 26,
-        "equipo": "Colón",
-        "pts": 23,
-        "pj": 24,
-        "pg": 6,
-        "pe": 5,
-        "pp": 13,
-        "gf": 27,
-        "gc": 46,
-        "dif": -19
-      },
-      {
-        "pos": 27,
-        "equipo": "Quilmes",
-        "pts": 21,
-        "pj": 24,
-        "pg": 4,
-        "pe": 9,
-        "pp": 11,
-        "gf": 23,
-        "gc": 40,
-        "dif": -17
-      },
-      {
         "pos": 28,
-        "equipo": "Indepte. Rivadavia",
-        "pts": 21,
-        "pj": 24,
+        "equipo": "Aldosivi",
+        "pts": 22,
+        "pj": 25,
         "pg": 5,
-        "pe": 6,
+        "pe": 7,
         "pp": 13,
-        "gf": 29,
-        "gc": 49,
-        "dif": -20
+        "gf": 21,
+        "gc": 42,
+        "dif": -21
       },
       {
         "pos": 29,
-        "equipo": "Aldosivi",
-        "pts": 21,
-        "pj": 24,
+        "equipo": "Tigre",
+        "pts": 22,
+        "pj": 25,
         "pg": 5,
-        "pe": 6,
+        "pe": 7,
         "pp": 13,
-        "gf": 20,
-        "gc": 41,
-        "dif": -21
+        "gf": 33,
+        "gc": 59,
+        "dif": -26
       },
       {
         "pos": 30,
-        "equipo": "Atlético Rafaela",
+        "equipo": "Indepte. Rivadavia",
         "pts": 21,
-        "pj": 24,
+        "pj": 25,
         "pg": 5,
         "pe": 6,
-        "pp": 13,
-        "gf": 26,
-        "gc": 49,
+        "pp": 14,
+        "gf": 29,
+        "gc": 52,
         "dif": -23
       },
       {
         "pos": 31,
-        "equipo": "Tigre",
+        "equipo": "Atlético Rafaela",
         "pts": 21,
-        "pj": 24,
+        "pj": 25,
         "pg": 5,
         "pe": 6,
-        "pp": 13,
-        "gf": 32,
-        "gc": 58,
-        "dif": -26
+        "pp": 14,
+        "gf": 26,
+        "gc": 51,
+        "dif": -25
       },
       {
         "pos": 32,
         "equipo": "Central Córdoba",
         "pts": 18,
-        "pj": 24,
+        "pj": 25,
         "pg": 5,
         "pe": 3,
-        "pp": 16,
+        "pp": 17,
         "gf": 18,
-        "gc": 52,
-        "dif": -34
+        "gc": 53,
+        "dif": -35
       },
       {
         "pos": 33,
         "equipo": "Estudiantes RC",
         "pts": 17,
-        "pj": 24,
+        "pj": 25,
         "pg": 4,
         "pe": 5,
-        "pp": 15,
+        "pp": 16,
         "gf": 23,
-        "gc": 55,
-        "dif": -32
+        "gc": 57,
+        "dif": -34
       },
       {
         "pos": 34,
         "equipo": "Gimnasia MZA",
         "pts": 16,
-        "pj": 24,
+        "pj": 25,
         "pg": 4,
         "pe": 4,
-        "pp": 16,
-        "gf": 18,
-        "gc": 46,
-        "dif": -28
+        "pp": 17,
+        "gf": 19,
+        "gc": 48,
+        "dif": -29
       },
       {
         "pos": 35,
         "equipo": "Dep. Riestra",
         "pts": 12,
-        "pj": 24,
+        "pj": 25,
         "pg": 2,
         "pe": 6,
-        "pp": 16,
+        "pp": 17,
         "gf": 14,
-        "gc": 45,
-        "dif": -31
+        "gc": 47,
+        "dif": -33
       },
       {
         "pos": 36,
         "equipo": "San Martin SJ",
-        "pts": 5,
-        "pj": 24,
-        "pg": 1,
+        "pts": 8,
+        "pj": 25,
+        "pg": 2,
         "pe": 2,
         "pp": 21,
-        "gf": 24,
-        "gc": 91,
-        "dif": -67
+        "gf": 26,
+        "gc": 92,
+        "dif": -66
       }
     ],
     "7MA": [
       {
         "pos": 1,
         "equipo": "Argentinos Jrs.",
-        "pts": 57,
-        "pj": 24,
-        "pg": 18,
+        "pts": 60,
+        "pj": 25,
+        "pg": 19,
         "pe": 3,
         "pp": 3,
-        "gf": 58,
+        "gf": 59,
         "gc": 21,
-        "dif": 37
+        "dif": 38
       },
       {
         "pos": 2,
         "equipo": "River Plate",
-        "pts": 54,
-        "pj": 24,
-        "pg": 17,
+        "pts": 57,
+        "pj": 25,
+        "pg": 18,
         "pe": 3,
         "pp": 4,
-        "gf": 70,
+        "gf": 78,
         "gc": 22,
-        "dif": 48
+        "dif": 56
       },
       {
         "pos": 3,
         "equipo": "Talleres",
-        "pts": 53,
-        "pj": 24,
-        "pg": 16,
+        "pts": 56,
+        "pj": 25,
+        "pg": 17,
         "pe": 5,
         "pp": 3,
-        "gf": 63,
+        "gf": 64,
         "gc": 17,
-        "dif": 46
+        "dif": 47
       },
       {
         "pos": 4,
         "equipo": "Rosario Central",
-        "pts": 50,
-        "pj": 24,
-        "pg": 16,
+        "pts": 53,
+        "pj": 25,
+        "pg": 17,
         "pe": 2,
         "pp": 6,
-        "gf": 62,
-        "gc": 27,
-        "dif": 35
+        "gf": 66,
+        "gc": 28,
+        "dif": 38
       },
       {
         "pos": 5,
-        "equipo": "Newell's",
+        "equipo": "Lanús",
         "pts": 49,
-        "pj": 24,
+        "pj": 25,
         "pg": 14,
         "pe": 7,
-        "pp": 3,
-        "gf": 40,
-        "gc": 17,
-        "dif": 23
+        "pp": 4,
+        "gf": 53,
+        "gc": 23,
+        "dif": 30
       },
       {
         "pos": 6,
-        "equipo": "Lanús",
-        "pts": 46,
-        "pj": 24,
-        "pg": 13,
+        "equipo": "Vélez",
+        "pts": 49,
+        "pj": 25,
+        "pg": 14,
         "pe": 7,
         "pp": 4,
-        "gf": 52,
-        "gc": 23,
-        "dif": 29
+        "gf": 50,
+        "gc": 26,
+        "dif": 24
       },
       {
         "pos": 7,
-        "equipo": "Vélez",
-        "pts": 46,
-        "pj": 24,
-        "pg": 13,
+        "equipo": "Newell's",
+        "pts": 49,
+        "pj": 25,
+        "pg": 14,
         "pe": 7,
         "pp": 4,
-        "gf": 47,
-        "gc": 25,
-        "dif": 22
+        "gf": 41,
+        "gc": 20,
+        "dif": 21
       },
       {
         "pos": 8,
         "equipo": "Boca Jrs.",
-        "pts": 45,
-        "pj": 24,
-        "pg": 14,
+        "pts": 48,
+        "pj": 25,
+        "pg": 15,
         "pe": 3,
         "pp": 7,
-        "gf": 52,
+        "gf": 54,
         "gc": 27,
-        "dif": 25
+        "dif": 27
       },
       {
         "pos": 9,
-        "equipo": "Racing",
-        "pts": 45,
-        "pj": 24,
-        "pg": 13,
-        "pe": 6,
-        "pp": 5,
-        "gf": 61,
-        "gc": 40,
-        "dif": 21
+        "equipo": "Defensa y Justicia",
+        "pts": 47,
+        "pj": 25,
+        "pg": 14,
+        "pe": 5,
+        "pp": 6,
+        "gf": 42,
+        "gc": 31,
+        "dif": 11
       },
       {
         "pos": 10,
         "equipo": "Godoy Cruz",
-        "pts": 45,
-        "pj": 24,
+        "pts": 46,
+        "pj": 25,
         "pg": 13,
-        "pe": 6,
+        "pe": 7,
         "pp": 5,
-        "gf": 37,
-        "gc": 21,
+        "gf": 38,
+        "gc": 22,
         "dif": 16
       },
       {
         "pos": 11,
-        "equipo": "Defensa y Justicia",
-        "pts": 44,
-        "pj": 24,
+        "equipo": "Racing",
+        "pts": 45,
+        "pj": 25,
         "pg": 13,
-        "pe": 5,
+        "pe": 6,
         "pp": 6,
-        "gf": 40,
-        "gc": 31,
-        "dif": 9
+        "gf": 61,
+        "gc": 41,
+        "dif": 20
       },
       {
         "pos": 12,
         "equipo": "Platense",
-        "pts": 40,
-        "pj": 24,
+        "pts": 41,
+        "pj": 25,
         "pg": 10,
-        "pe": 10,
+        "pe": 11,
         "pp": 4,
         "gf": 29,
         "gc": 20,
@@ -1453,191 +1453,191 @@
       },
       {
         "pos": 13,
-        "equipo": "San Lorenzo",
-        "pts": 37,
-        "pj": 24,
-        "pg": 9,
-        "pe": 10,
-        "pp": 5,
-        "gf": 39,
-        "gc": 25,
-        "dif": 14
+        "equipo": "Gimnasia LP",
+        "pts": 40,
+        "pj": 25,
+        "pg": 12,
+        "pe": 4,
+        "pp": 9,
+        "gf": 47,
+        "gc": 35,
+        "dif": 12
       },
       {
         "pos": 14,
-        "equipo": "Gimnasia LP",
-        "pts": 37,
-        "pj": 24,
+        "equipo": "Estudiantes",
+        "pts": 38,
+        "pj": 25,
         "pg": 11,
-        "pe": 4,
+        "pe": 5,
         "pp": 9,
         "gf": 45,
-        "gc": 35,
-        "dif": 10
+        "gc": 38,
+        "dif": 7
       },
       {
         "pos": 15,
-        "equipo": "Estudiantes",
-        "pts": 35,
-        "pj": 24,
-        "pg": 10,
-        "pe": 5,
-        "pp": 9,
-        "gf": 42,
-        "gc": 37,
-        "dif": 5
+        "equipo": "San Lorenzo",
+        "pts": 37,
+        "pj": 25,
+        "pg": 9,
+        "pe": 10,
+        "pp": 6,
+        "gf": 39,
+        "gc": 26,
+        "dif": 13
       },
       {
         "pos": 16,
         "equipo": "Tigre",
-        "pts": 34,
-        "pj": 24,
-        "pg": 8,
+        "pts": 37,
+        "pj": 25,
+        "pg": 9,
         "pe": 10,
         "pp": 6,
-        "gf": 45,
+        "gf": 49,
         "gc": 36,
-        "dif": 9
+        "dif": 13
       },
       {
         "pos": 17,
-        "equipo": "Belgrano",
-        "pts": 34,
-        "pj": 24,
-        "pg": 9,
-        "pe": 7,
-        "pp": 8,
-        "gf": 47,
-        "gc": 42,
-        "dif": 5
+        "equipo": "Colón",
+        "pts": 35,
+        "pj": 25,
+        "pg": 10,
+        "pe": 5,
+        "pp": 10,
+        "gf": 33,
+        "gc": 27,
+        "dif": 6
       },
       {
         "pos": 18,
-        "equipo": "Independiente",
-        "pts": 33,
-        "pj": 24,
-        "pg": 10,
-        "pe": 3,
-        "pp": 11,
-        "gf": 28,
-        "gc": 32,
-        "dif": -4
+        "equipo": "Belgrano",
+        "pts": 34,
+        "pj": 25,
+        "pg": 9,
+        "pe": 7,
+        "pp": 9,
+        "gf": 48,
+        "gc": 45,
+        "dif": 3
       },
       {
         "pos": 19,
-        "equipo": "Colón",
-        "pts": 32,
-        "pj": 24,
-        "pg": 9,
-        "pe": 5,
-        "pp": 10,
-        "gf": 28,
-        "gc": 27,
-        "dif": 1
+        "equipo": "Independiente",
+        "pts": 33,
+        "pj": 25,
+        "pg": 10,
+        "pe": 3,
+        "pp": 12,
+        "gf": 29,
+        "gc": 36,
+        "dif": -7
       },
       {
         "pos": 20,
-        "equipo": "Barracas Central",
+        "equipo": "Huracán",
         "pts": 32,
-        "pj": 24,
-        "pg": 8,
-        "pe": 8,
-        "pp": 8,
-        "gf": 36,
-        "gc": 37,
-        "dif": -1
+        "pj": 25,
+        "pg": 9,
+        "pe": 5,
+        "pp": 11,
+        "gf": 31,
+        "gc": 38,
+        "dif": -7
       },
       {
         "pos": 21,
-        "equipo": "Huracán",
+        "equipo": "Barracas Central",
         "pts": 32,
-        "pj": 24,
-        "pg": 9,
-        "pe": 5,
-        "pp": 10,
-        "gf": 30,
-        "gc": 36,
-        "dif": -6
+        "pj": 25,
+        "pg": 8,
+        "pe": 8,
+        "pp": 9,
+        "gf": 36,
+        "gc": 45,
+        "dif": -9
       },
       {
         "pos": 22,
-        "equipo": "Instituto",
-        "pts": 28,
-        "pj": 24,
-        "pg": 8,
+        "equipo": "Unión",
+        "pts": 31,
+        "pj": 25,
+        "pg": 9,
         "pe": 4,
         "pp": 12,
-        "gf": 35,
-        "gc": 37,
-        "dif": -2
+        "gf": 36,
+        "gc": 52,
+        "dif": -16
       },
       {
         "pos": 23,
-        "equipo": "Central Córdoba",
-        "pts": 28,
-        "pj": 24,
-        "pg": 7,
-        "pe": 7,
-        "pp": 10,
-        "gf": 25,
-        "gc": 38,
-        "dif": -13
+        "equipo": "Banfield",
+        "pts": 30,
+        "pj": 25,
+        "pg": 8,
+        "pe": 6,
+        "pp": 11,
+        "gf": 28,
+        "gc": 37,
+        "dif": -9
       },
       {
         "pos": 24,
-        "equipo": "Unión",
+        "equipo": "Instituto",
         "pts": 28,
-        "pj": 24,
+        "pj": 25,
         "pg": 8,
         "pe": 4,
-        "pp": 12,
-        "gf": 33,
-        "gc": 50,
-        "dif": -17
+        "pp": 13,
+        "gf": 35,
+        "gc": 39,
+        "dif": -4
       },
       {
         "pos": 25,
-        "equipo": "Banfield",
-        "pts": 27,
-        "pj": 24,
+        "equipo": "Central Córdoba",
+        "pts": 28,
+        "pj": 25,
         "pg": 7,
-        "pe": 6,
+        "pe": 7,
         "pp": 11,
-        "gf": 24,
-        "gc": 36,
-        "dif": -12
+        "gf": 25,
+        "gc": 39,
+        "dif": -14
       },
       {
         "pos": 26,
-        "equipo": "Aldosivi",
-        "pts": 26,
-        "pj": 24,
-        "pg": 7,
-        "pe": 5,
-        "pp": 12,
-        "gf": 29,
-        "gc": 44,
-        "dif": -15
+        "equipo": "Atlético Rafaela",
+        "pts": 27,
+        "pj": 25,
+        "pg": 8,
+        "pe": 3,
+        "pp": 14,
+        "gf": 27,
+        "gc": 53,
+        "dif": -26
       },
       {
         "pos": 27,
-        "equipo": "Estudiantes RC",
-        "pts": 25,
-        "pj": 24,
-        "pg": 6,
-        "pe": 7,
-        "pp": 11,
-        "gf": 21,
-        "gc": 44,
-        "dif": -23
+        "equipo": "Aldosivi",
+        "pts": 26,
+        "pj": 25,
+        "pg": 7,
+        "pe": 5,
+        "pp": 13,
+        "gf": 29,
+        "gc": 46,
+        "dif": -17
       },
       {
         "pos": 28,
         "equipo": "Atlético Tucumán",
-        "pts": 24,
-        "pj": 24,
+        "pts": 25,
+        "pj": 25,
         "pg": 6,
-        "pe": 6,
+        "pe": 7,
         "pp": 12,
         "gf": 34,
         "gc": 37,
@@ -1645,133 +1645,133 @@
       },
       {
         "pos": 29,
-        "equipo": "Ferro",
-        "pts": 24,
-        "pj": 24,
+        "equipo": "Estudiantes RC",
+        "pts": 25,
+        "pj": 25,
         "pg": 6,
-        "pe": 6,
+        "pe": 7,
         "pp": 12,
-        "gf": 22,
-        "gc": 38,
-        "dif": -16
+        "gf": 23,
+        "gc": 47,
+        "dif": -24
       },
       {
         "pos": 30,
-        "equipo": "Atlético Rafaela",
+        "equipo": "Ferro",
         "pts": 24,
-        "pj": 24,
-        "pg": 7,
-        "pe": 3,
-        "pp": 14,
-        "gf": 25,
-        "gc": 52,
-        "dif": -27
+        "pj": 25,
+        "pg": 6,
+        "pe": 6,
+        "pp": 13,
+        "gf": 23,
+        "gc": 42,
+        "dif": -19
       },
       {
         "pos": 31,
         "equipo": "Quilmes",
         "pts": 22,
-        "pj": 24,
+        "pj": 25,
         "pg": 5,
         "pe": 7,
-        "pp": 12,
+        "pp": 13,
         "gf": 27,
-        "gc": 54,
-        "dif": -27
+        "gc": 56,
+        "dif": -29
       },
       {
         "pos": 32,
         "equipo": "Sarmiento",
         "pts": 21,
-        "pj": 24,
+        "pj": 25,
         "pg": 5,
         "pe": 6,
-        "pp": 13,
+        "pp": 14,
         "gf": 28,
-        "gc": 44,
-        "dif": -16
+        "gc": 48,
+        "dif": -20
       },
       {
         "pos": 33,
         "equipo": "Indepte. Rivadavia",
-        "pts": 18,
-        "pj": 24,
+        "pts": 19,
+        "pj": 25,
         "pg": 4,
-        "pe": 6,
+        "pe": 7,
         "pp": 14,
-        "gf": 22,
-        "gc": 54,
+        "gf": 23,
+        "gc": 55,
         "dif": -32
       },
       {
         "pos": 34,
         "equipo": "Dep. Riestra",
         "pts": 13,
-        "pj": 24,
+        "pj": 25,
         "pg": 4,
         "pe": 1,
-        "pp": 19,
+        "pp": 20,
         "gf": 25,
-        "gc": 63,
-        "dif": -38
+        "gc": 68,
+        "dif": -43
       },
       {
         "pos": 35,
         "equipo": "Gimnasia MZA",
         "pts": 9,
-        "pj": 24,
+        "pj": 25,
         "pg": 1,
         "pe": 6,
-        "pp": 17,
+        "pp": 18,
         "gf": 18,
-        "gc": 60,
-        "dif": -42
+        "gc": 61,
+        "dif": -43
       },
       {
         "pos": 36,
         "equipo": "San Martin SJ",
-        "pts": 1,
-        "pj": 24,
-        "pg": 0,
+        "pts": 4,
+        "pj": 25,
+        "pg": 1,
         "pe": 1,
         "pp": 23,
-        "gf": 4,
+        "gf": 5,
         "gc": 74,
-        "dif": -70
+        "dif": -69
       }
     ],
     "8VA": [
       {
         "pos": 1,
         "equipo": "River Plate",
-        "pts": 61,
-        "pj": 24,
-        "pg": 20,
+        "pts": 64,
+        "pj": 25,
+        "pg": 21,
         "pe": 1,
         "pp": 3,
-        "gf": 108,
+        "gf": 113,
         "gc": 20,
-        "dif": 88
+        "dif": 93
       },
       {
         "pos": 2,
         "equipo": "Boca Jrs.",
-        "pts": 60,
-        "pj": 24,
-        "pg": 19,
+        "pts": 63,
+        "pj": 25,
+        "pg": 20,
         "pe": 3,
         "pp": 2,
-        "gf": 67,
+        "gf": 70,
         "gc": 22,
-        "dif": 45
+        "dif": 48
       },
       {
         "pos": 3,
         "equipo": "Rosario Central",
-        "pts": 58,
-        "pj": 24,
+        "pts": 59,
+        "pj": 25,
         "pg": 18,
-        "pe": 4,
+        "pe": 5,
         "pp": 2,
         "gf": 62,
         "gc": 15,
@@ -1779,167 +1779,167 @@
       },
       {
         "pos": 4,
-        "equipo": "San Lorenzo",
-        "pts": 53,
-        "pj": 24,
+        "equipo": "Unión",
+        "pts": 54,
+        "pj": 25,
         "pg": 17,
-        "pe": 2,
+        "pe": 3,
         "pp": 5,
-        "gf": 64,
-        "gc": 23,
-        "dif": 41
+        "gf": 48,
+        "gc": 33,
+        "dif": 15
       },
       {
         "pos": 5,
-        "equipo": "Vélez",
+        "equipo": "San Lorenzo",
         "pts": 53,
-        "pj": 24,
-        "pg": 16,
-        "pe": 5,
-        "pp": 3,
-        "gf": 57,
-        "gc": 23,
-        "dif": 34
+        "pj": 25,
+        "pg": 17,
+        "pe": 2,
+        "pp": 6,
+        "gf": 64,
+        "gc": 26,
+        "dif": 38
       },
       {
         "pos": 6,
-        "equipo": "Unión",
-        "pts": 51,
-        "pj": 24,
-        "pg": 16,
-        "pe": 3,
-        "pp": 5,
-        "gf": 45,
-        "gc": 32,
-        "dif": 13
+        "equipo": "Independiente",
+        "pts": 53,
+        "pj": 25,
+        "pg": 17,
+        "pe": 2,
+        "pp": 6,
+        "gf": 66,
+        "gc": 30,
+        "dif": 36
       },
       {
         "pos": 7,
-        "equipo": "Independiente",
-        "pts": 50,
-        "pj": 24,
+        "equipo": "Vélez",
+        "pts": 53,
+        "pj": 25,
         "pg": 16,
-        "pe": 2,
-        "pp": 6,
-        "gf": 62,
-        "gc": 29,
-        "dif": 33
+        "pe": 5,
+        "pp": 4,
+        "gf": 58,
+        "gc": 26,
+        "dif": 32
       },
       {
         "pos": 8,
         "equipo": "Talleres",
-        "pts": 50,
-        "pj": 24,
-        "pg": 16,
+        "pts": 53,
+        "pj": 25,
+        "pg": 17,
         "pe": 2,
         "pp": 6,
-        "gf": 41,
+        "gf": 44,
         "gc": 19,
-        "dif": 22
+        "dif": 25
       },
       {
         "pos": 9,
         "equipo": "Banfield",
         "pts": 50,
-        "pj": 24,
+        "pj": 25,
         "pg": 16,
         "pe": 2,
-        "pp": 6,
-        "gf": 46,
-        "gc": 30,
-        "dif": 16
+        "pp": 7,
+        "gf": 47,
+        "gc": 34,
+        "dif": 13
       },
       {
         "pos": 10,
-        "equipo": "Lanús",
-        "pts": 47,
-        "pj": 24,
+        "equipo": "Estudiantes",
+        "pts": 49,
+        "pj": 25,
         "pg": 15,
-        "pe": 2,
-        "pp": 7,
-        "gf": 54,
-        "gc": 29,
-        "dif": 25
+        "pe": 4,
+        "pp": 6,
+        "gf": 49,
+        "gc": 30,
+        "dif": 19
       },
       {
         "pos": 11,
-        "equipo": "Estudiantes",
-        "pts": 46,
-        "pj": 24,
-        "pg": 14,
-        "pe": 4,
-        "pp": 6,
-        "gf": 48,
-        "gc": 30,
-        "dif": 18
+        "equipo": "Lanús",
+        "pts": 47,
+        "pj": 25,
+        "pg": 15,
+        "pe": 2,
+        "pp": 8,
+        "gf": 56,
+        "gc": 32,
+        "dif": 24
       },
       {
         "pos": 12,
-        "equipo": "Belgrano",
+        "equipo": "Newell's",
         "pts": 44,
-        "pj": 24,
+        "pj": 25,
         "pg": 14,
         "pe": 2,
-        "pp": 8,
+        "pp": 9,
         "gf": 40,
-        "gc": 40,
-        "dif": 0
+        "gc": 34,
+        "dif": 6
       },
       {
         "pos": 13,
-        "equipo": "Newell's",
-        "pts": 41,
-        "pj": 24,
-        "pg": 13,
+        "equipo": "Belgrano",
+        "pts": 44,
+        "pj": 25,
+        "pg": 14,
         "pe": 2,
         "pp": 9,
-        "gf": 37,
-        "gc": 33,
-        "dif": 4
+        "gf": 40,
+        "gc": 41,
+        "dif": -1
       },
       {
         "pos": 14,
         "equipo": "Argentinos Jrs.",
-        "pts": 38,
-        "pj": 24,
-        "pg": 12,
+        "pts": 41,
+        "pj": 25,
+        "pg": 13,
         "pe": 2,
         "pp": 10,
-        "gf": 54,
-        "gc": 41,
-        "dif": 13
+        "gf": 57,
+        "gc": 42,
+        "dif": 15
       },
       {
         "pos": 15,
         "equipo": "Godoy Cruz",
-        "pts": 37,
-        "pj": 24,
-        "pg": 11,
+        "pts": 40,
+        "pj": 25,
+        "pg": 12,
         "pe": 4,
         "pp": 9,
-        "gf": 40,
+        "gf": 44,
         "gc": 24,
-        "dif": 16
+        "dif": 20
       },
       {
         "pos": 16,
         "equipo": "Huracán",
-        "pts": 36,
-        "pj": 24,
-        "pg": 10,
+        "pts": 39,
+        "pj": 25,
+        "pg": 11,
         "pe": 6,
         "pp": 8,
-        "gf": 45,
+        "gf": 48,
         "gc": 40,
-        "dif": 5
+        "dif": 8
       },
       {
         "pos": 17,
         "equipo": "Gimnasia LP",
-        "pts": 36,
-        "pj": 24,
+        "pts": 37,
+        "pj": 25,
         "pg": 10,
-        "pe": 6,
+        "pe": 7,
         "pp": 8,
         "gf": 43,
         "gc": 46,
@@ -1947,665 +1947,665 @@
       },
       {
         "pos": 18,
+        "equipo": "Quilmes",
+        "pts": 36,
+        "pj": 25,
+        "pg": 11,
+        "pe": 3,
+        "pp": 11,
+        "gf": 40,
+        "gc": 41,
+        "dif": -1
+      },
+      {
+        "pos": 19,
         "equipo": "Ferro",
-        "pts": 35,
-        "pj": 24,
+        "pts": 36,
+        "pj": 25,
         "pg": 10,
-        "pe": 5,
+        "pe": 6,
         "pp": 9,
         "gf": 34,
         "gc": 36,
         "dif": -2
       },
       {
-        "pos": 19,
-        "equipo": "Quilmes",
-        "pts": 33,
-        "pj": 24,
-        "pg": 10,
-        "pe": 3,
-        "pp": 11,
-        "gf": 38,
-        "gc": 40,
-        "dif": -2
-      },
-      {
         "pos": 20,
         "equipo": "Racing",
-        "pts": 31,
-        "pj": 24,
-        "pg": 9,
+        "pts": 34,
+        "pj": 25,
+        "pg": 10,
         "pe": 4,
         "pp": 11,
-        "gf": 39,
-        "gc": 40,
-        "dif": -1
+        "gf": 42,
+        "gc": 42,
+        "dif": 0
       },
       {
         "pos": 21,
         "equipo": "Tigre",
         "pts": 31,
-        "pj": 24,
+        "pj": 25,
         "pg": 8,
         "pe": 7,
-        "pp": 9,
+        "pp": 10,
         "gf": 23,
-        "gc": 33,
-        "dif": -10
+        "gc": 36,
+        "dif": -13
       },
       {
         "pos": 22,
         "equipo": "Barracas Central",
         "pts": 30,
-        "pj": 24,
+        "pj": 25,
         "pg": 9,
         "pe": 3,
-        "pp": 12,
+        "pp": 13,
         "gf": 27,
-        "gc": 41,
-        "dif": -14
+        "gc": 46,
+        "dif": -19
       },
       {
         "pos": 23,
         "equipo": "Defensa y Justicia",
         "pts": 30,
-        "pj": 24,
+        "pj": 25,
         "pg": 9,
         "pe": 3,
-        "pp": 12,
-        "gf": 26,
-        "gc": 46,
-        "dif": -20
+        "pp": 13,
+        "gf": 27,
+        "gc": 48,
+        "dif": -21
       },
       {
         "pos": 24,
         "equipo": "Colón",
         "pts": 28,
-        "pj": 24,
+        "pj": 25,
         "pg": 8,
         "pe": 4,
-        "pp": 12,
+        "pp": 13,
         "gf": 25,
-        "gc": 49,
-        "dif": -24
+        "gc": 50,
+        "dif": -25
       },
       {
         "pos": 25,
         "equipo": "Sarmiento",
-        "pts": 24,
-        "pj": 24,
-        "pg": 6,
+        "pts": 27,
+        "pj": 25,
+        "pg": 7,
         "pe": 6,
         "pp": 12,
-        "gf": 20,
+        "gf": 23,
         "gc": 32,
-        "dif": -12
+        "dif": -9
       },
       {
         "pos": 26,
-        "equipo": "Instituto",
-        "pts": 23,
-        "pj": 24,
-        "pg": 6,
+        "equipo": "Dep. Riestra",
+        "pts": 26,
+        "pj": 25,
+        "pg": 7,
         "pe": 5,
+        "pp": 13,
+        "gf": 27,
+        "gc": 36,
+        "dif": -9
+      },
+      {
+        "pos": 27,
+        "equipo": "Instituto",
+        "pts": 24,
+        "pj": 25,
+        "pg": 6,
+        "pe": 6,
         "pp": 13,
         "gf": 38,
         "gc": 47,
         "dif": -9
       },
       {
-        "pos": 27,
-        "equipo": "Dep. Riestra",
-        "pts": 23,
-        "pj": 24,
-        "pg": 6,
-        "pe": 5,
-        "pp": 13,
-        "gf": 26,
-        "gc": 36,
-        "dif": -10
-      },
-      {
         "pos": 28,
-        "equipo": "Aldosivi",
+        "equipo": "San Martin SJ",
         "pts": 23,
-        "pj": 24,
-        "pg": 6,
-        "pe": 5,
-        "pp": 13,
-        "gf": 23,
+        "pj": 25,
+        "pg": 7,
+        "pe": 2,
+        "pp": 16,
+        "gf": 28,
         "gc": 52,
-        "dif": -29
+        "dif": -24
       },
       {
         "pos": 29,
-        "equipo": "San Martin SJ",
-        "pts": 20,
-        "pj": 24,
+        "equipo": "Aldosivi",
+        "pts": 23,
+        "pj": 25,
         "pg": 6,
-        "pe": 2,
-        "pp": 16,
-        "gf": 27,
-        "gc": 52,
-        "dif": -25
+        "pe": 5,
+        "pp": 14,
+        "gf": 23,
+        "gc": 55,
+        "dif": -32
       },
       {
         "pos": 30,
-        "equipo": "Gimnasia MZA",
-        "pts": 18,
-        "pj": 24,
+        "equipo": "Atlético Tucumán",
+        "pts": 21,
+        "pj": 25,
         "pg": 4,
-        "pe": 6,
-        "pp": 14,
+        "pe": 9,
+        "pp": 12,
         "gf": 18,
-        "gc": 37,
-        "dif": -19
+        "gc": 46,
+        "dif": -28
       },
       {
         "pos": 31,
-        "equipo": "Atlético Tucumán",
+        "equipo": "Gimnasia MZA",
         "pts": 18,
-        "pj": 24,
-        "pg": 3,
-        "pe": 9,
-        "pp": 12,
-        "gf": 17,
-        "gc": 46,
-        "dif": -29
+        "pj": 25,
+        "pg": 4,
+        "pe": 6,
+        "pp": 15,
+        "gf": 18,
+        "gc": 38,
+        "dif": -20
       },
       {
         "pos": 32,
         "equipo": "Platense",
         "pts": 16,
-        "pj": 24,
+        "pj": 25,
         "pg": 4,
         "pe": 4,
-        "pp": 16,
+        "pp": 17,
         "gf": 17,
-        "gc": 41,
-        "dif": -24
+        "gc": 42,
+        "dif": -25
       },
       {
         "pos": 33,
         "equipo": "Central Córdoba",
         "pts": 10,
-        "pj": 24,
+        "pj": 25,
         "pg": 2,
         "pe": 4,
-        "pp": 18,
-        "gf": 9,
-        "gc": 41,
-        "dif": -32
+        "pp": 19,
+        "gf": 10,
+        "gc": 44,
+        "dif": -34
       },
       {
         "pos": 34,
         "equipo": "Estudiantes RC",
         "pts": 10,
-        "pj": 24,
+        "pj": 25,
         "pg": 2,
         "pe": 4,
-        "pp": 18,
-        "gf": 13,
-        "gc": 46,
-        "dif": -33
+        "pp": 19,
+        "gf": 14,
+        "gc": 49,
+        "dif": -35
       },
       {
         "pos": 35,
         "equipo": "Atlético Rafaela",
         "pts": 7,
-        "pj": 24,
+        "pj": 25,
         "pg": 1,
         "pe": 4,
-        "pp": 19,
+        "pp": 20,
         "gf": 10,
-        "gc": 69,
-        "dif": -59
+        "gc": 72,
+        "dif": -62
       },
       {
         "pos": 36,
         "equipo": "Indepte. Rivadavia",
         "pts": 7,
-        "pj": 24,
+        "pj": 25,
         "pg": 2,
         "pe": 1,
-        "pp": 21,
+        "pp": 22,
         "gf": 14,
-        "gc": 77,
-        "dif": -63
+        "gc": 81,
+        "dif": -67
       }
     ],
     "9NA": [
       {
         "pos": 1,
         "equipo": "River Plate",
-        "pts": 60,
-        "pj": 24,
-        "pg": 19,
+        "pts": 63,
+        "pj": 25,
+        "pg": 20,
         "pe": 3,
         "pp": 2,
-        "gf": 56,
+        "gf": 62,
         "gc": 8,
-        "dif": 48
+        "dif": 54
       },
       {
         "pos": 2,
         "equipo": "Rosario Central",
-        "pts": 58,
-        "pj": 24,
-        "pg": 17,
+        "pts": 61,
+        "pj": 25,
+        "pg": 18,
         "pe": 7,
         "pp": 0,
-        "gf": 58,
+        "gf": 59,
         "gc": 13,
-        "dif": 45
+        "dif": 46
       },
       {
         "pos": 3,
-        "equipo": "Vélez",
-        "pts": 58,
-        "pj": 24,
-        "pg": 18,
-        "pe": 4,
-        "pp": 2,
-        "gf": 51,
-        "gc": 20,
-        "dif": 31
+        "equipo": "Belgrano",
+        "pts": 59,
+        "pj": 25,
+        "pg": 19,
+        "pe": 2,
+        "pp": 4,
+        "gf": 64,
+        "gc": 23,
+        "dif": 41
       },
       {
         "pos": 4,
-        "equipo": "Belgrano",
-        "pts": 56,
-        "pj": 24,
+        "equipo": "Vélez",
+        "pts": 59,
+        "pj": 25,
         "pg": 18,
-        "pe": 2,
-        "pp": 4,
-        "gf": 63,
-        "gc": 23,
-        "dif": 40
+        "pe": 5,
+        "pp": 2,
+        "gf": 52,
+        "gc": 21,
+        "dif": 31
       },
       {
         "pos": 5,
-        "equipo": "San Lorenzo",
-        "pts": 50,
-        "pj": 24,
+        "equipo": "Boca Jrs.",
+        "pts": 52,
+        "pj": 25,
         "pg": 15,
-        "pe": 5,
-        "pp": 4,
-        "gf": 45,
-        "gc": 20,
-        "dif": 25
+        "pe": 7,
+        "pp": 3,
+        "gf": 62,
+        "gc": 32,
+        "dif": 30
       },
       {
         "pos": 6,
-        "equipo": "Boca Jrs.",
-        "pts": 49,
-        "pj": 24,
-        "pg": 14,
-        "pe": 7,
-        "pp": 3,
-        "gf": 60,
-        "gc": 32,
-        "dif": 28
-      },
-      {
-        "pos": 7,
-        "equipo": "Newell's",
-        "pts": 47,
-        "pj": 24,
-        "pg": 14,
+        "equipo": "San Lorenzo",
+        "pts": 50,
+        "pj": 25,
+        "pg": 15,
         "pe": 5,
         "pp": 5,
-        "gf": 45,
-        "gc": 22,
+        "gf": 46,
+        "gc": 23,
         "dif": 23
       },
       {
-        "pos": 8,
+        "pos": 7,
         "equipo": "Independiente",
-        "pts": 46,
-        "pj": 24,
-        "pg": 14,
+        "pts": 49,
+        "pj": 25,
+        "pg": 15,
         "pe": 4,
         "pp": 6,
-        "gf": 55,
+        "gf": 56,
         "gc": 36,
-        "dif": 19
+        "dif": 20
+      },
+      {
+        "pos": 8,
+        "equipo": "Talleres",
+        "pts": 48,
+        "pj": 25,
+        "pg": 14,
+        "pe": 6,
+        "pp": 5,
+        "gf": 61,
+        "gc": 24,
+        "dif": 37
       },
       {
         "pos": 9,
-        "equipo": "Talleres",
-        "pts": 45,
-        "pj": 24,
-        "pg": 13,
+        "equipo": "Newell's",
+        "pts": 48,
+        "pj": 25,
+        "pg": 14,
         "pe": 6,
         "pp": 5,
-        "gf": 58,
+        "gf": 46,
         "gc": 23,
-        "dif": 35
+        "dif": 23
       },
       {
         "pos": 10,
         "equipo": "Lanús",
-        "pts": 43,
-        "pj": 24,
-        "pg": 14,
+        "pts": 46,
+        "pj": 25,
+        "pg": 15,
         "pe": 1,
         "pp": 9,
-        "gf": 56,
+        "gf": 60,
         "gc": 39,
-        "dif": 17
+        "dif": 21
       },
       {
         "pos": 11,
-        "equipo": "Estudiantes",
-        "pts": 42,
-        "pj": 24,
-        "pg": 12,
+        "equipo": "Huracán",
+        "pts": 45,
+        "pj": 25,
+        "pg": 13,
         "pe": 6,
         "pp": 6,
-        "gf": 35,
-        "gc": 19,
-        "dif": 16
+        "gf": 43,
+        "gc": 28,
+        "dif": 15
       },
       {
         "pos": 12,
-        "equipo": "Huracán",
+        "equipo": "Estudiantes",
         "pts": 42,
-        "pj": 24,
+        "pj": 25,
         "pg": 12,
         "pe": 6,
-        "pp": 6,
-        "gf": 42,
-        "gc": 28,
-        "dif": 14
+        "pp": 7,
+        "gf": 35,
+        "gc": 20,
+        "dif": 15
       },
       {
         "pos": 13,
         "equipo": "Argentinos Jrs.",
-        "pts": 38,
-        "pj": 24,
-        "pg": 10,
+        "pts": 41,
+        "pj": 25,
+        "pg": 11,
         "pe": 8,
         "pp": 6,
-        "gf": 25,
+        "gf": 27,
         "gc": 22,
-        "dif": 3
+        "dif": 5
       },
       {
         "pos": 14,
         "equipo": "Banfield",
         "pts": 34,
-        "pj": 24,
+        "pj": 25,
         "pg": 9,
         "pe": 7,
-        "pp": 8,
+        "pp": 9,
         "gf": 45,
-        "gc": 36,
-        "dif": 9
+        "gc": 37,
+        "dif": 8
       },
       {
         "pos": 15,
-        "equipo": "Racing",
+        "equipo": "Unión",
         "pts": 34,
-        "pj": 24,
+        "pj": 25,
         "pg": 9,
         "pe": 7,
-        "pp": 8,
-        "gf": 30,
-        "gc": 26,
-        "dif": 4
+        "pp": 9,
+        "gf": 35,
+        "gc": 30,
+        "dif": 5
       },
       {
         "pos": 16,
-        "equipo": "Atlético Tucumán",
-        "pts": 33,
-        "pj": 24,
+        "equipo": "Racing",
+        "pts": 34,
+        "pj": 25,
         "pg": 9,
-        "pe": 6,
+        "pe": 7,
+        "pp": 9,
+        "gf": 30,
+        "gc": 30,
+        "dif": 0
+      },
+      {
+        "pos": 17,
+        "equipo": "Atlético Tucumán",
+        "pts": 34,
+        "pj": 25,
+        "pg": 9,
+        "pe": 7,
         "pp": 9,
         "gf": 19,
         "gc": 31,
         "dif": -12
       },
       {
-        "pos": 17,
-        "equipo": "Unión",
-        "pts": 31,
-        "pj": 24,
-        "pg": 8,
-        "pe": 7,
-        "pp": 9,
-        "gf": 34,
-        "gc": 30,
-        "dif": 4
-      },
-      {
         "pos": 18,
-        "equipo": "Aldosivi",
-        "pts": 30,
-        "pj": 24,
-        "pg": 7,
-        "pe": 9,
-        "pp": 8,
-        "gf": 27,
-        "gc": 31,
+        "equipo": "Godoy Cruz",
+        "pts": 33,
+        "pj": 25,
+        "pg": 9,
+        "pe": 6,
+        "pp": 10,
+        "gf": 25,
+        "gc": 29,
         "dif": -4
       },
       {
         "pos": 19,
-        "equipo": "Godoy Cruz",
+        "equipo": "Aldosivi",
         "pts": 30,
-        "pj": 24,
-        "pg": 8,
-        "pe": 6,
-        "pp": 10,
-        "gf": 24,
-        "gc": 29,
-        "dif": -5
-      },
-      {
-        "pos": 20,
-        "equipo": "Atlético Rafaela",
-        "pts": 28,
-        "pj": 24,
+        "pj": 25,
         "pg": 7,
-        "pe": 7,
-        "pp": 10,
-        "gf": 25,
-        "gc": 31,
+        "pe": 9,
+        "pp": 9,
+        "gf": 27,
+        "gc": 33,
         "dif": -6
       },
       {
-        "pos": 21,
-        "equipo": "Gimnasia LP",
-        "pts": 28,
-        "pj": 24,
+        "pos": 20,
+        "equipo": "Instituto",
+        "pts": 29,
+        "pj": 25,
         "pg": 6,
-        "pe": 10,
+        "pe": 11,
         "pp": 8,
-        "gf": 28,
-        "gc": 35,
-        "dif": -7
-      },
-      {
-        "pos": 22,
-        "equipo": "Ferro",
-        "pts": 27,
-        "pj": 24,
-        "pg": 7,
-        "pe": 6,
-        "pp": 11,
-        "gf": 32,
-        "gc": 41,
+        "gf": 19,
+        "gc": 28,
         "dif": -9
       },
       {
-        "pos": 23,
-        "equipo": "Platense",
-        "pts": 27,
-        "pj": 24,
+        "pos": 21,
+        "equipo": "Defensa y Justicia",
+        "pts": 29,
+        "pj": 25,
+        "pg": 8,
+        "pe": 5,
+        "pp": 12,
+        "gf": 24,
+        "gc": 34,
+        "dif": -10
+      },
+      {
+        "pos": 22,
+        "equipo": "Atlético Rafaela",
+        "pts": 28,
+        "pj": 25,
         "pg": 7,
-        "pe": 6,
+        "pe": 7,
+        "pp": 11,
+        "gf": 25,
+        "gc": 32,
+        "dif": -7
+      },
+      {
+        "pos": 23,
+        "equipo": "Gimnasia LP",
+        "pts": 28,
+        "pj": 25,
+        "pg": 6,
+        "pe": 10,
+        "pp": 9,
+        "gf": 29,
+        "gc": 37,
+        "dif": -8
+      },
+      {
+        "pos": 24,
+        "equipo": "Platense",
+        "pts": 28,
+        "pj": 25,
+        "pg": 7,
+        "pe": 7,
         "pp": 11,
         "gf": 18,
         "gc": 28,
         "dif": -10
       },
       {
-        "pos": 24,
-        "equipo": "Estudiantes RC",
-        "pts": 27,
-        "pj": 24,
-        "pg": 6,
-        "pe": 9,
-        "pp": 9,
-        "gf": 19,
-        "gc": 34,
-        "dif": -15
-      },
-      {
         "pos": 25,
-        "equipo": "Instituto",
-        "pts": 26,
-        "pj": 24,
-        "pg": 5,
-        "pe": 11,
-        "pp": 8,
-        "gf": 17,
-        "gc": 27,
+        "equipo": "Ferro",
+        "pts": 27,
+        "pj": 25,
+        "pg": 7,
+        "pe": 6,
+        "pp": 12,
+        "gf": 32,
+        "gc": 42,
         "dif": -10
       },
       {
         "pos": 26,
-        "equipo": "Defensa y Justicia",
-        "pts": 26,
-        "pj": 24,
-        "pg": 7,
-        "pe": 5,
-        "pp": 12,
-        "gf": 23,
-        "gc": 34,
-        "dif": -11
+        "equipo": "Estudiantes RC",
+        "pts": 27,
+        "pj": 25,
+        "pg": 6,
+        "pe": 9,
+        "pp": 10,
+        "gf": 19,
+        "gc": 35,
+        "dif": -16
       },
       {
         "pos": 27,
         "equipo": "Sarmiento",
         "pts": 24,
-        "pj": 24,
+        "pj": 25,
         "pg": 6,
         "pe": 6,
-        "pp": 12,
-        "gf": 23,
-        "gc": 33,
-        "dif": -10
+        "pp": 13,
+        "gf": 24,
+        "gc": 35,
+        "dif": -11
       },
       {
         "pos": 28,
-        "equipo": "Indepte. Rivadavia",
-        "pts": 22,
-        "pj": 24,
-        "pg": 6,
-        "pe": 4,
-        "pp": 14,
-        "gf": 31,
-        "gc": 53,
-        "dif": -22
+        "equipo": "Tigre",
+        "pts": 24,
+        "pj": 25,
+        "pg": 5,
+        "pe": 9,
+        "pp": 11,
+        "gf": 26,
+        "gc": 41,
+        "dif": -15
       },
       {
         "pos": 29,
-        "equipo": "Tigre",
-        "pts": 21,
-        "pj": 24,
-        "pg": 4,
-        "pe": 9,
-        "pp": 11,
-        "gf": 24,
-        "gc": 40,
-        "dif": -16
+        "equipo": "Indepte. Rivadavia",
+        "pts": 22,
+        "pj": 25,
+        "pg": 6,
+        "pe": 4,
+        "pp": 15,
+        "gf": 31,
+        "gc": 54,
+        "dif": -23
       },
       {
         "pos": 30,
-        "equipo": "Gimnasia MZA",
+        "equipo": "Colón",
         "pts": 19,
-        "pj": 24,
+        "pj": 25,
         "pg": 4,
         "pe": 7,
-        "pp": 13,
-        "gf": 22,
-        "gc": 46,
+        "pp": 14,
+        "gf": 13,
+        "gc": 37,
         "dif": -24
       },
       {
         "pos": 31,
-        "equipo": "Colón",
-        "pts": 18,
-        "pj": 24,
+        "equipo": "Gimnasia MZA",
+        "pts": 19,
+        "pj": 25,
         "pg": 4,
-        "pe": 6,
+        "pe": 7,
         "pp": 14,
-        "gf": 11,
-        "gc": 35,
-        "dif": -24
+        "gf": 24,
+        "gc": 49,
+        "dif": -25
       },
       {
         "pos": 32,
-        "equipo": "Quilmes",
-        "pts": 17,
-        "pj": 24,
-        "pg": 3,
-        "pe": 8,
-        "pp": 13,
-        "gf": 19,
-        "gc": 42,
-        "dif": -23
+        "equipo": "Dep. Riestra",
+        "pts": 18,
+        "pj": 25,
+        "pg": 4,
+        "pe": 6,
+        "pp": 15,
+        "gf": 25,
+        "gc": 52,
+        "dif": -27
       },
       {
         "pos": 33,
-        "equipo": "Dep. Riestra",
+        "equipo": "Quilmes",
         "pts": 17,
-        "pj": 24,
-        "pg": 4,
-        "pe": 5,
-        "pp": 15,
-        "gf": 23,
-        "gc": 50,
-        "dif": -27
+        "pj": 25,
+        "pg": 3,
+        "pe": 8,
+        "pp": 14,
+        "gf": 19,
+        "gc": 43,
+        "dif": -24
       },
       {
         "pos": 34,
         "equipo": "Barracas Central",
         "pts": 13,
-        "pj": 24,
+        "pj": 25,
         "pg": 2,
         "pe": 7,
-        "pp": 15,
+        "pp": 16,
         "gf": 24,
-        "gc": 51,
-        "dif": -27
+        "gc": 57,
+        "dif": -33
       },
       {
         "pos": 35,
         "equipo": "Central Córdoba",
         "pts": 11,
-        "pj": 24,
+        "pj": 25,
         "pg": 2,
         "pe": 5,
-        "pp": 17,
+        "pp": 18,
         "gf": 7,
-        "gc": 41,
-        "dif": -34
+        "gc": 43,
+        "dif": -36
       },
       {
         "pos": 36,
         "equipo": "San Martin SJ",
-        "pts": 8,
-        "pj": 24,
-        "pg": 1,
+        "pts": 11,
+        "pj": 25,
+        "pg": 2,
         "pe": 5,
         "pp": 18,
-        "gf": 12,
-        "gc": 77,
-        "dif": -65
+        "gf": 15,
+        "gc": 79,
+        "dif": -64
       }
     ],
     "RESERVA_APE": {
@@ -3610,6 +3610,11 @@
         "gf": 1,
         "gc": 0,
         "rival": "Platense"
+      },
+      "25": {
+        "gf": 1,
+        "gc": 1,
+        "rival": "Sarmiento"
       }
     },
     "5TA": {
@@ -3732,6 +3737,11 @@
         "gf": 0,
         "gc": 0,
         "rival": "Platense"
+      },
+      "25": {
+        "gf": 4,
+        "gc": 4,
+        "rival": "Sarmiento"
       }
     },
     "6TA": {
@@ -3854,6 +3864,11 @@
         "gf": 1,
         "gc": 0,
         "rival": "Platense"
+      },
+      "25": {
+        "gf": 1,
+        "gc": 1,
+        "rival": "Sarmiento"
       }
     },
     "7MA": {
@@ -3976,6 +3991,11 @@
         "gf": 0,
         "gc": 0,
         "rival": "Platense"
+      },
+      "25": {
+        "gf": 4,
+        "gc": 0,
+        "rival": "Sarmiento"
       }
     },
     "8VA": {
@@ -4098,6 +4118,11 @@
         "gf": 2,
         "gc": 0,
         "rival": "Platense"
+      },
+      "25": {
+        "gf": 0,
+        "gc": 3,
+        "rival": "Sarmiento"
       }
     },
     "9NA": {
@@ -4215,6 +4240,11 @@
         "gf": 0,
         "gc": 0,
         "rival": "Platense"
+      },
+      "25": {
+        "gf": 2,
+        "gc": 1,
+        "rival": "Sarmiento"
       }
     }
   },
@@ -6859,6 +6889,116 @@
           "gl": 1,
           "gv": 2
         }
+      ],
+      "25": [
+        {
+          "local": "Quilmes",
+          "visitante": "Defensa y Justicia",
+          "gl": 1,
+          "gv": 2
+        },
+        {
+          "local": "Barracas Central",
+          "visitante": "River Plate",
+          "gl": 2,
+          "gv": 0
+        },
+        {
+          "local": "Estudiantes RC",
+          "visitante": "Unión",
+          "gl": 0,
+          "gv": 3
+        },
+        {
+          "local": "Talleres",
+          "visitante": "San Lorenzo",
+          "gl": 3,
+          "gv": 1
+        },
+        {
+          "local": "Instituto",
+          "visitante": "Gimnasia LP",
+          "gl": 3,
+          "gv": 0
+        },
+        {
+          "local": "Argentinos Jrs.",
+          "visitante": "Central Córdoba",
+          "gl": 0,
+          "gv": 1
+        },
+        {
+          "local": "San Martin SJ",
+          "visitante": "Gimnasia MZA",
+          "gl": 0,
+          "gv": 1
+        },
+        {
+          "local": "Newell&#8217;s",
+          "visitante": "Vélez",
+          "gl": 0,
+          "gv": 0
+        },
+        {
+          "local": "Independiente",
+          "visitante": "Banfield",
+          "gl": 1,
+          "gv": 2
+        },
+        {
+          "local": "Lanús",
+          "visitante": "Racing",
+          "gl": 1,
+          "gv": 3
+        },
+        {
+          "local": "Ferro",
+          "visitante": "Rosario Central",
+          "gl": 2,
+          "gv": 3
+        },
+        {
+          "local": "Indepte. Rivadavia",
+          "visitante": "Godoy Cruz",
+          "gl": 2,
+          "gv": 1
+        },
+        {
+          "local": "Atlético Tucumán",
+          "visitante": "Platense",
+          "gl": 2,
+          "gv": 4
+        },
+        {
+          "local": "Tigre",
+          "visitante": "Sarmiento",
+          "gl": 1,
+          "gv": 1
+        },
+        {
+          "local": "Estudiantes",
+          "visitante": "Belgrano",
+          "gl": 2,
+          "gv": 2
+        },
+        {
+          "local": "Huracán",
+          "visitante": "Atlético Rafaela",
+          "gl": 2,
+          "gv": 0
+        },
+        {
+          "local": "Colón",
+          "visitante": "Dep. Riestra",
+          "gl": 0,
+          "gv": 1
+        },
+        {
+          "local": "Boca Jrs.",
+          "visitante": "Aldosivi",
+          "gl": 1,
+          "gv": 0
+        }
       ]
     },
     "5TA": {
@@ -9494,6 +9634,116 @@
           "visitante": "Barracas Central",
           "gl": 1,
           "gv": 1
+        }
+      ],
+      "25": [
+        {
+          "local": "Quilmes",
+          "visitante": "Defensa y Justicia",
+          "gl": 0,
+          "gv": 3
+        },
+        {
+          "local": "Barracas Central",
+          "visitante": "River Plate",
+          "gl": 1,
+          "gv": 1
+        },
+        {
+          "local": "Estudiantes RC",
+          "visitante": "Unión",
+          "gl": 2,
+          "gv": 0
+        },
+        {
+          "local": "Talleres",
+          "visitante": "San Lorenzo",
+          "gl": 4,
+          "gv": 1
+        },
+        {
+          "local": "Instituto",
+          "visitante": "Gimnasia LP",
+          "gl": 0,
+          "gv": 1
+        },
+        {
+          "local": "Argentinos Jrs.",
+          "visitante": "Central Córdoba",
+          "gl": 2,
+          "gv": 1
+        },
+        {
+          "local": "San Martin SJ",
+          "visitante": "Gimnasia MZA",
+          "gl": 2,
+          "gv": 1
+        },
+        {
+          "local": "Newell&#8217;s",
+          "visitante": "Vélez",
+          "gl": 0,
+          "gv": 1
+        },
+        {
+          "local": "Independiente",
+          "visitante": "Banfield",
+          "gl": 4,
+          "gv": 0
+        },
+        {
+          "local": "Lanús",
+          "visitante": "Racing",
+          "gl": 4,
+          "gv": 1
+        },
+        {
+          "local": "Ferro",
+          "visitante": "Rosario Central",
+          "gl": 2,
+          "gv": 0
+        },
+        {
+          "local": "Indepte. Rivadavia",
+          "visitante": "Godoy Cruz",
+          "gl": 1,
+          "gv": 0
+        },
+        {
+          "local": "Atlético Tucumán",
+          "visitante": "Platense",
+          "gl": 4,
+          "gv": 1
+        },
+        {
+          "local": "Tigre",
+          "visitante": "Sarmiento",
+          "gl": 4,
+          "gv": 4
+        },
+        {
+          "local": "Estudiantes",
+          "visitante": "Belgrano",
+          "gl": 1,
+          "gv": 2
+        },
+        {
+          "local": "Huracán",
+          "visitante": "Atlético Rafaela",
+          "gl": 3,
+          "gv": 0
+        },
+        {
+          "local": "Colón",
+          "visitante": "Dep. Riestra",
+          "gl": 0,
+          "gv": 0
+        },
+        {
+          "local": "Boca Jrs.",
+          "visitante": "Aldosivi",
+          "gl": 5,
+          "gv": 0
         }
       ]
     },
@@ -12137,6 +12387,116 @@
           "gl": 0,
           "gv": 0
         }
+      ],
+      "25": [
+        {
+          "local": "Quilmes",
+          "visitante": "Defensa y Justicia",
+          "gl": 1,
+          "gv": 1
+        },
+        {
+          "local": "Barracas Central",
+          "visitante": "River Plate",
+          "gl": 2,
+          "gv": 1
+        },
+        {
+          "local": "Estudiantes RC",
+          "visitante": "Unión",
+          "gl": 0,
+          "gv": 2
+        },
+        {
+          "local": "Talleres",
+          "visitante": "San Lorenzo",
+          "gl": 1,
+          "gv": 0
+        },
+        {
+          "local": "Instituto",
+          "visitante": "Gimnasia LP",
+          "gl": 0,
+          "gv": 1
+        },
+        {
+          "local": "Argentinos Jrs.",
+          "visitante": "Central Córdoba",
+          "gl": 1,
+          "gv": 0
+        },
+        {
+          "local": "San Martin SJ",
+          "visitante": "Gimnasia MZA",
+          "gl": 2,
+          "gv": 1
+        },
+        {
+          "local": "Newell&#8217;s",
+          "visitante": "Vélez",
+          "gl": 1,
+          "gv": 0
+        },
+        {
+          "local": "Independiente",
+          "visitante": "Banfield",
+          "gl": 1,
+          "gv": 0
+        },
+        {
+          "local": "Lanús",
+          "visitante": "Racing",
+          "gl": 5,
+          "gv": 1
+        },
+        {
+          "local": "Ferro",
+          "visitante": "Rosario Central",
+          "gl": 0,
+          "gv": 3
+        },
+        {
+          "local": "Indepte. Rivadavia",
+          "visitante": "Godoy Cruz",
+          "gl": 0,
+          "gv": 3
+        },
+        {
+          "local": "Atlético Tucumán",
+          "visitante": "Platense",
+          "gl": 0,
+          "gv": 3
+        },
+        {
+          "local": "Tigre",
+          "visitante": "Sarmiento",
+          "gl": 1,
+          "gv": 1
+        },
+        {
+          "local": "Estudiantes",
+          "visitante": "Belgrano",
+          "gl": 1,
+          "gv": 3
+        },
+        {
+          "local": "Huracán",
+          "visitante": "Atlético Rafaela",
+          "gl": 2,
+          "gv": 0
+        },
+        {
+          "local": "Colón",
+          "visitante": "Dep. Riestra",
+          "gl": 2,
+          "gv": 0
+        },
+        {
+          "local": "Boca Jrs.",
+          "visitante": "Aldosivi",
+          "gl": 1,
+          "gv": 1
+        }
       ]
     },
     "7MA": {
@@ -14778,6 +15138,116 @@
           "visitante": "Quilmes",
           "gl": 2,
           "gv": 1
+        }
+      ],
+      "25": [
+        {
+          "local": "Defensa y Justicia",
+          "visitante": "Quilmes",
+          "gl": 2,
+          "gv": 0
+        },
+        {
+          "local": "River Plate",
+          "visitante": "Barracas Central",
+          "gl": 8,
+          "gv": 0
+        },
+        {
+          "local": "Unión",
+          "visitante": "Estudiantes RC",
+          "gl": 3,
+          "gv": 2
+        },
+        {
+          "local": "San Lorenzo",
+          "visitante": "Talleres",
+          "gl": 0,
+          "gv": 1
+        },
+        {
+          "local": "Gimnasia LP",
+          "visitante": "Instituto",
+          "gl": 2,
+          "gv": 0
+        },
+        {
+          "local": "Central Córdoba",
+          "visitante": "Argentinos Jrs.",
+          "gl": 0,
+          "gv": 1
+        },
+        {
+          "local": "Gimnasia MZA",
+          "visitante": "San Martin SJ",
+          "gl": 0,
+          "gv": 1
+        },
+        {
+          "local": "Vélez",
+          "visitante": "Newell&#8217;s",
+          "gl": 3,
+          "gv": 1
+        },
+        {
+          "local": "Banfield",
+          "visitante": "Independiente",
+          "gl": 4,
+          "gv": 1
+        },
+        {
+          "local": "Racing",
+          "visitante": "Lanús",
+          "gl": 0,
+          "gv": 1
+        },
+        {
+          "local": "Rosario Central",
+          "visitante": "Ferro",
+          "gl": 4,
+          "gv": 1
+        },
+        {
+          "local": "Godoy Cruz",
+          "visitante": "Indepte. Rivadavia",
+          "gl": 1,
+          "gv": 1
+        },
+        {
+          "local": "Platense",
+          "visitante": "Atlético Tucumán",
+          "gl": 0,
+          "gv": 0
+        },
+        {
+          "local": "Sarmiento",
+          "visitante": "Tigre",
+          "gl": 0,
+          "gv": 4
+        },
+        {
+          "local": "Belgrano",
+          "visitante": "Estudiantes",
+          "gl": 1,
+          "gv": 3
+        },
+        {
+          "local": "Atlético Rafaela",
+          "visitante": "Huracán",
+          "gl": 2,
+          "gv": 1
+        },
+        {
+          "local": "Dep. Riestra",
+          "visitante": "Colón",
+          "gl": 0,
+          "gv": 5
+        },
+        {
+          "local": "Aldosivi",
+          "visitante": "Boca Jrs.",
+          "gl": 0,
+          "gv": 2
         }
       ]
     },
@@ -17421,6 +17891,116 @@
           "gl": 1,
           "gv": 5
         }
+      ],
+      "25": [
+        {
+          "local": "Defensa y Justicia",
+          "visitante": "Quilmes",
+          "gl": 1,
+          "gv": 2
+        },
+        {
+          "local": "River Plate",
+          "visitante": "Barracas Central",
+          "gl": 5,
+          "gv": 0
+        },
+        {
+          "local": "Unión",
+          "visitante": "Estudiantes RC",
+          "gl": 3,
+          "gv": 1
+        },
+        {
+          "local": "San Lorenzo",
+          "visitante": "Talleres",
+          "gl": 0,
+          "gv": 3
+        },
+        {
+          "local": "Gimnasia LP",
+          "visitante": "Instituto",
+          "gl": 0,
+          "gv": 0
+        },
+        {
+          "local": "Central Córdoba",
+          "visitante": "Argentinos Jrs.",
+          "gl": 1,
+          "gv": 3
+        },
+        {
+          "local": "Gimnasia MZA",
+          "visitante": "San Martin SJ",
+          "gl": 0,
+          "gv": 1
+        },
+        {
+          "local": "Vélez",
+          "visitante": "Newell&#8217;s",
+          "gl": 1,
+          "gv": 3
+        },
+        {
+          "local": "Banfield",
+          "visitante": "Independiente",
+          "gl": 1,
+          "gv": 4
+        },
+        {
+          "local": "Racing",
+          "visitante": "Lanús",
+          "gl": 3,
+          "gv": 2
+        },
+        {
+          "local": "Rosario Central",
+          "visitante": "Ferro",
+          "gl": 0,
+          "gv": 0
+        },
+        {
+          "local": "Godoy Cruz",
+          "visitante": "Indepte. Rivadavia",
+          "gl": 4,
+          "gv": 0
+        },
+        {
+          "local": "Platense",
+          "visitante": "Atlético Tucumán",
+          "gl": 0,
+          "gv": 1
+        },
+        {
+          "local": "Sarmiento",
+          "visitante": "Tigre",
+          "gl": 3,
+          "gv": 0
+        },
+        {
+          "local": "Belgrano",
+          "visitante": "Estudiantes",
+          "gl": 0,
+          "gv": 1
+        },
+        {
+          "local": "Atlético Rafaela",
+          "visitante": "Huracán",
+          "gl": 0,
+          "gv": 3
+        },
+        {
+          "local": "Dep. Riestra",
+          "visitante": "Colón",
+          "gl": 1,
+          "gv": 0
+        },
+        {
+          "local": "Aldosivi",
+          "visitante": "Boca Jrs.",
+          "gl": 0,
+          "gv": 3
+        }
       ]
     },
     "9NA": {
@@ -19953,17 +20533,121 @@
           "gl": 1,
           "gv": 1
         }
+      ],
+      "25": [
+        {
+          "local": "Defensa y Justicia",
+          "visitante": "Quilmes",
+          "gl": 1,
+          "gv": 0
+        },
+        {
+          "local": "River Plate",
+          "visitante": "Barracas Central",
+          "gl": 6,
+          "gv": 0
+        },
+        {
+          "local": "Unión",
+          "visitante": "Estudiantes RC",
+          "gl": 1,
+          "gv": 0
+        },
+        {
+          "local": "San Lorenzo",
+          "visitante": "Talleres",
+          "gl": 1,
+          "gv": 3
+        },
+        {
+          "local": "Gimnasia LP",
+          "visitante": "Instituto",
+          "gl": 1,
+          "gv": 2
+        },
+        {
+          "local": "Central Córdoba",
+          "visitante": "Argentinos Jrs.",
+          "gl": 0,
+          "gv": 2
+        },
+        {
+          "local": "Gimnasia MZA",
+          "visitante": "San Martin SJ",
+          "gl": 2,
+          "gv": 3
+        },
+        {
+          "local": "Vélez",
+          "visitante": "Newell&#8217;s",
+          "gl": 1,
+          "gv": 1
+        },
+        {
+          "local": "Banfield",
+          "visitante": "Independiente",
+          "gl": 0,
+          "gv": 1
+        },
+        {
+          "local": "Racing",
+          "visitante": "Lanús",
+          "gl": 0,
+          "gv": 4
+        },
+        {
+          "local": "Rosario Central",
+          "visitante": "Ferro",
+          "gl": 1,
+          "gv": 0
+        },
+        {
+          "local": "Platense",
+          "visitante": "Atlético Tucumán",
+          "gl": 0,
+          "gv": 0
+        },
+        {
+          "local": "Sarmiento",
+          "visitante": "Tigre",
+          "gl": 1,
+          "gv": 2
+        },
+        {
+          "local": "Belgrano",
+          "visitante": "Estudiantes",
+          "gl": 1,
+          "gv": 0
+        },
+        {
+          "local": "Atlético Rafaela",
+          "visitante": "Huracán",
+          "gl": 0,
+          "gv": 1
+        },
+        {
+          "local": "Dep. Riestra",
+          "visitante": "Colón",
+          "gl": 2,
+          "gv": 2
+        },
+        {
+          "local": "Aldosivi",
+          "visitante": "Boca Jrs.",
+          "gl": 0,
+          "gv": 2
+        }
       ]
     }
   },
   "tigre_parenlapelota": {
     "4TA": {
-      "pj": 24,
+      "pj": 25,
       "pg": 12,
-      "pe": 4,
+      "pe": 5,
       "pp": 8,
-      "gf": 38,
-      "gc": 25
+      "gf": 39,
+      "gc": 26
     },
     "5TA": {
       "pj": 24,
@@ -19982,11 +20666,11 @@
       "gc": 57
     },
     "7MA": {
-      "pj": 24,
-      "pg": 8,
+      "pj": 25,
+      "pg": 9,
       "pe": 10,
       "pp": 6,
-      "gf": 45,
+      "gf": 49,
       "gc": 36
     },
     "8VA": {
@@ -19998,12 +20682,12 @@
       "gc": 33
     },
     "9NA": {
-      "pj": 24,
-      "pg": 4,
+      "pj": 25,
+      "pg": 5,
       "pe": 9,
       "pp": 11,
-      "gf": 24,
-      "gc": 40
+      "gf": 26,
+      "gc": 41
     }
   },
   "rival_alertas": {
@@ -20026,10 +20710,10 @@
       "amarillas_riesgo": []
     },
     "6TA": {
-      "fecha": 25,
-      "rival": "SARMIENTO (JUNIN)",
+      "fecha": 26,
+      "rival": "BELGRANO (CORDOBA)",
       "goleador": {
-        "nombre": "RODRIGUEZ, ALEXANDER",
+        "nombre": "BAZAN, SANTIAGO ANDRES",
         "goles": 11
       },
       "amarillas_riesgo": []
@@ -20053,18 +20737,13 @@
       "amarillas_riesgo": []
     },
     "9NA": {
-      "fecha": 25,
-      "rival": "SARMIENTO (JUNIN)",
+      "fecha": 26,
+      "rival": "BELGRANO (CORDOBA)",
       "goleador": {
-        "nombre": "ROLDAN, NICOLAS JESUS",
-        "goles": 8
+        "nombre": "MANSILLA RIZZI, FRANCISCO",
+        "goles": 27
       },
-      "amarillas_riesgo": [
-        {
-          "nombre": "RODRIGUEZ MARTINGORENA, SANTINO",
-          "amarillas": 5
-        }
-      ]
+      "amarillas_riesgo": []
     },
     "RESERVA_S2": {
       "fecha": 9,
@@ -25009,6 +25688,11 @@
         "gf": 1,
         "gc": 0,
         "rival": "PLATENSE"
+      },
+      "25": {
+        "gf": 1,
+        "gc": 1,
+        "rival": "SARMIENTO (J)"
       }
     },
     "7MA": {
@@ -25385,6 +26069,11 @@
         "gf": 0,
         "gc": 0,
         "rival": "PLATENSE"
+      },
+      "25": {
+        "gf": 2,
+        "gc": 1,
+        "rival": "SARMIENTO (J)"
       }
     },
     "RESERVA": {
@@ -30664,7 +31353,7 @@
           ]
         },
         "Alan Luengo": {
-          "pos": "",
+          "pos": "DFC",
           "match": [
             {
               "fecha": "F11",
@@ -30784,6 +31473,30 @@
                 8.267923675638608,
                 0.11,
                 742.12695
+              ]
+            },
+            {
+              "fecha": "F25",
+              "opp": "Sarmiento",
+              "min": 95,
+              "metrics": [
+                8860.40869,
+                92.81154,
+                239.73,
+                169.38,
+                65.03,
+                4,
+                29.06046,
+                16,
+                21,
+                51,
+                null,
+                3.809,
+                -5.55972,
+                0.17,
+                9.203945530726257,
+                0.68,
+                809.99472
               ]
             },
             {
@@ -31088,11 +31801,35 @@
                 3.35,
                 78.32047
               ]
+            },
+            {
+              "fecha": "F25",
+              "opp": "Sarmiento",
+              "min": 7,
+              "metrics": [
+                762.42444,
+                111.58792,
+                29.55,
+                59.74,
+                48.02,
+                3,
+                28.56229,
+                3,
+                2,
+                6,
+                null,
+                3.98165,
+                -4.53693,
+                0.43,
+                27.335528723015006,
+                6.86,
+                76.55174
+              ]
             }
           ]
         },
         "Brandom Leszczuk": {
-          "pos": "",
+          "pos": "EXT",
           "match": [
             {
               "fecha": "F11",
@@ -31191,6 +31928,30 @@
               ]
             },
             {
+              "fecha": "F25",
+              "opp": "Sarmiento",
+              "min": 25,
+              "metrics": [
+                2726.64795,
+                110.17947,
+                183.85001,
+                159.36,
+                0,
+                0,
+                24.66479,
+                10,
+                15,
+                23,
+                null,
+                4.16852,
+                -4.7522,
+                0.4,
+                22.356058604871876,
+                0.0,
+                292.53049
+              ]
+            },
+            {
               "fecha": "F5",
               "opp": "newells",
               "min": 107,
@@ -31241,7 +32002,7 @@
           ]
         },
         "Cristian Benitez": {
-          "pos": "Vol",
+          "pos": "",
           "match": [
             {
               "fecha": "F11",
@@ -31710,6 +32471,30 @@
               ]
             },
             {
+              "fecha": "F25",
+              "opp": "Sarmiento",
+              "min": 73,
+              "metrics": [
+                6901.17969,
+                94.94663,
+                198.09,
+                99.89,
+                15.74,
+                1,
+                26.79628,
+                18,
+                16,
+                46,
+                null,
+                4.12806,
+                -4.63592,
+                0.25,
+                10.013093057010977,
+                0.22,
+                670.75111
+              ]
+            },
+            {
               "fecha": "F9",
               "opp": "Talleres Cba",
               "min": 61,
@@ -31931,6 +32716,30 @@
               ]
             },
             {
+              "fecha": "F25",
+              "opp": "Sarmiento",
+              "min": 90,
+              "metrics": [
+                9572.5249,
+                105.82404,
+                605.88998,
+                448.87001,
+                212.21,
+                10,
+                29.95237,
+                35,
+                60,
+                77,
+                null,
+                4.0515,
+                -6.07805,
+                0.39,
+                21.77377085244923,
+                2.36,
+                1083.3363
+              ]
+            },
+            {
               "fecha": "F8",
               "opp": "Instituto",
               "min": 51,
@@ -32008,6 +32817,30 @@
               ]
             },
             {
+              "fecha": "F25",
+              "opp": "Sarmiento",
+              "min": 95,
+              "metrics": [
+                9470.32129,
+                99.20029,
+                356.86,
+                157.88,
+                80.01,
+                4,
+                31.86739,
+                18,
+                19,
+                75,
+                null,
+                4.14963,
+                -4.93876,
+                0.19,
+                11.317667702513967,
+                0.84,
+                1119.78949
+              ]
+            },
+            {
               "fecha": "F9",
               "opp": "Talleres Cba",
               "min": 61,
@@ -32058,6 +32891,30 @@
                 11.865057064761666,
                 0.69,
                 620.36822
+              ]
+            },
+            {
+              "fecha": "F25",
+              "opp": "Sarmiento",
+              "min": 90,
+              "metrics": [
+                9371.08008,
+                104.38582,
+                405.85001,
+                328.49001,
+                188.05999,
+                11,
+                31.08873,
+                28,
+                36,
+                59,
+                null,
+                4.29727,
+                -5.08768,
+                0.31,
+                16.00182693110996,
+                2.09,
+                850.28726
               ]
             },
             {
@@ -32356,7 +33213,7 @@
           ]
         },
         "Josue Rojas": {
-          "pos": "LAT",
+          "pos": "",
           "match": [
             {
               "fecha": "F11",
@@ -32926,6 +33783,30 @@
               ]
             },
             {
+              "fecha": "F25",
+              "opp": "Sarmiento",
+              "min": 95,
+              "metrics": [
+                8404.25684,
+                88.38941,
+                243.65,
+                221.31999,
+                57.38,
+                2,
+                30.0855,
+                14,
+                18,
+                58,
+                null,
+                3.8855,
+                -4.32504,
+                0.15,
+                8.565607437150836,
+                0.6,
+                813.13962
+              ]
+            },
+            {
               "fecha": "F6",
               "opp": "Smsj",
               "min": 98,
@@ -33048,6 +33929,30 @@
                 15.858747549353302,
                 1.92,
                 1124.76892
+              ]
+            },
+            {
+              "fecha": "F25",
+              "opp": "Sarmiento",
+              "min": 90,
+              "metrics": [
+                9463.54248,
+                105.14891,
+                449.12,
+                319.93001,
+                75.26,
+                4,
+                28.39859,
+                25,
+                32,
+                63,
+                null,
+                3.88867,
+                -4.80003,
+                0.28,
+                14.96666716048651,
+                0.84,
+                922.85538
               ]
             },
             {
@@ -33197,6 +34102,30 @@
                 1.0189584751531653,
                 0.04,
                 967.84937
+              ]
+            },
+            {
+              "fecha": "F25",
+              "opp": "Sarmiento",
+              "min": 95,
+              "metrics": [
+                10314.66064,
+                108.04463,
+                548.79999,
+                438.75999,
+                277.34,
+                14,
+                30.98425,
+                25,
+                39,
+                84,
+                null,
+                4.69693,
+                -5.25121,
+                0.26,
+                20.243610125698325,
+                2.92,
+                1092.02289
               ]
             },
             {
@@ -33808,7 +34737,7 @@
           ]
         },
         "Tiziano Medina": {
-          "pos": "DFC",
+          "pos": "",
           "match": [
             {
               "fecha": "F24",
@@ -33837,7 +34766,7 @@
           ]
         },
         "Tomas Copes": {
-          "pos": "",
+          "pos": "Vol",
           "match": [
             {
               "fecha": "F11",
@@ -33909,6 +34838,30 @@
                 23.462515964512864,
                 1.92,
                 451.36343
+              ]
+            },
+            {
+              "fecha": "F25",
+              "opp": "Sarmiento",
+              "min": 8,
+              "metrics": [
+                770.53979,
+                110.49014,
+                52.7,
+                27.58,
+                16.96,
+                1,
+                27.91062,
+                2,
+                4,
+                4,
+                null,
+                4.13277,
+                -3.75606,
+                0.25,
+                20.325850676882684,
+                2.12,
+                86.89348
               ]
             },
             {
@@ -34236,7 +35189,7 @@
           ]
         },
         "Yair Hillaret": {
-          "pos": "",
+          "pos": "EXT",
           "match": [
             {
               "fecha": "F11",
@@ -34260,6 +35213,30 @@
                 7.329236739974127,
                 0.57,
                 245.92136
+              ]
+            },
+            {
+              "fecha": "F25",
+              "opp": "Sarmiento",
+              "min": 8,
+              "metrics": [
+                647.06512,
+                95.88991,
+                15.54,
+                24.56,
+                27.47,
+                2,
+                27.18023,
+                1,
+                3,
+                3,
+                null,
+                3.32874,
+                -4.762,
+                0.12,
+                10.75433828141334,
+                3.43,
+                72.9528
               ]
             },
             {
@@ -34363,6 +35340,30 @@
                 13.335908781484003,
                 0.6,
                 968.08502
+              ]
+            },
+            {
+              "fecha": "F25",
+              "opp": "Sarmiento",
+              "min": 95,
+              "metrics": [
+                8751.58252,
+                91.6716,
+                266.06001,
+                130.52,
+                58.63,
+                2,
+                29.82732,
+                25,
+                21,
+                75,
+                null,
+                3.84542,
+                -6.27315,
+                0.26,
+                8.300803282122903,
+                0.62,
+                850.78604
               ]
             },
             {
@@ -40239,6 +41240,30 @@
               ]
             },
             {
+              "fecha": "F25",
+              "opp": "Sarmiento",
+              "min": 32,
+              "metrics": [
+                3444.84229,
+                107.11352,
+                102.92,
+                108.62,
+                17.11,
+                0,
+                26.40157,
+                8,
+                9,
+                27,
+                null,
+                4.64516,
+                -5.25296,
+                0.25,
+                12.564105221699382,
+                0.53,
+                316.35284
+              ]
+            },
+            {
               "fecha": "F3",
               "opp": "Lanús",
               "min": 92,
@@ -40260,30 +41285,6 @@
                 13.664839462697405,
                 2.76,
                 745.59512
-              ]
-            },
-            {
-              "fecha": "F5",
-              "opp": "Newells",
-              "min": 101,
-              "metrics": [
-                8638.81299,
-                85.68834,
-                236.42,
-                200.77,
-                123.09,
-                6,
-                29.18497,
-                22,
-                25,
-                55,
-                null,
-                4.22169,
-                -6.07159,
-                0.22,
-                8.985319887584724,
-                1.22,
-                839.71024
               ]
             },
             {
@@ -40458,11 +41459,35 @@
                 0.3,
                 861.03229
               ]
+            },
+            {
+              "fecha": "F25",
+              "opp": "Sarmiento",
+              "min": 96,
+              "metrics": [
+                9295.79053,
+                97.0333,
+                326.34,
+                241.88,
+                86.07,
+                5,
+                28.40354,
+                16,
+                12,
+                36,
+                null,
+                4.36155,
+                -4.06404,
+                0.17,
+                11.453653340292275,
+                0.9,
+                835.47382
+              ]
             }
           ]
         },
         "Conrado Vera": {
-          "pos": "LAT",
+          "pos": "",
           "match": [
             {
               "fecha": "F24",
@@ -40510,30 +41535,6 @@
                 23.23717563986204,
                 3.09,
                 940.2406
-              ]
-            },
-            {
-              "fecha": "F5",
-              "opp": "Newells",
-              "min": 101,
-              "metrics": [
-                11332.77832,
-                112.40977,
-                663.98999,
-                491.64999,
-                219.66,
-                11,
-                29.39525,
-                28,
-                38,
-                95,
-                null,
-                4.3226,
-                -6.23876,
-                0.28,
-                21.30709188295586,
-                2.17,
-                1061.18762
               ]
             },
             {
@@ -40611,7 +41612,7 @@
           ]
         },
         "Cristian Barrios": {
-          "pos": "",
+          "pos": "DC",
           "match": [
             {
               "fecha": "F20",
@@ -40635,6 +41636,30 @@
                 20.25063933607031,
                 0.34,
                 267.26981
+              ]
+            },
+            {
+              "fecha": "F25",
+              "opp": "Sarmiento",
+              "min": 21,
+              "metrics": [
+                2405.05127,
+                117.24618,
+                174.03999,
+                163.11,
+                40.47,
+                2,
+                29.14268,
+                10,
+                8,
+                14,
+                null,
+                4.30629,
+                -5.14659,
+                0.48,
+                28.45546331250455,
+                1.93,
+                263.84329
               ]
             }
           ]
@@ -40787,30 +41812,6 @@
               ]
             },
             {
-              "fecha": "F5",
-              "opp": "Newells",
-              "min": 101,
-              "metrics": [
-                8430.88281,
-                83.62588,
-                259.96001,
-                122.12,
-                8.81,
-                1,
-                27.61988,
-                12,
-                21,
-                50,
-                null,
-                5.19424,
-                -5.10987,
-                0.12,
-                7.338072507852538,
-                0.09,
-                797.88098
-              ]
-            },
-            {
               "fecha": "F6",
               "opp": "San Martin SJ",
               "min": 23,
@@ -40909,7 +41910,7 @@
           ]
         },
         "Gonzalo Ledesma": {
-          "pos": "LAT",
+          "pos": "",
           "match": [
             {
               "fecha": "F10",
@@ -41419,6 +42420,30 @@
                 0.89,
                 1036.92319
               ]
+            },
+            {
+              "fecha": "F25",
+              "opp": "Sarmiento",
+              "min": 82,
+              "metrics": [
+                8584.28149,
+                105.33055,
+                410.24001,
+                347.44,
+                257.33,
+                13,
+                29.19337,
+                24,
+                33,
+                65,
+                null,
+                5.27222,
+                -5.68785,
+                0.29,
+                17.66047761835976,
+                3.14,
+                819.94482
+              ]
             }
           ]
         },
@@ -41546,6 +42571,30 @@
               ]
             },
             {
+              "fecha": "F25",
+              "opp": "Sarmiento",
+              "min": 96,
+              "metrics": [
+                10718.53906,
+                111.88454,
+                741.22998,
+                484.06999,
+                78.81,
+                5,
+                27.41072,
+                33,
+                37,
+                86,
+                null,
+                4.31092,
+                -5.43238,
+                0.34,
+                21.392275156576197,
+                0.82,
+                1221.87024
+              ]
+            },
+            {
               "fecha": "F3",
               "opp": "Lanús",
               "min": 68,
@@ -41567,30 +42616,6 @@
                 19.90414080301721,
                 1.21,
                 733.93826
-              ]
-            },
-            {
-              "fecha": "F5",
-              "opp": "Newells",
-              "min": 53,
-              "metrics": [
-                3576.31714,
-                68.22646,
-                257.06,
-                194.87,
-                40.2,
-                2,
-                27.92258,
-                11,
-                17,
-                27,
-                null,
-                4.6274,
-                -6.01543,
-                0.21,
-                12.826042983565108,
-                0.76,
-                378.82346
               ]
             },
             {
@@ -41815,6 +42840,30 @@
               ]
             },
             {
+              "fecha": "F25",
+              "opp": "Sarmiento",
+              "min": 82,
+              "metrics": [
+                7776.1311,
+                95.00794,
+                294.25999,
+                180.11,
+                104.24,
+                7,
+                29.18669,
+                22,
+                28,
+                54,
+                null,
+                4.46827,
+                -5.1674,
+                0.27,
+                11.348590523394213,
+                1.27,
+                754.89346
+              ]
+            },
+            {
               "fecha": "F3",
               "opp": "Lanús",
               "min": 92,
@@ -41836,30 +42885,6 @@
                 11.913305609003448,
                 1.38,
                 939.68756
-              ]
-            },
-            {
-              "fecha": "F5",
-              "opp": "Newells",
-              "min": 101,
-              "metrics": [
-                8118.00903,
-                80.52249,
-                246.32999,
-                289.43,
-                173.08,
-                10,
-                30.14133,
-                22,
-                24,
-                56,
-                null,
-                4.39851,
-                -5.23678,
-                0.22,
-                10.0586543230286,
-                1.71,
-                895.12866
               ]
             },
             {
@@ -41963,30 +42988,6 @@
         "Ivo Crotto": {
           "pos": "",
           "match": [
-            {
-              "fecha": "F5",
-              "opp": "Newells",
-              "min": 18,
-              "metrics": [
-                1710.87781,
-                96.48623,
-                144.34,
-                66.63,
-                0,
-                0,
-                24.09021,
-                3,
-                11,
-                8,
-                null,
-                3.37128,
-                -4.39217,
-                0.17,
-                20.490830991343252,
-                0.0,
-                159.13254
-              ]
-            },
             {
               "fecha": "F8",
               "opp": "Instituto",
@@ -42137,6 +43138,30 @@
               ]
             },
             {
+              "fecha": "F25",
+              "opp": "Sarmiento",
+              "min": 64,
+              "metrics": [
+                7656.38184,
+                120.27903,
+                548.53,
+                351.14,
+                109.37,
+                5,
+                29.97118,
+                19,
+                29,
+                73,
+                null,
+                4.08134,
+                -5.18465,
+                0.3,
+                24.06591750865994,
+                1.71,
+                786.35402
+              ]
+            },
+            {
               "fecha": "F3",
               "opp": "Lanús",
               "min": 24,
@@ -42238,30 +43263,6 @@
           "pos": "",
           "match": [
             {
-              "fecha": "F5",
-              "opp": "Newells",
-              "min": 17,
-              "metrics": [
-                1481.17944,
-                84.71386,
-                39.45,
-                11.85,
-                0,
-                0,
-                22.6016,
-                7,
-                2,
-                7,
-                null,
-                3.76442,
-                -3.64908,
-                0.41,
-                6.183190826160313,
-                0.0,
-                130.56686
-              ]
-            },
-            {
               "fecha": "F7",
               "opp": "Argentinos Jrs",
               "min": 49,
@@ -42360,30 +43361,6 @@
                 9.403352383035738,
                 1.63,
                 133.00951
-              ]
-            },
-            {
-              "fecha": "F5",
-              "opp": "Newells",
-              "min": 66,
-              "metrics": [
-                5951.29297,
-                90.78874,
-                243.42,
-                211.23,
-                53.21,
-                2,
-                28.78814,
-                13,
-                22,
-                44,
-                null,
-                4.16255,
-                -5.49038,
-                0.2,
-                11.911793870421505,
-                0.81,
-                683.50185
               ]
             },
             {
@@ -42733,6 +43710,30 @@
               ]
             },
             {
+              "fecha": "F25",
+              "opp": "Sarmiento",
+              "min": 96,
+              "metrics": [
+                10558.47217,
+                110.2137,
+                680.73001,
+                455.39001,
+                54.04,
+                3,
+                26.87671,
+                20,
+                45,
+                75,
+                null,
+                4.31423,
+                -4.87054,
+                0.21,
+                20.19258903966597,
+                0.56,
+                1154.08044
+              ]
+            },
+            {
               "fecha": "F3",
               "opp": "Lanús",
               "min": 69,
@@ -42999,30 +44000,6 @@
                 17.33366473181346,
                 0.28,
                 991.40369
-              ]
-            },
-            {
-              "fecha": "F5",
-              "opp": "Newells",
-              "min": 83,
-              "metrics": [
-                9265.3855,
-                111.12728,
-                460.98001,
-                396.28999,
-                66.61,
-                3,
-                28.03827,
-                23,
-                29,
-                59,
-                null,
-                3.66328,
-                -5.42131,
-                0.28,
-                18.528638862347027,
-                0.8,
-                1065.62192
               ]
             },
             {
@@ -43295,33 +44272,33 @@
               ]
             },
             {
-              "fecha": "F5",
-              "opp": "Newells",
-              "min": 19,
+              "fecha": "F25",
+              "opp": "Sarmiento",
+              "min": 96,
               "metrics": [
-                1352.4541,
-                75.77693,
-                32.1,
-                7,
-                0,
-                0,
-                22.01645,
-                6,
+                10849.7041,
+                114.91626,
+                413.39999,
+                222.44,
+                18.33,
                 1,
-                4,
+                25.8776,
+                26,
+                34,
+                76,
                 null,
-                4.83204,
-                -3.03782,
-                0.32,
-                3.713583083523309,
-                0.0,
-                171.12
+                4.2881,
+                -5.04728,
+                0.27,
+                15.12118956158664,
+                0.19,
+                949.74591
               ]
             }
           ]
         },
         "Nicolas Crotto": {
-          "pos": "DC",
+          "pos": "",
           "match": [
             {
               "fecha": "F10",
@@ -43518,7 +44495,7 @@
           ]
         },
         "Ramiro Clauser": {
-          "pos": "VOL",
+          "pos": "",
           "match": [
             {
               "fecha": "F10",
@@ -43614,30 +44591,6 @@
                 21.650593932370345,
                 1.86,
                 148.44708
-              ]
-            },
-            {
-              "fecha": "F5",
-              "opp": "Newells",
-              "min": 18,
-              "metrics": [
-                1858.06909,
-                105.77143,
-                150.7,
-                145.73,
-                35.97,
-                3,
-                28.80762,
-                7,
-                6,
-                15,
-                null,
-                4.30984,
-                -5.56476,
-                0.39,
-                28.11548277530574,
-                2.0,
-                192.53081
               ]
             },
             {
@@ -43739,7 +44692,7 @@
           ]
         },
         "Roman Miño": {
-          "pos": "",
+          "pos": "DC",
           "match": [
             {
               "fecha": "F10",
@@ -43931,6 +44884,30 @@
                 11.859729044903778,
                 1.88,
                 832.87521
+              ]
+            },
+            {
+              "fecha": "F25",
+              "opp": "Sarmiento",
+              "min": 32,
+              "metrics": [
+                3577.61719,
+                110.20769,
+                208.17,
+                92.5,
+                72.96,
+                4,
+                30.92739,
+                10,
+                9,
+                24,
+                null,
+                4.10171,
+                -6.05164,
+                0.31,
+                19.932229803619563,
+                2.28,
+                364.97617
               ]
             },
             {
@@ -44379,6 +45356,30 @@
                 1.04,
                 324.90814
               ]
+            },
+            {
+              "fecha": "F25",
+              "opp": "Sarmiento",
+              "min": 96,
+              "metrics": [
+                2572.45044,
+                51.3805,
+                79.52,
+                134.78999,
+                33.79,
+                3,
+                29.4589,
+                5,
+                9,
+                9,
+                null,
+                3.7173,
+                -5.23387,
+                0.05,
+                3.375887160751566,
+                0.35,
+                1029.26382
+              ]
             }
           ]
         },
@@ -44530,30 +45531,6 @@
               ]
             },
             {
-              "fecha": "F5",
-              "opp": "Newells",
-              "min": 101,
-              "metrics": [
-                8276.71265,
-                82.09667,
-                155.61,
-                111.71,
-                27.33,
-                2,
-                28.14882,
-                16,
-                12,
-                46,
-                null,
-                4.65319,
-                -5.04267,
-                0.16,
-                5.446718465862127,
-                0.27,
-                947.57874
-              ]
-            },
-            {
               "fecha": "F6",
               "opp": "San Martin SJ",
               "min": 45,
@@ -44628,7 +45605,7 @@
           ]
         },
         "Tomas Demonte": {
-          "pos": "",
+          "pos": "DFC",
           "match": [
             {
               "fecha": "F10",
@@ -44700,6 +45677,30 @@
                 14.321170220064182,
                 1.21,
                 216.00603
+              ]
+            },
+            {
+              "fecha": "F25",
+              "opp": "Sarmiento",
+              "min": 64,
+              "metrics": [
+                5598.62073,
+                93.14708,
+                115.73,
+                56.97,
+                36.31,
+                2,
+                29.90021,
+                6,
+                6,
+                42,
+                null,
+                3.98552,
+                -4.27048,
+                0.09,
+                7.263494037845125,
+                0.57,
+                589.67804
               ]
             },
             {
@@ -44921,6 +45922,30 @@
                 11.317035048930771,
                 0.13,
                 928.50049
+              ]
+            },
+            {
+              "fecha": "F25",
+              "opp": "Sarmiento",
+              "min": 28,
+              "metrics": [
+                2982.3501,
+                105.75647,
+                110.52,
+                74.58,
+                53.92,
+                3,
+                28.88952,
+                7,
+                6,
+                12,
+                null,
+                3.83305,
+                -6.52372,
+                0.25,
+                14.227220879309222,
+                1.93,
+                321.27396
               ]
             },
             {
@@ -49907,6 +50932,30 @@
               ]
             },
             {
+              "fecha": "F25",
+              "opp": "Sarmiento",
+              "min": 83,
+              "metrics": [
+                8230.43848,
+                99.70246,
+                355.43001,
+                289.72,
+                79.11,
+                4,
+                27.94068,
+                15,
+                28,
+                54,
+                null,
+                4.28212,
+                -5.3735,
+                0.18,
+                13.58510006056935,
+                0.95,
+                925.69577
+              ]
+            },
+            {
               "fecha": "F5",
               "opp": "Newells",
               "min": 88,
@@ -50226,6 +51275,30 @@
                 20.393962361516504,
                 0.67,
                 226.65305
+              ]
+            },
+            {
+              "fecha": "F25",
+              "opp": "Sarmiento",
+              "min": 41,
+              "metrics": [
+                4228.16064,
+                103.12587,
+                307,
+                183.59,
+                31.07,
+                2,
+                27.65099,
+                15,
+                18,
+                45,
+                null,
+                3.84966,
+                -4.5871,
+                0.37,
+                19.800000243902442,
+                0.76,
+                456.75378
               ]
             },
             {
@@ -50647,6 +51720,30 @@
               ]
             },
             {
+              "fecha": "F25",
+              "opp": "Sarmiento",
+              "min": 69,
+              "metrics": [
+                6628.68433,
+                96.22827,
+                322.78,
+                290.14,
+                114.62,
+                6,
+                29.44766,
+                10,
+                15,
+                42,
+                null,
+                4.2005,
+                -4.73546,
+                0.14,
+                15.50279451259345,
+                1.66,
+                641.89987
+              ]
+            },
+            {
               "fecha": "F5",
               "opp": "Newells",
               "min": 88,
@@ -50993,6 +52090,30 @@
               ]
             },
             {
+              "fecha": "F25",
+              "opp": "Sarmiento",
+              "min": 83,
+              "metrics": [
+                7781.33008,
+                94.26202,
+                220.42999,
+                81.27,
+                0,
+                0,
+                23.87469,
+                25,
+                24,
+                68,
+                null,
+                4.30034,
+                -4.75269,
+                0.3,
+                7.890853906723199,
+                0.0,
+                871.8718
+              ]
+            },
+            {
               "fecha": "F5",
               "opp": "Newells",
               "min": 13,
@@ -51168,6 +52289,30 @@
                 16.08217272910425,
                 2.06,
                 270.04425
+              ]
+            },
+            {
+              "fecha": "F25",
+              "opp": "Sarmiento",
+              "min": 14,
+              "metrics": [
+                1918.88647,
+                140.42345,
+                143.22,
+                78.76,
+                0,
+                0,
+                24.35683,
+                7,
+                12,
+                22,
+                null,
+                3.61992,
+                -5.45082,
+                0.5,
+                27.155507500914748,
+                0.0,
+                182.2906
               ]
             },
             {
@@ -51365,6 +52510,30 @@
                 15.78898768502072,
                 1.49,
                 959.94852
+              ]
+            },
+            {
+              "fecha": "F25",
+              "opp": "Sarmiento",
+              "min": 83,
+              "metrics": [
+                8349.94141,
+                101.15011,
+                538.93001,
+                349.69,
+                95.88,
+                4,
+                28.08579,
+                18,
+                32,
+                63,
+                null,
+                3.85336,
+                -5.90565,
+                0.22,
+                19.103452816474864,
+                1.16,
+                964.00186
               ]
             },
             {
@@ -51757,6 +52926,30 @@
               ]
             },
             {
+              "fecha": "F25",
+              "opp": "Sarmiento",
+              "min": 42,
+              "metrics": [
+                3993.38721,
+                96.1104,
+                207.61,
+                86.84,
+                1.17,
+                0,
+                24.94839,
+                11,
+                12,
+                37,
+                null,
+                4.44043,
+                -4.82187,
+                0.26,
+                10.875812274368233,
+                0.03,
+                481.49118
+              ]
+            },
+            {
               "fecha": "F7",
               "opp": "Argentinos Jrs",
               "min": 12,
@@ -52004,7 +53197,7 @@
           ]
         },
         "Luca Cabrera": {
-          "pos": "",
+          "pos": "VOL",
           "match": [
             {
               "fecha": "F10",
@@ -52220,6 +53413,30 @@
                 14.169168004653867,
                 1.33,
                 1019.54977
+              ]
+            },
+            {
+              "fecha": "F25",
+              "opp": "Sarmiento",
+              "min": 42,
+              "metrics": [
+                4692.30029,
+                112.93141,
+                287.70999,
+                187.2,
+                9.59,
+                1,
+                25.35795,
+                14,
+                19,
+                41,
+                null,
+                3.76863,
+                -4.64006,
+                0.33,
+                19.07003561973526,
+                0.23,
+                554.99414
               ]
             },
             {
@@ -52489,6 +53706,30 @@
                 17.986249873761896,
                 0.3,
                 1270.05597
+              ]
+            },
+            {
+              "fecha": "F25",
+              "opp": "Sarmiento",
+              "min": 41,
+              "metrics": [
+                4686.80664,
+                114.31236,
+                229.42999,
+                76.1,
+                0,
+                0,
+                24.80661,
+                11,
+                16,
+                44,
+                null,
+                4.17605,
+                -5.08315,
+                0.27,
+                16.276340975609756,
+                0.0,
+                577.27191
               ]
             },
             {
@@ -52860,6 +54101,30 @@
                 0.41,
                 629.73807
               ]
+            },
+            {
+              "fecha": "F25",
+              "opp": "Sarmiento",
+              "min": 62,
+              "metrics": [
+                6211.1134,
+                99.5198,
+                258.21999,
+                126.6,
+                18.57,
+                1,
+                25.70284,
+                9,
+                26,
+                32,
+                null,
+                3.78746,
+                -5.10448,
+                0.15,
+                10.884969062529208,
+                0.3,
+                646.3502
+              ]
             }
           ]
         },
@@ -53013,6 +54278,30 @@
                 12.811249259917112,
                 1.1,
                 914.67041
+              ]
+            },
+            {
+              "fecha": "F25",
+              "opp": "Sarmiento",
+              "min": 83,
+              "metrics": [
+                7708.84009,
+                93.38389,
+                329.32,
+                145.09,
+                62.76,
+                4,
+                27.05534,
+                10,
+                17,
+                40,
+                null,
+                3.81768,
+                -4.44767,
+                0.12,
+                11.05487583282859,
+                0.76,
+                799.9014
               ]
             },
             {
@@ -53506,6 +54795,30 @@
               ]
             },
             {
+              "fecha": "F25",
+              "opp": "Sarmiento",
+              "min": 83,
+              "metrics": [
+                8742.57813,
+                105.90646,
+                546.70999,
+                243.26,
+                36.81,
+                1,
+                26.08226,
+                24,
+                37,
+                63,
+                null,
+                3.93971,
+                -5.31661,
+                0.29,
+                16.881889521502117,
+                0.44,
+                892.78995
+              ]
+            },
+            {
               "fecha": "F5",
               "opp": "Newells",
               "min": 68,
@@ -53892,6 +55205,30 @@
                 21.417642341619885,
                 1.86,
                 496.49896
+              ]
+            },
+            {
+              "fecha": "F25",
+              "opp": "Sarmiento",
+              "min": 20,
+              "metrics": [
+                2506.48291,
+                123.84829,
+                99.8,
+                81.39,
+                0,
+                0,
+                24.62277,
+                8,
+                13,
+                23,
+                null,
+                3.82237,
+                -4.42529,
+                0.4,
+                18.083010788108375,
+                0.0,
+                320.42105
               ]
             },
             {
@@ -54558,6 +55895,30 @@
               ]
             },
             {
+              "fecha": "F25",
+              "opp": "Sarmiento",
+              "min": 83,
+              "metrics": [
+                8894.18604,
+                107.74302,
+                468.68001,
+                257.70999,
+                0,
+                0,
+                24.72361,
+                11,
+                25,
+                57,
+                null,
+                3.58576,
+                -5.3961,
+                0.13,
+                16.440944881889767,
+                0.0,
+                913.57932
+              ]
+            },
+            {
               "fecha": "F5",
               "opp": "Newells",
               "min": 88,
@@ -54904,6 +56265,30 @@
                 0.05,
                 967.25601
               ]
+            },
+            {
+              "fecha": "F25",
+              "opp": "Sarmiento",
+              "min": 78,
+              "metrics": [
+                7688.04736,
+                98.98773,
+                295.01999,
+                114.45,
+                1.82,
+                0,
+                26.36371,
+                50,
+                15,
+                40,
+                null,
+                5.32656,
+                -5.5378,
+                0.64,
+                11.066780987124464,
+                0.02,
+                1149.88037
+              ]
             }
           ]
         },
@@ -55100,6 +56485,30 @@
                 18.322964336283185,
                 1.21,
                 913.7847
+              ]
+            },
+            {
+              "fecha": "F25",
+              "opp": "Sarmiento",
+              "min": 78,
+              "metrics": [
+                8157.00562,
+                105.02582,
+                556.45999,
+                451.02002,
+                93.47,
+                5,
+                28.65579,
+                24,
+                39,
+                75,
+                null,
+                4.43331,
+                -5.4691,
+                0.31,
+                20.97489296137339,
+                1.2,
+                952.56351
               ]
             }
           ]
@@ -55428,11 +56837,35 @@
                 1.2,
                 879.02982
               ]
+            },
+            {
+              "fecha": "F25",
+              "opp": "Sarmiento",
+              "min": 78,
+              "metrics": [
+                7428.11499,
+                95.64097,
+                371.26999,
+                296.34,
+                135.49,
+                6,
+                27.32898,
+                11,
+                31,
+                58,
+                null,
+                3.94554,
+                -4.21519,
+                0.14,
+                15.294849527896993,
+                1.74,
+                808.88055
+              ]
             }
           ]
         },
         "Benjamin Sanchez": {
-          "pos": "",
+          "pos": "Lateral Izquierdo",
           "match": [
             {
               "fecha": "F21",
@@ -55456,6 +56889,30 @@
                 12.436830350527906,
                 0.68,
                 672.01877
+              ]
+            },
+            {
+              "fecha": "F25",
+              "opp": "Sarmiento",
+              "min": 13,
+              "metrics": [
+                1160.41797,
+                90.85759,
+                42.65,
+                12.48,
+                5.38,
+                0,
+                25.17178,
+                0,
+                0,
+                9,
+                null,
+                2.42219,
+                -2.59541,
+                0.0,
+                10.06123156313783,
+                0.41,
+                151.40266
               ]
             }
           ]
@@ -55586,6 +57043,30 @@
                 11.959923107425478,
                 0.39,
                 636.02481
+              ]
+            },
+            {
+              "fecha": "F25",
+              "opp": "Sarmiento",
+              "min": 78,
+              "metrics": [
+                6476.44189,
+                83.38766,
+                311.02,
+                174.18999,
+                57.14,
+                4,
+                27.09252,
+                19,
+                23,
+                56,
+                null,
+                4.2969,
+                -4.98131,
+                0.24,
+                11.390085708154505,
+                0.73,
+                685.06961
               ]
             }
           ]
@@ -55784,6 +57265,30 @@
                 0.36,
                 749.59869
               ]
+            },
+            {
+              "fecha": "F25",
+              "opp": "Sarmiento",
+              "min": 78,
+              "metrics": [
+                6745.53809,
+                86.85242,
+                265.56001,
+                107.18,
+                21.03,
+                1,
+                25.8088,
+                9,
+                14,
+                45,
+                null,
+                3.5718,
+                -4.35239,
+                0.12,
+                9.325493562231758,
+                0.27,
+                707.71948
+              ]
             }
           ]
         },
@@ -55884,6 +57389,30 @@
                 6.831763814858744,
                 0.34,
                 104.8603
+              ]
+            },
+            {
+              "fecha": "F25",
+              "opp": "Sarmiento",
+              "min": 12,
+              "metrics": [
+                1053.93445,
+                86.21846,
+                36.26,
+                26.91,
+                12.75,
+                1,
+                25.89882,
+                1,
+                1,
+                8,
+                null,
+                3.09237,
+                -3.3468,
+                0.08,
+                10.55416431052589,
+                1.06,
+                116.67916
               ]
             }
           ]
@@ -56201,6 +57730,30 @@
                 16.529735851101297,
                 0.77,
                 783.047
+              ]
+            },
+            {
+              "fecha": "F25",
+              "opp": "Sarmiento",
+              "min": 78,
+              "metrics": [
+                8138.6355,
+                104.7893,
+                374.91,
+                130.82,
+                25.98,
+                1,
+                28.41948,
+                23,
+                26,
+                81,
+                null,
+                3.88622,
+                -4.52471,
+                0.29,
+                13.355665107296137,
+                0.33,
+                854.57639
               ]
             }
           ]
@@ -56678,11 +58231,35 @@
                 0.15,
                 861.47668
               ]
+            },
+            {
+              "fecha": "F25",
+              "opp": "Sarmiento",
+              "min": 78,
+              "metrics": [
+                8526.69043,
+                109.78571,
+                428.85001,
+                248.75999,
+                16.96,
+                0,
+                25.26019,
+                18,
+                12,
+                64,
+                null,
+                4.06034,
+                -4.59116,
+                0.23,
+                15.759785407725321,
+                0.22,
+                903.09366
+              ]
             }
           ]
         },
         "Joaquin Gomez": {
-          "pos": "Defensa Central",
+          "pos": "",
           "match": [
             {
               "fecha": "F10",
@@ -57033,7 +58610,7 @@
           ]
         },
         "Lautaro Prado": {
-          "pos": "Volante Izquierdo",
+          "pos": "",
           "match": [
             {
               "fecha": "F20",
@@ -57182,6 +58759,30 @@
                 16.41079672566372,
                 0.94,
                 961.62726
+              ]
+            },
+            {
+              "fecha": "F25",
+              "opp": "Sarmiento",
+              "min": 78,
+              "metrics": [
+                8178.63818,
+                105.30435,
+                440.06,
+                327.78,
+                147.29,
+                8,
+                29.67219,
+                14,
+                17,
+                53,
+                null,
+                4.28064,
+                -5.31034,
+                0.18,
+                18.613519184549354,
+                1.89,
+                883.3143
               ]
             }
           ]
@@ -57437,7 +59038,7 @@
           ]
         },
         "Miqueas Olocco": {
-          "pos": "",
+          "pos": "DC",
           "match": [
             {
               "fecha": "F10",
@@ -57606,6 +59207,30 @@
                 1.86,
                 212.52487
               ]
+            },
+            {
+              "fecha": "F25",
+              "opp": "Sarmiento",
+              "min": 26,
+              "metrics": [
+                2329.0166,
+                91.16357,
+                112.46,
+                66.38,
+                15.03,
+                1,
+                25.65998,
+                8,
+                7,
+                18,
+                null,
+                3.86907,
+                -4.68761,
+                0.31,
+                12.464528189217607,
+                0.58,
+                219.60999
+              ]
             }
           ]
         },
@@ -57755,11 +59380,35 @@
                 0.0,
                 604.07384
               ]
+            },
+            {
+              "fecha": "F25",
+              "opp": "Sarmiento",
+              "min": 25,
+              "metrics": [
+                2462.13013,
+                99.52759,
+                139.25999,
+                0.5,
+                0,
+                0,
+                20.89503,
+                3,
+                6,
+                20,
+                null,
+                3.49197,
+                -3.75519,
+                0.12,
+                11.472822074063242,
+                0.0,
+                242.30403
+              ]
             }
           ]
         },
         "OCTAVIO GOMEZ": {
-          "pos": "Defensa Central",
+          "pos": "",
           "match": [
             {
               "fecha": "F11",
@@ -58173,6 +59822,30 @@
                 0.68,
                 686.61334
               ]
+            },
+            {
+              "fecha": "F25",
+              "opp": "Sarmiento",
+              "min": 56,
+              "metrics": [
+                5279.67371,
+                94.41786,
+                257.68,
+                131.64,
+                16.44,
+                2,
+                25.9566,
+                11,
+                18,
+                29,
+                null,
+                4.02619,
+                -4.86093,
+                0.2,
+                12.512928118172686,
+                0.29,
+                673.02087
+              ]
             }
           ]
         },
@@ -58297,6 +59970,30 @@
                 5.539702136304678,
                 0.0,
                 217.5146
+              ]
+            },
+            {
+              "fecha": "F25",
+              "opp": "Sarmiento",
+              "min": 57,
+              "metrics": [
+                5794.1167,
+                101.42489,
+                254.56001,
+                118.99,
+                3.96,
+                0,
+                25.34796,
+                15,
+                24,
+                46,
+                null,
+                3.6344,
+                -5.27617,
+                0.26,
+                11.540043878715032,
+                0.07,
+                739.25336
               ]
             }
           ]
@@ -66947,6 +68644,510 @@
               "dur": 5.1,
               "vel": 27.97,
               "dist": 35.39
+            }
+          ]
+        }
+      },
+      "F25": {
+        "opp": "Sarmiento",
+        "periodos": [
+          {
+            "name": "Primer tiempo",
+            "start": 1789214853,
+            "end": 1789217655
+          },
+          {
+            "name": "Segundo tiempo",
+            "start": 1789218571,
+            "end": 1789221497
+          }
+        ],
+        "jugadores": {
+          "Lautaro Benitez": [
+            {
+              "start": 1789215219.86,
+              "dur": 1.3,
+              "vel": 25.24,
+              "dist": 7.7
+            },
+            {
+              "start": 1789216024.96,
+              "dur": 5.7,
+              "vel": 30.1,
+              "dist": 43.42
+            },
+            {
+              "start": 1789216457.16,
+              "dur": 3.2,
+              "vel": 26.6,
+              "dist": 21.96
+            },
+            {
+              "start": 1789217346.16,
+              "dur": 2.0,
+              "vel": 26.17,
+              "dist": 13.47
+            }
+          ],
+          "Tomas Copes": [
+            {
+              "start": 1789221419.24,
+              "dur": 4.3,
+              "vel": 27.9,
+              "dist": 29.7
+            }
+          ],
+          "Benjamin Figueredo": [
+            {
+              "start": 1789221169.48,
+              "dur": 6.9,
+              "vel": 28.55,
+              "dist": 47.41
+            },
+            {
+              "start": 1789221178.08,
+              "dur": 1.7,
+              "vel": 25.34,
+              "dist": 10.86
+            },
+            {
+              "start": 1789221418.58,
+              "dur": 4.8,
+              "vel": 26.21,
+              "dist": 32.21
+            }
+          ],
+          "Felipe Fredes": [
+            {
+              "start": 1789215047.66,
+              "dur": 2.1,
+              "vel": 26.28,
+              "dist": 13.72
+            },
+            {
+              "start": 1789215506.06,
+              "dur": 2.9,
+              "vel": 26.32,
+              "dist": 19.72
+            },
+            {
+              "start": 1789215571.86,
+              "dur": 4.1,
+              "vel": 28.26,
+              "dist": 28.87
+            },
+            {
+              "start": 1789216023.96,
+              "dur": 6.9,
+              "vel": 26.42,
+              "dist": 46.14
+            },
+            {
+              "start": 1789216197.56,
+              "dur": 2.6,
+              "vel": 26.1,
+              "dist": 17.04
+            },
+            {
+              "start": 1789216457.16,
+              "dur": 4.4,
+              "vel": 29.05,
+              "dist": 31.76
+            },
+            {
+              "start": 1789216584.76,
+              "dur": 3.1,
+              "vel": 26.14,
+              "dist": 20.48
+            },
+            {
+              "start": 1789219185.36,
+              "dur": 4.8,
+              "vel": 26.06,
+              "dist": 32.49
+            },
+            {
+              "start": 1789219509.06,
+              "dur": 6.1,
+              "vel": 27.22,
+              "dist": 42.79
+            },
+            {
+              "start": 1789220265.46,
+              "dur": 2.7,
+              "vel": 28.04,
+              "dist": 18.35
+            },
+            {
+              "start": 1789220359.26,
+              "dur": 6.4,
+              "vel": 29.95,
+              "dist": 49.15
+            },
+            {
+              "start": 1789220435.76,
+              "dur": 2.9,
+              "vel": 28.12,
+              "dist": 20.09
+            }
+          ],
+          "Santino Gonzalez": [
+            {
+              "start": 1789215460.45,
+              "dur": 1.8,
+              "vel": 25.96,
+              "dist": 11.64
+            },
+            {
+              "start": 1789216024.65,
+              "dur": 5.9,
+              "vel": 29.84,
+              "dist": 44.72
+            },
+            {
+              "start": 1789217382.95,
+              "dur": 3.0,
+              "vel": 26.71,
+              "dist": 20.17
+            },
+            {
+              "start": 1789219675.15,
+              "dur": 3.8,
+              "vel": 25.42,
+              "dist": 24.45
+            }
+          ],
+          "Yair Hillaret": [
+            {
+              "start": 1789221241.31,
+              "dur": 1.7,
+              "vel": 25.2,
+              "dist": 10.66
+            },
+            {
+              "start": 1789221331.31,
+              "dur": 3.1,
+              "vel": 26.82,
+              "dist": 21.03
+            },
+            {
+              "start": 1789221402.71,
+              "dur": 2.8,
+              "vel": 27.18,
+              "dist": 19.08
+            }
+          ],
+          "Brandom Leszczuk": [],
+          "Facundo Lopez": [
+            {
+              "start": 1789216639.47,
+              "dur": 3.6,
+              "vel": 26.78,
+              "dist": 24.75
+            }
+          ],
+          "Alan Luengo": [
+            {
+              "start": 1789216586.09,
+              "dur": 5.1,
+              "vel": 29.05,
+              "dist": 36.06
+            },
+            {
+              "start": 1789216638.69,
+              "dur": 3.2,
+              "vel": 26.5,
+              "dist": 21.93
+            },
+            {
+              "start": 1789220133.99,
+              "dur": 1.5,
+              "vel": 25.81,
+              "dist": 9.68
+            },
+            {
+              "start": 1789220178.29,
+              "dur": 2.5,
+              "vel": 26.5,
+              "dist": 16.88
+            },
+            {
+              "start": 1789220361.09,
+              "dur": 4.6,
+              "vel": 26.06,
+              "dist": 30.88
+            }
+          ],
+          "Lucas Molas": [
+            {
+              "start": 1789215055.25,
+              "dur": 4.2,
+              "vel": 27.47,
+              "dist": 29.11
+            },
+            {
+              "start": 1789215506.35,
+              "dur": 1.9,
+              "vel": 25.74,
+              "dist": 12.36
+            },
+            {
+              "start": 1789216025.15,
+              "dur": 5.2,
+              "vel": 28.08,
+              "dist": 37.21
+            },
+            {
+              "start": 1789216473.85,
+              "dur": 1.9,
+              "vel": 27.25,
+              "dist": 12.67
+            },
+            {
+              "start": 1789217100.25,
+              "dur": 5.2,
+              "vel": 31.0,
+              "dist": 37.84
+            },
+            {
+              "start": 1789217245.65,
+              "dur": 4.2,
+              "vel": 27.04,
+              "dist": 28.78
+            },
+            {
+              "start": 1789218658.25,
+              "dur": 4.3,
+              "vel": 29.84,
+              "dist": 31.79
+            },
+            {
+              "start": 1789218759.25,
+              "dur": 1.6,
+              "vel": 25.38,
+              "dist": 10.1
+            },
+            {
+              "start": 1789219325.15,
+              "dur": 4.0,
+              "vel": 28.76,
+              "dist": 28.79
+            },
+            {
+              "start": 1789219397.15,
+              "dur": 3.9,
+              "vel": 27.5,
+              "dist": 26.23
+            },
+            {
+              "start": 1789219506.95,
+              "dur": 4.8,
+              "vel": 28.3,
+              "dist": 34.77
+            },
+            {
+              "start": 1789220177.65,
+              "dur": 2.4,
+              "vel": 25.56,
+              "dist": 15.84
+            },
+            {
+              "start": 1789220475.25,
+              "dur": 2.7,
+              "vel": 26.6,
+              "dist": 18.24
+            },
+            {
+              "start": 1789220646.15,
+              "dur": 3.7,
+              "vel": 26.39,
+              "dist": 24.6
+            },
+            {
+              "start": 1789220787.95,
+              "dur": 4.0,
+              "vel": 26.5,
+              "dist": 27.43
+            },
+            {
+              "start": 1789220865.45,
+              "dur": 3.7,
+              "vel": 28.37,
+              "dist": 26.41
+            },
+            {
+              "start": 1789221417.75,
+              "dur": 4.6,
+              "vel": 26.35,
+              "dist": 30.95
+            }
+          ],
+          "Ignacio Ordoñez": [
+            {
+              "start": 1789215002.65,
+              "dur": 2.7,
+              "vel": 26.93,
+              "dist": 17.85
+            },
+            {
+              "start": 1789215572.55,
+              "dur": 3.1,
+              "vel": 25.27,
+              "dist": 19.65
+            },
+            {
+              "start": 1789215668.55,
+              "dur": 8.0,
+              "vel": 29.38,
+              "dist": 53.87
+            },
+            {
+              "start": 1789215773.65,
+              "dur": 3.1,
+              "vel": 26.71,
+              "dist": 20.93
+            },
+            {
+              "start": 1789215924.05,
+              "dur": 1.9,
+              "vel": 25.13,
+              "dist": 11.8
+            },
+            {
+              "start": 1789215928.05,
+              "dur": 2.6,
+              "vel": 26.42,
+              "dist": 17.05
+            },
+            {
+              "start": 1789216025.85,
+              "dur": 5.3,
+              "vel": 31.1,
+              "dist": 41.54
+            },
+            {
+              "start": 1789216197.45,
+              "dur": 2.8,
+              "vel": 25.31,
+              "dist": 18.29
+            },
+            {
+              "start": 1789216900.15,
+              "dur": 2.0,
+              "vel": 25.16,
+              "dist": 12.85
+            },
+            {
+              "start": 1789217365.55,
+              "dur": 1.9,
+              "vel": 27.94,
+              "dist": 12.86
+            },
+            {
+              "start": 1789217382.25,
+              "dur": 3.2,
+              "vel": 28.08,
+              "dist": 22.47
+            },
+            {
+              "start": 1789219026.55,
+              "dur": 2.3,
+              "vel": 25.09,
+              "dist": 14.89
+            },
+            {
+              "start": 1789219195.75,
+              "dur": 2.1,
+              "vel": 27.22,
+              "dist": 14.16
+            },
+            {
+              "start": 1789219819.35,
+              "dur": 4.5,
+              "vel": 28.94,
+              "dist": 31.68
+            },
+            {
+              "start": 1789220265.95,
+              "dur": 2.3,
+              "vel": 25.78,
+              "dist": 14.83
+            },
+            {
+              "start": 1789220737.05,
+              "dur": 3.5,
+              "vel": 25.67,
+              "dist": 23.15
+            }
+          ],
+          "Lautaro Pannoni": [
+            {
+              "start": 1789215391.89,
+              "dur": 2.0,
+              "vel": 25.24,
+              "dist": 12.83
+            },
+            {
+              "start": 1789219185.79,
+              "dur": 3.9,
+              "vel": 26.71,
+              "dist": 25.75
+            },
+            {
+              "start": 1789220359.49,
+              "dur": 5.3,
+              "vel": 27.72,
+              "dist": 37.33
+            },
+            {
+              "start": 1789220585.69,
+              "dur": 2.0,
+              "vel": 25.78,
+              "dist": 13.14
+            },
+            {
+              "start": 1789220705.19,
+              "dur": 2.8,
+              "vel": 28.4,
+              "dist": 19.55
+            },
+            {
+              "start": 1789221066.89,
+              "dur": 3.1,
+              "vel": 28.04,
+              "dist": 21.89
+            }
+          ],
+          "Gastón Pérez": [
+            {
+              "start": 1789215361.01,
+              "dur": 2.2,
+              "vel": 25.81,
+              "dist": 14.35
+            },
+            {
+              "start": 1789216025.01,
+              "dur": 5.5,
+              "vel": 31.86,
+              "dist": 43.5
+            },
+            {
+              "start": 1789220475.21,
+              "dur": 2.2,
+              "vel": 25.09,
+              "dist": 14.12
+            },
+            {
+              "start": 1789220865.41,
+              "dur": 3.0,
+              "vel": 25.67,
+              "dist": 19.86
+            },
+            {
+              "start": 1789221419.11,
+              "dur": 4.2,
+              "vel": 28.01,
+              "dist": 29.88
             }
           ]
         }
