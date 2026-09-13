@@ -1,5 +1,5 @@
 {
-  "actualizado": "2026-09-13 17:20",
+  "actualizado": "2026-09-13 19:00",
   "fuente": "ligaprofesional.ar (oficial)",
   "fuente_fixture": "ligaprofesional.ar (oficial)",
   "fuente_reserva": "statfutbol.com.ar",
@@ -20650,20 +20650,20 @@
       "gc": 26
     },
     "5TA": {
-      "pj": 24,
+      "pj": 25,
       "pg": 8,
-      "pe": 8,
+      "pe": 9,
       "pp": 8,
-      "gf": 32,
-      "gc": 26
+      "gf": 36,
+      "gc": 30
     },
     "6TA": {
-      "pj": 24,
+      "pj": 25,
       "pg": 6,
-      "pe": 6,
+      "pe": 7,
       "pp": 12,
-      "gf": 34,
-      "gc": 57
+      "gf": 35,
+      "gc": 58
     },
     "7MA": {
       "pj": 25,
@@ -20674,12 +20674,12 @@
       "gc": 36
     },
     "8VA": {
-      "pj": 24,
+      "pj": 25,
       "pg": 8,
       "pe": 7,
-      "pp": 9,
+      "pp": 10,
       "gf": 23,
-      "gc": 33
+      "gc": 36
     },
     "9NA": {
       "pj": 25,
