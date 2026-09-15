@@ -1,5 +1,5 @@
 {
-  "actualizado": "2026-09-14 07:25",
+  "actualizado": "2026-09-15 01:20",
   "fuente": "ligaprofesional.ar (oficial)",
   "fuente_fixture": "ligaprofesional.ar (oficial)",
   "fuente_reserva": "statfutbol.com.ar",
@@ -2608,6 +2608,446 @@
         "dif": -64
       }
     ],
+    "RESERVA_APE": {
+      "zonas": {
+        "Zona A": [
+          {
+            "pos": 1,
+            "equipo": "VELEZ",
+            "pts": 44,
+            "pj": 18,
+            "pg": 14,
+            "pe": 2,
+            "pp": 2,
+            "gf": 40,
+            "gc": 11,
+            "dif": 29
+          },
+          {
+            "pos": 2,
+            "equipo": "RIVER PLATE",
+            "pts": 31,
+            "pj": 18,
+            "pg": 9,
+            "pe": 4,
+            "pp": 5,
+            "gf": 24,
+            "gc": 17,
+            "dif": 7
+          },
+          {
+            "pos": 3,
+            "equipo": "RACING CLUB",
+            "pts": 30,
+            "pj": 18,
+            "pg": 8,
+            "pe": 6,
+            "pp": 4,
+            "gf": 27,
+            "gc": 23,
+            "dif": 4
+          },
+          {
+            "pos": 4,
+            "equipo": "ATL. TUCUMAN",
+            "pts": 30,
+            "pj": 18,
+            "pg": 9,
+            "pe": 3,
+            "pp": 6,
+            "gf": 26,
+            "gc": 25,
+            "dif": 1
+          },
+          {
+            "pos": 5,
+            "equipo": "UNION (SF)",
+            "pts": 29,
+            "pj": 18,
+            "pg": 7,
+            "pe": 8,
+            "pp": 3,
+            "gf": 23,
+            "gc": 19,
+            "dif": 4
+          },
+          {
+            "pos": 6,
+            "equipo": "ARGENTINOS JRS",
+            "pts": 28,
+            "pj": 18,
+            "pg": 7,
+            "pe": 7,
+            "pp": 4,
+            "gf": 24,
+            "gc": 18,
+            "dif": 6
+          },
+          {
+            "pos": 7,
+            "equipo": "TALLERES (C)",
+            "pts": 26,
+            "pj": 18,
+            "pg": 7,
+            "pe": 5,
+            "pp": 6,
+            "gf": 27,
+            "gc": 21,
+            "dif": 6
+          },
+          {
+            "pos": 8,
+            "equipo": "CENTRAL",
+            "pts": 26,
+            "pj": 18,
+            "pg": 7,
+            "pe": 5,
+            "pp": 6,
+            "gf": 25,
+            "gc": 22,
+            "dif": 3
+          },
+          {
+            "pos": 9,
+            "equipo": "INSTITUTO (C)",
+            "pts": 24,
+            "pj": 18,
+            "pg": 5,
+            "pe": 9,
+            "pp": 4,
+            "gf": 20,
+            "gc": 21,
+            "dif": -1
+          },
+          {
+            "pos": 10,
+            "equipo": "SAN LORENZO",
+            "pts": 24,
+            "pj": 18,
+            "pg": 6,
+            "pe": 6,
+            "pp": 6,
+            "gf": 22,
+            "gc": 24,
+            "dif": -2
+          },
+          {
+            "pos": 11,
+            "equipo": "GIMNASIA (LP)",
+            "pts": 23,
+            "pj": 18,
+            "pg": 6,
+            "pe": 5,
+            "pp": 7,
+            "gf": 19,
+            "gc": 17,
+            "dif": 2
+          },
+          {
+            "pos": 12,
+            "equipo": "GIMNASIA (M)",
+            "pts": 23,
+            "pj": 18,
+            "pg": 6,
+            "pe": 5,
+            "pp": 7,
+            "gf": 16,
+            "gc": 19,
+            "dif": -3
+          },
+          {
+            "pos": 13,
+            "equipo": "BANFIELD",
+            "pts": 23,
+            "pj": 18,
+            "pg": 6,
+            "pe": 5,
+            "pp": 7,
+            "gf": 14,
+            "gc": 18,
+            "dif": -4
+          },
+          {
+            "pos": 14,
+            "equipo": "ALDOSIVI (MDP)",
+            "pts": 18,
+            "pj": 18,
+            "pg": 5,
+            "pe": 3,
+            "pp": 10,
+            "gf": 17,
+            "gc": 28,
+            "dif": -11
+          },
+          {
+            "pos": 15,
+            "equipo": "BARRACAS CTRAL",
+            "pts": 17,
+            "pj": 18,
+            "pg": 4,
+            "pe": 5,
+            "pp": 9,
+            "gf": 11,
+            "gc": 24,
+            "dif": -13
+          },
+          {
+            "pos": 16,
+            "equipo": "SARMIENTO (J)",
+            "pts": 16,
+            "pj": 18,
+            "pg": 4,
+            "pe": 4,
+            "pp": 10,
+            "gf": 16,
+            "gc": 26,
+            "dif": -10
+          },
+          {
+            "pos": 17,
+            "equipo": "TIGRE",
+            "pts": 16,
+            "pj": 18,
+            "pg": 4,
+            "pe": 4,
+            "pp": 10,
+            "gf": 15,
+            "gc": 25,
+            "dif": -10
+          },
+          {
+            "pos": 18,
+            "equipo": "GODOY CRUZ (M)",
+            "pts": 15,
+            "pj": 18,
+            "pg": 4,
+            "pe": 3,
+            "pp": 11,
+            "gf": 20,
+            "gc": 30,
+            "dif": -10
+          }
+        ],
+        "Zona B": [
+          {
+            "pos": 1,
+            "equipo": "BOCA JRS",
+            "pts": 36,
+            "pj": 18,
+            "pg": 11,
+            "pe": 3,
+            "pp": 4,
+            "gf": 33,
+            "gc": 11,
+            "dif": 22
+          },
+          {
+            "pos": 2,
+            "equipo": "INDEPENDIENTE",
+            "pts": 36,
+            "pj": 18,
+            "pg": 11,
+            "pe": 3,
+            "pp": 4,
+            "gf": 36,
+            "gc": 16,
+            "dif": 20
+          },
+          {
+            "pos": 3,
+            "equipo": "LANUS",
+            "pts": 35,
+            "pj": 18,
+            "pg": 11,
+            "pe": 2,
+            "pp": 5,
+            "gf": 39,
+            "gc": 24,
+            "dif": 15
+          },
+          {
+            "pos": 4,
+            "equipo": "NEWELLS",
+            "pts": 34,
+            "pj": 18,
+            "pg": 10,
+            "pe": 4,
+            "pp": 4,
+            "gf": 26,
+            "gc": 16,
+            "dif": 10
+          },
+          {
+            "pos": 5,
+            "equipo": "QUILMES",
+            "pts": 33,
+            "pj": 18,
+            "pg": 10,
+            "pe": 3,
+            "pp": 5,
+            "gf": 20,
+            "gc": 12,
+            "dif": 8
+          },
+          {
+            "pos": 6,
+            "equipo": "DEF Y JUSTICIA",
+            "pts": 32,
+            "pj": 18,
+            "pg": 9,
+            "pe": 5,
+            "pp": 4,
+            "gf": 38,
+            "gc": 24,
+            "dif": 14
+          },
+          {
+            "pos": 7,
+            "equipo": "ESTUDIANTES (LP)",
+            "pts": 28,
+            "pj": 18,
+            "pg": 8,
+            "pe": 4,
+            "pp": 6,
+            "gf": 25,
+            "gc": 16,
+            "dif": 9
+          },
+          {
+            "pos": 8,
+            "equipo": "BELGRANO (C)",
+            "pts": 27,
+            "pj": 18,
+            "pg": 8,
+            "pe": 3,
+            "pp": 7,
+            "gf": 27,
+            "gc": 29,
+            "dif": -2
+          },
+          {
+            "pos": 9,
+            "equipo": "HURACAN",
+            "pts": 26,
+            "pj": 18,
+            "pg": 7,
+            "pe": 5,
+            "pp": 6,
+            "gf": 23,
+            "gc": 17,
+            "dif": 6
+          },
+          {
+            "pos": 10,
+            "equipo": "PLATENSE",
+            "pts": 26,
+            "pj": 18,
+            "pg": 7,
+            "pe": 5,
+            "pp": 6,
+            "gf": 17,
+            "gc": 20,
+            "dif": -3
+          },
+          {
+            "pos": 11,
+            "equipo": "RIESTRA",
+            "pts": 25,
+            "pj": 18,
+            "pg": 7,
+            "pe": 4,
+            "pp": 7,
+            "gf": 25,
+            "gc": 18,
+            "dif": 7
+          },
+          {
+            "pos": 12,
+            "equipo": "IND.RIVADAVIA (M)",
+            "pts": 24,
+            "pj": 18,
+            "pg": 7,
+            "pe": 3,
+            "pp": 8,
+            "gf": 23,
+            "gc": 23,
+            "dif": 0
+          },
+          {
+            "pos": 13,
+            "equipo": "FERRO",
+            "pts": 22,
+            "pj": 18,
+            "pg": 6,
+            "pe": 4,
+            "pp": 8,
+            "gf": 20,
+            "gc": 23,
+            "dif": -3
+          },
+          {
+            "pos": 14,
+            "equipo": "C.CORDOBA(SDE)",
+            "pts": 19,
+            "pj": 18,
+            "pg": 5,
+            "pe": 4,
+            "pp": 9,
+            "gf": 21,
+            "gc": 33,
+            "dif": -12
+          },
+          {
+            "pos": 15,
+            "equipo": "COLON",
+            "pts": 18,
+            "pj": 18,
+            "pg": 5,
+            "pe": 3,
+            "pp": 10,
+            "gf": 15,
+            "gc": 23,
+            "dif": -8
+          },
+          {
+            "pos": 16,
+            "equipo": "ATL. RAFAELA",
+            "pts": 12,
+            "pj": 18,
+            "pg": 3,
+            "pe": 3,
+            "pp": 12,
+            "gf": 21,
+            "gc": 36,
+            "dif": -15
+          },
+          {
+            "pos": 17,
+            "equipo": "ESTUDIANTES (RC)",
+            "pts": 11,
+            "pj": 18,
+            "pg": 2,
+            "pe": 5,
+            "pp": 11,
+            "gf": 9,
+            "gc": 32,
+            "dif": -23
+          },
+          {
+            "pos": 18,
+            "equipo": "SAN MARTIN (SJ)",
+            "pts": 8,
+            "pj": 18,
+            "pg": 2,
+            "pe": 2,
+            "pp": 14,
+            "gf": 16,
+            "gc": 59,
+            "dif": -43
+          }
+        ]
+      }
+    },
     "RESERVA_CLA": {
       "zonas": {
         "Zona A": [
@@ -20162,6 +20602,12 @@
           "gv": 0
         },
         {
+          "local": "Godoy Cruz",
+          "visitante": "Indepte. Rivadavia",
+          "gl": 1,
+          "gv": 0
+        },
+        {
           "local": "Platense",
           "visitante": "Atlético Tucumán",
           "gl": 0,
@@ -21965,7 +22411,7 @@
       },
       {
         "nombre": "GONZALEZ, ALEX EMANUEL",
-        "gol": 0,
+        "gol": 1,
         "am": 1,
         "roja": 0
       },
@@ -22037,7 +22483,7 @@
       },
       {
         "nombre": "MOLAS, LUCAS GABRIEL",
-        "gol": 0,
+        "gol": 1,
         "am": 1,
         "roja": 1
       },
@@ -22061,6 +22507,12 @@
       },
       {
         "nombre": "PANNONI, LAUTARO BENJAMIN",
+        "gol": 0,
+        "am": 0,
+        "roja": 0
+      },
+      {
+        "nombre": "PELUFFO, IGNACIO",
         "gol": 0,
         "am": 0,
         "roja": 0
@@ -22598,6 +23050,481 @@
           "roja": false
         },
         "BENITEZ, CRISTIAN ALEJANDRO": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        }
+      }
+    },
+    "5TA": {
+      "1": {
+        "PEREYRA SALERNO, MANUEL": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "MOYANO, JERONIMO THOMAS": {
+          "goles": 0,
+          "amarilla": false,
+          "roja": true
+        },
+        "JUAREZ, GUSTAVO NAHUEL": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "MIÑO, ESTEBAN ROMAN": {
+          "goles": 1,
+          "amarilla": false,
+          "roja": false
+        },
+        "VERA LORENZO, CONRADO": {
+          "goles": 1,
+          "amarilla": false,
+          "roja": false
+        },
+        "CLAUSER BLANCO, RAMIRO": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "VILLANUEVA, JUAN ROMAN": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        }
+      },
+      "2": {
+        "ADAMOVSKY TAU, FELIPE": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "MIÑO, ESTEBAN ROMAN": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        }
+      },
+      "3": {
+        "WIRZ, AXEL LEANDRO": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "MIÑO, ESTEBAN ROMAN": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        }
+      },
+      "4": {
+        "RODRIGUEZ ZENTNER, THIAGO": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "MIÑO, ESTEBAN ROMAN": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        }
+      },
+      "5": {
+        "RODRIGUEZ ZENTNER, THIAGO": {
+          "goles": 1,
+          "amarilla": false,
+          "roja": false
+        },
+        "CANULLO, JUAN MARTIN": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "MIÑO, ESTEBAN ROMAN": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        }
+      },
+      "6": {
+        "ZERDA, SANTIAGO LIONEL": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "CORDOBA, FABRICIO SANTIAGO": {
+          "goles": 1,
+          "amarilla": false,
+          "roja": false
+        },
+        "LEDESMA, GONZALO EMMANUEL": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "POBLETE, MATIAS LUIS": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "LETIZIA PEYRET, IGNACIO TOMAS": {
+          "goles": 2,
+          "amarilla": false,
+          "roja": false
+        },
+        "MIÑO, ESTEBAN ROMAN": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "PEREZ BERTOLA, JOAQUIN": {
+          "goles": 1,
+          "amarilla": false,
+          "roja": false
+        }
+      },
+      "7": {
+        "MOYANO, JERONIMO THOMAS": {
+          "goles": 0,
+          "amarilla": false,
+          "roja": true
+        },
+        "LETIZIA PEYRET, IGNACIO TOMAS": {
+          "goles": 1,
+          "amarilla": false,
+          "roja": false
+        },
+        "POBLETE, MATIAS LUIS": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "LLERA, MARIANO": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        }
+      },
+      "8": {
+        "CORDOBA, FABRICIO SANTIAGO": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "WIRZ, AXEL LEANDRO": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "POBLETE, MATIAS LUIS": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "LETIZIA PEYRET, IGNACIO TOMAS": {
+          "goles": 1,
+          "amarilla": false,
+          "roja": false
+        },
+        "CROTTO CARLINI, IVO SANTINO": {
+          "goles": 1,
+          "amarilla": false,
+          "roja": false
+        }
+      },
+      "9": {
+        "LETIZIA PEYRET, IGNACIO TOMAS": {
+          "goles": 2,
+          "amarilla": false,
+          "roja": false
+        },
+        "LEDESMA, GONZALO EMMANUEL": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        }
+      },
+      "10": {
+        "LLERA, MARIANO": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "CROTTO, NICOLAS": {
+          "goles": 1,
+          "amarilla": false,
+          "roja": false
+        },
+        "MIÑO, ESTEBAN ROMAN": {
+          "goles": 1,
+          "amarilla": true,
+          "roja": false
+        }
+      },
+      "11": {
+        "WIRZ, AXEL LEANDRO": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "ADAMOVSKY TAU, FELIPE": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "CROTTO, NICOLAS": {
+          "goles": 1,
+          "amarilla": false,
+          "roja": false
+        },
+        "LEDESMA, GONZALO EMMANUEL": {
+          "goles": 1,
+          "amarilla": false,
+          "roja": false
+        }
+      },
+      "12": {
+        "RODRIGUEZ ZENTNER, THIAGO": {
+          "goles": 1,
+          "amarilla": false,
+          "roja": false
+        }
+      },
+      "13": {
+        "RODRIGUEZ ZENTNER, THIAGO": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "MIÑO, ESTEBAN ROMAN": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "VILLANUEVA, JUAN ROMAN": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        }
+      },
+      "14": {
+        "MOYANO, JERONIMO THOMAS": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "WIRZ, AXEL LEANDRO": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "JUAREZ, GUSTAVO NAHUEL": {
+          "goles": 0,
+          "amarilla": false,
+          "roja": true
+        },
+        "LLERA, MARIANO": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "LETIZIA PEYRET, IGNACIO TOMAS": {
+          "goles": 1,
+          "amarilla": false,
+          "roja": false
+        },
+        "POBLETE, MATIAS LUIS": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "LEDESMA, GONZALO EMMANUEL": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "GONZALEZ, LAUTARO EZEQUIEL": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        }
+      },
+      "15": {
+        "WIRZ, AXEL LEANDRO": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "LLERA, MARIANO": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        }
+      },
+      "16": {
+        "LEDESMA, GONZALO EMMANUEL": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "RODRIGUEZ ZENTNER, THIAGO": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "SAMPER, JOAQUIN MANUEL": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        }
+      },
+      "17": {
+        "ZERDA, SANTIAGO LIONEL": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "MOYANO, JERONIMO THOMAS": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "LUQUE, GONZALO OMAR": {
+          "goles": 1,
+          "amarilla": false,
+          "roja": false
+        },
+        "JUAREZ, GUSTAVO NAHUEL": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "RODRIGUEZ ZENTNER, THIAGO": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "LETIZIA PEYRET, IGNACIO TOMAS": {
+          "goles": 2,
+          "amarilla": false,
+          "roja": false
+        },
+        "LLERA, MARIANO": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        }
+      },
+      "18": {
+        "RODRIGUEZ ZENTNER, THIAGO": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "MIÑO, ESTEBAN ROMAN": {
+          "goles": 1,
+          "amarilla": true,
+          "roja": false
+        }
+      },
+      "19": {
+        "WIRZ, AXEL LEANDRO": {
+          "goles": 1,
+          "amarilla": true,
+          "roja": false
+        },
+        "LUQUE, GONZALO OMAR": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "MIÑO, ESTEBAN ROMAN": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        }
+      },
+      "20": {
+        "WIRZ, AXEL LEANDRO": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "LETIZIA PEYRET, IGNACIO TOMAS": {
+          "goles": 1,
+          "amarilla": true,
+          "roja": false
+        },
+        "GALESIO, SANTINO": {
+          "goles": 1,
+          "amarilla": false,
+          "roja": false
+        },
+        "LEDESMA, GONZALO EMMANUEL": {
+          "goles": 1,
+          "amarilla": false,
+          "roja": false
+        }
+      },
+      "21": {
+        "JUAREZ, GUSTAVO NAHUEL": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "CROTTO, NICOLAS": {
+          "goles": 1,
+          "amarilla": false,
+          "roja": false
+        },
+        "LLERA, MARIANO": {
+          "goles": 1,
+          "amarilla": false,
+          "roja": false
+        },
+        "MIÑO, ESTEBAN ROMAN": {
+          "goles": 1,
+          "amarilla": false,
+          "roja": false
+        },
+        "LEDESMA, GONZALO EMMANUEL": {
+          "goles": 1,
+          "amarilla": false,
+          "roja": false
+        },
+        "BARRIOS BARRIOS, CRISTIAN ARIEL": {
+          "goles": 1,
+          "amarilla": false,
+          "roja": false
+        }
+      },
+      "22": {
+        "LETIZIA PEYRET, IGNACIO TOMAS": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        }
+      },
+      "23": {
+        "LLERA, MARIANO": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "MIÑO, ESTEBAN ROMAN": {
+          "goles": 1,
+          "amarilla": true,
+          "roja": false
+        }
+      },
+      "24": {
+        "WIRZ, AXEL LEANDRO": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "FEVERSANI, BAUTISTA": {
           "goles": 0,
           "amarilla": true,
           "roja": false
@@ -30563,10 +31490,10 @@
             {
               "fecha": "F25",
               "opp": "Sarmiento",
-              "min": 95,
+              "min": 93,
               "metrics": [
-                8860.40869,
-                92.81154,
+                8709.78955,
+                93.60333,
                 239.73,
                 169.38,
                 65.03,
@@ -30574,14 +31501,14 @@
                 29.06046,
                 16,
                 21,
-                51,
+                50,
                 null,
                 3.809,
                 -5.55972,
                 0.17,
-                9.203945530726257,
-                0.68,
-                809.99472
+                9.442987641053197,
+                0.7,
+                786.45621
               ]
             },
             {
@@ -30890,10 +31817,10 @@
             {
               "fecha": "F25",
               "opp": "Sarmiento",
-              "min": 7,
+              "min": 9,
               "metrics": [
-                762.42444,
-                111.58792,
+                923.89203,
+                105.14505,
                 29.55,
                 59.74,
                 48.02,
@@ -30905,10 +31832,10 @@
                 null,
                 3.98165,
                 -4.53693,
-                0.43,
-                27.335528723015006,
-                6.86,
-                76.55174
+                0.33,
+                20.119573413767103,
+                5.34,
+                84.87657
               ]
             }
           ]
@@ -31015,10 +31942,10 @@
             {
               "fecha": "F25",
               "opp": "Sarmiento",
-              "min": 25,
+              "min": 47,
               "metrics": [
-                2726.64795,
-                110.17947,
+                2761.22803,
+                60.28882,
                 183.85001,
                 159.36,
                 0,
@@ -31026,14 +31953,14 @@
                 24.66479,
                 10,
                 15,
-                23,
+                24,
                 null,
                 4.16852,
                 -4.7522,
-                0.4,
-                22.356058604871876,
+                0.21,
+                11.981773436948076,
                 0.0,
-                292.53049
+                302.18607
               ]
             },
             {
@@ -31558,10 +32485,10 @@
             {
               "fecha": "F25",
               "opp": "Sarmiento",
-              "min": 73,
+              "min": 70,
               "metrics": [
-                6901.17969,
-                94.94663,
+                6722.72607,
+                96.3277,
                 198.09,
                 99.89,
                 15.74,
@@ -31569,14 +32496,14 @@
                 26.79628,
                 18,
                 16,
-                46,
+                44,
                 null,
                 4.12806,
                 -4.63592,
-                0.25,
-                10.013093057010977,
+                0.26,
+                10.428403237323309,
                 0.22,
-                670.75111
+                652.45677
               ]
             },
             {
@@ -31803,25 +32730,25 @@
             {
               "fecha": "F25",
               "opp": "Sarmiento",
-              "min": 90,
+              "min": 87,
               "metrics": [
-                9572.5249,
-                105.82404,
-                605.88998,
-                448.87001,
+                9327.20264,
+                107.10151,
+                595.75998,
+                440.15001,
                 212.21,
                 10,
                 29.95237,
-                35,
-                60,
-                77,
+                33,
+                58,
+                76,
                 null,
                 4.0515,
                 -6.07805,
-                0.39,
-                21.77377085244923,
-                2.36,
-                1083.3363
+                0.38,
+                22.182977005884887,
+                2.44,
+                1055.29306
               ]
             },
             {
@@ -31904,10 +32831,10 @@
             {
               "fecha": "F25",
               "opp": "Sarmiento",
-              "min": 95,
+              "min": 93,
               "metrics": [
-                9470.32129,
-                99.20029,
+                9299.79688,
+                99.94408,
                 356.86,
                 157.88,
                 80.01,
@@ -31920,9 +32847,9 @@
                 4.14963,
                 -4.93876,
                 0.19,
-                11.317667702513967,
-                0.84,
-                1119.78949
+                11.611606770553466,
+                0.86,
+                1098.97162
               ]
             },
             {
@@ -31981,12 +32908,12 @@
             {
               "fecha": "F25",
               "opp": "Sarmiento",
-              "min": 90,
+              "min": 87,
               "metrics": [
-                9371.08008,
-                104.38582,
-                405.85001,
-                328.49001,
+                9183.1123,
+                104.98165,
+                399.37,
+                323.43001,
                 188.05999,
                 11,
                 31.08873,
@@ -31996,10 +32923,10 @@
                 null,
                 4.29727,
                 -5.08768,
-                0.31,
-                16.00182693110996,
-                2.09,
-                850.28726
+                0.32,
+                16.23886079784163,
+                2.16,
+                832.29846
               ]
             },
             {
@@ -32870,25 +33797,25 @@
             {
               "fecha": "F25",
               "opp": "Sarmiento",
-              "min": 95,
+              "min": 93,
               "metrics": [
-                8404.25684,
-                88.38941,
+                8245.31689,
+                88.61168,
                 243.65,
                 221.31999,
                 57.38,
                 2,
                 30.0855,
-                14,
+                13,
                 18,
-                58,
+                57,
                 null,
                 3.8855,
                 -4.32504,
-                0.15,
-                8.565607437150836,
-                0.6,
-                813.13962
+                0.14,
+                8.708436217087588,
+                0.62,
+                799.79257
               ]
             },
             {
@@ -33019,25 +33946,25 @@
             {
               "fecha": "F25",
               "opp": "Sarmiento",
-              "min": 90,
+              "min": 87,
               "metrics": [
-                9463.54248,
-                105.14891,
-                449.12,
-                319.93001,
+                9245.64453,
+                105.69652,
+                444.06,
+                314.84,
                 75.26,
                 4,
                 28.39859,
                 25,
-                32,
-                63,
+                31,
+                62,
                 null,
                 3.88867,
                 -4.80003,
-                0.28,
-                14.96666716048651,
-                0.84,
-                922.85538
+                0.29,
+                15.257763665567285,
+                0.87,
+                900.89035
               ]
             },
             {
@@ -33192,25 +34119,25 @@
             {
               "fecha": "F25",
               "opp": "Sarmiento",
-              "min": 95,
+              "min": 93,
               "metrics": [
-                10314.66064,
-                108.04463,
-                548.79999,
-                438.75999,
-                277.34,
-                14,
+                10040.08545,
+                107.8999,
+                521.85999,
+                432.94,
+                250.92999,
+                13,
                 30.98425,
                 25,
-                39,
-                84,
+                38,
+                83,
                 null,
                 4.69693,
-                -5.25121,
-                0.26,
-                20.243610125698325,
-                2.92,
-                1092.02289
+                -4.7642,
+                0.27,
+                19.90929575497045,
+                2.7,
+                1061.63251
               ]
             },
             {
@@ -33822,7 +34749,7 @@
           ]
         },
         "Tiziano Medina": {
-          "pos": "",
+          "pos": "DFC",
           "match": [
             {
               "fecha": "F24",
@@ -33846,6 +34773,30 @@
                 6.860993975493534,
                 0.6,
                 873.02753
+              ]
+            },
+            {
+              "fecha": "F25",
+              "opp": "Sarmiento",
+              "min": 93,
+              "metrics": [
+                1155.96199,
+                13.72906,
+                5.76,
+                0,
+                0,
+                0,
+                20.40902,
+                3,
+                0,
+                1,
+                null,
+                5.21275,
+                -2.33263,
+                0.03,
+                0.11531434712520151,
+                0.0,
+                899.22278
               ]
             }
           ]
@@ -33928,10 +34879,10 @@
             {
               "fecha": "F25",
               "opp": "Sarmiento",
-              "min": 8,
+              "min": 9,
               "metrics": [
-                770.53979,
-                110.49014,
+                804.44623,
+                94.49621,
                 52.7,
                 27.58,
                 16.96,
@@ -33943,10 +34894,10 @@
                 null,
                 4.13277,
                 -3.75606,
-                0.25,
-                20.325850676882684,
-                2.12,
-                86.89348
+                0.22,
+                16.955725519767316,
+                1.88,
+                90.38425
               ]
             },
             {
@@ -34303,10 +35254,10 @@
             {
               "fecha": "F25",
               "opp": "Sarmiento",
-              "min": 8,
+              "min": 9,
               "metrics": [
-                647.06512,
-                95.88991,
+                695.51428,
+                97.52935,
                 15.54,
                 24.56,
                 27.47,
@@ -34318,10 +35269,10 @@
                 null,
                 3.32874,
                 -4.762,
-                0.12,
-                10.75433828141334,
-                3.43,
-                72.9528
+                0.11,
+                9.2351610470753,
+                3.05,
+                83.69292
               ]
             },
             {
@@ -34430,25 +35381,25 @@
             {
               "fecha": "F25",
               "opp": "Sarmiento",
-              "min": 95,
+              "min": 93,
               "metrics": [
-                8751.58252,
-                91.6716,
+                8580.729,
+                92.21632,
                 266.06001,
                 130.52,
                 58.63,
                 2,
                 29.82732,
-                25,
+                24,
                 21,
-                75,
+                74,
                 null,
                 3.84542,
                 -6.27315,
                 0.26,
-                8.300803282122903,
-                0.62,
-                850.78604
+                8.417840085975282,
+                0.63,
+                832.69952
               ]
             },
             {
@@ -68238,11 +69189,5 @@
         }
       }
     }
-  },
-  "errores": [
-    "RESERVA_APE Zona A: Remote end closed connection without response",
-    "RESERVA_APE Zona B: Remote end closed connection without response",
-    "statfutbol partidos 5TA: Remote end closed connection without response",
-    "Catapult efforts: The read operation timed out"
-  ]
+  }
 }
