@@ -1,5 +1,5 @@
 {
-  "actualizado": "2026-09-16 07:00",
+  "actualizado": "2026-09-16 23:00",
   "fuente": "ligaprofesional.ar (oficial)",
   "fuente_fixture": "ligaprofesional.ar (oficial)",
   "fuente_reserva": "statfutbol.com.ar",
@@ -3065,6 +3065,30 @@
           },
           {
             "pos": 2,
+            "equipo": "ROSARIO CENTRAL",
+            "pts": 16,
+            "pj": 9,
+            "pg": 4,
+            "pe": 4,
+            "pp": 1,
+            "gf": 13,
+            "gc": 11,
+            "dif": 2
+          },
+          {
+            "pos": 3,
+            "equipo": "GIMNASIA Y ESGRIMA (MENDOZA)",
+            "pts": 15,
+            "pj": 9,
+            "pg": 5,
+            "pe": 0,
+            "pp": 4,
+            "gf": 12,
+            "gc": 11,
+            "dif": 1
+          },
+          {
+            "pos": 4,
             "equipo": "SARMIENTO (JUNIN)",
             "pts": 14,
             "pj": 9,
@@ -3076,7 +3100,31 @@
             "dif": 3
           },
           {
-            "pos": 3,
+            "pos": 5,
+            "equipo": "UNION (SF)",
+            "pts": 13,
+            "pj": 9,
+            "pg": 2,
+            "pe": 7,
+            "pp": 0,
+            "gf": 11,
+            "gc": 6,
+            "dif": 5
+          },
+          {
+            "pos": 6,
+            "equipo": "GIMNASIA Y ESGRIMA (LP)",
+            "pts": 13,
+            "pj": 9,
+            "pg": 3,
+            "pe": 4,
+            "pp": 2,
+            "gf": 8,
+            "gc": 4,
+            "dif": 4
+          },
+          {
+            "pos": 7,
             "equipo": "INSTITUTO (CORDOBA)",
             "pts": 13,
             "pj": 8,
@@ -3088,7 +3136,7 @@
             "dif": 3
           },
           {
-            "pos": 4,
+            "pos": 8,
             "equipo": "VELEZ SARSFIELD",
             "pts": 13,
             "pj": 9,
@@ -3100,55 +3148,31 @@
             "dif": 3
           },
           {
-            "pos": 5,
+            "pos": 9,
             "equipo": "TALLERES (CORDOBA)",
             "pts": 13,
-            "pj": 8,
+            "pj": 9,
             "pg": 3,
             "pe": 4,
-            "pp": 1,
+            "pp": 2,
             "gf": 8,
-            "gc": 6,
-            "dif": 2
-          },
-          {
-            "pos": 6,
-            "equipo": "ROSARIO CENTRAL",
-            "pts": 13,
-            "pj": 8,
-            "pg": 3,
-            "pe": 4,
-            "pp": 1,
-            "gf": 12,
-            "gc": 11,
+            "gc": 7,
             "dif": 1
           },
           {
-            "pos": 7,
-            "equipo": "GIMNASIA Y ESGRIMA (MENDOZA)",
-            "pts": 12,
-            "pj": 8,
-            "pg": 4,
-            "pe": 0,
-            "pp": 4,
-            "gf": 11,
-            "gc": 11,
-            "dif": 0
-          },
-          {
-            "pos": 8,
+            "pos": 10,
             "equipo": "SAN LORENZO",
             "pts": 11,
-            "pj": 8,
+            "pj": 9,
             "pg": 3,
             "pe": 2,
-            "pp": 3,
+            "pp": 4,
             "gf": 9,
-            "gc": 5,
-            "dif": 4
+            "gc": 7,
+            "dif": 2
           },
           {
-            "pos": 9,
+            "pos": 11,
             "equipo": "RACING CLUB",
             "pts": 11,
             "pj": 9,
@@ -3160,40 +3184,16 @@
             "dif": 0
           },
           {
-            "pos": 10,
+            "pos": 12,
             "equipo": "TIGRE",
             "pts": 11,
-            "pj": 8,
+            "pj": 9,
             "pg": 3,
             "pe": 2,
-            "pp": 3,
-            "gf": 11,
-            "gc": 11,
-            "dif": 0
-          },
-          {
-            "pos": 11,
-            "equipo": "GIMNASIA Y ESGRIMA (LP)",
-            "pts": 10,
-            "pj": 8,
-            "pg": 2,
-            "pe": 4,
-            "pp": 2,
-            "gf": 6,
-            "gc": 4,
-            "dif": 2
-          },
-          {
-            "pos": 12,
-            "equipo": "UNION (SF)",
-            "pts": 10,
-            "pj": 8,
-            "pg": 1,
-            "pe": 7,
-            "pp": 0,
-            "gf": 6,
-            "gc": 5,
-            "dif": 1
+            "pp": 4,
+            "gf": 12,
+            "gc": 16,
+            "dif": -4
           },
           {
             "pos": 13,
@@ -3235,13 +3235,13 @@
             "pos": 16,
             "equipo": "ATL. TUCUMAN",
             "pts": 8,
-            "pj": 8,
+            "pj": 9,
             "pg": 2,
             "pe": 2,
-            "pp": 4,
+            "pp": 5,
             "gf": 5,
-            "gc": 11,
-            "dif": -6
+            "gc": 12,
+            "dif": -7
           },
           {
             "pos": 17,
@@ -3308,13 +3308,13 @@
           {
             "pos": 4,
             "equipo": "LANUS",
-            "pts": 16,
-            "pj": 8,
+            "pts": 17,
+            "pj": 9,
             "pg": 5,
-            "pe": 1,
+            "pe": 2,
             "pp": 2,
-            "gf": 13,
-            "gc": 9,
+            "gf": 16,
+            "gc": 12,
             "dif": 4
           },
           {
@@ -3369,13 +3369,13 @@
             "pos": 9,
             "equipo": "QUILMES",
             "pts": 11,
-            "pj": 8,
+            "pj": 9,
             "pg": 3,
             "pe": 2,
-            "pp": 3,
+            "pp": 4,
             "gf": 7,
-            "gc": 7,
-            "dif": 0
+            "gc": 8,
+            "dif": -1
           },
           {
             "pos": 10,
@@ -3391,6 +3391,18 @@
           },
           {
             "pos": 11,
+            "equipo": "HURACAN",
+            "pts": 10,
+            "pj": 9,
+            "pg": 3,
+            "pe": 1,
+            "pp": 5,
+            "gf": 10,
+            "gc": 9,
+            "dif": 1
+          },
+          {
+            "pos": 12,
             "equipo": "SAN MARTIN (SAN JUAN)",
             "pts": 10,
             "pj": 8,
@@ -3402,7 +3414,7 @@
             "dif": -4
           },
           {
-            "pos": 12,
+            "pos": 13,
             "equipo": "DEFENSA Y JUSTICIA",
             "pts": 8,
             "pj": 9,
@@ -3414,27 +3426,15 @@
             "dif": 0
           },
           {
-            "pos": 13,
-            "equipo": "HURACAN",
-            "pts": 7,
-            "pj": 8,
-            "pg": 2,
-            "pe": 1,
-            "pp": 5,
-            "gf": 9,
-            "gc": 9,
-            "dif": 0
-          },
-          {
             "pos": 14,
             "equipo": "INDEPENDIENTE RIVADAVIA (MENDOZA)",
-            "pts": 7,
-            "pj": 8,
+            "pts": 8,
+            "pj": 9,
             "pg": 2,
-            "pe": 1,
+            "pe": 2,
             "pp": 5,
-            "gf": 6,
-            "gc": 13,
+            "gf": 9,
+            "gc": 16,
             "dif": -7
           },
           {
@@ -3451,6 +3451,18 @@
           },
           {
             "pos": 16,
+            "equipo": "PLATENSE",
+            "pts": 5,
+            "pj": 9,
+            "pg": 0,
+            "pe": 5,
+            "pp": 4,
+            "gf": 3,
+            "gc": 10,
+            "dif": -7
+          },
+          {
+            "pos": 17,
             "equipo": "COLON",
             "pts": 5,
             "pj": 9,
@@ -3462,27 +3474,15 @@
             "dif": -8
           },
           {
-            "pos": 17,
-            "equipo": "PLATENSE",
-            "pts": 4,
-            "pj": 8,
-            "pg": 0,
-            "pe": 4,
-            "pp": 4,
-            "gf": 2,
-            "gc": 9,
-            "dif": -7
-          },
-          {
             "pos": 18,
             "equipo": "FERROCARRIL OESTE",
-            "pts": 4,
-            "pj": 8,
+            "pts": 5,
+            "pj": 9,
             "pg": 1,
-            "pe": 1,
+            "pe": 2,
             "pp": 6,
-            "gf": 6,
-            "gc": 16,
+            "gf": 7,
+            "gc": 17,
             "dif": -10
           }
         ]
@@ -20758,11 +20758,11 @@
       "amarillas_riesgo": []
     },
     "RESERVA_S2": {
-      "fecha": 9,
-      "rival": "UNION (SF)",
+      "fecha": 10,
+      "rival": "DEFENSA Y JUSTICIA",
       "goleador": {
-        "nombre": "AIMAR, MATEO",
-        "goles": 1
+        "nombre": "CANTERO, EMILIANO",
+        "goles": 2
       },
       "amarillas_riesgo": []
     }
@@ -26226,6 +26226,11 @@
         "gf": 2,
         "gc": 0,
         "rival": "ATL. TUCUMAN"
+      },
+      "9": {
+        "gf": 1,
+        "gc": 5,
+        "rival": "UNION (SF)"
       }
     }
   },
@@ -26445,9 +26450,9 @@
         "rival": "UNION (SF)",
         "cond": "V",
         "fecha_iso": "2026-09-16",
-        "jugado": false,
-        "gf": null,
-        "gc": null
+        "jugado": true,
+        "gf": 1,
+        "gc": 5
       },
       "10": {
         "rival": "DEF Y JUSTICIA",
