@@ -3071,11 +3071,13 @@ function renderStatsSingle(cat, content){
   const isReserva = cat === 'RESERVA';
   // dataCat: clave real de storage. Para RESERVA depende del semestre elegido.
   const dataCat = isReserva ? (reservaSemestre===2 ? 'RESERVA_S2' : 'RESERVA') : cat;
-  // Los links de video (Partido/Resumen/Análisis/Próximo Rival) se mudaron
-  // a la pestaña VIDEOANÁLISIS -- acá en ESTADÍSTICAS solo queda Citaciones
-  // (a pedido: "tiene que vivir en los dos lugares"). RESERVA nunca tuvo
-  // citaciones, así que para RESERVA esta columna directamente no existe.
-  const resultadosLinks = (!isReserva && CATEGORIES.includes(cat)) ? LINK_TYPES.filter(lt=>lt.key==='cit') : [];
+  // Los 5 tipos de link (Citaciones/Partido/Resumen/Análisis Propio/
+  // Análisis Rival) se ven acá como accesos directos de solo ícono -- la
+  // edición del link (pegar la URL) sigue viviendo en VIDEOANÁLISIS, esto
+  // es nada más para no tener que salir de RESULTADOS a mirar un video.
+  // RESERVA nunca tuvo esto, así que para RESERVA esta columna directamente
+  // no existe.
+  const resultadosLinks = (!isReserva && CATEGORIES.includes(cat)) ? LINK_TYPES : [];
   const isLink = resultadosLinks.length > 0;
   const showEquipo = false;   // botón/panel de equipo retirado de todas las categorías
   const fixtureList = isReserva ? (reservaSemestre===2 ? RIVALS_RESERVA_S2 : RIVALS_RESERVA) : RIVALS;
@@ -3145,15 +3147,28 @@ function renderStatsSingle(cat, content){
       : `<td class="rival-name" style="text-align:center">${esc(rName)||'—'} <span class="cond-badge cond-${rCond}" style="margin-left:4px;font-size:10px">${rCond==='L'?'LOCAL':'VISIT.'}</span></td>`;
 
     const hasTeamData = !!(matchData[dataCat][r.f]?.titulares?.length);
-    // Citaciones: no hay campo para pegar link a mano — el ícono abre la
-    // ficha ya procesada (extraída del PDF real) si existe, o queda vacío
-    // si esa fecha todavía no se cargó. Vive acá Y en VIDEOANÁLISIS (a
-    // pedido, mismo botón/comportamiento en los dos lugares).
-    const linkCols = isLink ? `<td class="link-cell" style="text-align:center">
-        <button class="link-btn${hasTeamData?'':' empty'}" title="Citaciones"
-          ${hasTeamData?`onclick="abrirCitacionView('${dataCat}',${r.f})"`:'disabled'}
-          style="background:none;border:none;cursor:${hasTeamData?'pointer':'default'};font-size:15px;padding:2px 6px">📋</button>
-      </td>` : '';
+    // Un botón de solo ícono por tipo de link, misma fila que fecha/rival/
+    // resultado. Citaciones abre la ficha ya procesada (sin campo para
+    // pegar link a mano, como siempre); el resto abre el link cargado en
+    // VIDEOANÁLISIS -- acá nunca se ve/edita la URL cruda, solo el ícono.
+    const linkCols = isLink ? resultadosLinks.map(lt=>{
+      if(lt.key==='cit'){
+        return `<td class="link-cell" style="text-align:center">
+          <button class="link-btn${hasTeamData?'':' empty'}" title="Citaciones"
+            ${hasTeamData?`onclick="abrirCitacionView('${dataCat}',${r.f})"`:'disabled'}
+            style="background:none;border:none;cursor:${hasTeamData?'pointer':'default'};font-size:15px;padding:2px 6px">📋</button>
+        </td>`;
+      }
+      const val = links[dataCat][r.f][lt.key] || '';
+      const has = val.trim() !== '';
+      const titulo = `F${r.f} · ${lt.label}${rName?' · vs '+rName:''}`.replace(/'/g,"\\'");
+      return `<td class="link-cell" style="text-align:center">
+        <button class="link-btn${has?'':' empty'}" title="${lt.label}"
+          onclick="abrirVideoEmbebido('${esc(val).replace(/'/g,"\\'")}','${titulo}')"
+          ${has?'':'disabled'}
+          style="background:none;border:none;cursor:${has?'pointer':'default'};font-size:15px;padding:2px 6px">${lt.icon}</button>
+      </td>`;
+    }).join('') : '';
     const equipoBtn = showEquipo
       ? `<td><button class="btn-equipo${hasTeamData?' active':''}" data-cat="${dataCat}" data-fecha="${r.f}" title="Ver/editar equipo">👥${hasTeamData?' ✓':''}</button></td>`
       : '';
