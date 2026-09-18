@@ -3149,8 +3149,12 @@ function renderStatsSingle(cat, content){
     const hasTeamData = !!(matchData[dataCat][r.f]?.titulares?.length);
     // Un botón de solo ícono por tipo de link, misma fila que fecha/rival/
     // resultado. Citaciones abre la ficha ya procesada (sin campo para
-    // pegar link a mano, como siempre); el resto abre el link cargado en
-    // VIDEOANÁLISIS -- acá nunca se ve/edita la URL cruda, solo el ícono.
+    // pegar link a mano, como siempre); el resto abre el link ya cargado.
+    // Para quien puede editar, un lápiz al lado despliega un campo chico
+    // (oculto por defecto) para pegar/corregir esa URL sin volver a
+    // mostrarla siempre en pantalla -- reusa el mismo .link-input que ya
+    // sabe guardar (attachTableEvents), asi que no hizo falta tocar nada
+    // del guardado.
     const linkCols = isLink ? resultadosLinks.map(lt=>{
       if(lt.key==='cit'){
         return `<td class="link-cell" style="text-align:center">
@@ -3162,12 +3166,17 @@ function renderStatsSingle(cat, content){
       const val = links[dataCat][r.f][lt.key] || '';
       const has = val.trim() !== '';
       const titulo = `F${r.f} · ${lt.label}${rName?' · vs '+rName:''}`.replace(/'/g,"\\'");
-      return `<td class="link-cell" style="text-align:center">
+      return `<td class="link-cell"><div class="link-wrap" style="display:flex;align-items:center;justify-content:center;gap:2px">
+        ${canEdit?`<input class="link-input" type="url" value="${esc(val)}" placeholder="${lt.label}…"
+          data-cat="${dataCat}" data-fecha="${r.f}" data-lkey="${lt.key}" title="${lt.label}"
+          onblur="this.style.display='none'" style="display:none;width:110px;font-size:11px">`:''}
         <button class="link-btn${has?'':' empty'}" title="${lt.label}"
-          onclick="abrirVideoEmbebido('${esc(val).replace(/'/g,"\\'")}','${titulo}')"
-          ${has?'':'disabled'}
-          style="background:none;border:none;cursor:${has?'pointer':'default'};font-size:15px;padding:2px 6px">${lt.icon}</button>
-      </td>`;
+          onclick="abrirVideoEmbebido(this.previousElementSibling&&this.previousElementSibling.classList.contains('link-input')?this.previousElementSibling.value:'${esc(val).replace(/'/g,"\\'")}','${titulo}')"
+          ${has||canEdit?'':'disabled'}
+          style="background:none;border:none;cursor:${has||canEdit?'pointer':'default'};font-size:15px;padding:2px 6px">${lt.icon}</button>
+        ${canEdit?`<button type="button" title="Editar ${lt.label}" onclick="toggleLinkEditInput(this)"
+          style="background:none;border:none;cursor:pointer;font-size:11px;padding:2px;color:var(--muted)">✏️</button>`:''}
+      </div></td>`;
     }).join('') : '';
     const equipoBtn = showEquipo
       ? `<td><button class="btn-equipo${hasTeamData?' active':''}" data-cat="${dataCat}" data-fecha="${r.f}" title="Ver/editar equipo">👥${hasTeamData?' ✓':''}</button></td>`
@@ -3358,15 +3367,16 @@ function renderStatsSingle(cat, content){
   }
 }
 
-// VIDEOANÁLISIS: se organiza en dos ramas -- ANÁLISIS PROPIOS (Placas de
-// Post Partido/Fase/Cierre + tabla partido a partido con los links de
-// video propios y Citaciones) y ANÁLISIS DE RIVAL (Placas de Portada
-// Próximo Rival/Estadísticas + accesos directos a Fase/Cierre + posición
-// en la tabla, últimos partidos, goleador y riesgo de suspensión del
-// próximo rival). Citaciones vive en LOS DOS lugares (acá y en
-// ESTADÍSTICAS) a pedido explícito. Fase y Cierre son UN SOLO juego de
-// controles (viven en Propios) -- los botones de Rival generan/comparten
-// con esos mismos datos en vez de duplicar sliders y estado.
+// VIDEOANÁLISIS: dos secciones planas, sin ramas Propios/Rival -- 🎬 PLACAS
+// (Portada Post Partido, Portada Próximo Rival, Placa de Estadísticas de
+// Rival, y un solo juego de controles de Fase/Cierre, compartido porque son
+// iguales se use para lo que se use) y 📊 ESTADÍSTICAS PRÓXIMO RIVAL
+// (posición en la tabla, últimos partidos, goleador y riesgo de suspensión
+// del próximo rival -- datos en texto, sin generar imagen). Ya no hay
+// tablas de links acá (ni para verlos ni para editarlos) -- ver el link es
+// el ícono de RESULTADOS (resultadosLinks en renderStatsSingle) y pegar/
+// corregir la URL es el lápiz ✏️ al lado de ese mismo ícono, para quien
+// puede editar.
 function renderVideoanalisisTab(cat, tabEl){
   const isReserva = cat === 'RESERVA';
   const dataCat = isReserva ? (reservaSemestre===2 ? 'RESERVA_S2' : 'RESERVA') : cat;
@@ -3378,47 +3388,21 @@ function renderVideoanalisisTab(cat, tabEl){
   const conRival = GENERAL_CATS.includes(cat);
 
   tabEl.innerHTML = `
-    ${seccionTitulo('va-propios-'+dataCat, `🟦 ANÁLISIS PROPIOS · <span style="color:${CAT_COLORS[cat]}">${cat}</span>`)}
-    <div id="sec-va-propios-${dataCat}"${seccionEstiloInicial('va-propios-'+dataCat)}>
-
-      ${seccionTitulo('va-prop-placas-'+dataCat, '🎬 PLACAS')}
-      <div id="sec-va-prop-placas-${dataCat}"${seccionEstiloInicial('va-prop-placas-'+dataCat)}>
-        ${conRival ? `<div id="placa-post-block-${cat}" style="margin-bottom:18px"></div>` : ''}
-        <div style="margin-bottom:18px">${placaRotuloHTML('🖼️ FASE')}${placaFaseControlesHTML(cat)}</div>
-        <div>${placaRotuloHTML('🖼️ CIERRE')}${placaCierreControlesHTML(cat)}</div>
-      </div>
-
-      ${seccionTitulo('va-prop-stats-'+dataCat, '🎥 VIDEOS PROPIOS')}
-      <div id="sec-va-prop-stats-${dataCat}"${seccionEstiloInicial('va-prop-stats-'+dataCat)}>
-        ${videoLinksTablaPropiosHTML(cat, dataCat)}
-      </div>
+    ${seccionTitulo('va-placas-'+dataCat, `🎬 PLACAS · <span style="color:${CAT_COLORS[cat]}">${cat}</span>`)}
+    <div id="sec-va-placas-${dataCat}"${seccionEstiloInicial('va-placas-'+dataCat)}>
+      ${conRival ? `<div id="placa-post-block-${cat}" style="margin-bottom:18px"></div>` : ''}
+      ${conRival ? `<div id="placa-portada-info-${cat}" style="margin-bottom:18px"></div>` : ''}
+      ${conRival ? `<div id="placa-stats-block-${cat}" style="margin-bottom:18px"></div>` : ''}
+      <div style="margin-bottom:18px">${placaRotuloHTML('🖼️ FASE')}${placaFaseControlesHTML(cat)}</div>
+      <div>${placaRotuloHTML('🖼️ CIERRE')}${placaCierreControlesHTML(cat)}</div>
     </div>
 
-    ${seccionTitulo('va-rival-'+dataCat, `🟥 ANÁLISIS DE RIVAL · <span style="color:${CAT_COLORS[cat]}">${cat}</span>`)}
-    <div id="sec-va-rival-${dataCat}"${seccionEstiloInicial('va-rival-'+dataCat)}>
-
-      ${seccionTitulo('va-riv-placas-'+dataCat, '🎬 PLACAS')}
-      <div id="sec-va-riv-placas-${dataCat}"${seccionEstiloInicial('va-riv-placas-'+dataCat)}>
-        ${conRival ? `<div id="placa-portada-info-${cat}" style="margin-bottom:18px"></div>` : ''}
-        ${conRival ? `<div id="placa-stats-block-${cat}" style="margin-bottom:18px"></div>` : ''}
-        <div style="margin-bottom:18px">${placaRotuloHTML('🖼️ FASE')}${placaFaseControlesHTML(cat, '-riv')}</div>
-        <div>${placaRotuloHTML('🖼️ CIERRE')}${placaCierreControlesHTML(cat, '-riv')}</div>
-      </div>
-
-      ${seccionTitulo('va-riv-videos-'+dataCat, '🎥 VIDEOS DE RIVAL')}
-      <div id="sec-va-riv-videos-${dataCat}"${seccionEstiloInicial('va-riv-videos-'+dataCat)}>
-        ${videoLinksTablaRivalHTML(cat, dataCat)}
-      </div>
-
-      ${seccionTitulo('va-riv-stats-'+dataCat, '📊 ESTADÍSTICAS DE RIVAL')}
-      <div id="sec-va-riv-stats-${dataCat}"${seccionEstiloInicial('va-riv-stats-'+dataCat)}>
-        <div id="rival-stats-detalle-${dataCat}"></div>
-      </div>
+    ${seccionTitulo('va-riv-stats-'+dataCat, `📊 ESTADÍSTICAS PRÓXIMO RIVAL · <span style="color:${CAT_COLORS[cat]}">${cat}</span>`)}
+    <div id="sec-va-riv-stats-${dataCat}"${seccionEstiloInicial('va-riv-stats-'+dataCat)}>
+      <div id="rival-stats-detalle-${dataCat}"></div>
     </div>
   `;
 
-  attachTableEvents(dataCat); // mismo listener que ESTADÍSTICAS: .link-input/.score-input ya saben guardar
-  attachTableEvents(dataCat, `tbody-riv-${dataCat}`); // tabla de VIDEOS DE RIVAL, id propio
   if(conRival){
     renderPlacaPostPartidoBlock(cat);
     renderPlacaProximoRivalBlock(cat);
@@ -3430,102 +3414,6 @@ function renderVideoanalisisTab(cat, tabEl){
   }
   actualizarPlacaFasePreview(cat);
   actualizarPlacaCierrePreview(cat);
-  actualizarPlacaFasePreview(cat, '-riv');
-  actualizarPlacaCierrePreview(cat, '-riv');
-}
-
-// Tabla partido a partido de "Estadísticas propias": Partido/Resumen/
-// Análisis Propio (video embebido) + Citaciones (misma ficha que ya existe
-// en ESTADÍSTICAS). "Próximo Rival" NO va acá -- es de Rival.
-function videoLinksTablaPropiosHTML(cat, dataCat){
-  const isReserva = cat === 'RESERVA';
-  const videoLinks = isReserva ? LINK_TYPES.filter(lt=>lt.key==='par') : LINK_TYPES.filter(lt=>lt.key!=='prx');
-  const fixtureList = isReserva ? (reservaSemestre===2 ? RIVALS_RESERVA_S2 : RIVALS_RESERVA) : RIVALS;
-  const headHTML = videoLinks.map(lt=>`<th title="${lt.label}">${lt.icon} ${lt.label}</th>`).join('');
-
-  let rows = '';
-  fixtureList.forEach(r=>{
-    if(!isReserva && (r.f-1)%bloqueSize===0 && r.f>1){
-      rows += `<tr class="divider-row"><td colspan="${2+videoLinks.length}">── BLOQUE F${r.f}–F${Math.min(r.f+bloqueSize-1,35)}</td></tr>`;
-    }
-    const rName = isReserva ? (rivalData[dataCat][r.f]?.rival || '') : r.r;
-    const hasTeamData = !!(matchData[dataCat][r.f]?.titulares?.length);
-    const fechaCal = isReserva ? '' : fechaCalCompacta(r.f);
-
-    const cols = videoLinks.map(lt=>{
-      if(lt.key==='cit'){
-        return `<td class="link-cell" style="text-align:center">
-          <button class="link-btn${hasTeamData?'':' empty'}" title="Citaciones"
-            ${hasTeamData?`onclick="abrirCitacionView('${dataCat}',${r.f})"`:'disabled'}
-            style="background:none;border:none;cursor:${hasTeamData?'pointer':'default'};font-size:15px;padding:2px 6px">📋</button>
-        </td>`;
-      }
-      const val = links[dataCat][r.f][lt.key] || '';
-      const has = val.trim() !== '';
-      const titulo = `F${r.f} · ${lt.label}${rName?' · vs '+rName:''}`.replace(/'/g,"\\'");
-      return `<td class="link-cell"><div class="link-wrap">
-        ${canEdit?`<input class="link-input" type="url" value="${esc(val)}" placeholder="${lt.label}…"
-          data-cat="${dataCat}" data-fecha="${r.f}" data-lkey="${lt.key}" title="${lt.label}">`:''}
-        <button class="link-btn${has?'':' empty'}" title="${lt.label}"
-          onclick="abrirVideoEmbebido(this.previousElementSibling&&this.previousElementSibling.classList.contains('link-input')?this.previousElementSibling.value:'${esc(val).replace(/'/g,"\\'")}','${titulo}')"
-          ${has||canEdit?'':'disabled'}
-          style="background:none;border:none;cursor:${has||canEdit?'pointer':'default'};font-size:15px;padding:2px 6px">${lt.icon}</button>
-      </div></td>`;
-    }).join('');
-
-    rows += `<tr data-cat="${dataCat}" data-fecha="${r.f}">
-      <td class="fecha-num" style="white-space:nowrap">F${r.f}${fechaCal?` - (${fechaCal})`:''}</td>
-      <td class="rival-name" style="text-align:center">${esc(rName)||'—'}</td>
-      ${cols}
-    </tr>`;
-  });
-
-  return `<div class="table-wrap"><table>
-      <thead><tr class="thead-sub"><th>FECHA</th><th>RIVAL</th>${headHTML}</tr></thead>
-      <tbody id="tbody-${dataCat}">${rows}</tbody>
-    </table></div>`;
-}
-
-// Tabla de "Análisis de Rival" (link tipo 'prx', "Próximo Rival") -- existía
-// el tipo de link en LINK_TYPES pero nunca se armó ninguna tabla para
-// cargarlo/verlo (videoLinksTablaPropiosHTML lo excluye a propósito, "es de
-// Rival", pero no había ningún otro lugar que lo mostrara) -- reportado por
-// Javi, 2026-09-02: "no puedo ver 'análisis de rival'". Mismo patrón que
-// videoLinksTablaPropiosHTML, con un solo tipo de link.
-function videoLinksTablaRivalHTML(cat, dataCat){
-  const isReserva = cat === 'RESERVA';
-  const lt = LINK_TYPES.find(x=>x.key==='prx');
-  const fixtureList = isReserva ? (reservaSemestre===2 ? RIVALS_RESERVA_S2 : RIVALS_RESERVA) : RIVALS;
-
-  let rows = '';
-  fixtureList.forEach(r=>{
-    if(!isReserva && (r.f-1)%bloqueSize===0 && r.f>1){
-      rows += `<tr class="divider-row"><td colspan="3">── BLOQUE F${r.f}–F${Math.min(r.f+bloqueSize-1,35)}</td></tr>`;
-    }
-    const rName = isReserva ? (rivalData[dataCat][r.f]?.rival || '') : r.r;
-    const fechaCal = isReserva ? '' : fechaCalCompacta(r.f);
-    const val = links[dataCat][r.f][lt.key] || '';
-    const has = val.trim() !== '';
-    const titulo = `F${r.f} · ${lt.label}${rName?' · vs '+rName:''}`.replace(/'/g,"\\'");
-
-    rows += `<tr data-cat="${dataCat}" data-fecha="${r.f}">
-      <td class="fecha-num" style="white-space:nowrap">F${r.f}${fechaCal?` - (${fechaCal})`:''}</td>
-      <td class="rival-name" style="text-align:center">${esc(rName)||'—'}</td>
-      <td class="link-cell"><div class="link-wrap">
-        ${canEdit?`<input class="link-input" type="url" value="${esc(val)}" placeholder="${lt.label}…"
-          data-cat="${dataCat}" data-fecha="${r.f}" data-lkey="${lt.key}" title="${lt.label}">`:''}
-        <button class="link-btn${has?'':' empty'}" title="${lt.label}"
-          onclick="abrirVideoEmbebido(this.previousElementSibling&&this.previousElementSibling.classList.contains('link-input')?this.previousElementSibling.value:'${esc(val).replace(/'/g,"\\'")}','${titulo}')"
-          ${has||canEdit?'':'disabled'}
-          style="background:none;border:none;cursor:${has||canEdit?'pointer':'default'};font-size:15px;padding:2px 6px">${lt.icon}</button>
-      </div></td>
-    </tr>`;
-  });
-
-  return `<div class="table-wrap"><table>
-      <thead><tr class="thead-sub"><th>FECHA</th><th>RIVAL</th><th title="${lt.label}">${lt.icon} ${lt.label}</th></tr></thead>
-      <tbody id="tbody-riv-${dataCat}">${rows}</tbody>
-    </table></div>`;
 }
 
 // Posición en la tabla, últimos partidos, goleador del plantel y riesgo de
@@ -6011,6 +5899,18 @@ function abrirCitacionView(cat, fecha){
   ov.querySelector('#cit-view-close').addEventListener('click',()=>ov.remove());
   cargarMitad(`${cat}/${fecha}`, d.titulares, d.suplentes);
   if(d.segundoTiempo) cargarMitad(`${cat}/${fecha}_2`, d.segundoTiempo.titulares, d.segundoTiempo.suplentes);
+}
+
+// Lápiz ✏️ al lado de un ícono de link en RESULTADOS: muestra/oculta el
+// campo de texto (oculto por defecto) para pegar o corregir esa URL. El
+// campo ya es un .link-input normal -- attachTableEvents lo guarda solo,
+// no hizo falta ningún guardado nuevo acá.
+function toggleLinkEditInput(btn){
+  const input = btn.parentElement.querySelector('.link-input');
+  if(!input) return;
+  const hidden = input.style.display === 'none';
+  input.style.display = hidden ? 'inline-block' : 'none';
+  if(hidden){ input.focus(); input.select(); }
 }
 
 // ── TABLE EVENTS ──────────────────────────────────────────────
