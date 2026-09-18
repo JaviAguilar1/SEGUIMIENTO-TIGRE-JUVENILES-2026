@@ -1165,36 +1165,48 @@ def fetch_catapult_efforts(email: str, password: str, cats, existentes=None, min
             if fecha_key in cat_prev:
                 continue  # ya resuelta en una corrida anterior, no se vuelve a pedir
 
-            rival = ""
-            for aid in activity_ids:
-                nombre_act = nombre_por_activity_id.get(aid, "")
-                if " vs " in nombre_act:
-                    rival = nombre_act.split(" vs ")[-1].strip()
-                    break
+            # Una fecha puntual con una actividad rota en Catapult (404,
+            # id borrado, lo que sea) no debe tirar abajo el resto de las
+            # fechas de esta categoria NI las otras categorias pedidas en
+            # la misma corrida -- confirmado en vivo (2026-09-18): al
+            # sumar 5TA/6TA, un 404 puntual abortaba tambien 4TA aunque ya
+            # estuviera resuelto. Mismo criterio que el resto del scraper
+            # ("un partido puntual con la pagina rota no debe tirar abajo
+            # toda la temporada").
+            try:
+                rival = ""
+                for aid in activity_ids:
+                    nombre_act = nombre_por_activity_id.get(aid, "")
+                    if " vs " in nombre_act:
+                        rival = nombre_act.split(" vs ")[-1].strip()
+                        break
 
-            jugadores_roster = {}  # nombre -> (activity_id, athlete_id)
-            periodos = []
-            for aid in activity_ids:
-                for atl in catapult_activity_athletes(opener, aid):
-                    nombre = f"{atl.get('first_name', '')} {atl.get('last_name', '')}".strip()
-                    if nombre and atl.get("id"):
-                        jugadores_roster.setdefault(nombre, (aid, atl["id"]))
-                for p in catapult_activity_periods(opener, aid):
-                    periodos.append({"name": p.get("name"), "start": p.get("start_time"), "end": p.get("end_time")})
+                jugadores_roster = {}  # nombre -> (activity_id, athlete_id)
+                periodos = []
+                for aid in activity_ids:
+                    for atl in catapult_activity_athletes(opener, aid):
+                        nombre = f"{atl.get('first_name', '')} {atl.get('last_name', '')}".strip()
+                        if nombre and atl.get("id"):
+                            jugadores_roster.setdefault(nombre, (aid, atl["id"]))
+                    for p in catapult_activity_periods(opener, aid):
+                        periodos.append({"name": p.get("name"), "start": p.get("start_time"), "end": p.get("end_time")})
 
-            jugadores_out = {}
-            for nombre, (aid, athlete_id) in jugadores_roster.items():
-                nombre_norm = _catapult_norm_nombre(nombre)
-                if nombre_norm in CATAPULT_ALIAS_NOMBRE:
-                    nombre = CATAPULT_ALIAS_NOMBRE[nombre_norm]
-                # No se descarta si no matchea el plantel (a diferencia de
-                # fetch_catapult_players) -- acá alcanza con haber jugado
-                # esa actividad, el filtro de categoria real ya lo hizo
-                # _catapult_actividades_partido/team_id al elegir la
-                # actividad. Igual se deja constancia en el nombre tal cual
-                # vino de Catapult para que el matcheo en la app (mismo
-                # criterio que gpsAliasedName) lo pueda resolver despues.
-                jugadores_out[nombre] = catapult_efforts_por_atleta(opener, cj, aid, athlete_id, min_kmh)
+                jugadores_out = {}
+                for nombre, (aid, athlete_id) in jugadores_roster.items():
+                    nombre_norm = _catapult_norm_nombre(nombre)
+                    if nombre_norm in CATAPULT_ALIAS_NOMBRE:
+                        nombre = CATAPULT_ALIAS_NOMBRE[nombre_norm]
+                    # No se descarta si no matchea el plantel (a diferencia de
+                    # fetch_catapult_players) -- acá alcanza con haber jugado
+                    # esa actividad, el filtro de categoria real ya lo hizo
+                    # _catapult_actividades_partido/team_id al elegir la
+                    # actividad. Igual se deja constancia en el nombre tal cual
+                    # vino de Catapult para que el matcheo en la app (mismo
+                    # criterio que gpsAliasedName) lo pueda resolver despues.
+                    jugadores_out[nombre] = catapult_efforts_por_atleta(opener, cj, aid, athlete_id, min_kmh)
+            except Exception as e:  # noqa
+                print(f"[AVISO] Catapult efforts {cat} {fecha_key}: {e} -- se saltea esta fecha.", file=sys.stderr)
+                continue
 
             cat_out[fecha_key] = {"opp": rival, "periodos": periodos, "jugadores": jugadores_out}
             nuevas += 1
@@ -1332,7 +1344,11 @@ def detectar_kickoffs_video(youtube_url, duracion_minima_1t=15*60):
     if not VIDEO_SYNC_DISPONIBLE or not _video_configurar_tesseract():
         return None
 
-    ydl_opts = {"quiet": True, "no_warnings": True, "format": "134/135/160/243"}
+    # 720p si esta disponible -- el cartel es chico, mas resolucion ayuda
+    # al OCR en videos con mas compresion/ruido. Cae a resoluciones mas
+    # chicas si el video no tiene 720p (formatos "https" directos, no
+    # m3u8, para poder hacer seek rapido sin descargar todo el video).
+    ydl_opts = {"quiet": True, "no_warnings": True, "format": "136/135/134/160/243"}
     try:
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             info = ydl.extract_info(youtube_url, download=False)
@@ -1344,8 +1360,15 @@ def detectar_kickoffs_video(youtube_url, duracion_minima_1t=15*60):
     ffmpeg_exe = imageio_ffmpeg.get_ffmpeg_exe()
     leer = lambda seg: _video_leer_en(stream_url, seg, ffmpeg_exe)  # noqa: E731
 
+    # Primero fino (cada 4s) en el primer minuto y medio -- el caso mas
+    # comun, la camara ya arranca grabando con el cartel puesto. Si no
+    # aparece ahi, un segundo barrido mas grueso hasta los 10 minutos, por
+    # las dudas de que haya un poco de previa/entrada en cancha antes de
+    # que se vea el cartel (confirmado que hace falta con algunos partidos
+    # cargados a mano por Javi, 2026-09-18).
     kickoff1 = None
-    for candidato in range(0, 90, 4):
+    candidatos_1t = list(range(0, 90, 4)) + list(range(90, 600, 15))
+    for candidato in candidatos_1t:
         r = leer(candidato)
         if r and r[0] == 1:
             estimado = candidato - r[1]
@@ -2475,9 +2498,10 @@ def main():
         # "clic en la metrica destacada -> ver el momento en video" (ver
         # fetch_catapult_efforts). Pipeline aparte de catapult_gps de
         # arriba, a proposito: no se toca lo que ya funciona en produccion.
-        # Solo 4TA por ahora (piloto, Javi 2026-09-05) -- sumar mas
-        # categorias despues es agregar el nombre a esta lista, nada mas.
-        CATAPULT_EFFORTS_CATS = ["4TA"]
+        # Empezo siendo solo 4TA (piloto, Javi 2026-09-05); sumadas 5TA y
+        # 6TA (Javi, 2026-09-18) para poder sincronizar tambien el video de
+        # esas categorias -- sumar mas es agregar el nombre a esta lista.
+        CATAPULT_EFFORTS_CATS = ["4TA", "5TA", "6TA"]
         try:
             efforts = fetch_catapult_efforts(
                 usuario_catapult, password_catapult, CATAPULT_EFFORTS_CATS,
