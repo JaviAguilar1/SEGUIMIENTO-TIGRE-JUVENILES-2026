@@ -364,12 +364,11 @@ table tr:hover td{background:rgba(26,58,143,0.15);}
 
 /* ── TARJETAS DE 9 CELDAS (POS/PTS/PJ/PG/PE/PP/GF/GC/DG) ──────────────
    "UBICACIÓN EN LA TABLA" y el mini-resumen del próximo rival: con
-   auto-fit, en celular la última fila queda con menos celdas que la
-   grilla completa y se pegan a la izquierda dejando un hueco a la
-   derecha. 3 columnas divide 9 exacto (3 filas parejas, ancho completo
-   siempre); en pantallas grandes hay lugar de sobra para una sola fila. */
-.stat-grid-9{display:grid;grid-template-columns:repeat(3,1fr);}
-@media(min-width:600px){.stat-grid-9{grid-template-columns:repeat(9,1fr);}}
+   auto-fit, en celular la última fila quedaba con menos celdas que la
+   grilla completa, pegadas a la izquierda con un hueco a la derecha.
+   Una sola fila de 9 columnas parejas ocupa siempre todo el ancho, en
+   celular y en desktop. */
+.stat-grid-9{display:grid;grid-template-columns:repeat(9,1fr);}
 
 /* ── GENERAL COMPARISON TABLE ───────────────────────── */
 .gen-table-wrap{overflow-x:auto;margin-bottom:24px;border-radius:10px;border:1px solid var(--border);}
