@@ -1,5 +1,5 @@
 {
-  "actualizado": "2026-09-17 07:00",
+  "actualizado": "2026-09-18 03:00",
   "fuente": "ligaprofesional.ar (oficial)",
   "fuente_fixture": "ligaprofesional.ar (oficial)",
   "fuente_reserva": "statfutbol.com.ar",
@@ -3125,14 +3125,14 @@
           },
           {
             "pos": 7,
-            "equipo": "INSTITUTO (CORDOBA)",
+            "equipo": "GODOY CRUZ A.T. (MENDOZA)",
             "pts": 13,
-            "pj": 8,
+            "pj": 9,
             "pg": 3,
             "pe": 4,
-            "pp": 1,
-            "gf": 11,
-            "gc": 8,
+            "pp": 2,
+            "gf": 12,
+            "gc": 9,
             "dif": 3
           },
           {
@@ -3149,6 +3149,18 @@
           },
           {
             "pos": 9,
+            "equipo": "INSTITUTO (CORDOBA)",
+            "pts": 13,
+            "pj": 9,
+            "pg": 3,
+            "pe": 4,
+            "pp": 2,
+            "gf": 12,
+            "gc": 11,
+            "dif": 1
+          },
+          {
+            "pos": 10,
             "equipo": "TALLERES (CORDOBA)",
             "pts": 13,
             "pj": 9,
@@ -3160,7 +3172,7 @@
             "dif": 1
           },
           {
-            "pos": 10,
+            "pos": 11,
             "equipo": "SAN LORENZO",
             "pts": 11,
             "pj": 9,
@@ -3172,7 +3184,7 @@
             "dif": 2
           },
           {
-            "pos": 11,
+            "pos": 12,
             "equipo": "RACING CLUB",
             "pts": 11,
             "pj": 9,
@@ -3184,7 +3196,7 @@
             "dif": 0
           },
           {
-            "pos": 12,
+            "pos": 13,
             "equipo": "TIGRE",
             "pts": 11,
             "pj": 9,
@@ -3196,31 +3208,7 @@
             "dif": -4
           },
           {
-            "pos": 13,
-            "equipo": "GODOY CRUZ A.T. (MENDOZA)",
-            "pts": 10,
-            "pj": 8,
-            "pg": 2,
-            "pe": 4,
-            "pp": 2,
-            "gf": 9,
-            "gc": 9,
-            "dif": 0
-          },
-          {
             "pos": 14,
-            "equipo": "BANFIELD",
-            "pts": 8,
-            "pj": 8,
-            "pg": 2,
-            "pe": 2,
-            "pp": 4,
-            "gf": 8,
-            "gc": 11,
-            "dif": -3
-          },
-          {
-            "pos": 15,
             "equipo": "ALDOSIVI (MAR DEL PLATA)",
             "pts": 8,
             "pj": 9,
@@ -3230,6 +3218,18 @@
             "gf": 7,
             "gc": 10,
             "dif": -3
+          },
+          {
+            "pos": 15,
+            "equipo": "BANFIELD",
+            "pts": 8,
+            "pj": 9,
+            "pg": 2,
+            "pe": 2,
+            "pp": 5,
+            "gf": 8,
+            "gc": 14,
+            "dif": -6
           },
           {
             "pos": 16,
@@ -3258,14 +3258,14 @@
           {
             "pos": 18,
             "equipo": "BARRACAS CENTRAL",
-            "pts": 3,
-            "pj": 8,
-            "pg": 0,
+            "pts": 6,
+            "pj": 9,
+            "pg": 1,
             "pe": 3,
             "pp": 5,
-            "gf": 5,
-            "gc": 15,
-            "dif": -10
+            "gf": 8,
+            "gc": 16,
+            "dif": -8
           }
         ],
         "Zona B": [
@@ -3283,30 +3283,42 @@
           },
           {
             "pos": 2,
-            "equipo": "ESTUDIANTES (LP)",
-            "pts": 17,
-            "pj": 8,
-            "pg": 5,
-            "pe": 2,
-            "pp": 1,
-            "gf": 16,
-            "gc": 7,
-            "dif": 9
-          },
-          {
-            "pos": 3,
             "equipo": "BOCA JUNIORS",
-            "pts": 17,
-            "pj": 8,
+            "pts": 18,
+            "pj": 9,
             "pg": 5,
-            "pe": 2,
+            "pe": 3,
             "pp": 1,
             "gf": 12,
             "gc": 4,
             "dif": 8
           },
           {
+            "pos": 3,
+            "equipo": "ESTUDIANTES (RIO CUARTO - CORDOBA)",
+            "pts": 18,
+            "pj": 9,
+            "pg": 5,
+            "pe": 3,
+            "pp": 1,
+            "gf": 8,
+            "gc": 4,
+            "dif": 4
+          },
+          {
             "pos": 4,
+            "equipo": "ESTUDIANTES (LP)",
+            "pts": 17,
+            "pj": 9,
+            "pg": 5,
+            "pe": 2,
+            "pp": 2,
+            "gf": 16,
+            "gc": 8,
+            "dif": 8
+          },
+          {
+            "pos": 5,
             "equipo": "LANUS",
             "pts": 17,
             "pj": 9,
@@ -3318,52 +3330,40 @@
             "dif": 4
           },
           {
-            "pos": 5,
-            "equipo": "ESTUDIANTES (RIO CUARTO - CORDOBA)",
-            "pts": 15,
-            "pj": 8,
-            "pg": 4,
-            "pe": 3,
-            "pp": 1,
-            "gf": 7,
-            "gc": 4,
-            "dif": 3
+            "pos": 6,
+            "equipo": "BELGRANO (CORDOBA)",
+            "pts": 17,
+            "pj": 9,
+            "pg": 5,
+            "pe": 2,
+            "pp": 2,
+            "gf": 12,
+            "gc": 11,
+            "dif": 1
           },
           {
-            "pos": 6,
+            "pos": 7,
             "equipo": "ATL. RAFAELA",
-            "pts": 15,
-            "pj": 8,
+            "pts": 16,
+            "pj": 9,
             "pg": 4,
-            "pe": 3,
+            "pe": 4,
             "pp": 1,
             "gf": 10,
             "gc": 8,
             "dif": 2
           },
           {
-            "pos": 7,
+            "pos": 8,
             "equipo": "RIESTRA",
             "pts": 14,
-            "pj": 8,
+            "pj": 9,
             "pg": 4,
             "pe": 2,
-            "pp": 2,
-            "gf": 14,
-            "gc": 8,
-            "dif": 6
-          },
-          {
-            "pos": 8,
-            "equipo": "BELGRANO (CORDOBA)",
-            "pts": 14,
-            "pj": 8,
-            "pg": 4,
-            "pe": 2,
-            "pp": 2,
-            "gf": 10,
+            "pp": 3,
+            "gf": 15,
             "gc": 10,
-            "dif": 0
+            "dif": 5
           },
           {
             "pos": 9,
@@ -3405,16 +3405,28 @@
             "pos": 12,
             "equipo": "SAN MARTIN (SAN JUAN)",
             "pts": 10,
-            "pj": 8,
+            "pj": 9,
             "pg": 2,
             "pe": 4,
-            "pp": 2,
+            "pp": 3,
             "gf": 7,
-            "gc": 11,
-            "dif": -4
+            "gc": 15,
+            "dif": -8
           },
           {
             "pos": 13,
+            "equipo": "NEWELLS OLD BOYS",
+            "pts": 9,
+            "pj": 9,
+            "pg": 2,
+            "pe": 3,
+            "pp": 4,
+            "gf": 9,
+            "gc": 10,
+            "dif": -1
+          },
+          {
+            "pos": 14,
             "equipo": "DEFENSA Y JUSTICIA",
             "pts": 8,
             "pj": 9,
@@ -3426,7 +3438,7 @@
             "dif": 0
           },
           {
-            "pos": 14,
+            "pos": 15,
             "equipo": "INDEPENDIENTE RIVADAVIA (MENDOZA)",
             "pts": 8,
             "pj": 9,
@@ -3436,18 +3448,6 @@
             "gf": 9,
             "gc": 16,
             "dif": -7
-          },
-          {
-            "pos": 15,
-            "equipo": "NEWELLS OLD BOYS",
-            "pts": 6,
-            "pj": 8,
-            "pg": 1,
-            "pe": 3,
-            "pp": 4,
-            "gf": 5,
-            "gc": 10,
-            "dif": -5
           },
           {
             "pos": 16,
@@ -20725,8 +20725,8 @@
       "fecha": 26,
       "rival": "BELGRANO (CORDOBA)",
       "goleador": {
-        "nombre": "BAZAN, SANTIAGO ANDRES",
-        "goles": 11
+        "nombre": "RUSTICHELLI, LUCA",
+        "goles": 12
       },
       "amarillas_riesgo": []
     },
@@ -20753,7 +20753,7 @@
       "rival": "BELGRANO (CORDOBA)",
       "goleador": {
         "nombre": "MANSILLA RIZZI, FRANCISCO",
-        "goles": 27
+        "goles": 28
       },
       "amarillas_riesgo": []
     },
@@ -20850,7 +20850,7 @@
       {
         "nombre": "FREDES, FELIPE BENJAMIN",
         "gol": 8,
-        "am": 3,
+        "am": 4,
         "roja": 0
       },
       {
@@ -20873,7 +20873,7 @@
       },
       {
         "nombre": "GONZALEZ, SANTINO MARCO ANTONIO",
-        "gol": 7,
+        "gol": 8,
         "am": 2,
         "roja": 0
       },
@@ -21055,7 +21055,7 @@
       },
       {
         "nombre": "CROTTO, NICOLAS",
-        "gol": 3,
+        "gol": 4,
         "am": 0,
         "roja": 0
       },
@@ -21079,8 +21079,8 @@
       },
       {
         "nombre": "FEVERSANI, BAUTISTA",
-        "gol": 0,
-        "am": 1,
+        "gol": 1,
+        "am": 2,
         "roja": 0
       },
       {
@@ -21121,26 +21121,26 @@
       },
       {
         "nombre": "LLERA, MARIANO",
-        "gol": 1,
+        "gol": 2,
         "am": 6,
         "roja": 0
       },
       {
         "nombre": "LUQUE, GONZALO OMAR",
-        "gol": 1,
+        "gol": 2,
         "am": 1,
         "roja": 0
       },
       {
         "nombre": "MIÑO, ESTEBAN ROMAN",
         "gol": 5,
-        "am": 10,
+        "am": 11,
         "roja": 0
       },
       {
         "nombre": "MOYANO, JERONIMO THOMAS",
         "gol": 0,
-        "am": 2,
+        "am": 3,
         "roja": 2
       },
       {
@@ -21213,7 +21213,7 @@
         "nombre": "WIRZ, AXEL LEANDRO",
         "gol": 1,
         "am": 8,
-        "roja": 0
+        "roja": 1
       },
       {
         "nombre": "ZERDA, SANTIAGO LIONEL",
@@ -21375,7 +21375,7 @@
       },
       {
         "nombre": "ROMERO, AURELIANO BENICIO",
-        "gol": 1,
+        "gol": 2,
         "am": 0,
         "roja": 0
       },
@@ -21479,7 +21479,7 @@
       },
       {
         "nombre": "DI SIPIO, AGUSTIN MARCELO",
-        "gol": 1,
+        "gol": 2,
         "am": 0,
         "roja": 0
       },
@@ -21533,14 +21533,14 @@
       },
       {
         "nombre": "LAMANNA, FABRIZIO MARTIN",
-        "gol": 3,
+        "gol": 4,
         "am": 1,
         "roja": 1
       },
       {
         "nombre": "LEVY PEREZ DE MEDINA, THIAGO",
-        "gol": 2,
-        "am": 1,
+        "gol": 4,
+        "am": 2,
         "roja": 0
       },
       {
@@ -21698,7 +21698,7 @@
       {
         "nombre": "DE OLIVERA, ELIAS JOAQUIN",
         "gol": 0,
-        "am": 0,
+        "am": 1,
         "roja": 0
       },
       {
@@ -21892,7 +21892,7 @@
       {
         "nombre": "DUARTE, GASTON EMANUEL",
         "gol": 0,
-        "am": 9,
+        "am": 10,
         "roja": 1
       },
       {
@@ -21981,7 +21981,7 @@
       },
       {
         "nombre": "ORTIZ, LEONARDO ARIEL",
-        "gol": 0,
+        "gol": 1,
         "am": 0,
         "roja": 0
       },
@@ -22017,7 +22017,7 @@
       },
       {
         "nombre": "VILLALBA BOGADO, GUSTAVO",
-        "gol": 3,
+        "gol": 4,
         "am": 4,
         "roja": 0
       },
@@ -23060,6 +23060,18 @@
           "amarilla": true,
           "roja": false
         }
+      },
+      "25": {
+        "GONZALEZ, SANTINO MARCO ANTONIO": {
+          "goles": 1,
+          "amarilla": false,
+          "roja": false
+        },
+        "FREDES, FELIPE BENJAMIN": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        }
       }
     },
     "5TA": {
@@ -23535,6 +23547,43 @@
           "amarilla": true,
           "roja": false
         }
+      },
+      "25": {
+        "MOYANO, JERONIMO THOMAS": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "LUQUE, GONZALO OMAR": {
+          "goles": 1,
+          "amarilla": false,
+          "roja": false
+        },
+        "FEVERSANI, BAUTISTA": {
+          "goles": 1,
+          "amarilla": true,
+          "roja": false
+        },
+        "LLERA, MARIANO": {
+          "goles": 1,
+          "amarilla": false,
+          "roja": false
+        },
+        "WIRZ, AXEL LEANDRO": {
+          "goles": 0,
+          "amarilla": false,
+          "roja": true
+        },
+        "MIÑO, ESTEBAN ROMAN": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "CROTTO, NICOLAS": {
+          "goles": 1,
+          "amarilla": false,
+          "roja": false
+        }
       }
     },
     "6TA": {
@@ -24003,6 +24052,13 @@
         "MALLMANN, FELIX": {
           "goles": 0,
           "amarilla": true,
+          "roja": false
+        }
+      },
+      "25": {
+        "ROMERO, AURELIANO BENICIO": {
+          "goles": 1,
+          "amarilla": false,
           "roja": false
         }
       }
@@ -24515,6 +24571,23 @@
           "amarilla": true,
           "roja": false
         }
+      },
+      "25": {
+        "LAMANNA, FABRIZIO MARTIN": {
+          "goles": 1,
+          "amarilla": false,
+          "roja": false
+        },
+        "LEVY PEREZ DE MEDINA, THIAGO": {
+          "goles": 2,
+          "amarilla": true,
+          "roja": false
+        },
+        "DI SIPIO, AGUSTIN MARCELO": {
+          "goles": 1,
+          "amarilla": false,
+          "roja": false
+        }
       }
     },
     "8VA": {
@@ -24909,6 +24982,13 @@
           "roja": false
         },
         "RIOS, LUCAS MATEO": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        }
+      },
+      "25": {
+        "DE OLIVERA, ELIAS JOAQUIN": {
           "goles": 0,
           "amarilla": true,
           "roja": false
@@ -25326,6 +25406,23 @@
         "DUARTE, GASTON EMANUEL": {
           "goles": 0,
           "amarilla": true,
+          "roja": false
+        }
+      },
+      "25": {
+        "ORTIZ, LEONARDO ARIEL": {
+          "goles": 1,
+          "amarilla": false,
+          "roja": false
+        },
+        "DUARTE, GASTON EMANUEL": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "VILLALBA BOGADO, GUSTAVO": {
+          "goles": 1,
+          "amarilla": false,
           "roja": false
         }
       }
@@ -50321,30 +50418,6 @@
               ]
             },
             {
-              "fecha": "F5",
-              "opp": "Newells",
-              "min": 88,
-              "metrics": [
-                7937.396,
-                90.14646,
-                192.38,
-                90.3,
-                0,
-                0,
-                24.27205,
-                7,
-                21,
-                48,
-                null,
-                3.41939,
-                -4.79816,
-                0.08,
-                6.637024304372516,
-                0.0,
-                723.32404
-              ]
-            },
-            {
               "fecha": "F9",
               "opp": "Talleres",
               "min": 89,
@@ -50659,30 +50732,6 @@
                 13.58510006056935,
                 0.95,
                 925.69577
-              ]
-            },
-            {
-              "fecha": "F5",
-              "opp": "Newells",
-              "min": 88,
-              "metrics": [
-                8733.68994,
-                99.19012,
-                218.44,
-                176.08,
-                25.2,
-                1,
-                27.56707,
-                16,
-                25,
-                65,
-                null,
-                4.7903,
-                -5.44473,
-                0.18,
-                8.732311073253834,
-                0.29,
-                1002.61227
               ]
             },
             {
@@ -51005,30 +51054,6 @@
                 19.800000243902442,
                 0.76,
                 456.75378
-              ]
-            },
-            {
-              "fecha": "F5",
-              "opp": "Newells",
-              "min": 20,
-              "metrics": [
-                2186.51807,
-                109.65303,
-                162.75999,
-                142.84,
-                86.52,
-                3,
-                29.39897,
-                9,
-                13,
-                12,
-                null,
-                3.94975,
-                -5.00803,
-                0.45,
-                27.59582654920513,
-                4.33,
-                218.84819
               ]
             },
             {
@@ -51450,30 +51475,6 @@
               ]
             },
             {
-              "fecha": "F5",
-              "opp": "Newells",
-              "min": 88,
-              "metrics": [
-                7862.23096,
-                89.2928,
-                275.25001,
-                208.47,
-                144.77,
-                7,
-                30.037,
-                7,
-                40,
-                41,
-                null,
-                4.29984,
-                -6.17401,
-                0.08,
-                10.718341851220897,
-                1.65,
-                789.77991
-              ]
-            },
-            {
               "fecha": "F6",
               "opp": "San Martin SJ",
               "min": 85,
@@ -51820,30 +51821,6 @@
               ]
             },
             {
-              "fecha": "F5",
-              "opp": "Newells",
-              "min": 13,
-              "metrics": [
-                1537.23291,
-                120.10883,
-                136.60001,
-                56.04,
-                13.9,
-                1,
-                25.60908,
-                8,
-                4,
-                14,
-                null,
-                3.81885,
-                -5.47172,
-                0.62,
-                29.771071465777684,
-                1.07,
-                168.89772
-              ]
-            },
-            {
               "fecha": "F8",
               "opp": "Instituto",
               "min": 33,
@@ -52019,30 +51996,6 @@
                 27.155507500914748,
                 0.0,
                 182.2906
-              ]
-            },
-            {
-              "fecha": "F5",
-              "opp": "Newells",
-              "min": 5,
-              "metrics": [
-                608.58923,
-                110.91475,
-                21.72,
-                6.45,
-                28.27,
-                1,
-                29.79458,
-                2,
-                5,
-                4,
-                null,
-                3.84933,
-                -5.85456,
-                0.4,
-                21.284855112083104,
-                5.65,
-                58.99567
               ]
             }
           ]
@@ -52240,30 +52193,6 @@
                 19.103452816474864,
                 1.16,
                 964.00186
-              ]
-            },
-            {
-              "fecha": "F5",
-              "opp": "Newells",
-              "min": 83,
-              "metrics": [
-                8049.02979,
-                97.48955,
-                405.02,
-                273.43,
-                153.99,
-                8,
-                30.23388,
-                22,
-                30,
-                64,
-                null,
-                4.0899,
-                -5.7492,
-                0.27,
-                16.613979748797888,
-                1.86,
-                862.8273
               ]
             },
             {
@@ -52805,30 +52734,6 @@
               ]
             },
             {
-              "fecha": "F5",
-              "opp": "Newells",
-              "min": 88,
-              "metrics": [
-                10148.98047,
-                115.26383,
-                472.83,
-                224.66,
-                32.28,
-                2,
-                28.21927,
-                25,
-                23,
-                68,
-                null,
-                4.71131,
-                -4.5239,
-                0.28,
-                16.479613628620104,
-                0.37,
-                1084.85864
-              ]
-            },
-            {
               "fecha": "F6",
               "opp": "San Martin SJ",
               "min": 54,
@@ -53143,30 +53048,6 @@
                 19.07003561973526,
                 0.23,
                 554.99414
-              ]
-            },
-            {
-              "fecha": "F5",
-              "opp": "Newells",
-              "min": 88,
-              "metrics": [
-                10139.05811,
-                115.15114,
-                638,
-                479.57001,
-                148.31,
-                8,
-                28.21688,
-                29,
-                47,
-                86,
-                null,
-                4.1562,
-                -6.36078,
-                0.33,
-                22.575355025553662,
-                1.69,
-                1154.08405
               ]
             },
             {
@@ -53932,30 +53813,6 @@
                 0.37,
                 303.23837
               ]
-            },
-            {
-              "fecha": "F5",
-              "opp": "Newells",
-              "min": 20,
-              "metrics": [
-                2025.51917,
-                101.579,
-                113.05,
-                77.98,
-                1.81,
-                0,
-                25.1007,
-                5,
-                7,
-                22,
-                null,
-                3.97046,
-                -4.64308,
-                0.25,
-                17.539827151000484,
-                0.09,
-                257.18405
-              ]
             }
           ]
         },
@@ -54205,30 +54062,6 @@
                 18.19719154356571,
                 5.35,
                 277.55469
-              ]
-            },
-            {
-              "fecha": "F5",
-              "opp": "Newells",
-              "min": 75,
-              "metrics": [
-                7867.43652,
-                104.5488,
-                469.16,
-                283.08,
-                121.13,
-                7,
-                28.75908,
-                23,
-                21,
-                45,
-                null,
-                3.96118,
-                -4.75747,
-                0.31,
-                17.45457431540526,
-                1.62,
-                730.30496
               ]
             },
             {
@@ -54522,30 +54355,6 @@
                 16.881889521502117,
                 0.44,
                 892.78995
-              ]
-            },
-            {
-              "fecha": "F5",
-              "opp": "Newells",
-              "min": 68,
-              "metrics": [
-                7484.81177,
-                109.89353,
-                339.58,
-                260.15001,
-                138.27,
-                9,
-                28.41378,
-                14,
-                38,
-                41,
-                null,
-                4.09867,
-                -5.57296,
-                0.21,
-                16.8986294652252,
-                2.03,
-                714.73877
               ]
             },
             {
@@ -54935,30 +54744,6 @@
                 18.083010788108375,
                 0.0,
                 320.42105
-              ]
-            },
-            {
-              "fecha": "F5",
-              "opp": "Newells",
-              "min": 68,
-              "metrics": [
-                7828.75562,
-                114.94338,
-                496.09999,
-                292.51,
-                36.4,
-                2,
-                27.19998,
-                9,
-                32,
-                55,
-                null,
-                3.6043,
-                -5.99395,
-                0.13,
-                19.435273358162572,
-                0.54,
-                822.69382
               ]
             },
             {
@@ -55625,30 +55410,6 @@
               ]
             },
             {
-              "fecha": "F5",
-              "opp": "Newells",
-              "min": 88,
-              "metrics": [
-                8227.29834,
-                93.43894,
-                144.92,
-                154.22,
-                23.28,
-                1,
-                25.99117,
-                4,
-                18,
-                42,
-                null,
-                3.68682,
-                -4.81361,
-                0.05,
-                6.402271436683703,
-                0.26,
-                810.37802
-              ]
-            },
-            {
               "fecha": "F6",
               "opp": "San Martin SJ",
               "min": 85,
@@ -56278,7 +56039,7 @@
           ]
         },
         "Bautista Mora": {
-          "pos": "Defensa Central",
+          "pos": "Central Derecho",
           "match": [
             {
               "fecha": "F13",
