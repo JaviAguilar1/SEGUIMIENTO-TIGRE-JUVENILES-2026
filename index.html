@@ -3268,10 +3268,10 @@ function renderStatsSingle(cat, content){
           : `<div style="font-size:13px;color:var(--muted)">Sin datos todavía.</div>`}
       </div>
       <div style="background:${reservaAlerta.amarillas_riesgo?.length?'rgba(245,158,11,0.12)':'rgba(34,197,94,0.12)'};border:1px solid ${reservaAlerta.amarillas_riesgo?.length?'rgba(245,158,11,0.45)':'rgba(34,197,94,0.4)'};border-radius:10px;padding:14px 16px">
-        <div style="font-size:12px;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;margin-bottom:6px">🟨 5ta amarilla</div>
+        <div style="font-size:12px;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;margin-bottom:6px">🟨 5ta amarilla / expulsión</div>
         ${reservaAlerta.amarillas_riesgo?.length
-          ? `<div style="font-size:14px;color:var(--draw)">${reservaAlerta.amarillas_riesgo.map(a=>esc(a.nombre)+' ('+a.amarillas+')').join('<br>')}</div>`
-          : `<div style="font-size:14px;color:var(--win)">Ningún jugador llegó a la 5ta amarilla en el partido previo.</div>`}
+          ? `<div style="font-size:14px;color:var(--draw)">${reservaAlerta.amarillas_riesgo.map(a=>esc(a.nombre)+' ('+(a.motivo==='roja'?'Roja':a.amarillas)+')').join('<br>')}</div>`
+          : `<div style="font-size:14px;color:var(--win)">Ningún jugador llegó a la 5ta amarilla ni fue expulsado en el partido previo.</div>`}
       </div>
     </div>` : '';
 
@@ -3512,10 +3512,10 @@ async function renderRivalStatsDetalle(dataCat, cat){
     amarillasHTML = `<div style="font-size:14px;color:var(--muted)">Sin datos todavía.</div>`;
     amarillasBg = 'var(--surface2)'; amarillasBorder = 'var(--border2)';
   } else if(alerta.amarillas_riesgo && alerta.amarillas_riesgo.length){
-    amarillasHTML = `<div style="font-size:15px;color:var(--draw)">${alerta.amarillas_riesgo.map(a=>esc(a.nombre)+' ('+a.amarillas+')').join('<br>')}</div>`;
+    amarillasHTML = `<div style="font-size:15px;color:var(--draw)">${alerta.amarillas_riesgo.map(a=>esc(a.nombre)+' ('+(a.motivo==='roja'?'Roja':a.amarillas)+')').join('<br>')}</div>`;
     amarillasBg = 'rgba(245,158,11,0.12)'; amarillasBorder = 'rgba(245,158,11,0.45)';
   } else {
-    amarillasHTML = `<div style="font-size:15px;color:var(--win)">Ningún jugador llegó a la 5ta amarilla en el partido previo.</div>`;
+    amarillasHTML = `<div style="font-size:15px;color:var(--win)">Ningún jugador llegó a la 5ta amarilla ni fue expulsado en el partido previo.</div>`;
     amarillasBg = 'rgba(34,197,94,0.12)'; amarillasBorder = 'rgba(34,197,94,0.4)';
   }
 
@@ -3525,7 +3525,7 @@ async function renderRivalStatsDetalle(dataCat, cat){
       ${golHTML}
     </div>
     <div style="background:${amarillasBg};border:1px solid ${amarillasBorder};border-radius:10px;padding:14px 16px">
-      <div style="font-size:12px;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;margin-bottom:10px">🟨 5ta amarilla</div>
+      <div style="font-size:12px;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;margin-bottom:10px">🟨 5ta amarilla / expulsión</div>
       ${amarillasHTML}
     </div>
   </div>`;
@@ -8017,17 +8017,17 @@ async function dibujarTarjetaRival({cat, prox, info, ultimos, ultimosLabel, reci
     const drawAmarillas = (y0) => {
       let cy=y0+padInterno;
       ctx.font="700 10px 'Barlow', sans-serif"; ctx.fillStyle=GOLD;
-      ctx.fillText('5TA AMARILLA', ex, cy); cy+=17;
+      ctx.fillText('5TA AMARILLA / EXPULSIÓN', ex, cy); cy+=17;
       const lista = alerta.amarillas_riesgo||[];
       if(lista.length){
         lista.slice(0,3).forEach(a=>{
           ctx.font="11px 'Barlow', sans-serif"; ctx.fillStyle=DRAW;
-          ctx.fillText(a.nombre.split(',')[0]+' ('+a.amarillas+')', ex, cy);
+          ctx.fillText(a.nombre.split(',')[0]+' ('+(a.motivo==='roja'?'Roja':a.amarillas)+')', ex, cy);
           cy+=16;
         });
       } else {
         ctx.font="11px 'Barlow', sans-serif"; ctx.fillStyle=WIN;
-        ctx.fillText('Sin jugadores con 5 amarillas.', ex, cy);
+        ctx.fillText('Sin jugadores suspendidos.', ex, cy);
       }
     };
 

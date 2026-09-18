@@ -1504,8 +1504,12 @@ def calcular_riesgo_suspension(sintesis_url, team_id, team_nombre, equipos, fixt
     (4 amarillas, podrian llegar a la 5ta en cualquier partido) -- eso no
     servia como aviso util (Javi, 2026-09-01: "hoy me muestra varios con 4,
     eso no me sirve"). Ahora solo devuelve a los que llegaron JUSTO a la
-    5ta amarilla en el ULTIMO partido jugado por el rival -- esos si estan
-    confirmados afuera del partido que nos toca jugar."""
+    5ta amarilla en el ULTIMO partido jugado por el rival, O que fueron
+    expulsados (roja directa o doble amarilla) en ese mismo ultimo partido
+    -- los dos casos dejan al jugador afuera del partido que nos toca jugar
+    (Javi, 2026-09-18: encontro que la expulsion sin llegar a la 5ta
+    amarilla no se estaba avisando). Cada entrada trae "motivo" ('amarilla'
+    o 'roja') para que la pantalla pueda mostrarlo distinto."""
     nombre_corto = team_nombre.split(" (")[0]
     partidos_equipo = [p for p in fixture if p["jugado"] and (
         p["local"] == nombre_corto or p["visita"] == nombre_corto
@@ -1524,13 +1528,25 @@ def calcular_riesgo_suspension(sintesis_url, team_id, team_nombre, equipos, fixt
         for nombre, ev in eventos.items():
             if ev["amarilla"]:
                 conteo[nombre] = conteo.get(nombre, 0) + 1
+        agregados_este_partido = set()
         for nombre in list(conteo.keys()):
             llego_a_la_5ta = conteo[nombre] >= AMARILLAS_SUSPENSION
             expulsado = eventos.get(nombre, {}).get("roja", False)
             if llego_a_la_5ta or expulsado:
                 conteo[nombre] = 0
-                if es_ultimo and llego_a_la_5ta:
-                    suspendidos_ultimo_partido.append({"nombre": nombre, "amarillas": AMARILLAS_SUSPENSION})
+                if es_ultimo:
+                    if llego_a_la_5ta:
+                        suspendidos_ultimo_partido.append({"nombre": nombre, "motivo": "amarilla", "amarillas": AMARILLAS_SUSPENSION})
+                    else:
+                        suspendidos_ultimo_partido.append({"nombre": nombre, "motivo": "roja"})
+                    agregados_este_partido.add(nombre)
+        if es_ultimo:
+            # Expulsado sin amarillas acumuladas este ciclo (roja directa de
+            # entrada, nunca paso por el loop de arriba porque nunca tuvo
+            # una amarilla que lo metiera en `conteo`).
+            for nombre, ev in eventos.items():
+                if ev.get("roja") and nombre not in agregados_este_partido:
+                    suspendidos_ultimo_partido.append({"nombre": nombre, "motivo": "roja"})
     return suspendidos_ultimo_partido
 
 
