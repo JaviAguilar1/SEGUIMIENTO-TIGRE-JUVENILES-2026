@@ -1206,6 +1206,282 @@ def fetch_catapult_efforts(email: str, password: str, cats, existentes=None, min
     return out
 
 
+# ── VIDEO — deteccion automatica de arranque de cada tiempo ─────────────
+# "Esfuerzos en video" (ver gpsVideoSeg en index.html) necesita, por cada
+# fecha, el segundo exacto del video de YouTube donde arranca cada tiempo
+# (gps/videoSync en Firebase) para poder saltar al momento justo de un
+# esfuerzo puntual (que ya trae fetch_catapult_efforts de arriba, con
+# hora real). Hasta ahora eso se cargaba siempre a mano, mirando el video.
+#
+# Esto lo automatiza para los partidos que traen quemado en la esquina un
+# cartel con el tiempo (1T/2T) y el reloj del partido (cámara "VEO",
+# 2026-09-18): se lee con OCR y se ubica el segundo exacto por búsqueda,
+# igual que se haría mirando el video a mano. Confirmado que NO todos los
+# videos tienen ese cartel (uno viejo de marzo no lo trae) -- si no se
+# encuentra, la fecha simplemente queda sin tocar para calibrar a mano
+# como siempre, nunca se inventa nada.
+#
+# Requiere paquetes de Python que NO son parte del resto de este script
+# a propósito (para que el resto del scraper siga corriendo en cualquier
+# PC sin ningún pip install): yt-dlp, imageio-ffmpeg, pytesseract, Pillow
+# -- más Tesseract OCR instalado en la PC (el programa en sí, aparte del
+# paquete de Python). Si algo de esto falta, esta sección entera se
+# saltea sola, mismo criterio que FUTDETAIL_USER/CATAPULT_USER.
+try:
+    import io as _video_io
+    import shutil as _video_shutil
+    import subprocess as _video_subprocess
+    import yt_dlp
+    import imageio_ffmpeg
+    import pytesseract
+    from PIL import Image as _VideoImage
+    VIDEO_SYNC_DISPONIBLE = True
+except ImportError:
+    VIDEO_SYNC_DISPONIBLE = False
+
+_TESSERACT_CANDIDATOS = [
+    r"C:\Program Files\Tesseract-OCR\tesseract.exe",
+    r"C:\Program Files (x86)\Tesseract-OCR\tesseract.exe",
+]
+
+
+def _video_configurar_tesseract():
+    """pytesseract busca 'tesseract' en el PATH -- recien instalado, en
+    Windows a veces no aparece todavia ahi (hace falta abrir una terminal
+    nueva). Si no lo encuentra, prueba las rutas tipicas del instalador."""
+    if _video_shutil.which("tesseract"):
+        return True
+    for candidato in _TESSERACT_CANDIDATOS:
+        if os.path.exists(candidato):
+            pytesseract.pytesseract.tesseract_cmd = candidato
+            return True
+    return False
+
+
+# Lee "1T 0:00" / "2T 15:07", etc. Tesseract confunde la T del cartel con
+# un 7 (fuente estilizada) de forma consistente -- confirmado con datos
+# reales, "1T" sale como "17" y "2T" como "27" -- por eso el regex acepta
+# T o 7 como segundo caracter en vez de pelear con eso.
+VIDEO_PERIODO_CLOCK_RE = re.compile(r"([12])[T7]\D{0,4}(\d{1,3}):(\d{2})")
+
+
+def _video_leer_marcador(frame_bytes):
+    """Recorta la esquina donde va el cartel quemado (1T/2T + reloj) y lo
+    lee con OCR. Devuelve (periodo, segundos_de_reloj) o None si no hay
+    cartel reconocible en este frame (video sin ese overlay, tapado por
+    algo, o mitad de una transicion).
+
+    El recorte es en PROPORCION del ancho/alto del frame (no en pixeles
+    fijos) para que sirva sin importar la resolucion real del video --
+    calibrado a ojo con el cartel de la camara VEO (esquina superior
+    izquierda), confirmado 2026-09-18 con la F24 de 4TA vs Platense."""
+    im = _VideoImage.open(_video_io.BytesIO(frame_bytes))
+    w, h = im.size
+    crop = im.crop((int(w*0.19), 0, int(w*0.34), int(h*0.10)))
+    if crop.width < 10 or crop.height < 10:
+        return None
+    factor = max(1, 300 // max(crop.width, 1))
+    crop = crop.resize((crop.width*factor, crop.height*factor))
+    texto = pytesseract.image_to_string(crop, config="--psm 8")
+    m = VIDEO_PERIODO_CLOCK_RE.search(texto.replace(" ", ""))
+    if not m:
+        return None
+    periodo = int(m.group(1))
+    segundos = int(m.group(2))*60 + int(m.group(3))
+    return periodo, segundos
+
+
+def _video_leer_en(stream_url, segundo, ffmpeg_exe):
+    """Un solo frame del video en el segundo pedido, via seek rapido de
+    ffmpeg directo sobre la URL (sin descargar el video entero -- YouTube
+    soporta range requests) + lectura del cartel. None si el segundo esta
+    fuera de rango, el stream se corto, o no hay cartel legible ahi."""
+    cmd = [ffmpeg_exe, "-ss", str(max(0, segundo)), "-i", stream_url,
+           "-vframes", "1", "-q:v", "4", "-f", "image2pipe", "-vcodec", "mjpeg", "-"]
+    try:
+        proc = _video_subprocess.run(cmd, capture_output=True, timeout=25)
+    except Exception:
+        return None
+    if not proc.stdout:
+        return None
+    try:
+        return _video_leer_marcador(proc.stdout)
+    except Exception:
+        return None
+
+
+def detectar_kickoffs_video(youtube_url, duracion_minima_1t=15*60):
+    """Encuentra el segundo exacto de arranque de 1er y 2do tiempo en un
+    video de YouTube con el cartel quemado de la camara VEO. Devuelve
+    {"kickoff1":seg, "kickoff2":seg} o None si no se pudo (sin ese
+    cartel, formato distinto, algo salio mal) -- la fecha queda para
+    calibrar a mano en ese caso.
+
+    Algoritmo (el mismo que se haria a mano mirando el video):
+    1) Busca el arranque del 1er tiempo probando los primeros segundos
+       del video (los partidos filmados asi arrancan grabando ya con el
+       cartel puesto, siempre dentro del primer minuto y medio).
+    2) Busca por biseccion el momento exacto donde el cartel pasa de "1T"
+       a "2T" -- sin asumir nada de cuanto dura el entretiempo EN EL
+       VIDEO (a veces esta editado/recortado: confirmado con la F24 de
+       4TA, calcular el segundo tiempo a partir del horario que da
+       Catapult a secas daba un resultado ~16 minutos mal).
+    3) Una vez ubicado el cambio de tiempo, ajusta fino para encontrar el
+       primer frame que diga exactamente "0:00" en cada tiempo.
+    """
+    if not VIDEO_SYNC_DISPONIBLE or not _video_configurar_tesseract():
+        return None
+
+    ydl_opts = {"quiet": True, "no_warnings": True, "format": "134/135/160/243"}
+    try:
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            info = ydl.extract_info(youtube_url, download=False)
+            stream_url = info["url"]
+            duracion = info.get("duration") or 6*3600
+    except Exception:
+        return None
+
+    ffmpeg_exe = imageio_ffmpeg.get_ffmpeg_exe()
+    leer = lambda seg: _video_leer_en(stream_url, seg, ffmpeg_exe)  # noqa: E731
+
+    kickoff1 = None
+    for candidato in range(0, 90, 4):
+        r = leer(candidato)
+        if r and r[0] == 1:
+            estimado = candidato - r[1]
+            for ajuste in range(max(0, estimado-3), estimado+4):
+                if leer(ajuste) == (1, 0):
+                    kickoff1 = ajuste
+                    break
+            if kickoff1 is None:
+                kickoff1 = max(0, estimado)
+            break
+    if kickoff1 is None:
+        return None  # sin cartel reconocible -- video sin overlay, o formato distinto
+
+    lo, hi = kickoff1 + duracion_minima_1t, duracion - 5
+    if hi <= lo:
+        return None
+    r_hi = leer(hi)
+    if not r_hi or r_hi[0] != 2:
+        hi = duracion - 30  # el cartel podria no aparecer justo en el ultimo segundo
+        r_hi = leer(hi)
+        if not r_hi or r_hi[0] != 2:
+            return None
+    while hi - lo > 2:
+        mid = (lo + hi) // 2
+        r = leer(mid)
+        if r and r[0] == 2:
+            hi = mid
+        elif r and r[0] == 1:
+            lo = mid
+        else:
+            # frame sin lectura clara (transicion, corte de camara) --
+            # probar un segundo mas adelante en vez de trabar la busqueda
+            r2 = leer(mid+1)
+            if r2 and r2[0] == 2:
+                hi = mid+1
+            elif r2 and r2[0] == 1:
+                lo = mid+1
+            else:
+                break
+
+    r_hi = leer(hi)
+    if not r_hi or r_hi[0] != 2:
+        return None
+    estimado2 = hi - r_hi[1]
+    kickoff2 = None
+    for ajuste in range(max(0, estimado2-5), estimado2+6):
+        if leer(ajuste) == (2, 0):
+            kickoff2 = ajuste
+            break
+    if kickoff2 is None:
+        kickoff2 = max(0, estimado2)
+
+    return {"kickoff1": float(kickoff1), "kickoff2": float(kickoff2)}
+
+
+# Firebase de Tigre (SOLO para leer el link del video cargado y guardar la
+# calibracion, gps/videoSync) -- credenciales de administrador en
+# variables de entorno (FIREBASE_EMAIL/FIREBASE_PASSWORD), mismo criterio
+# que CATAPULT_USER/BL_USER: si no estan configuradas, esta parte se
+# saltea sola. apiKey/databaseURL son los mismos que usa index.html (no
+# son secretos, ya estan en el HTML publico). A diferencia de
+# subir_a_firebase.py (que sube TODO lo de futdetail), esto SOLO lee
+# stats/links/{cat}/{fecha}/par y escribe gps/videoSync/{cat}/{fecha} --
+# nunca toca nada mas, y nunca pisa una calibracion que ya exista (ni
+# manual ni de una corrida anterior de esto mismo). Ojo: "links" vive
+# ANIDADO bajo "stats" (todo lo que guarda saveData() en index.html
+# cuelga de ahi) -- "gps" en cambio es su propio nodo raiz aparte.
+TIGRE_FB_API_KEY = "AIzaSyCw7zfTu06EfT9PNvwcUQq5yGZiy5AGDPE"
+TIGRE_FB_DB_URL = "https://tigre-2026-default-rtdb.firebaseio.com"
+
+
+def _tigre_fb_login(email, password):
+    auth_url = ("https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword"
+                f"?key={TIGRE_FB_API_KEY}")
+    body = json.dumps({"email": email, "password": password, "returnSecureToken": True}).encode()
+    req = urllib.request.Request(auth_url, data=body, headers={"Content-Type": "application/json"})
+    with urllib.request.urlopen(req, timeout=30) as resp:
+        return json.loads(resp.read().decode("utf-8"))["idToken"]
+
+
+def _tigre_fb_get(path, id_token):
+    url = f"{TIGRE_FB_DB_URL}/{path}.json?auth={id_token}"
+    with urllib.request.urlopen(url, timeout=30) as resp:
+        return json.loads(resp.read().decode("utf-8"))
+
+
+def _tigre_fb_put(path, valor, id_token):
+    url = f"{TIGRE_FB_DB_URL}/{path}.json?auth={id_token}"
+    req = urllib.request.Request(url, data=json.dumps(valor).encode(),
+                                  headers={"Content-Type": "application/json"}, method="PUT")
+    with urllib.request.urlopen(req, timeout=30) as resp:
+        return resp.status
+
+
+def sincronizar_video_kickoffs(email, password, catapult_efforts):
+    """Para cada fecha con esfuerzos de Catapult (catapult_efforts) que ya
+    tenga un link de video cargado y todavia NO tenga calibracion
+    (gps/videoSync), intenta detectarla sola con detectar_kickoffs_video.
+    Si no se puede, no hace nada -- la fecha queda para calibrar a mano
+    como hasta ahora, sin romper nada."""
+    if not VIDEO_SYNC_DISPONIBLE:
+        print("[AVISO] Sincronizacion de video: faltan paquetes de Python "
+              "(yt-dlp/imageio-ffmpeg/pytesseract/Pillow) o Tesseract OCR -- se omite.")
+        return
+    try:
+        id_token = _tigre_fb_login(email, password)
+    except Exception as e:
+        print(f"[ERROR] Sincronizacion de video: no se pudo loguear en Firebase: {e}", file=sys.stderr)
+        return
+
+    detectadas = 0
+    for cat, fechas in catapult_efforts.items():
+        for fecha_key in fechas:
+            fecha_num = fecha_key.lstrip("F")
+            try:
+                if _tigre_fb_get(f"gps/videoSync/{cat}/{fecha_key}", id_token):
+                    continue
+                link = _tigre_fb_get(f"stats/links/{cat}/{fecha_num}/par", id_token)
+            except Exception:
+                continue
+            if not link:
+                continue
+            resultado = detectar_kickoffs_video(link)
+            if not resultado:
+                continue
+            try:
+                _tigre_fb_put(f"gps/videoSync/{cat}/{fecha_key}", resultado, id_token)
+                detectadas += 1
+                print(f"[OK] Video sincronizado solo: {cat} {fecha_key} "
+                      f"(kickoff1={resultado['kickoff1']:.0f}s, kickoff2={resultado['kickoff2']:.0f}s)")
+            except Exception as e:
+                print(f"[ERROR] Sincronizacion de video {cat} {fecha_key}: no se pudo guardar: {e}", file=sys.stderr)
+    if detectadas:
+        print(f"[OK] Sincronizacion de video: {detectadas} fecha(s) calibradas solas")
+
+
 # ── parenlapelota.com.ar (segunda fuente publica para 4TA-9NA) ──────────
 # Next.js con render en el servidor -- la tabla de posiciones ya viene
 # armada en el HTML de la respuesta, sin JS ni login (confirmado con un
@@ -2218,6 +2494,23 @@ def main():
                 resultado["catapult_efforts"] = catapult_efforts_previos
     else:
         print("[AVISO] CATAPULT_USER/CATAPULT_PASS no configurados, se omite Catapult OpenField")
+
+    # Sincronizacion automatica de video (arranque de cada tiempo) para
+    # "Esfuerzos en video" -- ver detectar_kickoffs_video/
+    # sincronizar_video_kickoffs mas arriba. Necesita catapult_efforts (ya
+    # calculado arriba) y credenciales de Firebase con permiso de editor.
+    # Opcional en los dos sentidos: si faltan las credenciales, o si falta
+    # algun paquete de Python/Tesseract OCR en esta PC, se saltea sola sin
+    # romper nada -- la calibracion sigue funcionando a mano como siempre.
+    usuario_firebase = os.environ.get("FIREBASE_EMAIL")
+    password_firebase = os.environ.get("FIREBASE_PASSWORD")
+    if usuario_firebase and password_firebase and resultado.get("catapult_efforts"):
+        try:
+            sincronizar_video_kickoffs(usuario_firebase, password_firebase, resultado["catapult_efforts"])
+        except Exception as e:  # noqa -- nunca debe tirar abajo el resto del scraper
+            print(f"[ERROR] Sincronizacion de video: {e}", file=sys.stderr)
+    elif not (usuario_firebase and password_firebase):
+        print("[AVISO] FIREBASE_EMAIL/FIREBASE_PASSWORD no configurados, se omite sincronizacion de video")
 
     # Salvaguarda: Zona A y Zona B de un mismo torneo de reserva salen de dos
     # URLs distintas de statfutbol (fetch_statfutbol_reserva_zona), asi que
