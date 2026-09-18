@@ -3542,7 +3542,7 @@ function extraerYoutubeId(url){
   return m ? m[1] : null;
 }
 
-function abrirVideoEmbebido(url, titulo, startSeconds){
+function abrirVideoEmbebido(url, titulo, startSeconds, endSeconds){
   url = (url||'').trim();
   if(!url) return;
   const id = extraerYoutubeId(url);
@@ -3551,10 +3551,13 @@ function abrirVideoEmbebido(url, titulo, startSeconds){
   if(m) m.remove();
   // startSeconds (opcional): salta directo a ese segundo del video y arranca
   // solo -- usado por "clic en la métrica -> ver el esfuerzo" (ver
-  // gpsAbrirVideoEsfuerzo). Sin este parámetro se comporta exactamente
-  // igual que antes (video normal, sin autoplay).
+  // gpsAbrirVideoEsfuerzo). endSeconds (opcional, solo tiene sentido junto
+  // con startSeconds): el embed de YouTube lo frena solo ahí, para que el
+  // video no siga corriendo después de terminado el esfuerzo puntual.
   const src = `https://www.youtube.com/embed/${id}` + (startSeconds>0
-    ? `?start=${Math.max(0,Math.round(startSeconds))}&autoplay=1` : '');
+    ? `?start=${Math.max(0,Math.round(startSeconds))}&autoplay=1`
+      + (endSeconds>0 ? `&end=${Math.round(endSeconds)}` : '')
+    : '');
   m = document.createElement('div');
   m.id = 'video-embed-modal'; m.className = 'modal-bg';
   m.addEventListener('click', e=>{ if(e.target===m) m.remove(); });
@@ -3899,12 +3902,17 @@ function gpsVideoSeg(cat, fechaKey, startUnix){
   return kickoffVideo + (startUnix - periodo.start);
 }
 
-function gpsAbrirVideoEsfuerzo(cat, fechaKey, startUnix, jugador, velKmh){
+function gpsAbrirVideoEsfuerzo(cat, fechaKey, startUnix, jugador, velKmh, durSeg){
   const fechaNum = parseInt(fechaKey.replace('F',''),10);
   const url = links[cat]?.[fechaNum]?.par;
   const seg = gpsVideoSeg(cat, fechaKey, startUnix);
   if(!url || seg==null) return;
-  abrirVideoEmbebido(url, `${jugador} · ${velKmh} km/h · ${fechaKey}`, seg);
+  // +2s de margen sobre la duración real del esfuerzo (dato de Catapult)
+  // para que no corte en seco justo cuando el jugador todavía se lo ve
+  // frenando en cámara -- sin esto el video seguía corriendo sin parar
+  // nunca.
+  const segEnd = durSeg>0 ? seg + durSeg + 2 : null;
+  abrirVideoEmbebido(url, `${jugador} · ${velKmh} km/h · ${fechaKey}`, seg, segEnd);
 }
 
 function gpsVideoFormHTML(cat){
@@ -3959,7 +3967,7 @@ function wireGpsVideoForm(){
   const esfuerzos = gpsVideoJugador ? (catapultEfforts[cat][fechaKey].jugadores[gpsVideoJugador]||[]) : [];
   const filasHTML = esfuerzos.length ? esfuerzos.map(e=>{
     const hora = new Date(e.start*1000).toLocaleTimeString('es-AR',{timeZone:'America/Argentina/Buenos_Aires'});
-    return `<div onclick="gpsAbrirVideoEsfuerzo('${cat}','${fechaKey}',${e.start},'${esc(formatNombreMostrar(gpsVideoJugador,cat)).replace(/'/g,"\\'")}',${e.vel})"
+    return `<div onclick="gpsAbrirVideoEsfuerzo('${cat}','${fechaKey}',${e.start},'${esc(formatNombreMostrar(gpsVideoJugador,cat)).replace(/'/g,"\\'")}',${e.vel},${e.dur})"
       style="display:flex;align-items:center;gap:10px;padding:8px 10px;background:var(--surface2);border-radius:6px;margin-bottom:5px;cursor:pointer;border:1px solid transparent"
       onmouseover="this.style.borderColor='var(--gold)'" onmouseout="this.style.borderColor='transparent'">
       <span style="font-family:'Bebas Neue',sans-serif;color:var(--gold2);min-width:60px">▶ ${hora}</span>
