@@ -3743,25 +3743,23 @@ function guardarGpsPosOverride(cat, nombre, valor){
 }
 
 let gpsCruceCat = null;
+// Sin desplegable acá -- RENDIMIENTO GPS ya es su propia pestaña (no una
+// sección dentro de otra pantalla), así que entrar a la pestaña ya "abre"
+// el contenido; un colapsable extra adentro era un clic de más para algo
+// que se quiere ver siempre.
 function renderRendimientoGpsTab(tabEl, cat){
   gpsCruceCat = cat;
   const hayDatos = Object.keys(catapultPlayersDeCategoria(cat)).length > 0;
   if(!hayDatos){
     tabEl.innerHTML = `
-      ${seccionTitulo('gps-cruce', '🛰️ RENDIMIENTO GPS · Catapult OpenField')}
-      <div id="sec-gps-cruce"${seccionEstiloInicial('gps-cruce')}>
-        <div style="text-align:center;padding:20px;color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-size:13px">
-          Todavía no hay datos de Catapult cargados para ${cat} (se actualiza solo, cada 4hs, en cuanto se suba un partido nuevo ahí).
-        </div>
+      <div style="text-align:center;padding:20px;color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-size:13px">
+        Todavía no hay datos de Catapult cargados para ${cat} (se actualiza solo, cada 4hs, en cuanto se suba un partido nuevo ahí).
       </div>`;
     return;
   }
   tabEl.innerHTML = `
-    ${seccionTitulo('gps-cruce', '🛰️ RENDIMIENTO GPS · Catapult OpenField')}
-    <div id="sec-gps-cruce"${seccionEstiloInicial('gps-cruce')}>
-      ${gpsCruceFormHTML(cat)}
-      <div id="gps-cruce-result"></div>
-    </div>`;
+    ${gpsCruceFormHTML(cat)}
+    <div id="gps-cruce-result"></div>`;
   wireGpsCruceForm();
 }
 
