@@ -1255,6 +1255,37 @@ CATEGORIES.forEach(cat => {
 //  HELPERS
 // ============================================================
 function getResult(gf,gc){ if(gf===null||gc===null)return null; return gf>gc?'W':gf===gc?'D':'L'; }
+
+// Autocompletar resultados: rellena EN VIVO las fechas sin carga manual con
+// el resultado de las fuentes automaticas (prioridad COMET > LIGA > statfutbol,
+// misma que Confiabilidad). La carga manual SIEMPRE gana, y lo autocompletado
+// NUNCA se guarda en Firebase (queda siempre fresco desde la fuente y no
+// ensucia tus datos). `resultsAuto` marca cuales son auto para: (a) no
+// persistirlos en saveData, (b) poder recalcularlos en cada render.
+let resultsAuto = new Set();
+function autoResultado(cat, fecha){
+  const p = (partidos[cat]||{})[fecha];  // COMET (solo 4TA/5TA/6TA)
+  if(p && p.golesTigre!=null && p.golesRival!=null) return [p.golesTigre, p.golesRival];
+  const liga = TABLA_DATA && TABLA_DATA.fixture && TABLA_DATA.fixture[cat] && TABLA_DATA.fixture[cat][fecha];
+  if(liga && liga.gf!=null && liga.gc!=null) return [liga.gf, liga.gc];
+  const sf = TABLA_DATA && TABLA_DATA.statfutbol_resultados && TABLA_DATA.statfutbol_resultados[cat] && TABLA_DATA.statfutbol_resultados[cat][fecha];
+  if(sf && sf.gf!=null && sf.gc!=null) return [sf.gf, sf.gc];
+  return null;
+}
+function autocompletarResultados(){
+  // 1. sacar lo autocompletado de la corrida anterior (deja solo lo manual)
+  resultsAuto.forEach(k=>{ const i=k.indexOf('|'); const c=k.slice(0,i), f=k.slice(i+1); if(results[c]) results[c][f]=null; });
+  resultsAuto.clear();
+  // 2. rellenar las fechas vacias desde las fuentes (solo 4TA-9NA)
+  GENERAL_CATS.forEach(cat=>{
+    if(!results[cat]) results[cat]={};
+    RIVALS.forEach(r=>{
+      if(results[cat][r.f]) return;  // ya hay dato manual -> no tocar
+      const a = autoResultado(cat, r.f);
+      if(a){ results[cat][r.f]=a; resultsAuto.add(cat+'|'+r.f); }
+    });
+  });
+}
 function calcStats(cat,from,to){
   let pj=0,pg=0,pe=0,pp=0,gf=0,gc=0;
   for(let f=from;f<=to;f++){
@@ -1410,7 +1441,7 @@ function initFirebase(){
             if(!p) return;
             CATEGORIES.forEach(cat=>{
               const fl=cat==='RESERVA'?RIVALS_RESERVA:RIVALS;
-              if(p.results?.[cat]) fl.forEach(r=>{ if(p.results[cat][r.f]) results[cat][r.f]=p.results[cat][r.f]; });
+              if(p.results?.[cat]) fl.forEach(r=>{ if(p.results[cat][r.f]){ results[cat][r.f]=p.results[cat][r.f]; resultsAuto.delete(cat+'|'+r.f); } });
               if(p.links?.[cat])   fl.forEach(r=>{ if(p.links[cat][r.f]) links[cat][r.f]=p.links[cat][r.f]; });
               if(p.goleadores?.[cat]) goleadores[cat]=p.goleadores[cat];
               if(p.matchData?.[cat]) Object.assign(matchData[cat], p.matchData[cat]);
@@ -1535,7 +1566,8 @@ function saveData(){
       payload.plantel[cat]=plantelFutdetail[cat]||[];
       const fl=cat==='RESERVA'?RIVALS_RESERVA:RIVALS;
       fl.forEach(r=>{
-        payload.results[cat][r.f]=results[cat][r.f]||null;
+        // Lo autocompletado (resultsAuto) NO se persiste -- solo la carga manual.
+        payload.results[cat][r.f]=resultsAuto.has(cat+'|'+r.f)?null:(results[cat][r.f]||null);
         payload.links[cat][r.f]=links[cat][r.f]||{};
       });
     });
@@ -1580,7 +1612,7 @@ function loadData(){
       if(p){
         CATEGORIES.forEach(cat=>{
           const fl=cat==='RESERVA'?RIVALS_RESERVA:RIVALS;
-          if(p.results?.[cat]) fl.forEach(r=>{ if(p.results[cat][r.f]) results[cat][r.f]=p.results[cat][r.f]; });
+          if(p.results?.[cat]) fl.forEach(r=>{ if(p.results[cat][r.f]){ results[cat][r.f]=p.results[cat][r.f]; resultsAuto.delete(cat+'|'+r.f); } });
           if(p.links?.[cat])   fl.forEach(r=>{ if(p.links[cat][r.f]) links[cat][r.f]=p.links[cat][r.f]; });
           if(p.goleadores?.[cat]) goleadores[cat]=p.goleadores[cat];
           // Load matchData (lineup + cambios)
@@ -1869,7 +1901,9 @@ function buildStatsModule(){
     <div class="main" id="stats-content"></div>`;
   buildStatsCatSelect();
   renderStatsCat('GENERAL');
-  loadTablaData().then(renderTablaDataStatus);
+  // Al cargar TABLA_DATA (fixture LIGA / statfutbol) re-renderizamos para que
+  // el autocompletado de resultados tome esas fuentes (no solo COMET).
+  loadTablaData().then(()=>{ renderTablaDataStatus(); refreshActiveModule(); });
 }
 
 // Aviso corto al lado de "ACTUALIZAR DATOS": ultima vez que corrio el
@@ -2098,6 +2132,7 @@ function toggleSeccion(idSeccion, event){
 
 // ── GENERAL VIEW ─────────────────────────────────────────────
 function renderStatsCat(cat){
+  autocompletarResultados();  // rellena en vivo las fechas sin carga manual (no persiste)
   const content=document.getElementById('stats-content');
   canEdit = canEditCat(cat); // el alcance de edicion depende de la categoria que se este mirando, no solo del rol
   updatePdfExportButton(cat);
@@ -5978,6 +6013,7 @@ function attachTableEvents(cat, tbodyId){
     if(e.target.classList.contains('score-input')){
       const f=parseInt(e.target.dataset.fecha),s=parseInt(e.target.dataset.side);
       const v=e.target.value===''?null:parseInt(e.target.value);
+      resultsAuto.delete(cat+'|'+f);  // el usuario lo edito a mano -> pasa a ser manual (se guarda)
       if(!results[cat][f])results[cat][f]=[null,null];
       results[cat][f][s]=v;
       if(results[cat][f][0]===null&&results[cat][f][1]===null)results[cat][f]=null;
@@ -7090,7 +7126,7 @@ function startPublicListener(){
     if(!p) return;
     CATEGORIES.forEach(cat=>{
       const fl=cat==='RESERVA'?RIVALS_RESERVA:RIVALS;
-      if(p.results?.[cat]) fl.forEach(r=>{ if(p.results[cat][r.f]) results[cat][r.f]=p.results[cat][r.f]; });
+      if(p.results?.[cat]) fl.forEach(r=>{ if(p.results[cat][r.f]){ results[cat][r.f]=p.results[cat][r.f]; resultsAuto.delete(cat+'|'+r.f); } });
       if(p.links?.[cat])   fl.forEach(r=>{ if(p.links[cat][r.f]) links[cat][r.f]=p.links[cat][r.f]; });
       if(p.goleadores?.[cat]) goleadores[cat]=p.goleadores[cat];
       if(p.matchData?.[cat]) Object.assign(matchData[cat], p.matchData[cat]);
