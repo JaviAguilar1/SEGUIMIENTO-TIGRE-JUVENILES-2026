@@ -61,6 +61,15 @@ clasifica y despacha; None si el video no tiene cartel (partidos de
 VIDEO). El re-login de Firebase cada 40 min evita el HTTP 401 en backfills
 largos (`sincronizar_video_kickoffs`).
 
+**Citaciones provisionales (2026-09-19).** Las citaciones (titulares/suplentes
+por fecha) salen del PDF de la planilla oficial (`parseCitacionPdf` en la app
+→ `stats/matchData`). Para las fechas **jugadas sin PDF**, el scraper las
+completa solo desde la formación de statfutbol
+(`sincronizar_citaciones_provisionales`), marcadas `provisional: true` — el
+modal (`abrirCitacionView`) muestra un cartel "provisional" y el PDF oficial
+las pisa cuando se sube. NUNCA pisa una planilla ya cargada (prioridad a la
+oficial). Corre con las mismas credenciales de Firebase que el video sync.
+
 **Firebase — nodos raíz reales** (grep `db.ref` en `index.html`): `users`,
 `stats` (+ subnodos: `links`, `plantel`, `jugadores`, `aliasJugadores`,
 `aliasJugadoresComet`, `aliasJugadoresGps`, `recordatoriosOmitidos`,
@@ -1095,8 +1104,9 @@ Verificado en la app real (sin login, y por consola) que nada quedó roto:
   Para que se calibre **solo hacia adelante**, falta crear en la PC
   `C:\Users\Javier\Documents\futdetail_scraper\credenciales_firebase_scraper.ps1`
   con `FIREBASE_EMAIL`/`FIREBASE_PASSWORD` de un usuario editor
-  (`actualizar_liga.ps1` ya sabe leerlo). Sin eso, ninguna fecha nueva se
-  calibra sola.
+  (`actualizar_liga.ps1` ya sabe leerlo). Sin ese archivo, hacia adelante NO
+  se completan solos **ni el video sync ni las citaciones provisionales** de
+  statfutbol (ambos usan esas credenciales).
 - **Re-scrape de Catapult para prender HSR 21-25:** el código y la UI ya
   están (chips Sprints/Carreras en el modo VIDEO), pero `catapult_efforts` en
   `tablas.json` todavía trae solo sprints hasta que la PC (o una corrida
