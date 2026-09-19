@@ -1204,6 +1204,20 @@ def fetch_catapult_efforts(email: str, password: str, cats, existentes=None, min
                     for p in catapult_activity_periods(opener, aid):
                         periodos.append({"name": p.get("name"), "start": p.get("start_time"), "end": p.get("end_time")})
 
+                # Ventanas de los dos tiempos del partido (Catapult marca
+                # "Primer/Segundo tiempo"). Se recortan los esfuerzos a esas
+                # ventanas para no traer calentamiento u otra sesion del dia,
+                # que despues caian mal en el video (segundo negativo). Mismo
+                # criterio que la app (gpsVideoFormHTML/gpsVideoSeg). Si no hay
+                # periodos con nombre de tiempo, no se filtra (fallback).
+                def _es_tiempo(nm):
+                    nm = (nm or "").lower()
+                    return "primer" in nm or "segundo" in nm
+                ventanas = [(p["start"], p["end"]) for p in periodos
+                            if p.get("start") and p.get("end") and _es_tiempo(p.get("name"))]
+                def _en_partido(e):
+                    s = e.get("start")
+                    return s is not None and (not ventanas or any(a <= s <= b for a, b in ventanas))
                 jugadores_out = {}
                 for nombre, (aid, athlete_id) in jugadores_roster.items():
                     nombre_norm = _catapult_norm_nombre(nombre)
@@ -1218,6 +1232,7 @@ def fetch_catapult_efforts(email: str, password: str, cats, existentes=None, min
                     # criterio que gpsAliasedName) lo pueda resolver despues.
                     esf = catapult_efforts_por_atleta(opener, cj, aid, athlete_id, min_kmh)
                     esf += catapult_hsr_por_atleta(opener, cj, aid, athlete_id)
+                    esf = [e for e in esf if _en_partido(e)]
                     jugadores_out[nombre] = sorted(esf, key=lambda e: e.get("start") or 0)
             except Exception as e:  # noqa
                 print(f"[AVISO] Catapult efforts {cat} {fecha_key}: {e} -- se saltea esta fecha.", file=sys.stderr)

@@ -4043,10 +4043,17 @@ function wireGpsVideoForm(){
     return;
   }
 
-  const jugadores = Object.keys(catapultEfforts[cat][fechaKey].jugadores||{}).sort();
+  const dia = catapultEfforts[cat][fechaKey];
+  // Solo esfuerzos DENTRO de los dos tiempos del partido. Catapult a veces
+  // trae esfuerzos de calentamiento u otra sesión del día (hora fuera del
+  // partido); al clickearlos, gpsVideoSeg daba un segundo negativo y el video
+  // arrancaba de 0. Mismo criterio de nombres de período que gpsVideoSeg.
+  const _ventanas = (dia.periodos||[]).filter(p=>/rimer|egundo/i.test(p.name||'') && p.start && p.end).map(p=>[p.start,p.end]);
+  const enPartido = e => !_ventanas.length || _ventanas.some(([a,b])=>e.start>=a && e.start<=b);
+  const jugadores = Object.keys(dia.jugadores||{}).filter(n=>(dia.jugadores[n]||[]).some(enPartido)).sort();
   if(!gpsVideoJugador || !jugadores.includes(gpsVideoJugador)) gpsVideoJugador = jugadores[0]||null;
   const jugOpts = jugadores.map(n=>`<option value="${esc(n)}"${n===gpsVideoJugador?' selected':''}>${esc(formatNombreMostrar(n,cat))}</option>`).join('');
-  const todos = gpsVideoJugador ? (catapultEfforts[cat][fechaKey].jugadores[gpsVideoJugador]||[]) : [];
+  const todos = (gpsVideoJugador ? (dia.jugadores[gpsVideoJugador]||[]) : []).filter(enPartido);
   // tipo faltante = sprint (datos viejos, antes de sumar HSR al scraper).
   const nSpr = todos.filter(e=>(e.tipo||'sprint')==='sprint').length;
   const nHsr = todos.filter(e=>e.tipo==='hsr').length;
