@@ -3917,6 +3917,7 @@ function wireGpsCruceForm(){ gpsSetMode(gpsMode); }
 // ============================================================
 let gpsVideoFecha = null;
 let gpsVideoJugador = null;
+let gpsVideoTipo = 'sprint';  // 'sprint' (>=25) o 'hsr' (carreras 21-25)
 
 // videoSec = segundo del video de YouTube donde saltar, calculado a partir
 // de la hora REAL del esfuerzo (Unix) + arranque real de ese período
@@ -4005,7 +4006,14 @@ function wireGpsVideoForm(){
   const jugadores = Object.keys(catapultEfforts[cat][fechaKey].jugadores||{}).sort();
   if(!gpsVideoJugador || !jugadores.includes(gpsVideoJugador)) gpsVideoJugador = jugadores[0]||null;
   const jugOpts = jugadores.map(n=>`<option value="${esc(n)}"${n===gpsVideoJugador?' selected':''}>${esc(formatNombreMostrar(n,cat))}</option>`).join('');
-  const esfuerzos = gpsVideoJugador ? (catapultEfforts[cat][fechaKey].jugadores[gpsVideoJugador]||[]) : [];
+  const todos = gpsVideoJugador ? (catapultEfforts[cat][fechaKey].jugadores[gpsVideoJugador]||[]) : [];
+  // tipo faltante = sprint (datos viejos, antes de sumar HSR al scraper).
+  const nSpr = todos.filter(e=>(e.tipo||'sprint')==='sprint').length;
+  const nHsr = todos.filter(e=>e.tipo==='hsr').length;
+  const esfuerzos = todos.filter(e=>(e.tipo||'sprint')===gpsVideoTipo);
+  const chip = (tipo,label,n)=>`<button type="button" onclick="gpsVideoTipo='${tipo}';wireGpsVideoForm();"
+      style="flex:1;background:${gpsVideoTipo===tipo?'var(--gold)':'var(--surface2)'};color:${gpsVideoTipo===tipo?'#1a1205':'var(--text)'};border:1px solid ${gpsVideoTipo===tipo?'var(--gold)':'var(--border)'};border-radius:6px;font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:1px;padding:8px 10px;cursor:pointer">${label} (${n})</button>`;
+  const chipsHTML = `<div style="display:flex;gap:8px;margin-bottom:12px">${chip('sprint','SPRINTS ≥25',nSpr)}${chip('hsr','CARRERAS 21-25',nHsr)}</div>`;
   const filasHTML = esfuerzos.length ? esfuerzos.map(e=>{
     const hora = new Date(e.start*1000).toLocaleTimeString('es-AR',{timeZone:'America/Argentina/Buenos_Aires'});
     return `<div onclick="gpsAbrirVideoEsfuerzo('${cat}','${fechaKey}',${e.start},'${esc(formatNombreMostrar(gpsVideoJugador,cat)).replace(/'/g,"\\'")}',${e.vel},${e.dur})"
@@ -4015,7 +4023,7 @@ function wireGpsVideoForm(){
       <span style="flex:1;font-family:'Barlow Condensed',sans-serif;font-size:13px;color:var(--text)">${e.vel} km/h</span>
       <span style="font-size:11px;color:var(--muted)">${e.dur}s · ${e.dist}m</span>
     </div>`;
-  }).join('') : `<div style="color:var(--muted);font-size:12px;padding:8px 0">Este jugador no tuvo esfuerzos ≥25km/h en esta fecha.</div>`;
+  }).join('') : `<div style="color:var(--muted);font-size:12px;padding:8px 0">Este jugador no tuvo ${gpsVideoTipo==='hsr'?'carreras de 21-25 km/h':'sprints ≥25 km/h'} en esta fecha.</div>`;
 
   cont.innerHTML = `
     <div style="margin-bottom:12px">
@@ -4023,6 +4031,7 @@ function wireGpsVideoForm(){
       <select id="gps-video-jugador" onchange="gpsVideoJugador=this.value;wireGpsVideoForm();"
         style="width:100%;background:rgba(5,8,15,.8);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:13px;padding:8px 10px;">${jugOpts}</select>
     </div>
+    ${chipsHTML}
     <div style="font-size:11px;color:var(--muted);margin-bottom:8px">Tocá cualquier esfuerzo para verlo en el video, saltando justo a ese momento.</div>
     ${filasHTML}`;
 }

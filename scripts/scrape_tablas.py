@@ -1075,26 +1075,17 @@ def catapult_activity_periods(opener, activity_id):
     return data.get("periods") or []
 
 
-def catapult_efforts_por_atleta(opener, cj, activity_id, athlete_id, min_kmh=25):
-    """Esfuerzos de velocidad de un atleta en una actividad, ya limpios:
-    la API los da en METROS POR SEGUNDO (no km/h) y separados por banda de
-    velocidad (7 y 8) -- un mismo sprint que cruza las dos bandas aparece
-    como DOS filas con tiempos superpuestos. Se convierte a km/h, se
-    funden las filas solapadas (mismo sprint) y se filtra por min_kmh (el
-    criterio de "sprint" que ya usa el club, 25 km/h). Validado en vivo
-    contra los 11 sprints de Pannoni en la F23 que ya se habian sacado a
-    mano de OpenField Cloud: coincide exacto (misma hora, duracion,
-    velocidad y distancia en los 11)."""
-    qs = urllib.parse.urlencode({"effort_types": "velocity", "velocity_bands": "7,8"})
+def _catapult_velocity_merged(opener, activity_id, athlete_id, bands):
+    """Baja los velocity_efforts de un atleta para las bandas pedidas y funde
+    los solapados: la API los da en METROS POR SEGUNDO y separados por banda,
+    asi que un mismo tramo que cruza varias bandas aparece como varias filas
+    con tiempos superpuestos. Devuelve una lista de tramos unicos
+    {start_time,end_time,max_velocity,distance} (velocidad en m/s todavia)."""
+    qs = urllib.parse.urlencode({"effort_types": "velocity", "velocity_bands": bands})
     url = f"{CATAPULT_API_BASE}/activities/{activity_id}/athletes/{athlete_id}/efforts?{qs}"
-    headers = dict(CATAPULT_HEADERS)
-    xsrf = _catapult_xsrf(cj)
-    if xsrf:
-        headers["X-XSRF-TOKEN"] = xsrf
     data = catapult_get(opener, url)
     raw = sorted((data[0].get("data") or {}).get("velocity_efforts") or [] if data else [],
                  key=lambda e: e.get("start_time") or 0)
-
     merged = []
     for e in raw:
         last = merged[-1] if merged else None
@@ -1107,19 +1098,40 @@ def catapult_efforts_por_atleta(opener, cj, activity_id, athlete_id, min_kmh=25)
                 "start_time": e.get("start_time"), "end_time": e.get("end_time") or e.get("start_time"),
                 "max_velocity": e.get("max_velocity") or 0, "distance": e.get("distance") or 0,
             })
+    return merged
 
-    out = []
-    for e in merged:
-        max_kmh = round((e["max_velocity"] or 0) * 3.6, 2)
-        if max_kmh < min_kmh:
-            continue
-        out.append({
-            "start": e["start_time"],
-            "dur": round((e["end_time"] or 0) - (e["start_time"] or 0), 2),
-            "vel": max_kmh,
-            "dist": round(e["distance"] or 0, 2),
-        })
-    return out
+
+def _catapult_effort_dict(e, tipo):
+    return {
+        "start": e["start_time"],
+        "dur": round((e["end_time"] or 0) - (e["start_time"] or 0), 2),
+        "vel": round((e["max_velocity"] or 0) * 3.6, 2),
+        "dist": round(e["distance"] or 0, 2),
+        "tipo": tipo,
+    }
+
+
+def catapult_efforts_por_atleta(opener, cj, activity_id, athlete_id, min_kmh=25):
+    """Sprints (>=min_kmh) de un atleta en una actividad, ya limpios en km/h y
+    con los tramos solapados fundidos. Validado en vivo contra los 11 sprints
+    de Pannoni en la F23 que ya se habian sacado a mano de OpenField Cloud:
+    coincide exacto (misma hora, duracion, velocidad y distancia en los 11).
+    cj se mantiene por compatibilidad de firma (el GET usa la cookie del
+    opener, no hace falta XSRF para leer)."""
+    merged = _catapult_velocity_merged(opener, activity_id, athlete_id, "7,8")
+    return [_catapult_effort_dict(e, "sprint") for e in merged
+            if round((e["max_velocity"] or 0) * 3.6, 2) >= min_kmh]
+
+
+def catapult_hsr_por_atleta(opener, cj, activity_id, athlete_id, lo_kmh=21, hi_kmh=25):
+    """Carreras de alta velocidad (lo_kmh <= pico < hi_kmh, tipo "hsr"), la
+    HSR que ya define el club (21-25 km/h). Banda 6 (>=~18 km/h) para no
+    perder nada del piso de 21 y despues se filtra el rango; el corte <hi_kmh
+    deja los sprints (>=25) afuera, asi no se cuenta dos veces el mismo
+    tramo (confirmado: 0 colisiones de start_time con los sprints)."""
+    merged = _catapult_velocity_merged(opener, activity_id, athlete_id, "6")
+    return [_catapult_effort_dict(e, "hsr") for e in merged
+            if lo_kmh <= round((e["max_velocity"] or 0) * 3.6, 2) < hi_kmh]
 
 
 def fetch_catapult_efforts(email: str, password: str, cats, existentes=None, min_kmh=25):
@@ -1203,7 +1215,9 @@ def fetch_catapult_efforts(email: str, password: str, cats, existentes=None, min
                     # actividad. Igual se deja constancia en el nombre tal cual
                     # vino de Catapult para que el matcheo en la app (mismo
                     # criterio que gpsAliasedName) lo pueda resolver despues.
-                    jugadores_out[nombre] = catapult_efforts_por_atleta(opener, cj, aid, athlete_id, min_kmh)
+                    esf = catapult_efforts_por_atleta(opener, cj, aid, athlete_id, min_kmh)
+                    esf += catapult_hsr_por_atleta(opener, cj, aid, athlete_id)
+                    jugadores_out[nombre] = sorted(esf, key=lambda e: e.get("start") or 0)
             except Exception as e:  # noqa
                 print(f"[AVISO] Catapult efforts {cat} {fecha_key}: {e} -- se saltea esta fecha.", file=sys.stderr)
                 continue
