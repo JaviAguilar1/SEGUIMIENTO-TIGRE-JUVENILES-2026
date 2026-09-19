@@ -3946,6 +3946,10 @@ function gpsAbrirVideoEsfuerzo(cat, fechaKey, startUnix, jugador, velKmh, durSeg
   const url = links[cat]?.[fechaNum]?.par;
   const seg = gpsVideoSeg(cat, fechaKey, startUnix);
   if(!url || seg==null) return;
+  // Pre-roll de 4s: el esfuerzo (start) es el instante en que el jugador
+  // CRUZA los 25 km/h, o sea que ya viene corriendo -- arrancamos el video
+  // unos segundos antes para ver el arranque del sprint y no caer en el medio.
+  const segInicio = Math.max(0, seg - 4);
   // +2s de margen sobre la duración real del esfuerzo (dato de Catapult)
   // para que no corte en seco justo cuando el jugador todavía se lo ve
   // frenando en cámara -- sin esto el video seguía corriendo sin parar
@@ -3974,11 +3978,11 @@ function gpsVideoFormHTML(cat){
 }
 
 function wireGpsVideoForm(){
+  _cargarYTApi();  // precarga la API de YouTube para que el 1er clic arranque sin demora
   const cat = gpsCruceCat, fechaKey = gpsVideoFecha;
   const cont = document.getElementById('gps-video-body');
   if(!cont) return;
   const fechaNum = parseInt(fechaKey.replace('F',''),10);
-  _cargarYTApi();  // precarga la API de YouTube para que el 1er clic arranque sin demora
   const videoUrl = links[cat]?.[fechaNum]?.par;
   if(!videoUrl){
     cont.innerHTML = `<div style="color:var(--muted);font-size:12px;padding:12px 0">Todavía no hay video cargado para ${esc(fechaKey)} (cargalo en la tabla de RESULTADOS, columna "Partido").</div>`;
