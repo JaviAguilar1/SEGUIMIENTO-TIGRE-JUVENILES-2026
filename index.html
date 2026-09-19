@@ -3273,7 +3273,7 @@ function renderStatsSingle(cat, content){
   // si quedó ese estado guardado de una sesión anterior (u otro rol), cae
   // acá y sigue de largo como si fuera 'resultados'.
 
-  const amarillaAlertCat = CONFIABILIDAD_CATS.includes(cat) ? amarillasEnAlerta(cat) : [];
+  const amarillaAlertCat = GENERAL_CATS.includes(cat) ? amarillasEnAlerta(cat) : [];
   const amarillaAlertHTML = amarillaAlertCat.length
     ? `<div style="background:rgba(245,158,11,0.15);border:1px solid rgba(245,158,11,0.45);border-radius:8px;
         padding:12px 16px;margin-bottom:12px;font-family:'Barlow Condensed',sans-serif">
@@ -8967,7 +8967,10 @@ function abrirPerfilJugador(cat, nombre){
     if(!enTit && !enSup) return;
     const partido=(partidos[cat]||{})[fecha];
     const eventos=[];
-    if(esReserva){
+    // Sin informe COMET de esa fecha (Reserva siempre, 7MA-9NA siempre, o una
+    // fecha suelta de 4/5/6 sin COMET cargado): las tarjetas por fecha salen de
+    // statfutbol. Excluyente con el bloque COMET de abajo -> no hay doble conteo.
+    if(!partido){
       const sfP = (TABLA_DATA?.statfutbol_partidos?.[cat]||{})[fecha];
       const ev = sfP ? Object.entries(sfP).find(([n])=>sonMismoJugador(n)) : null;
       if(ev && ev[1].amarilla){ amCometSum++; eventos.push('🟨'); }
@@ -9023,8 +9026,9 @@ function abrirPerfilJugador(cat, nombre){
     .find(j=>sonMismoJugador(j.nombre));
   const amarillasFinal = Math.max(amCometSum, sfJ?(parseInt(sfJ.am)||0):0);
   const rojasFinal = Math.max(rojCometSum, sfJ?(parseInt(sfJ.roja)||0):0);
-  // Reserva: los goles de cada fecha (carga manual/statfutbol) van al frente de Eventos.
-  if(esReserva && geEntry){
+  // Reserva y 7MA-9NA (sin COMET): los goles de cada fecha (carga manual/
+  // statfutbol, vía golesEfectivos) van al frente de Eventos.
+  if((esReserva || !Object.keys(partidos[cat]||{}).length) && geEntry){
     partidosJugados.forEach(pj=>{
       const n = geEntry.fechas.filter(f=>f===`F${pj.fecha}`).length;
       if(n) pj.eventos.unshift(...Array(n).fill('⚽'));
@@ -9366,6 +9370,36 @@ function amarillasEnAlerta(cat){
   // suspensión y el conteo relevante es el que lleva desde ahí, no el
   // acumulado entero. Por eso hace falta procesar los partidos en orden
   // cronológico (por fecha), no en el orden en que estén en Firebase.
+  const fechasComet = Object.keys(partidos[cat]||{});
+  // 7MA-9NA no tienen COMET: el ciclo de amarillas se arma desde statfutbol
+  // (statfutbol_partidos = amarilla/roja por jugador por fecha). statfutbol trae
+  // NOMBRES, no ids, así que el ciclo se lleva emparejando cada nombre contra el
+  // plantel actual (mismo subconjunto de palabras que usa Goleadores). Un jugador
+  // que todavía no está en el plantel de futdetail no entra -- igual que la rama
+  // COMET, que exige plantelNombreDeId != null.
+  if(!fechasComet.length){
+    const sfPartidos = TABLA_DATA?.statfutbol_partidos?.[cat];
+    if(!sfPartidos) return [];
+    const rosterNombres = (plantelFutdetail[cat]||[]).map(p=>p.nombre);
+    const palabras = n=>new Set(normNombreOrdenIndependiente(n).split(' ').filter(Boolean));
+    const canon = n=>{ const a=palabras(n); const m=rosterNombres.filter(r=>{ const b=palabras(r); const [ch,gr]=a.size<=b.size?[a,b]:[b,a]; return ch.size && [...ch].every(w=>gr.has(w)); }); return m.length===1?m[0]:null; };
+    const porNombre = {}; // nombreCanon -> count del ciclo actual
+    Object.keys(sfPartidos).map(Number).sort((a,b)=>a-b).forEach(fecha=>{
+      const sfP = sfPartidos[fecha]||{};
+      const expulsados = new Set();
+      Object.entries(sfP).forEach(([n,ev])=>{
+        const nom = canon(n); if(!nom) return;
+        if(ev.amarilla) porNombre[nom]=(porNombre[nom]||0)+1;
+        if(ev.roja) expulsados.add(nom);
+      });
+      Object.keys(porNombre).forEach(nom=>{
+        if(porNombre[nom]>=AMARILLAS_SUSPENSION || expulsados.has(nom)) porNombre[nom]=0;
+      });
+    });
+    return Object.entries(porNombre)
+      .map(([nombre,count])=>({nombre, ciclo:count, count, id:null}))
+      .filter(p=>p.ciclo>=AMARILLAS_ALERTA && !estaArchivado(cat, p.nombre));
+  }
   const fechasOrdenadas = Object.keys(partidos[cat]||{}).map(Number).sort((a,b)=>a-b);
   fechasOrdenadas.forEach(fecha=>{
     const partido = partidos[cat][fecha];
