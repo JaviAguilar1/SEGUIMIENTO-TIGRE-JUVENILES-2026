@@ -1326,21 +1326,28 @@ def _video_leer_marcador(frame_bytes):
     return periodo, segundos
 
 
-def _video_leer_en(stream_url, segundo, ffmpeg_exe):
-    """Un solo frame del video en el segundo pedido, via seek rapido de
-    ffmpeg directo sobre la URL (sin descargar el video entero -- YouTube
-    soporta range requests) + lectura del cartel. None si el segundo esta
-    fuera de rango, el stream se corto, o no hay cartel legible ahi."""
+def _video_frame_en(stream_url, segundo, ffmpeg_exe):
+    """Un solo frame (bytes JPEG) del video en el segundo pedido, via seek
+    rapido de ffmpeg directo sobre la URL (sin descargar el video entero --
+    YouTube soporta range requests). None si el segundo esta fuera de rango o
+    el stream se corto."""
     cmd = [ffmpeg_exe, "-ss", str(max(0, segundo)), "-i", stream_url,
            "-vframes", "1", "-q:v", "4", "-f", "image2pipe", "-vcodec", "mjpeg", "-"]
     try:
         proc = _video_subprocess.run(cmd, capture_output=True, timeout=25)
     except Exception:
         return None
-    if not proc.stdout:
+    return proc.stdout or None
+
+
+def _video_leer_en(stream_url, segundo, ffmpeg_exe):
+    """Lee el cartel VEO (1T/2T + reloj) en el segundo pedido. None si no hay
+    cartel legible ahi."""
+    frame = _video_frame_en(stream_url, segundo, ffmpeg_exe)
+    if not frame:
         return None
     try:
-        return _video_leer_marcador(proc.stdout)
+        return _video_leer_marcador(frame)
     except Exception:
         return None
 
@@ -1430,6 +1437,128 @@ def detectar_kickoffs_video(youtube_url, duracion_minima_1t=15*60):
     return {"kickoff1": float(kickoff1), "kickoff2": float(kickoff2)}
 
 
+# ── Cartel LPF (partidos de local, transmision oficial) ─────────────────
+# A diferencia del cartel VEO, NO trae "1T/2T": solo un reloj corrido de
+# partido en una caja arriba al centro-izquierda (~x 0.33-0.44). Cuenta
+# 0:00 -> 45:00 en el 1T y sigue 45:00 -> 90:00 en el 2T (se congela en el
+# entretiempo). Se calibra por el "offset" (segundo_de_video - reloj) de
+# cada tiempo: kickoff1 = offset del 1T; kickoff2 = 45:00 + offset del 2T.
+# Validado contra F13 (3/2791) y F5 (3/2730) de 4TA, 2026-09-19.
+_VIDEO_RELOJ_LPF_RE = re.compile(r"(\d{1,3}):(\d{2})")
+
+
+def _video_leer_reloj_lpf(frame_bytes):
+    """Lee el reloj del cartel LPF. Devuelve segundos de reloj (int) o None
+    si no hay reloj legible ahi (video sin ese overlay)."""
+    im = _VideoImage.open(_video_io.BytesIO(frame_bytes))
+    w, h = im.size
+    crop = im.crop((int(w*0.33), int(h*0.02), int(w*0.44), int(h*0.11))).convert("L")
+    crop = crop.resize((crop.width*4, crop.height*4))
+    # Primero binarizado (texto blanco sobre caja); si no, el gris directo.
+    for img in (crop.point(lambda p: 255 if p > 170 else 0), crop):
+        txt = pytesseract.image_to_string(img, config="--psm 7 -c tessedit_char_whitelist=0123456789:")
+        m = _VIDEO_RELOJ_LPF_RE.search(txt)
+        if m and int(m.group(2)) < 60:
+            return int(m.group(1)) * 60 + int(m.group(2))
+    return None
+
+
+def _video_offset_ransac(pares, tol=6):
+    """De una lista de (segundo_video, reloj_segundos) devuelve (offset, n):
+    el offset = segundo_video - reloj que MAS puntos comparten (tipo RANSAC),
+    robusto a lecturas sueltas que el OCR lee mal (un digito fantasma agranda
+    el reloj -> offset negativo, imposible: se descarta). None si no hay
+    consenso."""
+    cands = sorted({t - c for t, c in pares if (t - c) >= -3})
+    mejor_off, mejor_n = None, 0
+    for cand in cands:
+        n = sum(1 for t, c in pares if abs((t - c) - cand) <= tol)
+        if n > mejor_n:
+            mejor_off, mejor_n = cand, n
+    if mejor_off is None:
+        return None, 0
+    inliers = sorted(t - c for t, c in pares if abs((t - c) - mejor_off) <= tol)
+    return inliers[len(inliers) // 2], len(inliers)
+
+
+def detectar_kickoffs_lpf(youtube_url):
+    """Como detectar_kickoffs_video pero para el cartel LPF (reloj corrido).
+    Muestrea el reloj en la 1a parte del video (1T) y en la 2a mitad (2T),
+    saca el offset robusto de cada tiempo y calcula los kickoffs. None si no
+    hay reloj legible (video sin cartel, tipico de partidos de visitante)."""
+    if not VIDEO_SYNC_DISPONIBLE or not _video_configurar_tesseract():
+        return None
+    ydl_opts = {"quiet": True, "no_warnings": True, "format": "136/135/134/160/243"}
+    try:
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            info = ydl.extract_info(youtube_url, download=False)
+            stream_url = info["url"]
+            duracion = int(info.get("duration") or 6 * 3600)
+    except Exception:
+        return None
+    ffmpeg_exe = imageio_ffmpeg.get_ffmpeg_exe()
+
+    def leer(t):
+        f = _video_frame_en(stream_url, t, ffmpeg_exe)
+        return _video_leer_reloj_lpf(f) if f else None
+
+    # 1T: primeros ~28 min de video (reloj < 40:00, seguro en 1er tiempo).
+    pts1 = [(t, leer(t)) for t in range(60, 1740, 180)]
+    pts1 = [(t, c) for t, c in pts1 if c is not None and c < 2400]
+    off1, n1 = _video_offset_ransac(pts1)
+    if off1 is None or n1 < 4:
+        return None
+    # 2T: segunda mitad del video (reloj > 47:00), evitando el borde de 45:00
+    # del entretiempo. ~10 muestras entre el 55% y el 90% del video.
+    paso2 = max(120, (int(duracion*0.90) - int(duracion*0.55)) // 9)
+    pts2 = [(t, leer(t)) for t in range(int(duracion*0.55), int(duracion*0.90), paso2)]
+    pts2 = [(t, c) for t, c in pts2 if c is not None and 2820 < c < 5400]
+    off2, n2 = _video_offset_ransac(pts2)
+    if off2 is None or n2 < 4:
+        return None
+    kickoff1 = max(0, off1)
+    kickoff2 = 2700 + off2  # el 2T arranca en 45:00 del reloj de partido
+    if not (0 <= kickoff1 <= 600 and kickoff1 + 2100 <= kickoff2 <= kickoff1 + 4200):
+        return None
+    return {"kickoff1": float(kickoff1), "kickoff2": float(kickoff2)}
+
+
+def detectar_kickoffs_auto(youtube_url):
+    """Prueba primero el cartel VEO (1T/2T explicito) y si no, el cartel LPF
+    (reloj corrido). Clasifica antes con un par de frames para no barrer todo
+    el video con el detector VEO cuando el cartel es LPF. None si el video no
+    tiene ningun cartel legible (partidos de visitante) -> calibrar a mano."""
+    if not VIDEO_SYNC_DISPONIBLE or not _video_configurar_tesseract():
+        return None
+    ydl_opts = {"quiet": True, "no_warnings": True, "format": "136/135/134/160/243"}
+    try:
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            info = ydl.extract_info(youtube_url, download=False)
+            stream_url = info["url"]
+    except Exception:
+        return None
+    ffmpeg_exe = imageio_ffmpeg.get_ffmpeg_exe()
+    es_veo = es_lpf = False
+    for t in (180, 480, 900):
+        frame = _video_frame_en(stream_url, t, ffmpeg_exe)
+        if not frame:
+            continue
+        try:
+            if _video_leer_marcador(frame):
+                es_veo = True
+                break
+        except Exception:
+            pass
+        if _video_leer_reloj_lpf(frame) is not None:
+            es_lpf = True
+            break
+    if es_veo:
+        return detectar_kickoffs_video(youtube_url)
+    if es_lpf:
+        return detectar_kickoffs_lpf(youtube_url)
+    return None
+
+
 # Firebase de Tigre (SOLO para leer el link del video cargado y guardar la
 # calibracion, gps/videoSync) -- credenciales de administrador en
 # variables de entorno (FIREBASE_EMAIL/FIREBASE_PASSWORD), mismo criterio
@@ -1497,7 +1626,7 @@ def sincronizar_video_kickoffs(email, password, catapult_efforts):
                 continue
             if not link:
                 continue
-            resultado = detectar_kickoffs_video(link)
+            resultado = detectar_kickoffs_auto(link)
             if not resultado:
                 continue
             try:
