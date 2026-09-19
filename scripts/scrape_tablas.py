@@ -1605,6 +1605,20 @@ def _tigre_fb_put(path, valor, id_token):
         return resp.status
 
 
+def _video_kickoffs_ok(r):
+    """Sanity del resultado del detector antes de guardarlo: kickoff1 chico y
+    separacion 1T-2T de un partido real (~45 min + entretiempo recortado en
+    video). Descarta lecturas malas del 2T (un offset equivocado da un dk
+    absurdo, ej. F25 -> 3/3749). Mismo criterio que la validacion del batch."""
+    if not r:
+        return False
+    k1, k2 = r.get("kickoff1"), r.get("kickoff2")
+    if k1 is None or k2 is None:
+        return False
+    dk = k2 - k1
+    return 0 <= k1 <= 600 and 2100 <= dk <= 3600
+
+
 def sincronizar_video_kickoffs(email, password, catapult_efforts):
     """Para cada fecha con esfuerzos de Catapult (catapult_efforts) que ya
     tenga un link de video cargado y todavia NO tenga calibracion
@@ -1632,6 +1646,12 @@ def sincronizar_video_kickoffs(email, password, catapult_efforts):
         print(f"[ERROR] Sincronizacion de video: no se pudo loguear en Firebase: {e}", file=sys.stderr)
         return
 
+    try:
+        fallos = _tigre_fb_get("gps/videoSyncFallos", token()) or {}
+    except Exception:
+        fallos = {}
+    MAX_INTENTOS = 3  # los de visitante sin cartel no van a leer nunca -> dejar de reintentarlos
+
     detectadas = 0
     for cat, fechas in catapult_efforts.items():
         for fecha_key in fechas:
@@ -1644,13 +1664,27 @@ def sincronizar_video_kickoffs(email, password, catapult_efforts):
                 continue
             if not link:
                 continue
-            resultado = detectar_kickoffs_auto(link)
-            if not resultado:
+            # Si ya se intento MAX_INTENTOS veces con ESTE mismo video sin
+            # exito, no se vuelve a intentar (evita bajar cuadros al pedo en
+            # cada corrida con los partidos de visitante sin cartel). Si el
+            # link cambia (video nuevo), el contador se reinicia y se reintenta.
+            prev = (fallos.get(cat) or {}).get(fecha_key) or {}
+            if prev.get("link") == link and prev.get("intentos", 0) >= MAX_INTENTOS:
                 continue
+            resultado = detectar_kickoffs_auto(link)
+            if not _video_kickoffs_ok(resultado):
+                n = prev.get("intentos", 0) + 1 if prev.get("link") == link else 1
+                try:
+                    _tigre_fb_put(f"gps/videoSyncFallos/{cat}/{fecha_key}", {"intentos": n, "link": link}, token())
+                except Exception:
+                    pass
+                continue
+            guardado = False
             for reintento in (False, True):
                 try:
                     _tigre_fb_put(f"gps/videoSync/{cat}/{fecha_key}", resultado, token(force=reintento))
                     detectadas += 1
+                    guardado = True
                     print(f"[OK] Video sincronizado solo: {cat} {fecha_key} "
                           f"(kickoff1={resultado['kickoff1']:.0f}s, kickoff2={resultado['kickoff2']:.0f}s)")
                     break
@@ -1658,6 +1692,11 @@ def sincronizar_video_kickoffs(email, password, catapult_efforts):
                     if not reintento:
                         continue
                     print(f"[ERROR] Sincronizacion de video {cat} {fecha_key}: no se pudo guardar: {e}", file=sys.stderr)
+            if guardado and prev:  # se pudo al fin -> limpiar el registro de fallos
+                try:
+                    _tigre_fb_put(f"gps/videoSyncFallos/{cat}/{fecha_key}", None, token())
+                except Exception:
+                    pass
     if detectadas:
         print(f"[OK] Sincronizacion de video: {detectadas} fecha(s) calibradas solas")
 
