@@ -73,7 +73,9 @@ oficial). Corre con las mismas credenciales de Firebase que el video sync.
 **Firebase — nodos raíz reales** (grep `db.ref` en `index.html`): `users`,
 `stats` (+ subnodos: `links`, `plantel`, `jugadores`, `aliasJugadores`,
 `aliasJugadoresComet`, `aliasJugadoresGps`, `recordatoriosOmitidos`,
-`golesMismatchOmitidos`, `jugadoresArchivados`, …), `gps` (+ `videoSync`),
+`golesMismatchOmitidos`, `jugadoresArchivados`, …), `gps` (+ `videoSync` y
+`videoSyncFallos` — fechas que el detector ya intentó 3 veces sin poder, para
+no reintentarlas cada corrida; se reinicia si cambia el link del video),
 `temporadaActiva`, `temporadas_cerradas`, `roles_taken`.
 
 ---
