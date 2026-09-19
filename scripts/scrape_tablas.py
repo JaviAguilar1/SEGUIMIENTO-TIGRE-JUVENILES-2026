@@ -1453,7 +1453,11 @@ def _video_leer_reloj_lpf(frame_bytes):
     si no hay reloj legible ahi (video sin ese overlay)."""
     im = _VideoImage.open(_video_io.BytesIO(frame_bytes))
     w, h = im.size
-    crop = im.crop((int(w*0.33), int(h*0.02), int(w*0.44), int(h*0.11))).convert("L")
+    # x 0.30-0.44: el reloj se corre horizontalmente segun el ancho del cuadro
+    # de equipos/marcador (en 6TA queda mas a la izquierda que en 4TA), asi que
+    # el recorte es ancho para cubrir las dos posiciones. El whitelist de
+    # digitos + el RANSAC descartan cualquier texto del marcador que se cuele.
+    crop = im.crop((int(w*0.30), int(h*0.02), int(w*0.44), int(h*0.11))).convert("L")
     crop = crop.resize((crop.width*4, crop.height*4))
     # Primero binarizado (texto blanco sobre caja); si no, el gris directo.
     for img in (crop.point(lambda p: 255 if p > 170 else 0), crop):
