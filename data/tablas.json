@@ -25426,6 +25426,457 @@
           "roja": false
         }
       }
+    },
+    "RESERVA": {
+      "1": {
+        "CORDOBA, FABRICIO SANTIAGO": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "MEDINA, ALEJANDRO ISMAEL": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        }
+      },
+      "2": {
+        "AFONSO, NICOLAS": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "FREDES, TIAGO": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "MEDINA, ALEJANDRO ISMAEL": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        }
+      },
+      "3": {
+        "FEVERSANI, BAUTISTA": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "SANCHEZ, THIAGO VALENTIN": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "CARRACEDO, LUCIAN": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "PESOLILLA, ROMAN": {
+          "goles": 1,
+          "amarilla": false,
+          "roja": false
+        }
+      },
+      "4": {
+        "MOLAS, LUCAS GABRIEL": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "PATERNOSTER, JOSE IGNACIO": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "ANDRUSISEN, JORDAN LAUTARO": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        }
+      },
+      "5": {
+        "SARAVIA, ROMAN LIONEL": {
+          "goles": 1,
+          "amarilla": false,
+          "roja": false
+        },
+        "GALESIO, SANTINO": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        }
+      },
+      "6": {
+        "MOLAS, LUCAS GABRIEL": {
+          "goles": 1,
+          "amarilla": false,
+          "roja": false
+        },
+        "SARAVIA, ROMAN LIONEL": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "ANDRUSISEN, JORDAN LAUTARO": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "MEDINA, ALEJANDRO ISMAEL": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        }
+      },
+      "7": {
+        "FERNANDEZ, TOMAS JULIAN": {
+          "goles": 0,
+          "amarilla": false,
+          "roja": true
+        },
+        "GALESIO, SANTINO": {
+          "goles": 1,
+          "amarilla": false,
+          "roja": false
+        },
+        "MAYER, TOMAS ALEJANDRO": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "AMBIELA, MARIO EMILIO": {
+          "goles": 1,
+          "amarilla": true,
+          "roja": false
+        }
+      },
+      "8": {
+        "LEGUIZAMON, MAXIMO LEONEL": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "CARRACEDO, LUCIAN": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "AFONSO, NICOLAS": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "LEZCANO, ALAN SEBASTIAN": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "MAYER, TOMAS ALEJANDRO": {
+          "goles": 1,
+          "amarilla": false,
+          "roja": false
+        }
+      },
+      "9": {
+        "FEVERSANI, BAUTISTA": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "LUNA SEMINO, AGUSTIN": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        }
+      },
+      "10": {
+        "LUNA SEMINO, AGUSTIN": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        }
+      },
+      "11": {
+        "FEVERSANI, BAUTISTA": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "SANCHEZ, THIAGO VALENTIN": {
+          "goles": 1,
+          "amarilla": false,
+          "roja": false
+        },
+        "PESOLILLA, ROMAN": {
+          "goles": 1,
+          "amarilla": false,
+          "roja": false
+        }
+      },
+      "12": {
+        "ORDOÑEZ, IGNACIO ARIEL": {
+          "goles": 1,
+          "amarilla": false,
+          "roja": false
+        },
+        "PESOLILLA, ROMAN": {
+          "goles": 1,
+          "amarilla": false,
+          "roja": false
+        }
+      },
+      "13": {
+        "GONZALEZ, ALEX EMANUEL": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "MEDINA, TIZIANO AGUSTIN": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        }
+      },
+      "14": {
+        "GONZALEZ, ALEX EMANUEL": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "PESOLILLA, ROMAN": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "LEZCANO, ALAN SEBASTIAN": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "GALESIO, SANTINO": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "AIRALA ZARATE, THIAGO LEONEL": {
+          "goles": 1,
+          "amarilla": false,
+          "roja": false
+        }
+      },
+      "15": {
+        "NAVONI, ALVARO": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "AIRALA ZARATE, THIAGO LEONEL": {
+          "goles": 1,
+          "amarilla": false,
+          "roja": false
+        }
+      },
+      "16": {
+        "CACERES, THOMAS EDUARDO": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        }
+      },
+      "17": {
+        "CACERES, THOMAS EDUARDO": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        }
+      },
+      "18": {
+        "MAYER, TOMAS ALEJANDRO": {
+          "goles": 1,
+          "amarilla": false,
+          "roja": false
+        },
+        "AIRALA ZARATE, THIAGO LEONEL": {
+          "goles": 1,
+          "amarilla": false,
+          "roja": false
+        },
+        "PANNONI, LAUTARO BENJAMIN": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        }
+      }
+    },
+    "RESERVA_S2": {
+      "1": {
+        "GONZALEZ, ALEX EMANUEL": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "FERREYRA, RODRIGO TOMAS": {
+          "goles": 1,
+          "amarilla": false,
+          "roja": false
+        }
+      },
+      "2": {
+        "LEZCANO, ALAN SEBASTIAN": {
+          "goles": 1,
+          "amarilla": false,
+          "roja": false
+        },
+        "FREDES, FELIPE BENJAMIN": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        }
+      },
+      "3": {
+        "MOLAS, LUCAS GABRIEL": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "LEZCANO, ALAN SEBASTIAN": {
+          "goles": 1,
+          "amarilla": false,
+          "roja": false
+        },
+        "NAVONI, ALVARO": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        }
+      },
+      "4": {
+        "PIROTA, JUAN MARTIN": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "ORDOÑEZ, IGNACIO ARIEL": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "FERREYRA, RODRIGO TOMAS": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "PESOLILLA, ROMAN": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "FREDES, FELIPE BENJAMIN": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        }
+      },
+      "5": {
+        "MARCHESE, ANGELO": {
+          "goles": 1,
+          "amarilla": false,
+          "roja": false
+        },
+        "CARRACEDO, LUCIAN": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "AFONSO, NICOLAS": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "PESOLILLA, ROMAN": {
+          "goles": 1,
+          "amarilla": false,
+          "roja": false
+        },
+        "RIVAS ROJAS, MARCO ANTONIO": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "CACERES, THOMAS EDUARDO": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "NAVONI, ALVARO": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "BENITEZ, CRISTIAN ALEJANDRO": {
+          "goles": 1,
+          "amarilla": false,
+          "roja": false
+        }
+      },
+      "6": {
+        "PIROTA, JUAN MARTIN": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "MOLAS, LUCAS GABRIEL": {
+          "goles": 0,
+          "amarilla": false,
+          "roja": true
+        },
+        "CARRACEDO, LUCIAN": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "FERREYRA, RODRIGO TOMAS": {
+          "goles": 1,
+          "amarilla": false,
+          "roja": false
+        }
+      },
+      "7": {
+        "CARRACEDO, LUCIAN": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "LUNA SEMINO, AGUSTIN": {
+          "goles": 1,
+          "amarilla": true,
+          "roja": false
+        },
+        "LEZCANO, ALAN SEBASTIAN": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "BENITEZ, CRISTIAN ALEJANDRO": {
+          "goles": 1,
+          "amarilla": false,
+          "roja": false
+        }
+      },
+      "8": {
+        "GONZALEZ, ALEX EMANUEL": {
+          "goles": 1,
+          "amarilla": false,
+          "roja": false
+        },
+        "MOLAS, LUCAS GABRIEL": {
+          "goles": 1,
+          "amarilla": false,
+          "roja": false
+        }
+      }
     }
   },
   "statfutbol_resultados": {

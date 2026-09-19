@@ -1163,7 +1163,7 @@ const RIVALS_RESERVA_S2 = [
 const rivalData  = { 'RESERVA': {}, 'RESERVA_S2': {} };
 RIVALS_RESERVA.forEach(r => { rivalData['RESERVA'][r.f] = {rival: r.r, cond: r.cond}; });
 RIVALS_RESERVA_S2.forEach(r => { rivalData['RESERVA_S2'][r.f] = {rival: r.r, cond: r.cond}; }); // goleadores[cat] = [{name, goals, fecha}]
-let reservaSemestre = 1; // 1 o 2 — qué semestre de RESERVA se está mostrando
+let reservaSemestre = 2; // 1 o 2 — qué semestre de RESERVA se está mostrando (arranca en el actual, el 2do)
 let isAdmin      = false;
 let canEdit      = false;
 let currentRole  = 'viewer';
@@ -6015,9 +6015,37 @@ function golesEfectivos(cat, excluirFechas){
   (plantelFutdetail[cat]||[]).forEach(p=>{ rosterPorNombre[normNombreOrdenIndependiente(p.nombre)]=p.nombre; });
   const manualPorFecha = {};
   (goleadores[cat]||[]).forEach(g=>{ (manualPorFecha[g.fecha]=manualPorFecha[g.fecha]||[]).push(g); });
+  // RESERVA: a falta de COMET, si la carga manual de una fecha no llega al
+  // resultado real, se completa con quién metió cada gol según statfutbol
+  // (TABLA_DATA.statfutbol_partidos, sintesis de cada partido). Orden de
+  // fuentes: carga manual -> statfutbol; la LPF oficial y sabadogol no
+  // publican goleadores de Reserva (se revisó 2026-09-19), así que si aun
+  // así falta algún gol respecto del resultado, queda como "Sin identificar"
+  // (se resuelve cargándolo a mano: la carga manual siempre gana).
+  const esReserva = cat==='RESERVA'||cat==='RESERVA_S2';
+  const sfPartidos = esReserva ? (TABLA_DATA?.statfutbol_partidos?.[cat]||{}) : {};
+  const palabras = n=>new Set(normNombreOrdenIndependiente(n).split(' ').filter(Boolean));
+  const nombresManual = [...new Set((goleadores[cat]||[]).map(g=>g.name))];
+  const canonReserva = n=>{
+    const a=palabras(n);
+    const c=nombresManual.filter(m=>{
+      const b=palabras(m);
+      const [chico,grande]=a.size<=b.size?[a,b]:[b,a];
+      return [...chico].every(w=>grande.has(w));
+    });
+    return c.length===1 ? c[0] : n;
+  };
+  const golesFavorReserva = f=>{
+    const r=results[cat]?.[f] || null;
+    if(r) return r[0];
+    const a=TABLA_DATA?.statfutbol_resultados?.[cat]?.[f];
+    return a ? a.gf : null;
+  };
   const fechas = new Set([
     ...Object.keys(manualPorFecha).map(Number),
     ...Object.keys(partidos[cat]||{}).map(Number),
+    ...Object.keys(sfPartidos).map(Number),
+    ...(esReserva ? Object.keys(TABLA_DATA?.statfutbol_resultados?.[cat]||{}).map(Number) : []),
   ]);
   const map={};
   fechas.forEach(fecha=>{
@@ -6039,12 +6067,25 @@ function golesEfectivos(cat, excluirFechas){
         map[name].fechas.push(detalle ? `F${fecha} (${detalle})` : `F${fecha}`);
       });
     } else {
-      (manualPorFecha[fecha]||[]).forEach(g=>{
-        const name = rosterPorNombre[normNombreOrdenIndependiente(g.name)] || g.name;
+      const manual = manualPorFecha[fecha]||[];
+      let usados = manual.reduce((t,g)=>t+g.goals,0);
+      const sfGoles = Object.entries(sfPartidos[fecha]||{}).filter(([,e])=>e.goles>0);
+      const sfTotal = sfGoles.reduce((t,[,e])=>t+e.goles,0);
+      const sumar = (name, goals)=>{
         if(!map[name]) map[name]={name, goals:0, fechas:[]};
-        map[name].goals+=g.goals;
-        map[name].fechas.push(`F${g.fecha}`);
-      });
+        map[name].goals+=goals;
+        map[name].fechas.push(`F${fecha}`);
+      };
+      if(esReserva && sfTotal>usados){
+        sfGoles.forEach(([n,e])=>sumar(canonReserva(n), e.goles));
+        usados = sfTotal;
+      } else {
+        manual.forEach(g=>sumar(rosterPorNombre[normNombreOrdenIndependiente(g.name)] || g.name, g.goals));
+      }
+      if(esReserva){
+        const gf = golesFavorReserva(fecha);
+        if(gf!=null && gf>usados) sumar('Sin identificar', gf-usados);
+      }
     }
   });
   return Object.values(map);
@@ -6085,7 +6126,7 @@ function renderGoleadores(cat){
     <div class="goleadores-card">
       <div class="gc-header">
         <h3>⚽ GOLEADORES ${cat}</h3>
-        <span style="font-family:Bebas Neue,sans-serif;font-size:20px;color:rgba(255,255,255,0.7)">${sorted.length}</span>
+        <span style="font-family:Bebas Neue,sans-serif;font-size:20px;color:rgba(255,255,255,0.7)" title="Goles a favor">${sorted.reduce((t,g)=>t+g.goals,0)}</span>
       </div>
       <div class="gc-body">${rowsHTML}</div>
       ${canEdit?`<div class="gol-add-row">

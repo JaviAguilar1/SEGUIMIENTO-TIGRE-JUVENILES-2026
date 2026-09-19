@@ -1274,7 +1274,9 @@ def _video_configurar_tesseract():
 # un 7 (fuente estilizada) de forma consistente -- confirmado con datos
 # reales, "1T" sale como "17" y "2T" como "27" -- por eso el regex acepta
 # T o 7 como segundo caracter en vez de pelear con eso.
-VIDEO_PERIODO_CLOCK_RE = re.compile(r"([12])[T7]\D{0,4}(\d{1,3}):(\d{2})")
+# Tolerante con la lectura del "1T"/"2T" (el OCR a veces lo lee "17", "11",
+# "1 1"): el periodo tiene que estar separado del reloj por espacio o "_".
+VIDEO_PERIODO_CLOCK_RE = re.compile(r"([12])\s*[T7I1l|][\s_]+(\d{1,3}):(\d{2})")
 
 
 def _video_leer_marcador(frame_bytes):
@@ -1289,13 +1291,20 @@ def _video_leer_marcador(frame_bytes):
     izquierda), confirmado 2026-09-18 con la F24 de 4TA vs Platense."""
     im = _VideoImage.open(_video_io.BytesIO(frame_bytes))
     w, h = im.size
-    crop = im.crop((int(w*0.19), 0, int(w*0.34), int(h*0.10)))
-    if crop.width < 10 or crop.height < 10:
-        return None
-    factor = max(1, 300 // max(crop.width, 1))
-    crop = crop.resize((crop.width*factor, crop.height*factor))
-    texto = pytesseract.image_to_string(crop, config="--psm 8")
-    m = VIDEO_PERIODO_CLOCK_RE.search(texto.replace(" ", ""))
+    # Primero el recorte angosto (solo periodo + reloj, camara VEO con
+    # cartel corto); si no lee, uno mas ancho que incluye los nombres de
+    # equipo (cartel largo, ej. "TIG 0 0 GDC 1T 4:57" en 5TA, 2026-09-19).
+    m = None
+    for x0, x1 in ((0.19, 0.34), (0.0, 0.30)):
+        crop = im.crop((int(w*x0), 0, int(w*x1), int(h*0.10)))
+        if crop.width < 10 or crop.height < 10:
+            continue
+        factor = max(1, 300 // max(crop.width, 1))
+        crop = crop.resize((crop.width*factor, crop.height*factor))
+        texto = pytesseract.image_to_string(crop, config="--psm 8")
+        m = VIDEO_PERIODO_CLOCK_RE.search(texto)
+        if m:
+            break
     if not m:
         return None
     periodo = int(m.group(1))
@@ -1382,37 +1391,20 @@ def detectar_kickoffs_video(youtube_url, duracion_minima_1t=15*60):
     if kickoff1 is None:
         return None  # sin cartel reconocible -- video sin overlay, o formato distinto
 
-    lo, hi = kickoff1 + duracion_minima_1t, duracion - 5
-    if hi <= lo:
+    # Barrido grueso buscando CUALQUIER lectura valida de 2T (el reloj del
+    # 2T es continuo, asi que kickoff2 = segundo_del_video - reloj). Una
+    # lectura "2T" solo vale si t - reloj queda bien despues del arranque
+    # del 1T (descarta lecturas confundidas). Reemplaza a la biseccion: en
+    # 5TA el video termina sin cartel (no hay lectura cerca del final) y el
+    # OCR a veces lee "2T" como "1T", lo que rompia la biseccion.
+    estimado2 = None
+    for t in range(kickoff1 + duracion_minima_1t, int(duracion) - 10, 90):
+        r = leer(t)
+        if r and r[0] == 2 and t - r[1] >= kickoff1 + duracion_minima_1t - 60:
+            estimado2 = t - r[1]
+            break
+    if estimado2 is None:
         return None
-    r_hi = leer(hi)
-    if not r_hi or r_hi[0] != 2:
-        hi = duracion - 30  # el cartel podria no aparecer justo en el ultimo segundo
-        r_hi = leer(hi)
-        if not r_hi or r_hi[0] != 2:
-            return None
-    while hi - lo > 2:
-        mid = (lo + hi) // 2
-        r = leer(mid)
-        if r and r[0] == 2:
-            hi = mid
-        elif r and r[0] == 1:
-            lo = mid
-        else:
-            # frame sin lectura clara (transicion, corte de camara) --
-            # probar un segundo mas adelante en vez de trabar la busqueda
-            r2 = leer(mid+1)
-            if r2 and r2[0] == 2:
-                hi = mid+1
-            elif r2 and r2[0] == 1:
-                lo = mid+1
-            else:
-                break
-
-    r_hi = leer(hi)
-    if not r_hi or r_hi[0] != 2:
-        return None
-    estimado2 = hi - r_hi[1]
     kickoff2 = None
     for ajuste in range(max(0, estimado2-5), estimado2+6):
         if leer(ajuste) == (2, 0):
@@ -2390,6 +2382,25 @@ def main():
         except Exception as e:  # noqa
             errores.append(f"statfutbol jugadores {cat}: {e}")
             print(f"[ERROR] statfutbol jugadores {cat}: {e}", file=sys.stderr)
+
+        # Goles de Tigre partido por partido (quien metio cada gol) -- para
+        # completar GOLEADORES de RESERVA en las fechas donde la carga manual
+        # no llega al resultado real (index.html, golesEfectivos). Mismo dato
+        # que ya se trae para 4TA-9NA, aca con la sintesis de cada torneo.
+        try:
+            por_fecha = {}
+            for p in fetch_statfutbol_reserva_fixture(cfg["fixture"]):
+                if not p["jugado"] or "TIGRE" not in (p["local"], p["visita"]):
+                    continue
+                eventos = fetch_statfutbol_sintesis_completa(
+                    STATFUTBOL_BASE + cfg["sintesis"], p["id_partido"], team_id_r, equipos_r)
+                if eventos:
+                    por_fecha[p["jornada"]] = eventos
+            resultado["statfutbol_partidos"][cat] = por_fecha
+            print(f"[OK] statfutbol partidos {cat}: {len(por_fecha)} fechas con datos")
+        except Exception as e:  # noqa
+            errores.append(f"statfutbol partidos {cat}: {e}")
+            print(f"[ERROR] statfutbol partidos {cat}: {e}", file=sys.stderr)
 
     # Resultados de Tigre partido por partido segun futdetail (panel privado).
     # Necesita FUTDETAIL_USER / FUTDETAIL_PASS como variables de entorno (las
