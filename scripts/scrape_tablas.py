@@ -17,6 +17,7 @@ import json
 import os
 import re
 import sys
+import time
 import datetime
 import urllib.request
 import urllib.parse
@@ -1603,15 +1604,26 @@ def _tigre_fb_put(path, valor, id_token):
 def sincronizar_video_kickoffs(email, password, catapult_efforts):
     """Para cada fecha con esfuerzos de Catapult (catapult_efforts) que ya
     tenga un link de video cargado y todavia NO tenga calibracion
-    (gps/videoSync), intenta detectarla sola con detectar_kickoffs_video.
-    Si no se puede, no hace nada -- la fecha queda para calibrar a mano
-    como hasta ahora, sin romper nada."""
+    (gps/videoSync), intenta detectarla sola con detectar_kickoffs_auto
+    (cartel VEO o LPF). Si no se puede, no hace nada -- la fecha queda para
+    calibrar a mano como hasta ahora, sin romper nada."""
     if not VIDEO_SYNC_DISPONIBLE:
         print("[AVISO] Sincronizacion de video: faltan paquetes de Python "
               "(yt-dlp/imageio-ffmpeg/pytesseract/Pillow) o Tesseract OCR -- se omite.")
         return
+
+    # El idToken de Firebase vence a la hora; en una corrida larga (backfill de
+    # muchas fechas) hay que renovarlo o los PUT empiezan a dar 401. Se
+    # re-loguea cada 40 min y, ante un fallo de guardado, se fuerza un
+    # re-login con un reintento.
+    _tok = {"id": None, "ts": 0.0}
+    def token(force=False):
+        if force or not _tok["id"] or (time.time() - _tok["ts"]) > 2400:
+            _tok["id"] = _tigre_fb_login(email, password)
+            _tok["ts"] = time.time()
+        return _tok["id"]
     try:
-        id_token = _tigre_fb_login(email, password)
+        token()
     except Exception as e:
         print(f"[ERROR] Sincronizacion de video: no se pudo loguear en Firebase: {e}", file=sys.stderr)
         return
@@ -1621,9 +1633,9 @@ def sincronizar_video_kickoffs(email, password, catapult_efforts):
         for fecha_key in fechas:
             fecha_num = fecha_key.lstrip("F")
             try:
-                if _tigre_fb_get(f"gps/videoSync/{cat}/{fecha_key}", id_token):
+                if _tigre_fb_get(f"gps/videoSync/{cat}/{fecha_key}", token()):
                     continue
-                link = _tigre_fb_get(f"stats/links/{cat}/{fecha_num}/par", id_token)
+                link = _tigre_fb_get(f"stats/links/{cat}/{fecha_num}/par", token())
             except Exception:
                 continue
             if not link:
@@ -1631,13 +1643,17 @@ def sincronizar_video_kickoffs(email, password, catapult_efforts):
             resultado = detectar_kickoffs_auto(link)
             if not resultado:
                 continue
-            try:
-                _tigre_fb_put(f"gps/videoSync/{cat}/{fecha_key}", resultado, id_token)
-                detectadas += 1
-                print(f"[OK] Video sincronizado solo: {cat} {fecha_key} "
-                      f"(kickoff1={resultado['kickoff1']:.0f}s, kickoff2={resultado['kickoff2']:.0f}s)")
-            except Exception as e:
-                print(f"[ERROR] Sincronizacion de video {cat} {fecha_key}: no se pudo guardar: {e}", file=sys.stderr)
+            for reintento in (False, True):
+                try:
+                    _tigre_fb_put(f"gps/videoSync/{cat}/{fecha_key}", resultado, token(force=reintento))
+                    detectadas += 1
+                    print(f"[OK] Video sincronizado solo: {cat} {fecha_key} "
+                          f"(kickoff1={resultado['kickoff1']:.0f}s, kickoff2={resultado['kickoff2']:.0f}s)")
+                    break
+                except Exception as e:
+                    if not reintento:
+                        continue
+                    print(f"[ERROR] Sincronizacion de video {cat} {fecha_key}: no se pudo guardar: {e}", file=sys.stderr)
     if detectadas:
         print(f"[OK] Sincronizacion de video: {detectadas} fecha(s) calibradas solas")
 
