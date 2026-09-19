@@ -8831,7 +8831,12 @@ async function generarPDFCategoria(cat){
 // BL GPS Performance, un resumen de sus partidos ahí. Se abre haciendo
 // click en el nombre dentro de la tabla de PLANTEL.
 function abrirPerfilJugador(cat, nombre){
-  const roster = plantelFutdetail[cat]||[];
+  // RESERVA: sin GPS ni minutos (no hay COMET ni Catapult), así que la ficha
+  // no lleva radar; muestra goles y tarjetas (amarillas/rojas) por fecha,
+  // sacadas de statfutbol (statfutbol_partidos). El plantel de Reserva vive
+  // bajo la clave 'RESERVA' aunque se esté viendo el 2do semestre.
+  const esReserva = cat==='RESERVA'||cat==='RESERVA_S2';
+  const roster = plantelFutdetail[cat] || (esReserva ? plantelFutdetail['RESERVA'] : null) || [];
   // Match por subconjunto de palabras, no por igualdad exacta: el nombre
   // puede llegar acá en otro formato ("APELLIDO, NOMBRE" desde Goleadores,
   // sin segundos nombres) que nunca va a ser igual al del plantel
@@ -8852,8 +8857,12 @@ function abrirPerfilJugador(cat, nombre){
 
   // Escudo del rival de una fecha (mismo fixture -- RIVALS -- que usa el
   // resto de la app para mayores/menores), usado en "Partidos jugados".
-  const escudoDeFecha = fecha=>{
-    const rivalCanon = RIVALS.find(x=>x.f===fecha)?.r;
+  const normRival = n=>(n||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9\s]/g,' ').replace(/\s+/g,' ').trim();
+  const escudoDeFecha = (fecha, rivalNombre)=>{
+    // Reserva tiene su propio fixture (no RIVALS): se busca por nombre de rival.
+    const rivalCanon = esReserva
+      ? Object.keys(RIVAL_INFO).find(k=>normRival(k)===normRival(rivalNombre))
+      : RIVALS.find(x=>x.f===fecha)?.r;
     const archivo = rivalCanon ? RIVAL_INFO[rivalCanon]?.escudo : null;
     return archivo ? `<img src="escudos/${archivo}" style="width:18px;height:18px;object-fit:contain;border-radius:50%;flex-shrink:0" alt="">` : '';
   };
@@ -8897,6 +8906,12 @@ function abrirPerfilJugador(cat, nombre){
     if(!enTit && !enSup) return;
     const partido=(partidos[cat]||{})[fecha];
     const eventos=[];
+    if(esReserva){
+      const sfP = (TABLA_DATA?.statfutbol_partidos?.[cat]||{})[fecha];
+      const ev = sfP ? Object.entries(sfP).find(([n])=>sonMismoJugador(n)) : null;
+      if(ev && ev[1].amarilla){ amCometSum++; eventos.push('🟨'); }
+      if(ev && ev[1].roja){ rojCometSum++; eventos.push('🟥'); }
+    }
     if(partido && idJ!=null){
       // "Entró"/"Salió" y los minutos exactos salen del informe de COMET
       // (partido.titulares/suplentes), no de la citación -- la citación es
@@ -8922,7 +8937,9 @@ function abrirPerfilJugador(cat, nombre){
       (partido.amarillas||[]).filter(a=>a.id===idJ).forEach(a=>{ amCometSum++; eventos.push(`🟨${minSuf(a.minuto)}`); });
       (partido.rojas||[]).filter(a=>a.id===idJ).forEach(a=>{ rojCometSum++; eventos.push(`🟥${minSuf(a.minuto)}`); });
     }
-    partidosJugados.push({fecha, rival:d.rival||'—', cond:condicionCat(cat,fecha), res:results[cat]?.[fecha]||null, eventos});
+    const autoRes = esReserva ? TABLA_DATA?.statfutbol_resultados?.[cat]?.[fecha] : null;
+    partidosJugados.push({fecha, rival:d.rival||'—', cond:condicionCat(cat,fecha),
+      res:results[cat]?.[fecha] || (autoRes ? [autoRes.gf, autoRes.gc] : null), eventos});
   });
   partidosJugados.sort((a,b)=>a.fecha-b.fecha);
   // Minutos: gana COMET (más preciso, partido a partido), pero como no
@@ -8945,6 +8962,13 @@ function abrirPerfilJugador(cat, nombre){
     .find(j=>sonMismoJugador(j.nombre));
   const amarillasFinal = Math.max(amCometSum, sfJ?(parseInt(sfJ.am)||0):0);
   const rojasFinal = Math.max(rojCometSum, sfJ?(parseInt(sfJ.roja)||0):0);
+  // Reserva: los goles de cada fecha (carga manual/statfutbol) van al frente de Eventos.
+  if(esReserva && geEntry){
+    partidosJugados.forEach(pj=>{
+      const n = geEntry.fechas.filter(f=>f===`F${pj.fecha}`).length;
+      if(n) pj.eventos.unshift(...Array(n).fill('⚽'));
+    });
+  }
 
   // Radar de arriba de la ficha: goles y minutos son 100% propios (tasa
   // sobre las convocatorias del jugador, nunca comparado contra nadie);
@@ -8992,7 +9016,7 @@ function abrirPerfilJugador(cat, nombre){
   const radarVelMax  = (refVelMax  && velMax!=null)      ? Math.min(100, Math.round(velMax/refVelMax*100))      : 0;
   const radarMts     = (refMts     && mtsProm!=null)     ? Math.min(100, Math.round(mtsProm/refMts*100))       : 0;
   const hayGps = gpsMatches.length>0;
-  const radarHTML = `
+  const radarHTML = esReserva ? '' : `
     <div style="position:relative;width:100%;height:240px;margin:6px 0">
       <canvas id="radar-perfil-jugador" role="img" aria-label="Radar de ${esc(nombreMostrar)}: cada eje es el porcentaje respecto al mejor dato del plantel de ${esc(cat)} en goles, minutos jugados${hayGps?', sprints, velocidad maxima y metros por minuto':''}${hayGps?'':' -- sprints, velocidad maxima y metros por minuto todavia pendientes de carga GPS'}"></canvas>
     </div>
@@ -9009,7 +9033,7 @@ function abrirPerfilJugador(cat, nombre){
           const r = pj.res;
           const resTxt = (r && r[0]!=null && r[1]!=null) ? `${r[0]}-${r[1]}` : '—';
           const resColor = r ? (getResult(r[0],r[1])==='W'?'var(--win)':getResult(r[0],r[1])==='D'?'var(--draw)':'var(--loss)') : 'var(--muted)';
-          return `<tr><td>F${pj.fecha}</td><td style="display:flex;align-items:center;gap:6px">${escudoDeFecha(pj.fecha)}${esc(pj.rival)}${condTxt?` <span class="cond-badge cond-${pj.cond}" style="font-size:9px">${condTxt}</span>`:''}</td>
+          return `<tr><td>F${pj.fecha}</td><td style="display:flex;align-items:center;gap:6px">${escudoDeFecha(pj.fecha, pj.rival)}${esc(pj.rival)}${condTxt?` <span class="cond-badge cond-${pj.cond}" style="font-size:9px">${condTxt}</span>`:''}</td>
             <td style="color:${resColor};font-weight:700">${resTxt}</td>
             <td style="font-size:11px">${pj.eventos.join(' ')||'—'}</td></tr>`;
         }).join('')}
@@ -9025,20 +9049,24 @@ function abrirPerfilJugador(cat, nombre){
     <h2 style="text-align:center">${esc(nombreMostrar)}</h2>
     <p style="text-align:center">${esc(jugador?.posicion||'—')} · ${esc(cat)}</p>
     ${radarHTML}
-    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:14px 0">
-      ${[['Convoc.',convocatorias],['Titular',vecesTitular],['Minutos',minutosFinal],['Amar.',amarillasFinal]]
+    <div style="display:grid;grid-template-columns:repeat(${esReserva?5:4},1fr);gap:8px;margin:14px 0">
+      ${(esReserva
+        ? [['Convoc.',convocatorias],['Titular',vecesTitular],['Goles',golesFinal],['Amar.',amarillasFinal],['Roj.',rojasFinal]]
+        : [['Convoc.',convocatorias],['Titular',vecesTitular],['Minutos',minutosFinal],['Amar.',amarillasFinal]])
         .map(([label,val])=>`<div style="background:var(--surface2);border-radius:8px;padding:8px;text-align:center">
           <div style="font-size:10px;color:var(--muted);text-transform:uppercase">${label}</div>
           <div style="font-size:18px;font-weight:700;color:var(--gold2)">${val||0}</div></div>`).join('')}
     </div>
-    <div style="font-size:11px;color:var(--muted);margin-bottom:10px">Convoc./titular: tus citaciones · minutos/amarillas: COMET, completado con futdetail donde falte informe. Goles: ver arriba (radar) y en Partidos jugados. Entró de banco: ${vecesEntroDeBanco} · Salió: ${vecesSalio}</div>
+    <div style="font-size:11px;color:var(--muted);margin-bottom:10px">${esReserva
+      ? 'Convoc./titular: tus citaciones · goles: tu carga, completada con statfutbol · tarjetas: statfutbol, partido por partido.'
+      : `Convoc./titular: tus citaciones · minutos/amarillas: COMET, completado con futdetail donde falte informe. Goles: ver arriba (radar) y en Partidos jugados. Entró de banco: ${vecesEntroDeBanco} · Salió: ${vecesSalio}`}</div>
     <div class="st"><div class="stbar"></div>🗓️ PARTIDOS JUGADOS</div>
     ${partidosJugadosHTML}
   </div>`;
   document.body.appendChild(m);
 
   killChart('radar-perfil-jugador');
-  new Chart(document.getElementById('radar-perfil-jugador'), {
+  if(!esReserva) new Chart(document.getElementById('radar-perfil-jugador'), {
     type: 'radar',
     data: {
       labels: [
