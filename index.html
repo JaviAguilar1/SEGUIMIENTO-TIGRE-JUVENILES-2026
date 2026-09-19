@@ -1276,13 +1276,18 @@ function autocompletarResultados(){
   // 1. sacar lo autocompletado de la corrida anterior (deja solo lo manual)
   resultsAuto.forEach(k=>{ const i=k.indexOf('|'); const c=k.slice(0,i), f=k.slice(i+1); if(results[c]) results[c][f]=null; });
   resultsAuto.clear();
-  // 2. rellenar las fechas vacias desde las fuentes (solo 4TA-9NA)
-  GENERAL_CATS.forEach(cat=>{
-    if(!results[cat]) results[cat]={};
-    RIVALS.forEach(r=>{
-      if(results[cat][r.f]) return;  // ya hay dato manual -> no tocar
-      const a = autoResultado(cat, r.f);
-      if(a){ results[cat][r.f]=a; resultsAuto.add(cat+'|'+r.f); }
+  // 2. rellenar las fechas vacias desde las fuentes. 4TA-9NA usan RIVALS y la
+  //    cadena COMET>LIGA>statfutbol; Reserva usa su propio fixture y solo
+  //    statfutbol (no tiene COMET/LIGA en TABLA_DATA).
+  const grupos = [[GENERAL_CATS, RIVALS], [['RESERVA'], RIVALS_RESERVA], [['RESERVA_S2'], RIVALS_RESERVA_S2]];
+  grupos.forEach(([cats, fl])=>{
+    cats.forEach(cat=>{
+      if(!results[cat]) results[cat]={};
+      fl.forEach(r=>{
+        if(results[cat][r.f]) return;  // ya hay dato manual -> no tocar
+        const a = autoResultado(cat, r.f);
+        if(a){ results[cat][r.f]=a; resultsAuto.add(cat+'|'+r.f); }
+      });
     });
   });
 }
@@ -6110,19 +6115,27 @@ function golesEfectivos(cat, excluirFechas){
   // así falta algún gol respecto del resultado, queda como "Sin identificar"
   // (se resuelve cargándolo a mano: la carga manual siempre gana).
   const esReserva = cat==='RESERVA'||cat==='RESERVA_S2';
-  const sfPartidos = esReserva ? (TABLA_DATA?.statfutbol_partidos?.[cat]||{}) : {};
+  // statfutbol como fuente de goleadores para las fechas SIN COMET: 7MA-9NA y
+  // Reserva no tienen COMET nunca; en 4TA-6TA solo entra si falta COMET esa
+  // fecha. Es display-only (no toca goleadores guardado): la carga manual de
+  // una fecha gana, y esto solo completa lo que falta.
+  const sfPartidos = TABLA_DATA?.statfutbol_partidos?.[cat]||{};
   const palabras = n=>new Set(normNombreOrdenIndependiente(n).split(' ').filter(Boolean));
   const nombresManual = [...new Set((goleadores[cat]||[]).map(g=>g.name))];
-  const canonReserva = n=>{
+  const rosterNombres = (plantelFutdetail[cat]||[]).map(p=>p.nombre);
+  // Empareja un nombre de statfutbol ("APELLIDO, NOMBRE COMPLETO") con el
+  // plantel (o con la carga manual) por subconjunto de palabras; si no matchea,
+  // lo acorta a "APELLIDO, PRIMER_NOMBRE".
+  const canonNombre = n=>{
     const a=palabras(n);
-    const c=nombresManual.filter(m=>{
-      const b=palabras(m);
-      const [chico,grande]=a.size<=b.size?[a,b]:[b,a];
-      return [...chico].every(w=>grande.has(w));
-    });
-    return c.length===1 ? c[0] : n;
+    const sub=lista=>lista.filter(m=>{ const b=palabras(m); const [ch,gr]=a.size<=b.size?[a,b]:[b,a]; return ch.size && [...ch].every(w=>gr.has(w)); });
+    const rk=sub(rosterNombres); if(rk.length===1) return rk[0];
+    const mm=sub(nombresManual); if(mm.length===1) return mm[0];
+    const i=n.indexOf(','); if(i<0) return n;
+    const ap=n.slice(0,i).trim(), no=n.slice(i+1).trim().split(/\s+/)[0]||'';
+    return no?`${ap}, ${no}`:ap;
   };
-  const golesFavorReserva = f=>{
+  const golesFavor = f=>{
     const r=results[cat]?.[f] || null;
     if(r) return r[0];
     const a=TABLA_DATA?.statfutbol_resultados?.[cat]?.[f];
@@ -6163,16 +6176,18 @@ function golesEfectivos(cat, excluirFechas){
         map[name].goals+=goals;
         map[name].fechas.push(`F${fecha}`);
       };
-      if(esReserva && sfTotal>usados){
-        sfGoles.forEach(([n,e])=>sumar(canonReserva(n), e.goles));
+      // La carga manual de la fecha gana; si es mas incompleta que statfutbol,
+      // se usa statfutbol para esa fecha (completar lo que falta).
+      if(sfTotal>usados){
+        sfGoles.forEach(([n,e])=>sumar(canonNombre(n), e.goles));
         usados = sfTotal;
       } else {
         manual.forEach(g=>sumar(rosterPorNombre[normNombreOrdenIndependiente(g.name)] || g.name, g.goals));
       }
-      if(esReserva){
-        const gf = golesFavorReserva(fecha);
-        if(gf!=null && gf>usados) sumar('Sin identificar', gf-usados);
-      }
+      // Si aun asi no se identificaron todos los goles a favor, el resto va
+      // como "Sin identificar" (se resuelve cargandolo a mano).
+      const gf = golesFavor(fecha);
+      if(gf!=null && gf>usados) sumar('Sin identificar', gf-usados);
     }
   });
   return Object.values(map);
