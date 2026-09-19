@@ -5940,6 +5940,7 @@ function abrirCitacionView(cat, fecha){
       </div>
       <button id="cit-view-close" style="background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;line-height:1">✕</button>
     </div>
+    ${d.provisional?`<div style="font-size:11px;color:var(--gold2);font-family:'Barlow Condensed',sans-serif;background:rgba(212,175,55,.12);border:1px solid var(--gold);border-radius:6px;padding:8px 10px;margin:8px 0">⚠️ Provisional — armada con la formación de statfutbol (quién jugó), todavía sin la planilla oficial de citación. Se corrige al subir el PDF.</div>`:''}
     ${hayWarn?`<div style="font-size:11px;color:var(--draw);font-family:'Barlow Condensed',sans-serif;margin:8px 0">⚠️ Los nombres marcados no coinciden con el plantel — puede haber salido incompleto o cruzado al leer el PDF, revisá contra el original si hace falta.</div>`:''}
     ${d.segundoTiempo?`<div style="font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:1px;color:var(--gold2);margin-top:10px">⏱️ PRIMER TIEMPO · NITO SAN ANDRÉS</div>`:''}
     ${mitadHTML(`${cat}/${fecha}`, d.titulares, d.suplentes)}
