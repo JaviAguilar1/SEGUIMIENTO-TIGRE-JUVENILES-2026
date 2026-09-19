@@ -14,6 +14,61 @@ Tigre. Se viene mejorando en fases (ver los archivos de "Pegada" en
 `C:\Users\Javier\Desktop\files\` para el plan completo). Progreso al 2026-08-15
 (actualizado el mismo día tras cerrar Fase 7):
 
+---
+
+> **⚠️ ESTADO REAL AL 2026-09-19 — LEER ESTO PRIMERO.** El detalle por fases
+> de más abajo quedó parcialmente viejo (ya hay una "CORRECCIÓN IMPORTANTE"
+> del 2026-08-29 sobre GPS/PLANTEL). Este bloque es lo vigente; verificar
+> contra el código antes de confiar en las fases históricas.
+
+**Automatización — la corre la PC del club, NO GitHub.** La tarea programada
+(`C:\Users\Javier\Documents\futdetail_scraper\actualizar_liga.ps1`, cada 4hs)
+corre `scripts/scrape_tablas.py` con TODAS las credenciales (futdetail, BL,
+Catapult, y — cuando exista el archivo, ver Pendiente — Firebase) y empuja a
+Firebase/repo. El cron de GitHub Actions (`tablas.yml`) está DESACTIVADO desde
+2026-09-01: queda solo como "Run workflow" manual y **no tiene creds de
+Catapult ni Firebase** (solo futdetail/BL), así que NO puede hacer efforts ni
+video sync — eso solo sale de la PC (punto único de falla). `backup.yml` sí
+sigue en GitHub (diario), pero respalda solo `stats`.
+
+**Fuentes de datos** (todas se juntan en `data/tablas.json`, salvo el video
+sync que va directo a Firebase):
+- **LPF oficial** (ligaprofesional.ar): tabla de posiciones 4TA-9NA
+  (`categorias`) + fixture (`fixture_completo`).
+- **statfutbol.com.ar / sabadogol**: resultados por partido
+  (`statfutbol_resultados`), jugadores (`statfutbol_jugadores`), síntesis y
+  tarjetas, riesgo de suspensión, alerta de rival (`rival_alertas`), y tabla +
+  fixture de RESERVA (`fixture_reserva`).
+- **futdetail**: partidos, plantel (`plantel_futdetail`), jugadores
+  (`jugadores_futdetail`), links.
+- **parenlapelota.com.ar**: fila de Tigre (cruce extra de Confiabilidad).
+- **Catapult OpenField**: totales por sesión (`fetch_catapult_players`) +
+  esfuerzos individuales con hora real (`catapult_efforts`) — **sprints ≥25 Y
+  carreras HSR 21-25**, cada esfuerzo con `tipo` ("sprint"/"hsr"; sin `tipo` =
+  sprint, datos viejos).
+- **YouTube (OCR)**: calibración de "esfuerzos en video" → `gps/videoSync`.
+
+**Esfuerzos en video (2026-09-19).** Motor en `index.html`
+(`gpsAbrirVideoEsfuerzo`/`abrirVideoEmbebido`): clic en un esfuerzo → salta al
+segundo exacto del video (pre-roll de 4s + botones ◀5s/5s▶). Fórmula:
+`segundo_video = kickoff + (hora_esfuerzo − arranque_del_tiempo)`, con
+`gps/videoSync/{cat}/F{n} = {kickoff1, kickoff2}`. La calibración se detecta
+sola en el scraper: hay **dos carteles** — VEO (reciente, "1T/2T" explícito,
+`detectar_kickoffs_video`) y **LPF** (viejo, reloj corrido sin período,
+`detectar_kickoffs_lpf` con clustering RANSAC de offsets). `detectar_kickoffs_auto`
+clasifica y despacha; None si el video no tiene cartel (partidos de
+**visitante** = video crudo → calibración manual con el formulario del modo
+VIDEO). El re-login de Firebase cada 40 min evita el HTTP 401 en backfills
+largos (`sincronizar_video_kickoffs`).
+
+**Firebase — nodos raíz reales** (grep `db.ref` en `index.html`): `users`,
+`stats` (+ subnodos: `links`, `plantel`, `jugadores`, `aliasJugadores`,
+`aliasJugadoresComet`, `aliasJugadoresGps`, `recordatoriosOmitidos`,
+`golesMismatchOmitidos`, `jugadoresArchivados`, …), `gps` (+ `videoSync`),
+`temporadaActiva`, `temporadas_cerradas`, `roles_taken`.
+
+---
+
 **Fase 1 — Estructura (COMPLETA):** se sacó la pantalla de Inicio y la solapa
 PLANTEL. La app arranca directo en ESTADÍSTICAS → GENERAL. Selector de
 categoría (desplegable) arriba, con el botón "ver datos de jugadores" al
@@ -1032,17 +1087,34 @@ Verificado en la app real (sin login, y por consola) que nada quedó roto:
 `buildPlantelModule`/`players` ya no existen.
 
 **Pendiente / a futuro:**
-- Si futdetail sigue sin traer algún jugador dentro de un plantel,
-  confirmar con el club si corresponde revisar la carga en futdetail (no
-  es algo que se arregle desde acá).
-- Auditoría de reglas de Firebase (pedida 2026-08-29, no se pudo completar
-  sin acceso a la consola): los nodos raíz que la app realmente usa hoy son
-  `users`, `stats`, `plantel`, `gps`, `temporadaActiva`,
-  `temporadas_cerradas`, `roles_taken` (confirmado por grep de
-  `db.ref('...')` en `index.html`). Falta que el usuario confirme en
-  Firebase Console que los 7 tienen `.read`/`.write` condicionados al rol
-  correspondiente — en particular `roles_taken` y `temporadas_cerradas`,
-  que no se habían chequeado antes.
-- Crear el usuario "viewer" dedicado para que `backup_firebase.py` también
-  respalde plantel/rendimiento/gps — descartado a pedido expreso del
-  usuario (2026-08-29): "eso no lo vamos a hacer".
+- **Esfuerzos en video — cerrar (en curso 2026-09-19):** ya se auto-calibran
+  las fechas con cartel legible (VEO + LPF de local). Faltan las de
+  **visitante** (video crudo sin cartel → calibración manual con el
+  formulario del modo VIDEO, 2 números por partido) y algunas 5TA/6TA cuyo
+  reloj LPF está en otra posición que el de 4TA (el detector aún no las lee).
+  Para que se calibre **solo hacia adelante**, falta crear en la PC
+  `C:\Users\Javier\Documents\futdetail_scraper\credenciales_firebase_scraper.ps1`
+  con `FIREBASE_EMAIL`/`FIREBASE_PASSWORD` de un usuario editor
+  (`actualizar_liga.ps1` ya sabe leerlo). Sin eso, ninguna fecha nueva se
+  calibra sola.
+- **Re-scrape de Catapult para prender HSR 21-25:** el código y la UI ya
+  están (chips Sprints/Carreras en el modo VIDEO), pero `catapult_efforts` en
+  `tablas.json` todavía trae solo sprints hasta que la PC (o una corrida
+  manual) regenere los datos con el scraper nuevo.
+- **Oportunidad — autocompletar resultados:** hoy `results` se carga a mano,
+  pero el mismo dato ya llega de 4 fuentes automáticas (COMET > LIGA >
+  futdetail > statfutbol) que la app solo usa para cruzar en Confiabilidad.
+  Se podría autocompletar con override manual. No decidido.
+- **Auditoría de reglas de Firebase** (pedida 2026-08-29, sin acceso a la
+  consola): nodos raíz reales `users`, `stats`, `gps`, `temporadaActiva`,
+  `temporadas_cerradas`, `roles_taken` (plantel/jugadores cuelgan de `stats`).
+  Falta confirmar en la consola que `.read`/`.write` estén condicionados al
+  rol — en particular `roles_taken`, `temporadas_cerradas` y los subnodos
+  nuevos de `stats` (`aliasJugadoresComet`, `golesMismatchOmitidos`,
+  `jugadoresArchivados`).
+- **Backup incompleto:** `backup_firebase.py` respalda solo `stats`
+  (plantel/gps/rendimiento sin copia). Crear el viewer user quedó descartado
+  a pedido del usuario (2026-08-29): "eso no lo vamos a hacer".
+- Si futdetail sigue sin traer algún jugador dentro de un plantel, confirmar
+  con el club si corresponde revisar la carga en futdetail (no se arregla
+  desde acá).
