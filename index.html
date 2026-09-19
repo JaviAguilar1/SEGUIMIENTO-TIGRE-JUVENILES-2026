@@ -3075,11 +3075,8 @@ function renderStatsSingle(cat, content){
   // Análisis Rival) se ven acá como accesos directos de solo ícono -- la
   // edición del link (pegar la URL) sigue viviendo en VIDEOANÁLISIS, esto
   // es nada más para no tener que salir de RESULTADOS a mirar un video.
-  // RESERVA (2026-09-19, a pedido): también tiene sus links, menos
-  // Citaciones (no hay planillas de COMET/citación de Reserva que las
-  // alimenten).
-  const resultadosLinks = isReserva ? LINK_TYPES.filter(lt=>lt.key!=='cit')
-    : (CATEGORIES.includes(cat) ? LINK_TYPES : []);
+  // RESERVA (2026-09-19, a pedido): también tiene sus links y Citaciones.
+  const resultadosLinks = (isReserva || CATEGORIES.includes(cat)) ? LINK_TYPES : [];
   const isLink = resultadosLinks.length > 0;
   const showEquipo = false;   // botón/panel de equipo retirado de todas las categorías
   const fixtureList = isReserva ? (reservaSemestre===2 ? RIVALS_RESERVA_S2 : RIVALS_RESERVA) : RIVALS;
@@ -7123,6 +7120,9 @@ function startPublicListener(){
 // local y da, ej. en F21, 8-0 en vez de 6-2).
 // CATS_MENORES ahora sale de CATEGORIAS_CONFIG (campo esMenor).
 function condicionCat(cat, fecha){
+  // RESERVA: localía automática desde statfutbol (fixture_reserva), no de RIVALS.
+  if(cat==='RESERVA'||cat==='RESERVA_S2')
+    return TABLA_DATA?.fixture_reserva?.[cat]?.[fecha]?.cond || rivalData[cat]?.[fecha]?.cond || null;
   const base = RIVALS.find(x=>x.f===fecha)?.c;
   if(!base) return null;
   return CATS_MENORES.has(cat) ? (base==='L'?'V':'L') : base;
