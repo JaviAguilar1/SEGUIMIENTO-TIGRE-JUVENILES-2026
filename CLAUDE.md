@@ -82,11 +82,17 @@ desde la fuente, la carga manual siempre gana):
   falta, statfutbol por fecha — para las 6 categorías + Reserva (antes solo
   Reserva). 7MA-9NA (sin COMET) muestran goleadores desde statfutbol; el gap
   contra el resultado va como "Sin identificar".
-- **Tarjetas:** los totales por jugador ya usan `max(COMET, statfutbol_jugadores)`
-  en todas las categorías. Pero la **alerta de 4 amarillas** (`amarillasEnAlerta`)
-  y los **eventos por fecha** de la ficha salen de COMET (4/5/6) + statfutbol
-  solo para Reserva → **7MA-9NA todavía sin alerta ni eventos por fecha**
-  (pendiente: extender el fallback de statfutbol a las menores).
+- **Tarjetas (2026-09-19):** los totales por jugador ya usaban
+  `max(COMET, statfutbol_jugadores)` en todas las categorías. Ahora la **alerta
+  de 4 amarillas** (`amarillasEnAlerta`) y los **eventos por fecha** de la ficha
+  (`abrirPerfilJugador`) también cubren 7MA-9NA: cuando la categoría no tiene
+  COMET, salen de `statfutbol_partidos` (amarilla/roja/gol por jugador por
+  fecha). El ciclo de suspensión (reinicio en la 5ta amarilla o roja) se lleva
+  emparejando el nombre de statfutbol contra el plantel por subconjunto de
+  palabras (statfutbol trae nombres, no ids). El call site de la alerta pasó de
+  `CONFIABILIDAD_CATS` (4/5/6) a `GENERAL_CATS` (4-9); Reserva mantiene su propia
+  alerta de próximo rival. Un jugador que todavía no está en el plantel de
+  futdetail no entra en la alerta (misma limitación conocida de goleadores).
 
 **Firebase — nodos raíz reales** (grep `db.ref` en `index.html`): `users`,
 `stats` (+ subnodos: `links`, `plantel`, `jugadores`, `aliasJugadores`,
@@ -1116,14 +1122,6 @@ Verificado en la app real (sin login, y por consola) que nada quedó roto:
 `buildPlantelModule`/`players` ya no existen.
 
 **Pendiente / a futuro:**
-- **Tarjetas de las menores (7MA-9NA) — último dato sin automatizar:** la
-  alerta de "4 amarillas" (`amarillasEnAlerta`) y los eventos por fecha de la
-  ficha (`abrirPerfilJugador`, array `eventos`) salen de COMET (4/5/6) +
-  statfutbol solo para Reserva → 7MA-9NA no tienen ni alerta ni tarjetas/goles
-  por fecha. Falta extender el fallback de statfutbol (`statfutbol_partidos`,
-  amarilla/roja por jugador por fecha) a las menores. Ojo: statfutbol trae
-  nombres (no ids), así que el ciclo de suspensión (reinicio en 5ta/roja) hay
-  que llevarlo emparejando por nombre contra el plantel.
 - **Esfuerzos en video — visitante a mano:** local con cartel se calibra solo
   (VEO + LPF); visitante (video sin cartel) sigue con el formulario manual del
   modo VIDEO. El archivo de creds de la PC YA existe, así que video sync +
