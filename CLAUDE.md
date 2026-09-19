@@ -60,6 +60,15 @@ clasifica y despacha; None si el video no tiene cartel (partidos de
 **visitante** = video crudo → calibración manual con el formulario del modo
 VIDEO). El re-login de Firebase cada 40 min evita el HTTP 401 en backfills
 largos (`sincronizar_video_kickoffs`).
+**Recorte a los tiempos del partido (2026-09-19):** Catapult traía esfuerzos de
+toda la actividad del día (calentamiento, otra sesión), no solo del partido —
+al clickearlos caían mal en el video (segundo negativo → arranca de 0). Ahora
+los esfuerzos se recortan a las ventanas "Primer/Segundo tiempo": en el scraper
+(`fetch_catapult_efforts`, datos nuevos), en la app (`gpsVideoFormHTML`, red de
+seguridad para datos viejos) y con una limpieza única del `tablas.json`
+(14894→13335 esfuerzos, se sacaron 1559 en 41 fechas). Método de validación:
+cruzar el `start` de cada esfuerzo contra `periodos`. `catapult_efforts` solo lo
+usa la función de video; 7MA-9NA no tienen GPS (chalecos solo en 4/5/6).
 
 **Citaciones provisionales (2026-09-19).** Las citaciones (titulares/suplentes
 por fecha) salen del PDF de la planilla oficial (`parseCitacionPdf` en la app
