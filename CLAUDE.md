@@ -70,6 +70,24 @@ modal (`abrirCitacionView`) muestra un cartel "provisional" y el PDF oficial
 las pisa cuando se sube. NUNCA pisa una planilla ya cargada (prioridad a la
 oficial). Corre con las mismas credenciales de Firebase que el video sync.
 
+**Autocompletado en vivo (2026-09-19).** Varias cosas se completan solas en el
+frontend desde las fuentes ya cargadas, **sin guardar en Firebase** (fresco
+desde la fuente, la carga manual siempre gana):
+- **Resultados** (`autocompletarResultados`, corre en `renderStatsCat`): las
+  fechas sin carga manual se rellenan con COMET > LIGA > statfutbol (4TA-9NA)
+  o statfutbol (Reserva/Reserva_S2). `resultsAuto` marca las auto para NO
+  persistirlas (`saveData` las omite) y recalcularlas cada render; editar a
+  mano una fecha la vuelve manual.
+- **Goleadores** (`golesEfectivos`, display-only): mergea manual + COMET y, si
+  falta, statfutbol por fecha — para las 6 categorías + Reserva (antes solo
+  Reserva). 7MA-9NA (sin COMET) muestran goleadores desde statfutbol; el gap
+  contra el resultado va como "Sin identificar".
+- **Tarjetas:** los totales por jugador ya usan `max(COMET, statfutbol_jugadores)`
+  en todas las categorías. Pero la **alerta de 4 amarillas** (`amarillasEnAlerta`)
+  y los **eventos por fecha** de la ficha salen de COMET (4/5/6) + statfutbol
+  solo para Reserva → **7MA-9NA todavía sin alerta ni eventos por fecha**
+  (pendiente: extender el fallback de statfutbol a las menores).
+
 **Firebase — nodos raíz reales** (grep `db.ref` en `index.html`): `users`,
 `stats` (+ subnodos: `links`, `plantel`, `jugadores`, `aliasJugadores`,
 `aliasJugadoresComet`, `aliasJugadoresGps`, `recordatoriosOmitidos`,
@@ -1098,32 +1116,24 @@ Verificado en la app real (sin login, y por consola) que nada quedó roto:
 `buildPlantelModule`/`players` ya no existen.
 
 **Pendiente / a futuro:**
-- **Esfuerzos en video — cerrar (en curso 2026-09-19):** ya se auto-calibran
-  las fechas con cartel legible (VEO + LPF de local). Faltan las de
-  **visitante** (video crudo sin cartel → calibración manual con el
-  formulario del modo VIDEO, 2 números por partido) y algunas 5TA/6TA cuyo
-  reloj LPF está en otra posición que el de 4TA (el detector aún no las lee).
-  Para que se calibre **solo hacia adelante**, falta crear en la PC
-  `C:\Users\Javier\Documents\futdetail_scraper\credenciales_firebase_scraper.ps1`
-  con `FIREBASE_EMAIL`/`FIREBASE_PASSWORD` de un usuario editor
-  (`actualizar_liga.ps1` ya sabe leerlo). Sin ese archivo, hacia adelante NO
-  se completan solos **ni el video sync ni las citaciones provisionales** de
-  statfutbol (ambos usan esas credenciales).
-- **Re-scrape de Catapult para prender HSR 21-25:** el código y la UI ya
-  están (chips Sprints/Carreras en el modo VIDEO), pero `catapult_efforts` en
-  `tablas.json` todavía trae solo sprints hasta que la PC (o una corrida
-  manual) regenere los datos con el scraper nuevo.
-- **Oportunidad — autocompletar resultados:** hoy `results` se carga a mano,
-  pero el mismo dato ya llega de 4 fuentes automáticas (COMET > LIGA >
-  futdetail > statfutbol) que la app solo usa para cruzar en Confiabilidad.
-  Se podría autocompletar con override manual. No decidido.
-- **Auditoría de reglas de Firebase** (pedida 2026-08-29, sin acceso a la
-  consola): nodos raíz reales `users`, `stats`, `gps`, `temporadaActiva`,
-  `temporadas_cerradas`, `roles_taken` (plantel/jugadores cuelgan de `stats`).
-  Falta confirmar en la consola que `.read`/`.write` estén condicionados al
-  rol — en particular `roles_taken`, `temporadas_cerradas` y los subnodos
-  nuevos de `stats` (`aliasJugadoresComet`, `golesMismatchOmitidos`,
-  `jugadoresArchivados`).
+- **Tarjetas de las menores (7MA-9NA) — último dato sin automatizar:** la
+  alerta de "4 amarillas" (`amarillasEnAlerta`) y los eventos por fecha de la
+  ficha (`abrirPerfilJugador`, array `eventos`) salen de COMET (4/5/6) +
+  statfutbol solo para Reserva → 7MA-9NA no tienen ni alerta ni tarjetas/goles
+  por fecha. Falta extender el fallback de statfutbol (`statfutbol_partidos`,
+  amarilla/roja por jugador por fecha) a las menores. Ojo: statfutbol trae
+  nombres (no ids), así que el ciclo de suspensión (reinicio en 5ta/roja) hay
+  que llevarlo emparejando por nombre contra el plantel.
+- **Esfuerzos en video — visitante a mano:** local con cartel se calibra solo
+  (VEO + LPF); visitante (video sin cartel) sigue con el formulario manual del
+  modo VIDEO. El archivo de creds de la PC YA existe, así que video sync +
+  citaciones provisionales corren solos cada 4hs (verificado 2026-09-19). El
+  video sync deja de reintentar una fecha tras 3 fallos con el mismo link
+  (`gps/videoSyncFallos`).
+- **Auditoría de reglas de Firebase** (sin acceso a la consola): confirmar que
+  `.read`/`.write` de `users`/`stats`/`gps`/`temporadaActiva`/
+  `temporadas_cerradas`/`roles_taken` estén condicionados al rol, no solo a
+  estar logueado — en particular `roles_taken` y `temporadas_cerradas`.
 - **Backup incompleto:** `backup_firebase.py` respalda solo `stats`
   (plantel/gps/rendimiento sin copia). Crear el viewer user quedó descartado
   a pedido del usuario (2026-08-29): "eso no lo vamos a hacer".
