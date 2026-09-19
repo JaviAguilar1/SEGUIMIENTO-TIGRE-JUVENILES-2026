@@ -1662,6 +1662,115 @@ def sincronizar_video_kickoffs(email, password, catapult_efforts):
         print(f"[OK] Sincronizacion de video: {detectadas} fecha(s) calibradas solas")
 
 
+def _statfutbol_formacion_tigre(catnum, id_partido, equipos, tid):
+    """Formacion de Tigre (titulares/suplentes con numero) desde la sintesis
+    de statfutbol de un partido. Devuelve (titulares, suplentes, rival) o
+    (None, None, None) si no se pudo (sintesis sin publicar, no se ubico el
+    lado de Tigre, formacion incompleta)."""
+    url = f"{STATFUTBOL_BASE}sintesispartido{catnum}2026.php"
+    try:
+        html = fetch_post(url, {"idPartido": id_partido, "fixGL": "0", "fixGV": "0"})
+    except Exception:
+        return None, None, None
+    idx = html.find('<th class="encabezado-equipo"')
+    idx2 = html.find("</table>", idx)
+    if idx < 0 or idx2 < 0:
+        return None, None, None
+    bloque = html[idx:idx2]
+    nombres = re.findall(r'encabezado-equipo">.*?;(.+?)\s*\(\d+ gol(?:es)?\)\s*</th>', bloque)
+    tds = re.findall(r'<td class="jugadores-equipo"[^>]*>(.*?)</td>', bloque, re.DOTALL)
+    if len(nombres) != 2 or len(tds) != 2:
+        return None, None, None
+    lado = None
+    for i, ne in enumerate(nombres):
+        m = statfutbol_match_equipo(ne, equipos)
+        if m and m[0] == tid:
+            lado = i
+    if lado is None:
+        return None, None, None
+    td = tds[lado]
+    rival = nombres[1 - lado]
+    # El header "SUPLENTE" separa los 11 titulares de los suplentes.
+    mk = re.search(r"SUPLENTE", td)
+    corte = mk.start() if mk else len(td)
+    titulares, suplentes = [], []
+    for mm in re.finditer(r'<span class="linea-jugador">(.*?)</span>', td, re.DOTALL):
+        txt = re.sub(r"\s+", " ", re.sub(r"<[^>]+>", "", mm.group(1))).strip()
+        m2 = re.match(r"(\d+)\.\s*(.+)", txt)
+        if not m2:
+            continue
+        num = int(m2.group(1))
+        resto = m2.group(2)
+        apellidos, nombres_j = resto.split(",", 1) if "," in resto else (resto, "")
+        prim = nombres_j.split()[0] if nombres_j.split() else ""
+        nombre = (prim.capitalize() + " " + " ".join(w.capitalize() for w in apellidos.split())).strip()
+        (titulares if mm.start() < corte else suplentes).append({"num": num, "nombre": nombre, "warn": False})
+    return titulares, suplentes, rival
+
+
+def sincronizar_citaciones_provisionales(email, password):
+    """Para cada fecha jugada de 4TA-9NA que TODAVIA no tenga citacion cargada
+    (ni planilla oficial ni provisional), completa la formacion desde
+    statfutbol marcada `provisional: true`. NUNCA pisa lo que ya haya cargado
+    (prioridad: planilla oficial > provisional existente). Cuando se sube el
+    PDF, parseCitacionPdf en la app pisa la provisional. Se saltea sola si
+    faltan las credenciales (main solo la llama si estan)."""
+    _tok = {"id": None, "ts": 0.0}
+    def token(force=False):
+        if force or not _tok["id"] or (time.time() - _tok["ts"]) > 2400:
+            _tok["id"] = _tigre_fb_login(email, password)
+            _tok["ts"] = time.time()
+        return _tok["id"]
+    try:
+        md_all = _tigre_fb_get("stats/matchData", token()) or {}
+    except Exception as e:
+        print(f"[ERROR] Citaciones provisionales: no se pudo leer matchData: {e}", file=sys.stderr)
+        return
+
+    def ya_tiene(cat, fecha):
+        arr = md_all.get(cat)
+        if not arr:
+            return False
+        d = arr[fecha] if isinstance(arr, list) and fecha < len(arr) else (arr.get(str(fecha)) if isinstance(arr, dict) else None)
+        return bool(d and d.get("titulares"))
+
+    total = 0
+    for cat, catnum in STATFUTBOL_CATNUM.items():
+        try:
+            fixture = fetch_statfutbol_fixture(catnum)
+            equipos = fetch_statfutbol_equipos(catnum)
+        except Exception:
+            continue
+        tid = next((eid for eid, en in equipos if "tigre" in en.lower()), None)
+        if not tid:
+            continue
+        for row in fixture:
+            if not row.get("jugado"):
+                continue
+            if not ("tigre" in row["local"].lower() or "tigre" in row["visita"].lower()):
+                continue
+            fecha = row["jornada"]
+            if ya_tiene(cat, fecha):
+                continue  # ya hay planilla (oficial o provisional) -> prioridad, no se toca
+            titulares, suplentes, rival = _statfutbol_formacion_tigre(catnum, row["id_partido"], equipos, tid)
+            if not titulares or len(titulares) < 7:
+                continue  # sintesis sin publicar / incompleta -> se deja para la proxima corrida
+            rival_disp = " ".join(w.capitalize() for w in (rival or "").split())
+            entry = {"rival": rival_disp, "titulares": titulares, "suplentes": suplentes, "provisional": True}
+            for reintento in (False, True):
+                try:
+                    _tigre_fb_put(f"stats/matchData/{cat}/{fecha}", entry, token(force=reintento))
+                    total += 1
+                    print(f"[OK] Citacion provisional: {cat} F{fecha} vs {rival_disp} ({len(titulares)}+{len(suplentes)})")
+                    break
+                except Exception as e:
+                    if not reintento:
+                        continue
+                    print(f"[ERROR] Citacion provisional {cat} F{fecha}: no se pudo guardar: {e}", file=sys.stderr)
+    if total:
+        print(f"[OK] Citaciones provisionales: {total} fecha(s) completadas desde statfutbol")
+
+
 # ── parenlapelota.com.ar (segunda fuente publica para 4TA-9NA) ──────────
 # Next.js con render en el servidor -- la tabla de posiciones ya viene
 # armada en el HTML de la respuesta, sin JS ni login (confirmado con un
@@ -2704,13 +2813,21 @@ def main():
     # romper nada -- la calibracion sigue funcionando a mano como siempre.
     usuario_firebase = os.environ.get("FIREBASE_EMAIL")
     password_firebase = os.environ.get("FIREBASE_PASSWORD")
-    if usuario_firebase and password_firebase and resultado.get("catapult_efforts"):
+    if usuario_firebase and password_firebase:
+        # Citaciones provisionales desde statfutbol para fechas jugadas sin
+        # planilla oficial (no depende de Catapult).
         try:
-            sincronizar_video_kickoffs(usuario_firebase, password_firebase, resultado["catapult_efforts"])
+            sincronizar_citaciones_provisionales(usuario_firebase, password_firebase)
         except Exception as e:  # noqa -- nunca debe tirar abajo el resto del scraper
-            print(f"[ERROR] Sincronizacion de video: {e}", file=sys.stderr)
-    elif not (usuario_firebase and password_firebase):
-        print("[AVISO] FIREBASE_EMAIL/FIREBASE_PASSWORD no configurados, se omite sincronizacion de video")
+            print(f"[ERROR] Citaciones provisionales: {e}", file=sys.stderr)
+        # Sincronizacion de video (necesita los esfuerzos de Catapult).
+        if resultado.get("catapult_efforts"):
+            try:
+                sincronizar_video_kickoffs(usuario_firebase, password_firebase, resultado["catapult_efforts"])
+            except Exception as e:  # noqa -- nunca debe tirar abajo el resto del scraper
+                print(f"[ERROR] Sincronizacion de video: {e}", file=sys.stderr)
+    else:
+        print("[AVISO] FIREBASE_EMAIL/FIREBASE_PASSWORD no configurados, se omite video y citaciones provisionales")
 
     # Salvaguarda: Zona A y Zona B de un mismo torneo de reserva salen de dos
     # URLs distintas de statfutbol (fetch_statfutbol_reserva_zona), asi que
