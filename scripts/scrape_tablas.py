@@ -1502,19 +1502,21 @@ def detectar_kickoffs_lpf(youtube_url):
         f = _video_frame_en(stream_url, t, ffmpeg_exe)
         return _video_leer_reloj_lpf(f) if f else None
 
-    # 1T: primeros ~28 min de video (reloj < 40:00, seguro en 1er tiempo).
-    pts1 = [(t, leer(t)) for t in range(60, 1740, 180)]
+    # 1T: primeros ~34 min de video (reloj < 40:00, seguro en 1er tiempo).
+    # Muestreo denso (cada 120s) para juntar suficientes lecturas limpias: el
+    # OCR del reloj es ruidoso y el clustering RANSAC necesita volumen.
+    pts1 = [(t, leer(t)) for t in range(60, 2100, 120)]
     pts1 = [(t, c) for t, c in pts1 if c is not None and c < 2400]
     off1, n1 = _video_offset_ransac(pts1)
-    if off1 is None or n1 < 4:
+    if off1 is None or n1 < 3:
         return None
     # 2T: segunda mitad del video (reloj > 47:00), evitando el borde de 45:00
-    # del entretiempo. ~10 muestras entre el 55% y el 90% del video.
-    paso2 = max(120, (int(duracion*0.90) - int(duracion*0.55)) // 9)
-    pts2 = [(t, leer(t)) for t in range(int(duracion*0.55), int(duracion*0.90), paso2)]
+    # del entretiempo. ~14 muestras entre el 55% y el 92% del video.
+    paso2 = max(120, (int(duracion*0.92) - int(duracion*0.55)) // 13)
+    pts2 = [(t, leer(t)) for t in range(int(duracion*0.55), int(duracion*0.92), paso2)]
     pts2 = [(t, c) for t, c in pts2 if c is not None and 2820 < c < 5400]
     off2, n2 = _video_offset_ransac(pts2)
-    if off2 is None or n2 < 4:
+    if off2 is None or n2 < 3:
         return None
     kickoff1 = max(0, off1)
     kickoff2 = 2700 + off2  # el 2T arranca en 45:00 del reloj de partido
@@ -1539,7 +1541,7 @@ def detectar_kickoffs_auto(youtube_url):
         return None
     ffmpeg_exe = imageio_ffmpeg.get_ffmpeg_exe()
     es_veo = es_lpf = False
-    for t in (180, 480, 900):
+    for t in (180, 360, 600, 900, 1320):
         frame = _video_frame_en(stream_url, t, ffmpeg_exe)
         if not frame:
             continue
