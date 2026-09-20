@@ -63,11 +63,41 @@ import getpass
 import json
 import os
 import sys
+import time
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import scrape_tablas as st  # noqa: E402
 
 RUTA_TABLAS = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "data", "tablas.json")
+
+
+def _sesion(email, password):
+    """Devuelve una funcion token() que se re-loguea sola cada 40 minutos. El
+    idToken de Firebase vence a la hora y estas mediciones tardan mas que eso
+    (medio minuto por fecha), asi que sin esto las lecturas del final de la
+    corrida vuelven vacias y parecen datos que no existen. Es el mismo
+    mecanismo que ya usa el scraper."""
+    estado = {"id": None, "ts": 0.0}
+
+    def token(force=False):
+        if force or not estado["id"] or (time.time() - estado["ts"]) > 2400:
+            estado["id"] = st._tigre_fb_login(email, password)
+            estado["ts"] = time.time()
+        return estado["id"]
+    return token
+
+
+def _leer(token, path):
+    """Lee un nodo de Firebase reintentando una vez con sesion nueva. Deja
+    pasar el error si falla igual: un problema de lectura NO se cuenta como
+    'ese dato no existe'."""
+    for forzar in (False, True):
+        try:
+            return st._tigre_fb_get(path, token(force=forzar))
+        except Exception:
+            if forzar:
+                raise
+    return None
 
 
 def _mediana(xs):
@@ -82,7 +112,7 @@ def medir_cortes(token, limite=0):
         print("[ERROR] Faltan yt-dlp / imageio-ffmpeg (pip install yt-dlp imageio-ffmpeg).")
         return 1
     try:
-        sync = st._tigre_fb_get("gps/videoSync", token) or {}
+        sync = _leer(token, "gps/videoSync") or {}
     except Exception as e:
         print("[ERROR] No se pudo leer gps/videoSync: %s" % e)
         return 1
@@ -120,7 +150,7 @@ def medir_cortes(token, limite=0):
         if limite and i >= limite:
             break
         try:
-            link = st._tigre_fb_get("stats/links/%s/%s/par" % (cat, fecha_key.lstrip("F")), token)
+            link = _leer(token, "stats/links/%s/%s/par" % (cat, fecha_key.lstrip("F")))
         except Exception:
             link = None
         if not link:
@@ -205,7 +235,7 @@ def medir_pendientes(token, efforts, limite=0):
         print("[ERROR] Faltan yt-dlp / imageio-ffmpeg (pip install yt-dlp imageio-ffmpeg).")
         return 1
     try:
-        sync = st._tigre_fb_get("gps/videoSync", token) or {}
+        sync = _leer(token, "gps/videoSync") or {}
     except Exception as e:
         print("[ERROR] No se pudo leer gps/videoSync: %s" % e)
         return 1
@@ -230,14 +260,15 @@ def medir_pendientes(token, efforts, limite=0):
           ("CAT", "FECHA", "1T", "2T", "HUECO", "CAND", "QUE HARIA"))
     print("-" * 100)
 
-    calibraria, a_mano, sin_link = 0, 0, 0
+    calibraria, a_mano, sin_link, errores = 0, 0, 0, []
     for i, (cat, fecha_key) in enumerate(pendientes):
         if limite and i >= limite:
             break
         try:
-            link = st._tigre_fb_get("stats/links/%s/%s/par" % (cat, fecha_key.lstrip("F")), token)
-        except Exception:
-            link = None
+            link = _leer(token, "stats/links/%s/%s/par" % (cat, fecha_key.lstrip("F")))
+        except Exception as e:
+            errores.append("%s %s (%s)" % (cat, fecha_key, e))
+            continue
         if not link:
             sin_link += 1
             continue
@@ -258,6 +289,9 @@ def medir_pendientes(token, efforts, limite=0):
     print("Quedan para el boton de dos clics: %d" % a_mano)
     if sin_link:
         print("Sin link de video cargado: %d" % sin_link)
+    if errores:
+        print("\n[AVISO] %d fecha(s) no se pudieron leer de Firebase (NO es que "
+              "no tengan link): %s" % (len(errores), ", ".join(errores[:5])))
     if calibraria:
         print("\n=> Al mergear a main, esa(s) %d fecha(s) se resuelven solas en la "
               "proxima corrida de la PC." % calibraria)
@@ -307,8 +341,9 @@ def main():
         print("[ERROR] data/tablas.json no tiene catapult_efforts todavia.")
         return 1
 
+    token = _sesion(email, password)
     try:
-        token = st._tigre_fb_login(email, password)
+        token()
     except Exception as e:
         print("[ERROR] No se pudo entrar a Firebase: %s" % e)
         return 1
@@ -330,7 +365,7 @@ def main():
     # poder leerla. Es lo que dice si a las que faltan las puede resolver el
     # OCR o si ya se rindio con ellas (3 intentos con el mismo link).
     try:
-        fallos = st._tigre_fb_get("gps/videoSyncFallos", token) or {}
+        fallos = _leer(token, "gps/videoSyncFallos") or {}
     except Exception:
         fallos = {}
     rendidas = []
@@ -347,7 +382,7 @@ def main():
             if not p1:
                 continue
             try:
-                link = st._tigre_fb_get("stats/links/%s/%s/par" % (cat, fecha_key.lstrip("F")), token)
+                link = _leer(token, "stats/links/%s/%s/par" % (cat, fecha_key.lstrip("F")))
             except Exception:
                 link = None
             if not link:
@@ -355,7 +390,7 @@ def main():
                 continue
             mirados += 1
             try:
-                sync = st._tigre_fb_get("gps/videoSync/%s/%s" % (cat, fecha_key), token)
+                sync = _leer(token, "gps/videoSync/%s/%s" % (cat, fecha_key))
             except Exception:
                 sync = None
             guardado = (sync or {}).get("kickoff1")
