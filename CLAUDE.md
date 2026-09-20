@@ -82,6 +82,50 @@ poblar en el backfill. El parser (`_catapult_actividades_partido`) mapea por dí
 real contra el fixture, no por el nombre, así que las variantes de nombre no
 importan.
 
+**Calibración por hora real del stream (2026-09-20).** Antes de mirar un solo
+cuadro, el scraper prueba una vía mucho más barata y más precisa que el OCR
+(`detectar_kickoffs_metadata`): si el video de YouTube fue una **transmisión en
+vivo**, YouTube guarda a qué hora real arrancó el stream
+(`liveBroadcastDetails.startTimestamp`, que yt-dlp expone como
+`release_timestamp`) y Catapult ya da a qué hora real arrancó cada tiempo
+(`periodos[].start`, epoch) → `kickoff_N = periodo_N.start − hora_del_segundo_0`.
+No necesita Tesseract ni bajar cuadros (~2s por fecha). Es además **más preciso
+que el OCR**: la app calcula `kickoff + (hora_esfuerzo − periodo.start)`, así que
+si el staff marcó el período corrido en OpenField —o el que opera el reloj del
+cartel VEO lo arrancó tarde— el error entra y sale por el mismo lado y se
+cancela; el OCR, que calibra contra el cartel, se lo come entero.
+- **Solo aplica a videos que fueron vivo** (los de local, transmisión propia).
+  Un archivo subido después (export de Veo, filmación de celular de visitante)
+  no tiene esa hora: YouTube se la borra al subirlo. Esos siguen por cartel/OCR
+  o a mano. El scraper distingue los dos casos solo (`live_status`).
+- **Tres validaciones antes de guardar**, porque una calibración mal escrita es
+  peor que ninguna: (1) el stream tiene que haber arrancado ANTES del saque
+  inicial y no más de una hora antes; (2) la duración del video tiene que
+  alcanzar para cubrir los dos tiempos (si pausaron la transmisión en el
+  entretiempo, el 2T caería corrido); (3) `_video_verificar_2t` mira **un solo
+  cuadro** en `kickoff2+5min` y confirma contra el cartel (VEO o LPF) que el
+  reloj va por donde debería — es la red contra una pausa corta que la duración
+  no llega a descartar. Si algo no cierra, devuelve None y sigue el camino del
+  OCR de siempre.
+- **Se auto-calibra** (`_video_metadata_offset`): una vez por corrida, y recién
+  cuando hay algo pendiente, mide el desfasaje de esta vía contra hasta 5 fechas
+  que YA estén calibradas (OCR o a mano) y aplica la mediana como corrección. Si
+  las muestras no se parecen entre sí (>30s de dispersión) no corrige nada y
+  avisa. O sea: no hay ninguna constante para mantener a mano.
+- `gps/videoSyncFallos` ahora guarda también con qué **vía** se intentó
+  (`_VIDEO_VIA_ACTUAL`): al sumar una vía nueva, las fechas que nunca se
+  pudieron leer se reintentan una vez más en vez de quedar descartadas para
+  siempre por los 3 fallos viejos.
+- **`scripts/medir_video_sync.py`** (nuevo, solo lee, no escribe nada): corre en
+  la PC con `FIREBASE_EMAIL`/`FIREBASE_PASSWORD` y dice cuántas fechas son
+  transmisión en vivo vs archivo subido, y cuánto se equivoca esta vía contra
+  cada fecha ya calibrada. Es la forma de verificar el desfasaje real antes de
+  confiar del todo (yo no pude correrlo: el entorno donde se programó esto no
+  tiene acceso ni a YouTube ni a Firebase).
+- **En la app**, el formulario manual ahora pide solo el segundo del 1T: el del
+  2T lo completa solo con el hueco entre tiempos que da Catapult
+  (`gpsVideoDerivar2T`), y se puede pisar a mano si ese video está editado.
+
 **Citaciones provisionales (2026-09-19).** Las citaciones (titulares/suplentes
 por fecha) salen del PDF de la planilla oficial (`parseCitacionPdf` en la app
 → `stats/matchData`). Para las fechas **jugadas sin PDF**, el scraper las
@@ -1158,9 +1202,12 @@ Verificado en la app real (sin login, y por consola) que nada quedó roto:
 `buildPlantelModule`/`players` ya no existen.
 
 **Pendiente / a futuro:**
-- **Esfuerzos en video — visitante a mano:** local con cartel se calibra solo
-  (VEO + LPF); visitante (video sin cartel) sigue con el formulario manual del
-  modo VIDEO. El archivo de creds de la PC YA existe, así que video sync +
+- **Esfuerzos en video — visitante a mano:** local se calibra solo (hora real
+  del stream si fue transmisión en vivo, y si no cartel VEO/LPF); visitante
+  (archivo subido, sin cartel) sigue con el formulario manual del modo VIDEO,
+  ahora de un solo dato (el 1T). Si algún día el volumen lo justifica, el
+  siguiente escalón sería leer el cartel con visión de Claude sobre unos pocos
+  cuadros, para los carteles que Tesseract no lee. El archivo de creds de la PC YA existe, así que video sync +
   citaciones provisionales corren solos cada 4hs (verificado 2026-09-19). El
   video sync deja de reintentar una fecha tras 3 fallos con el mismo link
   (`gps/videoSyncFallos`).
