@@ -1569,7 +1569,7 @@ def detectar_kickoffs_lpf(youtube_url):
 # tiempos completos. Si no da, devuelve None y sigue el camino del OCR.
 _VIDEO_TOLERANCIA_FIN = 600   # seg que puede faltarle al video al final (cortaron el stream antes de que el staff cerrara el periodo)
 _VIDEO_PREVIA_MAX = 3600      # seg de previa del stream antes del saque inicial que se consideran creibles
-_VIDEO_VIA_ACTUAL = "metadata+ocr"  # cambiar si se suma una via nueva -> reintenta los fallos viejos una vez
+_VIDEO_VIA_ACTUAL = "metadata+ocr+corte"  # sumar una via aca -> reintenta los fallos viejos una vez
 _VIDEO_SONDEOS_MAX = 8        # cuantos videos se consultan buscando transmisiones en vivo antes de rendirse
 # Medido el 2026-09-20 sobre las 55 fechas con link: NINGUNA es transmision en
 # vivo (el club transmite, pero a YouTube sube el archivo despues, y ahi YouTube
@@ -1584,6 +1584,17 @@ def _video_vale_la_pena_metadata():
     """False cuando ya se consultaron varios videos en esta corrida y ninguno
     era transmision en vivo -- evita gastar una consulta por fecha al pedo."""
     return _video_vivos["encontrados"] > 0 or _video_vivos["vistos"] < _VIDEO_SONDEOS_MAX
+
+
+def _video_vias_nuevas(via_previa):
+    """Que vias de las de hoy NO se habian probado todavia en una fecha que ya
+    fallo. Si la unica novedad es la de la hora del stream y ya se vio que los
+    videos de esta corrida no son en vivo, no hay novedad real: reintentar
+    seria repetir el mismo barrido que ya fallo."""
+    nuevas = set(_VIDEO_VIA_ACTUAL.split("+")) - set((via_previa or "").split("+"))
+    if nuevas == {"metadata"} and not _video_vale_la_pena_metadata():
+        return set()
+    return nuevas
 
 
 def _video_periodos_1y2(periodos):
@@ -1629,14 +1640,19 @@ _VIDEO_FORMATO = "136/135/134/160/243"
 _VIDEO_FORMATO_LIVIANO = "160/134/135/136/243"
 
 
-def _video_stream_url(youtube_url, formato=_VIDEO_FORMATO):
-    """URL directa del video para sacarle cuadros con ffmpeg."""
+def _video_stream_url(youtube_url, formato=_VIDEO_FORMATO, con_duracion=False):
+    """URL directa del video para sacarle cuadros con ffmpeg. Con
+    con_duracion=True devuelve (url, duracion_en_segundos) de la misma consulta,
+    para no preguntarle dos veces a YouTube."""
+    url = duracion = None
     try:
         with yt_dlp.YoutubeDL({"quiet": True, "no_warnings": True,
                                "format": formato}) as ydl:
-            return ydl.extract_info(youtube_url, download=False)["url"]
+            info = ydl.extract_info(youtube_url, download=False)
+            url, duracion = info["url"], info.get("duration")
     except Exception:
-        return None
+        url = duracion = None
+    return (url, duracion) if con_duracion else url
 
 
 def _video_verificar_2t(youtube_url, kickoff2, ventana=300):
@@ -1696,6 +1712,41 @@ def detectar_kickoffs_metadata(youtube_url, periodos, offset=0.0, meta=None):
     if not _video_verificar_2t(youtube_url, k2):
         return None   # el cartel dice otra cosa en el 2T -> transmision pausada, que lo resuelva el OCR
     return {"kickoff1": float(k1), "kickoff2": float(k2), "fuente": "metadata"}
+
+
+def _video_mediana(xs):
+    xs = sorted(xs)
+    return xs[len(xs) // 2] if xs else None
+
+
+def _video_tipicos(token):
+    """Devuelve una funcion cat -> (arranque tipico del 1T, hueco tipico entre
+    tiempos) sacada de las fechas que YA estan calibradas. Primero las de la
+    misma categoria (las menores pueden jugar tiempos mas cortos), y si son
+    pocas, las de todas. Igual que gpsVideoHuecoTipico en la app: no hay
+    ninguna constante para mantener a mano, se afina sola."""
+    try:
+        sync = _tigre_fb_get("gps/videoSync", token) or {}
+    except Exception:
+        sync = {}
+    datos = {}
+    for cat, fechas in (sync or {}).items():
+        for v in (fechas or {}).values():
+            k1, k2 = (v or {}).get("kickoff1"), (v or {}).get("kickoff2")
+            if k1 is None or k2 is None or (k2 - k1) <= 600:
+                continue
+            datos.setdefault(cat, []).append((float(k1), float(k2) - float(k1)))
+    todas = [x for lista in datos.values() for x in lista]
+
+    def tipicos(cat):
+        lista = datos.get(cat) or []
+        if len(lista) < 3:
+            lista = todas
+        if not lista:
+            return _VIDEO_K1_TIPICO, _VIDEO_HUECO_TIPICO
+        return (_video_mediana([k1 for k1, _ in lista]),
+                _video_mediana([h for _, h in lista]))
+    return tipicos
 
 
 def _video_metadata_offset(catapult_efforts, token, muestras=5):
@@ -1763,11 +1814,18 @@ _VIDEO_K1_TIPICO = 3.0         # de ultima; en la corrida se usa la mediana real
 _VIDEO_HUECO_TIPICO = 2750.0   # idem (2699-2795 en las 17 fechas medidas)
 _VIDEO_CORTE_MARGEN = 150      # cuanto se mira a cada lado del hueco tipico
 _VIDEO_CORTE_UMBRAL = 0.12     # que tan distinto tiene que ser un cuadro del anterior
-_VIDEO_CORTE_AJUSTE = 0.0      # correccion fija (el corte puede caer unos segundos antes del saque)
-# Con que criterio elegir cuando en la ventana hay mas de un corte: "fuerte" =
-# el cambio de imagen mas marcado, "cercano" = el que cae mas cerca de donde
-# suele arrancar el 2T. Lo decide la medicion (medir_video_sync.py --cortes).
-_VIDEO_CORTE_REGLA = "fuerte"
+# MEDIDO EL 2026-09-20 contra las 17 fechas ya calibradas (medir_video_sync.py
+# --cortes): el corte cae SIEMPRE unos 3s antes del saque del 2T (el que edita
+# corta un toque antes de la pelota), con una dispersion de 3,7s entre la mejor
+# y la peor. Corrigiendo esos 3,1s acierta dentro de +-3s en 14 de 15.
+_VIDEO_CORTE_AJUSTE = 3.1
+# La unica que fallo (5TA F13) agarro un destello de 3 cuadros seguidos con
+# puntaje 1.00 a 85s del saque real. Se descarta sola: cuando el corte mas
+# marcado y el mas cercano al hueco tipico estan lejos uno del otro, el mas
+# marcado no es el del entretiempo. En las 14 buenas nunca se separan mas de
+# 43s. Con este freno: 14 automaticas bien, 3 a mano, 0 mal calibradas.
+_VIDEO_CORTE_DESACUERDO = 60
+_VIDEO_2T_MINIMO = 1800        # despues del corte tiene que quedar video para un 2do tiempo
 
 
 def _video_cortes_escena(stream_url, desde, hasta, ffmpeg_exe, umbral=_VIDEO_CORTE_UMBRAL):
@@ -1814,38 +1872,49 @@ def detectar_kickoffs_corte(youtube_url, k1=None, hueco=None, margen=_VIDEO_CORT
         return None
     k1 = _VIDEO_K1_TIPICO if k1 is None else float(k1)
     hueco = _VIDEO_HUECO_TIPICO if hueco is None else float(hueco)
-    stream_url = _video_stream_url(youtube_url, _VIDEO_FORMATO_LIVIANO)
+    stream_url, duracion = _video_stream_url(youtube_url, _VIDEO_FORMATO_LIVIANO,
+                                             con_duracion=True)
     if not stream_url:
         return None
-    desde, hasta = k1 + hueco - margen, k1 + hueco + margen
+    centro = k1 + hueco
+    desde, hasta = centro - margen, centro + margen
     cortes = _video_cortes_escena(stream_url, desde, hasta, imageio_ffmpeg.get_ffmpeg_exe())
     if not cortes:
-        return None
-    if _VIDEO_CORTE_REGLA == "cercano":
-        segundo = min(cortes, key=lambda c: abs(c[0] - (k1 + hueco)))[0]
-    else:
-        segundo = max(cortes, key=lambda c: c[1])[0]
-    segundo += _VIDEO_CORTE_AJUSTE
+        return None                      # sin corte no se inventa nada: queda para calibrar a mano
+    fuerte = max(cortes, key=lambda c: c[1])[0]
+    cercano = min(cortes, key=lambda c: abs(c[0] - centro))[0]
+    if abs(fuerte - cercano) > _VIDEO_CORTE_DESACUERDO:
+        return None                      # el corte mas marcado no es el del entretiempo
+    segundo = fuerte + _VIDEO_CORTE_AJUSTE
     if not (desde <= segundo <= hasta):
         return None
+    if duracion and duracion - segundo < _VIDEO_2T_MINIMO:
+        return None                      # despues del corte no entra un 2do tiempo
     return {"kickoff1": round(k1, 1), "kickoff2": round(segundo, 1), "fuente": "corte"}
 
 
-def detectar_kickoffs_auto(youtube_url, periodos=None, offset=0.0):
-    """Prueba primero la hora real del stream (detectar_kickoffs_metadata, sin
-    mirar el video) y, si el video no fue transmision en vivo, los carteles:
-    VEO (1T/2T explicito) y si no LPF (reloj corrido). Clasifica antes con un
-    par de frames para no barrer todo el video con el detector VEO cuando el
-    cartel es LPF. None si no se pudo por ninguna via (tipico de los partidos
-    de visitante filmados a mano) -> calibrar a mano."""
+def detectar_kickoffs_auto(youtube_url, periodos=None, offset=0.0,
+                           tipicos=None, saltear_ocr=False):
+    """Tres vias, de la mas barata a la mas cara: (1) la hora real del stream
+    (detectar_kickoffs_metadata, sin mirar el video); (2) los carteles, VEO
+    (1T/2T explicito) o LPF (reloj corrido) -- clasifica antes con un par de
+    frames para no barrer todo el video con el detector equivocado; (3) el
+    corte del entretiempo (detectar_kickoffs_corte), que no necesita ningun
+    cartel y es la unica que sirve en los partidos de visitante filmados a
+    mano. None si no se pudo por ninguna -> calibrar a mano."""
     if not VIDEO_SYNC_DISPONIBLE:
         return None
+    k1_tip, hueco_tip = tipicos or (_VIDEO_K1_TIPICO, _VIDEO_HUECO_TIPICO)
     if periodos and _video_vale_la_pena_metadata():
         por_metadata = detectar_kickoffs_metadata(youtube_url, periodos, offset)
         if por_metadata:
             return por_metadata
-    if not _video_configurar_tesseract():
-        return None
+    # Ultimo recurso: el corte del entretiempo, que no necesita cartel. Va
+    # DESPUES del OCR (que lee el marcador real y es mas verificable), salvo
+    # cuando el OCR ya se rindio con esta fecha: ahi repetir su barrido serian
+    # horas de PC para volver a fallar igual.
+    if saltear_ocr or not _video_configurar_tesseract():
+        return detectar_kickoffs_corte(youtube_url, k1_tip, hueco_tip)
     ydl_opts = {"quiet": True, "no_warnings": True, "format": "136/135/134/160/243"}
     try:
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
@@ -1868,11 +1937,12 @@ def detectar_kickoffs_auto(youtube_url, periodos=None, offset=0.0):
         if _video_leer_reloj_lpf(frame) is not None:
             es_lpf = True
             break
+    por_cartel = None
     if es_veo:
-        return detectar_kickoffs_video(youtube_url)
-    if es_lpf:
-        return detectar_kickoffs_lpf(youtube_url)
-    return None
+        por_cartel = detectar_kickoffs_video(youtube_url)
+    elif es_lpf:
+        por_cartel = detectar_kickoffs_lpf(youtube_url)
+    return por_cartel or detectar_kickoffs_corte(youtube_url, k1_tip, hueco_tip)
 
 
 # Firebase de Tigre (SOLO para leer el link del video cargado y guardar la
@@ -1975,6 +2045,15 @@ def sincronizar_video_kickoffs(email, password, catapult_efforts):
         if _off["v"] is None:
             _off["v"] = _video_metadata_offset(catapult_efforts, token)
         return _off["v"]
+
+    # Donde arranca tipicamente cada tiempo dentro del video, por categoria:
+    # es la ventana donde la via del corte busca el entretiempo. Se lee una
+    # sola vez por corrida y recien cuando hay algo pendiente.
+    _tip = {"v": None}
+    def tipicos(cat):
+        if _tip["v"] is None:
+            _tip["v"] = _video_tipicos(token())
+        return _tip["v"](cat)
     MAX_INTENTOS = 3  # los de visitante sin cartel no van a leer nunca -> dejar de reintentarlos
 
     detectadas = 0
@@ -2002,11 +2081,16 @@ def sincronizar_video_kickoffs(email, password, catapult_efforts):
             # OCR que ya fallo 3 veces (con estos videos, horas de PC al pedo).
             prev = (fallos.get(cat) or {}).get(fecha_key) or {}
             mismo_link = prev.get("link") == link
-            mismo_intento = mismo_link and (prev.get("via") == _VIDEO_VIA_ACTUAL
-                                            or not _video_vale_la_pena_metadata())
-            if mismo_intento and prev.get("intentos", 0) >= MAX_INTENTOS:
+            nuevas = _video_vias_nuevas(prev.get("via")) if mismo_link else set()
+            se_rindio = mismo_link and prev.get("intentos", 0) >= MAX_INTENTOS
+            if se_rindio and not nuevas:
                 continue
-            resultado = detectar_kickoffs_auto(link, (fechas.get(fecha_key) or {}).get("periodos"), offset())
+            # Si el OCR ya se rindio con esta fecha y lo unico nuevo es otra
+            # via, no se repite su barrido (son minutos de PC por fecha para
+            # volver a fallar igual): se prueba directo la via nueva.
+            resultado = detectar_kickoffs_auto(
+                link, (fechas.get(fecha_key) or {}).get("periodos"), offset(),
+                tipicos(cat), saltear_ocr=(se_rindio and "ocr" not in nuevas))
             if not _video_kickoffs_ok(resultado):
                 n = prev.get("intentos", 0) + 1 if mismo_link else 1
                 try:

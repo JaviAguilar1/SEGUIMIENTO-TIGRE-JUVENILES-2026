@@ -138,6 +138,53 @@ cancela; el OCR, que calibra contra el cartel, se lo come entero.
   del 1T que marca Catapult (`p1.end − p1.start`): acierta dentro de ±34s en 11
   de 17, pero se va hasta 7 minutos en las otras 6 (períodos cerrados tarde en
   OpenField), así que quedó descartado.
+- **Vía del CORTE del entretiempo (2026-09-20, MEDIDA y enganchada).** Como a
+  todos los videos les recortan el entretiempo, entre los dos tiempos queda un
+  corte seco que se encuentra **sin leer ningún cartel** — es la única vía
+  automática que sirve en los partidos de visitante filmados a mano.
+  `_video_cortes_escena` corre la detección de escena de ffmpeg
+  (`select=gt(scene,0.12)` + `metadata=print`) sobre una ventana angosta (hueco
+  típico ±150s) y en la calidad más baja del video; `detectar_kickoffs_corte`
+  elige el corte y devuelve kickoff1/kickoff2. El 1T no se detecta: sale de la
+  mediana de lo ya calibrado (0-5s) y el pre-roll de 4s de la app se come ese
+  error. **Ojo con el `-t` de ffmpeg: va ANTES del `-i`** — como opción de
+  salida no corta nada, porque el filtro descarta todos los cuadros iguales y
+  ffmpeg termina leyendo el video entero.
+  - **Medido contra las 17 ya calibradas** (`medir_video_sync.py --cortes`,
+    corrido en la PC): el corte cae **siempre ~3s antes** del saque del 2T (el
+    que edita corta un toque antes de la pelota), con una dispersión de 3,7s
+    entre la mejor y la peor. Con `_VIDEO_CORTE_AJUSTE = 3.1` acierta dentro de
+    ±3s en **14 de 15**. Dos fechas (5TA F7, 6TA F1) no tienen ningún corte en
+    la ventana → se abstiene, no inventa.
+  - **La única que falló** (5TA F13) agarró un destello de 3 cuadros seguidos
+    con puntaje 1.00 a 85s del saque real. Se descarta sola con
+    `_VIDEO_CORTE_DESACUERDO` (60s): si el corte más marcado y el más cercano
+    al hueco típico están lejos uno del otro, el más marcado no es el del
+    entretiempo. En las 14 buenas nunca se separan más de 43s. Resultado con el
+    freno: **14 automáticas bien, 3 a mano, 0 mal calibradas**.
+  - Dos validaciones más antes de guardar: el corte tiene que caer dentro de la
+    ventana, y después del corte tiene que quedar video para un 2do tiempo
+    (`_VIDEO_2T_MINIMO`, 30 min) — la duración sale de la misma consulta a
+    YouTube que la URL del stream, no de una segunda.
+  - **La ventana se calcula por categoría** (`_video_tipicos`, mediana de lo ya
+    calibrado; si la categoría tiene menos de 3, las de todas; si no hay nada,
+    `_VIDEO_K1_TIPICO`/`_VIDEO_HUECO_TIPICO`). Importante porque lo medido es
+    4TA/5TA/6TA y 7MA-9NA pueden jugar tiempos más cortos.
+  - **Va última en la cascada** de `detectar_kickoffs_auto` (metadata → cartel →
+    corte): el OCR lee el marcador real y es más verificable, así que no se
+    toca lo que ya funciona. Excepción: si el OCR **ya se rindió** con esa fecha
+    (3 intentos), `saltear_ocr` va directo al corte — repetir el barrido serían
+    minutos de PC por fecha para volver a fallar igual.
+  - `_video_vias_nuevas` reemplaza la comparación cruda contra
+    `_VIDEO_VIA_ACTUAL`: calcula qué vías de hoy NO se probaron en esa fecha, y
+    si la única novedad es la de metadata (que ya se sabe que no aplica) no
+    reintenta. Al sumar una vía nueva de verdad, las fechas dadas por perdidas
+    se reabren una vez.
+  - **Sin medir todavía: cuántas de las 38 que faltan resuelve.** Lo medido son
+    las 17 ya calibradas, mayormente de local; las que faltan son de visitante y
+    puede que no las recorten igual (o que no arranquen en el saque). En ese
+    caso no encuentra corte en la ventana y se abstiene, que es el modo de falla
+    seguro. Se ve en la próxima corrida de la PC.
 - **Calibración manual, de dos clics** (`gpsVideoCalibrarAbrir` /
   `gpsVideoMarcarKickoff`): el botón "▶ BUSCARLO EN EL VIDEO" abre el
   reproductor de siempre con ±1s/±5s y dos botones, "📍 ARRANCA EL 1T" y
@@ -1229,23 +1276,6 @@ Verificado en la app real (sin login, y por consola) que nada quedó roto:
 `buildPlantelModule`/`players` ya no existen.
 
 **Pendiente / a futuro:**
-- **Via automatica del CORTE del entretiempo (escrita el 2026-09-20, SIN MEDIR
-  todavia).** Como a todos los videos les recortan el entretiempo, entre los dos
-  tiempos queda un corte seco que se puede encontrar sin leer ningun cartel:
-  `_video_cortes_escena` corre la deteccion de escena de ffmpeg (`select=gt(scene,N)`
-  + `metadata=print`) sobre una ventana angosta (hueco tipico +-150s, en la
-  calidad mas baja del video) y `detectar_kickoffs_corte` se queda con el corte
-  mas marcado. El 1T no se detecta: se usa la mediana de lo ya calibrado (0-5s).
-  **Todavia NO esta enganchado a `detectar_kickoffs_auto`** — primero hay que
-  correr `medir_video_sync.py --cortes` en la PC, que lo prueba contra las
-  fechas que YA estan calibradas (la respuesta correcta al lado) y dice si el
-  corte cae donde arranca el 2T, si se corre siempre lo mismo (ahi se corrige
-  con `_VIDEO_CORTE_AJUSTE`) y cual de las dos reglas para elegir entre varios
-  cortes conviene (`_VIDEO_CORTE_REGLA`: "fuerte" o "cercano"). Si da bien, con
-  eso se calibran solas las 38 que el OCR no pudo; si da mal, no se engancha y
-  quedan a mano. Ojo con el `-t` de ffmpeg: va ANTES del `-i` (como option de
-  salida no corta nada, porque el filtro descarta todos los cuadros y ffmpeg
-  termina leyendo el video entero).
 - **Esfuerzos en video — lo que falta calibrar:** 17 de 55 hechas al 2026-09-20.
   Las que no puede leer el detector se marcan a mano con el botón de dos clics
   (1T y 2T, ver arriba) — la vía por hora real no aplica (0 videos en vivo) y a
