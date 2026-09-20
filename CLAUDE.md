@@ -129,16 +129,29 @@ cancela; el OCR, que calibra contra el cartel, se lo come entero.
   cobertura (tarda segundos). Es la forma de verificar el desfasaje real antes de
   confiar del todo (yo no pude correrlo: el entorno donde se programó esto no
   tiene acceso ni a YouTube ni a Firebase).
-- **En la app**, el formulario manual ahora pide solo el segundo del 1T: el del
-  2T lo completa solo con el hueco entre tiempos que da Catapult
-  (`gpsVideoDerivar2T`), y se puede pisar a mano si ese video está editado.
-  Además no hace falta tipear el segundo: el botón "▶ BUSCARLO EN EL VIDEO"
-  (`gpsVideoCalibrarAbrir`) abre el reproductor de siempre con botones de
-  ±1s/±5s y un "📍 ACÁ ARRANCA EL 1T" que copia el momento exacto al
-  formulario (`gpsVideoMarcarKickoff`, vía `_ytPlayer.getCurrentTime()`).
-  `abrirVideoEmbebido` acepta ahora un 5º parámetro opcional con botones
-  propios para la barra del reproductor — los dos usos que ya existían no
-  cambian.
+- **A TODOS los videos les recortan el entretiempo (medido el 2026-09-20).** En
+  las 17 fechas ya calibradas, el hueco entre el arranque del 1T y el del 2T
+  DENTRO del video da 2699-2795s, contra 3580-4105s de hora real: 0 de 17
+  continuos. Por eso **el 2T no se puede calcular con la hora de Catapult** —
+  un intento de hacerlo (`gpsVideoDerivar2T`, vivió unas horas) lo ponía entre
+  15 y 23 minutos corrido, y se borró. También se probó estimarlo con el fin
+  del 1T que marca Catapult (`p1.end − p1.start`): acierta dentro de ±34s en 11
+  de 17, pero se va hasta 7 minutos en las otras 6 (períodos cerrados tarde en
+  OpenField), así que quedó descartado.
+- **Calibración manual, de dos clics** (`gpsVideoCalibrarAbrir` /
+  `gpsVideoMarcarKickoff`): el botón "▶ BUSCARLO EN EL VIDEO" abre el
+  reproductor de siempre con ±1s/±5s y dos botones, "📍 ARRANCA EL 1T" y
+  "📍 ARRANCA EL 2T", que copian `_ytPlayer.getCurrentTime()` al formulario.
+  Al marcar el 1T, el video **salta solo** a donde suele arrancar el 2T:
+  `gpsVideoHuecoTipico(cat)` es la mediana del hueco de las fechas YA
+  calibradas (primero las de la misma categoría, si no las de todas; 2750 de
+  última) — no una constante, se afina sola a medida que se calibran más.
+  El otro dato medido: el 1T arranca entre 0 y 5s (mediana 3), o sea que a
+  estos videos también les recortan la previa.
+  `abrirVideoEmbebido` acepta un 5º parámetro opcional con botones propios
+  para la barra del reproductor — los dos usos que ya existían no cambian.
+- **Cobertura al 2026-09-20: 17 de 55 fechas calibradas, faltan 38** (la lista
+  sale de `medir_video_sync.py --rapido`).
 
 **Citaciones provisionales (2026-09-19).** Las citaciones (titulares/suplentes
 por fecha) salen del PDF de la planilla oficial (`parseCitacionPdf` en la app

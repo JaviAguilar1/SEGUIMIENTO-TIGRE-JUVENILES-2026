@@ -3997,39 +3997,56 @@ function gpsAbrirVideoEsfuerzo(cat, fechaKey, startUnix, jugador, velKmh, durSeg
   abrirVideoEmbebido(url, `${jugador} · ${velKmh} km/h · ${fechaKey}`, segInicio, segEnd);
 }
 
-// El video de un partido casi siempre es continuo (no se corta en el
-// entretiempo) y Catapult ya sabe cuánto pasa entre el saque inicial de un
-// tiempo y el del otro (periodos[].start, hora real). O sea que alcanza con
-// cargar el segundo del 1T: el del 2T sale solo de esa cuenta. Se puede pisar
-// a mano igual, por si ese video justo estaba editado.
-function gpsVideoDerivar2T(cat, fechaKey){
-  const i1 = document.getElementById('gps-video-k1'), i2 = document.getElementById('gps-video-k2');
-  if(!i1 || !i2 || i2.dataset.manual === '1' || i1.value === '') return;
-  const per = catapultEfforts[cat]?.[fechaKey]?.periodos || [];
-  const p1 = per.find(p=>/rimer/i.test(p.name||'')), p2 = per.find(p=>/egundo/i.test(p.name||''));
-  if(!p1?.start || !p2?.start) return;
-  i2.value = (Number(i1.value) + (p2.start - p1.start)).toFixed(1);
+// MEDIDO EL 2026-09-20 sobre las 17 fechas ya calibradas: a TODOS los videos
+// les recortan el entretiempo (el hueco entre tiempos dentro del video da
+// entre 2699 y 2795 segundos, contra 3580-4105 de hora real). O sea que el 2T
+// NO se puede calcular con la hora real de Catapult -- eso metia el arranque
+// del 2T entre 15 y 23 minutos corrido.
+// Lo que sí sirve: ese hueco del video es el primer tiempo real (45 min mas
+// descuento) y es muy parejo entre partidos, así que alcanza para SALTAR el
+// video cerca del saque del 2T y que la persona lo confirme a ojo. El valor
+// sale de las fechas que ya estan calibradas (primero las de la misma
+// categoria), no de una constante: se afina solo a medida que se calibran mas.
+// Tambien se probo estimarlo con el fin del 1T que marca Catapult: acierta en
+// 11 de 17 pero se va hasta 7 minutos en el resto (periodos cerrados tarde en
+// OpenField), asi que se descarto.
+const GPS_VIDEO_HUECO_DEFECTO = 2750;
+
+function gpsVideoHuecoTipico(cat){
+  const huecos = c => Object.values(videoSync[c] || {})
+    .map(v => (v && v.kickoff2 != null && v.kickoff1 != null) ? v.kickoff2 - v.kickoff1 : null)
+    .filter(h => h != null && h > 600);
+  let lista = huecos(cat);
+  if(lista.length < 3) lista = Object.keys(videoSync || {}).flatMap(huecos);
+  if(!lista.length) return GPS_VIDEO_HUECO_DEFECTO;
+  lista.sort((a, b) => a - b);
+  return lista[Math.floor(lista.length / 2)];
 }
 
-// Calibrar a ojo, sin tipear segundos: abre el video, se busca el saque
-// inicial con los botones de ±1s/±5s y un clic en "ACÁ ARRANCA EL 1T" copia
-// el momento exacto al formulario (el 2T lo completa gpsVideoDerivar2T). Es
-// el camino de los partidos que no se calibran solos: los de visitante, que
-// son archivos subidos y no transmisiones en vivo, así que no traen la hora
-// real de grabación (ver detectar_kickoffs_metadata en scrape_tablas.py).
 function gpsVideoCalibrarAbrir(cat, fechaKey, url){
-  const btn = (txt, js) => `<button type="button" onclick="${js}" style="background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:'Bebas Neue',sans-serif;font-size:15px;letter-spacing:1px;padding:9px 20px;cursor:pointer">${txt}</button>`;
-  const marcar = `<button type="button" onclick="gpsVideoMarcarKickoff('${cat}','${fechaKey}')" style="background:var(--red);border:none;border-radius:6px;color:#fff;font-family:'Bebas Neue',sans-serif;font-size:15px;letter-spacing:1px;padding:9px 20px;cursor:pointer">📍 ACÁ ARRANCA EL 1T</button>`;
-  abrirVideoEmbebido(url, `Calibrar ${fechaKey} · pará el video justo en el saque inicial del 1er tiempo`,
-    0, 0, btn('◀ 1s','videoSeekRel(-1)') + btn('1s ▶','videoSeekRel(1)') + marcar);
+  const btn = (txt, js, color) => `<button type="button" onclick="${js}" style="background:${color || 'var(--surface2)'};border:${color ? 'none' : '1px solid var(--border)'};border-radius:6px;color:${color ? '#fff' : 'var(--text)'};font-family:'Bebas Neue',sans-serif;font-size:15px;letter-spacing:1px;padding:9px 20px;cursor:pointer">${txt}</button>`;
+  abrirVideoEmbebido(url, `Calibrar ${fechaKey} · pará el video en el saque inicial de cada tiempo y marcalo`,
+    0, 0,
+    btn('◀ 1s', 'videoSeekRel(-1)') + btn('1s ▶', 'videoSeekRel(1)') +
+    btn('📍 ARRANCA EL 1T', `gpsVideoMarcarKickoff('${cat}','${fechaKey}',1)`, 'var(--red)') +
+    btn('📍 ARRANCA EL 2T', `gpsVideoMarcarKickoff('${cat}','${fechaKey}',2)`, 'var(--red)') +
+    `<span id="gps-video-marca" style="color:var(--muted);font-size:12px;align-self:center"></span>`);
 }
 
-function gpsVideoMarcarKickoff(cat, fechaKey){
+function gpsVideoMarcarKickoff(cat, fechaKey, cual){
   if(!_ytPlayer || !_ytPlayer.getCurrentTime) return;
   const t = _ytPlayer.getCurrentTime() || 0;
-  const i1 = document.getElementById('gps-video-k1');
-  if(i1){ i1.value = t.toFixed(1); gpsVideoDerivar2T(cat, fechaKey); }
-  cerrarVideoEmbebido();
+  const input = document.getElementById(cual === 1 ? 'gps-video-k1' : 'gps-video-k2');
+  if(input) input.value = t.toFixed(1);
+  const aviso = document.getElementById('gps-video-marca');
+  if(cual === 1){
+    // A estos videos les recortan el entretiempo, así que el 2T arranca casi
+    // pegado al final del 1T: se salta ahí y la persona ajusta con ±1s/±5s.
+    _ytPlayer.seekTo(Math.max(0, t + gpsVideoHuecoTipico(cat)), true);
+    if(aviso) aviso.textContent = `1T en ${t.toFixed(1)}s · buscá el 2T acá cerca`;
+  }else{
+    if(aviso) aviso.textContent = `2T en ${t.toFixed(1)}s · ya podés cerrar y guardar`;
+  }
 }
 
 function gpsVideoFormHTML(cat){
@@ -4066,17 +4083,17 @@ function wireGpsVideoForm(){
   if(!sync){
     cont.innerHTML = canEdit ? `
       <div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:14px;font-size:12px;color:var(--muted)">
-        Falta calibrar el video de ${esc(fechaKey)} — hace falta saber en qué segundo del video arranca el primer tiempo (una sola vez por partido).
-        El segundo tiempo se calcula solo con la hora que da Catapult; si el video está editado, corregilo a mano.
+        Falta calibrar el video de ${esc(fechaKey)} — hace falta saber en qué segundo del video arranca cada tiempo (una sola vez por partido).
+        A estos videos les recortan el entretiempo, así que los dos se marcan mirando el video: el botón de abajo te lleva directo.
         <div style="margin-top:10px">
           <button type="button" onclick="gpsVideoCalibrarAbrir('${cat}','${fechaKey}','${esc(videoUrl).replace(/'/g,"\\'")}')"
             style="background:var(--gold2);border:none;border-radius:6px;color:#0b0f18;font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:1px;padding:10px 18px;cursor:pointer;">▶ BUSCARLO EN EL VIDEO</button>
         </div>
         <div style="display:grid;grid-template-columns:1fr 1fr auto;gap:8px;margin-top:10px;align-items:end">
           <div><label style="font-size:10px;text-transform:uppercase;letter-spacing:1px;display:block;margin-bottom:4px">Segundo · arranca 1T</label>
-            <input id="gps-video-k1" type="number" step="0.1" oninput="gpsVideoDerivar2T('${cat}','${fechaKey}')" style="width:100%;background:rgba(5,8,15,.8);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:13px;padding:8px 10px;"></div>
-          <div><label style="font-size:10px;text-transform:uppercase;letter-spacing:1px;display:block;margin-bottom:4px">Segundo · arranca 2T <span style="text-transform:none;letter-spacing:0">(se completa solo)</span></label>
-            <input id="gps-video-k2" type="number" step="0.1" oninput="this.dataset.manual='1'" style="width:100%;background:rgba(5,8,15,.8);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:13px;padding:8px 10px;"></div>
+            <input id="gps-video-k1" type="number" step="0.1" style="width:100%;background:rgba(5,8,15,.8);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:13px;padding:8px 10px;"></div>
+          <div><label style="font-size:10px;text-transform:uppercase;letter-spacing:1px;display:block;margin-bottom:4px">Segundo · arranca 2T</label>
+            <input id="gps-video-k2" type="number" step="0.1" style="width:100%;background:rgba(5,8,15,.8);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:13px;padding:8px 10px;"></div>
           <button type="button" onclick="guardarVideoSync('${cat}','${fechaKey}',document.getElementById('gps-video-k1').value,document.getElementById('gps-video-k2').value)"
             style="background:var(--red);border:none;border-radius:6px;color:#fff;font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:1px;padding:10px 18px;cursor:pointer;">GUARDAR</button>
         </div>
