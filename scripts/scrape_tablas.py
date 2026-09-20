@@ -1621,13 +1621,19 @@ def _video_metadata_yt(youtube_url):
     return meta
 
 
-def _video_stream_url(youtube_url):
-    """URL directa del video para sacarle cuadros con ffmpeg (mismos formatos
-    que usan los detectores de cartel: 'https' directo, no m3u8, para poder
-    saltar a un segundo puntual sin bajar todo)."""
+# Formatos de YouTube en orden de preferencia: 'https' directo (no m3u8) para
+# poder saltar a un segundo puntual sin bajar el video entero. El liviano
+# arranca por la calidad mas baja -- alcanza de sobra para ver si la imagen
+# cambia de golpe, y baja y decodifica mucho mas rapido.
+_VIDEO_FORMATO = "136/135/134/160/243"
+_VIDEO_FORMATO_LIVIANO = "160/134/135/136/243"
+
+
+def _video_stream_url(youtube_url, formato=_VIDEO_FORMATO):
+    """URL directa del video para sacarle cuadros con ffmpeg."""
     try:
         with yt_dlp.YoutubeDL({"quiet": True, "no_warnings": True,
-                               "format": "136/135/134/160/243"}) as ydl:
+                               "format": formato}) as ydl:
             return ydl.extract_info(youtube_url, download=False)["url"]
     except Exception:
         return None
@@ -1739,6 +1745,90 @@ def _video_metadata_offset(catapult_efforts, token, muestras=5):
         print("[OK] Video: la hora real del stream se corrige en %+.1fs "
               "(medido contra %d fecha(s) ya calibradas)" % (mediana, len(errores)))
     return float(mediana)
+
+
+# --- Arranque del 2do tiempo por el CORTE del entretiempo -------------------
+# A TODOS los videos les recortan el entretiempo (medido el 2026-09-20: 0 de 17
+# continuos), asi que en algun punto hay un corte seco entre el final del 1er
+# tiempo y el arranque del 2do. Ese corte se puede encontrar SIN leer ningun
+# cartel: la imagen cambia de golpe entre un cuadro y el siguiente. Es la via
+# automatica que queda para los videos que el OCR no puede leer (los de
+# visitante, filmados a mano y sin marcador en pantalla).
+#
+# El arranque del 1er tiempo no hace falta detectarlo: a estos videos tambien
+# les recortan la previa y arrancan en el saque inicial (0-5s en las 17 fechas
+# ya calibradas, mediana 3), y la app muestra 4s antes de cada esfuerzo, asi
+# que un par de segundos de error no se notan.
+_VIDEO_K1_TIPICO = 3.0         # de ultima; en la corrida se usa la mediana real
+_VIDEO_HUECO_TIPICO = 2750.0   # idem (2699-2795 en las 17 fechas medidas)
+_VIDEO_CORTE_MARGEN = 150      # cuanto se mira a cada lado del hueco tipico
+_VIDEO_CORTE_UMBRAL = 0.12     # que tan distinto tiene que ser un cuadro del anterior
+_VIDEO_CORTE_AJUSTE = 0.0      # correccion fija (el corte puede caer unos segundos antes del saque)
+# Con que criterio elegir cuando en la ventana hay mas de un corte: "fuerte" =
+# el cambio de imagen mas marcado, "cercano" = el que cae mas cerca de donde
+# suele arrancar el 2T. Lo decide la medicion (medir_video_sync.py --cortes).
+_VIDEO_CORTE_REGLA = "fuerte"
+
+
+def _video_cortes_escena(stream_url, desde, hasta, ffmpeg_exe, umbral=_VIDEO_CORTE_UMBRAL):
+    """Segundos del video (absolutos) donde la imagen cambia de golpe, dentro
+    de la ventana pedida. Devuelve [(segundo, cuanto_cambio), ...] ordenado por
+    segundo. Solo decodifica esa ventana, no el video entero."""
+    desde = int(max(0, desde))
+    dur = max(1, int(hasta) - desde)
+    # OJO: el "-t" va ANTES del "-i" a proposito. Como option de salida no
+    # corta nada aca (el filtro descarta todos los cuadros iguales, asi que al
+    # final de la cadena no llega ninguno que pase del limite y ffmpeg sigue
+    # leyendo el video entero); como option de entrada si limita lo que baja.
+    cmd = [ffmpeg_exe, "-ss", str(desde), "-t", str(dur), "-i", stream_url,
+           "-an", "-sn",
+           "-vf", "select='gt(scene,%.3f)',metadata=print:file=-" % umbral,
+           "-f", "null", "-"]
+    try:
+        proc = _video_subprocess.run(cmd, capture_output=True, timeout=300)
+    except Exception:
+        return []
+    cortes, pendiente = [], None
+    for linea in (proc.stdout or b"").decode("utf-8", "ignore").splitlines():
+        m = re.search(r"pts_time:([0-9.]+)", linea)
+        if m:
+            pendiente = float(m.group(1))
+            # ffmpeg a veces arranca el reloj de cero en el punto de corte y a
+            # veces mantiene el del video entero; se distingue solo, porque la
+            # ventana que miramos arranca muy lejos del segundo 0.
+            if pendiente <= dur + 5:
+                pendiente += desde
+            continue
+        m = re.search(r"scene_score=([0-9.]+)", linea)
+        if m and pendiente is not None:
+            cortes.append((pendiente, float(m.group(1))))
+            pendiente = None
+    return sorted(cortes)
+
+
+def detectar_kickoffs_corte(youtube_url, k1=None, hueco=None, margen=_VIDEO_CORTE_MARGEN):
+    """kickoff1/kickoff2 buscando el corte del entretiempo dentro de una
+    ventana angosta alrededor del hueco tipico. None si ahi no hay ningun corte
+    claro -- nunca inventa un valor."""
+    if not VIDEO_SYNC_DISPONIBLE:
+        return None
+    k1 = _VIDEO_K1_TIPICO if k1 is None else float(k1)
+    hueco = _VIDEO_HUECO_TIPICO if hueco is None else float(hueco)
+    stream_url = _video_stream_url(youtube_url, _VIDEO_FORMATO_LIVIANO)
+    if not stream_url:
+        return None
+    desde, hasta = k1 + hueco - margen, k1 + hueco + margen
+    cortes = _video_cortes_escena(stream_url, desde, hasta, imageio_ffmpeg.get_ffmpeg_exe())
+    if not cortes:
+        return None
+    if _VIDEO_CORTE_REGLA == "cercano":
+        segundo = min(cortes, key=lambda c: abs(c[0] - (k1 + hueco)))[0]
+    else:
+        segundo = max(cortes, key=lambda c: c[1])[0]
+    segundo += _VIDEO_CORTE_AJUSTE
+    if not (desde <= segundo <= hasta):
+        return None
+    return {"kickoff1": round(k1, 1), "kickoff2": round(segundo, 1), "fuente": "corte"}
 
 
 def detectar_kickoffs_auto(youtube_url, periodos=None, offset=0.0):

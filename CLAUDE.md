@@ -1229,6 +1229,23 @@ Verificado en la app real (sin login, y por consola) que nada quedó roto:
 `buildPlantelModule`/`players` ya no existen.
 
 **Pendiente / a futuro:**
+- **Via automatica del CORTE del entretiempo (escrita el 2026-09-20, SIN MEDIR
+  todavia).** Como a todos los videos les recortan el entretiempo, entre los dos
+  tiempos queda un corte seco que se puede encontrar sin leer ningun cartel:
+  `_video_cortes_escena` corre la deteccion de escena de ffmpeg (`select=gt(scene,N)`
+  + `metadata=print`) sobre una ventana angosta (hueco tipico +-150s, en la
+  calidad mas baja del video) y `detectar_kickoffs_corte` se queda con el corte
+  mas marcado. El 1T no se detecta: se usa la mediana de lo ya calibrado (0-5s).
+  **Todavia NO esta enganchado a `detectar_kickoffs_auto`** — primero hay que
+  correr `medir_video_sync.py --cortes` en la PC, que lo prueba contra las
+  fechas que YA estan calibradas (la respuesta correcta al lado) y dice si el
+  corte cae donde arranca el 2T, si se corre siempre lo mismo (ahi se corrige
+  con `_VIDEO_CORTE_AJUSTE`) y cual de las dos reglas para elegir entre varios
+  cortes conviene (`_VIDEO_CORTE_REGLA`: "fuerte" o "cercano"). Si da bien, con
+  eso se calibran solas las 38 que el OCR no pudo; si da mal, no se engancha y
+  quedan a mano. Ojo con el `-t` de ffmpeg: va ANTES del `-i` (como option de
+  salida no corta nada, porque el filtro descarta todos los cuadros y ffmpeg
+  termina leyendo el video entero).
 - **Esfuerzos en video — lo que falta calibrar:** 17 de 55 hechas al 2026-09-20.
   Las que no puede leer el detector se marcan a mano con el botón de dos clics
   (1T y 2T, ver arriba) — la vía por hora real no aplica (0 videos en vivo) y a

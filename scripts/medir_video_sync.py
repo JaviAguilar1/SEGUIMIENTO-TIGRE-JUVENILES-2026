@@ -33,6 +33,20 @@ teclado; son las mismas que ya usa el scraper)
 Opcionales: un numero limita cuantas fechas mira (ej. "10"; si no, son ~2
 segundos por fecha), y "--rapido" saltea YouTube por completo y solo informa
 cuantas fechas estan calibradas y cuantas faltan (tarda segundos).
+
+Modo "--cortes": prueba la OTRA via automatica, la del corte del entretiempo
+------------------------------------------------------------------------
+A todos los videos les recortan el entretiempo, asi que el arranque del 2do
+tiempo deberia poder encontrarse solo: es el corte seco que queda entre los dos
+tiempos, y para verlo no hace falta leer ningun cartel. Este modo corre ese
+detector contra las fechas que YA estan calibradas a mano (o sea, con la
+respuesta correcta al lado) y muestra cuanto se equivoca en cada una. Si da
+bien, se engancha al scraper y las fechas que faltan se calibran solas.
+
+    python scripts\\medir_video_sync.py --cortes
+
+Tarda entre 20 y 40 segundos por fecha (baja y mira ~5 minutos de video en la
+calidad mas baja). Un numero lo limita: "--cortes 5".
 """
 import getpass
 import json
@@ -45,12 +59,141 @@ import scrape_tablas as st  # noqa: E402
 RUTA_TABLAS = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "data", "tablas.json")
 
 
+def _mediana(xs):
+    xs = sorted(xs)
+    return xs[len(xs) // 2] if xs else None
+
+
+def medir_cortes(token, limite=0):
+    """Corre el detector del corte del entretiempo contra las fechas que ya
+    estan calibradas y compara con la respuesta correcta. No escribe nada."""
+    if not st.VIDEO_SYNC_DISPONIBLE:
+        print("[ERROR] Faltan yt-dlp / imageio-ffmpeg (pip install yt-dlp imageio-ffmpeg).")
+        return 1
+    try:
+        sync = st._tigre_fb_get("gps/videoSync", token) or {}
+    except Exception as e:
+        print("[ERROR] No se pudo leer gps/videoSync: %s" % e)
+        return 1
+
+    listas = []
+    for cat in sorted(sync):
+        for fecha_key in sorted(sync[cat] or {}, key=lambda f: int(f.lstrip("F"))):
+            v = (sync[cat] or {}).get(fecha_key) or {}
+            k1, k2 = v.get("kickoff1"), v.get("kickoff2")
+            if k1 is None or k2 is None:
+                continue
+            listas.append((cat, fecha_key, float(k1), float(k2)))
+    if not listas:
+        print("[ERROR] Todavia no hay ninguna fecha calibrada contra la cual comparar.")
+        return 1
+
+    # La ventana donde se busca el corte sale de lo ya calibrado, igual que lo
+    # haria el scraper: mediana del arranque del 1T y mediana del hueco.
+    k1_tip = _mediana([k1 for _, _, k1, _ in listas])
+    hueco_tip = _mediana([k2 - k1 for _, _, k1, k2 in listas])
+    margen = st._VIDEO_CORTE_MARGEN
+    centro = k1_tip + hueco_tip
+    print("Fechas calibradas para comparar: %d" % len(listas))
+    print("Ventana donde se busca el corte: %.0fs a %.0fs del video "
+          "(1T tipico %.1fs + hueco tipico %.0fs, +-%ds)"
+          % (centro - margen, centro + margen, k1_tip, hueco_tip, margen))
+    print("Umbral de cambio de imagen: %.2f\n" % st._VIDEO_CORTE_UMBRAL)
+    print("%-5s %-5s %9s %9s %8s %9s %6s  %s" %
+          ("CAT", "FECHA", "2T REAL", "CORTE", "DIF", "CERCANO", "CAND", "LOS 3 CORTES MAS FUERTES"))
+    print("-" * 110)
+
+    ffmpeg_exe = st.imageio_ffmpeg.get_ffmpeg_exe()
+    difs_fuerte, difs_cercano, sin_corte, sin_link = [], [], [], 0
+    for i, (cat, fecha_key, k1, k2) in enumerate(listas):
+        if limite and i >= limite:
+            break
+        try:
+            link = st._tigre_fb_get("stats/links/%s/%s/par" % (cat, fecha_key.lstrip("F")), token)
+        except Exception:
+            link = None
+        if not link:
+            sin_link += 1
+            continue
+        stream_url = st._video_stream_url(link, st._VIDEO_FORMATO_LIVIANO)
+        if not stream_url:
+            print("%-5s %-5s %9.1f %9s %8s %9s %6s  (no se pudo abrir el video)"
+                  % (cat, fecha_key, k2, "-", "-", "-", "-"))
+            continue
+        cortes = st._video_cortes_escena(stream_url, centro - margen, centro + margen, ffmpeg_exe)
+        if not cortes:
+            sin_corte.append("%s %s" % (cat, fecha_key))
+            print("%-5s %-5s %9.1f %9s %8s %9s %6d  (ningun corte en la ventana)"
+                  % (cat, fecha_key, k2, "-", "-", "-", 0))
+            continue
+        fuerte = max(cortes, key=lambda c: c[1])[0]
+        cercano = min(cortes, key=lambda c: abs(c[0] - centro))[0]
+        difs_fuerte.append(fuerte - k2)
+        difs_cercano.append(cercano - k2)
+        top = sorted(cortes, key=lambda c: -c[1])[:3]
+        print("%-5s %-5s %9.1f %9.1f %8.1f %9.1f %6d  %s"
+              % (cat, fecha_key, k2, fuerte, fuerte - k2, cercano - k2, len(cortes),
+                 "  ".join("%.0fs(%.2f)" % (s, sc) for s, sc in top)))
+
+    print("-" * 110)
+    if sin_link:
+        print("Fechas calibradas sin link de video: %d" % sin_link)
+    if sin_corte:
+        print("Sin ningun corte en la ventana (%d): %s" % (len(sin_corte), ", ".join(sin_corte)))
+    if not difs_fuerte:
+        print("\n=> No se pudo medir ninguna fecha.")
+        return 1
+
+    # Cual de las dos reglas conviene para elegir entre varios cortes: quedarse
+    # con el mas marcado, o con el mas cercano a donde suele arrancar el 2T.
+    # Se juzga cada una DESPUES de sacarle el desfasaje fijo (la mediana): lo
+    # que importa no es que el corte caiga exacto, sino que caiga siempre a la
+    # misma distancia, porque eso se corrige con una constante.
+    resumen = {}
+    for clave, nombre, difs in (("fuerte", 'el corte mas marcado ("fuerte")', difs_fuerte),
+                                ("cercano", 'el corte mas cercano al hueco tipico ("cercano")', difs_cercano)):
+        mediana = _mediana(difs)
+        ajustadas = [d - mediana for d in difs]
+        resumen[clave] = {"clave": clave, "nombre": nombre, "mediana": mediana,
+                          "dentro": sum(1 for d in ajustadas if abs(d) <= 3),
+                          "peor": max(abs(d) for d in ajustadas), "n": len(difs)}
+        r = resumen[clave]
+        print("\nEligiendo %s:" % nombre)
+        print("  Cae siempre %+.1fs respecto del arranque real del 2T" % mediana)
+        print("  Corrigiendo esos %+.1fs, acierta dentro de +-3s en %d de %d "
+              "(la peor se va %.1fs)" % (-mediana, r["dentro"], r["n"], r["peor"]))
+
+    # A igualdad de aciertos gana la que ya cae mas cerca sin corregir nada:
+    # una regla que necesita mover 45s "siempre igual" es mas sospechosa (esta
+    # agarrando otro corte) que una que cae encima.
+    mejor = max(resumen.values(),
+                key=lambda r: (r["dentro"], -r["peor"], -abs(r["mediana"])))
+    print("")
+    if mejor["dentro"] == mejor["n"]:
+        if abs(mejor["mediana"]) <= 2:
+            print("=> SIRVE tal cual, eligiendo %s." % mejor["nombre"])
+        else:
+            print("=> SIRVE eligiendo %s y corrigiendo %+.1fs fijo "
+                  "(_VIDEO_CORTE_AJUSTE)." % (mejor["nombre"], -mejor["mediana"]))
+    elif mejor["dentro"] >= mejor["n"] - 1:
+        print("=> Casi: falla %d de %d eligiendo %s. Mirar esa(s) fecha(s) en la "
+              "columna de cortes antes de largarlo."
+              % (mejor["n"] - mejor["dentro"], mejor["n"], mejor["nombre"]))
+    else:
+        print("=> NO sirve asi: el corte cae en cualquier lado (lo mejor es %s, y "
+              "acierta %d de %d). Mirar la columna de los cortes mas fuertes para "
+              "entender que esta agarrando."
+              % (mejor["nombre"], mejor["dentro"], mejor["n"]))
+    return 0
+
+
 def main():
     args = sys.argv[1:]
     rapido = "--rapido" in args           # solo cobertura, sin consultar YouTube
+    cortes = "--cortes" in args           # probar el detector del corte del entretiempo
     limite = next((int(a) for a in args if a.isdigit()), 0)
 
-    if not st.VIDEO_SYNC_DISPONIBLE and not rapido:
+    if not st.VIDEO_SYNC_DISPONIBLE and not (rapido or cortes):
         print("[ERROR] Falta yt-dlp (pip install yt-dlp) -- sin eso no se puede leer la "
               "hora de arranque de los videos.")
         return 1
@@ -88,6 +231,9 @@ def main():
     except Exception as e:
         print("[ERROR] No se pudo entrar a Firebase: %s" % e)
         return 1
+
+    if "--cortes" in args:
+        return medir_cortes(token, limite)
 
     if rapido:
         print("%-5s %-5s %10s %10s %12s %12s %9s  %s" %
