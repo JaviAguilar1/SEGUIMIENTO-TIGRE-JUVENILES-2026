@@ -1864,33 +1864,41 @@ def _video_cortes_escena(stream_url, desde, hasta, ffmpeg_exe, umbral=_VIDEO_COR
     return sorted(cortes)
 
 
-def detectar_kickoffs_corte(youtube_url, k1=None, hueco=None, margen=_VIDEO_CORTE_MARGEN):
-    """kickoff1/kickoff2 buscando el corte del entretiempo dentro de una
-    ventana angosta alrededor del hueco tipico. None si ahi no hay ningun corte
-    claro -- nunca inventa un valor."""
+def _detectar_corte(youtube_url, k1=None, hueco=None, margen=_VIDEO_CORTE_MARGEN):
+    """Motor de la via del corte. Devuelve (resultado, motivo, cortes): el
+    motivo dice por que no se pudo, para poder medir sin duplicar la logica
+    (lo usa medir_video_sync.py --pendientes). Nunca inventa un valor."""
     if not VIDEO_SYNC_DISPONIBLE:
-        return None
+        return None, "faltan paquetes de video", []
     k1 = _VIDEO_K1_TIPICO if k1 is None else float(k1)
     hueco = _VIDEO_HUECO_TIPICO if hueco is None else float(hueco)
     stream_url, duracion = _video_stream_url(youtube_url, _VIDEO_FORMATO_LIVIANO,
                                              con_duracion=True)
     if not stream_url:
-        return None
+        return None, "no se pudo abrir el video", []
     centro = k1 + hueco
     desde, hasta = centro - margen, centro + margen
     cortes = _video_cortes_escena(stream_url, desde, hasta, imageio_ffmpeg.get_ffmpeg_exe())
     if not cortes:
-        return None                      # sin corte no se inventa nada: queda para calibrar a mano
+        return None, "ningun corte en la ventana", cortes
     fuerte = max(cortes, key=lambda c: c[1])[0]
     cercano = min(cortes, key=lambda c: abs(c[0] - centro))[0]
     if abs(fuerte - cercano) > _VIDEO_CORTE_DESACUERDO:
-        return None                      # el corte mas marcado no es el del entretiempo
+        return None, "el corte mas marcado no es el del entretiempo", cortes
     segundo = fuerte + _VIDEO_CORTE_AJUSTE
     if not (desde <= segundo <= hasta):
-        return None
+        return None, "el corte quedo fuera de la ventana", cortes
     if duracion and duracion - segundo < _VIDEO_2T_MINIMO:
-        return None                      # despues del corte no entra un 2do tiempo
-    return {"kickoff1": round(k1, 1), "kickoff2": round(segundo, 1), "fuente": "corte"}
+        return None, "despues del corte no entra un 2do tiempo", cortes
+    return ({"kickoff1": round(k1, 1), "kickoff2": round(segundo, 1), "fuente": "corte"},
+            "", cortes)
+
+
+def detectar_kickoffs_corte(youtube_url, k1=None, hueco=None, margen=_VIDEO_CORTE_MARGEN):
+    """kickoff1/kickoff2 buscando el corte del entretiempo dentro de una
+    ventana angosta alrededor del hueco tipico. None si ahi no hay ningun corte
+    claro -- nunca inventa un valor."""
+    return _detectar_corte(youtube_url, k1, hueco, margen)[0]
 
 
 def detectar_kickoffs_auto(youtube_url, periodos=None, offset=0.0,

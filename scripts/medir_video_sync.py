@@ -47,6 +47,17 @@ bien, se engancha al scraper y las fechas que faltan se calibran solas.
 
 Tarda entre 20 y 40 segundos por fecha (baja y mira ~5 minutos de video en la
 calidad mas baja). Un numero lo limita: "--cortes 5".
+
+Modo "--pendientes": que haria con las fechas que TODAVIA no estan calibradas
+---------------------------------------------------------------------------
+Corre el mismo detector del corte sobre las fechas que faltan y muestra que
+guardaria en cada una -- SIN escribir nada. Sirve para saber de antemano
+cuantas se van a resolver solas y cuantas van a quedar a mano, en vez de
+enterarse despues de que el scraper ya escribio.
+
+    python scripts\\medir_video_sync.py --pendientes
+
+Mismo tiempo por fecha que --cortes, y tambien se puede limitar con un numero.
 """
 import getpass
 import json
@@ -187,10 +198,80 @@ def medir_cortes(token, limite=0):
     return 0
 
 
+def medir_pendientes(token, efforts, limite=0):
+    """Corre la via del corte sobre las fechas que faltan calibrar y muestra
+    que guardaria en cada una. No escribe nada."""
+    if not st.VIDEO_SYNC_DISPONIBLE:
+        print("[ERROR] Faltan yt-dlp / imageio-ffmpeg (pip install yt-dlp imageio-ffmpeg).")
+        return 1
+    try:
+        sync = st._tigre_fb_get("gps/videoSync", token) or {}
+    except Exception as e:
+        print("[ERROR] No se pudo leer gps/videoSync: %s" % e)
+        return 1
+    tipicos = st._video_tipicos(token)
+
+    pendientes = []
+    for cat in sorted(efforts):
+        for fecha_key in sorted(efforts[cat] or {}, key=lambda f: int(f.lstrip("F"))):
+            if ((sync.get(cat) or {}).get(fecha_key) or {}).get("kickoff1") is not None:
+                continue
+            p1, _ = st._video_periodos_1y2((efforts[cat][fecha_key] or {}).get("periodos"))
+            if not p1:
+                continue
+            pendientes.append((cat, fecha_key))
+    if not pendientes:
+        print("No queda ninguna fecha sin calibrar.")
+        return 0
+
+    print("Fechas sin calibrar: %d (esto tarda entre 20 y 40 segundos cada una)\n"
+          % len(pendientes))
+    print("%-5s %-5s %8s %10s %8s %5s  %s" %
+          ("CAT", "FECHA", "1T", "2T", "HUECO", "CAND", "QUE HARIA"))
+    print("-" * 100)
+
+    calibraria, a_mano, sin_link = 0, 0, 0
+    for i, (cat, fecha_key) in enumerate(pendientes):
+        if limite and i >= limite:
+            break
+        try:
+            link = st._tigre_fb_get("stats/links/%s/%s/par" % (cat, fecha_key.lstrip("F")), token)
+        except Exception:
+            link = None
+        if not link:
+            sin_link += 1
+            continue
+        k1_tip, hueco_tip = tipicos(cat)
+        r, motivo, cortes = st._detectar_corte(link, k1_tip, hueco_tip)
+        if r:
+            calibraria += 1
+            print("%-5s %-5s %8.1f %10.1f %8.0f %5d  CALIBRARIA SOLA" %
+                  (cat, fecha_key, r["kickoff1"], r["kickoff2"],
+                   r["kickoff2"] - r["kickoff1"], len(cortes)))
+        else:
+            a_mano += 1
+            print("%-5s %-5s %8s %10s %8s %5d  queda a mano (%s)" %
+                  (cat, fecha_key, "-", "-", "-", len(cortes), motivo))
+
+    print("-" * 100)
+    print("\nSe calibrarian solas: %d" % calibraria)
+    print("Quedan para el boton de dos clics: %d" % a_mano)
+    if sin_link:
+        print("Sin link de video cargado: %d" % sin_link)
+    if calibraria:
+        print("\n=> Al mergear a main, esa(s) %d fecha(s) se resuelven solas en la "
+              "proxima corrida de la PC." % calibraria)
+    else:
+        print("\n=> Esta via no resuelve ninguna de las que faltan: esos videos "
+              "estan editados de otra forma.")
+    return 0
+
+
 def main():
     args = sys.argv[1:]
     rapido = "--rapido" in args           # solo cobertura, sin consultar YouTube
     cortes = "--cortes" in args           # probar el detector del corte del entretiempo
+    cortes = cortes or "--pendientes" in args   # idem, sobre las fechas que faltan
     limite = next((int(a) for a in args if a.isdigit()), 0)
 
     if not st.VIDEO_SYNC_DISPONIBLE and not (rapido or cortes):
@@ -234,6 +315,8 @@ def main():
 
     if "--cortes" in args:
         return medir_cortes(token, limite)
+    if "--pendientes" in args:
+        return medir_pendientes(token, efforts, limite)
 
     if rapido:
         print("%-5s %-5s %10s %10s %12s %12s %9s  %s" %
