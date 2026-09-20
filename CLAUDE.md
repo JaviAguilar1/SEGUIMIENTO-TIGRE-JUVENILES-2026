@@ -1229,15 +1229,21 @@ Verificado en la app real (sin login, y por consola) que nada quedó roto:
 `buildPlantelModule`/`players` ya no existen.
 
 **Pendiente / a futuro:**
-- **Esfuerzos en video — visitante a mano:** local se calibra solo (hora real
-  del stream si fue transmisión en vivo, y si no cartel VEO/LPF); visitante
-  (archivo subido, sin cartel) sigue con el formulario manual del modo VIDEO,
-  ahora de un solo dato (el 1T). Si algún día el volumen lo justifica, el
-  siguiente escalón sería leer el cartel con visión de Claude sobre unos pocos
-  cuadros, para los carteles que Tesseract no lee. El archivo de creds de la PC YA existe, así que video sync +
-  citaciones provisionales corren solos cada 4hs (verificado 2026-09-19). El
-  video sync deja de reintentar una fecha tras 3 fallos con el mismo link
-  (`gps/videoSyncFallos`).
+- **Esfuerzos en video — lo que falta calibrar:** 17 de 55 hechas al 2026-09-20.
+  Las que no puede leer el detector se marcan a mano con el botón de dos clics
+  (1T y 2T, ver arriba) — la vía por hora real no aplica (0 videos en vivo) y a
+  todos les recortan el entretiempo. Si el volumen lo justifica, el siguiente
+  escalón sería leer el cartel con visión de Claude sobre unos pocos cuadros,
+  para los carteles que Tesseract no lee; para decidirlo,
+  `medir_video_sync.py --rapido` informa cuántas de las que faltan ya fueron
+  dadas por perdidas por el detector (3 intentos) y cuántas ni se intentaron.
+  El archivo de creds de la PC YA existe, así que video sync + citaciones
+  provisionales corren solos cada 4hs (verificado 2026-09-19). El video sync
+  deja de reintentar una fecha tras 3 fallos con el mismo link
+  (`gps/videoSyncFallos`); ese "se rindió" se reabre al sumar una vía nueva
+  (`_VIDEO_VIA_ACTUAL`), **pero solo si la vía nueva puede aportar algo** — si
+  ya se vio que los videos de la corrida no son transmisiones en vivo, no se
+  repite el barrido de OCR que ya falló (medido: 8 reintentos en vez de 58).
 - **Auditoría de reglas de Firebase** (sin acceso a la consola): confirmar que
   `.read`/`.write` de `users`/`stats`/`gps`/`temporadaActiva`/
   `temporadas_cerradas`/`roles_taken` estén condicionados al rol, no solo a

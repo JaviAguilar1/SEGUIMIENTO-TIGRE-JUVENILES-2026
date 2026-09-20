@@ -97,6 +97,15 @@ def main():
               ("CAT", "FECHA", "VIDEO", "GUARDADO", "MEDIDO", "DIF", "OBS"))
     print("-" * 86)
 
+    # Registro del detector automatico: cuantas veces intento cada fecha sin
+    # poder leerla. Es lo que dice si a las que faltan las puede resolver el
+    # OCR o si ya se rindio con ellas (3 intentos con el mismo link).
+    try:
+        fallos = st._tigre_fb_get("gps/videoSyncFallos", token) or {}
+    except Exception:
+        fallos = {}
+    rendidas = []
+
     errores, en_vivo, subidos, sin_link, cortados, mirados = [], 0, 0, 0, 0, 0
     calibradas, sin_calibrar = 0, []
     huecos, k1s = [], []      # para el chequeo de video continuo vs recortado
@@ -123,6 +132,9 @@ def main():
             guardado = (sync or {}).get("kickoff1")
             if guardado is None:
                 sin_calibrar.append("%s %s" % (cat, fecha_key))
+                intentos = ((fallos.get(cat) or {}).get(fecha_key) or {}).get("intentos", 0)
+                if intentos >= 3:
+                    rendidas.append("%s %s" % (cat, fecha_key))
             else:
                 calibradas += 1
             gtxt = "-" if guardado is None else "%.1f" % float(guardado)
@@ -185,6 +197,13 @@ def main():
           (calibradas, mirados, len(sin_calibrar)))
     if sin_calibrar:
         print("Sin calibrar: %s" % ", ".join(sin_calibrar))
+    if sin_calibrar:
+        nunca = len(sin_calibrar) - len(rendidas)
+        print("De esas, el detector automatico ya se rindio con %d (3 intentos sin poder "
+              "leer el cartel) y todavia no llego a %d." % (len(rendidas), nunca))
+        if rendidas and len(rendidas) == len(sin_calibrar):
+            print("=> El OCR no puede con ninguna de las que faltan: son todas a mano "
+                  "(o haria falta leer el cartel con vision de Claude).")
     if rapido:
         if k1s:
             k1s.sort()

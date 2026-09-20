@@ -1906,13 +1906,19 @@ def sincronizar_video_kickoffs(email, password, catapult_efforts):
             # Un fallo viejo solo cuenta si se intento con las MISMAS vias que
             # hay hoy: al sumar una via nueva (ver _VIDEO_VIA_ACTUAL) las
             # fechas que nunca se pudieron leer se reintentan una vez mas.
+            # PERO ese reintento solo vale la pena si la via nueva puede
+            # aportar algo: si ya se vio que los videos de esta corrida no son
+            # transmisiones en vivo, reintentar es repetir el mismo barrido de
+            # OCR que ya fallo 3 veces (con estos videos, horas de PC al pedo).
             prev = (fallos.get(cat) or {}).get(fecha_key) or {}
-            mismo_intento = prev.get("link") == link and prev.get("via") == _VIDEO_VIA_ACTUAL
+            mismo_link = prev.get("link") == link
+            mismo_intento = mismo_link and (prev.get("via") == _VIDEO_VIA_ACTUAL
+                                            or not _video_vale_la_pena_metadata())
             if mismo_intento and prev.get("intentos", 0) >= MAX_INTENTOS:
                 continue
             resultado = detectar_kickoffs_auto(link, (fechas.get(fecha_key) or {}).get("periodos"), offset())
             if not _video_kickoffs_ok(resultado):
-                n = prev.get("intentos", 0) + 1 if mismo_intento else 1
+                n = prev.get("intentos", 0) + 1 if mismo_link else 1
                 try:
                     _tigre_fb_put(f"gps/videoSyncFallos/{cat}/{fecha_key}",
                                   {"intentos": n, "link": link, "via": _VIDEO_VIA_ACTUAL}, token())
