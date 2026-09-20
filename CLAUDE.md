@@ -74,7 +74,13 @@ solo donde el club usó los chalecos GPS; si una categoría no los usa, queda
 vacía y su pestaña de video no aparece (no rompe nada). La calibración de video
 (`sincronizar_video_kickoffs`) y el filtro de la app son genéricos, se extienden
 solos. La 1ª corrida de la PC con las cat nuevas es pesada (backfill de todas
-sus fechas).
+sus fechas). **Confirmado vía OpenField (2026-09-20, sesión del usuario en el
+navegador): las 6 juveniles usan chalecos** — ~100 actividades por categoría,
+con partidos "F## <cat> vs Rival" de 14-15 jugadores (7/8/9 incluidas). O sea
+que la nota vieja "chalecos solo en 4/5/6" quedó desactualizada; todas van a
+poblar en el backfill. El parser (`_catapult_actividades_partido`) mapea por día
+real contra el fixture, no por el nombre, así que las variantes de nombre no
+importan.
 
 **Citaciones provisionales (2026-09-19).** Las citaciones (titulares/suplentes
 por fecha) salen del PDF de la planilla oficial (`parseCitacionPdf` en la app
