@@ -2846,9 +2846,11 @@ def main():
         # fetch_catapult_efforts). Pipeline aparte de catapult_gps de
         # arriba, a proposito: no se toca lo que ya funciona en produccion.
         # Empezo siendo solo 4TA (piloto, Javi 2026-09-05); sumadas 5TA y
-        # 6TA (Javi, 2026-09-18) para poder sincronizar tambien el video de
-        # esas categorias -- sumar mas es agregar el nombre a esta lista.
-        CATAPULT_EFFORTS_CATS = ["4TA", "5TA", "6TA"]
+        # 6TA (Javi, 2026-09-18); extendido a 7MA/8VA/9NA (Javi, 2026-09-20)
+        # -- todas las juveniles. Reserva queda afuera a pedido. Sumar mas es
+        # agregar el nombre a esta lista; trae datos solo si el club uso los
+        # chalecos GPS en esa categoria (si no, queda vacia, no rompe nada).
+        CATAPULT_EFFORTS_CATS = ["4TA", "5TA", "6TA", "7MA", "8VA", "9NA"]
         try:
             efforts = fetch_catapult_efforts(
                 usuario_catapult, password_catapult, CATAPULT_EFFORTS_CATS,

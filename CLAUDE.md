@@ -68,7 +68,13 @@ los esfuerzos se recortan a las ventanas "Primer/Segundo tiempo": en el scraper
 seguridad para datos viejos) y con una limpieza única del `tablas.json`
 (14894→13335 esfuerzos, se sacaron 1559 en 41 fechas). Método de validación:
 cruzar el `start` de cada esfuerzo contra `periodos`. `catapult_efforts` solo lo
-usa la función de video; 7MA-9NA no tienen GPS (chalecos solo en 4/5/6).
+usa la función de video. **Extendido a todas las juveniles (2026-09-20):**
+`CATAPULT_EFFORTS_CATS = ["4TA".."9NA"]` (Reserva afuera a pedido) — trae datos
+solo donde el club usó los chalecos GPS; si una categoría no los usa, queda
+vacía y su pestaña de video no aparece (no rompe nada). La calibración de video
+(`sincronizar_video_kickoffs`) y el filtro de la app son genéricos, se extienden
+solos. La 1ª corrida de la PC con las cat nuevas es pesada (backfill de todas
+sus fechas).
 
 **Citaciones provisionales (2026-09-19).** Las citaciones (titulares/suplentes
 por fecha) salen del PDF de la planilla oficial (`parseCitacionPdf` en la app
