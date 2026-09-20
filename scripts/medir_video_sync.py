@@ -89,12 +89,17 @@ def main():
         print("[ERROR] No se pudo entrar a Firebase: %s" % e)
         return 1
 
-    print("%-5s %-5s %-10s %10s %10s %8s  %s" %
-          ("CAT", "FECHA", "VIDEO", "GUARDADO", "MEDIDO", "DIF", "OBS"))
-    print("-" * 78)
+    if rapido:
+        print("%-5s %-5s %10s %10s %12s %12s %9s  %s" %
+              ("CAT", "FECHA", "1T", "2T", "HUECO VID", "HUECO CATA", "DIF", "OBS"))
+    else:
+        print("%-5s %-5s %-10s %10s %10s %8s  %s" %
+              ("CAT", "FECHA", "VIDEO", "GUARDADO", "MEDIDO", "DIF", "OBS"))
+    print("-" * 86)
 
     errores, en_vivo, subidos, sin_link, cortados, mirados = [], 0, 0, 0, 0, 0
     calibradas, sin_calibrar = 0, []
+    huecos, k1s = [], []      # para el chequeo de video continuo vs recortado
     for cat in sorted(efforts):
         for fecha_key in sorted(efforts[cat], key=lambda f: int(f.lstrip("F"))):
             if limite and mirados >= limite:
@@ -122,9 +127,26 @@ def main():
                 calibradas += 1
             gtxt = "-" if guardado is None else "%.1f" % float(guardado)
             if rapido:
-                print("%-5s %-5s %-10s %10s %10s %8s  %s" %
-                      (cat, fecha_key, "-", gtxt, "-", "-",
-                       "calibrada" if guardado is not None else "SIN CALIBRAR"))
+                # Con las fechas ya calibradas se contesta la pregunta clave:
+                # el hueco entre el arranque del 1T y el del 2T DENTRO DEL
+                # VIDEO, comparado con el hueco real que da Catapult. Si
+                # coinciden, el video es continuo y el 2T se puede calcular
+                # solo; si el del video es mas chico, al video le recortaron
+                # el entretiempo y ese calculo pondria el 2T corrido.
+                k2 = (sync or {}).get("kickoff2")
+                if guardado is None or k2 is None:
+                    print("%-5s %-5s %10s %10s %12s %12s %9s  %s" %
+                          (cat, fecha_key, gtxt, "-", "-", "-", "-",
+                           "SIN CALIBRAR" if guardado is None else "sin 2T guardado"))
+                    continue
+                hueco_video = float(k2) - float(guardado)
+                hueco_real = p2["start"] - p1["start"]
+                dif = hueco_video - hueco_real
+                huecos.append(dif)
+                k1s.append(float(guardado))
+                print("%-5s %-5s %10.1f %10.1f %12.0f %12.0f %+9.0f  %s" %
+                      (cat, fecha_key, float(guardado), float(k2), hueco_video, hueco_real, dif,
+                       "continuo" if abs(dif) <= 30 else "ENTRETIEMPO RECORTADO"))
                 continue
             meta = st._video_metadata_yt(link)
             if not meta:
@@ -164,6 +186,24 @@ def main():
     if sin_calibrar:
         print("Sin calibrar: %s" % ", ".join(sin_calibrar))
     if rapido:
+        if k1s:
+            k1s.sort()
+            print("Arranque del 1T en el video: entre %.0fs y %.0fs (mediana %.0fs)" %
+                  (k1s[0], k1s[-1], k1s[len(k1s) // 2]))
+        if huecos:
+            continuos = sum(1 for d in huecos if abs(d) <= 30)
+            huecos.sort()
+            print("Hueco entre tiempos: coincide con Catapult en %d de %d fechas "
+                  "(diferencia entre %+.0fs y %+.0fs)" %
+                  (continuos, len(huecos), huecos[0], huecos[-1]))
+            if continuos == len(huecos):
+                print("=> Los videos son continuos: el 2T se puede calcular solo a partir del 1T.")
+            elif continuos == 0:
+                print("=> A los videos les recortan el entretiempo: el 2T NO se puede calcular "
+                      "a partir del 1T, hay que marcarlo a mano.")
+            else:
+                print("=> Mezcla: algunos videos son continuos y a otros les recortan el "
+                      "entretiempo. El 2T calculado solo sirve como sugerencia a confirmar.")
         return 0
     print("Videos mirados: %d   |   en vivo: %d   |   subidos como archivo: %d   |   "
           "sin link: %d" % (mirados, en_vivo, subidos, sin_link))
