@@ -9031,12 +9031,16 @@ function abrirPerfilJugador(cat, nombre){
   //   mismo número que "Mi carga" en Confiabilidad).
   // - Tarjetas: COMET vs. statfutbol (la tabla oficial LPF, tampoco tiene
   //   amistosos) en vez de COMET vs. futdetail.
-  const convocatorias = vecesTitular+vecesBanco;
-  const minutosFinal = Math.max(minCometSum, parseInt(s.minutos_jugados)||0);
-  const geEntry = golesEfectivos(cat).find(g=>sonMismoJugador(g.name));
-  const golesFinal = geEntry ? geEntry.goals : golCometSum;
   const sfJ = ((TABLA_DATA&&TABLA_DATA.statfutbol_jugadores&&TABLA_DATA.statfutbol_jugadores[cat])||[])
     .find(j=>sonMismoJugador(j.nombre));
+  // Partidos y minutos: el mayor entre lo que dan las citaciones/COMET y el
+  // total de statfutbol (PJ/min), que viene completo y público. Clave en
+  // 7MA-9NA (sin COMET ni futdetail): si a las citaciones les falta alguna
+  // fecha, igual se muestra el número real (mismo criterio que goles/tarjetas).
+  const convocatorias = Math.max(vecesTitular+vecesBanco, sfJ?(parseInt(sfJ.pj)||0):0);
+  const minutosFinal = Math.max(minCometSum, parseInt(s.minutos_jugados)||0, sfJ?(parseInt(sfJ.min)||0):0);
+  const geEntry = golesEfectivos(cat).find(g=>sonMismoJugador(g.name));
+  const golesFinal = geEntry ? geEntry.goals : golCometSum;
   const amarillasFinal = Math.max(amCometSum, sfJ?(parseInt(sfJ.am)||0):0);
   const rojasFinal = Math.max(rojCometSum, sfJ?(parseInt(sfJ.roja)||0):0);
   // Reserva y 7MA-9NA (sin COMET): los goles de cada fecha (carga manual/

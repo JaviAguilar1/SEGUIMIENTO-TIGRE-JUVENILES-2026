@@ -110,6 +110,13 @@ desde la fuente, la carga manual siempre gana):
   oficial vs citación provisional de statfutbol —nombre + apellido, sin segundos
   nombres— vs plantel completo). Antes exigía nombre idéntico y contaba de menos
   (caso Inostroza, 8VA: mostraba 16 en vez de todas sus fechas).
+- **Partidos y minutos desde statfutbol (2026-09-20):** además del match por
+  subconjunto, la ficha toma `max(citaciones/COMET, statfutbol)` para partidos y
+  minutos. `fetch_statfutbol_plantel` ahora captura **PJ (celda 1)** y **minutos
+  (celda 2)** —antes solo gol/am/roja— y los guarda en `statfutbol_jugadores`.
+  Clave en 7MA-9NA (sin COMET ni futdetail): aunque a las citaciones les falte
+  una fecha, el total real sale de statfutbol (completo y público). Mismo patrón
+  que goles/tarjetas. Caso Inostroza 8VA: 22 PJ / 1582 min (antes 16 / 0).
 
 **Firebase — nodos raíz reales** (grep `db.ref` en `index.html`): `users`,
 `stats` (+ subnodos: `links`, `plantel`, `jugadores`, `aliasJugadores`,

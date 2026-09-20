@@ -1993,6 +1993,11 @@ def fetch_statfutbol_plantel(catnum, team_id):
     html = fetch_post(f"{STATFUTBOL_BASE}afaplanteles{catnum}2026Resolucion.php", {"player": team_id})
     filas = re.findall(r'<tr class="trConsultParaJugadores">(.*?)</tr>', html, re.DOTALL)
     out = []
+    def _int(c):
+        try:
+            return int(re.sub(r"[^0-9]", "", re.sub(r"<[^>]+>", "", c)) or 0)
+        except Exception:
+            return 0
     for fila in filas:
         nombre_m = re.search(r'jugador-pc">([^<]*)</span>', fila)
         celdas = re.findall(r"<td[^>]*>(.*?)</td>", fila, re.DOTALL)
@@ -2005,7 +2010,10 @@ def fetch_statfutbol_plantel(catnum, team_id):
             roja = int(re.sub(r"<[^>]+>", "", celdas[5]).strip())
         except (ValueError, IndexError):
             continue
-        out.append({"nombre": nombre_m.group(1).strip(), "gol": gol, "am": am, "roja": roja})
+        # PJ (celda 1) y minutos (celda 2): fuente publica de "partidos
+        # jugados"/minutos para 7MA-9NA (sin COMET). Parseo tolerante -> 0.
+        out.append({"nombre": nombre_m.group(1).strip(), "pj": _int(celdas[1]), "min": _int(celdas[2]),
+                    "gol": gol, "am": am, "roja": roja})
     return out
 
 
