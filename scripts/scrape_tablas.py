@@ -1570,6 +1570,20 @@ def detectar_kickoffs_lpf(youtube_url):
 _VIDEO_TOLERANCIA_FIN = 600   # seg que puede faltarle al video al final (cortaron el stream antes de que el staff cerrara el periodo)
 _VIDEO_PREVIA_MAX = 3600      # seg de previa del stream antes del saque inicial que se consideran creibles
 _VIDEO_VIA_ACTUAL = "metadata+ocr"  # cambiar si se suma una via nueva -> reintenta los fallos viejos una vez
+_VIDEO_SONDEOS_MAX = 8        # cuantos videos se consultan buscando transmisiones en vivo antes de rendirse
+# Medido el 2026-09-20 sobre las 55 fechas con link: NINGUNA es transmision en
+# vivo (el club transmite, pero a YouTube sube el archivo despues, y ahi YouTube
+# borra la hora de grabacion). O sea que hoy esta via no entra nunca. Se deja
+# igual porque no cuesta casi nada y es la mas precisa el dia que suba un vivo,
+# pero se corta sola: si los primeros videos de la corrida no son en vivo, no se
+# pregunta por el resto.
+_video_vivos = {"vistos": 0, "encontrados": 0}
+
+
+def _video_vale_la_pena_metadata():
+    """False cuando ya se consultaron varios videos en esta corrida y ninguno
+    era transmision en vivo -- evita gastar una consulta por fecha al pedo."""
+    return _video_vivos["encontrados"] > 0 or _video_vivos["vistos"] < _VIDEO_SONDEOS_MAX
 
 
 def _video_periodos_1y2(periodos):
@@ -1598,9 +1612,13 @@ def _video_metadata_yt(youtube_url):
             info = ydl.extract_info(youtube_url, download=False)
     except Exception:
         return None
-    return {"live_status": info.get("live_status"),
+    meta = {"live_status": info.get("live_status"),
             "release_timestamp": info.get("release_timestamp"),
             "duration": info.get("duration")}
+    _video_vivos["vistos"] += 1
+    if meta["live_status"] in ("was_live", "is_live") and meta["release_timestamp"]:
+        _video_vivos["encontrados"] += 1
+    return meta
 
 
 def _video_stream_url(youtube_url):
@@ -1683,9 +1701,10 @@ def _video_metadata_offset(catapult_efforts, token, muestras=5):
     muestras suficientes, o si las muestras no se parecen entre si (ahi el
     dato no es confiable y es mejor no corregir nada)."""
     errores = []
+    sondeos = 0   # cada sondeo es una consulta a YouTube: hay que acotarlos
     for cat, fechas in (catapult_efforts or {}).items():
         for fecha_key, dia in fechas.items():
-            if len(errores) >= muestras:
+            if len(errores) >= muestras or sondeos >= _VIDEO_SONDEOS_MAX:
                 break
             p1, _ = _video_periodos_1y2((dia or {}).get("periodos"))
             if not p1:
@@ -1703,6 +1722,7 @@ def _video_metadata_offset(catapult_efforts, token, muestras=5):
             if not link:
                 continue
             meta = _video_metadata_yt(link)
+            sondeos += 1
             if not meta or meta.get("live_status") not in ("was_live", "is_live") or not meta.get("release_timestamp"):
                 continue
             errores.append((p1["start"] - meta["release_timestamp"]) - float(sync["kickoff1"]))
@@ -1730,7 +1750,7 @@ def detectar_kickoffs_auto(youtube_url, periodos=None, offset=0.0):
     de visitante filmados a mano) -> calibrar a mano."""
     if not VIDEO_SYNC_DISPONIBLE:
         return None
-    if periodos:
+    if periodos and _video_vale_la_pena_metadata():
         por_metadata = detectar_kickoffs_metadata(youtube_url, periodos, offset)
         if por_metadata:
             return por_metadata

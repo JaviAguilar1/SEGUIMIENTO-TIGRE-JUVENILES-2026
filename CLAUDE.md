@@ -94,10 +94,15 @@ que el OCR**: la app calcula `kickoff + (hora_esfuerzo − periodo.start)`, así
 si el staff marcó el período corrido en OpenField —o el que opera el reloj del
 cartel VEO lo arrancó tarde— el error entra y sale por el mismo lado y se
 cancela; el OCR, que calibra contra el cartel, se lo come entero.
-- **Solo aplica a videos que fueron vivo** (los de local, transmisión propia).
-  Un archivo subido después (export de Veo, filmación de celular de visitante)
-  no tiene esa hora: YouTube se la borra al subirlo. Esos siguen por cartel/OCR
-  o a mano. El scraper distingue los dos casos solo (`live_status`).
+- **MEDIDO EL 2026-09-20 — hoy esta vía no entra nunca:** de las 55 fechas con
+  link, **0 son transmisión en vivo** (`medir_video_sync.py` corrido en la PC).
+  El club transmite los partidos de local, pero a YouTube el video llega como
+  **archivo subido después**, y ahí YouTube borra la hora de grabación. O sea
+  que la calibración sigue saliendo del OCR del cartel o a mano. La vía se deja
+  igual porque no cuesta nada y es la más precisa el día que se suba un vivo,
+  pero **se corta sola**: si los primeros `_VIDEO_SONDEOS_MAX` (8) videos de la
+  corrida no son en vivo, no se pregunta por el resto (sin eso, gastaba ~2
+  minutos por corrida preguntando algo que ya sabemos que da que no).
 - **Tres validaciones antes de guardar**, porque una calibración mal escrita es
   peor que ninguna: (1) el stream tiene que haber arrancado ANTES del saque
   inicial y no más de una hora antes; (2) la duración del video tiene que
@@ -117,9 +122,11 @@ cancela; el OCR, que calibra contra el cartel, se lo come entero.
   pudieron leer se reintentan una vez más en vez de quedar descartadas para
   siempre por los 3 fallos viejos.
 - **`scripts/medir_video_sync.py`** (nuevo, solo lee, no escribe nada): corre en
-  la PC con `FIREBASE_EMAIL`/`FIREBASE_PASSWORD` y dice cuántas fechas son
+  la PC (pide las credenciales de Firebase por teclado si no están en el
+  entorno) y dice cuántas fechas están calibradas y cuántas faltan, cuántas son
   transmisión en vivo vs archivo subido, y cuánto se equivoca esta vía contra
-  cada fecha ya calibrada. Es la forma de verificar el desfasaje real antes de
+  cada fecha ya calibrada. Con `--rapido` saltea YouTube y solo informa la
+  cobertura (tarda segundos). Es la forma de verificar el desfasaje real antes de
   confiar del todo (yo no pude correrlo: el entorno donde se programó esto no
   tiene acceso ni a YouTube ni a Firebase).
 - **En la app**, el formulario manual ahora pide solo el segundo del 1T: el del

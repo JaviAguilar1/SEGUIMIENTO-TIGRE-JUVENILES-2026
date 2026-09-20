@@ -30,8 +30,9 @@ Como correrlo (en la PC del club, desde la carpeta del repo):
 (si FIREBASE_EMAIL/FIREBASE_PASSWORD no estan en el entorno, las pide por
 teclado; son las mismas que ya usa el scraper)
 
-Opcional: un primer argumento limita cuantas fechas mira (ej. "10" para una
-prueba rapida, que si no son ~2 segundos por fecha).
+Opcionales: un numero limita cuantas fechas mira (ej. "10"; si no, son ~2
+segundos por fecha), y "--rapido" saltea YouTube por completo y solo informa
+cuantas fechas estan calibradas y cuantas faltan (tarda segundos).
 """
 import getpass
 import json
@@ -45,9 +46,11 @@ RUTA_TABLAS = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "da
 
 
 def main():
-    limite = int(sys.argv[1]) if len(sys.argv) > 1 else 0
+    args = sys.argv[1:]
+    rapido = "--rapido" in args           # solo cobertura, sin consultar YouTube
+    limite = next((int(a) for a in args if a.isdigit()), 0)
 
-    if not st.VIDEO_SYNC_DISPONIBLE:
+    if not st.VIDEO_SYNC_DISPONIBLE and not rapido:
         print("[ERROR] Falta yt-dlp (pip install yt-dlp) -- sin eso no se puede leer la "
               "hora de arranque de los videos.")
         return 1
@@ -91,6 +94,7 @@ def main():
     print("-" * 78)
 
     errores, en_vivo, subidos, sin_link, cortados, mirados = [], 0, 0, 0, 0, 0
+    calibradas, sin_calibrar = 0, []
     for cat in sorted(efforts):
         for fecha_key in sorted(efforts[cat], key=lambda f: int(f.lstrip("F"))):
             if limite and mirados >= limite:
@@ -107,16 +111,31 @@ def main():
                 sin_link += 1
                 continue
             mirados += 1
+            try:
+                sync = st._tigre_fb_get("gps/videoSync/%s/%s" % (cat, fecha_key), token)
+            except Exception:
+                sync = None
+            guardado = (sync or {}).get("kickoff1")
+            if guardado is None:
+                sin_calibrar.append("%s %s" % (cat, fecha_key))
+            else:
+                calibradas += 1
+            gtxt = "-" if guardado is None else "%.1f" % float(guardado)
+            if rapido:
+                print("%-5s %-5s %-10s %10s %10s %8s  %s" %
+                      (cat, fecha_key, "-", gtxt, "-", "-",
+                       "calibrada" if guardado is not None else "SIN CALIBRAR"))
+                continue
             meta = st._video_metadata_yt(link)
             if not meta:
                 print("%-5s %-5s %-10s %10s %10s %8s  %s" %
-                      (cat, fecha_key, "?", "-", "-", "-", "no se pudo leer el video"))
+                      (cat, fecha_key, "?", gtxt, "-", "-", "no se pudo leer el video"))
                 continue
             es_vivo = meta.get("live_status") in ("was_live", "is_live") and meta.get("release_timestamp")
             if not es_vivo:
                 subidos += 1
                 print("%-5s %-5s %-10s %10s %10s %8s  %s" %
-                      (cat, fecha_key, meta.get("live_status") or "?", "-", "-", "-",
+                      (cat, fecha_key, meta.get("live_status") or "?", gtxt, "-", "-",
                        "archivo subido: sin hora de grabacion"))
                 continue
             en_vivo += 1
@@ -129,11 +148,6 @@ def main():
             if duracion and k2 + (p2["end"] - p2["start"]) > duracion + st._VIDEO_TOLERANCIA_FIN:
                 cortados += 1
                 obs.append("el video no cubre el 2T (pausado/cortado)")
-            try:
-                sync = st._tigre_fb_get("gps/videoSync/%s/%s" % (cat, fecha_key), token)
-            except Exception:
-                sync = None
-            guardado = (sync or {}).get("kickoff1")
             if guardado is None:
                 obs.append("sin calibrar todavia (esta es la que ganariamos)")
                 print("%-5s %-5s %-10s %10s %10.1f %8s  %s" %
@@ -145,6 +159,12 @@ def main():
                   (cat, fecha_key, "en vivo", float(guardado), k1, dif, "; ".join(obs)))
 
     print("-" * 78)
+    print("Calibradas hoy: %d de %d   |   faltan calibrar: %d" %
+          (calibradas, mirados, len(sin_calibrar)))
+    if sin_calibrar:
+        print("Sin calibrar: %s" % ", ".join(sin_calibrar))
+    if rapido:
+        return 0
     print("Videos mirados: %d   |   en vivo: %d   |   subidos como archivo: %d   |   "
           "sin link: %d" % (mirados, en_vivo, subidos, sin_link))
     if cortados:
