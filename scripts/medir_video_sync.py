@@ -25,13 +25,15 @@ Este script contesta tres preguntas antes de confiar en esa cuenta:
 
 Como correrlo (en la PC del club, desde la carpeta del repo):
 
-    set FIREBASE_EMAIL=...
-    set FIREBASE_PASSWORD=...
     python scripts\\medir_video_sync.py
+
+(si FIREBASE_EMAIL/FIREBASE_PASSWORD no estan en el entorno, las pide por
+teclado; son las mismas que ya usa el scraper)
 
 Opcional: un primer argumento limita cuantas fechas mira (ej. "10" para una
 prueba rapida, que si no son ~2 segundos por fecha).
 """
+import getpass
 import json
 import os
 import sys
@@ -50,10 +52,22 @@ def main():
               "hora de arranque de los videos.")
         return 1
 
+    # Las credenciales salen de las mismas variables de entorno que usa el
+    # scraper; si no estan puestas (correr el script suelto, a mano), las pide
+    # por teclado en vez de fallar -- no se guardan en ningun lado.
     email = os.environ.get("FIREBASE_EMAIL")
     password = os.environ.get("FIREBASE_PASSWORD")
     if not (email and password):
-        print("[ERROR] Faltan FIREBASE_EMAIL / FIREBASE_PASSWORD.")
+        print("No estan FIREBASE_EMAIL / FIREBASE_PASSWORD en el entorno, asi que van a mano")
+        print("(es el mismo usuario de Firebase que usa el scraper; no se guarda nada).")
+        try:
+            email = email or input("Email de Firebase: ").strip()
+            password = password or getpass.getpass("Contrasena: ")
+        except (EOFError, KeyboardInterrupt):
+            print("\n[ERROR] Sin credenciales no se puede leer la calibracion que ya tenes.")
+            return 1
+    if not (email and password):
+        print("[ERROR] Faltan las credenciales de Firebase.")
         return 1
 
     try:
@@ -145,7 +159,9 @@ def main():
     print("Comparacion contra %d fecha(s) ya calibradas: "
           "min %+.1fs / mediana %+.1fs / max %+.1fs" % (len(errores), errores[0], mediana, errores[-1]))
     disperso = errores[-1] - errores[0]
-    if disperso <= 3:
+    # Ojo: mirar solo la dispersion no alcanza -- un desfasaje PAREJO de varios
+    # segundos tiene dispersion 0 y aun asi hay que corregirlo.
+    if disperso <= 3 and abs(mediana) <= 3:
         print("=> La hora real del stream coincide con lo ya calibrado. La via automatica "
               "es confiable (y mas precisa que el OCR).")
     elif disperso <= 10:
