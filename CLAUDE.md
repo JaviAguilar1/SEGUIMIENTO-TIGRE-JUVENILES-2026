@@ -125,6 +125,13 @@ cancela; el OCR, que calibra contra el cartel, se lo come entero.
 - **En la app**, el formulario manual ahora pide solo el segundo del 1T: el del
   2T lo completa solo con el hueco entre tiempos que da Catapult
   (`gpsVideoDerivar2T`), y se puede pisar a mano si ese video está editado.
+  Además no hace falta tipear el segundo: el botón "▶ BUSCARLO EN EL VIDEO"
+  (`gpsVideoCalibrarAbrir`) abre el reproductor de siempre con botones de
+  ±1s/±5s y un "📍 ACÁ ARRANCA EL 1T" que copia el momento exacto al
+  formulario (`gpsVideoMarcarKickoff`, vía `_ytPlayer.getCurrentTime()`).
+  `abrirVideoEmbebido` acepta ahora un 5º parámetro opcional con botones
+  propios para la barra del reproductor — los dos usos que ya existían no
+  cambian.
 
 **Citaciones provisionales (2026-09-19).** Las citaciones (titulares/suplentes
 por fecha) salen del PDF de la planilla oficial (`parseCitacionPdf` en la app
