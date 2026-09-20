@@ -8959,7 +8959,13 @@ function abrirPerfilJugador(cat, nombre){
   // plantel al cargar); si no, cae al mismo criterio de nombre "orden
   // independiente" que usa el resto de la app para cruzar fuentes distintas.
   const nombreNorm = normNombreOrdenIndependiente(nombre);
-  const esMismoJugador = p => (jugador?.id!=null && p.id===jugador.id) || normNombreOrdenIndependiente(p.nombre)===nombreNorm;
+  // Match por id (si la citación lo trae), por nombre idéntico, o por
+  // subconjunto de palabras (mismo criterio que sonMismoJugador usa para goles/
+  // tarjetas). El subconjunto hace falta en 7MA-9NA/Reserva: sin COMET no hay
+  // id, y el mismo jugador viene con nombres distintos según la fuente de cada
+  // fecha (planilla oficial vs citación provisional de statfutbol vs plantel),
+  // así que exigir nombre idéntico dejaba fechas afuera y contaba de menos.
+  const esMismoJugador = p => (jugador?.id!=null && p.id===jugador.id) || normNombreOrdenIndependiente(p.nombre)===nombreNorm || sonMismoJugador(p.nombre);
   const idJ = jugador?.id!=null ? jugador.id : null;
   const DURACION_PARTIDO = 90; // partidos de COMET son de 90' (confirmado con el reglamento del torneo)
   let vecesTitular=0, vecesBanco=0, vecesEntroDeBanco=0, vecesSalio=0;

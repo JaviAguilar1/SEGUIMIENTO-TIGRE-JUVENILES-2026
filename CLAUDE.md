@@ -102,6 +102,14 @@ desde la fuente, la carga manual siempre gana):
   `CONFIABILIDAD_CATS` (4/5/6) a `GENERAL_CATS` (4-9); Reserva mantiene su propia
   alerta de próximo rival. Un jugador que todavía no está en el plantel de
   futdetail no entra en la alerta (misma limitación conocida de goleadores).
+- **Partidos jugados en la ficha (2026-09-20):** el conteo de convocatorias/
+  titular y la lista "Partidos jugados" (`esMismoJugador` en `abrirPerfilJugador`)
+  matchea por id, por nombre idéntico O por **subconjunto de palabras**. El
+  subconjunto es clave en 7MA-9NA/Reserva: sin COMET no hay id, y el mismo
+  jugador viene con nombres distintos según la fuente de cada fecha (planilla
+  oficial vs citación provisional de statfutbol —nombre + apellido, sin segundos
+  nombres— vs plantel completo). Antes exigía nombre idéntico y contaba de menos
+  (caso Inostroza, 8VA: mostraba 16 en vez de todas sus fechas).
 
 **Firebase — nodos raíz reales** (grep `db.ref` en `index.html`): `users`,
 `stats` (+ subnodos: `links`, `plantel`, `jugadores`, `aliasJugadores`,
