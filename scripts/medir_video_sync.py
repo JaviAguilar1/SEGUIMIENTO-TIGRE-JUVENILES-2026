@@ -58,6 +58,20 @@ enterarse despues de que el scraper ya escribio.
     python scripts\\medir_video_sync.py --pendientes
 
 Mismo tiempo por fecha que --cortes, y tambien se puede limitar con un numero.
+
+Modo "--duraciones": que tipo de video es cada uno (editado o continuo)
+----------------------------------------------------------------------
+La duracion del video delata si le recortaron el entretiempo o no, sin mirar
+un solo cuadro: un video editado dura los dos tiempos (~92 min), uno continuo
+dura ademas todo el entretiempo (~110 min o mas). Importa porque en un video
+CONTINUO el arranque del 2do tiempo SI se puede calcular con la hora de
+Catapult (en los editados no, por eso se necesita el corte).
+
+    python scripts\\medir_video_sync.py --duraciones
+
+Son ~2 segundos por fecha (solo pregunta la duracion, no baja video). Mira
+tambien las fechas YA calibradas, que sirven de control: esas sabemos que son
+editadas, asi que el veredicto tiene que decir "editado" en ellas.
 """
 import getpass
 import json
@@ -301,11 +315,87 @@ def medir_pendientes(token, efforts, limite=0):
     return 0
 
 
+# Un segundo tiempo dura ~45 min: es la parte del video que no depende de como
+# lo hayan editado, asi que sirve de patron para las dos cuentas.
+_2T_APROX = 2700
+
+
+def medir_duraciones(token, efforts, limite=0):
+    """Compara la duracion de cada video contra lo que mediria si fuera
+    editado (dos tiempos pegados) o continuo (con el entretiempo adentro).
+    Solo pregunta la duracion a YouTube, no baja nada. No escribe nada."""
+    if not st.VIDEO_SYNC_DISPONIBLE:
+        print("[ERROR] Falta yt-dlp (pip install yt-dlp).")
+        return 1
+    try:
+        sync = _leer(token, "gps/videoSync") or {}
+    except Exception as e:
+        print("[ERROR] No se pudo leer gps/videoSync: %s" % e)
+        return 1
+    tipicos = st._video_tipicos(token)
+
+    print("%-5s %-5s %-10s %9s %10s %9s  %s" %
+          ("CAT", "FECHA", "ESTADO", "DURA", "SI EDITADO", "SI CONT.", "VEREDICTO"))
+    print("-" * 95)
+
+    conteo = {}
+    mirados, errores = 0, []
+    for cat in sorted(efforts):
+        for fecha_key in sorted(efforts[cat] or {}, key=lambda f: int(f.lstrip("F"))):
+            if limite and mirados >= limite:
+                break
+            p1, p2 = st._video_periodos_1y2((efforts[cat][fecha_key] or {}).get("periodos"))
+            if not p1:
+                continue
+            try:
+                link = _leer(token, "stats/links/%s/%s/par" % (cat, fecha_key.lstrip("F")))
+            except Exception as e:
+                errores.append("%s %s (%s)" % (cat, fecha_key, e))
+                continue
+            if not link:
+                continue
+            meta = st._video_metadata_yt(link)
+            dur = (meta or {}).get("duration")
+            calibrada = ((sync.get(cat) or {}).get(fecha_key) or {}).get("kickoff1") is not None
+            estado = "calibrada" if calibrada else "falta"
+            mirados += 1
+            if not dur:
+                print("%-5s %-5s %-10s %9s %10s %9s  no se pudo leer la duracion"
+                      % (cat, fecha_key, estado, "-", "-", "-"))
+                conteo["sin duracion"] = conteo.get("sin duracion", 0) + 1
+                continue
+            # Las dos unicas horas de Catapult en las que se puede confiar son
+            # los dos saques iniciales (los finales de tiempo se cierran tarde
+            # en OpenField). Con esas alcanza: la diferencia entre las dos
+            # cuentas es de mas de 10 minutos.
+            editado = tipicos(cat)[1] + _2T_APROX
+            continuo = (p2["start"] - p1["start"]) + _2T_APROX
+            veredicto = "CONTINUO" if abs(dur - continuo) < abs(dur - editado) else "editado"
+            if dur < editado - 900:
+                veredicto = "corto (?)"
+            conteo[veredicto] = conteo.get(veredicto, 0) + 1
+            print("%-5s %-5s %-10s %9d %10d %9d  %s"
+                  % (cat, fecha_key, estado, dur, editado, continuo, veredicto))
+
+    print("-" * 95)
+    print("\nVideos mirados: %d" % mirados)
+    for k in sorted(conteo):
+        print("  %-12s %d" % (k, conteo[k]))
+    if errores:
+        print("\n[AVISO] %d fecha(s) no se pudieron leer de Firebase: %s"
+              % (len(errores), ", ".join(errores[:5])))
+    print("\n=> Las 'calibrada' tienen que dar editado (ya sabemos que les recortan "
+          "el entretiempo). Si las que faltan dan CONTINUO, en esas el 2do tiempo "
+          "se puede calcular con la hora de Catapult y alcanza con marcar el 1T.")
+    return 0
+
+
 def main():
     args = sys.argv[1:]
     rapido = "--rapido" in args           # solo cobertura, sin consultar YouTube
     cortes = "--cortes" in args           # probar el detector del corte del entretiempo
     cortes = cortes or "--pendientes" in args   # idem, sobre las fechas que faltan
+    cortes = cortes or "--duraciones" in args   # editado vs continuo, solo por la duracion
     limite = next((int(a) for a in args if a.isdigit()), 0)
 
     if not st.VIDEO_SYNC_DISPONIBLE and not (rapido or cortes):
@@ -352,6 +442,8 @@ def main():
         return medir_cortes(token, limite)
     if "--pendientes" in args:
         return medir_pendientes(token, efforts, limite)
+    if "--duraciones" in args:
+        return medir_duraciones(token, efforts, limite)
 
     if rapido:
         print("%-5s %-5s %10s %10s %12s %12s %9s  %s" %
