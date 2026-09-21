@@ -292,6 +292,19 @@ desde la fuente, la carga manual siempre gana):
   una fecha, el total real sale de statfutbol (completo y público). Mismo patrón
   que goles/tarjetas. Caso Inostroza 8VA: 22 PJ / 1582 min (antes 16 / 0).
 
+**Minutos y partidos jugados de RESERVA (2026-09-21).** La ficha del jugador
+muestra `max(citaciones/COMET, futdetail, statfutbol)` para partidos y minutos,
+pero en Reserva los 92 jugadores (51 + 41 del S2) figuraban con **0**: había dos
+parsers casi idénticos para la misma tabla de statfutbol (uno por URL), y cuando
+el 2026-09-20 se le agregaron PJ y minutos al de juveniles, **el de Reserva quedó
+atrás**. Confirmado en la página real desde el celular del usuario (captura,
+2026-09-21): la tabla de Reserva tiene exactamente las mismas columnas
+(`JUGADOR · PJ · MIN · GOL · AM · EXP · OUT · IN`). Ahora hay **un solo**
+`parse_statfutbol_plantel(html)` que usan las dos páginas, así que no se pueden
+volver a desincronizar. No hubo que tocar nada en la app: ya leía
+`statfutbol_jugadores[cat]` igual para Reserva. Los minutos aparecen en la
+primera corrida de la PC.
+
 **Firebase — nodos raíz reales** (grep `db.ref` en `index.html`): `users`,
 `stats` (+ subnodos: `links`, `plantel`, `jugadores`, `aliasJugadores`,
 `aliasJugadoresComet`, `aliasJugadoresGps`, `recordatoriosOmitidos`,

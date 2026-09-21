@@ -2431,21 +2431,25 @@ def fetch_statfutbol_equipos(catnum):
     return [(v, n.strip()) for v, n in opts]
 
 
-def fetch_statfutbol_plantel(catnum, team_id):
-    """Plantel del equipo con acumulado de temporada por jugador (ya viene
-    calculado por statfutbol, no hay que sumar partido a partido)."""
-    html = fetch_post(f"{STATFUTBOL_BASE}afaplanteles{catnum}2026Resolucion.php", {"player": team_id})
-    filas = re.findall(r'<tr class="trConsultParaJugadores">(.*?)</tr>', html, re.DOTALL)
-    out = []
+def parse_statfutbol_plantel(html):
+    """Filas de la tabla de plantel de statfutbol (acumulado de temporada por
+    jugador, ya calculado por ellos). Columnas, confirmadas en la pagina real
+    de juveniles y de Reserva -- son las mismas:
+        [0]=nombre [1]=PJ [2]=MIN [3]=GOL [4]=AM [5]=EXP [6]=OUT [7]=IN [8]=boton
+
+    Este parser lo usan las DOS paginas (juveniles y Reserva, que solo cambian
+    de URL). Antes habia una copia para cada una y la de Reserva se quedo sin
+    leer PJ ni minutos cuando se agregaron a la otra -- de ahi que Reserva
+    mostrara 0 minutos en todos sus jugadores."""
     def _int(c):
         try:
             return int(re.sub(r"[^0-9]", "", re.sub(r"<[^>]+>", "", c)) or 0)
         except Exception:
             return 0
-    for fila in filas:
+    out = []
+    for fila in re.findall(r'<tr class="trConsultParaJugadores">(.*?)</tr>', html, re.DOTALL):
         nombre_m = re.search(r'jugador-pc">([^<]*)</span>', fila)
         celdas = re.findall(r"<td[^>]*>(.*?)</td>", fila, re.DOTALL)
-        # celdas: [0]=nombre, [1]=PJ, [2]=MIN, [3]=GOL, [4]=AM, [5]=EXP, [6]=OUT, [7]=IN, [8]=boton
         if not nombre_m or len(celdas) < 6:
             continue
         try:
@@ -2454,11 +2458,16 @@ def fetch_statfutbol_plantel(catnum, team_id):
             roja = int(re.sub(r"<[^>]+>", "", celdas[5]).strip())
         except (ValueError, IndexError):
             continue
-        # PJ (celda 1) y minutos (celda 2): fuente publica de "partidos
-        # jugados"/minutos para 7MA-9NA (sin COMET). Parseo tolerante -> 0.
-        out.append({"nombre": nombre_m.group(1).strip(), "pj": _int(celdas[1]), "min": _int(celdas[2]),
+        out.append({"nombre": nombre_m.group(1).strip(),
+                    "pj": _int(celdas[1]), "min": _int(celdas[2]),
                     "gol": gol, "am": am, "roja": roja})
     return out
+
+
+def fetch_statfutbol_plantel(catnum, team_id):
+    """Plantel de una juvenil (4TA-9NA)."""
+    return parse_statfutbol_plantel(
+        fetch_post(f"{STATFUTBOL_BASE}afaplanteles{catnum}2026Resolucion.php", {"player": team_id}))
 
 
 def fetch_statfutbol_sintesis_tarjetas(sintesis_url, id_partido, team_id_objetivo, equipos):
@@ -2860,25 +2869,11 @@ def fetch_statfutbol_reserva_equipos(planteles_base):
 
 
 def fetch_statfutbol_reserva_plantel(planteles_base, team_id):
-    """Plantel de Reserva de un equipo, acumulado de temporada por jugador
-    -- mismo formato/columnas que fetch_statfutbol_plantel (confirmado con
-    datos reales de Tigre, 2026-09-02), URL literal en vez de catnum."""
-    html = fetch_post(f"{STATFUTBOL_BASE}{planteles_base}Resolucion.php", {"player": team_id})
-    filas = re.findall(r'<tr class="trConsultParaJugadores">(.*?)</tr>', html, re.DOTALL)
-    out = []
-    for fila in filas:
-        nombre_m = re.search(r'jugador-pc">([^<]*)</span>', fila)
-        celdas = re.findall(r"<td[^>]*>(.*?)</td>", fila, re.DOTALL)
-        if not nombre_m or len(celdas) < 6:
-            continue
-        try:
-            gol = int(re.sub(r"<[^>]+>", "", celdas[3]).strip())
-            am = int(re.sub(r"<[^>]+>", "", celdas[4]).strip())
-            roja = int(re.sub(r"<[^>]+>", "", celdas[5]).strip())
-        except (ValueError, IndexError):
-            continue
-        out.append({"nombre": nombre_m.group(1).strip(), "gol": gol, "am": am, "roja": roja})
-    return out
+    """Plantel de Reserva. Misma tabla que las juveniles (confirmado en la
+    pagina real el 2026-09-21: JUGADOR/PJ/MIN/GOL/AM/EXP/OUT/IN), solo cambia
+    la URL: aca es literal en vez de armarse con el numero de categoria."""
+    return parse_statfutbol_plantel(
+        fetch_post(f"{STATFUTBOL_BASE}{planteles_base}Resolucion.php", {"player": team_id}))
 
 
 def calcular_alerta_rival_reserva(torneo_cfg):
