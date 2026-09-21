@@ -31,6 +31,25 @@ Catapult ni Firebase** (solo futdetail/BL), así que NO puede hacer efforts ni
 video sync — eso solo sale de la PC (punto único de falla). `backup.yml` sí
 sigue en GitHub (diario), pero respalda solo `stats`.
 
+**ORDEN DE PRIORIDAD DE LAS FUENTES (regla del usuario, 2026-09-21).** Para
+resultados, goles, goleadores, tarjetas (amarillas y rojas), minutos jugados,
+citaciones y cambios, el orden es:
+
+1. **Lo cargado a mano** (planilla tipeada en la app, PDF de COMET, PDF de
+   citación) — SIEMPRE gana, en la fecha donde haya carga.
+2. **statfutbol**.
+3. **LPF oficial** (ligaprofesional.ar).
+
+Dos aclaraciones sobre la regla tal como se pidió: **sabadogol ya no es fuente**
+(se sacó por poca confiabilidad y la reemplazó ligaprofesional.ar + statfutbol),
+y la prioridad se aplica **por fecha, no por total de temporada** — si no,
+"manual gana" haría que un total salga más bajo cuando la carga manual cubre
+solo algunas fechas.
+
+**PENDIENTE DE APLICAR:** hoy el orden real es otro en varios lados (resultados
+van COMET > LIGA > statfutbol; tarjetas y minutos usan `max(...)` en vez de
+prioridad). Ver el plan acordado antes de tocar nada.
+
 **Fuentes de datos** (todas se juntan en `data/tablas.json`, salvo el video
 sync que va directo a Firebase):
 - **LPF oficial** (ligaprofesional.ar): tabla de posiciones 4TA-9NA
