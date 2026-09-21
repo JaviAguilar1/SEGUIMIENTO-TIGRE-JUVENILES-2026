@@ -4023,6 +4023,41 @@ function gpsVideoHuecoTipico(cat){
   return lista[Math.floor(lista.length / 2)];
 }
 
+// Cuánto separa, DENTRO DEL VIDEO, el arranque del 1T del arranque del 2T.
+// Depende de cómo esté editado el video:
+//  - recortado (lo habitual): el entretiempo no está, así que es el hueco
+//    típico medido en las fechas ya calibradas.
+//  - continuo: el entretiempo está adentro, así que es el hueco REAL entre los
+//    dos saques que da Catapult, y esa cuenta es exacta.
+// La duración del video dice cuál de los dos es sin mirar un solo cuadro: uno
+// continuo mide además todo el entretiempo, unos 10 minutos más. Medido el
+// 2026-09-21 sobre las 55 fechas con link: 46 recortados y 7 continuos, y el
+// veredicto acertó en las 17 que ya estaban calibradas a mano.
+const GPS_VIDEO_2T_APROX = 2700;
+
+function gpsVideoHuecos(cat, fechaKey){
+  const per = (catapultEfforts[cat] || {})[fechaKey]?.periodos || [];
+  const p1 = per.find(p => /rimer/i.test(p.name || ''));
+  const p2 = per.find(p => /egundo/i.test(p.name || ''));
+  const recortado = gpsVideoHuecoTipico(cat);
+  const continuo = (p1?.start && p2?.start) ? (p2.start - p1.start) : null;
+  const dur = _ytPlayer?.getDuration ? (_ytPlayer.getDuration() || 0) : 0;
+  const esContinuo = !!(continuo && dur &&
+    Math.abs(dur - (continuo + GPS_VIDEO_2T_APROX)) < Math.abs(dur - (recortado + GPS_VIDEO_2T_APROX)));
+  return {recortado, continuo, esContinuo};
+}
+
+function gpsVideoSaltarA(seg){
+  if(_ytPlayer?.seekTo) _ytPlayer.seekTo(Math.max(0, seg), true);
+}
+
+function gpsVideoSaltarOtro(cat, fechaKey){
+  const k1 = parseFloat(document.getElementById('gps-video-k1')?.value);
+  if(isNaN(k1)) return;
+  const h = gpsVideoHuecos(cat, fechaKey);
+  gpsVideoSaltarA(k1 + (h.esContinuo ? h.recortado : (h.continuo || h.recortado)));
+}
+
 function gpsVideoCalibrarAbrir(cat, fechaKey, url){
   const btn = (txt, js, color) => `<button type="button" onclick="${js}" style="background:${color || 'var(--surface2)'};border:${color ? 'none' : '1px solid var(--border)'};border-radius:6px;color:${color ? '#fff' : 'var(--text)'};font-family:'Bebas Neue',sans-serif;font-size:15px;letter-spacing:1px;padding:9px 20px;cursor:pointer">${txt}</button>`;
   abrirVideoEmbebido(url, `Calibrar ${fechaKey} · pará el video en el saque inicial de cada tiempo y marcalo`,
@@ -4040,10 +4075,18 @@ function gpsVideoMarcarKickoff(cat, fechaKey, cual){
   if(input) input.value = t.toFixed(1);
   const aviso = document.getElementById('gps-video-marca');
   if(cual === 1){
-    // A estos videos les recortan el entretiempo, así que el 2T arranca casi
-    // pegado al final del 1T: se salta ahí y la persona ajusta con ±1s/±5s.
-    _ytPlayer.seekTo(Math.max(0, t + gpsVideoHuecoTipico(cat)), true);
-    if(aviso) aviso.textContent = `1T en ${t.toFixed(1)}s · buscá el 2T acá cerca`;
+    // Se salta a donde debería arrancar el 2T y la persona ajusta con ±1s/±5s.
+    // Si el video resultó ser de los continuos, el salto usa la hora real de
+    // Catapult, que ahí da justo; si no, el hueco típico de los recortados.
+    const h = gpsVideoHuecos(cat, fechaKey);
+    const usar = (h.esContinuo && h.continuo) ? h.continuo : h.recortado;
+    const hayOtro = !!h.continuo;   // si Catapult dio las dos horas, siempre hay un segundo salto para probar
+    gpsVideoSaltarA(t + usar);
+    if(aviso){
+      aviso.innerHTML = `1T en ${t.toFixed(1)}s · buscá el 2T acá cerca ` +
+        `<span style="opacity:.7">(${h.esContinuo ? 'video completo, hora de Catapult' : 'video recortado'})</span>` +
+        (hayOtro ? ` <button type="button" onclick="gpsVideoSaltarOtro('${cat}','${fechaKey}')" style="background:none;border:1px solid var(--border);border-radius:5px;color:var(--text);font-size:11px;padding:2px 8px;cursor:pointer">probar el otro salto</button>` : '');
+    }
   }else{
     if(aviso) aviso.textContent = `2T en ${t.toFixed(1)}s · ya podés cerrar y guardar`;
   }

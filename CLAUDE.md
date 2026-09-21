@@ -180,25 +180,64 @@ cancela; el OCR, que calibra contra el cartel, se lo come entero.
     si la única novedad es la de metadata (que ya se sabe que no aplica) no
     reintenta. Al sumar una vía nueva de verdad, las fechas dadas por perdidas
     se reabren una vez.
-  - **Sin medir todavía: cuántas de las 38 que faltan resuelve.** Lo medido son
-    las 17 ya calibradas, mayormente de local; las que faltan son de visitante y
-    puede que no las recorten igual (o que no arranquen en el saque). En ese
-    caso no encuentra corte en la ventana y se abstiene, que es el modo de falla
-    seguro. Se ve en la próxima corrida de la PC.
+  - **Medido sobre las 38 que faltan (2026-09-21, `--pendientes`): resuelve 15**
+    (4TA F6/F8/F12/F18/F22, 5TA F3/F15/F17/F22/F23, 6TA F6/F8/F13/F15/F17). La
+    cobertura pasa de 17 a 32 de 56 fechas.
+  - **La detección NO es reproducible al 100%:** entre dos corridas, 4TA F10 y
+    F12 se dieron vuelta (una calibró en una corrida y no en la otra). Es la
+    descarga de ese pedazo de video que a veces se traba. No es grave porque el
+    scraper reintenta hasta 3 veces en corridas distintas, pero los números
+    bailan un poco entre mediciones.
+  - **Segunda pasada con umbral bajo** (`_VIDEO_CORTE_UMBRAL_SUAVE`, 0.05): de
+    las que el corte no resolvía, 14 están editadas (lo confirma la duración,
+    ver abajo) pero el corte no aparecía con el umbral normal — probablemente
+    sea una fundida y no un corte seco. La segunda pasada solo corre cuando la
+    primera no encontró nada, así que no cambia en nada las fechas que ya
+    salían bien, y los tres frenos se aplican igual. **Sin medir todavía
+    cuántas recupera.**
+  - **Video continuo: se corta antes de gastar PC.** Si la duración dice que al
+    video NO le recortaron el entretiempo, no hay ningún corte que encontrar y
+    `_detectar_corte` devuelve None de entrada, sin bajar nada (le llega el
+    hueco real entre saques desde `detectar_kickoffs_auto`).
+- **Editado vs continuo, por la pura duración (medido el 2026-09-21,
+  `medir_video_sync.py --duraciones`).** Un video editado mide los dos tiempos
+  (~92 min) y uno continuo mide además todo el entretiempo (~110 min o más), así
+  que la duración sola dice cuál es cada uno sin mirar un cuadro (~2s por fecha,
+  ya viene en la misma consulta de metadata). La cuenta usa **solo los dos saques
+  iniciales** de Catapult, las únicas horas confiables (los finales de tiempo se
+  cierran tarde en OpenField). **Control: las 17 fechas ya calibradas dieron
+  "editado", las 17** — que es lo que se sabía de antes, así que al veredicto se
+  le puede creer. Resultado sobre las 55 con link: **46 editados, 7 continuos**
+  (4TA F4/F16/F25, 5TA F16/F25, 6TA F4/F16), 1 de 46 minutos (6TA F10, subieron
+  medio partido) y 1 privado (5TA F20). Los 7 continuos son exactamente 7 de las
+  que el corte no podía resolver: ningún video continuo dio un corte falso.
+  **En un video continuo el 2T SÍ sale de la hora de Catapult** (es el caso que
+  el `gpsVideoDerivar2T` borrado suponía para todos); lo que sigue sin saberse es
+  el arranque del 1T, porque esos videos traen previa.
 - **Calibración manual, de dos clics** (`gpsVideoCalibrarAbrir` /
   `gpsVideoMarcarKickoff`): el botón "▶ BUSCARLO EN EL VIDEO" abre el
   reproductor de siempre con ±1s/±5s y dos botones, "📍 ARRANCA EL 1T" y
   "📍 ARRANCA EL 2T", que copian `_ytPlayer.getCurrentTime()` al formulario.
-  Al marcar el 1T, el video **salta solo** a donde suele arrancar el 2T:
-  `gpsVideoHuecoTipico(cat)` es la mediana del hueco de las fechas YA
-  calibradas (primero las de la misma categoría, si no las de todas; 2750 de
-  última) — no una constante, se afina sola a medida que se calibran más.
+  Al marcar el 1T, el video **salta solo** a donde debería arrancar el 2T, y
+  desde el 2026-09-21 el salto se elige según el tipo de video (`gpsVideoHuecos`,
+  misma cuenta que `--duraciones` pero con la duración que da el reproductor):
+  si el video es **recortado**, salta al hueco típico —`gpsVideoHuecoTipico(cat)`,
+  la mediana del hueco de las fechas YA calibradas (primero las de la misma
+  categoría, si no las de todas; 2750 de última), no una constante, se afina
+  sola—; si es **continuo**, salta al hueco REAL entre saques que da Catapult,
+  que ahí es exacto. El cartelito dice cuál de los dos usó y hay un botón
+  "probar el otro salto" por si erró. La persona igual confirma con el ojo
+  antes de guardar: nunca se completa el 2T solo (ese fue el error de
+  `gpsVideoDerivar2T`).
   El otro dato medido: el 1T arranca entre 0 y 5s (mediana 3), o sea que a
   estos videos también les recortan la previa.
   `abrirVideoEmbebido` acepta un 5º parámetro opcional con botones propios
   para la barra del reproductor — los dos usos que ya existían no cambian.
-- **Cobertura al 2026-09-20: 17 de 55 fechas calibradas, faltan 38** (la lista
-  sale de `medir_video_sync.py --rapido`).
+- **Cobertura al 2026-09-21: 17 de 56 calibradas a mano/OCR, + 15 que resuelve
+  sola la vía del corte en cuanto corra la PC = 32.** De las que quedarían: 7
+  continuas (marcar solo el 1T, el 2T lo sugiere el salto de Catapult), 14
+  editadas sin corte visible (a ver qué recupera el umbral bajo), 1 privada y 1
+  de medio partido. La lista sale de `medir_video_sync.py --rapido`.
 
 **Citaciones provisionales (2026-09-19).** Las citaciones (titulares/suplentes
 por fecha) salen del PDF de la planilla oficial (`parseCitacionPdf` en la app
@@ -1276,14 +1315,14 @@ Verificado en la app real (sin login, y por consola) que nada quedó roto:
 `buildPlantelModule`/`players` ya no existen.
 
 **Pendiente / a futuro:**
-- **Esfuerzos en video — lo que falta calibrar:** 17 de 55 hechas al 2026-09-20.
-  Las que no puede leer el detector se marcan a mano con el botón de dos clics
-  (1T y 2T, ver arriba) — la vía por hora real no aplica (0 videos en vivo) y a
-  todos les recortan el entretiempo. Si el volumen lo justifica, el siguiente
-  escalón sería leer el cartel con visión de Claude sobre unos pocos cuadros,
-  para los carteles que Tesseract no lee; para decidirlo,
+- **Esfuerzos en video — lo que falta calibrar:** ver la cobertura de arriba.
+  Lo que el detector no puede se marca a mano con el botón de dos clics. Si el
+  volumen lo justifica, el siguiente escalón sería leer el cartel con visión de
+  Claude sobre unos pocos cuadros, para los carteles que Tesseract no lee;
   `medir_video_sync.py --rapido` informa cuántas de las que faltan ya fueron
   dadas por perdidas por el detector (3 intentos) y cuántas ni se intentaron.
+  **Sin correr todavía: `--pendientes` de nuevo, para ver qué suma el umbral
+  bajo** sobre las 14 editadas en las que el corte no aparecía.
   El archivo de creds de la PC YA existe, así que video sync + citaciones
   provisionales corren solos cada 4hs (verificado 2026-09-19). El video sync
   deja de reintentar una fecha tras 3 fallos con el mismo link

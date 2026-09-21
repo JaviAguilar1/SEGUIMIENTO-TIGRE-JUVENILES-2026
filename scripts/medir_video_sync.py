@@ -260,10 +260,10 @@ def medir_pendientes(token, efforts, limite=0):
         for fecha_key in sorted(efforts[cat] or {}, key=lambda f: int(f.lstrip("F"))):
             if ((sync.get(cat) or {}).get(fecha_key) or {}).get("kickoff1") is not None:
                 continue
-            p1, _ = st._video_periodos_1y2((efforts[cat][fecha_key] or {}).get("periodos"))
+            p1, p2 = st._video_periodos_1y2((efforts[cat][fecha_key] or {}).get("periodos"))
             if not p1:
                 continue
-            pendientes.append((cat, fecha_key))
+            pendientes.append((cat, fecha_key, p2["start"] - p1["start"]))
     if not pendientes:
         print("No queda ninguna fecha sin calibrar.")
         return 0
@@ -275,7 +275,7 @@ def medir_pendientes(token, efforts, limite=0):
     print("-" * 100)
 
     calibraria, a_mano, sin_link, errores = 0, 0, 0, []
-    for i, (cat, fecha_key) in enumerate(pendientes):
+    for i, (cat, fecha_key, gap_real) in enumerate(pendientes):
         if limite and i >= limite:
             break
         try:
@@ -287,7 +287,7 @@ def medir_pendientes(token, efforts, limite=0):
             sin_link += 1
             continue
         k1_tip, hueco_tip = tipicos(cat)
-        r, motivo, cortes = st._detectar_corte(link, k1_tip, hueco_tip)
+        r, motivo, cortes = st._detectar_corte(link, k1_tip, hueco_tip, gap_real=gap_real)
         if r:
             calibraria += 1
             print("%-5s %-5s %8.1f %10.1f %8.0f %5d  CALIBRARIA SOLA" %
@@ -313,11 +313,6 @@ def medir_pendientes(token, efforts, limite=0):
         print("\n=> Esta via no resuelve ninguna de las que faltan: esos videos "
               "estan editados de otra forma.")
     return 0
-
-
-# Un segundo tiempo dura ~45 min: es la parte del video que no depende de como
-# lo hayan editado, asi que sirve de patron para las dos cuentas.
-_2T_APROX = 2700
 
 
 def medir_duraciones(token, efforts, limite=0):
@@ -368,8 +363,8 @@ def medir_duraciones(token, efforts, limite=0):
             # los dos saques iniciales (los finales de tiempo se cierran tarde
             # en OpenField). Con esas alcanza: la diferencia entre las dos
             # cuentas es de mas de 10 minutos.
-            editado = tipicos(cat)[1] + _2T_APROX
-            continuo = (p2["start"] - p1["start"]) + _2T_APROX
+            editado = tipicos(cat)[1] + st._VIDEO_2T_APROX
+            continuo = (p2["start"] - p1["start"]) + st._VIDEO_2T_APROX
             veredicto = "CONTINUO" if abs(dur - continuo) < abs(dur - editado) else "editado"
             if dur < editado - 900:
                 veredicto = "corto (?)"

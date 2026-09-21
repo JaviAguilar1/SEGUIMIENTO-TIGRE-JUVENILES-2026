@@ -1826,6 +1826,15 @@ _VIDEO_CORTE_AJUSTE = 3.1
 # 43s. Con este freno: 14 automaticas bien, 3 a mano, 0 mal calibradas.
 _VIDEO_CORTE_DESACUERDO = 60
 _VIDEO_2T_MINIMO = 1800        # despues del corte tiene que quedar video para un 2do tiempo
+_VIDEO_2T_APROX = 2700         # lo que dura un 2do tiempo: el pedazo de video que no depende de la edicion
+# Segunda pasada con un umbral mas bajo para los cortes SUAVES (una fundida en
+# vez de un corte seco). Medido el 2026-09-21: de las 38 fechas sin calibrar,
+# 14 estan editadas (la duracion del video lo confirma: les falta el
+# entretiempo) pero el corte no aparecia con el umbral normal. Solo se usa
+# cuando la primera pasada no encontro nada, asi que no cambia en nada las
+# fechas que ya salen bien; y los tres frenos de siempre (ventana, acuerdo
+# entre las dos reglas, y que quede 2do tiempo) se aplican igual.
+_VIDEO_CORTE_UMBRAL_SUAVE = 0.05
 
 
 def _video_cortes_escena(stream_url, desde, hasta, ffmpeg_exe, umbral=_VIDEO_CORTE_UMBRAL):
@@ -1864,7 +1873,8 @@ def _video_cortes_escena(stream_url, desde, hasta, ffmpeg_exe, umbral=_VIDEO_COR
     return sorted(cortes)
 
 
-def _detectar_corte(youtube_url, k1=None, hueco=None, margen=_VIDEO_CORTE_MARGEN):
+def _detectar_corte(youtube_url, k1=None, hueco=None, margen=_VIDEO_CORTE_MARGEN,
+                    gap_real=None):
     """Motor de la via del corte. Devuelve (resultado, motivo, cortes): el
     motivo dice por que no se pudo, para poder medir sin duplicar la logica
     (lo usa medir_video_sync.py --pendientes). Nunca inventa un valor."""
@@ -1876,9 +1886,22 @@ def _detectar_corte(youtube_url, k1=None, hueco=None, margen=_VIDEO_CORTE_MARGEN
                                              con_duracion=True)
     if not stream_url:
         return None, "no se pudo abrir el video", []
+    # Un video CONTINUO (sin recortar el entretiempo) no tiene ningun corte
+    # que encontrar, y la duracion lo delata sin mirar un solo cuadro: mide
+    # ademas todo el entretiempo, 10 minutos mas que uno editado. Medido el
+    # 2026-09-21: 7 de las fechas sin calibrar son asi. Se corta aca para no
+    # gastar medio minuto de PC por corrida buscando algo que no existe.
+    if gap_real and duracion:
+        if abs(duracion - (gap_real + _VIDEO_2T_APROX)) < abs(duracion - (hueco + _VIDEO_2T_APROX)):
+            return None, "video continuo (no le recortaron el entretiempo)", []
     centro = k1 + hueco
     desde, hasta = centro - margen, centro + margen
-    cortes = _video_cortes_escena(stream_url, desde, hasta, imageio_ffmpeg.get_ffmpeg_exe())
+    ffmpeg_exe = imageio_ffmpeg.get_ffmpeg_exe()
+    cortes = _video_cortes_escena(stream_url, desde, hasta, ffmpeg_exe)
+    if not cortes:
+        # Segunda pasada por si el corte es suave (una fundida).
+        cortes = _video_cortes_escena(stream_url, desde, hasta, ffmpeg_exe,
+                                      _VIDEO_CORTE_UMBRAL_SUAVE)
     if not cortes:
         return None, "ningun corte en la ventana", cortes
     fuerte = max(cortes, key=lambda c: c[1])[0]
@@ -1894,11 +1917,12 @@ def _detectar_corte(youtube_url, k1=None, hueco=None, margen=_VIDEO_CORTE_MARGEN
             "", cortes)
 
 
-def detectar_kickoffs_corte(youtube_url, k1=None, hueco=None, margen=_VIDEO_CORTE_MARGEN):
+def detectar_kickoffs_corte(youtube_url, k1=None, hueco=None, margen=_VIDEO_CORTE_MARGEN,
+                            gap_real=None):
     """kickoff1/kickoff2 buscando el corte del entretiempo dentro de una
     ventana angosta alrededor del hueco tipico. None si ahi no hay ningun corte
     claro -- nunca inventa un valor."""
-    return _detectar_corte(youtube_url, k1, hueco, margen)[0]
+    return _detectar_corte(youtube_url, k1, hueco, margen, gap_real)[0]
 
 
 def detectar_kickoffs_auto(youtube_url, periodos=None, offset=0.0,
@@ -1913,6 +1937,11 @@ def detectar_kickoffs_auto(youtube_url, periodos=None, offset=0.0,
     if not VIDEO_SYNC_DISPONIBLE:
         return None
     k1_tip, hueco_tip = tipicos or (_VIDEO_K1_TIPICO, _VIDEO_HUECO_TIPICO)
+    # Hueco REAL entre los dos saques iniciales (con entretiempo): sirve para
+    # darse cuenta de que el video es continuo y no perder tiempo buscando un
+    # corte que no existe.
+    _p1, _p2 = _video_periodos_1y2(periodos)
+    gap_real = (_p2["start"] - _p1["start"]) if _p1 else None
     if periodos and _video_vale_la_pena_metadata():
         por_metadata = detectar_kickoffs_metadata(youtube_url, periodos, offset)
         if por_metadata:
@@ -1922,7 +1951,7 @@ def detectar_kickoffs_auto(youtube_url, periodos=None, offset=0.0,
     # cuando el OCR ya se rindio con esta fecha: ahi repetir su barrido serian
     # horas de PC para volver a fallar igual.
     if saltear_ocr or not _video_configurar_tesseract():
-        return detectar_kickoffs_corte(youtube_url, k1_tip, hueco_tip)
+        return detectar_kickoffs_corte(youtube_url, k1_tip, hueco_tip, gap_real=gap_real)
     ydl_opts = {"quiet": True, "no_warnings": True, "format": "136/135/134/160/243"}
     try:
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
@@ -1950,7 +1979,8 @@ def detectar_kickoffs_auto(youtube_url, periodos=None, offset=0.0,
         por_cartel = detectar_kickoffs_video(youtube_url)
     elif es_lpf:
         por_cartel = detectar_kickoffs_lpf(youtube_url)
-    return por_cartel or detectar_kickoffs_corte(youtube_url, k1_tip, hueco_tip)
+    return por_cartel or detectar_kickoffs_corte(youtube_url, k1_tip, hueco_tip,
+                                                 gap_real=gap_real)
 
 
 # Firebase de Tigre (SOLO para leer el link del video cargado y guardar la
