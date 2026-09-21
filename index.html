@@ -1263,13 +1263,34 @@ function getResult(gf,gc){ if(gf===null||gc===null)return null; return gf>gc?'W'
 // ensucia tus datos). `resultsAuto` marca cuales son auto para: (a) no
 // persistirlos en saveData, (b) poder recalcularlos en cada render.
 let resultsAuto = new Set();
+// La LPF publica la fecha ANTES de que se juegue, con TODOS los partidos en
+// 0-0. Mirando solo el partido de Tigre ese "0-0 de relleno" es idéntico a un
+// empate real; mirando la fecha entera se distingue solo, porque que los 9
+// partidos terminen 0-0 el mismo día no pasa nunca. Sin esto, el sábado a la
+// mañana la app se autocompletaba con un 0-0 inventado, que además contaba
+// como partido jugado en la tabla y en las estadísticas.
+// Verificado el 2026-09-21 contra los datos reales: las 15 fechas con 0-0
+// legítimo de las 6 categorías están todas en fechas con otros resultados, así
+// que este filtro no tapa ningún resultado de verdad.
+function fechaSinJugar(cat, fecha){
+  const ronda = TABLA_DATA && TABLA_DATA.fixture_completo && TABLA_DATA.fixture_completo[cat]
+    && TABLA_DATA.fixture_completo[cat][fecha];
+  return Array.isArray(ronda) && ronda.length > 0 && ronda.every(p => !p.gl && !p.gv);
+}
 function autoResultado(cat, fecha){
   const p = (partidos[cat]||{})[fecha];  // COMET (solo 4TA/5TA/6TA)
+  // El informe de COMET se sube a mano y es de un partido ya jugado: un 0-0
+  // ahí es real, no se filtra.
   if(p && p.golesTigre!=null && p.golesRival!=null) return [p.golesTigre, p.golesRival];
+  const sinJugar = fechaSinJugar(cat, fecha);
+  // Un 0-0 de una fecha que no se jugó no vale, pero sí vale el resto: si la
+  // LIGA todavía no cargó el resultado y statfutbol sí, se usa el de
+  // statfutbol en vez de quedarse con el 0-0 de relleno.
+  const vale = (gf, gc) => !(sinJugar && !gf && !gc);
   const liga = TABLA_DATA && TABLA_DATA.fixture && TABLA_DATA.fixture[cat] && TABLA_DATA.fixture[cat][fecha];
-  if(liga && liga.gf!=null && liga.gc!=null) return [liga.gf, liga.gc];
+  if(liga && liga.gf!=null && liga.gc!=null && vale(liga.gf, liga.gc)) return [liga.gf, liga.gc];
   const sf = TABLA_DATA && TABLA_DATA.statfutbol_resultados && TABLA_DATA.statfutbol_resultados[cat] && TABLA_DATA.statfutbol_resultados[cat][fecha];
-  if(sf && sf.gf!=null && sf.gc!=null) return [sf.gf, sf.gc];
+  if(sf && sf.gf!=null && sf.gc!=null && vale(sf.gf, sf.gc)) return [sf.gf, sf.gc];
   return null;
 }
 function autocompletarResultados(){
