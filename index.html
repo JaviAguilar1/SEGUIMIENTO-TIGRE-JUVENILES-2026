@@ -1278,19 +1278,20 @@ function fechaSinJugar(cat, fecha){
   return Array.isArray(ronda) && ronda.length > 0 && ronda.every(p => !p.gl && !p.gv);
 }
 function autoResultado(cat, fecha){
-  const p = (partidos[cat]||{})[fecha];  // COMET (solo 4TA/5TA/6TA)
-  // El informe de COMET se sube a mano y es de un partido ya jugado: un 0-0
-  // ahí es real, no se filtra.
+  const p = (partidos[cat]||{})[fecha];  // informe de COMET, subido a mano
+  // Lo cargado a mano gana siempre (regla de prioridad de fuentes). Además un
+  // 0-0 de un informe de COMET es de un partido ya jugado: no se filtra.
   if(p && p.golesTigre!=null && p.golesRival!=null) return [p.golesTigre, p.golesRival];
   const sinJugar = fechaSinJugar(cat, fecha);
   // Un 0-0 de una fecha que no se jugó no vale, pero sí vale el resto: si la
   // LIGA todavía no cargó el resultado y statfutbol sí, se usa el de
   // statfutbol en vez de quedarse con el 0-0 de relleno.
   const vale = (gf, gc) => !(sinJugar && !gf && !gc);
-  const liga = TABLA_DATA && TABLA_DATA.fixture && TABLA_DATA.fixture[cat] && TABLA_DATA.fixture[cat][fecha];
-  if(liga && liga.gf!=null && liga.gc!=null && vale(liga.gf, liga.gc)) return [liga.gf, liga.gc];
+  // Orden pedido por Javi (2026-09-21): statfutbol antes que la LPF oficial.
   const sf = TABLA_DATA && TABLA_DATA.statfutbol_resultados && TABLA_DATA.statfutbol_resultados[cat] && TABLA_DATA.statfutbol_resultados[cat][fecha];
   if(sf && sf.gf!=null && sf.gc!=null && vale(sf.gf, sf.gc)) return [sf.gf, sf.gc];
+  const liga = TABLA_DATA && TABLA_DATA.fixture && TABLA_DATA.fixture[cat] && TABLA_DATA.fixture[cat][fecha];
+  if(liga && liga.gf!=null && liga.gc!=null && vale(liga.gf, liga.gc)) return [liga.gf, liga.gc];
   return null;
 }
 function autocompletarResultados(){
@@ -9091,7 +9092,7 @@ function abrirPerfilJugador(cat, nombre){
   const idJ = jugador?.id!=null ? jugador.id : null;
   const DURACION_PARTIDO = 90; // partidos de COMET son de 90' (confirmado con el reglamento del torneo)
   let vecesTitular=0, vecesBanco=0, vecesEntroDeBanco=0, vecesSalio=0;
-  let minCometSum=0, golCometSum=0, amCometSum=0, rojCometSum=0;
+  let minCometSum=0, golCometSum=0;
   const partidosJugados=[]; // {fecha, rival, cond, res:[gf,gc], eventos:[..chips]}
   Object.entries(matchData[cat]||{}).forEach(([fechaStr,d])=>{
     const fecha=parseInt(fechaStr,10);
@@ -9108,8 +9109,8 @@ function abrirPerfilJugador(cat, nombre){
     if(!partido){
       const sfP = (TABLA_DATA?.statfutbol_partidos?.[cat]||{})[fecha];
       const ev = sfP ? Object.entries(sfP).find(([n])=>sonMismoJugador(n)) : null;
-      if(ev && ev[1].amarilla){ amCometSum++; eventos.push('🟨'); }
-      if(ev && ev[1].roja){ rojCometSum++; eventos.push('🟥'); }
+      if(ev && ev[1].amarilla) eventos.push('🟨');
+      if(ev && ev[1].roja) eventos.push('🟥');
     }
     if(partido && idJ!=null){
       // "Entró"/"Salió" y los minutos exactos salen del informe de COMET
@@ -9133,8 +9134,8 @@ function abrirPerfilJugador(cat, nombre){
         if(g.autogol){ eventos.push(`⚫${minSuf(g.minuto)} (autogol)`); return; }
         golCometSum++; eventos.push(`⚽${minSuf(g.minuto)}${g.penal?' (P)':''}`);
       });
-      (partido.amarillas||[]).filter(a=>a.id===idJ).forEach(a=>{ amCometSum++; eventos.push(`🟨${minSuf(a.minuto)}`); });
-      (partido.rojas||[]).filter(a=>a.id===idJ).forEach(a=>{ rojCometSum++; eventos.push(`🟥${minSuf(a.minuto)}`); });
+      (partido.amarillas||[]).filter(a=>a.id===idJ).forEach(a=>{ eventos.push(`🟨${minSuf(a.minuto)}`); });
+      (partido.rojas||[]).filter(a=>a.id===idJ).forEach(a=>{ eventos.push(`🟥${minSuf(a.minuto)}`); });
     }
     const autoRes = esReserva ? TABLA_DATA?.statfutbol_resultados?.[cat]?.[fecha] : null;
     partidosJugados.push({fecha, rival:d.rival||'—', cond:condicionCat(cat,fecha),
@@ -9155,16 +9156,46 @@ function abrirPerfilJugador(cat, nombre){
   //   amistosos) en vez de COMET vs. futdetail.
   const sfJ = ((TABLA_DATA&&TABLA_DATA.statfutbol_jugadores&&TABLA_DATA.statfutbol_jugadores[cat])||[])
     .find(j=>sonMismoJugador(j.nombre));
-  // Partidos y minutos: el mayor entre lo que dan las citaciones/COMET y el
-  // total de statfutbol (PJ/min), que viene completo y público. Clave en
-  // 7MA-9NA (sin COMET ni futdetail): si a las citaciones les falta alguna
-  // fecha, igual se muestra el número real (mismo criterio que goles/tarjetas).
+  // TARJETAS — prioridad por FECHA (regla de Javi, 2026-09-21): en cada fecha
+  // gana el informe de COMET (que se sube a mano) y, donde no hay, statfutbol.
+  // Se recorren TODAS las fechas con dato, no solo las que tienen citación
+  // cargada: antes el total salía de un max() contra el acumulado de temporada
+  // de statfutbol, justamente para tapar las fechas sin citación. El max()
+  // rompía la prioridad — si COMET y statfutbol no coincidían, ganaba el más
+  // alto en vez del más confiable.
+  function tarjetasPorFecha(tipo){   // 'amarilla' | 'roja'
+    const sfPartidos = (TABLA_DATA&&TABLA_DATA.statfutbol_partidos&&TABLA_DATA.statfutbol_partidos[cat])||{};
+    const fechas = new Set([...Object.keys(partidos[cat]||{}), ...Object.keys(sfPartidos)]);
+    let n = 0;
+    fechas.forEach(fechaStr=>{
+      const fecha = parseInt(fechaStr,10);
+      const partido = (partidos[cat]||{})[fecha];
+      if(partido && idJ!=null){   // sin id no se puede leer el informe: va statfutbol
+        n += (partido[tipo==='amarilla'?'amarillas':'rojas']||[]).filter(a=>a.id===idJ).length;
+        return;
+      }
+      const ev = Object.entries(sfPartidos[fecha]||{}).find(([nom])=>sonMismoJugador(nom));
+      if(ev && ev[1][tipo]) n++;
+    });
+    return n;
+  }
+  // CONVOCATORIAS y MINUTOS: acá statfutbol solo da el ACUMULADO de temporada,
+  // no el dato fecha por fecha, así que no se puede mezclar con COMET sin
+  // contar dos veces. Por eso: si el informe de COMET está cargado en TODAS
+  // las fechas que jugó la categoría, mandan los minutos de COMET (cargados a
+  // mano, y son los exactos porque salen de los cambios); si falta aunque sea
+  // una, manda el total de statfutbol, que sí está completo.
+  const fechasJugadas = Object.keys(results[cat]||{}).filter(f=>results[cat][f]).map(Number);
+  const cometCubreTodo = fechasJugadas.length > 0 &&
+    fechasJugadas.every(f=>(partidos[cat]||{})[f]);
+  const minSf = sfJ ? (parseInt(sfJ.min)||0) : 0;
   const convocatorias = Math.max(vecesTitular+vecesBanco, sfJ?(parseInt(sfJ.pj)||0):0);
-  const minutosFinal = Math.max(minCometSum, parseInt(s.minutos_jugados)||0, sfJ?(parseInt(sfJ.min)||0):0);
+  const minutosFinal = (cometCubreTodo && minCometSum) ? minCometSum
+    : (minSf || (parseInt(s.minutos_jugados)||0) || minCometSum);
   const geEntry = golesEfectivos(cat).find(g=>sonMismoJugador(g.name));
   const golesFinal = geEntry ? geEntry.goals : golCometSum;
-  const amarillasFinal = Math.max(amCometSum, sfJ?(parseInt(sfJ.am)||0):0);
-  const rojasFinal = Math.max(rojCometSum, sfJ?(parseInt(sfJ.roja)||0):0);
+  const amarillasFinal = tarjetasPorFecha('amarilla');
+  const rojasFinal = tarjetasPorFecha('roja');
   // Reserva y 7MA-9NA (sin COMET): los goles de cada fecha (carga manual/
   // statfutbol, vía golesEfectivos) van al frente de Eventos.
   if((esReserva || !Object.keys(partidos[cat]||{}).length) && geEntry){
@@ -9502,66 +9533,60 @@ function catapultResolverJugador(cat, nombre){
 function amarillasEnAlerta(cat){
   const AMARILLAS_ALERTA = 4;
   const AMARILLAS_SUSPENSION = 5; // a la 5ta amarilla se cumple 1 fecha y el conteo arranca de cero
-  const porJugador = {}; // id -> {nombre, count}
   // El conteo es por CICLO, no por total de temporada: se reinicia en cero
   // apenas el jugador es expulsado (roja directa o doble amarilla), o al
   // llegar a la 5ta amarilla acumulada -- en los dos casos ya cumplió una
-  // suspensión y el conteo relevante es el que lleva desde ahí, no el
-  // acumulado entero. Por eso hace falta procesar los partidos en orden
-  // cronológico (por fecha), no en el orden en que estén en Firebase.
-  const fechasComet = Object.keys(partidos[cat]||{});
-  // 7MA-9NA no tienen COMET: el ciclo de amarillas se arma desde statfutbol
-  // (statfutbol_partidos = amarilla/roja por jugador por fecha). statfutbol trae
-  // NOMBRES, no ids, así que el ciclo se lleva emparejando cada nombre contra el
-  // plantel actual (mismo subconjunto de palabras que usa Goleadores). Un jugador
-  // que todavía no está en el plantel de futdetail no entra -- igual que la rama
-  // COMET, que exige plantelNombreDeId != null.
-  if(!fechasComet.length){
-    const sfPartidos = TABLA_DATA?.statfutbol_partidos?.[cat];
-    if(!sfPartidos) return [];
-    const rosterNombres = (plantelFutdetail[cat]||[]).map(p=>p.nombre);
-    const palabras = n=>new Set(normNombreOrdenIndependiente(n).split(' ').filter(Boolean));
-    const canon = n=>{ const a=palabras(n); const m=rosterNombres.filter(r=>{ const b=palabras(r); const [ch,gr]=a.size<=b.size?[a,b]:[b,a]; return ch.size && [...ch].every(w=>gr.has(w)); }); return m.length===1?m[0]:null; };
-    const porNombre = {}; // nombreCanon -> count del ciclo actual
-    Object.keys(sfPartidos).map(Number).sort((a,b)=>a-b).forEach(fecha=>{
-      const sfP = sfPartidos[fecha]||{};
-      const expulsados = new Set();
-      Object.entries(sfP).forEach(([n,ev])=>{
-        const nom = canon(n); if(!nom) return;
-        if(ev.amarilla) porNombre[nom]=(porNombre[nom]||0)+1;
+  // suspensión y el conteo relevante es el que lleva desde ahí. Por eso hace
+  // falta procesar las fechas en orden cronológico.
+  //
+  // Prioridad por FECHA (regla de Javi, 2026-09-21): en cada fecha manda el
+  // informe de COMET (cargado a mano) y, donde no hay, statfutbol. Antes esto
+  // era todo-o-nada: si la categoría tenía aunque fuera UN informe de COMET,
+  // las fechas sin informe no se contaban, y el ciclo quedaba corto justo en
+  // 4TA/5TA/6TA, que son las que tienen COMET a medias.
+  //
+  // El ciclo se lleva por NOMBRE del plantel, no por id: COMET trae ids y
+  // statfutbol nombres, así que el nombre del plantel es lo único común a las
+  // dos fuentes. Un jugador que no esté en el plantel actual no entra (no va a
+  // sumar más amarillas y no afecta al equipo hoy) -- mismo criterio de antes.
+  const sfPartidos = (TABLA_DATA && TABLA_DATA.statfutbol_partidos && TABLA_DATA.statfutbol_partidos[cat]) || {};
+  const rosterNombres = (plantelFutdetail[cat]||[]).map(p=>p.nombre);
+  const palabras = n=>new Set(normNombreOrdenIndependiente(n).split(' ').filter(Boolean));
+  const canon = n=>{ const a=palabras(n||''); const m=rosterNombres.filter(r=>{ const b=palabras(r); const [ch,gr]=a.size<=b.size?[a,b]:[b,a]; return ch.size && [...ch].every(w=>gr.has(w)); }); return m.length===1?m[0]:null; };
+  const nombreDe = (id, nombre)=> (id ? plantelNombreDeId(cat, id) : null) || canon(nombre);
+
+  const fechas = [...new Set([...Object.keys(partidos[cat]||{}), ...Object.keys(sfPartidos)])]
+    .map(Number).sort((a,b)=>a-b);
+  const ciclo = {};   // nombre del plantel -> amarillas del ciclo actual
+  fechas.forEach(fecha=>{
+    const partido = (partidos[cat]||{})[fecha];
+    const expulsados = new Set();
+    if(partido){
+      (partido.amarillas||[]).forEach(a=>{
+        const nom = nombreDe(a.id, a.nombre);
+        if(nom) ciclo[nom] = (ciclo[nom]||0)+1;
+      });
+      (partido.rojas||[]).forEach(r=>{
+        const nom = nombreDe(r.id, r.nombre);
+        if(nom) expulsados.add(nom);
+      });
+    }else{
+      Object.entries(sfPartidos[fecha]||{}).forEach(([n,ev])=>{
+        const nom = canon(n);
+        if(!nom) return;
+        if(ev.amarilla) ciclo[nom] = (ciclo[nom]||0)+1;
         if(ev.roja) expulsados.add(nom);
       });
-      Object.keys(porNombre).forEach(nom=>{
-        if(porNombre[nom]>=AMARILLAS_SUSPENSION || expulsados.has(nom)) porNombre[nom]=0;
-      });
-    });
-    return Object.entries(porNombre)
-      .map(([nombre,count])=>({nombre, ciclo:count, count, id:null}))
-      .filter(p=>p.ciclo>=AMARILLAS_ALERTA && !estaArchivado(cat, p.nombre));
-  }
-  const fechasOrdenadas = Object.keys(partidos[cat]||{}).map(Number).sort((a,b)=>a-b);
-  fechasOrdenadas.forEach(fecha=>{
-    const partido = partidos[cat][fecha];
-    (partido.amarillas||[]).forEach(a=>{
-      if(!a.id) return;
-      if(!porJugador[a.id]) porJugador[a.id]={nombre:plantelNombreDeId(cat,a.id)||a.nombre, count:0};
-      porJugador[a.id].count++;
-    });
-    const expulsados = new Set((partido.rojas||[]).map(r=>r.id).filter(Boolean));
-    Object.keys(porJugador).forEach(id=>{
-      if(porJugador[id].count>=AMARILLAS_SUSPENSION || expulsados.has(id)) porJugador[id].count=0;
+    }
+    Object.keys(ciclo).forEach(nom=>{
+      if(ciclo[nom]>=AMARILLAS_SUSPENSION || expulsados.has(nom)) ciclo[nom]=0;
     });
   });
-  // Solo jugadores que siguen en el plantel actual y no fueron archivados
-  // a mano -- uno que ya se fue no va a sumar más amarillas y no afecta al
-  // equipo hoy, aunque su carga histórica de tarjetas se mantenga intacta
-  // (Javi, 2026-09-02, caso Poblete Matías en 5TA -- seguía apareciendo
-  // porque futdetail todavía no lo había sacado de su propio plantel; el
-  // filtro por plantelFutdetail solo no alcanza, hace falta también poder
-  // archivarlo a mano con el botón nuevo de PLANTEL).
-  return Object.entries(porJugador)
-    .map(([id,p])=>({...p, ciclo: p.count, id}))
-    .filter(p=>p.ciclo>=AMARILLAS_ALERTA && plantelNombreDeId(cat,p.id)!=null && !estaArchivado(cat, p.nombre));
+  // "estaArchivado": los que se fueron y se archivaron a mano no molestan más
+  // (Javi, 2026-09-02, caso Poblete Matías en 5TA).
+  return Object.entries(ciclo)
+    .map(([nombre,count])=>({nombre, ciclo:count, count, id:null}))
+    .filter(p=>p.ciclo>=AMARILLAS_ALERTA && !estaArchivado(cat, p.nombre));
 }
 // El pill "N en alerta" del header se sacó a pedido de Javi -- el mismo
 // aviso (4+ amarillas, riesgo de suspensión) ya se ve adentro de cada

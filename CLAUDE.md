@@ -46,9 +46,34 @@ y la prioridad se aplica **por fecha, no por total de temporada** — si no,
 "manual gana" haría que un total salga más bajo cuando la carga manual cubre
 solo algunas fechas.
 
-**PENDIENTE DE APLICAR:** hoy el orden real es otro en varios lados (resultados
-van COMET > LIGA > statfutbol; tarjetas y minutos usan `max(...)` en vez de
-prioridad). Ver el plan acordado antes de tocar nada.
+**APLICADO el 2026-09-21** en los cinco puntos que la fuente permite hoy:
+- **Resultados** (`autoResultado`): pasó a manual/COMET → **statfutbol** → LPF
+  (antes la LPF iba antes que statfutbol).
+- **Tarjetas de la ficha** (`tarjetasPorFecha` en `abrirPerfilJugador`): se
+  cuenta **fecha por fecha** — COMET donde hay informe, statfutbol donde no —
+  recorriendo TODAS las fechas con dato, no solo las que tienen citación
+  cargada. Reemplaza al `max(COMET, total de temporada de statfutbol)`, que
+  rompía la prioridad: cuando las dos fuentes no coincidían ganaba el número
+  más alto, no el más confiable. El `max()` estaba ahí para tapar las fechas
+  sin citación; recorrer todas las fechas lo hace innecesario.
+- **Alerta de 4 amarillas** (`amarillasEnAlerta`): era **todo o nada** — si la
+  categoría tenía aunque fuera UN informe de COMET, las fechas sin informe no
+  se contaban, y el ciclo quedaba corto justo en 4TA/5TA/6TA (las que tienen
+  COMET a medias). Ahora recorre la unión de fechas con la misma prioridad. El
+  ciclo se lleva por **nombre del plantel**, no por id: COMET trae ids y
+  statfutbol nombres, y el nombre es lo único común a las dos.
+- **Minutos**: COMET manda **solo si está cargado en todas las fechas jugadas**
+  de la categoría; si falta una, manda el total de statfutbol. No se puede
+  mezclar fecha a fecha porque statfutbol solo publica el ACUMULADO de
+  temporada (ver el pendiente de los cambios más abajo).
+- **Goleadores y citaciones** ya cumplían la regla, no se tocaron.
+
+**PENDIENTE — los cambios (quién entró/salió y en qué minuto).** Hoy salen solo
+del PDF de COMET, o sea 4TA/5TA/6TA y solo en las fechas subidas. statfutbol
+tiene columnas OUT/IN en la tabla de plantel pero son **cantidades**, no el
+minuto. Falta mirar qué muestra el botón del ojito (columna MAS) de esa tabla:
+si trae el detalle partido a partido del jugador, resolvería los cambios Y los
+minutos por fecha en todas las categorías, Reserva incluida.
 
 **Fuentes de datos** (todas se juntan en `data/tablas.json`, salvo el video
 sync que va directo a Firebase):
