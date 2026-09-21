@@ -214,6 +214,11 @@ cancela; el OCR, que calibra contra el cartel, se lo come entero.
   **En un video continuo el 2T SÍ sale de la hora de Catapult** (es el caso que
   el `gpsVideoDerivar2T` borrado suponía para todos); lo que sigue sin saberse es
   el arranque del 1T, porque esos videos traen previa.
+- **`scripts/sincronizar_video.py` (nuevo, 2026-09-21): dispara SOLO el video
+  sync a mano**, sin esperar la corrida de 4hs y sin tocar la carpeta de la
+  tarea programada. No necesita credenciales de Catapult ni futdetail (los
+  esfuerzos ya están en `data/tablas.json`), solo las de Firebase. Escribe
+  exactamente lo mismo que escribiría la corrida automática.
 - **Calibración manual, de dos clics** (`gpsVideoCalibrarAbrir` /
   `gpsVideoMarcarKickoff`): el botón "▶ BUSCARLO EN EL VIDEO" abre el
   reproductor de siempre con ±1s/±5s y dos botones, "📍 ARRANCA EL 1T" y
