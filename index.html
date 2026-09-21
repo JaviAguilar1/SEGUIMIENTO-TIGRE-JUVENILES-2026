@@ -124,14 +124,6 @@ header::after{
   display:flex;overflow-x:auto;scrollbar-width:none;padding:0 16px;
 }
 .cat-subtabs::-webkit-scrollbar{display:none;}
-.cat-tab{
-  padding:9px 16px;
-  font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:2px;
-  color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;
-  transition:all .2s;white-space:nowrap;display:flex;align-items:center;gap:6px;
-}
-.cat-tab:hover{color:var(--text);}
-.cat-tab.active{border-bottom-color:currentColor;}
 .cat-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
 
 /* ── MAIN CONTENT ───────────────────────────────────── */
@@ -150,7 +142,6 @@ header::after{
 .st::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,var(--border),transparent);}
 
 /* ── STAT CARDS ─────────────────────────────────────── */
-.stats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(105px,1fr));gap:10px;margin-bottom:20px;}
 .stat-card{
   background:linear-gradient(135deg,var(--surface2),var(--surface));
   border:1px solid var(--border);border-radius:10px;padding:14px 10px;text-align:center;
@@ -194,12 +185,6 @@ header::after{
 .chart-card h3{font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:2px;
   color:var(--gold);margin-bottom:14px;}
 .pies-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(175px,1fr));gap:12px;margin-bottom:24px;}
-.pie-card{background:linear-gradient(135deg,var(--surface2),var(--surface));
-  border:1px solid var(--border);border-radius:12px;padding:14px;text-align:center;}
-.pie-card h4{font-family:'Bebas Neue',sans-serif;font-size:12px;letter-spacing:1.5px;
-  color:var(--gold);margin-bottom:10px;}
-.pie-stat-row{display:flex;justify-content:center;gap:8px;margin-top:8px;
-  font-size:11px;font-family:'Barlow Condensed',sans-serif;font-weight:600;}
 
 /* ── RESULTS TABLE ──────────────────────────────────── */
 .table-wrap{overflow-x:auto;margin-bottom:24px;border-radius:10px;
@@ -437,7 +422,6 @@ table.gen-table .cat-cell{font-family:'Bebas Neue',sans-serif;font-size:15px;
 @media(max-width:750px){
   .charts-row{grid-template-columns:1fr;}
   .pies-grid{grid-template-columns:repeat(auto-fill,minmax(150px,1fr));}
-  .stats-grid{grid-template-columns:repeat(4,1fr);}
   .stat-card .val{font-size:26px;}
   .main{padding:10px;}
   header{padding:8px 12px;min-height:56px;gap:10px;}
@@ -453,7 +437,6 @@ table.gen-table .cat-cell{font-family:'Bebas Neue',sans-serif;font-size:15px;
   .goleadores-grid{grid-template-columns:1fr;}
 }
 @media(max-width:400px){
-  .stats-grid{grid-template-columns:repeat(4,1fr);gap:6px;}
   .stat-card{padding:10px 6px;}
   .stat-card .val{font-size:22px;}
 }
@@ -1354,18 +1337,6 @@ function getPeriodos(cat){
   for(let s=1;s<=35;s+=bloqueSize)p.push({label:`F${s}–F${Math.min(s+bloqueSize-1,35)}`,from:s,to:Math.min(s+bloqueSize-1,35)});
   return p;
 }
-function getBlocks(cat){
-  if(cat==='RESERVA'||cat==='RESERVA_S2'){
-    // Each individual played match = its own bar in the chart
-    const played = [];
-    for(let f=1; f<=18; f++){ if(results[cat]?.[f]) played.push(f); }
-    if(!played.length) return [{label:'F1–F18', from:1, to:18}];
-    return played.map(f=>({label:`F${f}`, from:f, to:f}));
-  }
-  const b=[];
-  for(let s=1;s<=35;s+=bloqueSize)b.push({label:`F${s}–F${Math.min(s+bloqueSize-1,35)}`,from:s,to:Math.min(s+bloqueSize-1,35)});
-  return b;
-}
 function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 // Sufijo "N'" de un minuto de gol/tarjeta -- vacío si no hay minuto cargado
 // (en vez de imprimir "undefined'" como pasaba antes).
@@ -1397,34 +1368,6 @@ function confirmAction(msg, onYes, btnLabel){
 }
 function killChart(id){ const c=Chart.getChart(id); if(c)c.destroy(); }
 function chartDef(){ return{responsive:true,maintainAspectRatio:false,animation:{duration:250},plugins:{legend:{labels:{color:'#5a7099',font:{family:'Barlow Condensed',size:11}}}},scales:{x:{ticks:{color:'#5a7099',font:{family:'Barlow Condensed'}},grid:{color:'rgba(26,45,90,0.4)'}},y:{ticks:{color:'#5a7099',font:{family:'Barlow Condensed'}},grid:{color:'rgba(26,45,90,0.4)'}}}}; }
-function statsHTML(s){
-  const dgC=s.dg>0?'var(--win)':s.dg<0?'var(--loss)':'var(--muted)',dgS=s.dg>0?'+':'';
-  return `<div class="stats-grid">
-    <div class="stat-card pts"><div class="val">${s.pts}</div><div class="lbl">Puntos</div></div>
-    <div class="stat-card pj"><div class="val">${s.pj}</div><div class="lbl">Jugados</div></div>
-    <div class="stat-card win"><div class="val">${s.pg}</div><div class="lbl">Ganados</div></div>
-    <div class="stat-card draw"><div class="val">${s.pe}</div><div class="lbl">Empates</div></div>
-    <div class="stat-card loss"><div class="val">${s.pp}</div><div class="lbl">Perdidos</div></div>
-    <div class="stat-card gf"><div class="val">${s.gf}</div><div class="lbl">GF</div></div>
-    <div class="stat-card gc"><div class="val">${s.gc}</div><div class="lbl">GC</div></div>
-    <div class="stat-card dg"><div class="val" style="color:${dgC}">${dgS}${s.dg}</div><div class="lbl">Dif Gol</div></div>
-  </div>`; }
-function drawPie(id,s){
-  if(s.pj===0)return; killChart(id);
-  new Chart(document.getElementById(id).getContext('2d'),{type:'doughnut',
-    data:{labels:['G','E','P'],datasets:[{data:[s.pg,s.pe,s.pp],
-      backgroundColor:['rgba(34,197,94,.82)','rgba(245,158,11,.82)','rgba(192,21,42,.75)'],
-      borderColor:['#22c55e','#f59e0b','#c0152a'],borderWidth:2}]},
-    options:{responsive:true,plugins:{legend:{display:false}}}});
-}
-function pieMini(id,s,label){
-  return `<div class="pie-card"><h4>${label}</h4><canvas id="${id}" height="150"></canvas>
-    <div class="pie-stat-row">
-      <span style="color:var(--win)">▲${s.pg}G</span>
-      <span style="color:var(--draw)">${s.pe}E</span>
-      <span style="color:var(--loss)">▼${s.pp}P</span>
-      <span style="color:var(--gold2)">${s.pts}pts</span>
-    </div></div>`; }
 
 // ============================================================
 //  FIREBASE + AUTH
@@ -1464,37 +1407,7 @@ function initFirebase(){
           });
           // Real-time data sync — listen for remote changes
           db.ref('stats').on('value', snap=>{
-            const p=snap.val();
-            if(!p) return;
-            CATEGORIES.forEach(cat=>{
-              const fl=cat==='RESERVA'?RIVALS_RESERVA:RIVALS;
-              if(p.results?.[cat]) fl.forEach(r=>{ if(p.results[cat][r.f]){ results[cat][r.f]=p.results[cat][r.f]; resultsAuto.delete(cat+'|'+r.f); } });
-              if(p.links?.[cat])   fl.forEach(r=>{ if(p.links[cat][r.f]) links[cat][r.f]=p.links[cat][r.f]; });
-              if(p.goleadores?.[cat]) goleadores[cat]=p.goleadores[cat];
-              if(p.matchData?.[cat]) Object.assign(matchData[cat], p.matchData[cat]);
-              if(p.partidos?.[cat]) Object.assign(partidos[cat], p.partidos[cat]);
-              if(p.gymData?.[cat])   gymData[cat] = p.gymData[cat];
-              if(p.jugadores?.[cat]) jugadoresStats[cat] = p.jugadores[cat];
-              if(p.plantel?.[cat]) plantelFutdetail[cat] = p.plantel[cat];
-              if(cat==='RESERVA'&&p.rivalData?.['RESERVA']) Object.assign(rivalData['RESERVA'], p.rivalData['RESERVA']);
-              if(p.jugadoresArchivados) jugadoresArchivados = p.jugadoresArchivados;
-            });
-            assignPlayerIds();
-            // RESERVA_S2 (2do semestre)
-            const c2='RESERVA_S2';
-            if(p.results?.[c2]) RIVALS_RESERVA_S2.forEach(r=>{ if(p.results[c2][r.f]) results[c2][r.f]=p.results[c2][r.f]; });
-            if(p.links?.[c2])   RIVALS_RESERVA_S2.forEach(r=>{ if(p.links[c2][r.f]) links[c2][r.f]=p.links[c2][r.f]; });
-            if(p.goleadores?.[c2]) goleadores[c2]=p.goleadores[c2];
-            if(p.matchData?.[c2]) Object.assign(matchData[c2], p.matchData[c2]);
-            if(p.rivalData?.[c2]) Object.assign(rivalData[c2], p.rivalData[c2]);
-            if(p.chequeoSemanal) chequeoSemanal = p.chequeoSemanal;
-            if(p.aliasJugadores) aliasJugadores = p.aliasJugadores;
-            if(p.aliasJugadoresComet) aliasJugadoresComet = p.aliasJugadoresComet;
-            if(p.recordatoriosOmitidos) recordatoriosOmitidos = p.recordatoriosOmitidos;
-            if(p.golesMismatchOmitidos) golesMismatchOmitidos = p.golesMismatchOmitidos;
-            if(p.gpsMetricCfg) gpsMetricCfg = p.gpsMetricCfg;
-            if(p.gpsPosOverride) gpsPosOverride = p.gpsPosOverride;
-            if(p.correccionesNombres) correccionesNombres = p.correccionesNombres;
+            if(!hidratarStats(snap.val())) return;
             refreshActiveModule();
             setTimeout(refreshAlerts, 200);
           });
@@ -1606,13 +1519,59 @@ function saveData(){
       payload.results['RESERVA_S2'][r.f]=results['RESERVA_S2'][r.f]||null;
       payload.links['RESERVA_S2'][r.f]=links['RESERVA_S2'][r.f]||{};
     });
-    db.ref('stats').set(payload)
+    // update() y NO set(): set() pisa el nodo 'stats' ENTERO, así que
+    // cualquier dato que viva ahí y no esté en el payload se borraría en el
+    // próximo guardado (ya pasó con los informes de COMET, ver arriba). Con
+    // update() se reemplaza solo lo que el payload nombra -- mismo resultado
+    // para todo lo que sí está, sin el riesgo de borrar lo que falte.
+    db.ref('stats').update(payload)
       .then(()=>showToast('☁ GUARDADO'))
       .catch(e=>console.warn('save error:',e));
   },800);
 }
 
 // ── Load ALL data (stats + plantel + rendimiento) in one go ──
+// Vuelca un snapshot del nodo 'stats' de Firebase al estado en memoria de la
+// app. Lo usan los TRES lugares que reciben ese snapshot: la carga inicial
+// (loadData), el listener en vivo del usuario logueado y el listener público
+// (sin login). Antes era el mismo bloque copiado tres veces, ~40 líneas cada
+// uno: cada dato nuevo había que acordarse de sumarlo en los tres, y el
+// público se había quedado sin RESERVA_S2. Devuelve false si el snapshot vino
+// vacío, para que el que llama sepa que no hay nada que redibujar.
+function hidratarStats(p){
+  if(!p) return false;
+  CATEGORIES.forEach(cat=>{
+    const fl=cat==='RESERVA'?RIVALS_RESERVA:RIVALS;
+    if(p.results?.[cat]) fl.forEach(r=>{ if(p.results[cat][r.f]){ results[cat][r.f]=p.results[cat][r.f]; resultsAuto.delete(cat+'|'+r.f); } });
+    if(p.links?.[cat])   fl.forEach(r=>{ if(p.links[cat][r.f]) links[cat][r.f]=p.links[cat][r.f]; });
+    if(p.goleadores?.[cat]) goleadores[cat]=p.goleadores[cat];
+    if(p.matchData?.[cat]) Object.assign(matchData[cat], p.matchData[cat]);   // citaciones + cambios
+    if(p.partidos?.[cat]) Object.assign(partidos[cat], p.partidos[cat]);      // informes de COMET
+    if(p.gymData?.[cat])   gymData[cat] = p.gymData[cat];
+    if(p.jugadores?.[cat]) jugadoresStats[cat] = p.jugadores[cat];
+    if(p.plantel?.[cat]) plantelFutdetail[cat] = p.plantel[cat];
+    if(cat==='RESERVA'&&p.rivalData?.['RESERVA']) Object.assign(rivalData['RESERVA'], p.rivalData['RESERVA']);
+  });
+  if(p.jugadoresArchivados) jugadoresArchivados = p.jugadoresArchivados;
+  assignPlayerIds();
+  // RESERVA_S2 (2do semestre) -- clave separada, no forma parte de CATEGORIES
+  const c2='RESERVA_S2';
+  if(p.results?.[c2]) RIVALS_RESERVA_S2.forEach(r=>{ if(p.results[c2][r.f]) results[c2][r.f]=p.results[c2][r.f]; });
+  if(p.links?.[c2])   RIVALS_RESERVA_S2.forEach(r=>{ if(p.links[c2][r.f]) links[c2][r.f]=p.links[c2][r.f]; });
+  if(p.goleadores?.[c2]) goleadores[c2]=p.goleadores[c2];
+  if(p.matchData?.[c2]) Object.assign(matchData[c2], p.matchData[c2]);
+  if(p.rivalData?.[c2]) Object.assign(rivalData[c2], p.rivalData[c2]);
+  if(p.chequeoSemanal) chequeoSemanal = p.chequeoSemanal;
+  if(p.aliasJugadores) aliasJugadores = p.aliasJugadores;
+  if(p.aliasJugadoresComet) aliasJugadoresComet = p.aliasJugadoresComet;
+  if(p.recordatoriosOmitidos) recordatoriosOmitidos = p.recordatoriosOmitidos;
+  if(p.golesMismatchOmitidos) golesMismatchOmitidos = p.golesMismatchOmitidos;
+  if(p.gpsMetricCfg) gpsMetricCfg = p.gpsMetricCfg;
+  if(p.gpsPosOverride) gpsPosOverride = p.gpsPosOverride;
+  if(p.correccionesNombres) correccionesNombres = p.correccionesNombres;
+  return true;
+}
+
 function loadData(){
   return new Promise(resolve=>{
     if(!fbReady||!db){resolve();return;}
@@ -1635,42 +1594,7 @@ function loadData(){
       const snap = statsSnap;
       return snap;
     }).then(snap=>{
-      const p=snap.val();
-      if(p){
-        CATEGORIES.forEach(cat=>{
-          const fl=cat==='RESERVA'?RIVALS_RESERVA:RIVALS;
-          if(p.results?.[cat]) fl.forEach(r=>{ if(p.results[cat][r.f]){ results[cat][r.f]=p.results[cat][r.f]; resultsAuto.delete(cat+'|'+r.f); } });
-          if(p.links?.[cat])   fl.forEach(r=>{ if(p.links[cat][r.f]) links[cat][r.f]=p.links[cat][r.f]; });
-          if(p.goleadores?.[cat]) goleadores[cat]=p.goleadores[cat];
-          // Load matchData (lineup + cambios)
-          if(p.matchData?.[cat]) Object.assign(matchData[cat], p.matchData[cat]);
-          if(p.partidos?.[cat]) Object.assign(partidos[cat], p.partidos[cat]);
-          if(p.gymData?.[cat])   gymData[cat] = p.gymData[cat];
-          if(p.jugadores?.[cat]) jugadoresStats[cat] = p.jugadores[cat];
-          if(p.plantel?.[cat]) plantelFutdetail[cat] = p.plantel[cat];
-          // Load RESERVA fixture
-          if(cat==='RESERVA'&&p.rivalData?.['RESERVA']){
-            Object.assign(rivalData['RESERVA'], p.rivalData['RESERVA']);
-          }
-        });
-        if(p.jugadoresArchivados) jugadoresArchivados = p.jugadoresArchivados;
-        assignPlayerIds();
-        // Load RESERVA_S2 (2do semestre) — clave separada, no forma parte de CATEGORIES
-        const c2='RESERVA_S2';
-        if(p.results?.[c2]) RIVALS_RESERVA_S2.forEach(r=>{ if(p.results[c2][r.f]) results[c2][r.f]=p.results[c2][r.f]; });
-        if(p.links?.[c2])   RIVALS_RESERVA_S2.forEach(r=>{ if(p.links[c2][r.f]) links[c2][r.f]=p.links[c2][r.f]; });
-        if(p.goleadores?.[c2]) goleadores[c2]=p.goleadores[c2];
-        if(p.matchData?.[c2]) Object.assign(matchData[c2], p.matchData[c2]);
-        if(p.rivalData?.[c2]) Object.assign(rivalData[c2], p.rivalData[c2]);
-        if(p.chequeoSemanal) chequeoSemanal = p.chequeoSemanal;
-        if(p.aliasJugadores) aliasJugadores = p.aliasJugadores;
-        if(p.aliasJugadoresComet) aliasJugadoresComet = p.aliasJugadoresComet;
-        if(p.recordatoriosOmitidos) recordatoriosOmitidos = p.recordatoriosOmitidos;
-        if(p.golesMismatchOmitidos) golesMismatchOmitidos = p.golesMismatchOmitidos;
-        if(p.gpsMetricCfg) gpsMetricCfg = p.gpsMetricCfg;
-        if(p.gpsPosOverride) gpsPosOverride = p.gpsPosOverride;
-        if(p.correccionesNombres) correccionesNombres = p.correccionesNombres;
-      }
+      hidratarStats(snap.val());
       showLoading(false); resolve();
     }).catch(e=>{console.warn('load error:',e);showLoading(false);resolve();});
   });
@@ -1886,35 +1810,6 @@ function showOfflineBanner(){
   document.body.appendChild(b);
 }
 
-
-// ============================================================
-//  CAT SUBTABS
-// ============================================================
-function buildCatSubtabs(containerId, onSelect, activeDefault='GENERAL'){
-  const wrap=document.getElementById(containerId);
-  wrap.innerHTML='';
-  // GENERAL tab
-  const tg=document.createElement('div');
-  tg.className='cat-tab'+(activeDefault==='GENERAL'?' active':'');
-  tg.dataset.cat='GENERAL';
-  tg.textContent='⬡ GENERAL';
-  tg.addEventListener('click',()=>{ selectCatTab(containerId,'GENERAL'); onSelect('GENERAL'); });
-  wrap.appendChild(tg);
-  // Category tabs
-  CATEGORIES.forEach(cat=>{
-    const t=document.createElement('div');
-    t.className='cat-tab'+(activeDefault===cat?' active':'');
-    t.dataset.cat=cat;
-    t.style.color=CAT_COLORS[cat];
-    t.innerHTML=`<span class="cat-dot" style="background:${CAT_COLORS[cat]}"></span>${cat}`;
-    t.addEventListener('click',()=>{ selectCatTab(containerId,cat); onSelect(cat); });
-    wrap.appendChild(t);
-  });
-}
-function selectCatTab(containerId, cat){
-  document.getElementById(containerId).querySelectorAll('.cat-tab')
-    .forEach(t=>t.classList.toggle('active',t.dataset.cat===cat));
-}
 
 // ============================================================
 //  STATS MODULE BUILD
@@ -7267,32 +7162,7 @@ initFirebase()
 function startPublicListener(){
   if(!fbReady||!db) return;
   db.ref('stats').on('value', snap=>{
-    const p=snap.val();
-    if(!p) return;
-    CATEGORIES.forEach(cat=>{
-      const fl=cat==='RESERVA'?RIVALS_RESERVA:RIVALS;
-      if(p.results?.[cat]) fl.forEach(r=>{ if(p.results[cat][r.f]){ results[cat][r.f]=p.results[cat][r.f]; resultsAuto.delete(cat+'|'+r.f); } });
-      if(p.links?.[cat])   fl.forEach(r=>{ if(p.links[cat][r.f]) links[cat][r.f]=p.links[cat][r.f]; });
-      if(p.goleadores?.[cat]) goleadores[cat]=p.goleadores[cat];
-      if(p.matchData?.[cat]) Object.assign(matchData[cat], p.matchData[cat]);
-      if(p.partidos?.[cat]) Object.assign(partidos[cat], p.partidos[cat]);
-      if(p.gymData?.[cat])   gymData[cat] = p.gymData[cat];
-      if(p.jugadores?.[cat]) jugadoresStats[cat] = p.jugadores[cat];
-      if(p.plantel?.[cat]) plantelFutdetail[cat] = p.plantel[cat];
-      if(cat==='RESERVA'&&p.rivalData?.['RESERVA']){
-        Object.assign(rivalData['RESERVA'], p.rivalData['RESERVA']);
-      }
-    });
-    assignPlayerIds();
-    if(p.chequeoSemanal) chequeoSemanal = p.chequeoSemanal;
-    if(p.aliasJugadores) aliasJugadores = p.aliasJugadores;
-    if(p.aliasJugadoresComet) aliasJugadoresComet = p.aliasJugadoresComet;
-    if(p.jugadoresArchivados) jugadoresArchivados = p.jugadoresArchivados;
-    if(p.recordatoriosOmitidos) recordatoriosOmitidos = p.recordatoriosOmitidos;
-    if(p.golesMismatchOmitidos) golesMismatchOmitidos = p.golesMismatchOmitidos;
-    if(p.gpsMetricCfg) gpsMetricCfg = p.gpsMetricCfg;
-    if(p.gpsPosOverride) gpsPosOverride = p.gpsPosOverride;
-    if(p.correccionesNombres) correccionesNombres = p.correccionesNombres;
+    if(!hidratarStats(snap.val())) return;
     refreshActiveModule();
   });
 }

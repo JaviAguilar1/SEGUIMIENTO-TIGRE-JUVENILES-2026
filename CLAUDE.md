@@ -349,6 +349,39 @@ volver a desincronizar. No hubo que tocar nada en la app: ya leía
 `statfutbol_jugadores[cat]` igual para Reserva. Los minutos aparecen en la
 primera corrida de la PC.
 
+**Revisión completa del index (2026-09-21).** Se revisaron las 9606 líneas
+buscando bugs, repetidos y código muerto. Lo aplicado:
+- **`saveData()` ahora usa `update()` y no `set()`.** Hacía `.set()` del nodo
+  `stats` ENTERO, así que el payload tenía que listar los 18 campos siempre: un
+  dato nuevo olvidado ahí se borraba en el próximo guardado (ya había pasado con
+  los informes de COMET, de ahí el comentario de alerta en el código). Con
+  `update()` se reemplaza solo lo que el payload nombra. `clearData` usa
+  `.remove()` y cerrar temporada ya usaba `update()`, así que nada dependía de
+  ese borrado.
+- **`hidratarStats(p)`: una sola función** para volcar el snapshot de `stats` al
+  estado en memoria. Estaba copiada en tres lados (carga inicial, listener del
+  usuario logueado, listener público), ~40 líneas cada uno. **Bug que destapó:
+  el listener público no cargaba RESERVA_S2** — sin login, los cambios en vivo
+  del 2º semestre de Reserva no llegaban (la carga inicial sí lo traía, así que
+  solo se notaba en las actualizaciones). Cada llamador conserva su propio final
+  (refresh de UI, `showLoading`, etc.); la función solo hidrata y devuelve false
+  si el snapshot vino vacío.
+- **Código muerto borrado (~130 líneas):** `getBlocks`, `statsHTML`, `drawPie`,
+  `pieMini`, `buildCatSubtabs` y, en cascada, `selectCatTab` (su único llamador
+  era `buildCatSubtabs`) + el CSS que quedó sin dueño (`.stats-grid`,
+  `.cat-tab*`, `.pie-card*`, `.pie-stat-row`). **`buildPDFSection` NO se borró**:
+  la planilla de citaciones con firma (`generarPDF`/`renderChecklist`) está
+  entera y funcionando, solo le falta un botón que la dispare desde que se
+  reorganizó RENDIMIENTO — decidir si se resucita o se borra.
+- **Sin aplicar, quedan anotados:** el guardado de informes de COMET está
+  duplicado entre carga individual y carga en lote; dos armadores de chips casi
+  idénticos en la vista de citaciones; tres bloques iguales de canvas; y
+  `abrirPerfilJugador` (315 líneas), `renderStatsSingle` (295) y
+  `calcConfiabilidad` (240) concentran demasiado.
+- **Automatización posible, no hecha:** `RIVALS` tiene las 35 fechas con rival y
+  localía tipeadas a mano, y el scraper ya baja el fixture oficial con esos
+  mismos datos — se podría calcular solo, pero `RIVALS` se usa en toda la app.
+
 **Firebase — nodos raíz reales** (grep `db.ref` en `index.html`): `users`,
 `stats` (+ subnodos: `links`, `plantel`, `jugadores`, `aliasJugadores`,
 `aliasJugadoresComet`, `aliasJugadoresGps`, `recordatoriosOmitidos`,
