@@ -82,6 +82,163 @@ poblar en el backfill. El parser (`_catapult_actividades_partido`) mapea por dí
 real contra el fixture, no por el nombre, así que las variantes de nombre no
 importan.
 
+**Calibración por hora real del stream (2026-09-20).** Antes de mirar un solo
+cuadro, el scraper prueba una vía mucho más barata y más precisa que el OCR
+(`detectar_kickoffs_metadata`): si el video de YouTube fue una **transmisión en
+vivo**, YouTube guarda a qué hora real arrancó el stream
+(`liveBroadcastDetails.startTimestamp`, que yt-dlp expone como
+`release_timestamp`) y Catapult ya da a qué hora real arrancó cada tiempo
+(`periodos[].start`, epoch) → `kickoff_N = periodo_N.start − hora_del_segundo_0`.
+No necesita Tesseract ni bajar cuadros (~2s por fecha). Es además **más preciso
+que el OCR**: la app calcula `kickoff + (hora_esfuerzo − periodo.start)`, así que
+si el staff marcó el período corrido en OpenField —o el que opera el reloj del
+cartel VEO lo arrancó tarde— el error entra y sale por el mismo lado y se
+cancela; el OCR, que calibra contra el cartel, se lo come entero.
+- **MEDIDO EL 2026-09-20 — hoy esta vía no entra nunca:** de las 55 fechas con
+  link, **0 son transmisión en vivo** (`medir_video_sync.py` corrido en la PC).
+  El club transmite los partidos de local, pero a YouTube el video llega como
+  **archivo subido después**, y ahí YouTube borra la hora de grabación. O sea
+  que la calibración sigue saliendo del OCR del cartel o a mano. La vía se deja
+  igual porque no cuesta nada y es la más precisa el día que se suba un vivo,
+  pero **se corta sola**: si los primeros `_VIDEO_SONDEOS_MAX` (8) videos de la
+  corrida no son en vivo, no se pregunta por el resto (sin eso, gastaba ~2
+  minutos por corrida preguntando algo que ya sabemos que da que no).
+- **Tres validaciones antes de guardar**, porque una calibración mal escrita es
+  peor que ninguna: (1) el stream tiene que haber arrancado ANTES del saque
+  inicial y no más de una hora antes; (2) la duración del video tiene que
+  alcanzar para cubrir los dos tiempos (si pausaron la transmisión en el
+  entretiempo, el 2T caería corrido); (3) `_video_verificar_2t` mira **un solo
+  cuadro** en `kickoff2+5min` y confirma contra el cartel (VEO o LPF) que el
+  reloj va por donde debería — es la red contra una pausa corta que la duración
+  no llega a descartar. Si algo no cierra, devuelve None y sigue el camino del
+  OCR de siempre.
+- **Se auto-calibra** (`_video_metadata_offset`): una vez por corrida, y recién
+  cuando hay algo pendiente, mide el desfasaje de esta vía contra hasta 5 fechas
+  que YA estén calibradas (OCR o a mano) y aplica la mediana como corrección. Si
+  las muestras no se parecen entre sí (>30s de dispersión) no corrige nada y
+  avisa. O sea: no hay ninguna constante para mantener a mano.
+- `gps/videoSyncFallos` ahora guarda también con qué **vía** se intentó
+  (`_VIDEO_VIA_ACTUAL`): al sumar una vía nueva, las fechas que nunca se
+  pudieron leer se reintentan una vez más en vez de quedar descartadas para
+  siempre por los 3 fallos viejos.
+- **`scripts/medir_video_sync.py`** (nuevo, solo lee, no escribe nada): corre en
+  la PC (pide las credenciales de Firebase por teclado si no están en el
+  entorno) y dice cuántas fechas están calibradas y cuántas faltan, cuántas son
+  transmisión en vivo vs archivo subido, y cuánto se equivoca esta vía contra
+  cada fecha ya calibrada. Con `--rapido` saltea YouTube y solo informa la
+  cobertura (tarda segundos). Es la forma de verificar el desfasaje real antes de
+  confiar del todo (yo no pude correrlo: el entorno donde se programó esto no
+  tiene acceso ni a YouTube ni a Firebase).
+- **A TODOS los videos les recortan el entretiempo (medido el 2026-09-20).** En
+  las 17 fechas ya calibradas, el hueco entre el arranque del 1T y el del 2T
+  DENTRO del video da 2699-2795s, contra 3580-4105s de hora real: 0 de 17
+  continuos. Por eso **el 2T no se puede calcular con la hora de Catapult** —
+  un intento de hacerlo (`gpsVideoDerivar2T`, vivió unas horas) lo ponía entre
+  15 y 23 minutos corrido, y se borró. También se probó estimarlo con el fin
+  del 1T que marca Catapult (`p1.end − p1.start`): acierta dentro de ±34s en 11
+  de 17, pero se va hasta 7 minutos en las otras 6 (períodos cerrados tarde en
+  OpenField), así que quedó descartado.
+- **Vía del CORTE del entretiempo (2026-09-20, MEDIDA y enganchada).** Como a
+  todos los videos les recortan el entretiempo, entre los dos tiempos queda un
+  corte seco que se encuentra **sin leer ningún cartel** — es la única vía
+  automática que sirve en los partidos de visitante filmados a mano.
+  `_video_cortes_escena` corre la detección de escena de ffmpeg
+  (`select=gt(scene,0.12)` + `metadata=print`) sobre una ventana angosta (hueco
+  típico ±150s) y en la calidad más baja del video; `detectar_kickoffs_corte`
+  elige el corte y devuelve kickoff1/kickoff2. El 1T no se detecta: sale de la
+  mediana de lo ya calibrado (0-5s) y el pre-roll de 4s de la app se come ese
+  error. **Ojo con el `-t` de ffmpeg: va ANTES del `-i`** — como opción de
+  salida no corta nada, porque el filtro descarta todos los cuadros iguales y
+  ffmpeg termina leyendo el video entero.
+  - **Medido contra las 17 ya calibradas** (`medir_video_sync.py --cortes`,
+    corrido en la PC): el corte cae **siempre ~3s antes** del saque del 2T (el
+    que edita corta un toque antes de la pelota), con una dispersión de 3,7s
+    entre la mejor y la peor. Con `_VIDEO_CORTE_AJUSTE = 3.1` acierta dentro de
+    ±3s en **14 de 15**. Dos fechas (5TA F7, 6TA F1) no tienen ningún corte en
+    la ventana → se abstiene, no inventa.
+  - **La única que falló** (5TA F13) agarró un destello de 3 cuadros seguidos
+    con puntaje 1.00 a 85s del saque real. Se descarta sola con
+    `_VIDEO_CORTE_DESACUERDO` (60s): si el corte más marcado y el más cercano
+    al hueco típico están lejos uno del otro, el más marcado no es el del
+    entretiempo. En las 14 buenas nunca se separan más de 43s. Resultado con el
+    freno: **14 automáticas bien, 3 a mano, 0 mal calibradas**.
+  - Dos validaciones más antes de guardar: el corte tiene que caer dentro de la
+    ventana, y después del corte tiene que quedar video para un 2do tiempo
+    (`_VIDEO_2T_MINIMO`, 30 min) — la duración sale de la misma consulta a
+    YouTube que la URL del stream, no de una segunda.
+  - **La ventana se calcula por categoría** (`_video_tipicos`, mediana de lo ya
+    calibrado; si la categoría tiene menos de 3, las de todas; si no hay nada,
+    `_VIDEO_K1_TIPICO`/`_VIDEO_HUECO_TIPICO`). Importante porque lo medido es
+    4TA/5TA/6TA y 7MA-9NA pueden jugar tiempos más cortos.
+  - **Va última en la cascada** de `detectar_kickoffs_auto` (metadata → cartel →
+    corte): el OCR lee el marcador real y es más verificable, así que no se
+    toca lo que ya funciona. Excepción: si el OCR **ya se rindió** con esa fecha
+    (3 intentos), `saltear_ocr` va directo al corte — repetir el barrido serían
+    minutos de PC por fecha para volver a fallar igual.
+  - `_video_vias_nuevas` reemplaza la comparación cruda contra
+    `_VIDEO_VIA_ACTUAL`: calcula qué vías de hoy NO se probaron en esa fecha, y
+    si la única novedad es la de metadata (que ya se sabe que no aplica) no
+    reintenta. Al sumar una vía nueva de verdad, las fechas dadas por perdidas
+    se reabren una vez.
+  - **Medido sobre las 38 que faltan (2026-09-21, `--pendientes`): resuelve 15**
+    (4TA F6/F8/F12/F18/F22, 5TA F3/F15/F17/F22/F23, 6TA F6/F8/F13/F15/F17). La
+    cobertura pasa de 17 a 32 de 56 fechas.
+  - **La detección NO es reproducible al 100%:** entre dos corridas, 4TA F10 y
+    F12 se dieron vuelta (una calibró en una corrida y no en la otra). Es la
+    descarga de ese pedazo de video que a veces se traba. No es grave porque el
+    scraper reintenta hasta 3 veces en corridas distintas, pero los números
+    bailan un poco entre mediciones.
+  - **Segunda pasada con umbral bajo** (`_VIDEO_CORTE_UMBRAL_SUAVE`, 0.05): de
+    las que el corte no resolvía, 14 están editadas (lo confirma la duración,
+    ver abajo) pero el corte no aparecía con el umbral normal — probablemente
+    sea una fundida y no un corte seco. La segunda pasada solo corre cuando la
+    primera no encontró nada, así que no cambia en nada las fechas que ya
+    salían bien, y los tres frenos se aplican igual. **Sin medir todavía
+    cuántas recupera.**
+  - **Video continuo: se corta antes de gastar PC.** Si la duración dice que al
+    video NO le recortaron el entretiempo, no hay ningún corte que encontrar y
+    `_detectar_corte` devuelve None de entrada, sin bajar nada (le llega el
+    hueco real entre saques desde `detectar_kickoffs_auto`).
+- **Editado vs continuo, por la pura duración (medido el 2026-09-21,
+  `medir_video_sync.py --duraciones`).** Un video editado mide los dos tiempos
+  (~92 min) y uno continuo mide además todo el entretiempo (~110 min o más), así
+  que la duración sola dice cuál es cada uno sin mirar un cuadro (~2s por fecha,
+  ya viene en la misma consulta de metadata). La cuenta usa **solo los dos saques
+  iniciales** de Catapult, las únicas horas confiables (los finales de tiempo se
+  cierran tarde en OpenField). **Control: las 17 fechas ya calibradas dieron
+  "editado", las 17** — que es lo que se sabía de antes, así que al veredicto se
+  le puede creer. Resultado sobre las 55 con link: **46 editados, 7 continuos**
+  (4TA F4/F16/F25, 5TA F16/F25, 6TA F4/F16), 1 de 46 minutos (6TA F10, subieron
+  medio partido) y 1 privado (5TA F20). Los 7 continuos son exactamente 7 de las
+  que el corte no podía resolver: ningún video continuo dio un corte falso.
+  **En un video continuo el 2T SÍ sale de la hora de Catapult** (es el caso que
+  el `gpsVideoDerivar2T` borrado suponía para todos); lo que sigue sin saberse es
+  el arranque del 1T, porque esos videos traen previa.
+- **Calibración manual, de dos clics** (`gpsVideoCalibrarAbrir` /
+  `gpsVideoMarcarKickoff`): el botón "▶ BUSCARLO EN EL VIDEO" abre el
+  reproductor de siempre con ±1s/±5s y dos botones, "📍 ARRANCA EL 1T" y
+  "📍 ARRANCA EL 2T", que copian `_ytPlayer.getCurrentTime()` al formulario.
+  Al marcar el 1T, el video **salta solo** a donde debería arrancar el 2T, y
+  desde el 2026-09-21 el salto se elige según el tipo de video (`gpsVideoHuecos`,
+  misma cuenta que `--duraciones` pero con la duración que da el reproductor):
+  si el video es **recortado**, salta al hueco típico —`gpsVideoHuecoTipico(cat)`,
+  la mediana del hueco de las fechas YA calibradas (primero las de la misma
+  categoría, si no las de todas; 2750 de última), no una constante, se afina
+  sola—; si es **continuo**, salta al hueco REAL entre saques que da Catapult,
+  que ahí es exacto. El cartelito dice cuál de los dos usó y hay un botón
+  "probar el otro salto" por si erró. La persona igual confirma con el ojo
+  antes de guardar: nunca se completa el 2T solo (ese fue el error de
+  `gpsVideoDerivar2T`).
+  El otro dato medido: el 1T arranca entre 0 y 5s (mediana 3), o sea que a
+  estos videos también les recortan la previa.
+  `abrirVideoEmbebido` acepta un 5º parámetro opcional con botones propios
+  para la barra del reproductor — los dos usos que ya existían no cambian.
+- **Cobertura al 2026-09-21: 17 de 56 calibradas a mano/OCR, + 15 que resuelve
+  sola la vía del corte en cuanto corra la PC = 32.** De las que quedarían: 7
+  continuas (marcar solo el 1T, el 2T lo sugiere el salto de Catapult), 14
+  editadas sin corte visible (a ver qué recupera el umbral bajo), 1 privada y 1
+  de medio partido. La lista sale de `medir_video_sync.py --rapido`.
+
 **Citaciones provisionales (2026-09-19).** Las citaciones (titulares/suplentes
 por fecha) salen del PDF de la planilla oficial (`parseCitacionPdf` en la app
 → `stats/matchData`). Para las fechas **jugadas sin PDF**, el scraper las
@@ -1158,12 +1315,21 @@ Verificado en la app real (sin login, y por consola) que nada quedó roto:
 `buildPlantelModule`/`players` ya no existen.
 
 **Pendiente / a futuro:**
-- **Esfuerzos en video — visitante a mano:** local con cartel se calibra solo
-  (VEO + LPF); visitante (video sin cartel) sigue con el formulario manual del
-  modo VIDEO. El archivo de creds de la PC YA existe, así que video sync +
-  citaciones provisionales corren solos cada 4hs (verificado 2026-09-19). El
-  video sync deja de reintentar una fecha tras 3 fallos con el mismo link
-  (`gps/videoSyncFallos`).
+- **Esfuerzos en video — lo que falta calibrar:** ver la cobertura de arriba.
+  Lo que el detector no puede se marca a mano con el botón de dos clics. Si el
+  volumen lo justifica, el siguiente escalón sería leer el cartel con visión de
+  Claude sobre unos pocos cuadros, para los carteles que Tesseract no lee;
+  `medir_video_sync.py --rapido` informa cuántas de las que faltan ya fueron
+  dadas por perdidas por el detector (3 intentos) y cuántas ni se intentaron.
+  **Sin correr todavía: `--pendientes` de nuevo, para ver qué suma el umbral
+  bajo** sobre las 14 editadas en las que el corte no aparecía.
+  El archivo de creds de la PC YA existe, así que video sync + citaciones
+  provisionales corren solos cada 4hs (verificado 2026-09-19). El video sync
+  deja de reintentar una fecha tras 3 fallos con el mismo link
+  (`gps/videoSyncFallos`); ese "se rindió" se reabre al sumar una vía nueva
+  (`_VIDEO_VIA_ACTUAL`), **pero solo si la vía nueva puede aportar algo** — si
+  ya se vio que los videos de la corrida no son transmisiones en vivo, no se
+  repite el barrido de OCR que ya falló (medido: 8 reintentos en vez de 58).
 - **Auditoría de reglas de Firebase** (sin acceso a la consola): confirmar que
   `.read`/`.write` de `users`/`stats`/`gps`/`temporadaActiva`/
   `temporadas_cerradas`/`roles_taken` estén condicionados al rol, no solo a
