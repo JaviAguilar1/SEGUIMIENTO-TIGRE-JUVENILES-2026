@@ -1,5 +1,5 @@
 {
-  "actualizado": "2026-09-21 08:08",
+  "actualizado": "2026-09-22 00:09",
   "fuente": "ligaprofesional.ar (oficial)",
   "fuente_fixture": "ligaprofesional.ar (oficial)",
   "fuente_reserva": "statfutbol.com.ar",
@@ -21437,6 +21437,24 @@
         "goles": 2
       },
       "amarillas_riesgo": []
+    },
+    "9NA": {
+      "fecha": 27,
+      "rival": "ATL. RAFAELA",
+      "goleador": {
+        "nombre": "GIMENEZ, BAUTISTA",
+        "goles": 7
+      },
+      "amarillas_riesgo": []
+    },
+    "RESERVA_S2": {
+      "fecha": 10,
+      "rival": "DEFENSA Y JUSTICIA",
+      "goleador": {
+        "nombre": "CANTERO, EMILIANO",
+        "goles": 2
+      },
+      "amarillas_riesgo": []
     }
   },
   "statfutbol_jugadores": {
@@ -23116,6 +23134,416 @@
         "roja": 0
       }
     ],
+    "RESERVA": [
+      {
+        "nombre": "AFONSO, NICOLAS",
+        "pj": 11,
+        "min": 562,
+        "gol": 0,
+        "am": 2,
+        "roja": 0
+      },
+      {
+        "nombre": "AIRALA ZARATE, THIAGO LEONEL",
+        "pj": 8,
+        "min": 553,
+        "gol": 3,
+        "am": 0,
+        "roja": 0
+      },
+      {
+        "nombre": "AMBIELA, MARIO EMILIO",
+        "pj": 1,
+        "min": 18,
+        "gol": 1,
+        "am": 1,
+        "roja": 0
+      },
+      {
+        "nombre": "ANDRUSISEN, JORDAN LAUTARO",
+        "pj": 10,
+        "min": 576,
+        "gol": 0,
+        "am": 2,
+        "roja": 0
+      },
+      {
+        "nombre": "BENITEZ, CRISTIAN ALEJANDRO",
+        "pj": 2,
+        "min": 27,
+        "gol": 0,
+        "am": 0,
+        "roja": 0
+      },
+      {
+        "nombre": "BENITEZ, LAUTARO AGUSTIN",
+        "pj": 1,
+        "min": 3,
+        "gol": 0,
+        "am": 0,
+        "roja": 0
+      },
+      {
+        "nombre": "CACERES, THOMAS EDUARDO",
+        "pj": 6,
+        "min": 439,
+        "gol": 0,
+        "am": 2,
+        "roja": 0
+      },
+      {
+        "nombre": "CALDERON, ROMAN",
+        "pj": 4,
+        "min": 88,
+        "gol": 0,
+        "am": 0,
+        "roja": 0
+      },
+      {
+        "nombre": "CARRACEDO, LUCIAN",
+        "pj": 13,
+        "min": 1039,
+        "gol": 0,
+        "am": 2,
+        "roja": 0
+      },
+      {
+        "nombre": "CORDOBA, FABRICIO SANTIAGO",
+        "pj": 2,
+        "min": 48,
+        "gol": 0,
+        "am": 1,
+        "roja": 0
+      },
+      {
+        "nombre": "DELGADO, FRANCISCO NEHUEN",
+        "pj": 0,
+        "min": 0,
+        "gol": 0,
+        "am": 0,
+        "roja": 0
+      },
+      {
+        "nombre": "FERNANDEZ, TOMAS JULIAN",
+        "pj": 6,
+        "min": 388,
+        "gol": 0,
+        "am": 0,
+        "roja": 1
+      },
+      {
+        "nombre": "FEVERSANI, BAUTISTA",
+        "pj": 15,
+        "min": 1350,
+        "gol": 0,
+        "am": 3,
+        "roja": 0
+      },
+      {
+        "nombre": "FIGUEREDO, BENJAMIN",
+        "pj": 10,
+        "min": 463,
+        "gol": 0,
+        "am": 0,
+        "roja": 0
+      },
+      {
+        "nombre": "FREDES, FELIPE BENJAMIN",
+        "pj": 6,
+        "min": 221,
+        "gol": 0,
+        "am": 0,
+        "roja": 0
+      },
+      {
+        "nombre": "FREDES, TIAGO",
+        "pj": 3,
+        "min": 40,
+        "gol": 0,
+        "am": 1,
+        "roja": 0
+      },
+      {
+        "nombre": "FUSTER, LUKA",
+        "pj": 7,
+        "min": 630,
+        "gol": 0,
+        "am": 0,
+        "roja": 0
+      },
+      {
+        "nombre": "GALESIO, SANTINO",
+        "pj": 12,
+        "min": 756,
+        "gol": 1,
+        "am": 2,
+        "roja": 0
+      },
+      {
+        "nombre": "GONZALEZ, ALEX EMANUEL",
+        "pj": 12,
+        "min": 865,
+        "gol": 0,
+        "am": 2,
+        "roja": 0
+      },
+      {
+        "nombre": "GONZALEZ, SANTINO MARCO ANTONIO",
+        "pj": 1,
+        "min": 23,
+        "gol": 0,
+        "am": 0,
+        "roja": 0
+      },
+      {
+        "nombre": "JUAREZ, GUSTAVO NAHUEL",
+        "pj": 1,
+        "min": 13,
+        "gol": 0,
+        "am": 0,
+        "roja": 0
+      },
+      {
+        "nombre": "LEGUIZAMON, MAXIMO LEONEL",
+        "pj": 7,
+        "min": 630,
+        "gol": 0,
+        "am": 1,
+        "roja": 0
+      },
+      {
+        "nombre": "LESZCZUK, BRANDON DANIEL",
+        "pj": 5,
+        "min": 178,
+        "gol": 0,
+        "am": 0,
+        "roja": 0
+      },
+      {
+        "nombre": "LEZCANO, ALAN SEBASTIAN",
+        "pj": 10,
+        "min": 552,
+        "gol": 0,
+        "am": 2,
+        "roja": 0
+      },
+      {
+        "nombre": "LLERA, MARIANO",
+        "pj": 0,
+        "min": 0,
+        "gol": 0,
+        "am": 0,
+        "roja": 0
+      },
+      {
+        "nombre": "LUNA SEMINO, AGUSTIN",
+        "pj": 3,
+        "min": 226,
+        "gol": 0,
+        "am": 2,
+        "roja": 0
+      },
+      {
+        "nombre": "LUONGO, ALAN EZEQUIEL",
+        "pj": 0,
+        "min": 0,
+        "gol": 0,
+        "am": 0,
+        "roja": 0
+      },
+      {
+        "nombre": "LUQUE, GONZALO OMAR",
+        "pj": 1,
+        "min": 38,
+        "gol": 0,
+        "am": 0,
+        "roja": 0
+      },
+      {
+        "nombre": "MARCHESE, ANGELO",
+        "pj": 2,
+        "min": 145,
+        "gol": 0,
+        "am": 0,
+        "roja": 0
+      },
+      {
+        "nombre": "MAYER, TOMAS ALEJANDRO",
+        "pj": 10,
+        "min": 476,
+        "gol": 2,
+        "am": 1,
+        "roja": 0
+      },
+      {
+        "nombre": "MEDINA, ALEJANDRO ISMAEL",
+        "pj": 10,
+        "min": 326,
+        "gol": 0,
+        "am": 3,
+        "roja": 0
+      },
+      {
+        "nombre": "MEDINA, TIZIANO AGUSTIN",
+        "pj": 9,
+        "min": 810,
+        "gol": 0,
+        "am": 1,
+        "roja": 0
+      },
+      {
+        "nombre": "MINNITI, LUCIANO SALVADOR",
+        "pj": 1,
+        "min": 31,
+        "gol": 0,
+        "am": 0,
+        "roja": 0
+      },
+      {
+        "nombre": "MIÑO, ESTEBAN ROMAN",
+        "pj": 1,
+        "min": 23,
+        "gol": 0,
+        "am": 0,
+        "roja": 0
+      },
+      {
+        "nombre": "MOLAS, LUCAS GABRIEL",
+        "pj": 15,
+        "min": 1105,
+        "gol": 1,
+        "am": 1,
+        "roja": 0
+      },
+      {
+        "nombre": "NAVONI, ALVARO",
+        "pj": 8,
+        "min": 565,
+        "gol": 0,
+        "am": 1,
+        "roja": 0
+      },
+      {
+        "nombre": "ORDOÑEZ, IGNACIO ARIEL",
+        "pj": 9,
+        "min": 364,
+        "gol": 1,
+        "am": 0,
+        "roja": 0
+      },
+      {
+        "nombre": "PANNONI, LAUTARO BENJAMIN",
+        "pj": 1,
+        "min": 16,
+        "gol": 0,
+        "am": 1,
+        "roja": 0
+      },
+      {
+        "nombre": "PATERNOSTER, JOSE IGNACIO",
+        "pj": 5,
+        "min": 222,
+        "gol": 0,
+        "am": 1,
+        "roja": 0
+      },
+      {
+        "nombre": "PELUFFO, IGNACIO",
+        "pj": 6,
+        "min": 393,
+        "gol": 0,
+        "am": 0,
+        "roja": 0
+      },
+      {
+        "nombre": "PEREYRA SALERNO, MANUEL",
+        "pj": 0,
+        "min": 0,
+        "gol": 0,
+        "am": 0,
+        "roja": 0
+      },
+      {
+        "nombre": "PEREZ, GASTON IGNACIO",
+        "pj": 5,
+        "min": 376,
+        "gol": 0,
+        "am": 0,
+        "roja": 0
+      },
+      {
+        "nombre": "PESOLILLA, ROMAN",
+        "pj": 17,
+        "min": 960,
+        "gol": 3,
+        "am": 1,
+        "roja": 0
+      },
+      {
+        "nombre": "RAMOS LAHITTE, BAUTISTA",
+        "pj": 4,
+        "min": 360,
+        "gol": 0,
+        "am": 0,
+        "roja": 0
+      },
+      {
+        "nombre": "RIVAS ROJAS, MARCO ANTONIO",
+        "pj": 4,
+        "min": 204,
+        "gol": 0,
+        "am": 0,
+        "roja": 0
+      },
+      {
+        "nombre": "RUIZ, SANTIAGO AGUSTIN",
+        "pj": 0,
+        "min": 0,
+        "gol": 0,
+        "am": 0,
+        "roja": 0
+      },
+      {
+        "nombre": "SANCHEZ, THIAGO VALENTIN",
+        "pj": 13,
+        "min": 870,
+        "gol": 1,
+        "am": 1,
+        "roja": 0
+      },
+      {
+        "nombre": "SARAVIA, ROMAN LIONEL",
+        "pj": 9,
+        "min": 787,
+        "gol": 1,
+        "am": 1,
+        "roja": 0
+      },
+      {
+        "nombre": "SODERO MC CORMACK, SANTINO",
+        "pj": 1,
+        "min": 27,
+        "gol": 0,
+        "am": 0,
+        "roja": 0
+      },
+      {
+        "nombre": "VERA LORENZO, CONRADO",
+        "pj": 0,
+        "min": 0,
+        "gol": 0,
+        "am": 0,
+        "roja": 0
+      },
+      {
+        "nombre": "WIRZ, AXEL LEANDRO",
+        "pj": 1,
+        "min": 25,
+        "gol": 0,
+        "am": 0,
+        "roja": 0
+      }
+    ],
     "RESERVA_S2": [
       {
         "nombre": "AFONSO, NICOLAS",
@@ -23448,6 +23876,494 @@
     ]
   },
   "statfutbol_partidos": {
+    "4TA": {
+      "1": {
+        "GONZALEZ, ALEX EMANUEL": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "FREDES, FELIPE BENJAMIN": {
+          "goles": 1,
+          "amarilla": false,
+          "roja": false
+        },
+        "PANNONI, LAUTARO BENJAMIN": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "NAVONI, ALVARO": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        }
+      },
+      "2": {
+        "GONZALEZ, ALEX EMANUEL": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "FREDES, FELIPE BENJAMIN": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        }
+      },
+      "3": {
+        "CACERES, THOMAS EDUARDO": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "GONZALEZ, SANTINO MARCO ANTONIO": {
+          "goles": 1,
+          "amarilla": false,
+          "roja": false
+        },
+        "FREDES, FELIPE BENJAMIN": {
+          "goles": 1,
+          "amarilla": false,
+          "roja": false
+        }
+      },
+      "4": {
+        "ROJAS, ELIAS JOSUE": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "AGUIRRE ARAMBURU, IÑAKI": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "PANNONI, LAUTARO BENJAMIN": {
+          "goles": 1,
+          "amarilla": false,
+          "roja": false
+        },
+        "FIGUEREDO, BENJAMIN": {
+          "goles": 1,
+          "amarilla": false,
+          "roja": false
+        }
+      },
+      "5": {
+        "LESZCZUK, BRANDON DANIEL": {
+          "goles": 1,
+          "amarilla": false,
+          "roja": false
+        },
+        "GONZALEZ, SANTINO MARCO ANTONIO": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "ORDOÑEZ, IGNACIO ARIEL": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "PANNONI, LAUTARO BENJAMIN": {
+          "goles": 1,
+          "amarilla": false,
+          "roja": false
+        }
+      },
+      "6": {
+        "BENITEZ, LAUTARO AGUSTIN": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "ROJAS, ELIAS JOSUE": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "AGUIRRE ARAMBURU, IÑAKI": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "PANNONI, LAUTARO BENJAMIN": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "GONZALEZ, SANTINO MARCO ANTONIO": {
+          "goles": 1,
+          "amarilla": false,
+          "roja": false
+        },
+        "GOMEZ, LUKA THIAGO": {
+          "goles": 2,
+          "amarilla": false,
+          "roja": false
+        },
+        "COPES, TOMAS": {
+          "goles": 1,
+          "amarilla": true,
+          "roja": false
+        }
+      },
+      "7": {
+        "LUONGO, ALAN EZEQUIEL": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "PANNONI, LAUTARO BENJAMIN": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "BENITEZ, CRISTIAN ALEJANDRO": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        }
+      },
+      "8": {
+        "LUONGO, ALAN EZEQUIEL": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        }
+      },
+      "9": {
+        "SARAVIA, ROMAN LIONEL": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "ANDRUSISEN, JORDAN LAUTARO": {
+          "goles": 1,
+          "amarilla": false,
+          "roja": false
+        },
+        "BENITEZ, CRISTIAN ALEJANDRO": {
+          "goles": 1,
+          "amarilla": false,
+          "roja": false
+        },
+        "HILLAIRET, YAIR NATANAEL": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        }
+      },
+      "10": {
+        "LUONGO, ALAN EZEQUIEL": {
+          "goles": 1,
+          "amarilla": false,
+          "roja": false
+        },
+        "CACERES, THOMAS EDUARDO": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "SARAVIA, ROMAN LIONEL": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "ANDRUSISEN, JORDAN LAUTARO": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "PANNONI, LAUTARO BENJAMIN": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "FREDES, FELIPE BENJAMIN": {
+          "goles": 1,
+          "amarilla": false,
+          "roja": false
+        }
+      },
+      "11": {
+        "BENITEZ, LAUTARO AGUSTIN": {
+          "goles": 1,
+          "amarilla": false,
+          "roja": false
+        },
+        "GONZALEZ, SANTINO MARCO ANTONIO": {
+          "goles": 1,
+          "amarilla": true,
+          "roja": false
+        },
+        "HILLAIRET, YAIR NATANAEL": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        }
+      },
+      "12": {
+        "FREDES, FELIPE BENJAMIN": {
+          "goles": 1,
+          "amarilla": false,
+          "roja": false
+        },
+        "PANNONI, LAUTARO BENJAMIN": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "BENITEZ, CRISTIAN ALEJANDRO": {
+          "goles": 1,
+          "amarilla": false,
+          "roja": false
+        },
+        "FERREYRA, RODRIGO TOMAS": {
+          "goles": 1,
+          "amarilla": false,
+          "roja": false
+        }
+      },
+      "14": {
+        "AFONSO, NICOLAS": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        }
+      },
+      "15": {
+        "GONZALEZ, ALEX EMANUEL": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "AGUIRRE ARAMBURU, IÑAKI": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "GONZALEZ, SANTINO MARCO ANTONIO": {
+          "goles": 1,
+          "amarilla": false,
+          "roja": false
+        },
+        "BENITEZ, CRISTIAN ALEJANDRO": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "LEZCANO, CRISTIAN LEONEL": {
+          "goles": 0,
+          "amarilla": false,
+          "roja": true
+        }
+      },
+      "16": {
+        "AGUIRRE ARAMBURU, IÑAKI": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "ORDOÑEZ, IGNACIO ARIEL": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "FERREYRA, RODRIGO TOMAS": {
+          "goles": 1,
+          "amarilla": false,
+          "roja": false
+        },
+        "PANNONI, LAUTARO BENJAMIN": {
+          "goles": 0,
+          "amarilla": false,
+          "roja": true
+        }
+      },
+      "17": {
+        "GONZALEZ, SANTINO MARCO ANTONIO": {
+          "goles": 1,
+          "amarilla": false,
+          "roja": false
+        },
+        "FREDES, FELIPE BENJAMIN": {
+          "goles": 1,
+          "amarilla": false,
+          "roja": false
+        },
+        "FERREYRA, RODRIGO TOMAS": {
+          "goles": 2,
+          "amarilla": false,
+          "roja": false
+        },
+        "LESZCZUK, BRANDON DANIEL": {
+          "goles": 1,
+          "amarilla": false,
+          "roja": false
+        }
+      },
+      "18": {
+        "RUIZ, SANTIAGO AGUSTIN": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "FREDES, FELIPE BENJAMIN": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "FERREYRA, RODRIGO TOMAS": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "PANNONI, LAUTARO BENJAMIN": {
+          "goles": 0,
+          "amarilla": false,
+          "roja": true
+        }
+      },
+      "19": {
+        "LUONGO, ALAN EZEQUIEL": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "SARAVIA, ROMAN LIONEL": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "ANDRUSISEN, JORDAN LAUTARO": {
+          "goles": 1,
+          "amarilla": false,
+          "roja": false
+        },
+        "AFONSO, NICOLAS": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "BENITEZ, CRISTIAN ALEJANDRO": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "LESZCZUK, BRANDON DANIEL": {
+          "goles": 1,
+          "amarilla": false,
+          "roja": false
+        }
+      },
+      "20": {
+        "GONZALEZ, ALEX EMANUEL": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "AFONSO, NICOLAS": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "BENITEZ, CRISTIAN ALEJANDRO": {
+          "goles": 1,
+          "amarilla": false,
+          "roja": false
+        },
+        "GONZALEZ, SANTINO MARCO ANTONIO": {
+          "goles": 1,
+          "amarilla": false,
+          "roja": false
+        }
+      },
+      "21": {
+        "PEREZ, GASTON IGNACIO": {
+          "goles": 0,
+          "amarilla": false,
+          "roja": true
+        },
+        "GONZALEZ, SANTINO MARCO ANTONIO": {
+          "goles": 1,
+          "amarilla": false,
+          "roja": false
+        },
+        "ANDRUSISEN, JORDAN LAUTARO": {
+          "goles": 1,
+          "amarilla": true,
+          "roja": false
+        },
+        "BENITEZ, CRISTIAN ALEJANDRO": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "HILLAIRET, YAIR NATANAEL": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        }
+      },
+      "23": {
+        "LUONGO, ALAN EZEQUIEL": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "LOPEZ, FACUNDO IVAN": {
+          "goles": 1,
+          "amarilla": false,
+          "roja": false
+        },
+        "PANNONI, LAUTARO BENJAMIN": {
+          "goles": 1,
+          "amarilla": true,
+          "roja": false
+        },
+        "FREDES, FELIPE BENJAMIN": {
+          "goles": 2,
+          "amarilla": false,
+          "roja": false
+        },
+        "GOMEZ, LUKA THIAGO": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        }
+      },
+      "24": {
+        "ORDOÑEZ, IGNACIO ARIEL": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "FREDES, FELIPE BENJAMIN": {
+          "goles": 1,
+          "amarilla": true,
+          "roja": false
+        },
+        "BENITEZ, CRISTIAN ALEJANDRO": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        }
+      },
+      "25": {
+        "GONZALEZ, SANTINO MARCO ANTONIO": {
+          "goles": 1,
+          "amarilla": false,
+          "roja": false
+        },
+        "FREDES, FELIPE BENJAMIN": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        }
+      }
+    },
     "5TA": {
       "1": {
         "PEREYRA SALERNO, MANUEL": {
@@ -25363,6 +26279,721 @@
       },
       "25": {
         "DE OLIVERA, ELIAS JOAQUIN": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        }
+      }
+    },
+    "9NA": {
+      "1": {
+        "TULIS, FEDERICO ORLANDO": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "MORA, BAUTISTA SEBASTIAN": {
+          "goles": 0,
+          "amarilla": false,
+          "roja": true
+        },
+        "NUÑEZ, TIZIANO ENRIQUE": {
+          "goles": 1,
+          "amarilla": false,
+          "roja": false
+        },
+        "GOMEZ, JOAQUIN": {
+          "goles": 1,
+          "amarilla": false,
+          "roja": false
+        },
+        "MONZON, IAN BAUTISTA": {
+          "goles": 0,
+          "amarilla": false,
+          "roja": true
+        }
+      },
+      "2": {
+        "GOMEZ ZARRACHO, OCTAVIO": {
+          "goles": 0,
+          "amarilla": false,
+          "roja": true
+        },
+        "NUÑEZ, TIZIANO ENRIQUE": {
+          "goles": 1,
+          "amarilla": true,
+          "roja": false
+        }
+      },
+      "3": {
+        "TULIS, FEDERICO ORLANDO": {
+          "goles": 0,
+          "amarilla": false,
+          "roja": true
+        },
+        "DIAZ OLIVA, SANTIAGO": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "VILLALBA BOGADO, GUSTAVO": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "GOMEZ, JOAQUIN": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        }
+      },
+      "4": {
+        "SOTO, MATEO JOSE": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "ZAPATA, ALEJO SANTINO": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "GOMEZ, JOAQUIN": {
+          "goles": 2,
+          "amarilla": true,
+          "roja": false
+        },
+        "VILLALBA BOGADO, GUSTAVO": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "OLOCCO, MIKEAS DIDIER": {
+          "goles": 1,
+          "amarilla": false,
+          "roja": false
+        },
+        "NUÑEZ, TIZIANO ENRIQUE": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        }
+      },
+      "5": {
+        "GOMEZ ZARRACHO, OCTAVIO": {
+          "goles": 0,
+          "amarilla": false,
+          "roja": true
+        },
+        "SOTO, MATEO JOSE": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "DUARTE, GASTON EMANUEL": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "ENRIQUE, IAN AIRTON": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        }
+      },
+      "6": {
+        "SOTO, MATEO JOSE": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "DUARTE, GASTON EMANUEL": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "OLOCCO, MIKEAS DIDIER": {
+          "goles": 1,
+          "amarilla": false,
+          "roja": false
+        },
+        "VILLALBA BOGADO, GUSTAVO": {
+          "goles": 1,
+          "amarilla": false,
+          "roja": false
+        }
+      },
+      "7": {
+        "MORA, BAUTISTA SEBASTIAN": {
+          "goles": 1,
+          "amarilla": false,
+          "roja": false
+        },
+        "TULIS, FEDERICO ORLANDO": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "ENRIQUE, IAN AIRTON": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "DUARTE, GASTON EMANUEL": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "GOMEZ, JOAQUIN": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        }
+      },
+      "8": {
+        "ZAPATA, ALEJO SANTINO": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "GOMEZ, JOAQUIN": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "VILLALBA BOGADO, GUSTAVO": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        }
+      },
+      "9": {
+        "AGORRECA, IGNACIO CARLOS": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "DUARTE, GASTON EMANUEL": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "OLOCCO, MIKEAS DIDIER": {
+          "goles": 1,
+          "amarilla": false,
+          "roja": false
+        }
+      },
+      "10": {
+        "DUARTE, GASTON EMANUEL": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "SOTO, MATEO JOSE": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "GOMEZ, JOAQUIN": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "DUARTE, GONZALO ISAIAS": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        }
+      },
+      "11": {
+        "ZAPATA, ALEJO SANTINO": {
+          "goles": 1,
+          "amarilla": false,
+          "roja": false
+        }
+      },
+      "12": {
+        "DIAZ OLIVA, SANTIAGO": {
+          "goles": 1,
+          "amarilla": false,
+          "roja": false
+        },
+        "ZAPATA, ALEJO SANTINO": {
+          "goles": 1,
+          "amarilla": false,
+          "roja": false
+        }
+      },
+      "13": {
+        "GOMEZ ZARRACHO, OCTAVIO": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "DUARTE, GASTON EMANUEL": {
+          "goles": 0,
+          "amarilla": false,
+          "roja": true
+        },
+        "GOMEZ, JOAQUIN": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "ENRIQUE, IAN AIRTON": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "BOJORGE, IAN BENJAMIN": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        }
+      },
+      "14": {
+        "GOMEZ ZARRACHO, OCTAVIO": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "AGORRECA, IGNACIO CARLOS": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "OLOCCO, MIKEAS DIDIER": {
+          "goles": 1,
+          "amarilla": false,
+          "roja": false
+        },
+        "GOMEZ, JOAQUIN": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        }
+      },
+      "15": {
+        "NUÑEZ, TIZIANO ENRIQUE": {
+          "goles": 1,
+          "amarilla": false,
+          "roja": false
+        }
+      },
+      "16": {
+        "AGORRECA, IGNACIO CARLOS": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "DUARTE, GASTON EMANUEL": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        }
+      },
+      "17": {
+        "ZAPATA, ALEJO SANTINO": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "GOMEZ, JOAQUIN": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        }
+      },
+      "18": {
+        "ALVARENGA, ADRIANO MARTIN": {
+          "goles": 1,
+          "amarilla": false,
+          "roja": false
+        },
+        "DUARTE, GASTON EMANUEL": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "MONZON, IAN BAUTISTA": {
+          "goles": 1,
+          "amarilla": false,
+          "roja": false
+        },
+        "ZAPATA, ALEJO SANTINO": {
+          "goles": 1,
+          "amarilla": false,
+          "roja": false
+        },
+        "HOLM, IAN NATANAEL": {
+          "goles": 1,
+          "amarilla": false,
+          "roja": false
+        }
+      },
+      "19": {
+        "TORRECILLA, ENZO FRANCISCO": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        }
+      },
+      "20": {
+        "TULIS, FEDERICO ORLANDO": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "IBAÑEZ, BASTIAN LAUTARO": {
+          "goles": 0,
+          "amarilla": false,
+          "roja": true
+        },
+        "VILLALBA BOGADO, GUSTAVO": {
+          "goles": 1,
+          "amarilla": false,
+          "roja": false
+        }
+      },
+      "21": {
+        "VILLALBA BOGADO, GUSTAVO": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "TULIS, FEDERICO ORLANDO": {
+          "goles": 1,
+          "amarilla": false,
+          "roja": false
+        }
+      },
+      "22": {
+        "AGORRECA, IGNACIO CARLOS": {
+          "goles": 1,
+          "amarilla": false,
+          "roja": false
+        }
+      },
+      "23": {
+        "DUARTE, GASTON EMANUEL": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "VILLALBA BOGADO, GUSTAVO": {
+          "goles": 1,
+          "amarilla": false,
+          "roja": false
+        },
+        "NUÑEZ, TIZIANO ENRIQUE": {
+          "goles": 1,
+          "amarilla": false,
+          "roja": false
+        }
+      },
+      "24": {
+        "DUARTE, GASTON EMANUEL": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        }
+      },
+      "25": {
+        "ORTIZ, LEONARDO ARIEL": {
+          "goles": 1,
+          "amarilla": false,
+          "roja": false
+        },
+        "DUARTE, GASTON EMANUEL": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "VILLALBA BOGADO, GUSTAVO": {
+          "goles": 1,
+          "amarilla": false,
+          "roja": false
+        }
+      }
+    },
+    "RESERVA": {
+      "1": {
+        "CORDOBA, FABRICIO SANTIAGO": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "MEDINA, ALEJANDRO ISMAEL": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        }
+      },
+      "2": {
+        "AFONSO, NICOLAS": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "FREDES, TIAGO": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "MEDINA, ALEJANDRO ISMAEL": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        }
+      },
+      "3": {
+        "FEVERSANI, BAUTISTA": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "SANCHEZ, THIAGO VALENTIN": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "CARRACEDO, LUCIAN": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "PESOLILLA, ROMAN": {
+          "goles": 1,
+          "amarilla": false,
+          "roja": false
+        }
+      },
+      "4": {
+        "MOLAS, LUCAS GABRIEL": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "PATERNOSTER, JOSE IGNACIO": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "ANDRUSISEN, JORDAN LAUTARO": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        }
+      },
+      "5": {
+        "SARAVIA, ROMAN LIONEL": {
+          "goles": 1,
+          "amarilla": false,
+          "roja": false
+        },
+        "GALESIO, SANTINO": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        }
+      },
+      "6": {
+        "MOLAS, LUCAS GABRIEL": {
+          "goles": 1,
+          "amarilla": false,
+          "roja": false
+        },
+        "SARAVIA, ROMAN LIONEL": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "ANDRUSISEN, JORDAN LAUTARO": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "MEDINA, ALEJANDRO ISMAEL": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        }
+      },
+      "7": {
+        "FERNANDEZ, TOMAS JULIAN": {
+          "goles": 0,
+          "amarilla": false,
+          "roja": true
+        },
+        "GALESIO, SANTINO": {
+          "goles": 1,
+          "amarilla": false,
+          "roja": false
+        },
+        "MAYER, TOMAS ALEJANDRO": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "AMBIELA, MARIO EMILIO": {
+          "goles": 1,
+          "amarilla": true,
+          "roja": false
+        }
+      },
+      "8": {
+        "LEGUIZAMON, MAXIMO LEONEL": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "CARRACEDO, LUCIAN": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "AFONSO, NICOLAS": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "LEZCANO, ALAN SEBASTIAN": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "MAYER, TOMAS ALEJANDRO": {
+          "goles": 1,
+          "amarilla": false,
+          "roja": false
+        }
+      },
+      "9": {
+        "FEVERSANI, BAUTISTA": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "LUNA SEMINO, AGUSTIN": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        }
+      },
+      "10": {
+        "LUNA SEMINO, AGUSTIN": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        }
+      },
+      "11": {
+        "FEVERSANI, BAUTISTA": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "SANCHEZ, THIAGO VALENTIN": {
+          "goles": 1,
+          "amarilla": false,
+          "roja": false
+        },
+        "PESOLILLA, ROMAN": {
+          "goles": 1,
+          "amarilla": false,
+          "roja": false
+        }
+      },
+      "12": {
+        "ORDOÑEZ, IGNACIO ARIEL": {
+          "goles": 1,
+          "amarilla": false,
+          "roja": false
+        },
+        "PESOLILLA, ROMAN": {
+          "goles": 1,
+          "amarilla": false,
+          "roja": false
+        }
+      },
+      "13": {
+        "GONZALEZ, ALEX EMANUEL": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "MEDINA, TIZIANO AGUSTIN": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        }
+      },
+      "14": {
+        "GONZALEZ, ALEX EMANUEL": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "PESOLILLA, ROMAN": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "LEZCANO, ALAN SEBASTIAN": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "GALESIO, SANTINO": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "AIRALA ZARATE, THIAGO LEONEL": {
+          "goles": 1,
+          "amarilla": false,
+          "roja": false
+        }
+      },
+      "15": {
+        "NAVONI, ALVARO": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "AIRALA ZARATE, THIAGO LEONEL": {
+          "goles": 1,
+          "amarilla": false,
+          "roja": false
+        }
+      },
+      "16": {
+        "CACERES, THOMAS EDUARDO": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        }
+      },
+      "17": {
+        "CACERES, THOMAS EDUARDO": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        }
+      },
+      "18": {
+        "MAYER, TOMAS ALEJANDRO": {
+          "goles": 1,
+          "amarilla": false,
+          "roja": false
+        },
+        "AIRALA ZARATE, THIAGO LEONEL": {
+          "goles": 1,
+          "amarilla": false,
+          "roja": false
+        },
+        "PANNONI, LAUTARO BENJAMIN": {
           "goles": 0,
           "amarilla": true,
           "roja": false
@@ -32260,30 +33891,6 @@
               ]
             },
             {
-              "fecha": "F5",
-              "opp": "newells",
-              "min": 107,
-              "metrics": [
-                8652.40283,
-                80.81323,
-                456.51001,
-                293.93,
-                126.19,
-                8,
-                30.53899,
-                30,
-                37,
-                62,
-                null,
-                4.56671,
-                -5.52903,
-                0.28,
-                12.162328767123288,
-                1.18,
-                1164.96069
-              ]
-            },
-            {
               "fecha": "F9",
               "opp": "talleres",
               "min": 50,
@@ -32526,30 +34133,6 @@
                 14.857067892800838,
                 1.06,
                 889.56967
-              ]
-            },
-            {
-              "fecha": "F5",
-              "opp": "newells",
-              "min": 58,
-              "metrics": [
-                2879.04517,
-                50.59241,
-                134.37,
-                127.11,
-                73.7,
-                4,
-                28.25008,
-                16,
-                25,
-                18,
-                null,
-                4.56589,
-                -4.97213,
-                0.28,
-                8.908564709252365,
-                1.27,
-                352.91202
               ]
             },
             {
@@ -34831,30 +36414,6 @@
               ]
             },
             {
-              "fecha": "F5",
-              "opp": "newells",
-              "min": 58,
-              "metrics": [
-                2049.15112,
-                35.7192,
-                73.74,
-                22.12,
-                16.43,
-                1,
-                26.50877,
-                6,
-                14,
-                12,
-                null,
-                4.20322,
-                -5.66285,
-                0.1,
-                3.7863076482383273,
-                0.28,
-                235.48524
-              ]
-            },
-            {
               "fecha": "F6",
               "opp": "Smsj",
               "min": 50,
@@ -35030,30 +36589,6 @@
                 14.972844162523572,
                 1.81,
                 977.74481
-              ]
-            },
-            {
-              "fecha": "F5",
-              "opp": "newells",
-              "min": 58,
-              "metrics": [
-                2360.89111,
-                41.79925,
-                80.78,
-                52.21,
-                36.33,
-                2,
-                27.22171,
-                11,
-                9,
-                20,
-                null,
-                3.86917,
-                -4.37319,
-                0.19,
-                4.6853623603551995,
-                0.63,
-                322.14682
               ]
             },
             {
@@ -41855,30 +43390,6 @@
               ]
             },
             {
-              "fecha": "F6",
-              "opp": "San Martin SJ",
-              "min": 83,
-              "metrics": [
-                6286.01221,
-                88.74516,
-                111.26,
-                123.38,
-                113.28,
-                4,
-                31.83564,
-                29,
-                6,
-                25,
-                null,
-                5.4304,
-                -7.28437,
-                0.35,
-                5.401261819524491,
-                1.36,
-                774.60196
-              ]
-            },
-            {
               "fecha": "F7",
               "opp": "Argentinos Jrs",
               "min": 95,
@@ -42102,30 +43613,6 @@
                 22.631018929223245,
                 0.91,
                 1011.78616
-              ]
-            },
-            {
-              "fecha": "F6",
-              "opp": "San Martin SJ",
-              "min": 68,
-              "metrics": [
-                7854.80811,
-                114.67013,
-                492.86002,
-                408.25,
-                171.18,
-                7,
-                29.09978,
-                25,
-                37,
-                56,
-                null,
-                4.02253,
-                -5.42937,
-                0.37,
-                24.222046642903198,
-                2.52,
-                720.33075
               ]
             },
             {
@@ -42400,30 +43887,6 @@
                 8.339498895350564,
                 1.36,
                 736.97772
-              ]
-            },
-            {
-              "fecha": "F6",
-              "opp": "San Martin SJ",
-              "min": 23,
-              "metrics": [
-                2266.8689,
-                99.82688,
-                107.99,
-                139.25999,
-                38.2,
-                1,
-                30.02064,
-                9,
-                10,
-                19,
-                null,
-                6.93627,
-                -4.04959,
-                0.39,
-                17.064910604192352,
-                1.66,
-                228.60016
               ]
             },
             {
@@ -43234,30 +44697,6 @@
               ]
             },
             {
-              "fecha": "F6",
-              "opp": "San Martin SJ",
-              "min": 46,
-              "metrics": [
-                5263.96436,
-                113.97974,
-                320.37,
-                350.34,
-                84.58,
-                4,
-                29.34373,
-                13,
-                21,
-                49,
-                null,
-                4.61671,
-                -5.74244,
-                0.28,
-                23.741681486827858,
-                1.84,
-                541.96454
-              ]
-            },
-            {
               "fecha": "F7",
               "opp": "Argentinos Jrs",
               "min": 20,
@@ -43500,30 +44939,6 @@
                 13.095992069905014,
                 1.39,
                 776.4285
-              ]
-            },
-            {
-              "fecha": "F6",
-              "opp": "San Martin SJ",
-              "min": 91,
-              "metrics": [
-                9403.70996,
-                103.01672,
-                339.92001,
-                354.42999,
-                118.9,
-                6,
-                31.79372,
-                18,
-                23,
-                58,
-                null,
-                3.73822,
-                -4.99242,
-                0.2,
-                13.65199926967318,
-                1.31,
-                1017.19501
               ]
             },
             {
@@ -43798,30 +45213,6 @@
                 23.67265284766785,
                 1.84,
                 392.96753
-              ]
-            },
-            {
-              "fecha": "F6",
-              "opp": "San Martin SJ",
-              "min": 91,
-              "metrics": [
-                10965.8457,
-                120.12977,
-                597.7,
-                377.56,
-                65.62,
-                3,
-                29.37576,
-                28,
-                44,
-                71,
-                null,
-                4.68524,
-                -5.35283,
-                0.31,
-                20.32704013145883,
-                0.72,
-                1011.30853
               ]
             },
             {
@@ -44325,30 +45716,6 @@
               ]
             },
             {
-              "fecha": "F6",
-              "opp": "San Martin SJ",
-              "min": 46,
-              "metrics": [
-                5000.59033,
-                108.27695,
-                249.38,
-                254.37,
-                38.07,
-                3,
-                27.08101,
-                5,
-                17,
-                35,
-                null,
-                3.47426,
-                -6.4127,
-                0.11,
-                17.876146012269942,
-                0.83,
-                578.70648
-              ]
-            },
-            {
               "fecha": "F7",
               "opp": "Argentinos Jrs",
               "min": 20,
@@ -44543,30 +45910,6 @@
                 26.81940434283906,
                 2.22,
                 229.3708
-              ]
-            },
-            {
-              "fecha": "F6",
-              "opp": "San Martin SJ",
-              "min": 45,
-              "metrics": [
-                5063.49756,
-                112.27267,
-                220.05,
-                176.24001,
-                47.5,
-                3,
-                28.08668,
-                10,
-                19,
-                26,
-                null,
-                4.02998,
-                -5.45494,
-                0.22,
-                19.920621064301553,
-                1.06,
-                575.77704
               ]
             },
             {
@@ -45161,30 +46504,6 @@
               ]
             },
             {
-              "fecha": "F6",
-              "opp": "San Martin SJ",
-              "min": 46,
-              "metrics": [
-                5060.21143,
-                109.56791,
-                237.53999,
-                227.67999,
-                143.41,
-                7,
-                29.18844,
-                13,
-                14,
-                34,
-                null,
-                3.67721,
-                -5.23726,
-                0.28,
-                19.15604431613136,
-                3.12,
-                527.34192
-              ]
-            },
-            {
               "fecha": "F7",
               "opp": "Argentinos Jrs",
               "min": 63,
@@ -45502,30 +46821,6 @@
               ]
             },
             {
-              "fecha": "F6",
-              "opp": "San Martin SJ",
-              "min": 45,
-              "metrics": [
-                4701.82471,
-                104.25332,
-                203.11,
-                169.17999,
-                134.38,
-                9,
-                31.12306,
-                12,
-                12,
-                27,
-                null,
-                4.67392,
-                -5.66029,
-                0.27,
-                16.972948780487805,
-                2.99,
-                481.80219
-              ]
-            },
-            {
               "fecha": "F8",
               "opp": "Instituto",
               "min": 95,
@@ -45701,30 +46996,6 @@
                 11.706569040547077,
                 0.0,
                 153.24969
-              ]
-            },
-            {
-              "fecha": "F6",
-              "opp": "San Martin SJ",
-              "min": 91,
-              "metrics": [
-                8808.8833,
-                96.50046,
-                324.84001,
-                101.77,
-                93.87,
-                3,
-                30.12452,
-                17,
-                24,
-                45,
-                null,
-                4.38114,
-                -4.74739,
-                0.19,
-                10.453715647252146,
-                1.03,
-                1042.4379
               ]
             },
             {
@@ -46071,30 +47342,6 @@
                 6.925941306755261,
                 0.59,
                 590.42465
-              ]
-            },
-            {
-              "fecha": "F6",
-              "opp": "San Martin SJ",
-              "min": 45,
-              "metrics": [
-                4339.08447,
-                100.33803,
-                76.6,
-                73.78,
-                30.89,
-                2,
-                27.3951,
-                13,
-                7,
-                20,
-                null,
-                3.90491,
-                -5.40039,
-                0.29,
-                7.9002217294900206,
-                0.69,
-                576.34406
               ]
             },
             {
@@ -46537,30 +47784,6 @@
                 9.364308012486994,
                 0.73,
                 1077.46368
-              ]
-            },
-            {
-              "fecha": "F6",
-              "opp": "San Martin SJ",
-              "min": 91,
-              "metrics": [
-                9082.45068,
-                99.49736,
-                297.61,
-                211.35,
-                166.48,
-                6,
-                31.95892,
-                14,
-                30,
-                44,
-                null,
-                4.11646,
-                -5.6907,
-                0.15,
-                11.28289209421216,
-                1.83,
-                970.25635
               ]
             },
             {
@@ -221744,14 +222967,5 @@
         }
       }
     }
-  },
-  "errores": [
-    "statfutbol 9NA: <urlopen error [WinError 10060] Se produjo un error durante el intento de conexión ya que la parte conectada no respondió adecuadamente tras un periodo de tiempo, o bien se produjo un error en la conexión establecida ya que el host conectado no ha podido responder>",
-    "statfutbol partidos 4TA: <urlopen error [WinError 10060] Se produjo un error durante el intento de conexión ya que la parte conectada no respondió adecuadamente tras un periodo de tiempo, o bien se produjo un error en la conexión establecida ya que el host conectado no ha podido responder>",
-    "statfutbol partidos 9NA: <urlopen error [WinError 10060] Se produjo un error durante el intento de conexión ya que la parte conectada no respondió adecuadamente tras un periodo de tiempo, o bien se produjo un error en la conexión establecida ya que el host conectado no ha podido responder>",
-    "statfutbol jugadores RESERVA: <urlopen error [WinError 10060] Se produjo un error durante el intento de conexión ya que la parte conectada no respondió adecuadamente tras un periodo de tiempo, o bien se produjo un error en la conexión establecida ya que el host conectado no ha podido responder>",
-    "statfutbol partidos RESERVA: cannot access local variable 'team_id_r' where it is not associated with a value",
-    "statfutbol RESERVA_S2: <urlopen error [WinError 10060] Se produjo un error durante el intento de conexión ya que la parte conectada no respondió adecuadamente tras un periodo de tiempo, o bien se produjo un error en la conexión establecida ya que el host conectado no ha podido responder>",
-    "Catapult efforts: <urlopen error [Errno 11001] getaddrinfo failed>"
-  ]
+  }
 }
