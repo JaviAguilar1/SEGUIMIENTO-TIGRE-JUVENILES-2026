@@ -6483,6 +6483,7 @@ function renderGoleadores(cat){
         <input class="gol-input" id="gol-name-${cat}" placeholder="Nombre del jugador…" autocomplete="off">
         <input class="gol-fecha-input" id="gol-fecha-${cat}" type="number" min="1" max="35" placeholder="F#">
         <input class="gol-fecha-input" id="gol-count-${cat}" type="number" min="1" max="9" value="1" style="width:40px">
+        <input class="gol-fecha-input" id="gol-min-${cat}" type="text" placeholder="Min." title="Minuto(s) del gol -- separados por coma si carga más de uno junto (ej. 20,45)" style="width:56px">
         <button class="btn-add-gol" onclick="addGoleador('${cat}')">+ GOL</button>
       </div>`:''}
     </div>
@@ -6875,6 +6876,7 @@ function addGoleador(cat){
   const nameEl=document.getElementById(`gol-name-${cat}`);
   const fechaEl=document.getElementById(`gol-fecha-${cat}`);
   const countEl=document.getElementById(`gol-count-${cat}`);
+  const minEl=document.getElementById(`gol-min-${cat}`);
   const name=nameEl.value.trim();
   const fecha=parseInt(fechaEl.value);
   const count=parseInt(countEl.value)||1;
@@ -6884,8 +6886,14 @@ function addGoleador(cat){
     return;
   }
   if(!goleadores[cat])goleadores[cat]=[];
-  goleadores[cat].push({name,goals:count,fecha});
-  nameEl.value=''; fechaEl.value=''; countEl.value='1';
+  const entry={name,goals:count,fecha};
+  // Minuto(s) del gol, opcional -- se muestra en la Ficha del jugador
+  // (Partidos jugados / Eventos) para fechas sin informe de COMET, mismo
+  // formato "⚽24'" que ya usan los goles que sí vienen de COMET.
+  const minutos=(minEl?.value||'').trim();
+  if(minutos) entry.minutos=minutos.split(',').map(s=>s.trim()).filter(Boolean);
+  goleadores[cat].push(entry);
+  nameEl.value=''; fechaEl.value=''; countEl.value='1'; if(minEl) minEl.value='';
   saveData();
   renderGoleadores(cat);
 }
@@ -9326,12 +9334,30 @@ function abrirPerfilJugador(cat, nombre){
   const golesFinal = geEntry ? geEntry.goals : golCometSum;
   const amarillasFinal = tarjetasPorFecha('amarilla');
   const rojasFinal = tarjetasPorFecha('roja');
-  // Reserva y 7MA-9NA (sin COMET): los goles de cada fecha (carga manual/
-  // statfutbol, vía golesEfectivos) van al frente de Eventos.
-  if((esReserva || !Object.keys(partidos[cat]||{}).length) && geEntry){
+  // Fechas SIN informe de COMET (Reserva y 7MA-9NA siempre; en 4TA-6TA
+  // cualquier fecha suelta sin COMET cargado, ej. recién jugada): los goles
+  // de esa fecha (carga manual/statfutbol, vía golesEfectivos) van al frente
+  // de Eventos. Antes esto solo corría si la categoría ENTERA no tenía
+  // ningún COMET cargado -- una fecha sin COMET en 4TA/5TA/6TA se quedaba
+  // sin mostrar el gol acá aunque sí estuviera en "Mi carga". Por fecha, no
+  // por categoría, para no pisar lo que el bloque de COMET de arriba ya puso.
+  // Si la carga manual (goleadores[cat]) tiene el minuto cargado, se muestra
+  // igual que un gol de COMET ("⚽24'"); si no, queda el ícono solo.
+  if(geEntry){
     partidosJugados.forEach(pj=>{
-      const n = geEntry.fechas.filter(f=>f===`F${pj.fecha}`).length;
-      if(n) pj.eventos.unshift(...Array(n).fill('⚽'));
+      if((partidos[cat]||{})[pj.fecha]) return; // esta fecha ya sumó sus goles reales de COMET arriba
+      const golesManual = (goleadores[cat]||[]).filter(g=>g.fecha===pj.fecha && sonMismoJugador(g.name));
+      if(golesManual.length){
+        const chips=[];
+        golesManual.forEach(g=>{
+          const mins=g.minutos||[];
+          for(let i=0;i<(g.goals||0);i++) chips.push(`⚽${mins[i]?minSuf(mins[i]):''}`);
+        });
+        pj.eventos.unshift(...chips);
+      } else {
+        const n = geEntry.fechas.filter(f=>f===`F${pj.fecha}`).length;
+        if(n) pj.eventos.unshift(...Array(n).fill('⚽'));
+      }
     });
   }
 
