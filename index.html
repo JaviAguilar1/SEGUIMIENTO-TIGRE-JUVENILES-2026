@@ -1850,7 +1850,25 @@ function populateDtRoleSelect(filtrarOcupados){
       : `<option value="">Ya están todos los roles creados</option>`;
   };
   if(filtrarOcupados && fbReady && db){
-    db.ref('roles_taken').once('value').then(snap=>build(snap.val()?Object.keys(snap.val()):[])).catch(()=>build([]));
+    // roles_taken solo sabe de las cuentas de DT creadas DESDE este mismo
+    // signup -- si alguna se creó a mano en la consola de Firebase con el
+    // rol puesto directo, roles_taken nunca se entera y el desplegable la
+    // seguía ofreciendo como libre (así se duplicaron cat_4TA/5TA/6TA; no
+    // se puede arreglar esa desincronización desde acá, ni siquiera como
+    // admin -- roles_taken solo se puede escribir para uno mismo, ver
+    // doDtSubmit). Por eso ahora también se mira directo en users/ qué
+    // roles ya tienen alguna cuenta real, sea como sea que se haya creado
+    // -- y si esa lectura no estuviera permitida sin sesión, se sigue
+    // usando roles_taken como antes, no queda peor que hoy.
+    Promise.allSettled([
+      db.ref('users').once('value'),
+      db.ref('roles_taken').once('value'),
+    ]).then(([usersR, takenR])=>{
+      const ocupados = new Set();
+      if(takenR.status==='fulfilled' && takenR.value.val()) Object.keys(takenR.value.val()).forEach(r=>ocupados.add(r));
+      if(usersR.status==='fulfilled' && usersR.value.val()) Object.values(usersR.value.val()).forEach(u=>{ if(u.role) ocupados.add(u.role); });
+      build([...ocupados]);
+    });
   } else {
     build([]);
   }
