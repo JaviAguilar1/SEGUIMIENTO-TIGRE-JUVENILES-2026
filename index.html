@@ -1356,6 +1356,17 @@ function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').r
 // Sufijo "N'" de un minuto de gol/tarjeta -- vacío si no hay minuto cargado
 // (en vez de imprimir "undefined'" como pasaba antes).
 function minSuf(m){ return m!=null ? m+"'" : ''; }
+// Para saber desde qué tipo de dispositivo entra cada cuenta (celular vs
+// computadora) -- se descartó guardar la IP a propósito: no dice nada del
+// tipo de dispositivo (una PC y un celular en la misma red comparten IP) y
+// conseguir la IP pública real requeriría llamar a un servicio externo en
+// cada login, mandando ese dato a un tercero. Mismo criterio simple que usa
+// cualquier sitio responsive: user-agent de teléfono/tablet o pantalla angosta.
+function detectarDispositivo(){
+  const ua = navigator.userAgent || '';
+  const esMovil = /Mobi|Android|iPhone|iPad|iPod/i.test(ua) || window.innerWidth < 768;
+  return esMovil ? 'Celular' : 'Computadora';
+}
 // Redondeo fijo a 2 decimales para métricas de GPS -- enteros quedan
 // enteros, solo lo que tiene fracción se recorta a 2 decimales (ej.
 // 30.14665 -> "30.15"), a diferencia del criterio viejo (1 decimal fijo).
@@ -1404,6 +1415,15 @@ function initFirebase(){
         if(_authListenerUid){ db.ref('users/'+_authListenerUid+'/role').off(); db.ref('stats').off(); _authListenerUid=null; }
         if(user){
           _authListenerUid = user.uid;
+          // Última vez que se vio activa esta cuenta (login real o simplemente
+          // volver a abrir la app con la sesión ya guardada) + desde qué tipo
+          // de dispositivo -- para saber qué cuentas se usan de verdad sin
+          // tener que ir a la consola de Firebase. .update() y no .set() para
+          // no pisar role/nombre/mustChangePassword de ese mismo nodo.
+          db.ref('users/'+user.uid).update({
+            lastLogin: new Date().toISOString(),
+            lastDevice: detectarDispositivo(),
+          }).catch(()=>{});
           // Remove login wall if still present (returning user with active session)
           const wall = document.getElementById('login-wall');
           if(wall){ wall.style.transition='opacity .3s'; wall.style.opacity='0'; setTimeout(()=>wall.remove(),300); }
