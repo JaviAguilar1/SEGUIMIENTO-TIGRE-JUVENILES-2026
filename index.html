@@ -1431,6 +1431,19 @@ function initFirebase(){
             lastDevice: detectarDispositivo(),
             email: user.email || null,
           }).catch(()=>{});
+          // Si esta cuenta ya tiene "nombre" guardado, se registra sola en
+          // login_lookup (nombre normalizado -> email) para que el login
+          // unificado pueda resolverla por nombre -- solo si esa entrada
+          // todavía no existe (nunca pisa un registro de otra cuenta).
+          db.ref('users/'+user.uid+'/nombre').once('value').then(snap=>{
+            const nombre=snap.val();
+            if(!nombre || !user.email) return;
+            const key=loginLookupKey(normalizarUsuario(nombre));
+            if(!key) return;
+            db.ref('login_lookup/'+key).once('value').then(s=>{
+              if(!s.exists()) db.ref('login_lookup/'+key).set(user.email).catch(()=>{});
+            });
+          });
           // Remove login wall if still present (returning user with active session)
           const wall = document.getElementById('login-wall');
           if(wall){ wall.style.transition='opacity .3s'; wall.style.opacity='0'; setTimeout(()=>wall.remove(),300); }
@@ -1843,24 +1856,19 @@ let loginMode = 'login'; // 'login' | 'signup' -- una sola ventana (buildLoginWa
 
 // "Usuario" -> email real para el signInWithEmailAndPassword de Firebase.
 // Acepta un email tal cual (tiene "@") o el nombre que esa cuenta tiene
-// guardado en users/{uid}/nombre -- para un DT, ese nombre resuelve solo al
-// email interno (dtEmailFor); para el resto de los roles hace falta que la
-// cuenta ya tenga guardado su email real ahí también (se completa solo la
-// primera vez que esa cuenta entra con su email, ver el listener de rol en
-// initFirebase -- por eso una cuenta recién creada en la consola de Firebase
-// todavía no puede loguearse por nombre hasta su primer login por email).
-//
-// MEDIDO EN VIVO (2026-09-22): las reglas de Firebase no dejan leer users/
-// sin sesión iniciada (PERMISSION_DENIED) -- así que esta búsqueda por
-// nombre solo puede andar para cuentas que sean parte de un alias fijo
-// (ADMIN_ALIAS de acá abajo) hasta que se agregue una regla de lectura
-// pública para users/{uid}/nombre en la consola de Firebase. El admin
-// (una sola cuenta) queda resuelto sin tocar la base para no depender de
-// eso; para cualquier otro nombre, el error avisa que por ahora hace falta
-// entrar con el email.
+// guardado en users/{uid}/nombre. Se resuelve contra `login_lookup`, un nodo
+// público de solo-lectura (nombre normalizado -> email) que cada cuenta
+// completa sola la primera vez que entra con su email (ver initFirebase) --
+// por eso una cuenta recién creada en la consola de Firebase todavía no
+// puede loguearse por nombre hasta su primer login por email.
 const ADMIN_ALIAS = {usuario:'admin', email:'javier92aguilar@gmail.com'};
 function normalizarUsuario(s){
   return (s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/\s+/g,' ').trim();
+}
+// Claves de Firebase no pueden tener . # $ [ ] / -- se sacan del nombre ya
+// normalizado (nombres de persona casi nunca los traen, pero por las dudas).
+function loginLookupKey(norm){
+  return norm.replace(/[.#$\[\]\/]/g, '');
 }
 function resolverEmailDeUsuario(input){
   const raw=(input||'').trim();
@@ -1869,14 +1877,11 @@ function resolverEmailDeUsuario(input){
   const norm=normalizarUsuario(raw);
   if(norm===ADMIN_ALIAS.usuario) return Promise.resolve({ok:true, email:ADMIN_ALIAS.email});
   if(!fbReady || !db) return Promise.resolve({ok:false, motivo:'sin-conexion'});
-  return db.ref('users').once('value').then(snap=>{
-    const data=snap.val()||{};
-    const matches=Object.values(data).filter(u=>u.nombre && normalizarUsuario(u.nombre)===norm);
-    if(matches.length!==1) return {ok:false, motivo: matches.length>1?'ambiguo':'no-encontrado'};
-    const u=matches[0];
-    if(u.role && u.role.startsWith('cat_')) return {ok:true, email:dtEmailFor(u.role)};
-    if(u.email) return {ok:true, email:u.email};
-    return {ok:false, motivo:'sin-email'};
+  const key=loginLookupKey(norm);
+  if(!key) return Promise.resolve({ok:false, motivo:'no-encontrado'});
+  return db.ref('login_lookup/'+key).once('value').then(snap=>{
+    const email=snap.val();
+    return email ? {ok:true, email} : {ok:false, motivo:'no-encontrado'};
   }).catch(e=>({ok:false, motivo: e.code==='PERMISSION_DENIED' ? 'sin-permiso' : 'sin-conexion'}));
 }
 
