@@ -776,6 +776,7 @@ table.gen-table .cat-cell{font-family:'Bebas Neue',sans-serif;font-size:15px;
     <div class="season-pill">TEMPORADA 2026</div>
     <div id="admin-badge">
       <span class="admin-tag" id="role-tag-txt">ADMIN</span>
+      <button id="btn-usuarios" onclick="abrirPanelUsuarios()" title="Usuarios y roles (solo admin)" style="display:none;background:rgba(42,120,214,0.18);border:1px solid rgba(42,120,214,0.4);border-radius:4px;color:#6fa8f5;font-size:9px;padding:2px 6px;cursor:pointer;font-family:Barlow Condensed,sans-serif;letter-spacing:1px;">👥</button>
       <button id="btn-cerrar-temporada" onclick="cerrarTemporada()" title="Archivar la temporada activa y arrancar una nueva" style="display:none;background:rgba(240,192,64,0.15);border:1px solid rgba(240,192,64,0.4);border-radius:4px;color:var(--gold2);font-size:9px;padding:2px 6px;cursor:pointer;font-family:Barlow Condensed,sans-serif;letter-spacing:1px;">📦</button>
       <button id="btn-reset" onclick="clearData()" style="display:none;background:rgba(192,21,42,0.2);border:1px solid rgba(192,21,42,0.4);border-radius:4px;color:rgba(255,100,100,0.7);font-size:9px;padding:2px 6px;cursor:pointer;font-family:Barlow Condensed,sans-serif;letter-spacing:1px;">🗑</button>
     </div>
@@ -1476,6 +1477,8 @@ function applyViewMode(){
   if(resetBtn) resetBtn.style.display=isAdmin?'':'none';
   const cerrarTempBtn=document.getElementById('btn-cerrar-temporada');
   if(cerrarTempBtn) cerrarTempBtn.style.display=isAdmin?'':'none';
+  const usuariosBtn=document.getElementById('btn-usuarios');
+  if(usuariosBtn) usuariosBtn.style.display=isAdmin?'':'none';
 
   // Filter categories for category-specific roles.
   // 'cat_4TA' -> su categoria + GENERAL (GENERAL le muestra una version
@@ -1506,6 +1509,18 @@ function applyViewMode(){
   }
 }
 
+// Nombre legible de un rol -- compartido entre el tag de la cabecera
+// (updateAuthUI) y el panel de usuarios (abrirPanelUsuarios), antes estaba
+// solo adentro de updateAuthUI.
+const ROLE_LABELS={'admin':'ADMIN',
+  'videoanalista_reserva':'VIDEO RESERVA','videoanalista_menores':'VIDEO 7-8-9',
+  'director':'DIR. DEPORTIVO','coordinador':'COORDINADOR'};
+function roleLabel(role){
+  if(!role) return '—';
+  let label = ROLE_LABELS[role];
+  if(!label && role.startsWith('cat_')) label = 'DT · '+role.replace('cat_','');
+  return label || role.toUpperCase();
+}
 function updateAuthUI(){
   const logoutBtn =document.getElementById('btn-logout');
   const badge     =document.getElementById('admin-badge');
@@ -1517,15 +1532,74 @@ function updateAuthUI(){
   if(currentRole && currentRole!=='viewer'){
     if(logoutBtn) logoutBtn.style.display='flex';
     if(badge)     badge.style.display='flex';
-    const roleLabels={'admin':'ADMIN',
-      'videoanalista_reserva':'VIDEO RESERVA','videoanalista_menores':'VIDEO 7-8-9',
-      'director':'DIR. DEPORTIVO','coordinador':'COORDINADOR'};
-    let label = roleLabels[currentRole];
-    if(!label && currentRole.startsWith('cat_')) label = 'DT · '+currentRole.replace('cat_','');
-    if(roleTagEl) roleTagEl.textContent = label || currentRole.toUpperCase();
+    if(roleTagEl) roleTagEl.textContent = roleLabel(currentRole);
   } else {
     if(logoutBtn) logoutBtn.style.display='none';
     if(badge)     badge.style.display='none';
+  }
+}
+
+// Panel de solo-admin (botón 👥 en la cabecera, escondido para cualquier
+// otro rol por applyViewMode) -- lista las cuentas de users/, con último
+// acceso y tipo de dispositivo (ver detectarDispositivo/onAuthStateChanged).
+async function abrirPanelUsuarios(){
+  if(!isAdmin || !db) return;
+  let m=document.getElementById('panel-usuarios-modal');
+  if(m) m.remove();
+  m=document.createElement('div');
+  m.id='panel-usuarios-modal'; m.className='modal-bg';
+  m.innerHTML=`<div class="modal-box" style="width:600px;max-width:94vw;text-align:left;max-height:85vh;overflow:auto">
+    <button class="m-cancel" onclick="document.getElementById('panel-usuarios-modal').remove()" style="float:right">✕</button>
+    <h2 style="text-align:center">👥 USUARIOS Y ROLES</h2>
+    <div id="panel-usuarios-body" style="margin-top:14px;font-size:12px;color:var(--muted);text-align:center">Cargando…</div>
+  </div>`;
+  document.body.appendChild(m);
+  try{
+    const snap = await db.ref('users').once('value');
+    const data = snap.val()||{};
+    const filas = Object.entries(data).map(([uid,u])=>({
+      uid, nombre:u.nombre||'', role:u.role||'', lastLogin:u.lastLogin||null, lastDevice:u.lastDevice||'',
+    }));
+    // Más recientes primero; las que nunca entraron (sin lastLogin, ej. una
+    // cuenta recién creada) quedan al final en vez de mezcladas en el medio.
+    filas.sort((a,b)=>{
+      if(!a.lastLogin && !b.lastLogin) return 0;
+      if(!a.lastLogin) return 1;
+      if(!b.lastLogin) return -1;
+      return new Date(b.lastLogin)-new Date(a.lastLogin);
+    });
+    const fmtFecha = iso=>{
+      if(!iso) return '— (nunca)';
+      try{ return new Date(iso).toLocaleString('es-AR',{timeZone:'America/Argentina/Buenos_Aires', dateStyle:'short', timeStyle:'short'}); }
+      catch(e){ return iso; }
+    };
+    // Un mismo rol de DT (cat_XXX) repetido en más de una cuenta no rompe
+    // nada -- las dos pueden loguearse y editar esa categoría igual -- pero
+    // suele ser un alta duplicada sin querer, vale la pena avisarlo acá.
+    const porRole={};
+    filas.forEach(f=>{ if(f.role) (porRole[f.role]=porRole[f.role]||[]).push(f); });
+    const duplicadosCat = Object.entries(porRole).filter(([role,arr])=>role.startsWith('cat_') && arr.length>1);
+    const avisoHTML = duplicadosCat.length ? `<div style="background:rgba(192,21,42,0.12);border:1px solid rgba(192,21,42,0.35);border-radius:8px;padding:10px;margin-bottom:12px;font-size:11px;color:var(--text)">
+        ⚠️ Más de una cuenta con el mismo rol de DT: ${duplicadosCat.map(([role,arr])=>`${esc(roleLabel(role))} (${arr.length})`).join(' · ')}
+      </div>` : '';
+    const rowsHTML = filas.map(f=>`<tr>
+        <td style="padding:6px 8px;border-bottom:1px solid var(--border2)">${f.nombre?esc(f.nombre):'<span style="color:var(--muted)">Sin nombre</span>'}</td>
+        <td style="padding:6px 8px;border-bottom:1px solid var(--border2);white-space:nowrap">${esc(roleLabel(f.role))}</td>
+        <td style="padding:6px 8px;border-bottom:1px solid var(--border2);white-space:nowrap">${fmtFecha(f.lastLogin)}</td>
+        <td style="padding:6px 8px;border-bottom:1px solid var(--border2)">${f.lastDevice?esc(f.lastDevice):'—'}</td>
+      </tr>`).join('');
+    document.getElementById('panel-usuarios-body').innerHTML = filas.length ? `
+      ${avisoHTML}
+      <div style="font-size:11px;color:var(--muted);margin-bottom:10px;text-align:left">${filas.length} cuenta${filas.length===1?'':'s'} registrada${filas.length===1?'':'s'}.</div>
+      <div class="table-wrap"><table style="width:100%;border-collapse:collapse;font-size:12px">
+        <thead><tr style="text-align:left;color:var(--gold2);font-family:'Barlow Condensed',sans-serif;letter-spacing:1px">
+          <th style="padding:6px 8px">NOMBRE</th><th style="padding:6px 8px">ROL</th><th style="padding:6px 8px">ÚLTIMO ACCESO</th><th style="padding:6px 8px">DISPOSITIVO</th>
+        </tr></thead>
+        <tbody>${rowsHTML}</tbody>
+      </table></div>` : `<div style="color:var(--muted);font-size:12px">No hay cuentas registradas.</div>`;
+  }catch(e){
+    const body=document.getElementById('panel-usuarios-body');
+    if(body) body.innerHTML = `<div style="color:var(--red2);font-size:12px">No se pudo cargar (${esc(e.message)}).</div>`;
   }
 }
 
