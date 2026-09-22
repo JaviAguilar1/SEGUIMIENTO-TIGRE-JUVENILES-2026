@@ -828,14 +828,16 @@ const FB_CONFIG = {
 // enConfiabilidad: entra en los cruces de 🔎 CONFIABILIDAD (a pedido, solo
 // 4TA/5TA/6TA). esMenor: juega la condición local/visitante invertida
 // (condicionCat). nombresPdf: variantes en español que usa el parser de PDF
-// de citaciones para detectar la categoría.
+// de citaciones para detectar la categoría. minTiempo: minutos que dura UN
+// tiempo de partido (dato del usuario, 2026-09-22) — lo usa el video sync
+// para saber dónde buscar el arranque del 2T; default 45 si no está.
 const CATEGORIAS_CONFIG = {
   '4TA':     {label:'4ta',     color:'#f0c040', enGeneral:true,  enConfiabilidad:true,  esMenor:false, nombresPdf:['cuarta']},
   '5TA':     {label:'5ta',     color:'#60a5fa', enGeneral:true,  enConfiabilidad:true,  esMenor:false, nombresPdf:['quinta']},
   '6TA':     {label:'6ta',     color:'#f87171', enGeneral:true,  enConfiabilidad:true,  esMenor:false, nombresPdf:['sexta']},
   '7MA':     {label:'7ma',     color:'#f472b6', enGeneral:true,  enConfiabilidad:false, esMenor:true,  nombresPdf:['septima','séptima']},
-  '8VA':     {label:'8va',     color:'#a78bfa', enGeneral:true,  enConfiabilidad:false, esMenor:true,  nombresPdf:['octava']},
-  '9NA':     {label:'9na',     color:'#34d399', enGeneral:true,  enConfiabilidad:false, esMenor:true,  nombresPdf:['novena']},
+  '8VA':     {label:'8va',     color:'#a78bfa', enGeneral:true,  enConfiabilidad:false, esMenor:true,  nombresPdf:['octava'], minTiempo:40},
+  '9NA':     {label:'9na',     color:'#34d399', enGeneral:true,  enConfiabilidad:false, esMenor:true,  nombresPdf:['novena'], minTiempo:35},
   'RESERVA': {label:'Reserva', color:'#e8a020', enGeneral:false, enConfiabilidad:false, esMenor:false, nombresPdf:[]},
 };
 const CATEGORIES = Object.keys(CATEGORIAS_CONFIG);
@@ -3949,13 +3951,27 @@ function gpsEsfuerzoTopSpeed(cat, fechaNum, nombre){
 // OpenField), asi que se descarto.
 const GPS_VIDEO_HUECO_DEFECTO = 2750;
 
+// Minutos que dura UN tiempo, por categoría (8VA/9NA juegan más corto —
+// ver CATEGORIAS_CONFIG). Todo lo que sigue (ventana de búsqueda del hueco,
+// editado/continuo) sale de esto, no de una constante fija para las 7.
+function gpsMinutosTiempo(cat){
+  return (CATEGORIAS_CONFIG[cat] || {}).minTiempo || 45;
+}
+
 function gpsVideoHuecoTipico(cat){
   const huecos = c => Object.values(videoSync[c] || {})
     .map(v => (v && v.kickoff2 != null && v.kickoff1 != null) ? v.kickoff2 - v.kickoff1 : null)
     .filter(h => h != null && h > 600);
   let lista = huecos(cat);
-  if(lista.length < 3) lista = Object.keys(videoSync || {}).flatMap(huecos);
-  if(!lista.length) return GPS_VIDEO_HUECO_DEFECTO;
+  if(lista.length < 3){
+    // Sin datos propios: se completa con las demás categorías que juegan la
+    // MISMA duración de tiempo (mezclar 4TA/45' con 9NA/35' centraría la
+    // búsqueda en el minuto equivocado).
+    lista = Object.keys(videoSync || {})
+      .filter(c => gpsMinutosTiempo(c) === gpsMinutosTiempo(cat))
+      .flatMap(huecos);
+  }
+  if(!lista.length) return gpsMinutosTiempo(cat)*60 + (GPS_VIDEO_HUECO_DEFECTO - 2700);
   lista.sort((a, b) => a - b);
   return lista[Math.floor(lista.length / 2)];
 }
@@ -3970,8 +3986,6 @@ function gpsVideoHuecoTipico(cat){
 // continuo mide además todo el entretiempo, unos 10 minutos más. Medido el
 // 2026-09-21 sobre las 55 fechas con link: 46 recortados y 7 continuos, y el
 // veredicto acertó en las 17 que ya estaban calibradas a mano.
-const GPS_VIDEO_2T_APROX = 2700;
-
 function gpsVideoHuecos(cat, fechaKey){
   const per = (catapultEfforts[cat] || {})[fechaKey]?.periodos || [];
   const p1 = per.find(p => /rimer/i.test(p.name || ''));
@@ -3979,8 +3993,9 @@ function gpsVideoHuecos(cat, fechaKey){
   const recortado = gpsVideoHuecoTipico(cat);
   const continuo = (p1?.start && p2?.start) ? (p2.start - p1.start) : null;
   const dur = _ytPlayer?.getDuration ? (_ytPlayer.getDuration() || 0) : 0;
+  const dosT = gpsMinutosTiempo(cat)*60;
   const esContinuo = !!(continuo && dur &&
-    Math.abs(dur - (continuo + GPS_VIDEO_2T_APROX)) < Math.abs(dur - (recortado + GPS_VIDEO_2T_APROX)));
+    Math.abs(dur - (continuo + dosT)) < Math.abs(dur - (recortado + dosT)));
   return {recortado, continuo, esContinuo};
 }
 

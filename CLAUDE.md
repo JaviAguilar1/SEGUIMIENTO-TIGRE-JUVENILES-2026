@@ -287,6 +287,42 @@ cancela; el OCR, que calibra contra el cartel, se lo come entero.
   continuas (marcar solo el 1T, el 2T lo sugiere el salto de Catapult), 14
   editadas sin corte visible (a ver qué recupera el umbral bajo), 1 privada y 1
   de medio partido. La lista sale de `medir_video_sync.py --rapido`.
+- **Corrida real del 2026-09-21: 25 fechas calibradas solas** (más de las 15
+  previstas gracias al umbral suave) — cobertura 17 → 42 de 56.
+- **8VA/9NA jugaban con la duración de tiempo mal asumida (corregido
+  2026-09-22).** Todo el sistema de video sync (ventana de búsqueda del corte,
+  distinción editado/continuo, mínimo de 2T) asumía 45' fijo para las 6
+  categorías. Dato del usuario: **8VA juega 2×40' y 9NA 2×35'** (4TA-7MA sí son
+  45', 7MA confirmado además porque midió un hueco real de 2727s). Con la
+  ventana centrada en 45', la vía del corte buscaba en el segundo equivocado
+  para 8VA/9NA y nunca podía calibrarlas — no es casualidad que fueran las dos
+  categorías más atrasadas.
+  - `_video_minutos_tiempo(cat)` en `scripts/scrape_tablas.py` (40/35, default
+    45) reemplaza las constantes fijas: `_video_2t_aprox(cat)` y
+    `_video_2t_minimo(cat)` (mismo margen de seguridad de siempre, dos
+    tercios, escalado) alimentan `_detectar_corte`. `_video_tipicos` ahora
+    agrupa el respaldo "todas" por duración de tiempo (ya no mezcla 4TA con
+    9NA) y su último fallback (sin ningún dato calibrado todavía) también sale
+    de la duración real de la categoría. Mismo cambio del lado de la app
+    (`gpsMinutosTiempo(cat)`, lee `CATEGORIAS_CONFIG[cat].minTiempo`,
+    `gpsVideoHuecoTipico` y `gpsVideoHuecos`).
+  - `_VIDEO_VIA_ACTUAL` pasó a `"metadata+ocr+corte-cat"` para que las fechas
+    de 8VA/9NA ya dadas por perdidas (3 intentos con la ventana vieja) se
+    reintenten una vez más con la ventana corregida — mismo mecanismo que ya
+    existía para sumar una vía nueva.
+- **Los bloqueos temporales de YouTube dejaron de gastar intentos (2026-09-22).**
+  La corrida del 21 tiró 22 `[youtube] ...: This video is not available` — el
+  usuario abrió uno de esos links a mano y anda perfecto, así que no era un
+  video roto, era YouTube frenando la descarga en el momento. Antes eso
+  contaba como un fallo más del detector (`gps/videoSyncFallos`, 3 y se
+  rinde), así que 22 fechas buenas iban camino a quedar descartadas para
+  siempre por un problema que no era de ellas. `_video_no_disponible(error)`
+  reconoce el mensaje de yt-dlp (`video is not available`, `unavailable`,
+  `private`, etc.) y `detectar_kickoffs_auto`/`detectar_kickoffs_corte` ahora
+  devuelven `(resultado, no_disponible)`: si `no_disponible` es `True`, el
+  llamador (`sincronizar_video_kickoffs`) no escribe nada en
+  `gps/videoSyncFallos` — la fecha se reintenta en la próxima corrida sin
+  haber perdido un intento.
 
 **Citaciones provisionales (2026-09-19).** Las citaciones (titulares/suplentes
 por fecha) salen del PDF de la planilla oficial (`parseCitacionPdf` en la app

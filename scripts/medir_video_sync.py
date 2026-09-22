@@ -287,7 +287,7 @@ def medir_pendientes(token, efforts, limite=0):
             sin_link += 1
             continue
         k1_tip, hueco_tip = tipicos(cat)
-        r, motivo, cortes = st._detectar_corte(link, k1_tip, hueco_tip, gap_real=gap_real)
+        r, motivo, cortes = st._detectar_corte(link, k1_tip, hueco_tip, gap_real=gap_real, cat=cat)
         if r:
             calibraria += 1
             print("%-5s %-5s %8.1f %10.1f %8.0f %5d  CALIBRARIA SOLA" %
@@ -363,8 +363,8 @@ def medir_duraciones(token, efforts, limite=0):
             # los dos saques iniciales (los finales de tiempo se cierran tarde
             # en OpenField). Con esas alcanza: la diferencia entre las dos
             # cuentas es de mas de 10 minutos.
-            editado = tipicos(cat)[1] + st._VIDEO_2T_APROX
-            continuo = (p2["start"] - p1["start"]) + st._VIDEO_2T_APROX
+            editado = tipicos(cat)[1] + st._video_2t_aprox(cat)
+            continuo = (p2["start"] - p1["start"]) + st._video_2t_aprox(cat)
             veredicto = "CONTINUO" if abs(dur - continuo) < abs(dur - editado) else "editado"
             if dur < editado - 900:
                 veredicto = "corto (?)"
