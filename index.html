@@ -4802,17 +4802,18 @@ function runGpsCruce(){
   // esfuerzo al que saltar).
   const conVideo = met.i===6;
   const rows = filas.slice(0,50).map((r,idx)=>{
-    let verTd = '';
+    let esf = null, verTd = '';
     if(conVideo){
-      const esf = gpsEsfuerzoTopSpeed(gpsCruceCat, r.fecha, r.nombre);
+      esf = gpsEsfuerzoTopSpeed(gpsCruceCat, r.fecha, r.nombre);
       verTd = `<td style="text-align:center">${esf?`<button type="button" onclick="gpsAbrirVideoEsfuerzo('${gpsCruceCat}','F${r.fecha}',${esf.start},'${esc(formatNombreMostrar(r.nombre,gpsCruceCat)).replace(/'/g,"\\'")}',${esf.vel},${esf.dur})"
         style="background:var(--gold2);border:none;border-radius:5px;color:#0b0f18;font-family:'Bebas Neue',sans-serif;font-size:12px;letter-spacing:1px;padding:5px 10px;cursor:pointer">▶ VER</button>`:''}</td>`;
     }
+    const detalle = esf ? ` <span style="font-size:11px;color:var(--muted)">· ${esf.dur}s · ${esf.dist}m</span>` : '';
     return `<tr>
       <td style="text-align:center;color:var(--muted)">${idx+1}</td>
       <td class="cat-cell">${esc(formatNombreMostrar(r.nombre,gpsCruceCat))}</td>
       <td style="text-align:center">F${r.fecha}${r.opp?` <span style="color:var(--muted);font-size:11px">vs ${esc(r.opp)}</span>`:''}</td>
-      <td style="text-align:center;color:var(--gold2);font-weight:700">${r.v.toFixed(r.v%1?1:0)}</td>
+      <td style="text-align:center;color:var(--gold2);font-weight:700">${r.v.toFixed(r.v%1?1:0)}${detalle}</td>
       ${verTd}
     </tr>`;
   }).join('');
