@@ -1569,7 +1569,7 @@ def detectar_kickoffs_lpf(youtube_url):
 # tiempos completos. Si no da, devuelve None y sigue el camino del OCR.
 _VIDEO_TOLERANCIA_FIN = 600   # seg que puede faltarle al video al final (cortaron el stream antes de que el staff cerrara el periodo)
 _VIDEO_PREVIA_MAX = 3600      # seg de previa del stream antes del saque inicial que se consideran creibles
-_VIDEO_VIA_ACTUAL = "metadata+ocr+corte"  # sumar una via aca -> reintenta los fallos viejos una vez
+_VIDEO_VIA_ACTUAL = "metadata+ocr+corte-cat"  # sumar una via aca -> reintenta los fallos viejos una vez
 _VIDEO_SONDEOS_MAX = 8        # cuantos videos se consultan buscando transmisiones en vivo antes de rendirse
 # Medido el 2026-09-20 sobre las 55 fechas con link: NINGUNA es transmision en
 # vivo (el club transmite, pero a YouTube sube el archivo despues, y ahi YouTube
@@ -1640,19 +1640,38 @@ _VIDEO_FORMATO = "136/135/134/160/243"
 _VIDEO_FORMATO_LIVIANO = "160/134/135/136/243"
 
 
-def _video_stream_url(youtube_url, formato=_VIDEO_FORMATO, con_duracion=False):
+def _video_stream_url(youtube_url, formato=_VIDEO_FORMATO, con_duracion=False, con_error=False):
     """URL directa del video para sacarle cuadros con ffmpeg. Con
     con_duracion=True devuelve (url, duracion_en_segundos) de la misma consulta,
-    para no preguntarle dos veces a YouTube."""
-    url = duracion = None
+    para no preguntarle dos veces a YouTube. Con con_error=True devuelve
+    (url, duracion, texto_del_error) -- para distinguir un video que YouTube
+    bloqueo esta vez (ver _video_no_disponible) de cualquier otro fallo."""
+    url = duracion = error = None
     try:
         with yt_dlp.YoutubeDL({"quiet": True, "no_warnings": True,
                                "format": formato}) as ydl:
             info = ydl.extract_info(youtube_url, download=False)
             url, duracion = info["url"], info.get("duration")
-    except Exception:
+    except Exception as e:
         url = duracion = None
+        error = str(e)
+    if con_error:
+        return url, duracion, error
     return (url, duracion) if con_duracion else url
+
+
+def _video_no_disponible(error):
+    """True si el error de yt-dlp es porque YouTube no dejo abrir el video
+    ESTA VEZ (bloqueo temporal, privado, borrado) -- no porque el detector no
+    supo leerlo. Confirmado a mano (2026-09-22): varias fechas que dieron
+    'This video is not available' abren bien en el navegador un rato despues.
+    No debe gastar uno de los MAX_INTENTOS de gps/videoSyncFallos."""
+    msg = str(error or "").lower()
+    return any(s in msg for s in (
+        "video is not available", "video unavailable", "private video",
+        "has been removed", "no longer available", "sign in to confirm",
+        "members-only",
+    ))
 
 
 def _video_verificar_2t(youtube_url, kickoff2, ventana=300):
@@ -1719,12 +1738,38 @@ def _video_mediana(xs):
     return xs[len(xs) // 2] if xs else None
 
 
+def _video_minutos_tiempo(cat):
+    """Minutos que dura UN tiempo de partido, por categoria. 4TA-7MA juegan
+    45' (reglamento LPF, confirmado tambien porque 7MA midio un hueco real de
+    2727s); 8VA juega 2x40' y 9NA 2x35' -- dato del usuario, 2026-09-22.
+    RESERVA no usa este sistema de video sync. Todo lo que sigue en la via
+    del corte (ventana de busqueda, editado/continuo, minimo de 2T) sale de
+    esto, asi que si el reglamento cambia se corrige en un solo lugar."""
+    return {"8VA": 40, "9NA": 35}.get(cat, 45)
+
+
+def _video_2t_aprox(cat=None):
+    """Duracion aprox. de un 2do tiempo (el pedazo del video que no depende
+    de la edicion), en segundos reales de la categoria."""
+    return _video_minutos_tiempo(cat) * 60
+
+
+def _video_2t_minimo(cat=None):
+    """Despues del corte del entretiempo tiene que quedar video para cubrir
+    un 2do tiempo entero. Mismo margen de seguridad ya probado para 45'
+    (1800 de 2700 = dos tercios), escalado a la duracion real de cada
+    categoria."""
+    return round(_video_2t_aprox(cat) * _VIDEO_2T_MINIMO / _VIDEO_2T_APROX)
+
+
 def _video_tipicos(token):
     """Devuelve una funcion cat -> (arranque tipico del 1T, hueco tipico entre
     tiempos) sacada de las fechas que YA estan calibradas. Primero las de la
-    misma categoria (las menores pueden jugar tiempos mas cortos), y si son
-    pocas, las de todas. Igual que gpsVideoHuecoTipico en la app: no hay
-    ninguna constante para mantener a mano, se afina sola."""
+    misma categoria, y si son pocas, las de las demas categorias que juegan
+    la MISMA duracion de tiempo (mezclar 4TA/45' con 9NA/35' en el respaldo
+    centraria la busqueda del corte en el minuto equivocado). Igual que
+    gpsVideoHuecoTipico en la app: no hay ninguna constante para mantener a
+    mano, se afina sola."""
     try:
         sync = _tigre_fb_get("gps/videoSync", token) or {}
     except Exception:
@@ -1736,14 +1781,19 @@ def _video_tipicos(token):
             if k1 is None or k2 is None or (k2 - k1) <= 600:
                 continue
             datos.setdefault(cat, []).append((float(k1), float(k2) - float(k1)))
-    todas = [x for lista in datos.values() for x in lista]
+    por_bloque = {}
+    for cat, lista in datos.items():
+        por_bloque.setdefault(_video_minutos_tiempo(cat), []).extend(lista)
 
     def tipicos(cat):
         lista = datos.get(cat) or []
         if len(lista) < 3:
-            lista = todas
+            lista = por_bloque.get(_video_minutos_tiempo(cat)) or []
         if not lista:
-            return _VIDEO_K1_TIPICO, _VIDEO_HUECO_TIPICO
+            # Sin ningun dato todavia ni de la categoria ni del bloque: el
+            # hueco tipico se estima con la duracion real + el mismo margen
+            # de tiempo agregado que se midio para 45' (50s de descuento).
+            return _VIDEO_K1_TIPICO, _video_2t_aprox(cat) + (_VIDEO_HUECO_TIPICO - _VIDEO_2T_APROX)
         return (_video_mediana([k1 for k1, _ in lista]),
                 _video_mediana([h for _, h in lista]))
     return tipicos
@@ -1873,8 +1923,11 @@ def _video_cortes_escena(stream_url, desde, hasta, ffmpeg_exe, umbral=_VIDEO_COR
     return sorted(cortes)
 
 
+_VIDEO_MOTIVO_NO_DISPONIBLE = "el video no esta disponible ahora (bloqueo temporal, privado o borrado)"
+
+
 def _detectar_corte(youtube_url, k1=None, hueco=None, margen=_VIDEO_CORTE_MARGEN,
-                    gap_real=None):
+                    gap_real=None, cat=None):
     """Motor de la via del corte. Devuelve (resultado, motivo, cortes): el
     motivo dice por que no se pudo, para poder medir sin duplicar la logica
     (lo usa medir_video_sync.py --pendientes). Nunca inventa un valor."""
@@ -1882,17 +1935,20 @@ def _detectar_corte(youtube_url, k1=None, hueco=None, margen=_VIDEO_CORTE_MARGEN
         return None, "faltan paquetes de video", []
     k1 = _VIDEO_K1_TIPICO if k1 is None else float(k1)
     hueco = _VIDEO_HUECO_TIPICO if hueco is None else float(hueco)
-    stream_url, duracion = _video_stream_url(youtube_url, _VIDEO_FORMATO_LIVIANO,
-                                             con_duracion=True)
+    stream_url, duracion, error = _video_stream_url(youtube_url, _VIDEO_FORMATO_LIVIANO,
+                                                     con_error=True)
     if not stream_url:
+        if _video_no_disponible(error):
+            return None, _VIDEO_MOTIVO_NO_DISPONIBLE, []
         return None, "no se pudo abrir el video", []
+    dos_t = _video_2t_aprox(cat)
     # Un video CONTINUO (sin recortar el entretiempo) no tiene ningun corte
     # que encontrar, y la duracion lo delata sin mirar un solo cuadro: mide
     # ademas todo el entretiempo, 10 minutos mas que uno editado. Medido el
     # 2026-09-21: 7 de las fechas sin calibrar son asi. Se corta aca para no
     # gastar medio minuto de PC por corrida buscando algo que no existe.
     if gap_real and duracion:
-        if abs(duracion - (gap_real + _VIDEO_2T_APROX)) < abs(duracion - (hueco + _VIDEO_2T_APROX)):
+        if abs(duracion - (gap_real + dos_t)) < abs(duracion - (hueco + dos_t)):
             return None, "video continuo (no le recortaron el entretiempo)", []
     centro = k1 + hueco
     desde, hasta = centro - margen, centro + margen
@@ -1911,31 +1967,37 @@ def _detectar_corte(youtube_url, k1=None, hueco=None, margen=_VIDEO_CORTE_MARGEN
     segundo = fuerte + _VIDEO_CORTE_AJUSTE
     if not (desde <= segundo <= hasta):
         return None, "el corte quedo fuera de la ventana", cortes
-    if duracion and duracion - segundo < _VIDEO_2T_MINIMO:
+    if duracion and duracion - segundo < _video_2t_minimo(cat):
         return None, "despues del corte no entra un 2do tiempo", cortes
     return ({"kickoff1": round(k1, 1), "kickoff2": round(segundo, 1), "fuente": "corte"},
             "", cortes)
 
 
 def detectar_kickoffs_corte(youtube_url, k1=None, hueco=None, margen=_VIDEO_CORTE_MARGEN,
-                            gap_real=None):
+                            gap_real=None, cat=None):
     """kickoff1/kickoff2 buscando el corte del entretiempo dentro de una
-    ventana angosta alrededor del hueco tipico. None si ahi no hay ningun corte
-    claro -- nunca inventa un valor."""
-    return _detectar_corte(youtube_url, k1, hueco, margen, gap_real)[0]
+    ventana angosta alrededor del hueco tipico. Devuelve (resultado,
+    no_disponible): resultado es None si ahi no hay ningun corte claro (nunca
+    inventa un valor), no_disponible es True cuando el motivo fue que YouTube
+    no dejo abrir el video (no cuenta como fallo del detector)."""
+    resultado, motivo, _ = _detectar_corte(youtube_url, k1, hueco, margen, gap_real, cat)
+    return resultado, motivo == _VIDEO_MOTIVO_NO_DISPONIBLE
 
 
 def detectar_kickoffs_auto(youtube_url, periodos=None, offset=0.0,
-                           tipicos=None, saltear_ocr=False):
+                           tipicos=None, saltear_ocr=False, cat=None):
     """Tres vias, de la mas barata a la mas cara: (1) la hora real del stream
     (detectar_kickoffs_metadata, sin mirar el video); (2) los carteles, VEO
     (1T/2T explicito) o LPF (reloj corrido) -- clasifica antes con un par de
     frames para no barrer todo el video con el detector equivocado; (3) el
     corte del entretiempo (detectar_kickoffs_corte), que no necesita ningun
     cartel y es la unica que sirve en los partidos de visitante filmados a
-    mano. None si no se pudo por ninguna -> calibrar a mano."""
+    mano. Devuelve (resultado, no_disponible): resultado es None si no se
+    pudo por ninguna via (calibrar a mano), no_disponible es True cuando
+    YouTube no dejo abrir el video esta vez -- eso no debe gastar uno de los
+    MAX_INTENTOS de gps/videoSyncFallos."""
     if not VIDEO_SYNC_DISPONIBLE:
-        return None
+        return None, False
     k1_tip, hueco_tip = tipicos or (_VIDEO_K1_TIPICO, _VIDEO_HUECO_TIPICO)
     # Hueco REAL entre los dos saques iniciales (con entretiempo): sirve para
     # darse cuenta de que el video es continuo y no perder tiempo buscando un
@@ -1945,20 +2007,20 @@ def detectar_kickoffs_auto(youtube_url, periodos=None, offset=0.0,
     if periodos and _video_vale_la_pena_metadata():
         por_metadata = detectar_kickoffs_metadata(youtube_url, periodos, offset)
         if por_metadata:
-            return por_metadata
+            return por_metadata, False
     # Ultimo recurso: el corte del entretiempo, que no necesita cartel. Va
     # DESPUES del OCR (que lee el marcador real y es mas verificable), salvo
     # cuando el OCR ya se rindio con esta fecha: ahi repetir su barrido serian
     # horas de PC para volver a fallar igual.
     if saltear_ocr or not _video_configurar_tesseract():
-        return detectar_kickoffs_corte(youtube_url, k1_tip, hueco_tip, gap_real=gap_real)
+        return detectar_kickoffs_corte(youtube_url, k1_tip, hueco_tip, gap_real=gap_real, cat=cat)
     ydl_opts = {"quiet": True, "no_warnings": True, "format": "136/135/134/160/243"}
     try:
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             info = ydl.extract_info(youtube_url, download=False)
             stream_url = info["url"]
-    except Exception:
-        return None
+    except Exception as e:
+        return None, _video_no_disponible(e)
     ffmpeg_exe = imageio_ffmpeg.get_ffmpeg_exe()
     es_veo = es_lpf = False
     for t in (180, 360, 600, 900, 1320):
@@ -1979,8 +2041,9 @@ def detectar_kickoffs_auto(youtube_url, periodos=None, offset=0.0,
         por_cartel = detectar_kickoffs_video(youtube_url)
     elif es_lpf:
         por_cartel = detectar_kickoffs_lpf(youtube_url)
-    return por_cartel or detectar_kickoffs_corte(youtube_url, k1_tip, hueco_tip,
-                                                 gap_real=gap_real)
+    if por_cartel:
+        return por_cartel, False
+    return detectar_kickoffs_corte(youtube_url, k1_tip, hueco_tip, gap_real=gap_real, cat=cat)
 
 
 # Firebase de Tigre (SOLO para leer el link del video cargado y guardar la
@@ -2126,10 +2189,15 @@ def sincronizar_video_kickoffs(email, password, catapult_efforts):
             # Si el OCR ya se rindio con esta fecha y lo unico nuevo es otra
             # via, no se repite su barrido (son minutos de PC por fecha para
             # volver a fallar igual): se prueba directo la via nueva.
-            resultado = detectar_kickoffs_auto(
+            resultado, no_disponible = detectar_kickoffs_auto(
                 link, (fechas.get(fecha_key) or {}).get("periodos"), offset(),
-                tipicos(cat), saltear_ocr=(se_rindio and "ocr" not in nuevas))
+                tipicos(cat), saltear_ocr=(se_rindio and "ocr" not in nuevas), cat=cat)
             if not _video_kickoffs_ok(resultado):
+                if no_disponible:
+                    # YouTube no dejo abrir el video esta vez (bloqueo
+                    # temporal, confirmado que abre bien a mano) -- no es un
+                    # fallo del detector, no gasta uno de los MAX_INTENTOS.
+                    continue
                 n = prev.get("intentos", 0) + 1 if mismo_link else 1
                 try:
                     _tigre_fb_put(f"gps/videoSyncFallos/{cat}/{fecha_key}",
