@@ -3879,6 +3879,9 @@ let gpsVideoFecha = null;
 let gpsVideoJugador = null;
 let gpsVideoTipo = 'sprint';  // 'sprint' (>=25) o 'hsr' (carreras 21-25)
 let gpsVideoRecalibrando = false;  // true = mostrar el form de calibración aunque ya haya una guardada
+let gpsVideoVista = 'individual';  // 'individual' (de siempre) o 'colectivo' (varios jugadores juntos)
+let gpsColVentana = 20;  // segundos: qué tan cerca en el tiempo tienen que caer los esfuerzos para contar como el mismo momento colectivo
+let gpsColMinJug = 3;    // mínimo de jugadores distintos para que un momento cuente como "colectivo"
 
 // videoSec = segundo del video de YouTube donde saltar, calculado a partir
 // de la hora REAL del esfuerzo (Unix) + arranque real de ese período
@@ -3915,6 +3918,52 @@ function gpsAbrirVideoEsfuerzo(cat, fechaKey, startUnix, jugador, velKmh, durSeg
   // nunca. El fin se mide desde el esfuerzo real (seg), no desde segInicio.
   const segEnd = durSeg>0 ? seg + durSeg + 2 : null;
   abrirVideoEmbebido(url, `${jugador} · ${velKmh} km/h · ${fechaKey}`, segInicio, segEnd);
+}
+
+// Esfuerzos colectivos: agrupa los esfuerzos de TODOS los jugadores de una
+// fecha por cercanía en el tiempo -- un esfuerzo entra en la racha actual si
+// cae dentro de "ventanaSeg" segundos del primer esfuerzo de esa racha; si
+// no, arranca una racha nueva. Se queda solo con las rachas que llegan a
+// "minJug" jugadores DISTINTOS (si un jugador tiene más de un esfuerzo en la
+// misma racha, cuenta una vez, con el más rápido). `tipo` filtra sprint
+// (>=25 km/h) o hsr (21-25) -- así "colectivo de sprints" son justo los
+// jugadores que en ese momento pasaron los 25 km/h, no cualquier corrida.
+function gpsColectivosDetectar(cat, fechaKey, ventanaSeg, minJug, tipo){
+  const dia = catapultEfforts[cat]?.[fechaKey];
+  if(!dia) return [];
+  const ventanas = (dia.periodos||[]).filter(p=>/rimer|egundo/i.test(p.name||'') && p.start && p.end).map(p=>[p.start,p.end]);
+  const enPartido = e => !ventanas.length || ventanas.some(([a,b])=>e.start>=a && e.start<=b);
+  const esTipo = e => (e.tipo||'sprint')===tipo;
+  const todos = [];
+  Object.entries(dia.jugadores||{}).forEach(([nombre, efs])=>{
+    (efs||[]).filter(e=>enPartido(e) && esTipo(e)).forEach(e=>todos.push({...e, nombre}));
+  });
+  todos.sort((a,b)=>a.start-b.start);
+  const rachas = [];
+  let actual = null;
+  todos.forEach(e=>{
+    if(actual && (e.start - actual.anchor) <= ventanaSeg) actual.efs.push(e);
+    else { actual = {anchor:e.start, efs:[e]}; rachas.push(actual); }
+  });
+  return rachas.map(r=>{
+    const porJugador = {};
+    r.efs.forEach(e=>{ if(!porJugador[e.nombre] || e.vel>porJugador[e.nombre].vel) porJugador[e.nombre]=e; });
+    const jugadores = Object.values(porJugador).sort((a,b)=>b.vel-a.vel);
+    const inicio = Math.min(...r.efs.map(e=>e.start));
+    const fin = Math.max(...r.efs.map(e=>e.start+(e.dur||0)));
+    return {inicio, span:Math.max(1, fin-inicio), jugadores};
+  }).filter(r=>r.jugadores.length>=minJug)
+    .sort((a,b)=>b.jugadores.length-a.jugadores.length || a.inicio-b.inicio);
+}
+
+function gpsAbrirVideoColectivo(cat, fechaKey, startUnix, spanSeg, titulo){
+  const fechaNum = parseInt(fechaKey.replace('F',''),10);
+  const url = links[cat]?.[fechaNum]?.par;
+  const seg = gpsVideoSeg(cat, fechaKey, startUnix);
+  if(!url || seg==null) return;
+  const segInicio = Math.max(0, seg - 4);
+  const segEnd = spanSeg>0 ? seg + spanSeg + 3 : null;
+  abrirVideoEmbebido(url, titulo, segInicio, segEnd);
 }
 
 // Para el ranking de "Top Speed": de todos los esfuerzos (sprint/HSR) de ese
@@ -4105,6 +4154,56 @@ function wireGpsVideoForm(){
   // arrancaba de 0. Mismo criterio de nombres de período que gpsVideoSeg.
   const _ventanas = (dia.periodos||[]).filter(p=>/rimer|egundo/i.test(p.name||'') && p.start && p.end).map(p=>[p.start,p.end]);
   const enPartido = e => !_ventanas.length || _ventanas.some(([a,b])=>e.start>=a && e.start<=b);
+
+  const recalHTML = canEdit?`<div style="text-align:right;margin-bottom:8px">
+      <button type="button" onclick="gpsVideoRecalibrando=true;wireGpsVideoForm();"
+        style="background:none;border:1px solid var(--border);border-radius:5px;color:var(--muted);font-size:11px;padding:4px 10px;cursor:pointer">🔄 Recalibrar este partido</button>
+    </div>`:'';
+  const vistaBtn = (v,label) => `<button type="button" onclick="gpsVideoVista='${v}';wireGpsVideoForm();"
+      style="flex:1;background:${gpsVideoVista===v?'var(--gold)':'var(--surface2)'};color:${gpsVideoVista===v?'#1a1205':'var(--text)'};border:1px solid ${gpsVideoVista===v?'var(--gold)':'var(--border)'};border-radius:6px;font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:1px;padding:8px 10px;cursor:pointer">${label}</button>`;
+  const vistaHTML = `<div style="display:flex;gap:8px;margin-bottom:12px">${vistaBtn('individual','👤 INDIVIDUAL')}${vistaBtn('colectivo','👥 COLECTIVO')}</div>`;
+
+  if(gpsVideoVista==='colectivo'){
+    // Un momento colectivo cuenta a cada jugador solo dentro de UN tipo
+    // (sprint o hsr) -- por eso los conteos de los chips salen de recalcular
+    // gpsColectivosDetectar para cada tipo, no de contar esfuerzos sueltos
+    // como en la vista individual.
+    const clustersSprint = gpsColectivosDetectar(cat, fechaKey, gpsColVentana, gpsColMinJug, 'sprint');
+    const clustersHsr = gpsColectivosDetectar(cat, fechaKey, gpsColVentana, gpsColMinJug, 'hsr');
+    const chip = (tipo,label,n)=>`<button type="button" onclick="gpsVideoTipo='${tipo}';wireGpsVideoForm();"
+        style="flex:1;background:${gpsVideoTipo===tipo?'var(--gold)':'var(--surface2)'};color:${gpsVideoTipo===tipo?'#1a1205':'var(--text)'};border:1px solid ${gpsVideoTipo===tipo?'var(--gold)':'var(--border)'};border-radius:6px;font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:1px;padding:8px 10px;cursor:pointer">${label} (${n})</button>`;
+    const chipsHTML = `<div style="display:flex;gap:8px;margin-bottom:12px">${chip('sprint','SPRINTS ≥25',clustersSprint.length)}${chip('hsr','CARRERAS 21-25',clustersHsr.length)}</div>`;
+    const clusters = gpsVideoTipo==='hsr' ? clustersHsr : clustersSprint;
+    const controlesHTML = `
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
+        <div><label style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;display:block;margin-bottom:4px">Ventana (segundos)</label>
+          <input id="gps-col-ventana" type="number" min="5" max="120" step="1" value="${gpsColVentana}"
+            onchange="gpsColVentana=Math.max(5,parseInt(this.value)||20);wireGpsVideoForm();"
+            style="width:100%;background:rgba(5,8,15,.8);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:13px;padding:8px 10px;"></div>
+        <div><label style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;display:block;margin-bottom:4px">Mínimo de jugadores</label>
+          <input id="gps-col-minjug" type="number" min="2" max="10" step="1" value="${gpsColMinJug}"
+            onchange="gpsColMinJug=Math.max(2,parseInt(this.value)||3);wireGpsVideoForm();"
+            style="width:100%;background:rgba(5,8,15,.8);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:13px;padding:8px 10px;"></div>
+      </div>`;
+    const filasHTML = clusters.length ? clusters.map(c=>{
+      const hora = new Date(c.inicio*1000).toLocaleTimeString('es-AR',{timeZone:'America/Argentina/Buenos_Aires'});
+      const chipsJug = c.jugadores.map(j=>`<span style="background:rgba(240,192,64,.12);border:1px solid var(--border2);border-radius:5px;padding:3px 8px;font-size:12px;color:var(--text)">${esc(formatNombreMostrar(j.nombre,cat))} <span style="color:var(--muted)">${j.vel} km/h</span></span>`).join('');
+      return `<div onclick="gpsAbrirVideoColectivo('${cat}','${fechaKey}',${c.inicio},${c.span},'${c.jugadores.length} jugadores · ${hora}')"
+        style="padding:10px;background:var(--surface2);border-radius:6px;margin-bottom:8px;cursor:pointer;border:1px solid transparent"
+        onmouseover="this.style.borderColor='var(--gold)'" onmouseout="this.style.borderColor='transparent'">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
+          <span style="font-family:'Bebas Neue',sans-serif;color:var(--gold2)">▶ ${hora}</span>
+          <span style="font-family:'Barlow Condensed',sans-serif;font-size:13px;color:var(--text)">👥 ${c.jugadores.length} jugadores</span>
+        </div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px">${chipsJug}</div>
+      </div>`;
+    }).join('') : `<div style="color:var(--muted);font-size:12px;padding:8px 0">No hay esfuerzos colectivos (${gpsColMinJug}+ jugadores en ${gpsColVentana}s) de ${gpsVideoTipo==='hsr'?'carreras 21-25 km/h':'sprints ≥25 km/h'} en esta fecha.</div>`;
+
+    cont.innerHTML = recalHTML + vistaHTML + controlesHTML + chipsHTML +
+      `<div style="font-size:11px;color:var(--muted);margin-bottom:8px">Tocá cualquier momento colectivo para verlo en el video.</div>` + filasHTML;
+    return;
+  }
+
   const jugadores = Object.keys(dia.jugadores||{}).filter(n=>(dia.jugadores[n]||[]).some(enPartido)).sort();
   if(!gpsVideoJugador || !jugadores.includes(gpsVideoJugador)) gpsVideoJugador = jugadores[0]||null;
   const jugOpts = jugadores.map(n=>`<option value="${esc(n)}"${n===gpsVideoJugador?' selected':''}>${esc(formatNombreMostrar(n,cat))}</option>`).join('');
@@ -4122,15 +4221,11 @@ function wireGpsVideoForm(){
       style="display:flex;align-items:center;gap:10px;padding:8px 10px;background:var(--surface2);border-radius:6px;margin-bottom:5px;cursor:pointer;border:1px solid transparent"
       onmouseover="this.style.borderColor='var(--gold)'" onmouseout="this.style.borderColor='transparent'">
       <span style="font-family:'Bebas Neue',sans-serif;color:var(--gold2);min-width:60px">▶ ${hora}</span>
-      <span style="flex:1;font-family:'Barlow Condensed',sans-serif;font-size:13px;color:var(--text)">${e.vel} <span style="font-size:11px;color:var(--muted)">km/h</span> <span style="font-weight:400;color:var(--text2)">· ${e.dur}s · ${e.dist}m</span></span>
+      <span style="flex:1;font-family:'Barlow Condensed',sans-serif;font-size:13px;color:var(--text)">${e.vel} <span style="font-size:12px;color:var(--muted)">km/h</span> <span style="font-weight:400;color:var(--text2)">· ${e.dur}<span style="font-size:11px">s</span> · ${e.dist}<span style="font-size:11px">m</span></span></span>
     </div>`;
   }).join('') : `<div style="color:var(--muted);font-size:12px;padding:8px 0">Este jugador no tuvo ${gpsVideoTipo==='hsr'?'carreras de 21-25 km/h':'sprints ≥25 km/h'} en esta fecha.</div>`;
 
-  cont.innerHTML = `
-    ${canEdit?`<div style="text-align:right;margin-bottom:8px">
-      <button type="button" onclick="gpsVideoRecalibrando=true;wireGpsVideoForm();"
-        style="background:none;border:1px solid var(--border);border-radius:5px;color:var(--muted);font-size:11px;padding:4px 10px;cursor:pointer">🔄 Recalibrar este partido</button>
-    </div>`:''}
+  cont.innerHTML = recalHTML + vistaHTML + `
     <div style="margin-bottom:12px">
       <label style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;display:block;margin-bottom:4px">Jugador</label>
       <select id="gps-video-jugador" onchange="gpsVideoJugador=this.value;wireGpsVideoForm();"
@@ -4808,8 +4903,8 @@ function runGpsCruce(){
       verTd = `<td style="text-align:center">${esf?`<button type="button" onclick="gpsAbrirVideoEsfuerzo('${gpsCruceCat}','F${r.fecha}',${esf.start},'${esc(formatNombreMostrar(r.nombre,gpsCruceCat)).replace(/'/g,"\\'")}',${esf.vel},${esf.dur})"
         style="background:var(--gold2);border:none;border-radius:5px;color:#0b0f18;font-family:'Bebas Neue',sans-serif;font-size:12px;letter-spacing:1px;padding:5px 10px;cursor:pointer">▶ VER</button>`:''}</td>`;
     }
-    const unidad = conVideo ? ` <span style="font-size:11px;font-weight:400;color:var(--muted)">${esc(met.unit)}</span>` : '';
-    const detalle = esf ? ` <span style="font-weight:400;color:var(--text2)">· ${esf.dur}s · ${esf.dist}m</span>` : '';
+    const unidad = conVideo ? ` <span style="font-size:12px;font-weight:400;color:var(--muted)">${esc(met.unit)}</span>` : '';
+    const detalle = esf ? ` <span style="font-weight:400;color:var(--text2)">· ${esf.dur}<span style="font-size:11px">s</span> · ${esf.dist}<span style="font-size:11px">m</span></span>` : '';
     return `<tr>
       <td style="text-align:center;color:var(--muted)">${idx+1}</td>
       <td class="cat-cell">${esc(formatNombreMostrar(r.nombre,gpsCruceCat))}</td>
