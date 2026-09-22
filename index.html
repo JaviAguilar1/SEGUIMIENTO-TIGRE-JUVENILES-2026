@@ -1134,14 +1134,10 @@ const RIVALS_RESERVA = [
   {f:13,r:'',cond:'L'},{f:14,r:'',cond:'V'},{f:15,r:'',cond:'L'},{f:16,r:'',cond:'V'},
   {f:17,r:'',cond:'L'},{f:18,r:'INTERZONAL', cond:'N'},
 ];
-// RESERVA — 2do semestre (Apertura/Clausura). Mismo formato, fixture propio y editable.
-const RIVALS_RESERVA_S2 = [
-  {f:1, r:'',cond:'L'},{f:2, r:'',cond:'V'},{f:3, r:'',cond:'L'},{f:4, r:'',cond:'V'},
-  {f:5, r:'',cond:'L'},{f:6, r:'',cond:'V'},{f:7, r:'',cond:'L'},{f:8, r:'',cond:'V'},
-  {f:9, r:'',cond:'L'},{f:10,r:'',cond:'V'},{f:11,r:'',cond:'L'},{f:12,r:'',cond:'V'},
-  {f:13,r:'',cond:'L'},{f:14,r:'',cond:'V'},{f:15,r:'',cond:'L'},{f:16,r:'',cond:'V'},
-  {f:17,r:'',cond:'L'},{f:18,r:'INTERZONAL', cond:'N'},
-];
+// RESERVA — 2do semestre (Apertura/Clausura). Mismo patrón que el 1er
+// semestre (18 fechas, L/V alternado + interzonal en F18) -- se deriva de
+// RIVALS_RESERVA en vez de mantener una segunda copia idéntica a mano.
+const RIVALS_RESERVA_S2 = RIVALS_RESERVA.map(r=>({...r}));
 
 // RESERVA custom fixture — rivalData['RESERVA'][fecha] = {rival, cond}
 // RESERVA_S2 usa su propia clave para no pisar los datos del 1er semestre
@@ -1153,6 +1149,7 @@ let isAdmin      = false;
 let canEdit      = false;
 let currentRole  = 'viewer';
 let catRole      = 'viewer'; // for category-level access
+let _authListenerUid = null; // uid cuyo listener de rol/stats está activo (ver initFirebase)
 
 // Roles con permiso de edicion y a que categorias alcanza. null = todas
 // (admin). Array = solo esas categorias -- el usuario puede VER cualquier
@@ -1167,7 +1164,11 @@ const EDIT_SCOPES = {
   videoanalista_menores: [...CATS_MENORES],
 };
 function canEditCat(cat){
-  if(!(currentRole in EDIT_SCOPES)) return false;
+  // hasOwnProperty explícito, no "in": un rol tipeado igual a algo heredado
+  // de Object (ej. "constructor", "toString") matcheaba igual con "in" y
+  // dejaba `scope` como una función en vez de un array/null -- .includes()
+  // reventaba más abajo.
+  if(!Object.prototype.hasOwnProperty.call(EDIT_SCOPES, currentRole)) return false;
   const scope = EDIT_SCOPES[currentRole];
   if(scope===null) return true;
   const base = (cat||'').replace('_S2','');
@@ -1306,6 +1307,18 @@ function calcStats(cat,from,to){
   }
   return{pj,pg,pe,pp,gf,gc,dg:gf-gc,pts:pg*3+pe};
 }
+// Igual que calcStats pero salteando las fechas autocompletadas (resultsAuto)
+// -- solo para Confiabilidad, donde comparar "mi carga" tiene que ser la
+// carga real del usuario, no lo que el propio autocompletado ya puso ahí.
+function calcStatsManual(cat,from,to){
+  let pj=0,pg=0,gf=0;
+  for(let f=from;f<=to;f++){
+    if(resultsAuto.has(cat+'|'+f)) continue;
+    const r=results[cat][f];
+    if(r){pj++;gf+=r[0];if(getResult(r[0],r[1])==='W')pg++;}
+  }
+  return{pj,pg,gf};
+}
 function calcStatsAll(from,to){
   let pj=0,pg=0,pe=0,pp=0,gf=0,gc=0;
   GENERAL_CATS.forEach(cat=>{const s=calcStats(cat,from,to);pj+=s.pj;pg+=s.pg;pe+=s.pe;pp+=s.pp;gf+=s.gf;gc+=s.gc;});
@@ -1382,7 +1395,15 @@ function initFirebase(){
       db=firebase.database();
       fbReady=true;
       firebase.auth().onAuthStateChanged(user=>{
+        // Si había un listener de rol/stats de otra cuenta (o de una corrida
+        // anterior de este mismo handler) todavía enganchado, lo soltamos
+        // antes de attachear el nuevo. Sin esto, en la PC compartida del club
+        // un logout+login sin recargar la página deja el listener de ROL de
+        // la cuenta VIEJA escuchando -- si ese rol se edita después desde la
+        // consola de Firebase, pisa el rol de la sesión nueva sin avisar.
+        if(_authListenerUid){ db.ref('users/'+_authListenerUid+'/role').off(); db.ref('stats').off(); _authListenerUid=null; }
         if(user){
+          _authListenerUid = user.uid;
           // Remove login wall if still present (returning user with active session)
           const wall = document.getElementById('login-wall');
           if(wall){ wall.style.transition='opacity .3s'; wall.style.opacity='0'; setTimeout(()=>wall.remove(),300); }
@@ -1634,26 +1655,31 @@ function cerrarTemporada(){
         const archivo = {
           results: p.results||{}, links: p.links||{}, goleadores: p.goleadores||{},
           matchData: p.matchData||{}, jugadores: p.jugadores||{}, rivalData: p.rivalData||{},
+          partidos: p.partidos||{}, gymData: p.gymData||{},
           cerradaEl: new Date().toISOString()
         };
         return db.ref('temporadas_cerradas/'+TEMPORADA_ACTIVA).set(archivo);
       }).then(()=>{
-        const payload = { results:{}, links:{}, goleadores:{}, jugadores:{}, matchData:{}, rivalData:{RESERVA:{},RESERVA_S2:{}} };
+        const payload = { results:{}, links:{}, goleadores:{}, jugadores:{}, matchData:{}, rivalData:{RESERVA:{},RESERVA_S2:{}}, partidos:{}, gymData:{} };
         CATEGORIES.forEach(cat=>{
           payload.results[cat]={}; payload.links[cat]={}; payload.goleadores[cat]=[]; payload.jugadores[cat]=[]; payload.matchData[cat]={};
+          payload.partidos[cat]={}; payload.gymData[cat]=[];
           const fl = cat==='RESERVA' ? RIVALS_RESERVA : RIVALS;
           fl.forEach(r=>{
             payload.results[cat][r.f]=null;
             payload.links[cat][r.f]={};
             LINK_TYPES.forEach(lt=>{ payload.links[cat][r.f][lt.key]=''; });
+            payload.partidos[cat][r.f]=null;
           });
           if(cat==='RESERVA'){
             payload.results['RESERVA_S2']={}; payload.links['RESERVA_S2']={};
             payload.goleadores['RESERVA_S2']=[]; payload.matchData['RESERVA_S2']={};
+            payload.partidos['RESERVA_S2']={}; payload.gymData['RESERVA_S2']=[];
             RIVALS_RESERVA_S2.forEach(r=>{
               payload.results['RESERVA_S2'][r.f]=null;
               payload.links['RESERVA_S2'][r.f]={};
               LINK_TYPES.forEach(lt=>{ payload.links['RESERVA_S2'][r.f][lt.key]=''; });
+              payload.partidos['RESERVA_S2'][r.f]=null;
             });
           }
         });
@@ -2185,6 +2211,24 @@ function renderTablaGeneral(containerId){
 // 7MA, 8VA y 9NA quedan afuera de la confiabilidad a pedido de Javi
 // (ver CATEGORIAS_CONFIG, campo enConfiabilidad).
 
+// goleadores guarda "Apellido, Nombre" y futdetail "Apellido Nombre" (sin
+// coma), y no siempre coinciden en tildes — hay que normalizar sacando coma
+// y acentos para que crucen bien. Globales (no solo de calcConfiabilidad)
+// para que vincularJugador pueda escribir la MISMA clave que después se lee.
+function normComparableNombre(s){
+  return (s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'')
+    .replace(/,/g,' ').replace(/\s+/g,' ').trim();
+}
+// Si el nombre matchea a alguien del plantel (por subconjunto de palabras,
+// mismo criterio que cometResolvePlayer), la clave es su id -- así "Cortes
+// Adrian maximiliano" y "CORTES, MAXIMILIANO" se suman como un solo jugador
+// en vez de aparecer como dos filas separadas. Si no matchea a nadie, cae al
+// string normalizado de siempre.
+function keyDeJugador(cat, nombre){
+  const p=matchPlantel(cat, nombre);
+  return p ? 'id:'+p.id : normComparableNombre(nombre);
+}
+
 // futdetail linkea en formato corto (youtu.be/ID) y la carga manual suele
 // ser el formato largo (youtube.com/watch?v=ID) — mismo video, texto
 // distinto. Se extrae el ID para comparar contra eso, no contra el link
@@ -2208,6 +2252,10 @@ function calcConfiabilidad(){
     const fechas=new Set([...Object.keys(fixtureLiga), ...Object.keys(fixtureFut), ...Object.keys(sfResultados)]);
     fechas.forEach(fechaStr=>{
       const fecha=parseInt(fechaStr);
+      // Si esta fecha no tiene carga manual, lo que hay en results[cat][fecha]
+      // es autocompletado (autoResultado) -- comparar eso contra "verdad" no
+      // tiene sentido, no hay ninguna carga del usuario que revisar.
+      if(resultsAuto.has(cat+'|'+fecha)) return;
       const comet=partidos[cat]?.[fecha]||null;
       const liga=fixtureLiga[fechaStr]||null;
       const fut=fixtureFut[fechaStr]||null;
@@ -2236,11 +2284,18 @@ function calcConfiabilidad(){
   // menor prioridad de las 4, solo referencia.
   const equipoMismatches=[]; // {cat, campo, mio, valor, fuente}
   CONFIABILIDAD_CATS.forEach(cat=>{
-    const mio=calcStats(cat,1,35);
+    // Igual que arriba: solo cuenta la carga manual, no lo autocompletado --
+    // calcStats normal mezcla las dos cosas (a propósito, para que la tabla
+    // de temporada se vea completa), pero acá compararía el autocompletado
+    // contra sí mismo y marcaría una "diferencia" que no es un error tuyo.
+    const mio=calcStatsManual(cat,1,35);
     const filas=(TABLA_DATA&&TABLA_DATA.categorias&&TABLA_DATA.categorias[cat])||[];
     const lpf=filas.find(f=>/tigre/i.test(f.equipo));
     const sfResultados=(TABLA_DATA&&TABLA_DATA.statfutbol_resultados&&TABLA_DATA.statfutbol_resultados[cat])||{};
-    const sfPartidos=Object.values(sfResultados);
+    // Si algún partido de statfutbol_resultados vino con gf/gc incompletos,
+    // "undefined>undefined" da false y lo subcontaba como derrota en vez de
+    // sacarlo de la cuenta -- mejor descartarlo entero de PJ/PG/GF.
+    const sfPartidos=Object.values(sfResultados).filter(p=>p.gf!=null && p.gc!=null);
     const sf=sfPartidos.length ? {
       pj: sfPartidos.length,
       pg: sfPartidos.filter(p=>p.gf>p.gc).length,
@@ -2257,20 +2312,8 @@ function calcConfiabilidad(){
   const golesMismatches=[]; // {cat, jugador, mio, fut, key, soloEn}
   CONFIABILIDAD_CATS.forEach(cat=>{
     const misGoles={}, nombreOriginal={};
-    // goleadores guarda "Apellido, Nombre" y futdetail "Apellido Nombre" (sin
-    // coma), y no siempre coinciden en tildes — hay que normalizar sacando
-    // coma y acentos para que crucen bien.
-    const normComparable=s=>(s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'')
-      .replace(/,/g,' ').replace(/\s+/g,' ').trim();
-    // Si el nombre matchea a alguien del plantel (por subconjunto de
-    // palabras, mismo criterio que cometResolvePlayer), la clave es su id
-    // -- así "Cortes Adrian maximiliano" y "CORTES, MAXIMILIANO" se suman
-    // como un solo jugador en vez de aparecer como dos filas separadas.
-    // Si no matchea a nadie, cae al string normalizado de siempre.
-    const keyDe=nombre=>{
-      const p=matchPlantel(cat, nombre);
-      return p ? 'id:'+p.id : normComparable(nombre);
-    };
+    const normComparable=normComparableNombre;
+    const keyDe=nombre=>keyDeJugador(cat, nombre);
     // Usa golesEfectivos (carga manual + COMET, COMET gana por fecha) en vez
     // de la carga manual sola — así compara lo que de verdad se ve en
     // pantalla contra futdetail, no un número viejo que COMET ya reemplazó.
@@ -2483,12 +2526,18 @@ function irAResultados(cat){
 // Tabla de equivalencias de jugadores: vincula un nombre "huérfano" (que
 // solo aparece en una fuente) con el que elegiste del lado opuesto, para
 // que de ahora en más se sumen como la misma persona.
-function vincularJugador(cat, keyEstaFila, soloEnEstaFila, keyElegida){
-  if(!canEdit || !keyElegida) return;
-  const keyFut = soloEnEstaFila==='futdetail' ? keyEstaFila : keyElegida;
-  const keyMia = soloEnEstaFila==='mia' ? keyEstaFila : keyElegida;
+// Recibe los NOMBRES tal cual salen de cada fuente (no la key ya calculada,
+// que para un nombre que matchea al plantel es "id:123" -- guardar esa key
+// como clave del alias no servía de nada porque la lectura (calcConfiabilidad,
+// golesMismatches) siempre busca el alias por el nombre normalizado del lado
+// futdetail, nunca por id; el vínculo quedaba guardado pero invisible y la
+// alerta volvía a aparecer idéntica después de "Vincular").
+function vincularJugador(cat, nombreEstaFila, soloEnEstaFila, nombreElegido){
+  if(!canEdit || !nombreElegido) return;
+  const nombreFut = soloEnEstaFila==='futdetail' ? nombreEstaFila : nombreElegido;
+  const nombreMia = soloEnEstaFila==='mia' ? nombreEstaFila : nombreElegido;
   aliasJugadores[cat]=aliasJugadores[cat]||{};
-  aliasJugadores[cat][keyFut]=keyMia;
+  aliasJugadores[cat][normComparableNombre(nombreFut)]=keyDeJugador(cat, nombreMia);
   guardarAliasJugadores();
   showToast('🔗 VINCULADO');
   renderConfiabilidad('gen-confiabilidad');
@@ -2624,13 +2673,13 @@ function renderConfiabilidad(containerId){
           const candidatos=golesMismatches.filter(x=>x.cat===m.cat && x.soloEn!=='ambas' && x.soloEn!==m.soloEn);
           if(candidatos.length){
             const selId=('vinc-'+m.cat+'-'+m.key).replace(/[^a-zA-Z0-9-]/g,'_');
-            const opts=candidatos.map(c=>`<option value="${esc(c.key)}">${esc(c.jugador)}</option>`).join('');
+            const opts=candidatos.map(c=>`<option value="${esc(c.jugador)}">${esc(c.jugador)}</option>`).join('');
             vincularHTML=`
               <select id="${selId}" style="background:var(--surface2);border:1px solid var(--border2);color:var(--text);
                 font-family:'Barlow Condensed',sans-serif;font-size:11px;padding:3px 6px;border-radius:4px;margin-left:8px">
                 <option value="">— Es el mismo que… —</option>${opts}
               </select>
-              <button onclick="vincularJugador('${esc(m.cat)}','${esc(m.key)}','${m.soloEn}',document.getElementById('${selId}').value)"
+              <button onclick="vincularJugador('${esc(m.cat)}','${esc(m.jugador).replace(/'/g,"\\'")}','${m.soloEn}',document.getElementById('${selId}').value)"
                 style="background:rgba(26,58,143,0.25);border:1px solid var(--border2);color:var(--gold2);
                 border-radius:6px;padding:4px 8px;font-family:Barlow Condensed,sans-serif;font-size:11px;
                 letter-spacing:1px;cursor:pointer;white-space:nowrap;margin-left:4px">🔗 Vincular</button>`;
@@ -3931,12 +3980,10 @@ function gpsAbrirVideoEsfuerzo(cat, fechaKey, startUnix, jugador, velKmh, durSeg
 function gpsColectivosDetectar(cat, fechaKey, ventanaSeg, minJug, tipo){
   const dia = catapultEfforts[cat]?.[fechaKey];
   if(!dia) return [];
-  const ventanas = (dia.periodos||[]).filter(p=>/rimer|egundo/i.test(p.name||'') && p.start && p.end).map(p=>[p.start,p.end]);
-  const enPartido = e => !ventanas.length || ventanas.some(([a,b])=>e.start>=a && e.start<=b);
   const esTipo = e => (e.tipo||'sprint')===tipo;
   const todos = [];
   Object.entries(dia.jugadores||{}).forEach(([nombre, efs])=>{
-    (efs||[]).filter(e=>enPartido(e) && esTipo(e)).forEach(e=>todos.push({...e, nombre}));
+    gpsFiltrarEnPartido(dia, efs).filter(esTipo).forEach(e=>todos.push({...e, nombre}));
   });
   todos.sort((a,b)=>a.start-b.start);
   const rachas = [];
@@ -3972,17 +4019,34 @@ function gpsAbrirVideoColectivo(cat, fechaKey, startUnix, spanSeg, titulo){
 // Devuelve null si falta cualquier cosa necesaria para saltar al video
 // (esfuerzos, link del partido o calibración) -- en ese caso no se muestra
 // el botón, mismo criterio que el resto de "Esfuerzos en video".
-function gpsEsfuerzoTopSpeed(cat, fechaNum, nombre){
+// Ventanas de "Primer/Segundo tiempo" de un día de Catapult -- único lugar
+// donde se arma este filtro; lo reusan gpsEsfuerzoTopSpeed, gpsColectivosDetectar
+// y wireGpsVideoForm para que "qué esfuerzo cuenta como parte del partido" sea
+// siempre el mismo criterio (antes estaba copiado igual en los 3 lugares).
+function gpsVentanasPartido(dia){
+  return (dia?.periodos||[]).filter(p=>/rimer|egundo/i.test(p.name||'') && p.start && p.end).map(p=>[p.start,p.end]);
+}
+function gpsFiltrarEnPartido(dia, efs){
+  const ventanas = gpsVentanasPartido(dia);
+  return (efs||[]).filter(e=>!ventanas.length || ventanas.some(([a,b])=>e.start>=a && e.start<=b));
+}
+
+function gpsEsfuerzoTopSpeed(cat, fechaNum, nombre, velEsperada){
   const fechaKey = 'F'+fechaNum;
   const dia = catapultEfforts[cat]?.[fechaKey];
   const url = links[cat]?.[fechaNum]?.par;
   const sync = videoSync[cat]?.[fechaKey];
   if(!dia || !url || !sync) return null;
-  const ventanas = (dia.periodos||[]).filter(p=>/rimer|egundo/i.test(p.name||'') && p.start && p.end).map(p=>[p.start,p.end]);
-  const enPartido = e => !ventanas.length || ventanas.some(([a,b])=>e.start>=a && e.start<=b);
-  const esfuerzos = (dia.jugadores?.[nombre]||[]).filter(enPartido);
+  const esfuerzos = gpsFiltrarEnPartido(dia, dia.jugadores?.[nombre]);
   if(!esfuerzos.length) return null;
-  return esfuerzos.reduce((best,e)=>(!best || e.vel>best.vel) ? e : best, null);
+  const mejor = esfuerzos.reduce((best,e)=>(!best || e.vel>best.vel) ? e : best, null);
+  // El agregado del partido (Top Speed del ranking) y el esfuerzo individual
+  // más rápido deberían coincidir casi exacto -- si no coinciden, el pipeline
+  // se perdió justo el sprint real (mismo gap ya documentado en ~5% de las
+  // filas) y lo que quedó acá es más lento: mejor no mostrar el botón que
+  // llevar al video a un momento que no es.
+  if(velEsperada!=null && Math.abs(mejor.vel - velEsperada) > 0.5) return null;
+  return mejor;
 }
 
 // MEDIDO EL 2026-09-20 sobre las 17 fechas ya calibradas: a TODOS los videos
@@ -4152,9 +4216,6 @@ function wireGpsVideoForm(){
   // trae esfuerzos de calentamiento u otra sesión del día (hora fuera del
   // partido); al clickearlos, gpsVideoSeg daba un segundo negativo y el video
   // arrancaba de 0. Mismo criterio de nombres de período que gpsVideoSeg.
-  const _ventanas = (dia.periodos||[]).filter(p=>/rimer|egundo/i.test(p.name||'') && p.start && p.end).map(p=>[p.start,p.end]);
-  const enPartido = e => !_ventanas.length || _ventanas.some(([a,b])=>e.start>=a && e.start<=b);
-
   const recalHTML = canEdit?`<div style="text-align:right;margin-bottom:8px">
       <button type="button" onclick="gpsVideoRecalibrando=true;wireGpsVideoForm();"
         style="background:none;border:1px solid var(--border);border-radius:5px;color:var(--muted);font-size:11px;padding:4px 10px;cursor:pointer">🔄 Recalibrar este partido</button>
@@ -4204,10 +4265,10 @@ function wireGpsVideoForm(){
     return;
   }
 
-  const jugadores = Object.keys(dia.jugadores||{}).filter(n=>(dia.jugadores[n]||[]).some(enPartido)).sort();
+  const jugadores = Object.keys(dia.jugadores||{}).filter(n=>gpsFiltrarEnPartido(dia,dia.jugadores[n]).length).sort();
   if(!gpsVideoJugador || !jugadores.includes(gpsVideoJugador)) gpsVideoJugador = jugadores[0]||null;
   const jugOpts = jugadores.map(n=>`<option value="${esc(n)}"${n===gpsVideoJugador?' selected':''}>${esc(formatNombreMostrar(n,cat))}</option>`).join('');
-  const todos = (gpsVideoJugador ? (dia.jugadores[gpsVideoJugador]||[]) : []).filter(enPartido);
+  const todos = gpsFiltrarEnPartido(dia, gpsVideoJugador ? dia.jugadores[gpsVideoJugador] : []);
   // tipo faltante = sprint (datos viejos, antes de sumar HSR al scraper).
   const nSpr = todos.filter(e=>(e.tipo||'sprint')==='sprint').length;
   const nHsr = todos.filter(e=>e.tipo==='hsr').length;
@@ -4387,7 +4448,11 @@ function renderGpsInforme(){
 
   const de60 = regs.filter(r=>r.min>=60);
   const excluidos = regs.length - de60.length;
-  const numsAt = idx => de60.map(r=>r.metrics[idx]).filter(v=>v!=null).map(Number);
+  // Si nadie llegó a 60' (común en juveniles con mucha rotación), un promedio
+  // sobre 0 jugadores dejaría los KPI en blanco sin avisar bien por qué --
+  // mejor promediar sobre todos los que jugaron y aclararlo.
+  const baseKpi = de60.length ? de60 : regs;
+  const numsAt = idx => baseKpi.map(r=>r.metrics[idx]).filter(v=>v!=null).map(Number);
   const hayPL = regs.some(r=>r.metrics[16]!=null);
 
   const kpis = [
@@ -4403,7 +4468,9 @@ function renderGpsInforme(){
 
   cont.innerHTML = `
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-bottom:8px">${kpis}</div>
-    ${excluidos>0?`<div style="font-size:10px;color:var(--muted);margin-bottom:16px">Promedios calculados sobre ${de60.length} jugador${de60.length===1?'':'es'} con 60' o más (${excluidos} con menos minutos no entran en el promedio, pero sí aparecen en los gráficos de abajo).</div>`:''}
+    ${de60.length===0
+      ? `<div style="font-size:10px;color:var(--muted);margin-bottom:16px">Ningún jugador llegó a 60' en este filtro -- los promedios de arriba son sobre los ${regs.length} que jugaron, sin ese piso de minutos.</div>`
+      : excluidos>0?`<div style="font-size:10px;color:var(--muted);margin-bottom:16px">Promedios calculados sobre ${de60.length} jugador${de60.length===1?'':'es'} con 60' o más (${excluidos} con menos minutos no entran en el promedio, pero sí aparecen en los gráficos de abajo).</div>`:''}
     ${gpsChartWrapHTML('ch-gic-dist','Distancia total y m/min')}
     ${gpsChartWrapHTML('ch-gic-hsr','HSR 21-25 y Sprints +25')}
     ${gpsChartWrapHTML('ch-gic-vel','Top Speed y Cant. Sprints')}
@@ -4899,7 +4966,7 @@ function runGpsCruce(){
   const rows = filas.slice(0,50).map((r,idx)=>{
     let esf = null, verTd = '';
     if(conVideo){
-      esf = gpsEsfuerzoTopSpeed(gpsCruceCat, r.fecha, r.nombre);
+      esf = gpsEsfuerzoTopSpeed(gpsCruceCat, r.fecha, r.nombre, r.v);
       verTd = `<td style="text-align:center">${esf?`<button type="button" onclick="gpsAbrirVideoEsfuerzo('${gpsCruceCat}','F${r.fecha}',${esf.start},'${esc(formatNombreMostrar(r.nombre,gpsCruceCat)).replace(/'/g,"\\'")}',${esf.vel},${esf.dur})"
         style="background:var(--gold2);border:none;border-radius:5px;color:#0b0f18;font-family:'Bebas Neue',sans-serif;font-size:12px;letter-spacing:1px;padding:5px 10px;cursor:pointer">▶ VER</button>`:''}</td>`;
     }
@@ -5492,11 +5559,16 @@ async function parseCometPdf(file, cat){
   all.sort((a,b)=>a.y-b.y);
 
   const idxWord = (word, start=0) => { for(let i=Math.max(0,start);i<all.length;i++){ if(all[i].s===word) return i; } return -1; };
-  const idxMatch = (re, start=0) => { for(let i=Math.max(0,start);i<all.length;i++){ if(re.test(all[i].s)) return i; } return -1; };
+  const idxMatch = (re, start=0, end=all.length) => { for(let i=Math.max(0,start);i<end;i++){ if(re.test(all[i].s)) return i; } return -1; };
 
   const iCalMonth = idxWord('calendar_month');
-  const headerWords = all.slice(0, iCalMonth<0?all.length:iCalMonth);
-  const iScore = idxMatch(/^\d+:\d+$/);
+  const finHeader = iCalMonth<0?all.length:iCalMonth;
+  const headerWords = all.slice(0, finHeader);
+  // El resultado tiene que salir DEL ENCABEZADO, no de cualquier lado del
+  // informe -- buscarlo en todo el documento podía agarrar cualquier otro
+  // texto con forma "N:NN" (una hora, una duración) que apareciera antes en
+  // el orden de lectura, arruinando goles/condición/rival sin ningún aviso.
+  const iScore = idxMatch(/^\d+:\d+$/, 0, finHeader);
   if(iScore<0) throw new Error('No se encontró el resultado en el encabezado — ¿es un informe de partido de COMET?');
   const score = all[iScore];
   const [golA, golB] = score.s.split(':').map(Number);
@@ -5769,7 +5841,7 @@ async function parseCometPdf(file, cat){
 
 function savePartidoComet(cat, fecha, data){
   if(!fbReady||!db||!canEdit) return Promise.reject(new Error('no-edit'));
-  return db.ref(`stats/partidos/${cat}/${fecha}`).set({
+  return db.ref(`stats/partidos/${cat}/${fecha}`).update({
     fuente:'comet', cargadoEl: new Date().toISOString(),
     rival:data.rival, condicion:data.condicion, golesTigre:data.golesTigre, golesRival:data.golesRival,
     titulares:data.titulares, suplentes:data.suplentes, goles:data.goles, amarillas:data.amarillas, rojas:data.rojas,
@@ -6471,14 +6543,21 @@ function renderRosterCat(cat, content){
 // Mejor vel. máx (BL GPS) de un jugador y en qué fecha, para destacarla en
 // su tarjeta -- mismo criterio de emparejamiento por nombre "orden
 // independiente" que ya usa el resto de la app entre fuentes distintas.
-function blTopSpeedInfo(cat, nombre){
-  const nn = normNombreOrdenIndependiente(nombre);
-  const entry = Object.entries(blPlayers).find(([n])=>normNombreOrdenIndependiente(n)===nn);
+// Mejor Top Speed (metrics[6]) entre los partidos de un [nombre, {match}]
+// -- lo único que cambia entre blTopSpeedInfo y catapultTopSpeedInfo es CÓMO
+// se resuelve ese entry (por nombre normalizado en BL, por catapultResolverJugador
+// en Catapult); antes ambas repetían este mismo cálculo por separado.
+function mejorTopSpeedDeEntry(entry){
   if(!entry) return null;
   const matches = (entry[1].match||[]).filter(m=>m.metrics && m.metrics[6]!=null);
   if(!matches.length) return null;
   const best = matches.reduce((a,b)=> b.metrics[6]>a.metrics[6] ? b : a);
   return {velmax: best.metrics[6], fecha: blFechaNum(best.fecha)};
+}
+function blTopSpeedInfo(cat, nombre){
+  const nn = normNombreOrdenIndependiente(nombre);
+  const entry = Object.entries(blPlayers).find(([n])=>normNombreOrdenIndependiente(n)===nn);
+  return mejorTopSpeedDeEntry(entry);
 }
 // Mismo cálculo que blTopSpeedInfo pero sobre catapultPlayers (ya viene
 // separado por categoría, no hace falta cruzar contra todas). Se prefiere
@@ -6486,11 +6565,7 @@ function blTopSpeedInfo(cat, nombre){
 // mantener activa de acá en adelante (Javi, 2026-09-02).
 function catapultTopSpeedInfo(cat, nombre){
   const entry = catapultResolverJugador(cat, nombre);
-  if(!entry) return null;
-  const matches = (entry[1].match||[]).filter(m=>m.metrics && m.metrics[6]!=null);
-  if(!matches.length) return null;
-  const best = matches.reduce((a,b)=> b.metrics[6]>a.metrics[6] ? b : a);
-  return {velmax: best.metrics[6], fecha: blFechaNum(best.fecha)};
+  return mejorTopSpeedDeEntry(entry);
 }
 function topSpeedInfo(cat, nombre){
   return catapultTopSpeedInfo(cat, nombre) || blTopSpeedInfo(cat, nombre);
@@ -7753,7 +7828,12 @@ function pdfSectionResultados(cat, dataCat, isReserva, rivalList){
     const resColor=res==='W'?'#16a34a':res==='D'?'#ca8a04':'#dc2626';
     const pts=res==='W'?3:res==='D'?1:0;
     const rName = isReserva ? (rivalData[dataCat][r.f]?.rival || r.r || '—') : r.r;
-    const rCond = isReserva ? (rivalData[dataCat][r.f]?.cond || r.c) : r.c;
+    // condicionCat ya resuelve Reserva (fixture_reserva/rivalData) y la
+    // condición invertida de 7MA/8VA/9NA -- usar el r.c crudo acá (como antes)
+    // mostraba local/visitante al revés para esas tres categorías, mismo bug
+    // que ya se había corregido en pantalla (renderStatsSingle) pero no en
+    // este export.
+    const rCond = condicionCat(dataCat, r.f) || r.c;
     rows+=`<tr>
       <td>${r.f}</td><td>${esc(rName)}</td>
       <td>${rCond==='L'?'Local':'Visit.'}</td>
@@ -8243,7 +8323,18 @@ async function dibujarTarjetaRival({cat, prox, info, ultimos, ultimosLabel, reci
     const escImg=escudosResultados[i];
     if(escImg){ ctx.drawImage(escImg, tx, ry+(rowH2visual-28)/2, 28, 28); tx+=36; }
     ctx.font="14px 'Barlow', sans-serif"; ctx.fillStyle=TXT2;
-    ctx.fillText(`Fecha ${p.fecha} vs ${NOMBRE_POR_LPF[p.rivalDe]||p.rivalDe} · ${p.cond==='L'?'LOCAL':'VISIT.'}`, tx, ry+rowH2visual/2-7);
+    // Un rival con nombre largo podía correrse encima del resultado, que
+    // se dibuja en una posición fija (leftX+colW-170) -- se trunca con "…"
+    // si no entra en el espacio disponible antes de esa marca.
+    const filaLabelFull=`Fecha ${p.fecha} vs ${NOMBRE_POR_LPF[p.rivalDe]||p.rivalDe} · ${p.cond==='L'?'LOCAL':'VISIT.'}`;
+    const filaLabelMaxW=(leftX+colW-170-10)-tx;
+    let filaLabel=filaLabelFull;
+    if(ctx.measureText(filaLabelFull).width > filaLabelMaxW){
+      let cortado=filaLabelFull;
+      while(cortado.length>4 && ctx.measureText(cortado+'…').width > filaLabelMaxW) cortado=cortado.slice(0,-1);
+      filaLabel=cortado+'…';
+    }
+    ctx.fillText(filaLabel, tx, ry+rowH2visual/2-7);
     ctx.font="700 17px 'Barlow', sans-serif"; ctx.fillStyle=TXT;
     ctx.fillText(`${p.gf}-${p.gc}`, leftX+colW-170, ry+rowH2visual/2-8);
     const bw=80;
@@ -8735,8 +8826,16 @@ async function dibujarPlacaPostPartido({fecha, info, escalaTigre, escalaRival, e
   ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
   ctx.font = "700 84px 'Barlow Condensed', sans-serif"; ctx.fillStyle = WHITE;
   ctx.fillText('Análisis post partido', W/2, H/2-28);
-  ctx.font = "700 38px 'Barlow', sans-serif";
-  ctx.fillText(`Fecha ${fecha}: ${info.lpf}`, W/2, H/2+48);
+  // El nombre del rival (info.lpf) puede ser largo -- se achica hasta entrar,
+  // mismo patrón que dibujarPlacaPortada/dibujarPlacaFase.
+  const lineaFecha = `Fecha ${fecha}: ${info.lpf}`;
+  let fontSizeFecha = 38;
+  ctx.font = `700 ${fontSizeFecha}px 'Barlow', sans-serif`;
+  while(ctx.measureText(lineaFecha).width > W-pad*2 && fontSizeFecha > 20){
+    fontSizeFecha -= 2;
+    ctx.font = `700 ${fontSizeFecha}px 'Barlow', sans-serif`;
+  }
+  ctx.fillText(lineaFecha, W/2, H/2+48);
   ctx.textAlign = 'left'; ctx.textBaseline = 'top';
 
   return new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
@@ -8812,7 +8911,17 @@ async function dibujarPlacaFase({titulo, subtitulo, escalaLiga, offsetXLiga, off
   }
 
   ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-  ctx.font = "700 84px 'Barlow Condensed', sans-serif"; ctx.fillStyle = WHITE;
+  // El título permite hasta 60 caracteres en el formulario -- a tamaño fijo
+  // un título largo se salía del canvas por los dos lados (texto centrado);
+  // se achica hasta entrar, mismo patrón que el nombre del rival en la
+  // portada (dibujarPlacaPortada).
+  let fontSizeTitulo = 84;
+  ctx.font = `700 ${fontSizeTitulo}px 'Barlow Condensed', sans-serif`;
+  while(ctx.measureText(titulo).width > W-pad*2 && fontSizeTitulo > 32){
+    fontSizeTitulo -= 4;
+    ctx.font = `700 ${fontSizeTitulo}px 'Barlow Condensed', sans-serif`;
+  }
+  ctx.fillStyle = WHITE;
   ctx.fillText(titulo, W/2, subtitulo ? H/2 - 28 : H/2);
   if(subtitulo){
     ctx.font = "italic 38px 'Barlow', sans-serif"; ctx.fillStyle = TXT2;
