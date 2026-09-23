@@ -777,6 +777,7 @@ table.gen-table .cat-cell{font-family:'Bebas Neue',sans-serif;font-size:15px;
     <div id="admin-badge">
       <span class="admin-tag" id="role-tag-txt">ADMIN</span>
       <button id="btn-usuarios" onclick="abrirPanelUsuarios()" title="Usuarios y roles (solo admin)" style="display:none;position:relative;background:rgba(42,120,214,0.18);border:1px solid rgba(42,120,214,0.4);border-radius:4px;color:#6fa8f5;font-size:9px;padding:2px 6px;cursor:pointer;font-family:Barlow Condensed,sans-serif;letter-spacing:1px;">👥<span id="btn-usuarios-badge" title="Cuentas nuevas desde tu última visita" style="display:none;position:absolute;top:-6px;right:-6px;background:#e01830;color:#fff;border-radius:8px;min-width:15px;height:15px;line-height:15px;font-size:9px;font-weight:700;padding:0 3px;box-shadow:0 0 0 1.5px #0a0f1e">0</span></button>
+      <button id="btn-gps-reserva-auto" onclick="marcarGpsReservaAutoVisto()" title="El PF de Reserva activó la automatización con Catapult -- revisar que los datos que se ven sean reales" style="display:none;position:relative;background:rgba(240,192,64,0.18);border:1px solid rgba(240,192,64,0.4);border-radius:4px;color:var(--gold2);font-size:9px;padding:2px 6px;cursor:pointer;font-family:Barlow Condensed,sans-serif;letter-spacing:1px;">🛰️<span id="btn-gps-reserva-auto-badge" style="display:none;position:absolute;top:-6px;right:-6px;background:#e01830;color:#fff;border-radius:8px;min-width:15px;height:15px;line-height:15px;font-size:9px;font-weight:700;padding:0 3px;box-shadow:0 0 0 1.5px #0a0f1e">!</span></button>
       <button id="btn-cerrar-temporada" onclick="cerrarTemporada()" title="Archivar la temporada activa y arrancar una nueva" style="display:none;background:rgba(240,192,64,0.15);border:1px solid rgba(240,192,64,0.4);border-radius:4px;color:var(--gold2);font-size:9px;padding:2px 6px;cursor:pointer;font-family:Barlow Condensed,sans-serif;letter-spacing:1px;">📦</button>
       <button id="btn-reset" onclick="clearData()" style="display:none;background:rgba(192,21,42,0.2);border:1px solid rgba(192,21,42,0.4);border-radius:4px;color:rgba(255,100,100,0.7);font-size:9px;padding:2px 6px;cursor:pointer;font-family:Barlow Condensed,sans-serif;letter-spacing:1px;">🗑</button>
     </div>
@@ -1494,6 +1495,8 @@ function initFirebase(){
             sincronizarStatsDesdeStatfutbol();
             if(isAdmin) attachBadgeUsuariosListener(user.uid);
             else if(_profileTakenListenerOn){ db.ref('profile_taken').off(); _profileTakenListenerOn=false; ocultarBadgeUsuarios(); }
+            if(isAdmin) attachBadgeGpsReservaListener(user.uid);
+            else if(_gpsReservaAutoListenerOn){ db.ref('gps/catapultReservaAuth/estado/activo').off(); _gpsReservaAutoListenerOn=false; }
           });
           // Real-time data sync — listen for remote changes
           db.ref('stats').on('value', snap=>{
@@ -1525,6 +1528,8 @@ function applyViewMode(){
   if(cerrarTempBtn) cerrarTempBtn.style.display=isAdmin?'':'none';
   const usuariosBtn=document.getElementById('btn-usuarios');
   if(usuariosBtn) usuariosBtn.style.display=isAdmin?'':'none';
+  const gpsReservaAutoBtn=document.getElementById('btn-gps-reserva-auto');
+  if(gpsReservaAutoBtn) gpsReservaAutoBtn.style.display=isAdmin?'':'none';
 
   // Filter categories for category-specific roles.
   // cat_XXX -> su categoria + GENERAL; ea_mayores/ea_menores -> sus 3
@@ -1613,6 +1618,38 @@ function attachBadgeUsuariosListener(adminUid){
 function ocultarBadgeUsuarios(){
   const badge = document.getElementById('btn-usuarios-badge');
   if(badge) badge.style.display='none';
+}
+// Mismo mecanismo que el badge de usuarios de arriba, pero para un solo
+// evento (no una lista que crece): "el PF de Reserva activó la
+// automatización de GPS con Catapult" -- se pidió expresamente que el admin
+// se entere (Javi, 2026-09-23: "tenemos que estar seguros de que le estamos
+// mostrando los datos reales"), y como esto corre en la PC del club cada 4hs
+// sin que nadie lo esté mirando, un badge en vivo (nunca un mail/push) es la
+// única forma de avisar sin meter Cloud Functions.
+let _gpsReservaAutoListenerOn = false;
+function attachBadgeGpsReservaListener(adminUid){
+  if(_gpsReservaAutoListenerOn) return;
+  _gpsReservaAutoListenerOn = true;
+  db.ref('gps/catapultReservaAuth/estado/activo').on('value', snap=>{
+    const badge = document.getElementById('btn-gps-reserva-auto-badge');
+    if(!badge) return;
+    if(!snap.val()){ badge.style.display='none'; return; }
+    db.ref('users/'+adminUid+'/gpsReservaAutoVisto').once('value').then(vsnap=>{
+      badge.style.display = vsnap.val() ? 'none' : 'block';
+    });
+  });
+}
+function marcarGpsReservaAutoVisto(){
+  const uid = firebase.auth().currentUser?.uid;
+  if(!uid) return;
+  db.ref('gps/catapultReservaAuth/estado/desde').once('value').then(snap=>{
+    const desde = snap.val();
+    alert('El PF de Reserva activó la automatización de GPS con Catapult'+(desde?' el '+new Date(desde).toLocaleDateString('es-AR'):'')+'. Revisá en PLANTEL → RESERVA → RENDIMIENTO GPS que los datos que se estén mostrando sean reales.');
+  });
+  db.ref('users/'+uid+'/gpsReservaAutoVisto').set(true).then(()=>{
+    const badge = document.getElementById('btn-gps-reserva-auto-badge');
+    if(badge) badge.style.display='none';
+  });
 }
 // Marca TODOS los perfiles ya reclamados como "vistos" por este admin --
 // se llama al abrir el panel de usuarios (ahí es cuando de verdad los mira).
@@ -4068,17 +4105,94 @@ let gpsCruceCat = null;
 function renderRendimientoGpsTab(tabEl, cat){
   gpsCruceCat = cat;
   const hayDatos = Object.keys(catapultPlayersDeCategoria(cat)).length > 0;
+  // RESERVA no entra en el pipeline automático de Catapult de 4TA-9NA (usa
+  // otro fixture, Copa Proyección) -- en su lugar, el PF de Reserva puede
+  // cargar su propio usuario/clave de Catapult una vez y automatizarse solo
+  // (Javi, 2026-09-23). El panel se muestra siempre arriba para RESERVA,
+  // tenga o no datos todavía.
+  const panelReserva = cat==='RESERVA' ? gpsReservaAutoPanelHTML() : '';
   if(!hayDatos){
-    tabEl.innerHTML = `
+    tabEl.innerHTML = panelReserva + `
       <div style="text-align:center;padding:20px;color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-size:13px">
         Todavía no hay datos de Catapult cargados para ${cat} (se actualiza solo, cada 4hs, en cuanto se suba un partido nuevo ahí).
       </div>`;
+    if(cat==='RESERVA') renderGpsReservaAutoPanel();
     return;
   }
-  tabEl.innerHTML = `
+  tabEl.innerHTML = panelReserva + `
     ${gpsCruceFormHTML(cat)}
     <div id="gps-cruce-result"></div>`;
+  if(cat==='RESERVA') renderGpsReservaAutoPanel();
   wireGpsCruceForm();
+}
+
+// Panel "Automatizar con Catapult" de RESERVA -- credenciales de escritura
+// SOLA VEZ: ni la app ni ningún rol (ni admin) las vuelve a leer, se guardan
+// directo en Firebase y de ahí las toma el scraper de la PC con la Admin SDK
+// (que no depende de las reglas de seguridad de lectura). Javi pidió
+// expresamente no tenerlas ("no me interesa tenerlas, solo ser funcional a
+// la plataforma") -- por eso credenciales/ necesita una regla de Firebase
+// con .read:false (ver charla, se le pasó el JSON exacto). estado/ SÍ es de
+// lectura normal (auth!=null): no es secreto, solo dice si está activo y
+// desde cuándo, para poder mostrar el cartelito y prender el badge del
+// admin (attachBadgeGpsReservaListener).
+function gpsReservaAutoPanelHTML(){
+  return `<div style="background:var(--surface2);border:1px solid var(--border2);border-radius:10px;padding:16px 18px;margin-bottom:14px">
+    <div id="gps-reserva-auto-contenido">Cargando…</div>
+  </div>`;
+}
+async function renderGpsReservaAutoPanel(){
+  const el = document.getElementById('gps-reserva-auto-contenido');
+  if(!el || !fbReady || !db) return;
+  let estado = null;
+  try{
+    const snap = await db.ref('gps/catapultReservaAuth/estado').once('value');
+    estado = snap.val();
+  }catch(e){ /* sin la regla de Firebase todavía configurada -- se trata como "no activo" */ }
+  if(estado && estado.activo){
+    el.innerHTML = `<div style="font-family:'Barlow Condensed',sans-serif">
+      <div style="color:var(--win);font-weight:700;font-size:14px;margin-bottom:4px">✅ Automatizado con Catapult</div>
+      <div style="color:var(--muted);font-size:12px">Activado el ${estado.desde?esc(new Date(estado.desde).toLocaleDateString('es-AR')):'—'}. Los datos de Reserva se traen solos cada 4hs, no hace falta cargar nada a mano.</div>
+      ${canEdit?`<button type="button" onclick="mostrarFormularioCatapultReserva()" style="margin-top:10px;background:none;border:1px solid var(--border2);border-radius:6px;color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-size:12px;padding:6px 12px;cursor:pointer">🔄 Cambiar usuario/clave</button>`:''}
+    </div>`;
+    return;
+  }
+  if(!canEdit){
+    el.innerHTML = `<div style="color:var(--muted);font-size:13px;font-family:'Barlow Condensed',sans-serif">Todavía no se activó la automatización de GPS con Catapult para Reserva.</div>`;
+    return;
+  }
+  el.innerHTML = gpsReservaAutoFormHTML();
+}
+function gpsReservaAutoFormHTML(){
+  return `<div style="font-family:'Barlow Condensed',sans-serif">
+    <div style="font-weight:700;color:var(--gold2);font-size:14px;margin-bottom:6px">🔗 Automatizar con Catapult</div>
+    <div style="color:var(--muted);font-size:12px;margin-bottom:10px">Se carga una sola vez -- desde ahí los datos de Reserva se traen solos, igual que en el resto de las categorías. La clave no se vuelve a mostrar en ningún lado, ni siquiera acá.</div>
+    <input type="text" id="catapult-reserva-user" placeholder="Usuario de Catapult" autocomplete="off"
+      style="display:block;background:var(--surface3,#0d1528);border:1px solid var(--border2);color:var(--text);width:100%;max-width:280px;border-radius:6px;padding:9px 12px;font-family:'Barlow Condensed',sans-serif;font-size:14px;outline:none;margin-bottom:8px">
+    <input type="password" id="catapult-reserva-pass" placeholder="Clave de Catapult" autocomplete="new-password"
+      style="display:block;background:var(--surface3,#0d1528);border:1px solid var(--border2);color:var(--text);width:100%;max-width:280px;border-radius:6px;padding:9px 12px;font-family:'Barlow Condensed',sans-serif;font-size:14px;outline:none;margin-bottom:10px">
+    <button type="button" onclick="activarCatapultReserva()" style="background:var(--gold2);border:none;border-radius:6px;color:#111;font-weight:700;font-family:'Barlow Condensed',sans-serif;font-size:13px;padding:9px 16px;cursor:pointer">GUARDAR Y ACTIVAR</button>
+  </div>`;
+}
+function mostrarFormularioCatapultReserva(){
+  const el = document.getElementById('gps-reserva-auto-contenido');
+  if(el) el.innerHTML = gpsReservaAutoFormHTML();
+}
+async function activarCatapultReserva(){
+  const usuario = (document.getElementById('catapult-reserva-user')?.value||'').trim();
+  const clave = document.getElementById('catapult-reserva-pass')?.value||'';
+  if(!usuario || !clave){ alert('Completá usuario y clave.'); return; }
+  if(!confirm('¿Guardar estas credenciales de Catapult para Reserva? Una vez guardadas no se pueden volver a ver desde acá, solo reemplazar por otras.')) return;
+  try{
+    await db.ref('gps/catapultReservaAuth').update({
+      credenciales: {usuario, clave, guardadoEl: Date.now()},
+      estado: {activo:true, desde: Date.now()},
+    });
+    showToast('🔗 CATAPULT ACTIVADO');
+    renderGpsReservaAutoPanel();
+  }catch(e){
+    alert('No se pudo guardar -- puede que falte configurar el permiso en Firebase todavía. Avisale a quien mantiene la app.\n\n'+e.message);
+  }
 }
 
 function gpsCruceFormHTML(cat){
