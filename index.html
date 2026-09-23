@@ -5927,6 +5927,8 @@ async function parseCometPdf(file, cat){
   // por equipo), pero sin el gutter de flechas que complicaba ALINEACIONES
   // — alcanza con el corte grueso x<200/x>=200.
   function sideWords(words){ return words.filter(w=>(w.x<200)===(side==='left')); }
+  // Mismo corte, lado contrario -- el rival (ver golesRivalMinutos más abajo).
+  function otroLadoWords(words){ return words.filter(w=>(w.x<200)!==(side==='left')); }
 
   // GOLES/TARJETAS: pdf.js junta "dorsal nombre" en un solo string por fila
   // (a diferencia de ALINEACIONES, donde vienen separados) — hay que
@@ -5947,6 +5949,7 @@ async function parseCometPdf(file, cat){
   }
 
   const golesRaw = [];
+  const golesRivalMinutos = [];
   if(iGoles>=0){
     const iDisc = idxWord('DISCIPLINARIO', iGoles);
     // Si el partido no tuvo tarjetas, COMET no imprime "DISCIPLINARIO" en la
@@ -5961,36 +5964,54 @@ async function parseCometPdf(file, cat){
     let iFinGoles = iGoles+300;
     if(iDisc>=0) iFinGoles = Math.min(iFinGoles, iDisc);
     if(iSustDetalle>=0) iFinGoles = Math.min(iFinGoles, iSustDetalle);
-    const golesWords = sideWords(all.slice(iGoles+1, iFinGoles));
-    const rowsG = cometGroupRows(golesWords, 6);
-    for(let i=0;i<rowsG.length;i++){
-      const items = rowsG[i].items;
-      if(!items.length || !cometMinRe.test(items[0].s)) continue;
-      const minuto = parseInt(items[0].s);
-      // "Gol de penal" es OTRO item de texto, en la misma fila que el dorsal+
-      // nombre pero más a la derecha (no una fila propia debajo, como el
-      // motivo de una tarjeta) — hay que sacarlo antes de armar el nombre, si
-      // no queda pegado ("BENITEZ, CRISTIAN ALEJANDRO Gol de penal").
-      const penal = items.slice(1).some(w=>/penal/i.test(w.s));
-      const nameItems = items.slice(1).filter(w=>!/penal/i.test(w.s));
-      const {dorsal, nombre} = splitDorsalNombre(nameItems);
-      // "Autogol" -- igual que el motivo de una tarjeta (parseTarjetas, más
-      // abajo), COMET lo pone en una fila propia debajo del nombre, no
-      // pegado en la misma fila. Es un gol EN CONTRA del equipo del que lo
-      // marca -- no cuenta como gol a favor en su ficha de goleador (aunque
-      // el dato de COMET nunca se borra, solo se excluye de esa cuenta).
-      // Caso real que destapó esto: Fernandez Jerónimo, 6TA, F3 vs Lanús,
-      // 70' -- Confiabilidad lo tenía sumado de más (Javi, 2026-09-03).
-      let autogol = /autogol/i.test(items.slice(1).map(w=>w.s).join(' '));
-      if(!autogol && i+1<rowsG.length){
-        const nxt = rowsG[i+1];
-        if(!(nxt.items[0] && cometMinRe.test(nxt.items[0].s)) && /autogol/i.test(nxt.items.map(w=>w.s).join(' '))){
-          autogol = true;
-          i++;
+    const golesSeccion = all.slice(iGoles+1, iFinGoles);
+
+    // GOLES trae la misma tabla de dos columnas que ALINEACIONES (una por
+    // equipo) -- se parsea una vez y se reusa para el lado de Tigre (contra
+    // el plantel, como siempre) y para el lado del rival, que antes se
+    // descartaba entero. Devuelve {minuto, dorsal, nombre, penal, autogol}[].
+    function parseGolesDeLado(words){
+      const rows = cometGroupRows(words, 6);
+      const out = [];
+      for(let i=0;i<rows.length;i++){
+        const items = rows[i].items;
+        if(!items.length || !cometMinRe.test(items[0].s)) continue;
+        const minuto = parseInt(items[0].s);
+        // "Gol de penal" es OTRO item de texto, en la misma fila que el dorsal+
+        // nombre pero más a la derecha (no una fila propia debajo, como el
+        // motivo de una tarjeta) — hay que sacarlo antes de armar el nombre, si
+        // no queda pegado ("BENITEZ, CRISTIAN ALEJANDRO Gol de penal").
+        const penal = items.slice(1).some(w=>/penal/i.test(w.s));
+        const nameItems = items.slice(1).filter(w=>!/penal/i.test(w.s));
+        const {dorsal, nombre} = splitDorsalNombre(nameItems);
+        // "Autogol" -- igual que el motivo de una tarjeta (parseTarjetas, más
+        // abajo), COMET lo pone en una fila propia debajo del nombre, no
+        // pegado en la misma fila. Es un gol EN CONTRA del equipo del que lo
+        // marca -- no cuenta como gol a favor en su ficha de goleador (aunque
+        // el dato de COMET nunca se borra, solo se excluye de esa cuenta).
+        // Caso real que destapó esto: Fernandez Jerónimo, 6TA, F3 vs Lanús,
+        // 70' -- Confiabilidad lo tenía sumado de más (Javi, 2026-09-03).
+        let autogol = /autogol/i.test(items.slice(1).map(w=>w.s).join(' '));
+        if(!autogol && i+1<rows.length){
+          const nxt = rows[i+1];
+          if(!(nxt.items[0] && cometMinRe.test(nxt.items[0].s)) && /autogol/i.test(nxt.items.map(w=>w.s).join(' '))){
+            autogol = true;
+            i++;
+          }
         }
+        out.push({minuto, dorsal, nombre, penal, autogol});
       }
-      golesRaw.push({minuto, dorsal, nombre, penal, autogol});
+      return out;
     }
+    golesRaw.push(...parseGolesDeLado(sideWords(golesSeccion)));
+    // Lado del rival: mismos minutos que hoy se venían cargando a mano en la
+    // citación (ver guardarMinutosGolesRival/abrirCitacionView) -- acá salen
+    // solos del mismo informe. Un "autogol" de este lado es un jugador RIVAL
+    // metiéndosela en su propio arco (ese gol es de Tigre en el marcador, no
+    // del rival), así que se excluye -- mismo criterio que ya se aplica del
+    // lado de Tigre más arriba.
+    golesRivalMinutos.push(...parseGolesDeLado(otroLadoWords(golesSeccion))
+      .filter(g=>!g.autogol).map(g=>g.minuto).sort((a,b)=>a-b));
   }
 
   function parseTarjetas(labelRe){
@@ -6071,16 +6092,28 @@ async function parseCometPdf(file, cat){
     p.minutosJugados = p.minutoEntrada==null ? 0 : (p.minutoSalida!=null ? p.minutoSalida-p.minutoEntrada : DURACION-p.minutoEntrada);
   });
 
-  return { categoria, fecha, rival, condicion, golesTigre, golesRival, titulares, suplentes, goles, amarillas, rojas, warnings };
+  return { categoria, fecha, rival, condicion, golesTigre, golesRival, titulares, suplentes, goles, amarillas, rojas, warnings, golesRivalMinutos };
 }
 
 function savePartidoComet(cat, fecha, data){
   if(!fbReady||!db||!canEdit) return Promise.reject(new Error('no-edit'));
-  return db.ref(`stats/partidos/${cat}/${fecha}`).update({
-    fuente:'comet', cargadoEl: new Date().toISOString(),
-    rival:data.rival, condicion:data.condicion, golesTigre:data.golesTigre, golesRival:data.golesRival,
-    titulares:data.titulares, suplentes:data.suplentes, goles:data.goles, amarillas:data.amarillas, rojas:data.rojas,
-  });
+  const base = `stats/partidos/${cat}/${fecha}`;
+  const updates = {
+    [`${base}/fuente`]: 'comet', [`${base}/cargadoEl`]: new Date().toISOString(),
+    [`${base}/rival`]: data.rival, [`${base}/condicion`]: data.condicion,
+    [`${base}/golesTigre`]: data.golesTigre, [`${base}/golesRival`]: data.golesRival,
+    [`${base}/titulares`]: data.titulares, [`${base}/suplentes`]: data.suplentes,
+    [`${base}/goles`]: data.goles, [`${base}/amarillas`]: data.amarillas, [`${base}/rojas`]: data.rojas,
+  };
+  // Minutos de los goles del rival -- COMET los trae del lado de la tabla de
+  // GOLES que antes se descartaba (ver parseCometPdf). Solo se pisa si el
+  // PDF encontró alguno: si no encontró ninguno (0-0, o un informe con ese
+  // bloque incompleto) se deja lo que ya hubiera cargado a mano en la
+  // citación, para no borrar un dato bueno con un parseo que no encontró nada.
+  if(data.golesRivalMinutos && data.golesRivalMinutos.length){
+    updates[`stats/matchData/${cat}/${fecha}/minutosGolesRival`] = data.golesRivalMinutos;
+  }
+  return db.ref().update(updates);
 }
 
 // ── Panel de confirmación (subís el PDF, revisás lo que se extrajo, recién
@@ -6203,6 +6236,11 @@ async function confirmarCometLote(){
         titulares:data.titulares, suplentes:data.suplentes,
         goles:data.goles, amarillas:data.amarillas, rojas:data.rojas,
       };
+      if(data.golesRivalMinutos && data.golesRivalMinutos.length){
+        if(!matchData[cat]) matchData[cat]={};
+        if(!matchData[cat][fecha]) matchData[cat][fecha]={};
+        matchData[cat][fecha].minutosGolesRival = data.golesRivalMinutos;
+      }
       catsAfectadas.add(cat);
       ok++;
     }catch(e){ console.error('[COMET lote]', cat, fecha, e); }
@@ -6253,6 +6291,7 @@ function abrirConfirmComet(cat, data){
     <p style="text-align:center;font-weight:700">Tigre ${data.condicion==='L'?data.golesTigre+' - '+data.golesRival:data.golesRival+' - '+data.golesTigre}</p>
     <div style="font-size:12px;color:var(--muted,#5a7099);text-align:center;margin-bottom:6px">
       ${data.titulares.length} titulares · ${data.suplentes.length} suplentes · ${data.goles.length} goles · ${data.amarillas.length} amarillas · ${data.rojas.length} rojas
+      ${data.golesRivalMinutos.length?` · goles del rival: ${data.golesRivalMinutos.map(m=>m+"'").join(', ')}`:''}
     </div>
     ${vincularHTML}
     ${warnHTML}
@@ -6306,6 +6345,11 @@ function confirmarComet(cat, fecha){
         titulares:data.titulares, suplentes:data.suplentes,
         goles:data.goles, amarillas:data.amarillas, rojas:data.rojas,
       };
+      if(data.golesRivalMinutos && data.golesRivalMinutos.length){
+        if(!matchData[cat]) matchData[cat]={};
+        if(!matchData[cat][fecha]) matchData[cat][fecha]={};
+        matchData[cat][fecha].minutosGolesRival = data.golesRivalMinutos;
+      }
       renderGoleadores(cat);
       renderConfiabilidad('gen-confiabilidad');
       refreshAlerts();
