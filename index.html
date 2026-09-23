@@ -6890,7 +6890,7 @@ function buildComparativaJugadoresHTML(cat, merged){
   const selStyle=`background:var(--surface2);border:1px solid var(--border2);color:var(--text);
     font-family:'Barlow Condensed',sans-serif;font-weight:600;letter-spacing:1px;font-size:13px;
     padding:7px 12px;border-radius:6px;cursor:pointer;outline:none`;
-  const selectsHTML=[0,1,2].map(i=>
+  const selectsHTML=[0,1,2,3].map(i=>
     `<select class="comp-jug-select" data-slot="${i}" style="${selStyle}">${opts}</select>`).join('');
   return `
     <div class="st"><div class="stbar"></div>⚖️ COMPARAR JUGADORES</div>
@@ -6901,13 +6901,20 @@ function buildComparativaJugadoresHTML(cat, merged){
 }
 
 // Cada jugador comparado se muestra con la misma tarjeta que la Ficha
-// individual (calcularFichaJugador/renderFichaCardHTML: radar + números),
-// sin el historial partido a partido (queda un clic más adentro, abriendo
-// la Ficha completa) -- así 2-3 tarjetas entran una al lado de la otra sin
-// quedar eternas. En cada estadística (Convoc./Titular/Minutos/Goles/Amar.,
-// o Roj. en Reserva) se resalta en dorado quién de los elegidos tiene el
-// mejor valor -- mismo criterio que ya usaba la comparativa vieja, pero
-// ahora sobre datos reales (COMET+statfutbol, no el merge simple del roster).
+// individual (calcularFichaJugador/renderFichaCardHTML: radar + números).
+// "Ver ficha completa" no abre un modal aparte -- despliega el detalle
+// (leyenda del radar + partidos jugados) DENTRO de esa misma tarjeta, así
+// se pueden tener 2-4 fichas completas abiertas a la vez, una al lado de
+// la otra (o apiladas si no entran). En cada estadística (Convoc./Titular/
+// Minutos/Goles/Amar., o Roj. en Reserva) se resalta en dorado quién de
+// los elegidos tiene el mejor valor.
+let fichaCompletaExpandida = {}; // {cat: Set(indices)} -- qué tarjetas de la comparación están con el detalle desplegado
+function toggleFichaCompletaComparacion(cat, i){
+  if(!fichaCompletaExpandida[cat]) fichaCompletaExpandida[cat] = new Set();
+  const set = fichaCompletaExpandida[cat];
+  if(set.has(i)) set.delete(i); else set.add(i);
+  renderComparativaJugadores(cat);
+}
 function renderComparativaJugadores(cat, merged){
   const container=document.getElementById(`comp-jug-result-${cat}`);
   if(!container) return;
@@ -6915,7 +6922,7 @@ function renderComparativaJugadores(cat, merged){
   const nombres=[...new Set(selects.map(s=>s.value).filter(v=>v!==''))];
   if(nombres.length<2){
     container.innerHTML=`<div style="text-align:center;padding:20px;color:var(--muted);
-      font-family:'Barlow Condensed',sans-serif;font-size:13px">Elegí 2 o 3 jugadores arriba para comparar</div>`;
+      font-family:'Barlow Condensed',sans-serif;font-size:13px">Elegí 2 a 4 jugadores arriba para comparar</div>`;
     return;
   }
   const datos = nombres.map(n=>calcularFichaJugador(cat, n));
@@ -6926,14 +6933,18 @@ function renderComparativaJugadores(cat, merged){
     if(max>0) boxesPorJugador.forEach((bs,i)=>{ if((bs.find(b=>b[0]===key)[2]||0)===max) mejoresPorJugador[i].add(key); });
   });
   const canvasId = i=>`radar-comp-${cat}-${i}`;
-  container.innerHTML=`<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px">
-    ${datos.map((d,i)=>`<div style="background:linear-gradient(135deg,var(--surface2),rgba(5,8,15,0.6));border:1px solid var(--border2);border-radius:12px;padding:14px 16px">
-      ${renderFichaCardHTML(d, canvasId(i), {detalle:false, mejores:mejoresPorJugador[i]})}
-      <div style="text-align:center;margin-top:6px">
-        <a href="javascript:void(0)" onclick="abrirPerfilJugador('${cat}','${esc(d.nombre).replace(/'/g,"\\'")}')"
-          style="color:var(--gold2);text-decoration:none;font-size:11px;letter-spacing:.5px;cursor:pointer">Ver ficha completa ▸</a>
-      </div>
-    </div>`).join('')}
+  const expandidos = fichaCompletaExpandida[cat] || new Set();
+  container.innerHTML=`<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;align-items:start">
+    ${datos.map((d,i)=>{
+      const abierto = expandidos.has(i);
+      return `<div style="background:linear-gradient(135deg,var(--surface2),rgba(5,8,15,0.6));border:1px solid var(--border2);border-radius:12px;padding:14px 16px">
+        ${renderFichaCardHTML(d, canvasId(i), {detalle:abierto, mejores:mejoresPorJugador[i]})}
+        <div style="text-align:center;margin-top:6px">
+          <a href="javascript:void(0)" onclick="toggleFichaCompletaComparacion('${cat}',${i})"
+            style="color:var(--gold2);text-decoration:none;font-size:11px;letter-spacing:.5px;cursor:pointer">${abierto?'▲ Ocultar detalle':'Ver ficha completa ▸'}</a>
+        </div>
+      </div>`;
+    }).join('')}
   </div>`;
   datos.forEach((d,i)=>dibujarRadarFicha(d, canvasId(i)));
 }
