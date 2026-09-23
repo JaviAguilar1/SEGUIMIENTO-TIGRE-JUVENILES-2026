@@ -1497,6 +1497,7 @@ function initFirebase(){
             else if(_profileTakenListenerOn){ db.ref('profile_taken').off(); _profileTakenListenerOn=false; ocultarBadgeUsuarios(); }
             if(isAdmin) attachBadgeGpsReservaListener(user.uid);
             else if(_gpsReservaAutoListenerOn){ db.ref('gps/catapultReservaAuth/estado/activo').off(); _gpsReservaAutoListenerOn=false; }
+            attachGpsReservaManualListener();
           });
           // Real-time data sync — listen for remote changes
           db.ref('stats').on('value', snap=>{
@@ -4161,7 +4162,25 @@ async function renderGpsReservaAutoPanel(){
     el.innerHTML = `<div style="color:var(--muted);font-size:13px;font-family:'Barlow Condensed',sans-serif">Todavía no se activó la automatización de GPS con Catapult para Reserva.</div>`;
     return;
   }
-  el.innerHTML = gpsReservaAutoFormHTML();
+  el.innerHTML = gpsReservaAutoFormHTML() + gpsReservaManualUploadHTML();
+}
+// Carga manual de un partido (CSV o PDF exportado de Catapult) -- vive al
+// lado de "Automatizar con Catapult" mientras la automatización no esté
+// activa (una vez activada, se deja de mostrar: "se deben anular las cargas
+// manuales", Javi 2026-09-23). No hace falta un botón "activar automático" y
+// otro de carga a la vez para siempre -- el PF de Reserva elige uno de los
+// dos caminos.
+function gpsReservaManualUploadHTML(){
+  const fechas = Object.keys(gpsReservaManual||{}).map(Number).sort((a,b)=>a-b);
+  const lista = fechas.length ? `<div style="color:var(--muted);font-size:11px;margin-top:8px">Ya cargadas: ${fechas.map(f=>'F'+f+' vs '+esc((gpsReservaManual[f]||{}).rival||'?')).join(' · ')}</div>` : '';
+  return `<div style="font-family:'Barlow Condensed',sans-serif;border-top:1px solid var(--border2);margin-top:14px;padding-top:14px">
+    <div style="font-weight:700;color:var(--gold2);font-size:14px;margin-bottom:6px">📄 Cargar un partido a mano</div>
+    <div style="color:var(--muted);font-size:12px;margin-bottom:10px">Subí el CSV o el PDF que exporta Catapult para un partido puntual -- se detecta solo qué jugador es cada fila y se muestra como en el resto de las categorías.</div>
+    <input type="file" id="gps-reserva-manual-file" accept=".csv,.pdf" style="display:none" onchange="gpsReservaManualUpload(this)">
+    <button type="button" onclick="document.getElementById('gps-reserva-manual-file').click()"
+      style="background:none;border:1px solid var(--border2);border-radius:6px;color:var(--gold2);font-weight:700;font-family:'Barlow Condensed',sans-serif;font-size:13px;padding:9px 16px;cursor:pointer">⬆ SUBIR CSV O PDF</button>
+    ${lista}
+  </div>`;
 }
 function gpsReservaAutoFormHTML(){
   return `<div style="font-family:'Barlow Condensed',sans-serif">
@@ -4193,6 +4212,320 @@ async function activarCatapultReserva(){
   }catch(e){
     alert('No se pudo guardar -- puede que falte configurar el permiso en Firebase todavía. Avisale a quien mantiene la app.\n\n'+e.message);
   }
+}
+
+// ── Carga manual de GPS para Reserva (CSV o PDF de Catapult) ───────────────
+// Se guarda en gps/reservaManual/{fecha} = {rival, jugadores:{nombre:{pos,min,
+// metrics}}, cargadoEl} y se mezcla dentro de catapultPlayers['RESERVA'] con
+// el mismo shape que ya usa el pipeline automático de 4TA-9NA (ver
+// fetch_catapult_players en scrape_tablas.py: {nombre:{pos, match:[{fecha,
+// opp,min,metrics}]}}) -- así TODA la pestaña RENDIMIENTO GPS (comparar,
+// ranking, perfil individual, por fecha, informe de partido) funciona igual
+// para Reserva sin tener que tocar ninguna de esas vistas, que ya leen de
+// catapultPlayersDeCategoria (Javi, 2026-09-23).
+// Orden fijo de metrics[], igual al que ya arma fetch_catapult_players:
+// [0]dist [1]mpm [2]m18-21 [3]m21-25 [4]m+25 [5]sprints [6]velmax [7]accEsf
+// [8]dccEsf [9]accB2 [10]rhie [11]maxAcc [12]maxDec [13]accPerMin
+// [14]hsrPerMin [15]m25PerMin [16]totalPL.
+let gpsReservaManual = {}; // fecha (num) -> {rival, jugadores:{nombre:{pos,min,metrics}}}
+let gpsReservaUploadData = null; // resultado del parseo, pendiente de confirmar
+
+function rosterNombresReserva(){
+  const set = new Set();
+  (plantelFutdetail['RESERVA']||[]).forEach(p=>p.nombre && set.add(p.nombre));
+  (jugadoresStats['RESERVA']||[]).forEach(j=>j.jugador && set.add(j.jugador));
+  return [...set];
+}
+// Mismo algoritmo de 3 niveles que ya usa catapultResolverJugador (exacto →
+// subconjunto de palabras → parecido de texto/LCS con umbral alto), pero
+// contra una lista de candidatos cualquiera en vez de catapultPlayers[cat] --
+// acá se usa al revés: viene un nombre crudo de un CSV/PDF y hay que
+// encontrar a quién del plantel corresponde.
+function resolverNombreLCS(nombre, candidatos){
+  const nn = normNombreOrdenIndependiente(nombre);
+  if(!nn) return null;
+  const exacto = candidatos.find(c=>normNombreOrdenIndependiente(c)===nn);
+  if(exacto) return exacto;
+  const palabras = new Set(nn.split(' '));
+  const subconjunto = candidatos.filter(c=>{
+    const cp = new Set(normNombreOrdenIndependiente(c).split(' '));
+    return [...palabras].every(w=>cp.has(w)) || [...cp].every(w=>palabras.has(w));
+  });
+  if(subconjunto.length===1) return subconjunto[0];
+  if(subconjunto.length>1) return null;
+  const lcsRatio = (a,b) => {
+    const dp = Array.from({length:a.length+1}, ()=>new Array(b.length+1).fill(0));
+    for(let i=1;i<=a.length;i++) for(let j=1;j<=b.length;j++)
+      dp[i][j] = a[i-1]===b[j-1] ? dp[i-1][j-1]+1 : Math.max(dp[i-1][j], dp[i][j-1]);
+    return (a.length+b.length) ? 2*dp[a.length][b.length]/(a.length+b.length) : 0;
+  };
+  let mejorScore=0, mejores=[];
+  candidatos.forEach(c=>{
+    const score = lcsRatio(nn, normNombreOrdenIndependiente(c));
+    if(score>mejorScore){ mejorScore=score; mejores=[c]; }
+    else if(score===mejorScore) mejores.push(c);
+  });
+  return (mejorScore>=0.84 && mejores.length===1) ? mejores[0] : null;
+}
+// CSV robusto a comillas ("Gastón Pérez") -- no hace falta más que esto,
+// Catapult no exporta comas adentro de un campo entrecomillado con comas propias.
+function parseCsvLine(line){
+  const out = []; let cur = ''; let inQ = false;
+  for(let i=0;i<line.length;i++){
+    const c = line[i];
+    if(inQ){
+      if(c==='"'){ if(line[i+1]==='"'){ cur+='"'; i++; } else inQ=false; }
+      else cur+=c;
+    } else {
+      if(c==='"') inQ=true;
+      else if(c===','){ out.push(cur); cur=''; }
+      else cur+=c;
+    }
+  }
+  out.push(cur);
+  return out;
+}
+async function parseGpsCsvReserva(file){
+  const text = await file.text();
+  const lines = text.split(/\r?\n/).filter(l=>l.trim());
+  if(lines.length<2) throw new Error('El CSV está vacío.');
+  const headers = parseCsvLine(lines[0]).map(h=>h.trim());
+  const idx = h => headers.findIndex(x=>x.toLowerCase()===h.toLowerCase());
+  const iName=idx('Name'), iDur=idx('Total Duration'), iDist=idx('Distancia Total (m)'),
+    iMpm=idx('Mts por Min'), iM1821=idx('Metros 18-21 km/h (m)'), iM2125=idx('Metros 21-25 km/h (m)'),
+    iM25=idx('Metros +25km/h (m)'), iSprints=idx('Sprints +25km/h'), iVelmax=idx('Vel Max (km/h)'),
+    iAcc=idx('Acc Esf +3mts/s'), iDcc=idx('Dcc Esf +3mts/s'), iAccB2=idx('Acceleration B2 Efforts (Gen 2)'),
+    iRhie=idx('RHIE Total Bouts'), iMaxAcc=idx('Max Acceleration'), iMaxDec=idx('Max Deceleration'),
+    iPL=idx('Total Player Load');
+  if(iName<0 || iDur<0 || iDist<0) throw new Error('No reconozco las columnas de este CSV -- ¿es un export de Catapult?');
+  const candidatos = rosterNombresReserva();
+  const jugadores = [], sinMatch = [];
+  for(let i=1;i<lines.length;i++){
+    const cols = parseCsvLine(lines[i]);
+    const nombreCrudo = (cols[iName]||'').trim();
+    if(!nombreCrudo || ['Total','Promedio','Min','Max'].includes(nombreCrudo)) continue;
+    const num = j => (j>=0 && cols[j]!==undefined && cols[j]!=='') ? parseFloat(cols[j]) : null;
+    const min = num(iDur)||0;
+    const accEsf = num(iAcc), m2125 = num(iM2125), m25 = num(iM25);
+    const metrics = [
+      num(iDist), num(iMpm), num(iM1821), m2125, m25, num(iSprints), num(iVelmax),
+      accEsf, num(iDcc), num(iAccB2), num(iRhie), num(iMaxAcc), num(iMaxDec),
+      min?Math.round((accEsf||0)/min*100)/100:0, min?Math.round((m2125||0)/min*100)/100:0,
+      min?Math.round((m25||0)/min*100)/100:0, num(iPL),
+    ];
+    const nombreReal = resolverNombreLCS(nombreCrudo, candidatos);
+    if(nombreReal) jugadores.push({nombre:nombreReal, min, metrics});
+    else sinMatch.push({nombreBlob:nombreCrudo, min, metrics});
+  }
+  if(!jugadores.length && !sinMatch.length) throw new Error('No encontré ninguna fila de jugador en el CSV.');
+  return {fecha:null, rival:'', jugadores, sinMatch};
+}
+// El PDF de Catapult junta a veces el nombre con la posición en un solo
+// token sin espacio, y hasta llega a mezclar el orden de un par de letras
+// (confirmado con un informe real, Javi 2026-09-23: "P�reVzolante" en vez de
+// "PérezVolante") -- por eso NO se confía en separar nombre/posición del
+// texto, se le pasa el bloque entero (nombre+posición pegados) a
+// resolverNombreLCS contra el plantel real y que la tolerancia de la
+// comparación absorba el ruido. La posición en sí no importa: la ficha la
+// pisa igual con la de futdetail (ver gpsPosDeFutdetail), así que no hace
+// falta separarla bien.
+// Los 14 valores numéricos de la fila SÍ salen limpios siempre (no se vieron
+// pegados a texto en ningún caso real) -- se identifican por ser el único
+// tipo de token puramente numérico en la fila, sin depender de una posición
+// en X fija (varía un poco de un informe a otro).
+async function parseGpsPdfReserva(file){
+  const pdfjsLib = await getPdfjsLib();
+  const arrayBuf = await file.arrayBuffer();
+  const pdf = await pdfjsLib.getDocument({data: arrayBuf}).promise;
+  let paginaDatos = null, itemsPagina1 = null;
+  for(let pg=1; pg<=pdf.numPages; pg++){
+    const page = await pdf.getPage(pg);
+    const tc = await page.getTextContent();
+    const items = tc.items.filter(it=>it.str && it.str.trim()).map(it=>({s:it.str.trim(), x:it.transform[4], y:it.transform[5]}));
+    if(pg===1) itemsPagina1 = items;
+    if(items.some(it=>it.s.includes('GENERALES'))) paginaDatos = items;
+  }
+  if(!paginaDatos) throw new Error('No encontré la página "DATOS GENERALES" en el PDF -- ¿es un informe de partido de Catapult?');
+
+  // Fecha y rival de la primera página ("... FECHA 26" / "Belgrano 3 - Tigre 3")
+  // -- pdf.js a veces junta todo el renglón en un solo item ("Belgrano 3 -
+  // Tigre 3") y a veces no, según el PDF -- agrupar por fila y unir cubre
+  // los dos casos sin duplicar lógica.
+  let fecha = null, rival = '';
+  if(itemsPagina1){
+    const porFila = {};
+    itemsPagina1.forEach(it=>{ const y=Math.round(it.y); (porFila[y]=porFila[y]||[]).push(it); });
+    Object.values(porFila).forEach(fila=>{
+      const texto = fila.sort((a,b)=>a.x-b.x).map(f=>f.s).join(' ');
+      const mFecha = texto.match(/FECHA\s+(\d+)/i);
+      if(mFecha && fecha==null) fecha = parseInt(mFecha[1]);
+      const mScore = texto.match(/^(.+?)\s+(\d+)\s*-\s*(.+?)\s+(\d+)$/);
+      if(mScore && !rival) rival = /tigre/i.test(mScore[1]) ? mScore[3].trim() : mScore[1].trim();
+    });
+  }
+
+  // Filas de datos: agrupar por Y (tolerancia 3px) y quedarse con las que
+  // tengan al menos 10 tokens puramente numéricos -- el encabezado (varias
+  // líneas, ninguna con más de un par de números sueltos) nunca llega a esa
+  // cantidad, así no hace falta saber de antemano cuántas líneas ocupa.
+  const filas = [];
+  paginaDatos.forEach(it=>{
+    const fila = filas.find(f=>Math.abs(f.y-it.y)<3);
+    if(fila) fila.items.push(it); else filas.push({y:it.y, items:[it]});
+  });
+  const esNumero = s => /^-?\d+(\.\d+)?$/.test(s);
+  const RESUMEN = ['Total','Promedio','Min','Max','TOTAL','PROMEDIO'];
+  const filasJugador = filas
+    .map(f=>({...f, items:f.items.sort((a,b)=>a.x-b.x)}))
+    .filter(f=>{
+      const nums = f.items.filter(it=>esNumero(it.s));
+      const primerTexto = f.items.find(it=>!esNumero(it.s));
+      return nums.length>=10 && primerTexto && !RESUMEN.includes(primerTexto.s);
+    });
+  if(!filasJugador.length) throw new Error('No pude leer ninguna fila de jugador de la página de datos.');
+
+  // Duración a veces queda pegada al final del texto de posición sin espacio
+  // ("Volante Central82") -- pdf.js no la separa en un token aparte, así que
+  // ese primer número de la fila (Duración) falta y TODO el resto se corría
+  // una columna (confirmado con un informe real, Javi 2026-09-23: el jugador
+  // terminaba con los minutos de otro campo). En vez de asumir un orden fijo,
+  // cada columna se identifica por CERCANÍA en X contra una posición de
+  // referencia calibrada con las filas que sí vinieron completas (14
+  // números) -- así una columna faltante en una fila puntual no corre a las
+  // demás. Si Duración falta, se recupera de los dígitos finales del propio
+  // texto de nombre/posición (y de paso lo deja más limpio para matchear).
+  const CAMPOS = ['dur','dist','mpm','m1821','m2125','m25','sprints','velmax','accEsf','dccEsf','maxAcc','maxDec','rhie','totalPL'];
+  const filaCompleta = filasJugador.find(f=>f.items.filter(it=>esNumero(it.s)).length===CAMPOS.length);
+  if(!filaCompleta) throw new Error('No encontré ninguna fila con las 14 columnas completas para calibrar -- probá con otro informe.');
+  const refX = filaCompleta.items.filter(it=>esNumero(it.s)).map(it=>it.x);
+
+  const candidatos = rosterNombresReserva();
+  const jugadores = [], sinMatch = [];
+  filasJugador.forEach(fila=>{
+    const nums = fila.items.filter(it=>esNumero(it.s));
+    const valores = {};
+    nums.forEach(n=>{
+      let mejorI=-1, mejorD=Infinity;
+      refX.forEach((x,i)=>{ const d=Math.abs(x-n.x); if(d<mejorD){ mejorD=d; mejorI=i; } });
+      if(mejorD<15 && valores[CAMPOS[mejorI]]===undefined) valores[CAMPOS[mejorI]] = parseFloat(n.s);
+    });
+    const xPrimerNum = nums[0].x;
+    let nombreBlob = fila.items.filter(it=>it.x < xPrimerNum && !esNumero(it.s)).map(it=>it.s).join(' ');
+    if(valores.dur===undefined){
+      const m = nombreBlob.match(/(\d{1,3})\s*$/);
+      if(m){ valores.dur = parseInt(m[1]); nombreBlob = nombreBlob.slice(0, m.index).trim(); }
+    }
+    if(!nombreBlob) return;
+    const min = valores.dur||0;
+    const metrics = [valores.dist, valores.mpm, valores.m1821, valores.m2125, valores.m25, valores.sprints,
+      valores.velmax, valores.accEsf, valores.dccEsf, null, valores.rhie, valores.maxAcc, valores.maxDec,
+      min&&valores.accEsf!=null?Math.round(valores.accEsf/min*100)/100:0,
+      min&&valores.m2125!=null?Math.round(valores.m2125/min*100)/100:0,
+      min&&valores.m25!=null?Math.round(valores.m25/min*100)/100:0,
+      valores.totalPL];
+    const nombreReal = resolverNombreLCS(nombreBlob, candidatos);
+    if(nombreReal) jugadores.push({nombre:nombreReal, min, metrics});
+    else sinMatch.push({nombreBlob, min, metrics});
+  });
+  if(!jugadores.length && !sinMatch.length) throw new Error('No pude leer ninguna fila de jugador de la página de datos.');
+  return {fecha, rival, jugadores, sinMatch};
+}
+
+async function gpsReservaManualUpload(fileInput){
+  const file = fileInput.files[0];
+  if(!file) return;
+  fileInput.value = '';
+  showToast('📄 Procesando…');
+  try{
+    let resultado;
+    if(/\.csv$/i.test(file.name)) resultado = await parseGpsCsvReserva(file);
+    else if(/\.pdf$/i.test(file.name)) resultado = await parseGpsPdfReserva(file);
+    else { alert('Subí un archivo .csv o .pdf exportado de Catapult.'); return; }
+    gpsReservaUploadData = resultado;
+    mostrarConfirmacionGpsReserva();
+  }catch(e){
+    alert('No pude leer el archivo: '+e.message);
+  }
+}
+function mostrarConfirmacionGpsReserva(){
+  const d = gpsReservaUploadData;
+  if(!d) return;
+  const candidatos = rosterNombresReserva();
+  const opcionesJugador = candidatos.map(c=>`<option value="${esc(c)}">${esc(formatNombreMostrar(c,'RESERVA'))}</option>`).join('');
+  const filasSinMatch = d.sinMatch.map((s,i)=>`
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;font-size:12px">
+      <span style="color:var(--muted);flex:1">⚠️ "${esc(s.nombreBlob)}" (${s.min}′)</span>
+      <select id="gps-reserva-sinmatch-${i}" style="background:var(--surface2);border:1px solid var(--border2);color:var(--text);border-radius:6px;padding:4px 8px;font-size:12px">
+        <option value="">Ignorar</option>
+        ${opcionesJugador}
+      </select>
+    </div>`).join('');
+  const modal = document.createElement('div');
+  modal.id = 'gps-reserva-confirm-modal';
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px';
+  modal.innerHTML = `<div style="background:var(--surface1,#0a0f1e);border:1px solid var(--border2);border-radius:12px;padding:20px;max-width:480px;width:100%;max-height:85vh;overflow:auto;font-family:'Barlow Condensed',sans-serif">
+    <div style="font-weight:700;color:var(--gold2);font-size:16px;margin-bottom:12px">Confirmar carga de GPS · Reserva</div>
+    <label style="font-size:11px;color:var(--muted)">FECHA</label>
+    <input id="gps-reserva-fecha" type="number" min="1" max="18" value="${d.fecha||''}" placeholder="Ej: 10"
+      style="display:block;width:100px;background:var(--surface2);border:1px solid var(--border2);color:var(--text);border-radius:6px;padding:8px 10px;margin:4px 0 10px;font-size:14px">
+    <label style="font-size:11px;color:var(--muted)">RIVAL</label>
+    <input id="gps-reserva-rival" type="text" value="${esc(d.rival||'')}" placeholder="Nombre del rival"
+      style="display:block;width:100%;box-sizing:border-box;background:var(--surface2);border:1px solid var(--border2);color:var(--text);border-radius:6px;padding:8px 10px;margin:4px 0 14px;font-size:14px">
+    <div style="color:var(--win);font-size:13px;margin-bottom:8px">✅ ${d.jugadores.length} jugador(es) reconocido(s) automáticamente</div>
+    ${d.sinMatch.length?`<div style="color:var(--draw);font-size:13px;margin-bottom:8px">⚠️ ${d.sinMatch.length} sin reconocer -- elegí a quién corresponden o dejalos en "Ignorar":</div>${filasSinMatch}`:''}
+    <div style="display:flex;gap:8px;margin-top:16px">
+      <button type="button" onclick="guardarGpsReservaManual()" style="flex:1;background:var(--gold2);border:none;border-radius:6px;color:#111;font-weight:700;padding:10px;cursor:pointer;font-size:13px">GUARDAR</button>
+      <button type="button" onclick="document.getElementById('gps-reserva-confirm-modal').remove()" style="background:none;border:1px solid var(--border2);border-radius:6px;color:var(--muted);padding:10px 16px;cursor:pointer;font-size:13px">CANCELAR</button>
+    </div>
+  </div>`;
+  document.body.appendChild(modal);
+}
+async function guardarGpsReservaManual(){
+  const d = gpsReservaUploadData;
+  if(!d) return;
+  const fecha = parseInt(document.getElementById('gps-reserva-fecha')?.value);
+  const rival = (document.getElementById('gps-reserva-rival')?.value||'').trim();
+  if(!fecha || !rival){ alert('Completá la fecha y el rival.'); return; }
+  const jugadores = {};
+  d.jugadores.forEach(j=>{ jugadores[j.nombre] = {pos:'', min:j.min, metrics:j.metrics}; });
+  d.sinMatch.forEach((s,i)=>{
+    const elegido = document.getElementById(`gps-reserva-sinmatch-${i}`)?.value;
+    if(elegido) jugadores[elegido] = {pos:'', min:s.min, metrics:s.metrics};
+  });
+  if(!Object.keys(jugadores).length){ alert('No hay ningún jugador para guardar.'); return; }
+  try{
+    await db.ref('gps/reservaManual/'+fecha).set({rival, jugadores, cargadoEl: Date.now()});
+    showToast('💾 GPS DE RESERVA GUARDADO');
+    document.getElementById('gps-reserva-confirm-modal')?.remove();
+    gpsReservaUploadData = null;
+    refreshActiveModule();
+  }catch(e){
+    alert('No se pudo guardar: '+e.message);
+  }
+}
+// Mezcla gps/reservaManual (cargado a mano) dentro de catapultPlayers['RESERVA']
+// con el mismo shape {nombre:{pos,match:[...]}} que ya arma el pipeline
+// automático -- se corre después de hidratar gpsReservaManual Y después de
+// loadTablaData (que pisa catapultPlayers entero desde TABLA_DATA), nunca antes.
+function mergeGpsReservaManual(){
+  const out = {};
+  Object.entries(gpsReservaManual||{}).forEach(([fecha, sesion])=>{
+    Object.entries((sesion||{}).jugadores||{}).forEach(([nombre, datos])=>{
+      out[nombre] = out[nombre] || {pos:datos.pos||'', match:[]};
+      out[nombre].match.push({fecha:'F'+fecha, opp:sesion.rival||'', min:datos.min, metrics:datos.metrics});
+    });
+  });
+  catapultPlayers['RESERVA'] = out;
+}
+let _gpsReservaManualListenerOn = false;
+function attachGpsReservaManualListener(){
+  if(_gpsReservaManualListenerOn || !db) return;
+  _gpsReservaManualListenerOn = true;
+  db.ref('gps/reservaManual').on('value', snap=>{
+    gpsReservaManual = snap.val() || {};
+    mergeGpsReservaManual();
+    refreshActiveModule();
+  });
 }
 
 function gpsCruceFormHTML(cat){
@@ -7648,6 +7981,7 @@ function loadTablaData(){
       sincronizarStatsDesdeStatfutbol();
       blPlayers = (TABLA_DATA.bl_gps && TABLA_DATA.bl_gps.players) || {};
       catapultPlayers = (TABLA_DATA.catapult_gps && TABLA_DATA.catapult_gps.players) || {};
+      mergeGpsReservaManual(); // catapultPlayers recién se pisó entero -- reponer RESERVA con lo cargado a mano
       // Esfuerzos individuales (sprints con hora real) + periodos por
       // fecha, para "clic en la metrica destacada -> ver el momento en
       // video" -- pipeline aparte de catapultPlayers (que solo trae
