@@ -9623,6 +9623,64 @@ function calcularFichaJugador(cat, nombre){
   };
 }
 
+// Un jugador puede tener convocatorias reales en más de una categoría en la
+// misma temporada -- no solo el caso de subir/bajar con Reserva, también un
+// jugador de una categoría que completa a otra un partido puntual (pasa
+// seguido: Adamovsky, Felipe es de 5TA y jugó de titular en 4TA; Pereyra,
+// Manuel, arquero de 5TA, ataja en 4TA -- casos reales, Javi 2026-09-23).
+// calcularFichaJugador ya busca por NOMBRE dentro de matchData/partidos de
+// la categoría que se le pida, sin exigir que esté en el plantel FORMAL de
+// esa categoría (esMismoJugador compara nombre, no requiere estar en
+// plantelFutdetail) -- alcanza con correrlo contra cada categoría y
+// quedarse con las que muestren alguna convocatoria real.
+// Riesgo conocido y aceptado (mismo criterio que sonMismoJugador en el
+// resto de la app): dos personas distintas con el mismo nombre en
+// categorías distintas se mezclarían acá. Sin vinculación manual todavía
+// para este caso puntual -- se agrega si aparece uno real.
+const CATS_PARA_MULTI_CATEGORIA = [...CATEGORIES, 'RESERVA_S2'];
+function calcularStatsMultiCategoria(catPrincipal, nombre){
+  const otras = [];
+  CATS_PARA_MULTI_CATEGORIA.forEach(cat=>{
+    if(cat===catPrincipal) return;
+    let d;
+    try{ d = calcularFichaJugador(cat, nombre); }catch(e){ return; }
+    if(d.convocatorias>0) otras.push(d);
+  });
+  return otras;
+}
+// Fila TOTAL (todas las categorías con convocatoria real) + una fila por
+// categoría, para las 6 estadísticas clave -- se muestra solo cuando el
+// jugador tiene convocatorias en más de una categoría (ver
+// calcularStatsMultiCategoria); si juega en una sola, no se agrega nada.
+function tablaMultiCategoriaHTML(d, otras){
+  const todas = [d, ...otras];
+  const total = {convocatorias:0, vecesTitular:0, minutosFinal:0, golesFinal:0, amarillasFinal:0, rojasFinal:0};
+  todas.forEach(x=>{
+    total.convocatorias += x.convocatorias||0;
+    total.vecesTitular += x.vecesTitular||0;
+    total.minutosFinal += x.minutosFinal||0;
+    total.golesFinal += x.golesFinal||0;
+    total.amarillasFinal += x.amarillasFinal||0;
+    total.rojasFinal += x.rojasFinal||0;
+  });
+  const etiquetaCat = cat => cat==='RESERVA_S2' ? 'RESERVA (2° sem.)' : cat;
+  const fila = (label, x, esTotal) => `<tr${esTotal?' style="font-weight:700;color:var(--gold2);border-top:1px solid var(--border2)"':''}>
+    <td style="text-align:left;padding:4px 6px">${esc(label)}</td>
+    <td>${x.convocatorias||0}</td><td>${x.vecesTitular||0}</td><td>${x.minutosFinal||0}</td>
+    <td>${x.golesFinal||0}</td><td>${x.amarillasFinal||0}</td><td>${x.rojasFinal||0}</td>
+  </tr>`;
+  return `
+    <div class="st"><div class="stbar"></div>📊 TAMBIÉN JUGÓ EN OTRAS CATEGORÍAS</div>
+    <div class="table-wrap"><table style="font-size:11px;text-align:center">
+      <thead><tr><th style="text-align:left">Categoría</th><th>Convoc.</th><th>Titular</th><th>Minutos</th><th>Goles</th><th>Amar.</th><th>Roj.</th></tr></thead>
+      <tbody>
+        ${fila(etiquetaCat(d.cat), d, false)}
+        ${otras.map(o=>fila(etiquetaCat(o.cat), o, false)).join('')}
+        ${fila('TOTAL', total, true)}
+      </tbody>
+    </table></div>`;
+}
+
 // Los "boxes" numéricos de la ficha (Convoc./Titular/Minutos.../Amar...), en
 // el mismo orden para la Ficha individual y para Comparar jugadores -- así
 // resaltar "el mejor" (ver renderFichaCardHTML) usa la misma lista de
@@ -9646,6 +9704,7 @@ function renderFichaCardHTML(d, canvasId, opts){
   const mejores = opts.mejores || new Set();
   const detalle = opts.detalle!==false;
   const boxes = statBoxesDeFicha(d);
+  const otrasCategorias = detalle ? calcularStatsMultiCategoria(d.cat, d.nombre) : [];
   const radarHTML = d.esReserva ? '' : `
     <div style="position:relative;width:100%;height:240px;margin:6px 0">
       <canvas id="${canvasId}" role="img" aria-label="Radar de ${esc(d.nombreMostrar)}: cada eje es el porcentaje respecto al mejor dato del plantel de ${esc(d.cat)} en goles, minutos jugados${d.hayGps?', sprints, velocidad maxima y metros por minuto':''}${d.hayGps?'':' -- sprints, velocidad maxima y metros por minuto todavia pendientes de carga GPS'}"></canvas>
@@ -9667,6 +9726,7 @@ function renderFichaCardHTML(d, canvasId, opts){
           <div style="font-size:18px;font-weight:700;color:${esMejor?'var(--gold2)':'var(--text)'}">${val||0}</div></div>`;
       }).join('')}
     </div>
+    ${otrasCategorias.length ? tablaMultiCategoriaHTML(d, otrasCategorias) : ''}
     ${detalle ? `
     <div style="font-size:11px;color:var(--muted);margin-bottom:10px">${d.esReserva
       ? 'Convoc./titular: tus citaciones · goles: tu carga, completada con statfutbol · tarjetas: statfutbol, partido por partido.'
