@@ -1096,6 +1096,28 @@ function desarchivarJugador(cat, nombre){
   renderRosterCat(cat, document.getElementById(`roster-content-${cat}`));
   refreshAlerts();
 }
+// jugadoresManual[cat] = [{nombre,posicion,edad}] -- jugadores que el
+// videoanalista/admin suma a mano porque todavía no aparecen en futdetail ni
+// en statfutbol (alta reciente, bajo perfil). Se mezclan con el plantel
+// sincronizado en renderRosterCat (nunca pisan a un jugador que ya vino de
+// una fuente automática) y usan el mismo archivar/desarchivar de arriba si
+// después hay que sacarlos (Javi, 2026-09-23: pedido para las 8 categorías,
+// no solo Reserva).
+let jugadoresManual = {};
+function agregarJugadorManual(cat, nombre, posicion, edad){
+  if(!canEdit) return;
+  nombre = (nombre||'').trim();
+  if(!nombre) return;
+  const yaExiste = (plantelFutdetail[cat]||[]).some(p=>mismoJugadorNombre(p.nombre, nombre))
+    || (jugadoresManual[cat]||[]).some(p=>mismoJugadorNombre(p.nombre, nombre));
+  if(yaExiste){ alert('Ya hay un jugador con ese nombre en el plantel de '+cat+'.'); return; }
+  jugadoresManual[cat] = jugadoresManual[cat] || [];
+  jugadoresManual[cat].push({nombre, posicion: (posicion||'').trim()||null, edad: parseInt(edad,10)||null});
+  if(fbReady && db) db.ref('stats/jugadoresManual').set(jugadoresManual)
+    .catch(e=>console.warn('agregarJugadorManual error:',e));
+  showToast('➕ JUGADOR AGREGADO');
+  renderRosterCat(cat, document.getElementById(`roster-content-${cat}`));
+}
 
 // ── ID único de jugador ──────────────────────────────────────
 // Determinístico a partir del nombre (slug) — no hace falta guardar nada
@@ -1685,7 +1707,7 @@ function saveData(){
     // guardado normal (cargar un resultado, un link, un gol) BORRARÍA todo
     // lo subido de COMET, porque saveData() hace un .set() del nodo entero,
     // no un merge parcial. Mismo motivo para aliasJugadoresComet.
-    const payload={results:{},links:{},goleadores:{},rivalData:rivalData,matchData:matchData,gymData:gymData,jugadores:{},plantel:{},chequeoSemanal:chequeoSemanal,aliasJugadores:aliasJugadores,aliasJugadoresComet:aliasJugadoresComet,recordatoriosOmitidos:recordatoriosOmitidos,golesMismatchOmitidos:golesMismatchOmitidos,partidos:partidos,jugadoresArchivados:jugadoresArchivados,gpsMetricCfg:gpsMetricCfg,gpsPosOverride:gpsPosOverride,correccionesNombres:correccionesNombres};
+    const payload={results:{},links:{},goleadores:{},rivalData:rivalData,matchData:matchData,gymData:gymData,jugadores:{},plantel:{},chequeoSemanal:chequeoSemanal,aliasJugadores:aliasJugadores,aliasJugadoresComet:aliasJugadoresComet,recordatoriosOmitidos:recordatoriosOmitidos,golesMismatchOmitidos:golesMismatchOmitidos,partidos:partidos,jugadoresArchivados:jugadoresArchivados,jugadoresManual:jugadoresManual,gpsMetricCfg:gpsMetricCfg,gpsPosOverride:gpsPosOverride,correccionesNombres:correccionesNombres};
     CATEGORIES.forEach(cat=>{
       payload.results[cat]={};
       payload.links[cat]={};
@@ -1741,6 +1763,7 @@ function hidratarStats(p){
     if(cat==='RESERVA'&&p.rivalData?.['RESERVA']) Object.assign(rivalData['RESERVA'], p.rivalData['RESERVA']);
   });
   if(p.jugadoresArchivados) jugadoresArchivados = p.jugadoresArchivados;
+  if(p.jugadoresManual) jugadoresManual = p.jugadoresManual;
   assignPlayerIds();
   // RESERVA_S2 (2do semestre) -- clave separada, no forma parte de CATEGORIES
   const c2='RESERVA_S2';
@@ -3625,9 +3648,11 @@ function renderVideoanalisisTab(cat, tabEl){
   // Portada/Estadísticas de rival: antes limitado a CONFIABILIDAD_CATS
   // (4TA/5TA/6TA) sin necesidad real -- los datos de base (fixture, tabla
   // LPF, rival_alertas de statfutbol) ya se descargan para las 6
-  // categorías juveniles por igual. Se extiende a GENERAL_CATS (4TA-9NA,
-  // sin RESERVA, que no tiene este fixture) a pedido de Javi, 2026-09-01.
-  const conRival = GENERAL_CATS.includes(cat);
+  // categorías juveniles por igual. Se extiende a GENERAL_CATS (4TA-9NA)
+  // a pedido de Javi, 2026-09-01, y a RESERVA el 2026-09-23 (con sus
+  // propias fuentes -- fixture_reserva/rival_alertas de Copa Proyección,
+  // ver proximoRivalInfoReserva/filaTablaLPFReserva más abajo).
+  const conRival = GENERAL_CATS.includes(cat) || isReserva;
 
   tabEl.innerHTML = `
     ${seccionTitulo('va-placas-'+dataCat, `🎬 PLACAS · <span style="color:${CAT_COLORS[cat]}">${cat}</span>`)}
@@ -3646,9 +3671,9 @@ function renderVideoanalisisTab(cat, tabEl){
   `;
 
   if(conRival){
-    renderPlacaPostPartidoBlock(cat);
-    renderPlacaProximoRivalBlock(cat);
-    renderPlacaStatsControlesBlock(cat);
+    renderPlacaPostPartidoBlock(cat, dataCat);
+    renderPlacaProximoRivalBlock(cat, dataCat);
+    renderPlacaStatsControlesBlock(cat, dataCat);
     renderRivalStatsDetalle(dataCat, cat);
   } else {
     const el = document.getElementById(`rival-stats-detalle-${dataCat}`);
@@ -3688,22 +3713,23 @@ async function renderRivalStatsDetalle(dataCat, cat){
   const el = document.getElementById(`rival-stats-detalle-${dataCat}`);
   if(!el) return;
   await loadTablaData();
-  const prox = proximoRivalInfo(cat);
+  const isReserva = cat === 'RESERVA';
+  const prox = isReserva ? proximoRivalInfoReserva(dataCat) : proximoRivalInfo(cat);
   if(!prox){
     el.innerHTML = `<div style="text-align:center;padding:16px;color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-size:14px">No encontré ningún partido pendiente en el fixture.</div>`;
     return;
   }
-  const info = RIVAL_INFO[prox.rival];
-  const filaRival = info ? filaTablaLPF(cat, info.lpf) : null;
+  const filaRival = isReserva ? filaTablaLPFReserva(dataCat, prox.rival)
+    : (RIVAL_INFO[prox.rival] ? filaTablaLPF(cat, RIVAL_INFO[prox.rival].lpf) : null);
   const cantUltimos = rivalStatsCantUltimos[dataCat] || 10;
-  const ultimos = ultimosPartidosRival(cat, prox.rival, null, cantUltimos);
-  const alerta = TABLA_DATA.rival_alertas && TABLA_DATA.rival_alertas[cat];
+  const ultimos = isReserva ? [] : ultimosPartidosRival(cat, prox.rival, null, cantUltimos);
+  const alerta = TABLA_DATA.rival_alertas && TABLA_DATA.rival_alertas[dataCat];
 
   let html = `<div style="font-family:'Barlow Condensed',sans-serif">
     <div style="margin-bottom:16px">
       <div style="font-size:12px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase">Próximo rival</div>
       <div style="font-size:22px;font-weight:700;color:var(--text)">${esc(prox.rival)}</div>
-      <div style="font-size:14px;color:var(--text2);margin-top:2px">Fecha ${prox.fecha} · ${formatFechaCalendario(prox.fecha)}</div>
+      <div style="font-size:14px;color:var(--text2);margin-top:2px">Fecha ${prox.fecha} · ${isReserva ? formatFechaReserva(dataCat, prox.fecha) : formatFechaCalendario(prox.fecha)}</div>
     </div>`;
 
   if(filaRival){
@@ -3742,7 +3768,13 @@ async function renderRivalStatsDetalle(dataCat, cat){
       <span style="color:${r.color};font-weight:700">${u.gf}-${u.gc} ${r.texto}</span>
     </div>`;
   }).join('') : `<div style="color:var(--muted);font-size:14px;padding:4px 0">Sin partidos registrados todavía.</div>`;
-  html += rivalStatsCajaHTML('Últimos partidos', sliderUltimos + filasUltimos);
+  // Reserva: todavía no tenemos el fixture completo de TODOS los equipos de
+  // la zona (solo los partidos de Tigre), así que no hay forma de saber los
+  // últimos resultados del rival -- se avisa en vez de mostrar un slider que
+  // no sirve para nada.
+  html += isReserva
+    ? rivalStatsCajaHTML('Últimos partidos', `<div style="color:var(--muted);font-size:14px">Todavía no disponible para Reserva.</div>`)
+    : rivalStatsCajaHTML('Últimos partidos', sliderUltimos + filasUltimos);
 
   const golHTML = alerta && alerta.goleador
     ? `<div style="font-size:17px;font-weight:700;color:var(--text)">${esc(alerta.goleador.nombre)}</div>
@@ -6827,11 +6859,32 @@ function rosterColValue(p, key){
 }
 
 function renderRosterCat(cat, content){
-  const roster=(plantelFutdetail[cat]||[]).filter(p=>!estaArchivado(cat, p.nombre));
+  const manualNoDuplicado = (jugadoresManual[cat]||[])
+    .filter(m=>!(plantelFutdetail[cat]||[]).some(p=>mismoJugadorNombre(p.nombre, m.nombre)))
+    .map(m=>({...m, fuenteRoster:'manual'}));
+  const roster=[...(plantelFutdetail[cat]||[]), ...manualNoDuplicado].filter(p=>!estaArchivado(cat, p.nombre));
   const statsPorNombre={};
   (jugadoresStats[cat]||[]).forEach(j=>{ statsPorNombre[normNombre(j.jugador)]=j; });
 
+  const formAgregarHTML = canEdit ? `
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:10px">
+      <input type="text" id="nuevo-jugador-nombre-${cat}" placeholder="Apellido Nombre" maxlength="60"
+        style="background:var(--surface2);border:1px solid var(--border2);color:var(--text);width:220px;
+        border-radius:6px;padding:8px 12px;font-family:'Barlow Condensed',sans-serif;font-size:14px;outline:none">
+      <input type="text" id="nuevo-jugador-posicion-${cat}" placeholder="Posición (opcional)" maxlength="30"
+        style="background:var(--surface2);border:1px solid var(--border2);color:var(--text);width:150px;
+        border-radius:6px;padding:8px 12px;font-family:'Barlow Condensed',sans-serif;font-size:14px;outline:none">
+      <input type="number" id="nuevo-jugador-edad-${cat}" placeholder="Edad" min="10" max="30"
+        style="background:var(--surface2);border:1px solid var(--border2);color:var(--text);width:70px;
+        border-radius:6px;padding:8px 12px;font-family:'Barlow Condensed',sans-serif;font-size:14px;outline:none">
+      <button type="button" onclick="agregarJugadorManual('${cat}', document.getElementById('nuevo-jugador-nombre-${cat}').value,
+        document.getElementById('nuevo-jugador-posicion-${cat}').value, document.getElementById('nuevo-jugador-edad-${cat}').value)"
+        style="background:var(--gold2);border:none;border-radius:6px;color:#111;font-weight:700;
+        font-family:'Barlow Condensed',sans-serif;font-size:13px;padding:8px 14px;cursor:pointer">➕ AGREGAR JUGADOR</button>
+    </div>` : '';
+
   content.innerHTML=`
+    ${formAgregarHTML}
     <input type="text" id="roster-search-${cat}" placeholder="🔎 Buscar jugador…" oninput="filtrarRosterJugadores('${cat}')"
       style="background:var(--surface2);border:1px solid var(--border2);color:var(--text);width:100%;max-width:280px;
       border-radius:6px;padding:8px 12px;font-family:'Barlow Condensed',sans-serif;font-size:14px;outline:none;margin-bottom:10px">
@@ -6983,7 +7036,7 @@ function renderRosterTable(cat, merged){
     const s=p.stats||{};
     return `<tr data-nombre="${esc((p.nombre||'').toLowerCase())}">
       <td class="rival-name" style="cursor:pointer" onclick="abrirPerfilJugador('${cat}','${esc(p.nombre||'').replace(/'/g,"\\'")}')"
-        title="Ver perfil">${foto}${esc(p.nombre?formatNombreMostrar(p.nombre,cat):'—')}${p.fuenteRoster==='statfutbol'?' <span title="Todavía sin datos de futdetail para esta categoría -- nombre y stats desde statfutbol, sin posición ni edad" style="color:var(--gold2);font-size:10px">(statfutbol)</span>':''}</td>
+        title="Ver perfil">${foto}${esc(p.nombre?formatNombreMostrar(p.nombre,cat):'—')}${p.fuenteRoster==='statfutbol'?' <span title="Todavía sin datos de futdetail para esta categoría -- nombre y stats desde statfutbol, sin posición ni edad" style="color:var(--gold2);font-size:10px">(statfutbol)</span>':''}${p.fuenteRoster==='manual'?' <span title="Agregado a mano -- todavía no aparece en futdetail ni en statfutbol" style="color:var(--gold2);font-size:10px">(agregado a mano)</span>':''}</td>
       <td>${esc(p.posicion||'—')}</td>
       <td>${p.edad||'—'}</td>
       <td>${s.convocatorias||0}</td>
@@ -7396,23 +7449,34 @@ function sincronizarPlantelDesdeFutdetail(){
   assignPlayerIds();
   refreshActiveModule();
 }
-// Relleno con statfutbol -- SOLO para la categoría que futdetail dejó vacía
-// (nunca pisa lo que futdetail sí trajo, gana igual que en todos lados de
-// la app). statfutbol no publica posición/edad, así que esas quedan en
-// blanco ("—" en la tabla) -- se marca fuenteRoster:'statfutbol' para poder
-// distinguirlo a simple vista. Se corre DESPUÉS de
+// Relleno con statfutbol -- jugador por jugador, no toda la categoría en
+// bloque (Javi, 2026-09-23): antes, si futdetail traía UN solo jugador de la
+// categoría, statfutbol se ignoraba entero y cualquier jugador real que
+// futdetail no tuviera (bajo perfil, alta tardía) quedaba sin fila. Ahora se
+// suma cada jugador de statfutbol que no matchee a nadie ya traído por
+// futdetail -- nunca pisa un jugador que futdetail sí trajo, gana igual que
+// en todos lados de la app. statfutbol no publica posición/edad, así que
+// esas quedan en blanco ("—" en la tabla) -- se marca fuenteRoster:'statfutbol'
+// para poder distinguirlo a simple vista. Se corre DESPUÉS de
 // sincronizarPlantelDesdeFutdetail/sincronizarJugadoresDesdeFutdetail (ver
 // los dos call sites) para que futdetail, si trajo algo, ya haya llenado
-// plantelFutdetail/jugadoresStats antes de este chequeo de "sigue vacío".
+// plantelFutdetail/jugadoresStats antes de este chequeo.
+function mismoJugadorNombre(a, b){
+  const wa = cometNameWords(a), wb = cometNameWords(b);
+  return wa.length>0 && wb.length>0 && (wa.every(w=>wb.includes(w)) || wb.every(w=>wa.includes(w)));
+}
 function sincronizarPlantelDesdeStatfutbol(){
   if(!canEdit || !fbReady) return;
   const sfJugadores = TABLA_DATA && TABLA_DATA.statfutbol_jugadores;
   if(!sfJugadores) return;
   Object.keys(sfJugadores).forEach(cat=>{
-    if((plantelFutdetail[cat]||[]).length) return; // futdetail ya trajo esta categoría, no se toca
     const fuente = sfJugadores[cat]||[];
     if(!fuente.length) return;
-    const nuevo = fuente.map(j=>({nombre:j.nombre, posicion:null, edad:null, fuenteRoster:'statfutbol'}));
+    const actuales = plantelFutdetail[cat]||[];
+    const faltantes = fuente.filter(j=>!actuales.some(p=>mismoJugadorNombre(p.nombre, j.nombre)))
+      .map(j=>({nombre:j.nombre, posicion:null, edad:null, fuenteRoster:'statfutbol'}));
+    if(!faltantes.length) return;
+    const nuevo = [...actuales, ...faltantes];
     plantelFutdetail[cat]=nuevo;
     db.ref('stats/plantel/'+cat).set(nuevo).catch(e=>console.warn('sincronizarPlantelDesdeStatfutbol:',e));
   });
@@ -7424,13 +7488,16 @@ function sincronizarStatsDesdeStatfutbol(){
   const sfJugadores = TABLA_DATA && TABLA_DATA.statfutbol_jugadores;
   if(!sfJugadores) return;
   Object.keys(sfJugadores).forEach(cat=>{
-    if((jugadoresStats[cat]||[]).length) return; // futdetail ya trajo esta categoría, no se toca
     const fuente = sfJugadores[cat]||[];
     if(!fuente.length) return;
-    const nuevo = fuente.map(j=>({
-      jugador:j.nombre, convocatorias:j.pj||0, partidos_titular:0, minutos_jugados:j.min||0,
-      goles:j.gol||0, asistencias:0, tarjeta_amarilla:j.am||0, tarjeta_roja:j.roja||0,
-    }));
+    const actuales = jugadoresStats[cat]||[];
+    const faltantes = fuente.filter(j=>!actuales.some(s=>mismoJugadorNombre(s.jugador, j.nombre)))
+      .map(j=>({
+        jugador:j.nombre, convocatorias:j.pj||0, partidos_titular:0, minutos_jugados:j.min||0,
+        goles:j.gol||0, asistencias:0, tarjeta_amarilla:j.am||0, tarjeta_roja:j.roja||0,
+      }));
+    if(!faltantes.length) return;
+    const nuevo = [...actuales, ...faltantes];
     jugadoresStats[cat]=nuevo;
     db.ref('stats/jugadores/'+cat).set(nuevo).catch(e=>console.warn('sincronizarStatsDesdeStatfutbol:',e));
   });
@@ -8219,6 +8286,77 @@ function filaTablaLPF(cat, nombreLpf){
   return filas.find(f=>f.equipo===nombreLpf) || null;
 }
 
+// ── Reserva: mismas 3 piezas de arriba (próximo rival / posición en tabla /
+// escudo) pero con las fuentes propias de Reserva -- no tiene RIVALS (fixture
+// fijo con nombre real) ni tabla LPF plana, así que no puede reusar
+// proximoRivalInfo/filaTablaLPF tal cual (Javi, 2026-09-23: "las tres placas +
+// estadísticas de rival" para Reserva).
+// Rival de una fecha: gana la carga a mano en rivalData (mismo criterio que
+// todo el resto de la app), y si todavía no se tipeó, cae al fixture
+// automático de statfutbol (TABLA_DATA.fixture_reserva).
+function rivalDeFechaReserva(dataCat, f){
+  const manual = rivalData[dataCat] && rivalData[dataCat][f] && rivalData[dataCat][f].rival;
+  if(manual) return manual;
+  const auto = TABLA_DATA && TABLA_DATA.fixture_reserva && TABLA_DATA.fixture_reserva[dataCat] && TABLA_DATA.fixture_reserva[dataCat][f];
+  return auto ? auto.rival : '';
+}
+// FECHA_CALENDARIO es la del fixture LPF de 4TA-9NA (por número de fecha) --
+// no sirve para Reserva, que juega otro calendario (Copa Proyección) y
+// comparte los mismos números de fecha (1-18) por otra competencia, así que
+// usarla ahí mostraría la fecha real equivocada. La fecha de Reserva sale de
+// TABLA_DATA.fixture_reserva (fecha_iso, statfutbol).
+function formatFechaReserva(dataCat, fecha){
+  const iso = TABLA_DATA && TABLA_DATA.fixture_reserva && TABLA_DATA.fixture_reserva[dataCat]
+    && TABLA_DATA.fixture_reserva[dataCat][fecha] && TABLA_DATA.fixture_reserva[dataCat][fecha].fecha_iso;
+  if(!iso) return '';
+  const p = iso.split('-');
+  if(p.length!==3) return '';
+  const dia = new Date(+p[0], +p[1]-1, +p[2]).toLocaleDateString('es-AR', {weekday:'long'});
+  return `${dia.charAt(0).toUpperCase()+dia.slice(1)} ${p[2]}/${p[1]}`;
+}
+// Próximo rival: se apoya en TABLA_DATA.rival_alertas[dataCat] (ya calculado
+// en el scraper, calcular_alerta_rival_reserva) en vez de rearmarlo con
+// fixture_reserva -- el nombre que trae ahí ya pasó por
+// statfutbol_match_equipo contra el listado de equipos, así que coincide
+// exacto con el nombre "largo" que usa la tabla de posiciones
+// (categorias.RESERVA_APE/CLA.zonas). El de fixture_reserva es la versión
+// "corta" de la página de fixture -- misma info, pero NO matchea contra la
+// tabla (confirmado con datos reales: "DEF Y JUSTICIA" en el fixture vs.
+// "DEFENSA Y JUSTICIA" en la tabla), así que no sirve para esto.
+function proximoRivalInfoReserva(dataCat){
+  const alerta = TABLA_DATA && TABLA_DATA.rival_alertas && TABLA_DATA.rival_alertas[dataCat];
+  if(!alerta) return null;
+  const lista = dataCat==='RESERVA_S2' ? RIVALS_RESERVA_S2 : RIVALS_RESERVA;
+  const entry = lista.find(e=>e.f===alerta.fecha);
+  const condTigre = entry ? entry.cond : 'L';
+  return {fecha:alerta.fecha, rival:alerta.rival, condTigre, condRival: condTigre==='L'?'V':'L'};
+}
+// Fila de la tabla de posiciones de Copa Proyección (RESERVA_APE/RESERVA_CLA,
+// dos zonas cada una) para un rival -- se busca en las dos zonas porque no
+// siempre sabemos de antemano en cuál está el rival.
+function filaTablaLPFReserva(dataCat, nombreRival){
+  const torneoCat = dataCat==='RESERVA_S2' ? 'RESERVA_CLA' : 'RESERVA_APE';
+  const zonas = (TABLA_DATA && TABLA_DATA.categorias && TABLA_DATA.categorias[torneoCat] && TABLA_DATA.categorias[torneoCat].zonas) || {};
+  for(const filas of Object.values(zonas)){
+    const fila = filas.find(f=>f.equipo===nombreRival);
+    if(fila) return fila;
+  }
+  return null;
+}
+// Escudo/equivalencia del rival: RIVAL_INFO está pensado para las ~20
+// visitas fijas de 4TA-9NA (clave = nombre tal cual sale en RIVALS), pero
+// Reserva trae el nombre crudo de statfutbol, que no siempre matchea esa
+// clave -- se prueba primero directo y, si no, contra el campo "sabadogol"
+// de cada entrada (mismo estilo de nombre que usa statfutbol). Si ninguna
+// de las dos matchea, se degrada igual que ya hacía la app ("todavía no
+// tengo cargado el escudo/equivalencia").
+function matchRivalInfo(nombreCrudo){
+  if(!nombreCrudo) return null;
+  if(RIVAL_INFO[nombreCrudo]) return RIVAL_INFO[nombreCrudo];
+  const n = normNombreOrdenIndependiente(nombreCrudo);
+  return Object.values(RIVAL_INFO).find(v=>normNombreOrdenIndependiente(v.sabadogol)===n) || null;
+}
+
 function resultadoLabel(gf, gc){
   if(gf>gc) return {texto:'GANÓ', color:'#22c55e'};
   if(gf<gc) return {texto:'PERDIÓ', color:'#ef4444'};
@@ -8304,18 +8442,25 @@ function chk(id, def=true){ const e=document.getElementById(id); return e ? e.ch
 
 async function construirParamsPlacaStats(cat){
   await loadTablaData();
-  const prox = proximoRivalInfo(cat);
+  const isReserva = cat === 'RESERVA';
+  const dataCat = placaDataCat[cat] || cat;
+  const prox = isReserva ? proximoRivalInfoReserva(dataCat) : proximoRivalInfo(cat);
   if(!prox) return null;
-  const info = RIVAL_INFO[prox.rival];
+  const info = isReserva ? matchRivalInfo(prox.rival) : RIVAL_INFO[prox.rival];
   if(!info) return null;
-  const filaRival = filaTablaLPF(cat, info.lpf);
-  const filaTigre = filaTablaLPF(cat, 'Tigre');
+  const filaRival = isReserva ? filaTablaLPFReserva(dataCat, prox.rival) : filaTablaLPF(cat, info.lpf);
+  const filaTigre = isReserva ? filaTablaLPFReserva(dataCat, 'TIGRE') : filaTablaLPF(cat, 'Tigre');
   if(!filaRival || !filaTigre) return null;
-  const modoInfo = leerModoUltimosPlaca(cat, prox.condRival);
-  const ultimos = ultimosPartidosRival(cat, prox.rival, modoInfo.condicion, modoInfo.cant);
-  const reciente = partidoMasRecienteRival(cat, prox.rival);
+  // Reserva: todavía no tenemos el fixture completo de la zona (solo los
+  // partidos propios de Tigre), así que no hay "últimos resultados del
+  // rival" ni "partido más reciente" para mostrar -- ver el mismo límite en
+  // renderRivalStatsDetalle. dibujarTarjetaRival ya tolera ultimos:[]/
+  // reciente:null (rowsN usa Math.max(...,1)).
+  const modoInfo = isReserva ? {cant:0, label:'NO DISPONIBLE PARA RESERVA'} : leerModoUltimosPlaca(cat, prox.condRival);
+  const ultimos = isReserva ? [] : ultimosPartidosRival(cat, prox.rival, modoInfo.condicion, modoInfo.cant);
+  const reciente = isReserva ? null : partidoMasRecienteRival(cat, prox.rival);
   const num = (id, def) => parseInt(document.getElementById(id+cat)?.value ?? def) || def;
-  const alerta = TABLA_DATA.rival_alertas && TABLA_DATA.rival_alertas[cat];
+  const alerta = TABLA_DATA.rival_alertas && TABLA_DATA.rival_alertas[dataCat];
   return {cat, prox, info, ultimos, ultimosLabel: modoInfo.label, reciente, filaRival, filaTigre, alerta,
     incluirGoleador: chk('placa-stats-incluir-goleador-'+cat),
     incluirAmarillas: chk('placa-stats-incluir-amarillas-'+cat),
@@ -8765,11 +8910,24 @@ function placaCierreControlesHTML(cat, ns=''){
 // ahora viven cada una directo en su sección, sin selector. Contenido plano
 // (sin su propio toggle anidado) porque ya vive adentro de la sección
 // colapsable "PLACAS" -- ver el comentario de placaRotuloHTML.
-async function renderPlacaPostPartidoBlock(cat){
+// cat -> dataCat real (RESERVA/RESERVA_S2 según semestre elegido; igual a
+// cat en el resto de las categorías) -- lo leen leerControlesPlacaPost/
+// generarPlacaPortada más abajo sin tener que agregarle el parámetro a toda
+// la cadena de funciones de las placas que ya se llaman entre sí con un
+// solo `cat`. Se pisa en cada render de la pestaña VIDEOANÁLISIS (siempre
+// antes de que se pueda tocar un botón de descarga).
+const placaDataCat = {};
+async function renderPlacaPostPartidoBlock(cat, dataCat){
+  placaDataCat[cat] = dataCat || cat;
   const el = document.getElementById(`placa-post-block-${cat}`);
   if(!el) return;
   await loadTablaData();
-  const jugadas = RIVALS.filter(r=>results[cat]?.[r.f]).sort((a,b)=>b.f-a.f);
+  const isReserva = cat === 'RESERVA';
+  const jugadas = isReserva
+    ? (dataCat==='RESERVA_S2' ? RIVALS_RESERVA_S2 : RIVALS_RESERVA)
+        .filter(r=>r.cond!=='N' && results[dataCat]?.[r.f])
+        .map(r=>({f:r.f, r:rivalDeFechaReserva(dataCat, r.f)})).sort((a,b)=>b.f-a.f)
+    : RIVALS.filter(r=>results[cat]?.[r.f]).sort((a,b)=>b.f-a.f);
   if(!jugadas.length){
     el.innerHTML = placaRotuloHTML('🖼️ PORTADA (POST PARTIDO)') +
       `<div style="padding:0 0 14px;font-family:'Barlow Condensed',sans-serif;font-size:14px;color:var(--text2)">
@@ -8813,17 +8971,19 @@ async function renderPlacaPostPartidoBlock(cat){
   actualizarPlacaPostPreview(cat);
 }
 
-async function renderPlacaProximoRivalBlock(cat){
+async function renderPlacaProximoRivalBlock(cat, dataCat){
   const el = document.getElementById(`placa-portada-info-${cat}`);
   if(!el) return;
   await loadTablaData();
-  const prox = proximoRivalInfo(cat);
+  const isReserva = cat === 'RESERVA';
+  const prox = isReserva ? proximoRivalInfoReserva(dataCat) : proximoRivalInfo(cat);
   if(!prox){ el.innerHTML = placaRotuloHTML('🖼️ PORTADA (PRÓXIMO RIVAL)') + 'No encontré ningún partido pendiente en el fixture.'; return; }
-  const info = RIVAL_INFO[prox.rival];
+  const info = isReserva ? matchRivalInfo(prox.rival) : RIVAL_INFO[prox.rival];
   if(!info){ el.innerHTML = placaRotuloHTML('🖼️ PORTADA (PRÓXIMO RIVAL)') + `Todavía no tengo cargado el escudo/equivalencia de "${prox.rival}".`; return; }
+  const fechaTexto = isReserva ? formatFechaReserva(dataCat, prox.fecha) : formatFechaCalendario(prox.fecha);
   el.innerHTML = placaRotuloHTML('🖼️ PORTADA (PRÓXIMO RIVAL)') + bloquePlacaConPreview(`
     Próximo rival: <strong style="color:var(--gold2)">${prox.rival}</strong>
-    · Fecha ${prox.fecha} · ${formatFechaCalendario(prox.fecha)}
+    · Fecha ${prox.fecha}${fechaTexto?' · '+fechaTexto:''}
     <div style="margin-top:10px;display:flex;gap:8px">
       <button onclick="generarPlacaPortada('${cat}')" id="btn-placa-portada" style="
         background:rgba(240,192,64,0.15);border:1px solid var(--border2);color:var(--gold2);
@@ -8844,7 +9004,7 @@ async function renderPlacaProximoRivalBlock(cat){
 const placaStatsModoUltimos = {}; // cat -> 'x' | 'cond' (default 'cond')
 function setPlacaStatsModo(cat, modo){
   placaStatsModoUltimos[cat] = modo;
-  renderPlacaStatsControlesBlock(cat);
+  renderPlacaStatsControlesBlock(cat, placaDataCat[cat]);
 }
 function leerModoUltimosPlaca(cat, condRival){
   const modo = placaStatsModoUltimos[cat] || 'cond';
@@ -8855,11 +9015,13 @@ function leerModoUltimosPlaca(cat, condRival){
   return {modo, cant:4, condicion:condRival, label:'ÚLTIMOS 4 · '+(condRival==='L'?'COMO LOCAL':'COMO VISITANTE')};
 }
 
-async function renderPlacaStatsControlesBlock(cat){
+async function renderPlacaStatsControlesBlock(cat, dataCat){
+  placaDataCat[cat] = dataCat || cat;
   const el = document.getElementById(`placa-stats-block-${cat}`);
   if(!el) return;
   await loadTablaData();
-  const prox = proximoRivalInfo(cat);
+  const isReserva = cat === 'RESERVA';
+  const prox = isReserva ? proximoRivalInfoReserva(placaDataCat[cat]) : proximoRivalInfo(cat);
   const modo = placaStatsModoUltimos[cat] || 'cond';
   const modoBtn = (val, label) => `<button type="button" onclick="setPlacaStatsModo('${cat}','${val}')" style="padding:6px 12px;
     border-radius:6px;border:1px solid ${modo===val?'var(--gold)':'var(--border2)'};
@@ -8895,8 +9057,10 @@ function leerControlesPlacaPost(cat){
   const sel = document.getElementById(`placa-post-fecha-${cat}`);
   if(!sel) return null;
   const fecha = parseInt(sel.value);
-  const entry = RIVALS.find(r=>r.f===fecha);
-  const info = entry && RIVAL_INFO[entry.r];
+  const isReserva = cat === 'RESERVA';
+  const dataCat = placaDataCat[cat] || cat;
+  const entry = isReserva ? {f:fecha, r:rivalDeFechaReserva(dataCat, fecha)} : RIVALS.find(r=>r.f===fecha);
+  const info = entry && (isReserva ? matchRivalInfo(entry.r) : RIVAL_INFO[entry.r]);
   if(!info) return null;
   const num = (id, def) => parseInt(document.getElementById(id+cat)?.value ?? def) || def;
   return {
@@ -9187,9 +9351,11 @@ async function generarPlacaPortada(cat, compartir){
   if(btn) btn.disabled = true;
   try{
     await loadTablaData();
-    const prox = proximoRivalInfo(cat);
+    const isReserva = cat === 'RESERVA';
+    const dataCat = placaDataCat[cat] || cat;
+    const prox = isReserva ? proximoRivalInfoReserva(dataCat) : proximoRivalInfo(cat);
     if(!prox){ alert('No encontré ningún partido pendiente en el fixture de '+cat+'.'); return; }
-    const info = RIVAL_INFO[prox.rival];
+    const info = isReserva ? matchRivalInfo(prox.rival) : RIVAL_INFO[prox.rival];
     if(!info){ alert('Todavía no tengo cargado el escudo/equivalencia de "'+prox.rival+'".'); return; }
     const blob = await dibujarPlacaPortada({cat, prox, info});
     await descargarOCompartirPlaca(blob, `portada-${cat}-F${prox.fecha}-${slugArchivo(prox.rival)}.png`, compartir);
