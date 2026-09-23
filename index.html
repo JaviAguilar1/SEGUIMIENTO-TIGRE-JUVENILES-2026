@@ -1175,6 +1175,23 @@ function canEditCat(cat){
   const base = (cat||'').replace('_S2','');
   return scope.includes(base);
 }
+// Roles con VISTA acotada a un grupo fijo de categorías (nunca edición, ver
+// EDIT_SCOPES arriba): DT/PF/AC por categoría (cat_XXX, una sola categoría)
+// y EA (ea_mayores/ea_menores, un grupo fijo de 3). Centraliza lo que antes
+// eran varios chequeos sueltos de "currentRole.startsWith('cat_')" repartidos
+// por el archivo -- así un rol acotado nuevo no se olvida en ninguno.
+const VIEW_SCOPES = {
+  ea_mayores: ['4TA','5TA','6TA'],
+  ea_menores: ['7MA','8VA','9NA'],
+};
+function categoriasPropias(){
+  if(currentRole && currentRole.startsWith('cat_')) return [currentRole.replace('cat_','').toUpperCase()];
+  if(Object.prototype.hasOwnProperty.call(VIEW_SCOPES, currentRole)) return VIEW_SCOPES[currentRole];
+  return null; // sin restricción (admin/director/coordinador/videoanalista_*)
+}
+function esVistaAcotada(){
+  return categoriasPropias() !== null;
+}
 let fbReady      = false;
 let db           = null;
 let saveTimeout  = null;
@@ -1419,11 +1436,7 @@ function initFirebase(){
           // Última vez que se vio activa esta cuenta (login real o simplemente
           // volver a abrir la app con la sesión ya guardada) + desde qué tipo
           // de dispositivo -- para saber qué cuentas se usan de verdad sin
-          // tener que ir a la consola de Firebase. También el email real
-          // (self-write, cada uno solo puede escribir el propio) -- así el
-          // login unificado puede resolver "usuario" -> email sin que nadie
-          // tenga que pasarle los emails de las cuentas ya creadas a mano en
-          // la consola: se completa solo la próxima vez que cada una entre.
+          // tener que ir a la consola de Firebase.
           // .update() y no .set() para no pisar role/nombre/mustChangePassword
           // de ese mismo nodo.
           db.ref('users/'+user.uid).update({
@@ -1431,19 +1444,6 @@ function initFirebase(){
             lastDevice: detectarDispositivo(),
             email: user.email || null,
           }).catch(()=>{});
-          // Si esta cuenta ya tiene "nombre" guardado, se registra sola en
-          // login_lookup (nombre normalizado -> email) para que el login
-          // unificado pueda resolverla por nombre -- solo si esa entrada
-          // todavía no existe (nunca pisa un registro de otra cuenta).
-          db.ref('users/'+user.uid+'/nombre').once('value').then(snap=>{
-            const nombre=snap.val();
-            if(!nombre || !user.email) return;
-            const key=loginLookupKey(normalizarUsuario(nombre));
-            if(!key) return;
-            db.ref('login_lookup/'+key).once('value').then(s=>{
-              if(!s.exists()) db.ref('login_lookup/'+key).set(user.email).catch(()=>{});
-            });
-          });
           // Remove login wall if still present (returning user with active session)
           const wall = document.getElementById('login-wall');
           if(wall){ wall.style.transition='opacity .3s'; wall.style.opacity='0'; setTimeout(()=>wall.remove(),300); }
@@ -1500,21 +1500,22 @@ function applyViewMode(){
   if(usuariosBtn) usuariosBtn.style.display=isAdmin?'':'none';
 
   // Filter categories for category-specific roles.
-  // 'cat_4TA' -> su categoria + GENERAL (GENERAL le muestra una version
-  // acotada, ver renderStatsGeneral) -- roles de DT, de solo vista.
-  // videoanalista_reserva/videoanalista_menores NO restringen la vista (ven
-  // todo) -- solo su EDICION queda acotada, ver EDIT_SCOPES y canEditCat,
-  // recalculado por categoria en cada render.
-  let allowedCats = null, dtCatPropia = null;
-  if(currentRole && currentRole.startsWith('cat_')){
-    dtCatPropia = currentRole.replace('cat_','').toUpperCase();
-    allowedCats = ['GENERAL', dtCatPropia];
+  // cat_XXX -> su categoria + GENERAL; ea_mayores/ea_menores -> sus 3
+  // categorias + GENERAL (GENERAL le muestra una version acotada, ver
+  // renderStatsGeneral) -- ver categoriasPropias(). videoanalista_reserva/
+  // videoanalista_menores NO restringen la vista (ven todo) -- solo su
+  // EDICION queda acotada, ver EDIT_SCOPES y canEditCat, recalculado por
+  // categoria en cada render.
+  let allowedCats = null;
+  const catsPropias = categoriasPropias();
+  if(catsPropias){
+    allowedCats = ['GENERAL', ...catsPropias];
   }
   const sel=document.getElementById('stats-cat-select');
   if(sel){
     if(allowedCats){
       [...sel.options].forEach(o=>{ o.hidden = !allowedCats.includes(o.value); });
-      const first = dtCatPropia; // arranca en su propia categoria, no en GENERAL
+      const first = catsPropias[0]; // arranca en la primera categoria propia, no en GENERAL
       sel.value=first;
       currentCategoria=first;
       renderStatsCat(first);
@@ -1533,7 +1534,8 @@ function applyViewMode(){
 // solo adentro de updateAuthUI.
 const ROLE_LABELS={'admin':'ADMIN',
   'videoanalista_reserva':'VIDEO RESERVA','videoanalista_menores':'VIDEO 7-8-9',
-  'director':'DIR. DEPORTIVO','coordinador':'COORDINADOR'};
+  'director':'DIR. DEPORTIVO','coordinador':'COORDINADOR',
+  'ea_mayores':'EA · 4-5-6TA','ea_menores':'EA · 7-8-9NA'};
 function roleLabel(role){
   if(!role) return '—';
   let label = ROLE_LABELS[role];
@@ -1592,21 +1594,8 @@ async function abrirPanelUsuarios(){
       try{ return new Date(iso).toLocaleString('es-AR',{timeZone:'America/Argentina/Buenos_Aires', dateStyle:'short', timeStyle:'short'}); }
       catch(e){ return iso; }
     };
-    // Un mismo rol de DT (cat_XXX) repetido en más de una cuenta no rompe
-    // nada -- las dos pueden loguearse y editar esa categoría igual -- pero
-    // suele ser un alta duplicada sin querer, vale la pena avisarlo acá.
-    const porRole={};
-    filas.forEach(f=>{ if(f.role) (porRole[f.role]=porRole[f.role]||[]).push(f); });
-    const duplicadosCat = Object.entries(porRole).filter(([role,arr])=>role.startsWith('cat_') && arr.length>1);
-    const avisoHTML = duplicadosCat.length ? `<div style="background:rgba(192,21,42,0.12);border:1px solid rgba(192,21,42,0.35);border-radius:8px;padding:10px;margin-bottom:12px;font-size:11px;color:var(--text)">
-        ⚠️ Más de una cuenta con el mismo rol de DT: ${duplicadosCat.map(([role,arr])=>`${esc(roleLabel(role))} (${arr.length})`).join(' · ')}
-      </div>` : '';
-    // El nombre es lo que esa cuenta va a poder escribir en "Usuario" para
-    // entrar sin tipear el email (ver resolverEmailDeUsuario) -- editable acá
-    // mismo para no tener que ir a la consola de Firebase. Para una cuenta sin
-    // email real guardado todavía (recién creada a mano, nunca logueada) el
-    // nombre no sirve de nada como login hasta que esa cuenta entre una vez
-    // con su email -- se avisa al lado.
+    // El nombre es el "Usuario" con el que esa cuenta se creó (ver PERFILES);
+    // editable acá mismo para no tener que ir a la consola de Firebase.
     const rowsHTML = filas.map(f=>`<tr>
         <td style="padding:6px 8px;border-bottom:1px solid var(--border2)">
           <div style="display:flex;gap:4px;align-items:center">
@@ -1615,18 +1604,16 @@ async function abrirPanelUsuarios(){
             <button onclick="guardarNombreUsuario('${f.uid}')" title="Guardar nombre"
               style="background:none;border:1px solid var(--border2);border-radius:5px;color:var(--gold2);font-size:11px;padding:3px 6px;cursor:pointer">💾</button>
           </div>
-          ${(!f.role || !f.role.startsWith('cat_')) && !f.email ? `<div style="font-size:10px;color:var(--muted);margin-top:3px">Falta su primer login por email para poder usar el nombre</div>` : ''}
         </td>
         <td style="padding:6px 8px;border-bottom:1px solid var(--border2);white-space:nowrap">${esc(roleLabel(f.role))}</td>
         <td style="padding:6px 8px;border-bottom:1px solid var(--border2);white-space:nowrap">${fmtFecha(f.lastLogin)}</td>
         <td style="padding:6px 8px;border-bottom:1px solid var(--border2)">${f.lastDevice?esc(f.lastDevice):'—'}</td>
       </tr>`).join('');
     document.getElementById('panel-usuarios-body').innerHTML = filas.length ? `
-      ${avisoHTML}
       <div style="font-size:11px;color:var(--muted);margin-bottom:10px;text-align:left">${filas.length} cuenta${filas.length===1?'':'s'} registrada${filas.length===1?'':'s'}.</div>
       <div class="table-wrap"><table style="width:100%;border-collapse:collapse;font-size:12px">
         <thead><tr style="text-align:left;color:var(--gold2);font-family:'Barlow Condensed',sans-serif;letter-spacing:1px">
-          <th style="padding:6px 8px">NOMBRE</th><th style="padding:6px 8px">ROL</th><th style="padding:6px 8px">ÚLTIMO ACCESO</th><th style="padding:6px 8px">DISPOSITIVO</th>
+          <th style="padding:6px 8px">USUARIO</th><th style="padding:6px 8px">ROL</th><th style="padding:6px 8px">ÚLTIMO ACCESO</th><th style="padding:6px 8px">DISPOSITIVO</th>
         </tr></thead>
         <tbody>${rowsHTML}</tbody>
       </table></div>` : `<div style="color:var(--muted);font-size:12px">No hay cuentas registradas.</div>`;
@@ -1832,173 +1819,171 @@ function cerrarTemporada(){
 }
 
 // ── Auth actions ─────────────────────────────────────────────
-// Roles de DT por categoria: login/alta "sin email" -- el DT solo elige su
-// categoria y una contraseña. El email que pide Firebase Auth por dentro se
-// arma solo (dtEmailFor), nunca lo ve ni lo escribe nadie. La exclusividad
-// (un solo DT por categoria) la garantiza Firebase Auth mismo -- el email
-// es unico por definicion, asi que un segundo alta con el mismo rol falla
-// solo con "email-already-in-use". roles_taken es nada mas para que el
-// desplegable de alta ya no muestre una categoria ocupada, no es la unica
-// traba real.
-const DT_ROLES = [
-  {role:'cat_4TA',     label:'DT · 4TA'},
-  {role:'cat_5TA',     label:'DT · 5TA'},
-  {role:'cat_6TA',     label:'DT · 6TA'},
-  {role:'cat_7MA',     label:'DT · 7MA'},
-  {role:'cat_8VA',     label:'DT · 8VA'},
-  {role:'cat_9NA',     label:'DT · 9NA'},
-  {role:'cat_RESERVA', label:'DT · Reserva'},
+// Catálogo fijo de cuentas ("perfiles"): cada una es un usuario visible en
+// los desplegables de login/alta, con un rol de permisos por detrás (varios
+// perfiles pueden compartir el mismo rol, ej. DT-4ta y PF-4ta comparten
+// cat_4TA -- mismo alcance de vista/edición para los dos, pero cuentas
+// separadas). El email que pide Firebase Auth por dentro se arma solo
+// (perfilEmailFor), nunca lo ve ni lo escribe nadie. La exclusividad (un
+// perfil = una sola cuenta) la garantiza la regla de Firebase de
+// profile_taken (self-claim, no se puede pisar), no el desplegable.
+const PERFILES = [
+  {slug:'dt_4ta',      usuario:'DT - 4ta',         role:'cat_4TA'},
+  {slug:'pf_4ta',      usuario:'PF - 4ta',         role:'cat_4TA'},
+  {slug:'dt_5ta',      usuario:'DT - 5ta',         role:'cat_5TA'},
+  {slug:'pf_5ta',      usuario:'PF - 5ta',         role:'cat_5TA'},
+  {slug:'dt_6ta',      usuario:'DT - 6ta',         role:'cat_6TA'},
+  {slug:'pf_6ta',      usuario:'PF - 6ta',         role:'cat_6TA'},
+  {slug:'dt_7ma',      usuario:'DT - 7ma',         role:'cat_7MA'},
+  {slug:'ac_7ma',      usuario:'AC - 7ma',         role:'cat_7MA'},
+  {slug:'pf_7ma',      usuario:'PF - 7ma',         role:'cat_7MA'},
+  {slug:'dt_8va',      usuario:'DT - 8va',         role:'cat_8VA'},
+  {slug:'ac_8va',      usuario:'AC - 8va',         role:'cat_8VA'},
+  {slug:'pf_8va',      usuario:'PF - 8va',         role:'cat_8VA'},
+  {slug:'dt_9na',      usuario:'DT - 9na',         role:'cat_9NA'},
+  {slug:'ac_9na',      usuario:'AC - 9na',         role:'cat_9NA'},
+  {slug:'pf_9na',      usuario:'PF - 9na',         role:'cat_9NA'},
+  {slug:'dt_reserva',  usuario:'DT - Reserva',     role:'cat_RESERVA'},
+  {slug:'ac_reserva',  usuario:'AC - Reserva',     role:'cat_RESERVA'},
+  {slug:'ea_reserva',  usuario:'EA - Reserva',     role:'cat_RESERVA'},
+  {slug:'va_reserva',  usuario:'VA - Reserva',     role:'videoanalista_reserva'},
+  {slug:'va_menores',  usuario:'VA - 7ma/8va/9na', role:'videoanalista_menores'},
+  {slug:'ea_mayores',  usuario:'EA - 4ta/5ta/6ta', role:'ea_mayores'},
+  {slug:'ea_menores',  usuario:'EA - 7ma/8va/9na', role:'ea_menores'},
+  {slug:'director',    usuario:'Director',         role:'director'},
+  {slug:'coordinador', usuario:'Coordinador',      role:'coordinador'},
 ];
-function dtEmailFor(role){
-  return 'dt.' + role.replace('cat_','').toLowerCase() + '@tigrejuveniles.internal';
+function perfilEmailFor(slug){
+  return 'perfil.' + slug + '@tigrejuveniles.internal';
 }
-let loginMode = 'login'; // 'login' | 'signup' -- una sola ventana (buildLoginWall), ya no hay panel de DT aparte.
-
-// "Usuario" -> email real para el signInWithEmailAndPassword de Firebase.
-// Acepta un email tal cual (tiene "@") o el nombre que esa cuenta tiene
-// guardado en users/{uid}/nombre. Se resuelve contra `login_lookup`, un nodo
-// público de solo-lectura (nombre normalizado -> email) que cada cuenta
-// completa sola la primera vez que entra con su email (ver initFirebase) --
-// por eso una cuenta recién creada en la consola de Firebase todavía no
-// puede loguearse por nombre hasta su primer login por email.
-const ADMIN_ALIAS = {usuario:'admin', email:'javier92aguilar@gmail.com'};
-function normalizarUsuario(s){
-  return (s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/\s+/g,' ').trim();
+function perfilPorSlug(slug){
+  return PERFILES.find(p=>p.slug===slug) || null;
 }
-// Claves de Firebase no pueden tener . # $ [ ] / -- se sacan del nombre ya
-// normalizado (nombres de persona casi nunca los traen, pero por las dudas).
-function loginLookupKey(norm){
-  return norm.replace(/[.#$\[\]\/]/g, '');
-}
-function resolverEmailDeUsuario(input){
-  const raw=(input||'').trim();
-  if(!raw) return Promise.resolve({ok:false, motivo:'vacio'});
-  if(raw.includes('@')) return Promise.resolve({ok:true, email:raw});
-  const norm=normalizarUsuario(raw);
-  if(norm===ADMIN_ALIAS.usuario) return Promise.resolve({ok:true, email:ADMIN_ALIAS.email});
-  if(!fbReady || !db) return Promise.resolve({ok:false, motivo:'sin-conexion'});
-  const key=loginLookupKey(norm);
-  if(!key) return Promise.resolve({ok:false, motivo:'no-encontrado'});
-  return db.ref('login_lookup/'+key).once('value').then(snap=>{
-    const email=snap.val();
-    return email ? {ok:true, email} : {ok:false, motivo:'no-encontrado'};
-  }).catch(e=>({ok:false, motivo: e.code==='PERMISSION_DENIED' ? 'sin-permiso' : 'sin-conexion'}));
-}
+let loginMode = 'login'; // 'login' | 'signup' -- una sola ventana (buildLoginWall).
+// Admin no está en PERFILES (no aparece en ningún desplegable, a propósito)
+// -- entra tipeando su email real, destapado con el link "Ingresar con
+// email" (ver toggleEmailMode). No es una traba de seguridad real (el
+// código sigue siendo visible para quien lo busque): lo que de verdad frena
+// que alguien se asigne admin es la regla de Firebase de users/{uid}/role.
+let emailMode = false;
 
 function setLoginMode(mode){
   loginMode=mode;
+  emailMode=false;
   const errEl=document.getElementById('wall-err'); errEl.style.display='none'; errEl.textContent='';
-  document.getElementById('wall-signup-extra').style.display = mode==='signup' ? '' : 'none';
-  document.getElementById('wall-btn').textContent = mode==='signup' ? '🔑 CREAR CUENTA' : '🔑 INGRESAR';
-  document.getElementById('wall-usuario').placeholder = mode==='signup' ? 'Tu nombre y apellido' : 'Usuario (tu email, o tu nombre si ya tenés cuenta)';
-  document.getElementById('wall-link-crear').textContent = mode==='signup' ? 'Ya tengo cuenta' : 'Crear cuenta';
-  document.getElementById('wall-link-olvide').style.display = mode==='signup' ? 'none' : '';
-  if(mode==='signup') populateDtRoleSelect(true);
+  const isSignup = mode==='signup';
+  document.getElementById('wall-signup-extra').style.display = isSignup ? '' : 'none';
+  document.getElementById('wall-usuario-select').style.display = isSignup ? 'none' : '';
+  document.getElementById('wall-email').style.display = 'none';
+  document.getElementById('wall-btn').textContent = isSignup ? '🔑 CREAR CUENTA' : '🔑 INGRESAR';
+  document.getElementById('wall-link-crear').textContent = isSignup ? 'Ya tengo cuenta' : 'Crear cuenta';
+  document.getElementById('wall-link-olvide').style.display = 'none';
+  document.getElementById('wall-link-email').style.display = isSignup ? 'none' : '';
+  document.getElementById('wall-link-email').textContent = 'Ingresar con email';
+  if(isSignup) populatePerfilSelect('signup');
+  else populatePerfilSelect('login');
 }
 
-function populateDtRoleSelect(filtrarOcupados){
-  const sel=document.getElementById('wall-dt-role');
+function toggleEmailMode(){
+  emailMode = !emailMode;
+  document.getElementById('wall-usuario-select').style.display = emailMode ? 'none' : '';
+  document.getElementById('wall-email').style.display = emailMode ? '' : 'none';
+  document.getElementById('wall-link-email').textContent = emailMode ? 'Volver al listado' : 'Ingresar con email';
+  document.getElementById('wall-link-olvide').style.display = emailMode ? '' : 'none';
+  document.getElementById('wall-err').style.display='none';
+}
+
+// mode: 'signup' llena wall-perfil-signup con los perfiles LIBRES; 'login'
+// llena wall-usuario-select con los perfiles YA CREADOS (profile_taken es de
+// lectura pública, no hace falta estar logueado).
+function populatePerfilSelect(mode){
+  const selId = mode==='signup' ? 'wall-perfil-signup' : 'wall-usuario-select';
+  const sel=document.getElementById(selId);
+  if(!sel) return;
   const build=(ocupados)=>{
-    const opts = DT_ROLES.filter(r=>!filtrarOcupados || !ocupados.includes(r.role));
+    const opts = mode==='signup'
+      ? PERFILES.filter(p=>!ocupados.has(p.slug))
+      : PERFILES.filter(p=>ocupados.has(p.slug));
     sel.innerHTML = opts.length
-      ? opts.map(r=>`<option value="${r.role}">${r.label}</option>`).join('')
-      : `<option value="">Ya están todos los roles creados</option>`;
+      ? opts.map(p=>`<option value="${p.slug}">${esc(p.usuario)}</option>`).join('')
+      : `<option value="">${mode==='signup' ? 'Ya están todos los usuarios creados' : 'Todavía no hay cuentas creadas'}</option>`;
   };
-  if(filtrarOcupados && fbReady && db){
-    // roles_taken solo sabe de las cuentas de DT creadas DESDE este mismo
-    // signup -- si alguna se creó a mano en la consola de Firebase con el
-    // rol puesto directo, roles_taken nunca se entera y el desplegable la
-    // seguía ofreciendo como libre (así se duplicaron cat_4TA/5TA/6TA; no
-    // se puede arreglar esa desincronización desde acá, ni siquiera como
-    // admin -- roles_taken solo se puede escribir para uno mismo, ver
-    // doWallSubmit). Por eso también se mira directo en users/ qué roles ya
-    // tienen alguna cuenta real, sea como sea que se haya creado -- y si esa
-    // lectura no estuviera permitida sin sesión, se sigue usando roles_taken
-    // como antes, no queda peor que hoy.
-    Promise.allSettled([
-      db.ref('users').once('value'),
-      db.ref('roles_taken').once('value'),
-    ]).then(([usersR, takenR])=>{
-      const ocupados = new Set();
-      if(takenR.status==='fulfilled' && takenR.value.val()) Object.keys(takenR.value.val()).forEach(r=>ocupados.add(r));
-      if(usersR.status==='fulfilled' && usersR.value.val()) Object.values(usersR.value.val()).forEach(u=>{ if(u.role) ocupados.add(u.role); });
-      build([...ocupados]);
-    });
+  if(fbReady && db){
+    db.ref('profile_taken').once('value')
+      .then(snap=>build(new Set(snap.val() ? Object.keys(snap.val()) : [])))
+      .catch(()=>build(new Set()));
   } else {
-    build([]);
+    build(new Set());
   }
 }
 
 function doWallSubmit(){
-  const usuarioEl=document.getElementById('wall-usuario');
   const passEl=document.getElementById('wall-pass');
   const errEl=document.getElementById('wall-err');
   const loadEl=document.getElementById('wall-loading');
   const btn=document.getElementById('wall-btn');
-  errEl.style.display='none';
-  const usuario=usuarioEl.value.trim();
+  errEl.style.display='none'; errEl.style.color='#ef4444';
   const pass=passEl.value;
-  if(!usuario||!pass){ errEl.textContent='Completá usuario y contraseña.'; errEl.style.display='block'; return; }
 
   if(loginMode==='signup'){
-    const role=document.getElementById('wall-dt-role').value;
-    if(!role){ errEl.textContent='Elegí tu categoría.'; errEl.style.display='block'; return; }
-    const email=dtEmailFor(role);
+    const slug=document.getElementById('wall-perfil-signup').value;
+    const perfil=perfilPorSlug(slug);
+    if(!perfil){ errEl.textContent='Elegí tu usuario.'; errEl.style.display='block'; return; }
+    if(!pass){ errEl.textContent='Completá una contraseña.'; errEl.style.display='block'; return; }
+    const email=perfilEmailFor(slug);
     btn.disabled=true; loadEl.style.display='block';
     firebase.auth().createUserWithEmailAndPassword(email, pass)
       .then(cred=>{
         const uid=cred.user.uid;
-        return db.ref().update({['users/'+uid+'/role']:role, ['users/'+uid+'/nombre']:usuario, ['roles_taken/'+role]:uid});
+        return db.ref().update({['users/'+uid+'/role']:perfil.role, ['users/'+uid+'/nombre']:perfil.usuario, ['profile_taken/'+slug]:uid});
       })
       .then(()=>{ cerrarLoginWall(); })
       .catch(e=>{
         loadEl.style.display='none'; btn.disabled=false;
-        errEl.textContent = e.code==='auth/email-already-in-use' ? 'Esa categoría ya tiene una cuenta creada.'
+        errEl.textContent = e.code==='auth/email-already-in-use' ? 'Ese usuario ya tiene una cuenta creada.'
           : e.code==='auth/weak-password' ? 'La contraseña necesita al menos 6 caracteres.' : e.message;
         errEl.style.display='block';
       });
     return;
   }
 
+  if(!pass){ errEl.textContent='Completá la contraseña.'; errEl.style.display='block'; return; }
+  let email;
+  if(emailMode){
+    email=(document.getElementById('wall-email').value||'').trim();
+    if(!email){ errEl.textContent='Escribí tu email.'; errEl.style.display='block'; return; }
+  } else {
+    const slug=document.getElementById('wall-usuario-select').value;
+    if(!slug){ errEl.textContent='Elegí tu usuario.'; errEl.style.display='block'; return; }
+    email=perfilEmailFor(slug);
+  }
   btn.disabled=true; loadEl.style.display='block';
-  resolverEmailDeUsuario(usuario).then(r=>{
-    if(!r.ok){
+  firebase.auth().signInWithEmailAndPassword(email, pass)
+    .then(()=>{ cerrarLoginWall(); })
+    .catch(()=>{
       loadEl.style.display='none'; btn.disabled=false;
-      errEl.textContent = r.motivo==='sin-permiso' ? 'Por ahora solo el admin puede entrar por nombre -- entrá con tu email.'
-        : r.motivo==='sin-email' ? 'Esa cuenta todavía no tiene email guardado para entrar por nombre -- entrá con tu email esta vez.'
-        : r.motivo==='ambiguo' ? 'Hay más de una cuenta con ese nombre -- entrá con tu email.'
-        : r.motivo==='sin-conexion' ? 'Sin conexión, probá de nuevo.'
-        : 'Usuario no encontrado.';
-      errEl.style.display='block';
-      return;
-    }
-    firebase.auth().signInWithEmailAndPassword(r.email, pass)
-      .then(()=>{ cerrarLoginWall(); })
-      .catch(()=>{
-        loadEl.style.display='none'; btn.disabled=false;
-        errEl.textContent='Usuario o contraseña incorrectos.'; errEl.style.display='block';
-      });
-  });
+      errEl.textContent='Usuario o contraseña incorrectos.'; errEl.style.display='block';
+    });
 }
 
+// Solo tiene sentido en modo email (admin/cuentas con email real) -- los
+// perfiles del desplegable usan un email interno inventado
+// (@tigrejuveniles.internal), no hay ninguna casilla real donde mandarles
+// un mail de reinicio.
 function doForgotPassword(){
-  const usuario=document.getElementById('wall-usuario').value.trim();
   const errEl=document.getElementById('wall-err');
   errEl.style.display='none';
-  if(!usuario){ errEl.style.color='#c9a227'; errEl.textContent='Escribí tu usuario o email arriba primero.'; errEl.style.display='block'; return; }
-  resolverEmailDeUsuario(usuario).then(r=>{
-    if(!r.ok || r.email.endsWith('@tigrejuveniles.internal')){
-      errEl.style.color='#c9a227';
-      errEl.textContent = (r.ok===false && r.motivo==='sin-permiso')
-        ? 'Escribí tu email arriba para pedir el reinicio (por nombre todavía no se puede).'
-        : 'Esta cuenta no tiene un email real -- pedile al admin que te reinicie la contraseña.';
-      errEl.style.display='block';
-      return;
-    }
-    firebase.auth().sendPasswordResetEmail(r.email)
-      .then(()=>{ errEl.style.color='#22c55e'; errEl.textContent='Te mandamos un mail para reiniciar la contraseña.'; errEl.style.display='block'; })
-      .catch(()=>{ errEl.style.color='#ef4444'; errEl.textContent='No se pudo mandar el mail.'; errEl.style.display='block'; });
-  });
+  if(!emailMode){
+    errEl.style.color='#c9a227';
+    errEl.textContent='Por ahora el reinicio por mail es solo para cuentas con email real -- tocá "Ingresar con email" arriba.';
+    errEl.style.display='block';
+    return;
+  }
+  const email=(document.getElementById('wall-email').value||'').trim();
+  if(!email){ errEl.style.color='#c9a227'; errEl.textContent='Escribí tu email arriba primero.'; errEl.style.display='block'; return; }
+  firebase.auth().sendPasswordResetEmail(email)
+    .then(()=>{ errEl.style.color='#22c55e'; errEl.textContent='Te mandamos un mail para reiniciar la contraseña.'; errEl.style.display='block'; })
+    .catch(()=>{ errEl.style.color='#ef4444'; errEl.textContent='No se pudo mandar el mail.'; errEl.style.display='block'; });
 }
 function cerrarLoginWall(){
   const wall=document.getElementById('login-wall');
@@ -2299,10 +2284,11 @@ function renderStatsCat(cat){
 }
 
 function renderStatsGeneral(content){
-  // DT (rol cat_XXX): version acotada de GENERAL -- solo resumen +
-  // rendimiento + tabla de posiciones. Sin top goleadores, sin tabla
-  // general combinada, sin confiabilidad (esa ya estaba atada a isAdmin).
-  const esDT = currentRole && currentRole.startsWith('cat_');
+  // Roles de vista acotada (DT/PF/AC por categoria, EA): version acotada de
+  // GENERAL -- solo resumen + rendimiento + tabla de posiciones. Sin top
+  // goleadores, sin tabla general combinada, sin confiabilidad (esa ya
+  // estaba atada a isAdmin).
+  const esDT = esVistaAcotada();
   // Summary table rows
   let trows=GENERAL_CATS.map(cat=>{
     const s=calcStats(cat,1,35);
@@ -3065,10 +3051,10 @@ function renderTopGoleadores(wrap){
 let catActiveTab = 'resultados'; // 'resultados' | 'plantel' | 'rendimiento_gps' | 'videoanalisis'
 
 function buildCatTabsHTML(){
-  // Los DT (rol cat_XXX) no ven VIDEOANÁLISIS -- a cambio, "Estadísticas
-  // próximo rival" se les muestra directo adentro de ESTADÍSTICAS (ver
-  // renderStatsSingle).
-  const esDT = currentRole && currentRole.startsWith('cat_');
+  // Los roles de vista acotada (DT/PF/AC por categoria, EA) no ven
+  // VIDEOANÁLISIS -- a cambio, "Estadísticas próximo rival" se les muestra
+  // directo adentro de ESTADÍSTICAS (ver renderStatsSingle).
+  const esDT = esVistaAcotada();
   // Orden pedido por Javi (2026-09-01): Estadísticas, Rendimiento,
   // Videoanálisis (si corresponde), Plantel al final -- mismo orden sirve
   // para admin y DT, porque el DT ya no ve Videoanálisis de por sí.
@@ -3440,7 +3426,7 @@ function renderStatsSingle(cat, content){
     renderRendimientoGpsTab(tabEl, cat);
     return;
   }
-  if(catActiveTab==='videoanalisis' && !(currentRole && currentRole.startsWith('cat_'))){
+  if(catActiveTab==='videoanalisis' && !esVistaAcotada()){
     renderVideoanalisisTab(cat, tabEl);
     return;
   }
@@ -3535,7 +3521,7 @@ function renderStatsSingle(cat, content){
       <div id="sistema-${dataCat}"></div>
     </div>`}
 
-    ${(currentRole && currentRole.startsWith('cat_') && GENERAL_CATS.includes(cat)) ? `
+    ${(esVistaAcotada() && GENERAL_CATS.includes(cat)) ? `
     ${seccionTitulo('rivalstats-'+dataCat, 'ESTADÍSTICAS PRÓXIMO RIVAL')}
     <div id="sec-rivalstats-${dataCat}"${seccionEstiloInicial('rivalstats-'+dataCat)}>
       <div id="rival-stats-detalle-${dataCat}"></div>
@@ -3568,7 +3554,7 @@ function renderStatsSingle(cat, content){
     document.getElementById(`bloque-cat-${dataCat}`).innerHTML = buildRendimientoGeneralHTML((from,to)=>calcStats(dataCat,from,to), dataCat, [cat]);
     document.getElementById(`sistema-${dataCat}`).innerHTML = buildSistemaTacticoHTML(dataCat);
   }
-  if(currentRole && currentRole.startsWith('cat_') && GENERAL_CATS.includes(cat)) renderRivalStatsDetalle(dataCat, cat);
+  if(esVistaAcotada() && GENERAL_CATS.includes(cat)) renderRivalStatsDetalle(dataCat, cat);
   renderGoleadores(dataCat);
   if(isReserva) {
     renderTablaReserva(`tabla-lpf-${cat}`);
@@ -7159,8 +7145,14 @@ function buildLoginWall(){
         <p style="font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:3px;
           color:#c9a227;margin-bottom:18px">ACCESO RESTRINGIDO</p>
 
-        <input id="wall-usuario" type="text" placeholder="Usuario (tu email, o tu nombre si ya tenés cuenta)"
+        <select id="wall-usuario-select"
           style="width:100%;background:rgba(5,8,15,0.8);border:1px solid #1a2d5a;
+          border-radius:8px;color:#d8e4ff;font-size:14px;padding:11px 14px;
+          font-family:'Barlow',sans-serif;outline:none;margin-bottom:10px;
+          box-sizing:border-box"><option value="">Cargando…</option></select>
+
+        <input id="wall-email" type="email" placeholder="Email" style="display:none;
+          width:100%;background:rgba(5,8,15,0.8);border:1px solid #1a2d5a;
           border-radius:8px;color:#d8e4ff;font-size:14px;padding:11px 14px;
           font-family:'Barlow',sans-serif;outline:none;margin-bottom:10px;
           box-sizing:border-box;transition:border-color .2s"
@@ -7168,7 +7160,7 @@ function buildLoginWall(){
           onblur="this.style.borderColor='#1a2d5a'">
 
         <div id="wall-signup-extra" style="display:none;margin-bottom:10px">
-          <select id="wall-dt-role"
+          <select id="wall-perfil-signup"
             style="width:100%;background:rgba(5,8,15,0.8);border:1px solid #1a2d5a;
             border-radius:8px;color:#d8e4ff;font-size:14px;padding:11px 14px;
             font-family:'Barlow',sans-serif;outline:none;box-sizing:border-box"></select>
@@ -7202,7 +7194,11 @@ function buildLoginWall(){
           <a id="wall-link-crear" href="javascript:void(0)" onclick="setLoginMode(loginMode==='signup'?'login':'signup')"
             style="color:#6fa8f5;text-decoration:none;cursor:pointer">Crear cuenta</a>
           <a id="wall-link-olvide" href="javascript:void(0)" onclick="doForgotPassword()"
-            style="color:#5a7099;text-decoration:none;cursor:pointer">¿Olvidaste tu contraseña?</a>
+            style="display:none;color:#5a7099;text-decoration:none;cursor:pointer">¿Olvidaste tu contraseña?</a>
+        </div>
+        <div style="text-align:center;margin-top:10px">
+          <a id="wall-link-email" href="javascript:void(0)" onclick="toggleEmailMode()"
+            style="color:#2a3d5a;text-decoration:none;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-size:10px;letter-spacing:1px">Ingresar con email</a>
         </div>
       </div>
 
@@ -7218,10 +7214,12 @@ function buildLoginWall(){
   const crestSrc = document.getElementById('escudoImg')?.src;
   if(crestSrc) document.getElementById('wall-crest').src = crestSrc;
 
-  // Enter key: de "usuario" pasa el foco a contraseña, de contraseña envía.
+  populatePerfilSelect('login');
+
+  // Enter key: de "email" pasa el foco a contraseña, de contraseña envía.
   setTimeout(()=>{
-    const usuarioEl = document.getElementById('wall-usuario');
-    if(usuarioEl) usuarioEl.addEventListener('keydown', e=>{ if(e.key==='Enter') document.getElementById('wall-pass')?.focus(); });
+    const emailEl = document.getElementById('wall-email');
+    if(emailEl) emailEl.addEventListener('keydown', e=>{ if(e.key==='Enter') document.getElementById('wall-pass')?.focus(); });
     const passEl = document.getElementById('wall-pass');
     if(passEl) passEl.addEventListener('keydown', e=>{ if(e.key==='Enter') doWallSubmit(); });
   }, 100);
