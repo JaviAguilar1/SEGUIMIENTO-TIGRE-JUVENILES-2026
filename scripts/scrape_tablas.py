@@ -3197,6 +3197,26 @@ def main():
                     }
             resultado["fixture_reserva"][cat] = fixture_tigre
             print(f"[OK] statfutbol fixture reserva {cat}: {len(fixture_tigre)} fechas")
+
+            # Fixture completo de LA ZONA (todos los partidos, no solo los de
+            # Tigre) -- mismo shape que fixture_completo de 4TA-9NA
+            # (parse_lpf_fixture_completo: {jornada:[{local,visitante,gl,gv}]}),
+            # para poder calcular "últimos partidos" de CUALQUIER rival del
+            # próximo partido, no solo los de Tigre (a pedido de Javi,
+            # 2026-09-23: "en la placa de estadísticas, traé los últimos
+            # partidos del rival, tal cual de 4ta a 9na"). Mismos datos ya
+            # traídos por fetch_statfutbol_reserva_fixture, no hace falta
+            # pedirlos de nuevo -- solo se filtran los jugados, como hace
+            # parse_lpf_fixture_completo.
+            fc = {}
+            for p in fixture_r:
+                if not p["jugado"] or p["gf_local"] is None:
+                    continue
+                fc.setdefault(p["jornada"], []).append({
+                    "local": p["local"], "visitante": p["visita"], "gl": p["gf_local"], "gv": p["gf_visita"],
+                })
+            resultado.setdefault("fixture_completo_reserva", {})[cat] = fc
+            print(f"[OK] fixture completo reserva {cat}: {len(fc)} fechas con partidos")
         except Exception as e:  # noqa
             errores.append(f"statfutbol resultados {cat}: {e}")
             print(f"[ERROR] statfutbol resultados {cat}: {e}", file=sys.stderr)

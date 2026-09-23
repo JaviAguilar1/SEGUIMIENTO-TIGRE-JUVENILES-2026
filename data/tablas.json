@@ -232301,5 +232301,3001 @@
         }
       }
     }
+  },
+  "fixture_completo_reserva": {
+    "RESERVA": {
+      "1": [
+        {
+          "local": "SAN LORENZO",
+          "visitante": "CENTRAL",
+          "gl": 2,
+          "gv": 1
+        },
+        {
+          "local": "ARGENTINOS JRS",
+          "visitante": "GODOY CRUZ (M)",
+          "gl": 1,
+          "gv": 1
+        },
+        {
+          "local": "ALDOSIVI (MDP)",
+          "visitante": "ATL. TUCUMAN",
+          "gl": 1,
+          "gv": 2
+        },
+        {
+          "local": "GIMNASIA (LP)",
+          "visitante": "UNION (SF)",
+          "gl": 1,
+          "gv": 0
+        },
+        {
+          "local": "VELEZ",
+          "visitante": "BANFIELD",
+          "gl": 3,
+          "gv": 1
+        },
+        {
+          "local": "RACING CLUB",
+          "visitante": "BARRACAS CTRAL",
+          "gl": 2,
+          "gv": 0
+        },
+        {
+          "local": "SARMIENTO (J)",
+          "visitante": "GIMNASIA (M)",
+          "gl": 0,
+          "gv": 0
+        },
+        {
+          "local": "INSTITUTO (C)",
+          "visitante": "TIGRE",
+          "gl": 1,
+          "gv": 0
+        },
+        {
+          "local": "RIVER PLATE",
+          "visitante": "TALLERES (C)",
+          "gl": 2,
+          "gv": 0
+        },
+        {
+          "local": "COLON",
+          "visitante": "ESTUDIANTES (LP)",
+          "gl": 0,
+          "gv": 0
+        },
+        {
+          "local": "RIESTRA",
+          "visitante": "INDEPENDIENTE",
+          "gl": 3,
+          "gv": 0
+        },
+        {
+          "local": "LANUS",
+          "visitante": "FERRO",
+          "gl": 2,
+          "gv": 0
+        },
+        {
+          "local": "DEF Y JUSTICIA",
+          "visitante": "ESTUDIANTES (RC)",
+          "gl": 2,
+          "gv": 0
+        },
+        {
+          "local": "BELGRANO (C)",
+          "visitante": "BOCA JRS",
+          "gl": 2,
+          "gv": 2
+        },
+        {
+          "local": "NEWELLS",
+          "visitante": "HURACAN",
+          "gl": 1,
+          "gv": 4
+        },
+        {
+          "local": "SAN MARTIN (SJ)",
+          "visitante": "PLATENSE",
+          "gl": 1,
+          "gv": 2
+        },
+        {
+          "local": "IND.RIVADAVIA (M)",
+          "visitante": "ATL. RAFAELA",
+          "gl": 2,
+          "gv": 0
+        },
+        {
+          "local": "C.CORDOBA(SDE)",
+          "visitante": "QUILMES",
+          "gl": 0,
+          "gv": 1
+        }
+      ],
+      "2": [
+        {
+          "local": "BANFIELD",
+          "visitante": "SAN LORENZO",
+          "gl": 0,
+          "gv": 0
+        },
+        {
+          "local": "CENTRAL",
+          "visitante": "TIGRE",
+          "gl": 2,
+          "gv": 0
+        },
+        {
+          "local": "GIMNASIA (LP)",
+          "visitante": "INSTITUTO (C)",
+          "gl": 1,
+          "gv": 1
+        },
+        {
+          "local": "UNION (SF)",
+          "visitante": "ALDOSIVI (MDP)",
+          "gl": 2,
+          "gv": 2
+        },
+        {
+          "local": "ATL. TUCUMAN",
+          "visitante": "ARGENTINOS JRS",
+          "gl": 0,
+          "gv": 0
+        },
+        {
+          "local": "BARRACAS CTRAL",
+          "visitante": "RIVER PLATE",
+          "gl": 1,
+          "gv": 0
+        },
+        {
+          "local": "TALLERES (C)",
+          "visitante": "VELEZ",
+          "gl": 2,
+          "gv": 2
+        },
+        {
+          "local": "GIMNASIA (M)",
+          "visitante": "RACING CLUB",
+          "gl": 1,
+          "gv": 1
+        },
+        {
+          "local": "GODOY CRUZ (M)",
+          "visitante": "SARMIENTO (J)",
+          "gl": 1,
+          "gv": 2
+        },
+        {
+          "local": "FERRO",
+          "visitante": "BELGRANO (C)",
+          "gl": 3,
+          "gv": 0
+        },
+        {
+          "local": "QUILMES",
+          "visitante": "ESTUDIANTES (LP)",
+          "gl": 0,
+          "gv": 0
+        },
+        {
+          "local": "ATL. RAFAELA",
+          "visitante": "SAN MARTIN (SJ)",
+          "gl": 4,
+          "gv": 0
+        },
+        {
+          "local": "BOCA JRS",
+          "visitante": "RIESTRA",
+          "gl": 3,
+          "gv": 0
+        },
+        {
+          "local": "DEF Y JUSTICIA",
+          "visitante": "COLON",
+          "gl": 2,
+          "gv": 1
+        },
+        {
+          "local": "ESTUDIANTES (RC)",
+          "visitante": "NEWELLS",
+          "gl": 0,
+          "gv": 0
+        },
+        {
+          "local": "HURACAN",
+          "visitante": "LANUS",
+          "gl": 1,
+          "gv": 1
+        },
+        {
+          "local": "INDEPENDIENTE",
+          "visitante": "IND.RIVADAVIA (M)",
+          "gl": 2,
+          "gv": 0
+        },
+        {
+          "local": "PLATENSE",
+          "visitante": "C.CORDOBA(SDE)",
+          "gl": 1,
+          "gv": 1
+        }
+      ],
+      "3": [
+        {
+          "local": "INSTITUTO (C)",
+          "visitante": "CENTRAL",
+          "gl": 1,
+          "gv": 1
+        },
+        {
+          "local": "ALDOSIVI (MDP)",
+          "visitante": "GIMNASIA (LP)",
+          "gl": 1,
+          "gv": 3
+        },
+        {
+          "local": "TIGRE",
+          "visitante": "BANFIELD",
+          "gl": 1,
+          "gv": 0
+        },
+        {
+          "local": "VELEZ",
+          "visitante": "BARRACAS CTRAL",
+          "gl": 2,
+          "gv": 0
+        },
+        {
+          "local": "ARGENTINOS JRS",
+          "visitante": "UNION (SF)",
+          "gl": 1,
+          "gv": 1
+        },
+        {
+          "local": "RIVER PLATE",
+          "visitante": "GIMNASIA (M)",
+          "gl": 5,
+          "gv": 1
+        },
+        {
+          "local": "RACING CLUB",
+          "visitante": "GODOY CRUZ (M)",
+          "gl": 4,
+          "gv": 2
+        },
+        {
+          "local": "SARMIENTO (J)",
+          "visitante": "ATL. TUCUMAN",
+          "gl": 1,
+          "gv": 2
+        },
+        {
+          "local": "SAN LORENZO",
+          "visitante": "TALLERES (C)",
+          "gl": 1,
+          "gv": 3
+        },
+        {
+          "local": "COLON",
+          "visitante": "QUILMES",
+          "gl": 0,
+          "gv": 1
+        },
+        {
+          "local": "ESTUDIANTES (LP)",
+          "visitante": "PLATENSE",
+          "gl": 3,
+          "gv": 0
+        },
+        {
+          "local": "RIESTRA",
+          "visitante": "FERRO",
+          "gl": 4,
+          "gv": 0
+        },
+        {
+          "local": "SAN MARTIN (SJ)",
+          "visitante": "INDEPENDIENTE",
+          "gl": 1,
+          "gv": 4
+        },
+        {
+          "local": "IND.RIVADAVIA (M)",
+          "visitante": "BOCA JRS",
+          "gl": 0,
+          "gv": 1
+        },
+        {
+          "local": "LANUS",
+          "visitante": "ESTUDIANTES (RC)",
+          "gl": 4,
+          "gv": 2
+        },
+        {
+          "local": "NEWELLS",
+          "visitante": "DEF Y JUSTICIA",
+          "gl": 1,
+          "gv": 0
+        },
+        {
+          "local": "BELGRANO (C)",
+          "visitante": "HURACAN",
+          "gl": 0,
+          "gv": 2
+        },
+        {
+          "local": "C.CORDOBA(SDE)",
+          "visitante": "ATL. RAFAELA",
+          "gl": 3,
+          "gv": 2
+        }
+      ],
+      "4": [
+        {
+          "local": "ALDOSIVI (MDP)",
+          "visitante": "INSTITUTO (C)",
+          "gl": 2,
+          "gv": 1
+        },
+        {
+          "local": "GIMNASIA (LP)",
+          "visitante": "ARGENTINOS JRS",
+          "gl": 1,
+          "gv": 1
+        },
+        {
+          "local": "UNION (SF)",
+          "visitante": "SARMIENTO (J)",
+          "gl": 1,
+          "gv": 0
+        },
+        {
+          "local": "ATL. TUCUMAN",
+          "visitante": "RACING CLUB",
+          "gl": 2,
+          "gv": 1
+        },
+        {
+          "local": "GODOY CRUZ (M)",
+          "visitante": "RIVER PLATE",
+          "gl": 1,
+          "gv": 0
+        },
+        {
+          "local": "GIMNASIA (M)",
+          "visitante": "VELEZ",
+          "gl": 1,
+          "gv": 0
+        },
+        {
+          "local": "BARRACAS CTRAL",
+          "visitante": "SAN LORENZO",
+          "gl": 0,
+          "gv": 2
+        },
+        {
+          "local": "TALLERES (C)",
+          "visitante": "TIGRE",
+          "gl": 1,
+          "gv": 0
+        },
+        {
+          "local": "BANFIELD",
+          "visitante": "CENTRAL",
+          "gl": 1,
+          "gv": 1
+        },
+        {
+          "local": "NEWELLS",
+          "visitante": "COLON",
+          "gl": 1,
+          "gv": 0
+        },
+        {
+          "local": "DEF Y JUSTICIA",
+          "visitante": "LANUS",
+          "gl": 1,
+          "gv": 2
+        },
+        {
+          "local": "ESTUDIANTES (RC)",
+          "visitante": "BELGRANO (C)",
+          "gl": 0,
+          "gv": 0
+        },
+        {
+          "local": "HURACAN",
+          "visitante": "RIESTRA",
+          "gl": 0,
+          "gv": 1
+        },
+        {
+          "local": "FERRO",
+          "visitante": "IND.RIVADAVIA (M)",
+          "gl": 0,
+          "gv": 0
+        },
+        {
+          "local": "BOCA JRS",
+          "visitante": "SAN MARTIN (SJ)",
+          "gl": 4,
+          "gv": 1
+        },
+        {
+          "local": "INDEPENDIENTE",
+          "visitante": "C.CORDOBA(SDE)",
+          "gl": 5,
+          "gv": 0
+        },
+        {
+          "local": "ATL. RAFAELA",
+          "visitante": "ESTUDIANTES (LP)",
+          "gl": 2,
+          "gv": 1
+        },
+        {
+          "local": "PLATENSE",
+          "visitante": "QUILMES",
+          "gl": 1,
+          "gv": 0
+        }
+      ],
+      "5": [
+        {
+          "local": "INSTITUTO (C)",
+          "visitante": "BANFIELD",
+          "gl": 2,
+          "gv": 0
+        },
+        {
+          "local": "CENTRAL",
+          "visitante": "TALLERES (C)",
+          "gl": 0,
+          "gv": 2
+        },
+        {
+          "local": "TIGRE",
+          "visitante": "BARRACAS CTRAL",
+          "gl": 1,
+          "gv": 1
+        },
+        {
+          "local": "SAN LORENZO",
+          "visitante": "GIMNASIA (M)",
+          "gl": 2,
+          "gv": 1
+        },
+        {
+          "local": "VELEZ",
+          "visitante": "GODOY CRUZ (M)",
+          "gl": 3,
+          "gv": 1
+        },
+        {
+          "local": "RIVER PLATE",
+          "visitante": "ATL. TUCUMAN",
+          "gl": 1,
+          "gv": 0
+        },
+        {
+          "local": "RACING CLUB",
+          "visitante": "UNION (SF)",
+          "gl": 1,
+          "gv": 1
+        },
+        {
+          "local": "SARMIENTO (J)",
+          "visitante": "GIMNASIA (LP)",
+          "gl": 2,
+          "gv": 0
+        },
+        {
+          "local": "ARGENTINOS JRS",
+          "visitante": "ALDOSIVI (MDP)",
+          "gl": 2,
+          "gv": 0
+        },
+        {
+          "local": "COLON",
+          "visitante": "PLATENSE",
+          "gl": 1,
+          "gv": 0
+        },
+        {
+          "local": "QUILMES",
+          "visitante": "ATL. RAFAELA",
+          "gl": 2,
+          "gv": 1
+        },
+        {
+          "local": "ESTUDIANTES (LP)",
+          "visitante": "INDEPENDIENTE",
+          "gl": 1,
+          "gv": 0
+        },
+        {
+          "local": "C.CORDOBA(SDE)",
+          "visitante": "BOCA JRS",
+          "gl": 0,
+          "gv": 4
+        },
+        {
+          "local": "SAN MARTIN (SJ)",
+          "visitante": "FERRO",
+          "gl": 2,
+          "gv": 1
+        },
+        {
+          "local": "IND.RIVADAVIA (M)",
+          "visitante": "HURACAN",
+          "gl": 4,
+          "gv": 1
+        },
+        {
+          "local": "RIESTRA",
+          "visitante": "ESTUDIANTES (RC)",
+          "gl": 3,
+          "gv": 0
+        },
+        {
+          "local": "BELGRANO (C)",
+          "visitante": "DEF Y JUSTICIA",
+          "gl": 2,
+          "gv": 4
+        },
+        {
+          "local": "LANUS",
+          "visitante": "NEWELLS",
+          "gl": 2,
+          "gv": 0
+        }
+      ],
+      "6": [
+        {
+          "local": "ARGENTINOS JRS",
+          "visitante": "INSTITUTO (C)",
+          "gl": 2,
+          "gv": 3
+        },
+        {
+          "local": "ALDOSIVI (MDP)",
+          "visitante": "SARMIENTO (J)",
+          "gl": 3,
+          "gv": 0
+        },
+        {
+          "local": "GIMNASIA (LP)",
+          "visitante": "RACING CLUB",
+          "gl": 2,
+          "gv": 3
+        },
+        {
+          "local": "GIMNASIA (M)",
+          "visitante": "TIGRE",
+          "gl": 2,
+          "gv": 1
+        },
+        {
+          "local": "BARRACAS CTRAL",
+          "visitante": "CENTRAL",
+          "gl": 0,
+          "gv": 3
+        },
+        {
+          "local": "GODOY CRUZ (M)",
+          "visitante": "SAN LORENZO",
+          "gl": 0,
+          "gv": 0
+        },
+        {
+          "local": "UNION (SF)",
+          "visitante": "RIVER PLATE",
+          "gl": 2,
+          "gv": 2
+        },
+        {
+          "local": "ATL. TUCUMAN",
+          "visitante": "VELEZ",
+          "gl": 0,
+          "gv": 2
+        },
+        {
+          "local": "TALLERES (C)",
+          "visitante": "BANFIELD",
+          "gl": 0,
+          "gv": 0
+        },
+        {
+          "local": "NEWELLS",
+          "visitante": "BELGRANO (C)",
+          "gl": 2,
+          "gv": 0
+        },
+        {
+          "local": "LANUS",
+          "visitante": "COLON",
+          "gl": 1,
+          "gv": 0
+        },
+        {
+          "local": "ATL. RAFAELA",
+          "visitante": "PLATENSE",
+          "gl": 0,
+          "gv": 1
+        },
+        {
+          "local": "ESTUDIANTES (RC)",
+          "visitante": "IND.RIVADAVIA (M)",
+          "gl": 1,
+          "gv": 1
+        },
+        {
+          "local": "HURACAN",
+          "visitante": "SAN MARTIN (SJ)",
+          "gl": 6,
+          "gv": 1
+        },
+        {
+          "local": "FERRO",
+          "visitante": "C.CORDOBA(SDE)",
+          "gl": 3,
+          "gv": 1
+        },
+        {
+          "local": "INDEPENDIENTE",
+          "visitante": "QUILMES",
+          "gl": 1,
+          "gv": 1
+        },
+        {
+          "local": "DEF Y JUSTICIA",
+          "visitante": "RIESTRA",
+          "gl": 1,
+          "gv": 1
+        },
+        {
+          "local": "BOCA JRS",
+          "visitante": "ESTUDIANTES (LP)",
+          "gl": 2,
+          "gv": 1
+        }
+      ],
+      "7": [
+        {
+          "local": "INSTITUTO (C)",
+          "visitante": "TALLERES (C)",
+          "gl": 0,
+          "gv": 0
+        },
+        {
+          "local": "BANFIELD",
+          "visitante": "BARRACAS CTRAL",
+          "gl": 0,
+          "gv": 1
+        },
+        {
+          "local": "CENTRAL",
+          "visitante": "GIMNASIA (M)",
+          "gl": 1,
+          "gv": 0
+        },
+        {
+          "local": "TIGRE",
+          "visitante": "GODOY CRUZ (M)",
+          "gl": 2,
+          "gv": 0
+        },
+        {
+          "local": "SAN LORENZO",
+          "visitante": "ATL. TUCUMAN",
+          "gl": 0,
+          "gv": 2
+        },
+        {
+          "local": "VELEZ",
+          "visitante": "UNION (SF)",
+          "gl": 4,
+          "gv": 0
+        },
+        {
+          "local": "RIVER PLATE",
+          "visitante": "GIMNASIA (LP)",
+          "gl": 0,
+          "gv": 3
+        },
+        {
+          "local": "RACING CLUB",
+          "visitante": "ALDOSIVI (MDP)",
+          "gl": 1,
+          "gv": 0
+        },
+        {
+          "local": "SARMIENTO (J)",
+          "visitante": "ARGENTINOS JRS",
+          "gl": 0,
+          "gv": 1
+        },
+        {
+          "local": "COLON",
+          "visitante": "ATL. RAFAELA",
+          "gl": 3,
+          "gv": 1
+        },
+        {
+          "local": "PLATENSE",
+          "visitante": "INDEPENDIENTE",
+          "gl": 2,
+          "gv": 2
+        },
+        {
+          "local": "QUILMES",
+          "visitante": "BOCA JRS",
+          "gl": 1,
+          "gv": 0
+        },
+        {
+          "local": "ESTUDIANTES (LP)",
+          "visitante": "FERRO",
+          "gl": 0,
+          "gv": 1
+        },
+        {
+          "local": "C.CORDOBA(SDE)",
+          "visitante": "HURACAN",
+          "gl": 1,
+          "gv": 1
+        },
+        {
+          "local": "SAN MARTIN (SJ)",
+          "visitante": "ESTUDIANTES (RC)",
+          "gl": 1,
+          "gv": 2
+        },
+        {
+          "local": "IND.RIVADAVIA (M)",
+          "visitante": "DEF Y JUSTICIA",
+          "gl": 2,
+          "gv": 3
+        },
+        {
+          "local": "RIESTRA",
+          "visitante": "NEWELLS",
+          "gl": 0,
+          "gv": 1
+        },
+        {
+          "local": "BELGRANO (C)",
+          "visitante": "LANUS",
+          "gl": 3,
+          "gv": 1
+        }
+      ],
+      "8": [
+        {
+          "local": "SARMIENTO (J)",
+          "visitante": "INSTITUTO (C)",
+          "gl": 1,
+          "gv": 1
+        },
+        {
+          "local": "ARGENTINOS JRS",
+          "visitante": "RACING CLUB",
+          "gl": 1,
+          "gv": 0
+        },
+        {
+          "local": "ALDOSIVI (MDP)",
+          "visitante": "RIVER PLATE",
+          "gl": 0,
+          "gv": 2
+        },
+        {
+          "local": "GIMNASIA (LP)",
+          "visitante": "VELEZ",
+          "gl": 0,
+          "gv": 1
+        },
+        {
+          "local": "UNION (SF)",
+          "visitante": "SAN LORENZO",
+          "gl": 3,
+          "gv": 1
+        },
+        {
+          "local": "ATL. TUCUMAN",
+          "visitante": "TIGRE",
+          "gl": 2,
+          "gv": 2
+        },
+        {
+          "local": "GODOY CRUZ (M)",
+          "visitante": "CENTRAL",
+          "gl": 2,
+          "gv": 3
+        },
+        {
+          "local": "GIMNASIA (M)",
+          "visitante": "BANFIELD",
+          "gl": 0,
+          "gv": 2
+        },
+        {
+          "local": "BARRACAS CTRAL",
+          "visitante": "TALLERES (C)",
+          "gl": 0,
+          "gv": 1
+        },
+        {
+          "local": "BELGRANO (C)",
+          "visitante": "COLON",
+          "gl": 2,
+          "gv": 1
+        },
+        {
+          "local": "LANUS",
+          "visitante": "RIESTRA",
+          "gl": 3,
+          "gv": 2
+        },
+        {
+          "local": "NEWELLS",
+          "visitante": "IND.RIVADAVIA (M)",
+          "gl": 2,
+          "gv": 0
+        },
+        {
+          "local": "DEF Y JUSTICIA",
+          "visitante": "SAN MARTIN (SJ)",
+          "gl": 8,
+          "gv": 0
+        },
+        {
+          "local": "ESTUDIANTES (RC)",
+          "visitante": "C.CORDOBA(SDE)",
+          "gl": 1,
+          "gv": 3
+        },
+        {
+          "local": "HURACAN",
+          "visitante": "ESTUDIANTES (LP)",
+          "gl": 1,
+          "gv": 0
+        },
+        {
+          "local": "FERRO",
+          "visitante": "QUILMES",
+          "gl": 0,
+          "gv": 2
+        },
+        {
+          "local": "BOCA JRS",
+          "visitante": "PLATENSE",
+          "gl": 2,
+          "gv": 0
+        },
+        {
+          "local": "INDEPENDIENTE",
+          "visitante": "ATL. RAFAELA",
+          "gl": 3,
+          "gv": 2
+        }
+      ],
+      "9": [
+        {
+          "local": "INSTITUTO (C)",
+          "visitante": "BARRACAS CTRAL",
+          "gl": 2,
+          "gv": 2
+        },
+        {
+          "local": "TALLERES (C)",
+          "visitante": "GIMNASIA (M)",
+          "gl": 0,
+          "gv": 0
+        },
+        {
+          "local": "BANFIELD",
+          "visitante": "GODOY CRUZ (M)",
+          "gl": 2,
+          "gv": 1
+        },
+        {
+          "local": "CENTRAL",
+          "visitante": "ATL. TUCUMAN",
+          "gl": 2,
+          "gv": 1
+        },
+        {
+          "local": "TIGRE",
+          "visitante": "UNION (SF)",
+          "gl": 0,
+          "gv": 0
+        },
+        {
+          "local": "SAN LORENZO",
+          "visitante": "GIMNASIA (LP)",
+          "gl": 0,
+          "gv": 2
+        },
+        {
+          "local": "VELEZ",
+          "visitante": "ALDOSIVI (MDP)",
+          "gl": 4,
+          "gv": 0
+        },
+        {
+          "local": "RIVER PLATE",
+          "visitante": "ARGENTINOS JRS",
+          "gl": 0,
+          "gv": 0
+        },
+        {
+          "local": "RACING CLUB",
+          "visitante": "SARMIENTO (J)",
+          "gl": 1,
+          "gv": 1
+        },
+        {
+          "local": "COLON",
+          "visitante": "INDEPENDIENTE",
+          "gl": 0,
+          "gv": 2
+        },
+        {
+          "local": "ATL. RAFAELA",
+          "visitante": "BOCA JRS",
+          "gl": 1,
+          "gv": 1
+        },
+        {
+          "local": "PLATENSE",
+          "visitante": "FERRO",
+          "gl": 1,
+          "gv": 1
+        },
+        {
+          "local": "QUILMES",
+          "visitante": "HURACAN",
+          "gl": 0,
+          "gv": 0
+        },
+        {
+          "local": "ESTUDIANTES (LP)",
+          "visitante": "ESTUDIANTES (RC)",
+          "gl": 0,
+          "gv": 0
+        },
+        {
+          "local": "C.CORDOBA(SDE)",
+          "visitante": "DEF Y JUSTICIA",
+          "gl": 1,
+          "gv": 1
+        },
+        {
+          "local": "SAN MARTIN (SJ)",
+          "visitante": "NEWELLS",
+          "gl": 2,
+          "gv": 1
+        },
+        {
+          "local": "IND.RIVADAVIA (M)",
+          "visitante": "LANUS",
+          "gl": 1,
+          "gv": 1
+        },
+        {
+          "local": "RIESTRA",
+          "visitante": "BELGRANO (C)",
+          "gl": 3,
+          "gv": 0
+        }
+      ],
+      "10": [
+        {
+          "local": "BOCA JRS",
+          "visitante": "RIVER PLATE",
+          "gl": 2,
+          "gv": 0
+        },
+        {
+          "local": "ATL. TUCUMAN",
+          "visitante": "C.CORDOBA(SDE)",
+          "gl": 1,
+          "gv": 1
+        },
+        {
+          "local": "TIGRE",
+          "visitante": "DEF Y JUSTICIA",
+          "gl": 0,
+          "gv": 1
+        },
+        {
+          "local": "BARRACAS CTRAL",
+          "visitante": "RIESTRA",
+          "gl": 1,
+          "gv": 0
+        },
+        {
+          "local": "ESTUDIANTES (LP)",
+          "visitante": "GIMNASIA (LP)",
+          "gl": 1,
+          "gv": 0
+        },
+        {
+          "local": "GIMNASIA (M)",
+          "visitante": "IND.RIVADAVIA (M)",
+          "gl": 0,
+          "gv": 1
+        },
+        {
+          "local": "INDEPENDIENTE",
+          "visitante": "RACING CLUB",
+          "gl": 1,
+          "gv": 2
+        },
+        {
+          "local": "ESTUDIANTES (RC)",
+          "visitante": "INSTITUTO (C)",
+          "gl": 1,
+          "gv": 1
+        },
+        {
+          "local": "BANFIELD",
+          "visitante": "LANUS",
+          "gl": 1,
+          "gv": 0
+        },
+        {
+          "local": "CENTRAL",
+          "visitante": "NEWELLS",
+          "gl": 3,
+          "gv": 3
+        },
+        {
+          "local": "PLATENSE",
+          "visitante": "ARGENTINOS JRS",
+          "gl": 2,
+          "gv": 0
+        },
+        {
+          "local": "HURACAN",
+          "visitante": "SAN LORENZO",
+          "gl": 0,
+          "gv": 1
+        },
+        {
+          "local": "TALLERES (C)",
+          "visitante": "BELGRANO (C)",
+          "gl": 2,
+          "gv": 4
+        },
+        {
+          "local": "UNION (SF)",
+          "visitante": "COLON",
+          "gl": 3,
+          "gv": 1
+        },
+        {
+          "local": "FERRO",
+          "visitante": "VELEZ",
+          "gl": 1,
+          "gv": 2
+        },
+        {
+          "local": "GODOY CRUZ (M)",
+          "visitante": "SAN MARTIN (SJ)",
+          "gl": 1,
+          "gv": 0
+        },
+        {
+          "local": "ATL. RAFAELA",
+          "visitante": "SARMIENTO (J)",
+          "gl": 0,
+          "gv": 1
+        },
+        {
+          "local": "QUILMES",
+          "visitante": "ALDOSIVI (MDP)",
+          "gl": 2,
+          "gv": 0
+        }
+      ],
+      "11": [
+        {
+          "local": "RACING CLUB",
+          "visitante": "INSTITUTO (C)",
+          "gl": 0,
+          "gv": 0
+        },
+        {
+          "local": "SARMIENTO (J)",
+          "visitante": "RIVER PLATE",
+          "gl": 2,
+          "gv": 3
+        },
+        {
+          "local": "ARGENTINOS JRS",
+          "visitante": "VELEZ",
+          "gl": 1,
+          "gv": 2
+        },
+        {
+          "local": "ALDOSIVI (MDP)",
+          "visitante": "SAN LORENZO",
+          "gl": 1,
+          "gv": 3
+        },
+        {
+          "local": "GIMNASIA (LP)",
+          "visitante": "TIGRE",
+          "gl": 1,
+          "gv": 2
+        },
+        {
+          "local": "UNION (SF)",
+          "visitante": "CENTRAL",
+          "gl": 1,
+          "gv": 1
+        },
+        {
+          "local": "ATL. TUCUMAN",
+          "visitante": "BANFIELD",
+          "gl": 1,
+          "gv": 2
+        },
+        {
+          "local": "GODOY CRUZ (M)",
+          "visitante": "TALLERES (C)",
+          "gl": 2,
+          "gv": 1
+        },
+        {
+          "local": "GIMNASIA (M)",
+          "visitante": "BARRACAS CTRAL",
+          "gl": 2,
+          "gv": 0
+        },
+        {
+          "local": "RIESTRA",
+          "visitante": "COLON",
+          "gl": 1,
+          "gv": 1
+        },
+        {
+          "local": "BELGRANO (C)",
+          "visitante": "IND.RIVADAVIA (M)",
+          "gl": 4,
+          "gv": 1
+        },
+        {
+          "local": "LANUS",
+          "visitante": "SAN MARTIN (SJ)",
+          "gl": 6,
+          "gv": 1
+        },
+        {
+          "local": "NEWELLS",
+          "visitante": "C.CORDOBA(SDE)",
+          "gl": 1,
+          "gv": 0
+        },
+        {
+          "local": "DEF Y JUSTICIA",
+          "visitante": "ESTUDIANTES (LP)",
+          "gl": 2,
+          "gv": 2
+        },
+        {
+          "local": "ESTUDIANTES (RC)",
+          "visitante": "QUILMES",
+          "gl": 0,
+          "gv": 1
+        },
+        {
+          "local": "HURACAN",
+          "visitante": "PLATENSE",
+          "gl": 0,
+          "gv": 0
+        },
+        {
+          "local": "FERRO",
+          "visitante": "ATL. RAFAELA",
+          "gl": 2,
+          "gv": 1
+        },
+        {
+          "local": "BOCA JRS",
+          "visitante": "INDEPENDIENTE",
+          "gl": 0,
+          "gv": 1
+        }
+      ],
+      "12": [
+        {
+          "local": "INSTITUTO (C)",
+          "visitante": "GIMNASIA (M)",
+          "gl": 0,
+          "gv": 0
+        },
+        {
+          "local": "BARRACAS CTRAL",
+          "visitante": "GODOY CRUZ (M)",
+          "gl": 1,
+          "gv": 0
+        },
+        {
+          "local": "TALLERES (C)",
+          "visitante": "ATL. TUCUMAN",
+          "gl": 5,
+          "gv": 0
+        },
+        {
+          "local": "BANFIELD",
+          "visitante": "UNION (SF)",
+          "gl": 1,
+          "gv": 1
+        },
+        {
+          "local": "CENTRAL",
+          "visitante": "GIMNASIA (LP)",
+          "gl": 0,
+          "gv": 0
+        },
+        {
+          "local": "TIGRE",
+          "visitante": "ALDOSIVI (MDP)",
+          "gl": 2,
+          "gv": 1
+        },
+        {
+          "local": "SAN LORENZO",
+          "visitante": "ARGENTINOS JRS",
+          "gl": 2,
+          "gv": 2
+        },
+        {
+          "local": "VELEZ",
+          "visitante": "SARMIENTO (J)",
+          "gl": 4,
+          "gv": 0
+        },
+        {
+          "local": "RIVER PLATE",
+          "visitante": "RACING CLUB",
+          "gl": 2,
+          "gv": 2
+        },
+        {
+          "local": "COLON",
+          "visitante": "BOCA JRS",
+          "gl": 0,
+          "gv": 3
+        },
+        {
+          "local": "INDEPENDIENTE",
+          "visitante": "FERRO",
+          "gl": 1,
+          "gv": 0
+        },
+        {
+          "local": "ATL. RAFAELA",
+          "visitante": "HURACAN",
+          "gl": 1,
+          "gv": 2
+        },
+        {
+          "local": "PLATENSE",
+          "visitante": "ESTUDIANTES (RC)",
+          "gl": 2,
+          "gv": 0
+        },
+        {
+          "local": "QUILMES",
+          "visitante": "DEF Y JUSTICIA",
+          "gl": 2,
+          "gv": 1
+        },
+        {
+          "local": "ESTUDIANTES (LP)",
+          "visitante": "NEWELLS",
+          "gl": 0,
+          "gv": 2
+        },
+        {
+          "local": "C.CORDOBA(SDE)",
+          "visitante": "LANUS",
+          "gl": 1,
+          "gv": 5
+        },
+        {
+          "local": "SAN MARTIN (SJ)",
+          "visitante": "BELGRANO (C)",
+          "gl": 1,
+          "gv": 2
+        },
+        {
+          "local": "IND.RIVADAVIA (M)",
+          "visitante": "RIESTRA",
+          "gl": 2,
+          "gv": 3
+        }
+      ],
+      "13": [
+        {
+          "local": "RIVER PLATE",
+          "visitante": "INSTITUTO (C)",
+          "gl": 1,
+          "gv": 0
+        },
+        {
+          "local": "RACING CLUB",
+          "visitante": "VELEZ",
+          "gl": 1,
+          "gv": 1
+        },
+        {
+          "local": "SARMIENTO (J)",
+          "visitante": "SAN LORENZO",
+          "gl": 1,
+          "gv": 2
+        },
+        {
+          "local": "ARGENTINOS JRS",
+          "visitante": "TIGRE",
+          "gl": 2,
+          "gv": 0
+        },
+        {
+          "local": "ALDOSIVI (MDP)",
+          "visitante": "CENTRAL",
+          "gl": 1,
+          "gv": 0
+        },
+        {
+          "local": "GIMNASIA (LP)",
+          "visitante": "BANFIELD",
+          "gl": 2,
+          "gv": 0
+        },
+        {
+          "local": "UNION (SF)",
+          "visitante": "TALLERES (C)",
+          "gl": 2,
+          "gv": 1
+        },
+        {
+          "local": "ATL. TUCUMAN",
+          "visitante": "BARRACAS CTRAL",
+          "gl": 3,
+          "gv": 2
+        },
+        {
+          "local": "GODOY CRUZ (M)",
+          "visitante": "GIMNASIA (M)",
+          "gl": 2,
+          "gv": 3
+        },
+        {
+          "local": "IND.RIVADAVIA (M)",
+          "visitante": "COLON",
+          "gl": 1,
+          "gv": 2
+        },
+        {
+          "local": "RIESTRA",
+          "visitante": "SAN MARTIN (SJ)",
+          "gl": 2,
+          "gv": 2
+        },
+        {
+          "local": "BELGRANO (C)",
+          "visitante": "C.CORDOBA(SDE)",
+          "gl": 1,
+          "gv": 0
+        },
+        {
+          "local": "LANUS",
+          "visitante": "ESTUDIANTES (LP)",
+          "gl": 1,
+          "gv": 4
+        },
+        {
+          "local": "NEWELLS",
+          "visitante": "QUILMES",
+          "gl": 2,
+          "gv": 0
+        },
+        {
+          "local": "DEF Y JUSTICIA",
+          "visitante": "PLATENSE",
+          "gl": 4,
+          "gv": 0
+        },
+        {
+          "local": "ESTUDIANTES (RC)",
+          "visitante": "ATL. RAFAELA",
+          "gl": 0,
+          "gv": 2
+        },
+        {
+          "local": "HURACAN",
+          "visitante": "INDEPENDIENTE",
+          "gl": 1,
+          "gv": 0
+        },
+        {
+          "local": "FERRO",
+          "visitante": "BOCA JRS",
+          "gl": 0,
+          "gv": 0
+        }
+      ],
+      "14": [
+        {
+          "local": "INSTITUTO (C)",
+          "visitante": "GODOY CRUZ (M)",
+          "gl": 2,
+          "gv": 1
+        },
+        {
+          "local": "GIMNASIA (M)",
+          "visitante": "ATL. TUCUMAN",
+          "gl": 1,
+          "gv": 2
+        },
+        {
+          "local": "BARRACAS CTRAL",
+          "visitante": "UNION (SF)",
+          "gl": 1,
+          "gv": 1
+        },
+        {
+          "local": "TALLERES (C)",
+          "visitante": "GIMNASIA (LP)",
+          "gl": 1,
+          "gv": 2
+        },
+        {
+          "local": "BANFIELD",
+          "visitante": "ALDOSIVI (MDP)",
+          "gl": 0,
+          "gv": 0
+        },
+        {
+          "local": "CENTRAL",
+          "visitante": "ARGENTINOS JRS",
+          "gl": 1,
+          "gv": 2
+        },
+        {
+          "local": "TIGRE",
+          "visitante": "SARMIENTO (J)",
+          "gl": 1,
+          "gv": 3
+        },
+        {
+          "local": "SAN LORENZO",
+          "visitante": "RACING CLUB",
+          "gl": 1,
+          "gv": 2
+        },
+        {
+          "local": "VELEZ",
+          "visitante": "RIVER PLATE",
+          "gl": 1,
+          "gv": 0
+        },
+        {
+          "local": "COLON",
+          "visitante": "FERRO",
+          "gl": 0,
+          "gv": 1
+        },
+        {
+          "local": "BOCA JRS",
+          "visitante": "HURACAN",
+          "gl": 1,
+          "gv": 0
+        },
+        {
+          "local": "INDEPENDIENTE",
+          "visitante": "ESTUDIANTES (RC)",
+          "gl": 5,
+          "gv": 0
+        },
+        {
+          "local": "ATL. RAFAELA",
+          "visitante": "DEF Y JUSTICIA",
+          "gl": 2,
+          "gv": 4
+        },
+        {
+          "local": "PLATENSE",
+          "visitante": "NEWELLS",
+          "gl": 1,
+          "gv": 1
+        },
+        {
+          "local": "QUILMES",
+          "visitante": "LANUS",
+          "gl": 0,
+          "gv": 2
+        },
+        {
+          "local": "ESTUDIANTES (LP)",
+          "visitante": "BELGRANO (C)",
+          "gl": 3,
+          "gv": 1
+        },
+        {
+          "local": "C.CORDOBA(SDE)",
+          "visitante": "RIESTRA",
+          "gl": 1,
+          "gv": 0
+        },
+        {
+          "local": "SAN MARTIN (SJ)",
+          "visitante": "IND.RIVADAVIA (M)",
+          "gl": 0,
+          "gv": 2
+        }
+      ],
+      "15": [
+        {
+          "local": "VELEZ",
+          "visitante": "INSTITUTO (C)",
+          "gl": 2,
+          "gv": 3
+        },
+        {
+          "local": "RIVER PLATE",
+          "visitante": "SAN LORENZO",
+          "gl": 1,
+          "gv": 1
+        },
+        {
+          "local": "RACING CLUB",
+          "visitante": "TIGRE",
+          "gl": 2,
+          "gv": 1
+        },
+        {
+          "local": "SARMIENTO (J)",
+          "visitante": "CENTRAL",
+          "gl": 0,
+          "gv": 2
+        },
+        {
+          "local": "ARGENTINOS JRS",
+          "visitante": "BANFIELD",
+          "gl": 2,
+          "gv": 0
+        },
+        {
+          "local": "ALDOSIVI (MDP)",
+          "visitante": "TALLERES (C)",
+          "gl": 0,
+          "gv": 2
+        },
+        {
+          "local": "GIMNASIA (LP)",
+          "visitante": "BARRACAS CTRAL",
+          "gl": 0,
+          "gv": 0
+        },
+        {
+          "local": "UNION (SF)",
+          "visitante": "GIMNASIA (M)",
+          "gl": 0,
+          "gv": 2
+        },
+        {
+          "local": "ATL. TUCUMAN",
+          "visitante": "GODOY CRUZ (M)",
+          "gl": 3,
+          "gv": 1
+        },
+        {
+          "local": "SAN MARTIN (SJ)",
+          "visitante": "COLON",
+          "gl": 1,
+          "gv": 1
+        },
+        {
+          "local": "IND.RIVADAVIA (M)",
+          "visitante": "C.CORDOBA(SDE)",
+          "gl": 2,
+          "gv": 1
+        },
+        {
+          "local": "RIESTRA",
+          "visitante": "ESTUDIANTES (LP)",
+          "gl": 1,
+          "gv": 2
+        },
+        {
+          "local": "BELGRANO (C)",
+          "visitante": "QUILMES",
+          "gl": 1,
+          "gv": 0
+        },
+        {
+          "local": "LANUS",
+          "visitante": "PLATENSE",
+          "gl": 0,
+          "gv": 2
+        },
+        {
+          "local": "NEWELLS",
+          "visitante": "ATL. RAFAELA",
+          "gl": 3,
+          "gv": 0
+        },
+        {
+          "local": "DEF Y JUSTICIA",
+          "visitante": "INDEPENDIENTE",
+          "gl": 1,
+          "gv": 1
+        },
+        {
+          "local": "ESTUDIANTES (RC)",
+          "visitante": "BOCA JRS",
+          "gl": 0,
+          "gv": 2
+        },
+        {
+          "local": "HURACAN",
+          "visitante": "FERRO",
+          "gl": 2,
+          "gv": 0
+        }
+      ],
+      "16": [
+        {
+          "local": "INSTITUTO (C)",
+          "visitante": "ATL. TUCUMAN",
+          "gl": 0,
+          "gv": 3
+        },
+        {
+          "local": "GODOY CRUZ (M)",
+          "visitante": "UNION (SF)",
+          "gl": 0,
+          "gv": 1
+        },
+        {
+          "local": "GIMNASIA (M)",
+          "visitante": "GIMNASIA (LP)",
+          "gl": 0,
+          "gv": 0
+        },
+        {
+          "local": "BARRACAS CTRAL",
+          "visitante": "ALDOSIVI (MDP)",
+          "gl": 0,
+          "gv": 2
+        },
+        {
+          "local": "TALLERES (C)",
+          "visitante": "ARGENTINOS JRS",
+          "gl": 2,
+          "gv": 2
+        },
+        {
+          "local": "BANFIELD",
+          "visitante": "SARMIENTO (J)",
+          "gl": 2,
+          "gv": 1
+        },
+        {
+          "local": "CENTRAL",
+          "visitante": "RACING CLUB",
+          "gl": 3,
+          "gv": 0
+        },
+        {
+          "local": "TIGRE",
+          "visitante": "RIVER PLATE",
+          "gl": 0,
+          "gv": 2
+        },
+        {
+          "local": "SAN LORENZO",
+          "visitante": "VELEZ",
+          "gl": 0,
+          "gv": 1
+        },
+        {
+          "local": "COLON",
+          "visitante": "HURACAN",
+          "gl": 3,
+          "gv": 1
+        },
+        {
+          "local": "FERRO",
+          "visitante": "ESTUDIANTES (RC)",
+          "gl": 4,
+          "gv": 1
+        },
+        {
+          "local": "BOCA JRS",
+          "visitante": "DEF Y JUSTICIA",
+          "gl": 5,
+          "gv": 0
+        },
+        {
+          "local": "INDEPENDIENTE",
+          "visitante": "NEWELLS",
+          "gl": 1,
+          "gv": 0
+        },
+        {
+          "local": "ATL. RAFAELA",
+          "visitante": "LANUS",
+          "gl": 1,
+          "gv": 7
+        },
+        {
+          "local": "PLATENSE",
+          "visitante": "BELGRANO (C)",
+          "gl": 0,
+          "gv": 2
+        },
+        {
+          "local": "QUILMES",
+          "visitante": "RIESTRA",
+          "gl": 1,
+          "gv": 0
+        },
+        {
+          "local": "ESTUDIANTES (LP)",
+          "visitante": "IND.RIVADAVIA (M)",
+          "gl": 0,
+          "gv": 1
+        },
+        {
+          "local": "C.CORDOBA(SDE)",
+          "visitante": "SAN MARTIN (SJ)",
+          "gl": 3,
+          "gv": 1
+        }
+      ],
+      "17": [
+        {
+          "local": "SAN LORENZO",
+          "visitante": "INSTITUTO (C)",
+          "gl": 2,
+          "gv": 2
+        },
+        {
+          "local": "VELEZ",
+          "visitante": "TIGRE",
+          "gl": 2,
+          "gv": 0
+        },
+        {
+          "local": "RIVER PLATE",
+          "visitante": "CENTRAL",
+          "gl": 2,
+          "gv": 1
+        },
+        {
+          "local": "RACING CLUB",
+          "visitante": "BANFIELD",
+          "gl": 1,
+          "gv": 2
+        },
+        {
+          "local": "SARMIENTO (J)",
+          "visitante": "TALLERES (C)",
+          "gl": 1,
+          "gv": 2
+        },
+        {
+          "local": "ARGENTINOS JRS",
+          "visitante": "BARRACAS CTRAL",
+          "gl": 3,
+          "gv": 1
+        },
+        {
+          "local": "ALDOSIVI (MDP)",
+          "visitante": "GIMNASIA (M)",
+          "gl": 1,
+          "gv": 0
+        },
+        {
+          "local": "GIMNASIA (LP)",
+          "visitante": "GODOY CRUZ (M)",
+          "gl": 0,
+          "gv": 2
+        },
+        {
+          "local": "UNION (SF)",
+          "visitante": "ATL. TUCUMAN",
+          "gl": 2,
+          "gv": 0
+        },
+        {
+          "local": "C.CORDOBA(SDE)",
+          "visitante": "COLON",
+          "gl": 2,
+          "gv": 0
+        },
+        {
+          "local": "SAN MARTIN (SJ)",
+          "visitante": "ESTUDIANTES (LP)",
+          "gl": 0,
+          "gv": 4
+        },
+        {
+          "local": "IND.RIVADAVIA (M)",
+          "visitante": "QUILMES",
+          "gl": 2,
+          "gv": 0
+        },
+        {
+          "local": "RIESTRA",
+          "visitante": "PLATENSE",
+          "gl": 1,
+          "gv": 0
+        },
+        {
+          "local": "BELGRANO (C)",
+          "visitante": "ATL. RAFAELA",
+          "gl": 1,
+          "gv": 1
+        },
+        {
+          "local": "LANUS",
+          "visitante": "INDEPENDIENTE",
+          "gl": 0,
+          "gv": 4
+        },
+        {
+          "local": "NEWELLS",
+          "visitante": "BOCA JRS",
+          "gl": 3,
+          "gv": 1
+        },
+        {
+          "local": "DEF Y JUSTICIA",
+          "visitante": "FERRO",
+          "gl": 2,
+          "gv": 1
+        },
+        {
+          "local": "ESTUDIANTES (RC)",
+          "visitante": "HURACAN",
+          "gl": 1,
+          "gv": 0
+        }
+      ],
+      "18": [
+        {
+          "local": "INSTITUTO (C)",
+          "visitante": "UNION (SF)",
+          "gl": 0,
+          "gv": 2
+        },
+        {
+          "local": "ATL. TUCUMAN",
+          "visitante": "GIMNASIA (LP)",
+          "gl": 2,
+          "gv": 1
+        },
+        {
+          "local": "GODOY CRUZ (M)",
+          "visitante": "ALDOSIVI (MDP)",
+          "gl": 2,
+          "gv": 2
+        },
+        {
+          "local": "GIMNASIA (M)",
+          "visitante": "ARGENTINOS JRS",
+          "gl": 2,
+          "gv": 1
+        },
+        {
+          "local": "BARRACAS CTRAL",
+          "visitante": "SARMIENTO (J)",
+          "gl": 0,
+          "gv": 0
+        },
+        {
+          "local": "TALLERES (C)",
+          "visitante": "RACING CLUB",
+          "gl": 2,
+          "gv": 3
+        },
+        {
+          "local": "BANFIELD",
+          "visitante": "RIVER PLATE",
+          "gl": 0,
+          "gv": 1
+        },
+        {
+          "local": "CENTRAL",
+          "visitante": "VELEZ",
+          "gl": 0,
+          "gv": 4
+        },
+        {
+          "local": "TIGRE",
+          "visitante": "SAN LORENZO",
+          "gl": 2,
+          "gv": 2
+        },
+        {
+          "local": "COLON",
+          "visitante": "ESTUDIANTES (RC)",
+          "gl": 1,
+          "gv": 0
+        },
+        {
+          "local": "HURACAN",
+          "visitante": "DEF Y JUSTICIA",
+          "gl": 1,
+          "gv": 1
+        },
+        {
+          "local": "FERRO",
+          "visitante": "NEWELLS",
+          "gl": 2,
+          "gv": 2
+        },
+        {
+          "local": "BOCA JRS",
+          "visitante": "LANUS",
+          "gl": 0,
+          "gv": 1
+        },
+        {
+          "local": "INDEPENDIENTE",
+          "visitante": "BELGRANO (C)",
+          "gl": 3,
+          "gv": 2
+        },
+        {
+          "local": "ATL. RAFAELA",
+          "visitante": "RIESTRA",
+          "gl": 0,
+          "gv": 0
+        },
+        {
+          "local": "PLATENSE",
+          "visitante": "IND.RIVADAVIA (M)",
+          "gl": 2,
+          "gv": 1
+        },
+        {
+          "local": "QUILMES",
+          "visitante": "SAN MARTIN (SJ)",
+          "gl": 6,
+          "gv": 1
+        },
+        {
+          "local": "ESTUDIANTES (LP)",
+          "visitante": "C.CORDOBA(SDE)",
+          "gl": 3,
+          "gv": 2
+        }
+      ]
+    },
+    "RESERVA_S2": {
+      "1": [
+        {
+          "local": "CENTRAL",
+          "visitante": "SAN LORENZO",
+          "gl": 0,
+          "gv": 0
+        },
+        {
+          "local": "GODOY CRUZ (M)",
+          "visitante": "ARGENTINOS JRS",
+          "gl": 1,
+          "gv": 0
+        },
+        {
+          "local": "ATL. TUCUMAN",
+          "visitante": "ALDOSIVI (MDP)",
+          "gl": 2,
+          "gv": 1
+        },
+        {
+          "local": "UNION (SF)",
+          "visitante": "GIMNASIA (LP)",
+          "gl": 0,
+          "gv": 0
+        },
+        {
+          "local": "BANFIELD",
+          "visitante": "VELEZ",
+          "gl": 1,
+          "gv": 0
+        },
+        {
+          "local": "BARRACAS CTRAL",
+          "visitante": "RACING CLUB",
+          "gl": 1,
+          "gv": 1
+        },
+        {
+          "local": "GIMNASIA (M)",
+          "visitante": "SARMIENTO (J)",
+          "gl": 0,
+          "gv": 1
+        },
+        {
+          "local": "TIGRE",
+          "visitante": "INSTITUTO (C)",
+          "gl": 1,
+          "gv": 0
+        },
+        {
+          "local": "TALLERES (C)",
+          "visitante": "RIVER PLATE",
+          "gl": 0,
+          "gv": 0
+        },
+        {
+          "local": "ESTUDIANTES (LP)",
+          "visitante": "COLON",
+          "gl": 2,
+          "gv": 0
+        },
+        {
+          "local": "INDEPENDIENTE",
+          "visitante": "RIESTRA",
+          "gl": 2,
+          "gv": 1
+        },
+        {
+          "local": "FERRO",
+          "visitante": "LANUS",
+          "gl": 2,
+          "gv": 1
+        },
+        {
+          "local": "ESTUDIANTES (RC)",
+          "visitante": "DEF Y JUSTICIA",
+          "gl": 1,
+          "gv": 0
+        },
+        {
+          "local": "BOCA JRS",
+          "visitante": "BELGRANO (C)",
+          "gl": 4,
+          "gv": 0
+        },
+        {
+          "local": "HURACAN",
+          "visitante": "NEWELLS",
+          "gl": 1,
+          "gv": 1
+        },
+        {
+          "local": "PLATENSE",
+          "visitante": "SAN MARTIN (SJ)",
+          "gl": 0,
+          "gv": 0
+        },
+        {
+          "local": "ATL. RAFAELA",
+          "visitante": "IND.RIVADAVIA (M)",
+          "gl": 2,
+          "gv": 1
+        },
+        {
+          "local": "QUILMES",
+          "visitante": "C.CORDOBA(SDE)",
+          "gl": 1,
+          "gv": 0
+        }
+      ],
+      "2": [
+        {
+          "local": "SAN LORENZO",
+          "visitante": "BANFIELD",
+          "gl": 3,
+          "gv": 0
+        },
+        {
+          "local": "TIGRE",
+          "visitante": "CENTRAL",
+          "gl": 1,
+          "gv": 3
+        },
+        {
+          "local": "INSTITUTO (C)",
+          "visitante": "GIMNASIA (LP)",
+          "gl": 0,
+          "gv": 0
+        },
+        {
+          "local": "ALDOSIVI (MDP)",
+          "visitante": "UNION (SF)",
+          "gl": 0,
+          "gv": 0
+        },
+        {
+          "local": "ARGENTINOS JRS",
+          "visitante": "ATL. TUCUMAN",
+          "gl": 1,
+          "gv": 0
+        },
+        {
+          "local": "RIVER PLATE",
+          "visitante": "BARRACAS CTRAL",
+          "gl": 4,
+          "gv": 0
+        },
+        {
+          "local": "VELEZ",
+          "visitante": "TALLERES (C)",
+          "gl": 0,
+          "gv": 1
+        },
+        {
+          "local": "RACING CLUB",
+          "visitante": "GIMNASIA (M)",
+          "gl": 2,
+          "gv": 3
+        },
+        {
+          "local": "SARMIENTO (J)",
+          "visitante": "GODOY CRUZ (M)",
+          "gl": 2,
+          "gv": 1
+        },
+        {
+          "local": "BELGRANO (C)",
+          "visitante": "FERRO",
+          "gl": 1,
+          "gv": 1
+        },
+        {
+          "local": "ESTUDIANTES (LP)",
+          "visitante": "QUILMES",
+          "gl": 1,
+          "gv": 1
+        },
+        {
+          "local": "SAN MARTIN (SJ)",
+          "visitante": "ATL. RAFAELA",
+          "gl": 0,
+          "gv": 0
+        },
+        {
+          "local": "RIESTRA",
+          "visitante": "BOCA JRS",
+          "gl": 1,
+          "gv": 1
+        },
+        {
+          "local": "COLON",
+          "visitante": "DEF Y JUSTICIA",
+          "gl": 2,
+          "gv": 2
+        },
+        {
+          "local": "NEWELLS",
+          "visitante": "ESTUDIANTES (RC)",
+          "gl": 1,
+          "gv": 1
+        },
+        {
+          "local": "LANUS",
+          "visitante": "HURACAN",
+          "gl": 1,
+          "gv": 0
+        },
+        {
+          "local": "IND.RIVADAVIA (M)",
+          "visitante": "INDEPENDIENTE",
+          "gl": 1,
+          "gv": 2
+        },
+        {
+          "local": "C.CORDOBA(SDE)",
+          "visitante": "PLATENSE",
+          "gl": 0,
+          "gv": 0
+        }
+      ],
+      "3": [
+        {
+          "local": "CENTRAL",
+          "visitante": "INSTITUTO (C)",
+          "gl": 2,
+          "gv": 2
+        },
+        {
+          "local": "GIMNASIA (LP)",
+          "visitante": "ALDOSIVI (MDP)",
+          "gl": 2,
+          "gv": 0
+        },
+        {
+          "local": "BANFIELD",
+          "visitante": "TIGRE",
+          "gl": 1,
+          "gv": 1
+        },
+        {
+          "local": "BARRACAS CTRAL",
+          "visitante": "VELEZ",
+          "gl": 0,
+          "gv": 0
+        },
+        {
+          "local": "UNION (SF)",
+          "visitante": "ARGENTINOS JRS",
+          "gl": 1,
+          "gv": 1
+        },
+        {
+          "local": "GIMNASIA (M)",
+          "visitante": "RIVER PLATE",
+          "gl": 1,
+          "gv": 2
+        },
+        {
+          "local": "GODOY CRUZ (M)",
+          "visitante": "RACING CLUB",
+          "gl": 1,
+          "gv": 1
+        },
+        {
+          "local": "ATL. TUCUMAN",
+          "visitante": "SARMIENTO (J)",
+          "gl": 0,
+          "gv": 0
+        },
+        {
+          "local": "TALLERES (C)",
+          "visitante": "SAN LORENZO",
+          "gl": 1,
+          "gv": 1
+        },
+        {
+          "local": "QUILMES",
+          "visitante": "COLON",
+          "gl": 1,
+          "gv": 1
+        },
+        {
+          "local": "PLATENSE",
+          "visitante": "ESTUDIANTES (LP)",
+          "gl": 0,
+          "gv": 3
+        },
+        {
+          "local": "FERRO",
+          "visitante": "RIESTRA",
+          "gl": 0,
+          "gv": 2
+        },
+        {
+          "local": "INDEPENDIENTE",
+          "visitante": "SAN MARTIN (SJ)",
+          "gl": 9,
+          "gv": 0
+        },
+        {
+          "local": "BOCA JRS",
+          "visitante": "IND.RIVADAVIA (M)",
+          "gl": 1,
+          "gv": 0
+        },
+        {
+          "local": "ESTUDIANTES (RC)",
+          "visitante": "LANUS",
+          "gl": 0,
+          "gv": 0
+        },
+        {
+          "local": "DEF Y JUSTICIA",
+          "visitante": "NEWELLS",
+          "gl": 1,
+          "gv": 1
+        },
+        {
+          "local": "HURACAN",
+          "visitante": "BELGRANO (C)",
+          "gl": 0,
+          "gv": 1
+        },
+        {
+          "local": "ATL. RAFAELA",
+          "visitante": "C.CORDOBA(SDE)",
+          "gl": 1,
+          "gv": 1
+        }
+      ],
+      "4": [
+        {
+          "local": "INSTITUTO (C)",
+          "visitante": "ALDOSIVI (MDP)",
+          "gl": 1,
+          "gv": 1
+        },
+        {
+          "local": "ARGENTINOS JRS",
+          "visitante": "GIMNASIA (LP)",
+          "gl": 0,
+          "gv": 0
+        },
+        {
+          "local": "SARMIENTO (J)",
+          "visitante": "UNION (SF)",
+          "gl": 0,
+          "gv": 0
+        },
+        {
+          "local": "RACING CLUB",
+          "visitante": "ATL. TUCUMAN",
+          "gl": 0,
+          "gv": 0
+        },
+        {
+          "local": "RIVER PLATE",
+          "visitante": "GODOY CRUZ (M)",
+          "gl": 0,
+          "gv": 0
+        },
+        {
+          "local": "VELEZ",
+          "visitante": "GIMNASIA (M)",
+          "gl": 2,
+          "gv": 0
+        },
+        {
+          "local": "SAN LORENZO",
+          "visitante": "BARRACAS CTRAL",
+          "gl": 1,
+          "gv": 0
+        },
+        {
+          "local": "TIGRE",
+          "visitante": "TALLERES (C)",
+          "gl": 0,
+          "gv": 1
+        },
+        {
+          "local": "CENTRAL",
+          "visitante": "BANFIELD",
+          "gl": 1,
+          "gv": 0
+        },
+        {
+          "local": "COLON",
+          "visitante": "NEWELLS",
+          "gl": 0,
+          "gv": 1
+        },
+        {
+          "local": "LANUS",
+          "visitante": "DEF Y JUSTICIA",
+          "gl": 3,
+          "gv": 1
+        },
+        {
+          "local": "BELGRANO (C)",
+          "visitante": "ESTUDIANTES (RC)",
+          "gl": 1,
+          "gv": 0
+        },
+        {
+          "local": "RIESTRA",
+          "visitante": "HURACAN",
+          "gl": 1,
+          "gv": 0
+        },
+        {
+          "local": "IND.RIVADAVIA (M)",
+          "visitante": "FERRO",
+          "gl": 2,
+          "gv": 1
+        },
+        {
+          "local": "SAN MARTIN (SJ)",
+          "visitante": "BOCA JRS",
+          "gl": 0,
+          "gv": 0
+        },
+        {
+          "local": "C.CORDOBA(SDE)",
+          "visitante": "INDEPENDIENTE",
+          "gl": 0,
+          "gv": 2
+        },
+        {
+          "local": "ESTUDIANTES (LP)",
+          "visitante": "ATL. RAFAELA",
+          "gl": 3,
+          "gv": 1
+        },
+        {
+          "local": "QUILMES",
+          "visitante": "PLATENSE",
+          "gl": 1,
+          "gv": 0
+        }
+      ],
+      "5": [
+        {
+          "local": "BANFIELD",
+          "visitante": "INSTITUTO (C)",
+          "gl": 2,
+          "gv": 3
+        },
+        {
+          "local": "TALLERES (C)",
+          "visitante": "CENTRAL",
+          "gl": 2,
+          "gv": 2
+        },
+        {
+          "local": "BARRACAS CTRAL",
+          "visitante": "TIGRE",
+          "gl": 1,
+          "gv": 3
+        },
+        {
+          "local": "GIMNASIA (M)",
+          "visitante": "SAN LORENZO",
+          "gl": 1,
+          "gv": 0
+        },
+        {
+          "local": "GODOY CRUZ (M)",
+          "visitante": "VELEZ",
+          "gl": 1,
+          "gv": 1
+        },
+        {
+          "local": "ATL. TUCUMAN",
+          "visitante": "RIVER PLATE",
+          "gl": 1,
+          "gv": 4
+        },
+        {
+          "local": "UNION (SF)",
+          "visitante": "RACING CLUB",
+          "gl": 2,
+          "gv": 2
+        },
+        {
+          "local": "GIMNASIA (LP)",
+          "visitante": "SARMIENTO (J)",
+          "gl": 0,
+          "gv": 2
+        },
+        {
+          "local": "ALDOSIVI (MDP)",
+          "visitante": "ARGENTINOS JRS",
+          "gl": 1,
+          "gv": 0
+        },
+        {
+          "local": "PLATENSE",
+          "visitante": "COLON",
+          "gl": 0,
+          "gv": 1
+        },
+        {
+          "local": "ATL. RAFAELA",
+          "visitante": "QUILMES",
+          "gl": 1,
+          "gv": 0
+        },
+        {
+          "local": "INDEPENDIENTE",
+          "visitante": "ESTUDIANTES (LP)",
+          "gl": 1,
+          "gv": 1
+        },
+        {
+          "local": "BOCA JRS",
+          "visitante": "C.CORDOBA(SDE)",
+          "gl": 0,
+          "gv": 1
+        },
+        {
+          "local": "FERRO",
+          "visitante": "SAN MARTIN (SJ)",
+          "gl": 0,
+          "gv": 5
+        },
+        {
+          "local": "HURACAN",
+          "visitante": "IND.RIVADAVIA (M)",
+          "gl": 2,
+          "gv": 0
+        },
+        {
+          "local": "ESTUDIANTES (RC)",
+          "visitante": "RIESTRA",
+          "gl": 1,
+          "gv": 0
+        },
+        {
+          "local": "DEF Y JUSTICIA",
+          "visitante": "BELGRANO (C)",
+          "gl": 1,
+          "gv": 1
+        },
+        {
+          "local": "NEWELLS",
+          "visitante": "LANUS",
+          "gl": 1,
+          "gv": 2
+        }
+      ],
+      "6": [
+        {
+          "local": "INSTITUTO (C)",
+          "visitante": "ARGENTINOS JRS",
+          "gl": 2,
+          "gv": 0
+        },
+        {
+          "local": "SARMIENTO (J)",
+          "visitante": "ALDOSIVI (MDP)",
+          "gl": 0,
+          "gv": 0
+        },
+        {
+          "local": "RACING CLUB",
+          "visitante": "GIMNASIA (LP)",
+          "gl": 1,
+          "gv": 4
+        },
+        {
+          "local": "TIGRE",
+          "visitante": "GIMNASIA (M)",
+          "gl": 1,
+          "gv": 3
+        },
+        {
+          "local": "CENTRAL",
+          "visitante": "BARRACAS CTRAL",
+          "gl": 2,
+          "gv": 2
+        },
+        {
+          "local": "SAN LORENZO",
+          "visitante": "GODOY CRUZ (M)",
+          "gl": 3,
+          "gv": 0
+        },
+        {
+          "local": "RIVER PLATE",
+          "visitante": "UNION (SF)",
+          "gl": 2,
+          "gv": 2
+        },
+        {
+          "local": "VELEZ",
+          "visitante": "ATL. TUCUMAN",
+          "gl": 2,
+          "gv": 0
+        },
+        {
+          "local": "BANFIELD",
+          "visitante": "TALLERES (C)",
+          "gl": 1,
+          "gv": 1
+        },
+        {
+          "local": "BELGRANO (C)",
+          "visitante": "NEWELLS",
+          "gl": 2,
+          "gv": 0
+        },
+        {
+          "local": "COLON",
+          "visitante": "LANUS",
+          "gl": 0,
+          "gv": 2
+        },
+        {
+          "local": "PLATENSE",
+          "visitante": "ATL. RAFAELA",
+          "gl": 1,
+          "gv": 1
+        },
+        {
+          "local": "IND.RIVADAVIA (M)",
+          "visitante": "ESTUDIANTES (RC)",
+          "gl": 1,
+          "gv": 1
+        },
+        {
+          "local": "SAN MARTIN (SJ)",
+          "visitante": "HURACAN",
+          "gl": 1,
+          "gv": 0
+        },
+        {
+          "local": "C.CORDOBA(SDE)",
+          "visitante": "FERRO",
+          "gl": 2,
+          "gv": 1
+        },
+        {
+          "local": "QUILMES",
+          "visitante": "INDEPENDIENTE",
+          "gl": 1,
+          "gv": 2
+        },
+        {
+          "local": "RIESTRA",
+          "visitante": "DEF Y JUSTICIA",
+          "gl": 3,
+          "gv": 3
+        },
+        {
+          "local": "ESTUDIANTES (LP)",
+          "visitante": "BOCA JRS",
+          "gl": 2,
+          "gv": 3
+        }
+      ],
+      "7": [
+        {
+          "local": "TALLERES (C)",
+          "visitante": "INSTITUTO (C)",
+          "gl": 0,
+          "gv": 1
+        },
+        {
+          "local": "BARRACAS CTRAL",
+          "visitante": "BANFIELD",
+          "gl": 0,
+          "gv": 2
+        },
+        {
+          "local": "GIMNASIA (M)",
+          "visitante": "CENTRAL",
+          "gl": 1,
+          "gv": 2
+        },
+        {
+          "local": "GODOY CRUZ (M)",
+          "visitante": "TIGRE",
+          "gl": 2,
+          "gv": 2
+        },
+        {
+          "local": "ATL. TUCUMAN",
+          "visitante": "SAN LORENZO",
+          "gl": 2,
+          "gv": 1
+        },
+        {
+          "local": "UNION (SF)",
+          "visitante": "VELEZ",
+          "gl": 0,
+          "gv": 0
+        },
+        {
+          "local": "GIMNASIA (LP)",
+          "visitante": "RIVER PLATE",
+          "gl": 0,
+          "gv": 1
+        },
+        {
+          "local": "ALDOSIVI (MDP)",
+          "visitante": "RACING CLUB",
+          "gl": 2,
+          "gv": 2
+        },
+        {
+          "local": "ARGENTINOS JRS",
+          "visitante": "SARMIENTO (J)",
+          "gl": 1,
+          "gv": 1
+        },
+        {
+          "local": "ATL. RAFAELA",
+          "visitante": "COLON",
+          "gl": 2,
+          "gv": 1
+        },
+        {
+          "local": "INDEPENDIENTE",
+          "visitante": "PLATENSE",
+          "gl": 1,
+          "gv": 1
+        },
+        {
+          "local": "BOCA JRS",
+          "visitante": "QUILMES",
+          "gl": 1,
+          "gv": 0
+        },
+        {
+          "local": "FERRO",
+          "visitante": "ESTUDIANTES (LP)",
+          "gl": 0,
+          "gv": 1
+        },
+        {
+          "local": "HURACAN",
+          "visitante": "C.CORDOBA(SDE)",
+          "gl": 5,
+          "gv": 1
+        },
+        {
+          "local": "ESTUDIANTES (RC)",
+          "visitante": "SAN MARTIN (SJ)",
+          "gl": 1,
+          "gv": 0
+        },
+        {
+          "local": "DEF Y JUSTICIA",
+          "visitante": "IND.RIVADAVIA (M)",
+          "gl": 4,
+          "gv": 0
+        },
+        {
+          "local": "NEWELLS",
+          "visitante": "RIESTRA",
+          "gl": 0,
+          "gv": 2
+        },
+        {
+          "local": "LANUS",
+          "visitante": "BELGRANO (C)",
+          "gl": 3,
+          "gv": 1
+        }
+      ],
+      "8": [
+        {
+          "local": "INSTITUTO (C)",
+          "visitante": "SARMIENTO (J)",
+          "gl": 2,
+          "gv": 2
+        },
+        {
+          "local": "RACING CLUB",
+          "visitante": "ARGENTINOS JRS",
+          "gl": 4,
+          "gv": 1
+        },
+        {
+          "local": "RIVER PLATE",
+          "visitante": "ALDOSIVI (MDP)",
+          "gl": 2,
+          "gv": 2
+        },
+        {
+          "local": "VELEZ",
+          "visitante": "GIMNASIA (LP)",
+          "gl": 0,
+          "gv": 0
+        },
+        {
+          "local": "SAN LORENZO",
+          "visitante": "UNION (SF)",
+          "gl": 0,
+          "gv": 1
+        },
+        {
+          "local": "TIGRE",
+          "visitante": "ATL. TUCUMAN",
+          "gl": 2,
+          "gv": 0
+        },
+        {
+          "local": "CENTRAL",
+          "visitante": "GODOY CRUZ (M)",
+          "gl": 0,
+          "gv": 3
+        },
+        {
+          "local": "BANFIELD",
+          "visitante": "GIMNASIA (M)",
+          "gl": 1,
+          "gv": 2
+        },
+        {
+          "local": "TALLERES (C)",
+          "visitante": "BARRACAS CTRAL",
+          "gl": 2,
+          "gv": 1
+        },
+        {
+          "local": "COLON",
+          "visitante": "BELGRANO (C)",
+          "gl": 1,
+          "gv": 3
+        },
+        {
+          "local": "RIESTRA",
+          "visitante": "LANUS",
+          "gl": 4,
+          "gv": 1
+        },
+        {
+          "local": "IND.RIVADAVIA (M)",
+          "visitante": "NEWELLS",
+          "gl": 1,
+          "gv": 0
+        },
+        {
+          "local": "SAN MARTIN (SJ)",
+          "visitante": "DEF Y JUSTICIA",
+          "gl": 1,
+          "gv": 1
+        },
+        {
+          "local": "C.CORDOBA(SDE)",
+          "visitante": "ESTUDIANTES (RC)",
+          "gl": 1,
+          "gv": 2
+        },
+        {
+          "local": "ESTUDIANTES (LP)",
+          "visitante": "HURACAN",
+          "gl": 3,
+          "gv": 1
+        },
+        {
+          "local": "QUILMES",
+          "visitante": "FERRO",
+          "gl": 2,
+          "gv": 1
+        },
+        {
+          "local": "PLATENSE",
+          "visitante": "BOCA JRS",
+          "gl": 0,
+          "gv": 2
+        },
+        {
+          "local": "ATL. RAFAELA",
+          "visitante": "INDEPENDIENTE",
+          "gl": 2,
+          "gv": 1
+        }
+      ],
+      "9": [
+        {
+          "local": "BARRACAS CTRAL",
+          "visitante": "INSTITUTO (C)",
+          "gl": 3,
+          "gv": 1
+        },
+        {
+          "local": "GIMNASIA (M)",
+          "visitante": "TALLERES (C)",
+          "gl": 1,
+          "gv": 0
+        },
+        {
+          "local": "GODOY CRUZ (M)",
+          "visitante": "BANFIELD",
+          "gl": 3,
+          "gv": 0
+        },
+        {
+          "local": "ATL. TUCUMAN",
+          "visitante": "CENTRAL",
+          "gl": 0,
+          "gv": 1
+        },
+        {
+          "local": "UNION (SF)",
+          "visitante": "TIGRE",
+          "gl": 5,
+          "gv": 1
+        },
+        {
+          "local": "GIMNASIA (LP)",
+          "visitante": "SAN LORENZO",
+          "gl": 2,
+          "gv": 0
+        },
+        {
+          "local": "ALDOSIVI (MDP)",
+          "visitante": "VELEZ",
+          "gl": 0,
+          "gv": 1
+        },
+        {
+          "local": "ARGENTINOS JRS",
+          "visitante": "RIVER PLATE",
+          "gl": 0,
+          "gv": 0
+        },
+        {
+          "local": "SARMIENTO (J)",
+          "visitante": "RACING CLUB",
+          "gl": 0,
+          "gv": 1
+        },
+        {
+          "local": "INDEPENDIENTE",
+          "visitante": "COLON",
+          "gl": 1,
+          "gv": 0
+        },
+        {
+          "local": "BOCA JRS",
+          "visitante": "ATL. RAFAELA",
+          "gl": 0,
+          "gv": 0
+        },
+        {
+          "local": "FERRO",
+          "visitante": "PLATENSE",
+          "gl": 1,
+          "gv": 1
+        },
+        {
+          "local": "HURACAN",
+          "visitante": "QUILMES",
+          "gl": 1,
+          "gv": 0
+        },
+        {
+          "local": "ESTUDIANTES (RC)",
+          "visitante": "ESTUDIANTES (LP)",
+          "gl": 1,
+          "gv": 0
+        },
+        {
+          "local": "DEF Y JUSTICIA",
+          "visitante": "C.CORDOBA(SDE)",
+          "gl": 2,
+          "gv": 3
+        },
+        {
+          "local": "NEWELLS",
+          "visitante": "SAN MARTIN (SJ)",
+          "gl": 4,
+          "gv": 0
+        },
+        {
+          "local": "LANUS",
+          "visitante": "IND.RIVADAVIA (M)",
+          "gl": 3,
+          "gv": 3
+        },
+        {
+          "local": "BELGRANO (C)",
+          "visitante": "RIESTRA",
+          "gl": 2,
+          "gv": 1
+        }
+      ],
+      "10": [
+        {
+          "local": "C.CORDOBA(SDE)",
+          "visitante": "ATL. TUCUMAN",
+          "gl": 0,
+          "gv": 1
+        },
+        {
+          "local": "SAN LORENZO",
+          "visitante": "HURACAN",
+          "gl": 0,
+          "gv": 2
+        },
+        {
+          "local": "VELEZ",
+          "visitante": "FERRO",
+          "gl": 4,
+          "gv": 0
+        }
+      ]
+    }
   }
 }

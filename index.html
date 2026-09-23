@@ -840,9 +840,26 @@ const CATEGORIAS_CONFIG = {
   '7MA':     {label:'7ma',     color:'#f472b6', enGeneral:true,  enConfiabilidad:false, esMenor:true,  nombresPdf:['septima','séptima']},
   '8VA':     {label:'8va',     color:'#a78bfa', enGeneral:true,  enConfiabilidad:false, esMenor:true,  nombresPdf:['octava'], minTiempo:40},
   '9NA':     {label:'9na',     color:'#34d399', enGeneral:true,  enConfiabilidad:false, esMenor:true,  nombresPdf:['novena'], minTiempo:35},
-  'RESERVA': {label:'Reserva', color:'#e8a020', enGeneral:false, enConfiabilidad:false, esMenor:false, nombresPdf:[]},
+  // nombresPdf de Reserva: a diferencia de 4TA-9NA (que dicen "Cuarta
+  // División", etc.), la planilla de Reserva dice el nombre del torneo
+  // ("Torneo Proyección", confirmado con una planilla real). No se agrega
+  // "tercera" (como a veces se le dice a Reserva en la jerga del club) por
+  // riesgo de falso positivo -- es una palabra común, podría aparecer suelta
+  // en la planilla de otra categoría y clasificarla mal. Si "proyección"/
+  // "reserva" no alcanzan para alguna planilla real, hace falta ver ESA
+  // planilla para agregar la palabra exacta que usa.
+  'RESERVA': {label:'Reserva', color:'#e8a020', enGeneral:false, enConfiabilidad:false, esMenor:false, nombresPdf:['proyección','proyeccion','reserva']},
 };
 const CATEGORIES = Object.keys(CATEGORIAS_CONFIG);
+// "4ta DIVISIÓN" suena bien en español, pero "Reserva DIVISIÓN" no -- para
+// esa categoría el orden natural es al revés ("DIVISIÓN RESERVA"), pedido
+// de Javi al ver la placa real (2026-09-23). Único lugar que arma este
+// breadcrumb para las placas (dibujarTarjetaRival/dibujarPlacaPortada).
+function catLabelPlaca(cat){
+  const label = CATEGORIAS_CONFIG[cat]?.label;
+  if(!label) return cat;
+  return cat==='RESERVA' ? ('DIVISIÓN '+label.toUpperCase()) : (label.toUpperCase()+' DIVISIÓN');
+}
 // Categorías que entran en el RESUMEN GENERAL (Reserva va aparte, nunca se mezcla)
 const GENERAL_CATS = CATEGORIES.filter(c=>CATEGORIAS_CONFIG[c].enGeneral);
 const CAT_COLORS = Object.fromEntries(CATEGORIES.map(c=>[c, CATEGORIAS_CONFIG[c].color]));
@@ -3236,6 +3253,42 @@ function renderResumenCategoriaFijo(cat, containerId){
     renderTablaLPF(cat, `tabla-lpf-${cat}`);
   });
 }
+// Mismo cartel fijo de arriba (POS/PTS/PJ/PG/PE/PP/GF/GC/DG), pero para
+// Reserva: sale de la tabla de Copa Proyección por zonas en vez de la LPF
+// plana, y no trae anidada la tabla de posiciones completa (Reserva ya
+// tiene la suya propia como sección aparte, "TABLA DE POSICIONES · LPF")
+// (Javi, 2026-09-23: "en la primera vista, mostrá la posición propia, tal
+// cual de 4ta a 9na").
+async function resumenReservaHTML(dataCat){
+  await loadTablaData();
+  const f = filaTablaLPFReserva(dataCat, 'TIGRE');
+  if(!f) return `<div style="padding:16px;text-align:center;color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-size:13px">Todavía no hay datos de la tabla de Copa Proyección.</div>`;
+  const dgC = f.dif>0?'var(--win)':f.dif<0?'var(--loss)':'var(--muted)';
+  const cell=(label,val,color)=>`<div style="text-align:center">
+    <div style="font-family:'Bebas Neue',sans-serif;font-size:22px;color:${color||'var(--text)'}">${val}</div>
+    <div style="font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-top:2px">${label}</div>
+  </div>`;
+  return `<div class="stat-grid-9" style="background:var(--surface2);border:1px solid var(--gold);border-radius:10px;
+    padding:14px 10px;gap:8px">
+    ${cell('POS', f.pos+'°', 'var(--gold2)')}
+    ${cell('PTS', f.pts, 'var(--gold2)')}
+    ${cell('PJ', f.pj)}
+    ${cell('PG', f.pg, 'var(--win)')}
+    ${cell('PE', f.pe, 'var(--draw)')}
+    ${cell('PP', f.pp, 'var(--loss)')}
+    ${cell('GF', f.gf, '#60a5fa')}
+    ${cell('GC', f.gc, '#f87171')}
+    ${cell('DG', (f.dif>0?'+':'')+f.dif, dgC)}
+  </div>`;
+}
+function renderResumenReserva(dataCat, containerId){
+  const el=document.getElementById(containerId);
+  if(!el) return;
+  resumenReservaHTML(dataCat).then(html=>{
+    const stillHere=document.getElementById(containerId);
+    if(stillHere) stillHere.innerHTML=html;
+  });
+}
 
 // Chevron de despliegue "pelado" (sin título/cartel al lado) -- mismo
 // motor que seccionTitulo (toggleSeccion busca los ids "chev-"/"sec-" con
@@ -3601,8 +3654,8 @@ function renderStatsSingle(cat, content){
   tabEl.innerHTML=`
     ${amarillaAlertHTML}
 
-    ${isReserva?'':`<div class="st"><div class="stbar"></div>📊 UBICACIÓN EN LA TABLA</div>
-    <div id="resumen-fijo-${dataCat}" style="margin-bottom:20px"></div>`}
+    <div class="st"><div class="stbar"></div>📊 UBICACIÓN EN LA TABLA</div>
+    <div id="resumen-fijo-${dataCat}" style="margin-bottom:20px"></div>
 
     ${seccionTitulo('goleadores-'+dataCat, `⚽ GOLEADORES · <span style="color:${CAT_COLORS[cat]}">${cat}</span>`)}
     <div id="sec-goleadores-${dataCat}"${seccionEstiloInicial('goleadores-'+dataCat)}>
@@ -3663,6 +3716,7 @@ function renderStatsSingle(cat, content){
   if(esVistaAcotada() && GENERAL_CATS.includes(cat)) renderRivalStatsDetalle(dataCat, cat);
   renderGoleadores(dataCat);
   if(isReserva) {
+    renderResumenReserva(dataCat, `resumen-fijo-${dataCat}`);
     renderTablaReserva(`tabla-lpf-${cat}`);
     renderFixtureReserva(dataCat, `fixture-cat-${dataCat}`, resultadosTablaHTML, wireResultadosEnFixture);
   } else {
@@ -3761,7 +3815,7 @@ async function renderRivalStatsDetalle(dataCat, cat){
   const filaRival = isReserva ? filaTablaLPFReserva(dataCat, prox.rival)
     : (RIVAL_INFO[prox.rival] ? filaTablaLPF(cat, RIVAL_INFO[prox.rival].lpf) : null);
   const cantUltimos = rivalStatsCantUltimos[dataCat] || 10;
-  const ultimos = isReserva ? [] : ultimosPartidosRival(cat, prox.rival, null, cantUltimos);
+  const ultimos = isReserva ? ultimosPartidosRivalReserva(dataCat, prox.rival, null, cantUltimos) : ultimosPartidosRival(cat, prox.rival, null, cantUltimos);
   const alerta = TABLA_DATA.rival_alertas && TABLA_DATA.rival_alertas[dataCat];
 
   let html = `<div style="font-family:'Barlow Condensed',sans-serif">
@@ -3807,13 +3861,7 @@ async function renderRivalStatsDetalle(dataCat, cat){
       <span style="color:${r.color};font-weight:700">${u.gf}-${u.gc} ${r.texto}</span>
     </div>`;
   }).join('') : `<div style="color:var(--muted);font-size:14px;padding:4px 0">Sin partidos registrados todavía.</div>`;
-  // Reserva: todavía no tenemos el fixture completo de TODOS los equipos de
-  // la zona (solo los partidos de Tigre), así que no hay forma de saber los
-  // últimos resultados del rival -- se avisa en vez de mostrar un slider que
-  // no sirve para nada.
-  html += isReserva
-    ? rivalStatsCajaHTML('Últimos partidos', `<div style="color:var(--muted);font-size:14px">Todavía no disponible para Reserva.</div>`)
-    : rivalStatsCajaHTML('Últimos partidos', sliderUltimos + filasUltimos);
+  html += rivalStatsCajaHTML('Últimos partidos', sliderUltimos + filasUltimos);
 
   const golHTML = alerta && alerta.goleador
     ? `<div style="font-size:17px;font-weight:700;color:var(--text)">${esc(alerta.goleador.nombre)}</div>
@@ -4253,15 +4301,9 @@ function resolverNombreLCS(nombre, candidatos){
   });
   if(subconjunto.length===1) return subconjunto[0];
   if(subconjunto.length>1) return null;
-  const lcsRatio = (a,b) => {
-    const dp = Array.from({length:a.length+1}, ()=>new Array(b.length+1).fill(0));
-    for(let i=1;i<=a.length;i++) for(let j=1;j<=b.length;j++)
-      dp[i][j] = a[i-1]===b[j-1] ? dp[i-1][j-1]+1 : Math.max(dp[i-1][j], dp[i][j-1]);
-    return (a.length+b.length) ? 2*dp[a.length][b.length]/(a.length+b.length) : 0;
-  };
   let mejorScore=0, mejores=[];
   candidatos.forEach(c=>{
-    const score = lcsRatio(nn, normNombreOrdenIndependiente(c));
+    const score = lcsRatioStr(nn, normNombreOrdenIndependiente(c));
     if(score>mejorScore){ mejorScore=score; mejores=[c]; }
     else if(score===mejorScore) mejores.push(c);
   });
@@ -8729,6 +8771,17 @@ function partidoMasRecienteRival(cat, rivalNombre){
   }
   return null;
 }
+function partidoMasRecienteRivalReserva(dataCat, rivalNombre){
+  const fc = (TABLA_DATA && TABLA_DATA.fixture_completo_reserva && TABLA_DATA.fixture_completo_reserva[dataCat]) || {};
+  const fechas = Object.keys(fc).map(Number).sort((a,b)=>b-a);
+  for(const f of fechas){
+    for(const p of fc[f]){
+      if(mismoEquipoReserva(p.local, rivalNombre)) return {fecha:f, cond:'L', rivalDe:p.visitante, gf:p.gl, gc:p.gv};
+      if(mismoEquipoReserva(p.visitante, rivalNombre)) return {fecha:f, cond:'V', rivalDe:p.local, gf:p.gv, gc:p.gl};
+    }
+  }
+  return null;
+}
 
 function filaTablaLPF(cat, nombreLpf){
   const filas = (TABLA_DATA && TABLA_DATA.categorias && TABLA_DATA.categorias[cat]) || [];
@@ -8783,6 +8836,26 @@ function proximoRivalInfoReserva(dataCat){
 // Fila de la tabla de posiciones de Copa Proyección (RESERVA_APE/RESERVA_CLA,
 // dos zonas cada una) para un rival -- se busca en las dos zonas porque no
 // siempre sabemos de antemano en cuál está el rival.
+// Últimos partidos del rival de Reserva -- mismo criterio que
+// ultimosPartidosRival (últimos N corridos, o filtrado por condición),
+// pero contra TABLA_DATA.fixture_completo_reserva (todos los partidos de la
+// zona, no solo los de Tigre; ver fixture_completo_reserva en
+// scrape_tablas.py, agregado 2026-09-23) y matcheando el nombre del rival
+// con mismoEquipoReserva en vez de exigir igualdad exacta contra RIVAL_INFO.
+function ultimosPartidosRivalReserva(dataCat, rivalNombre, condicion, cant){
+  const fc = (TABLA_DATA && TABLA_DATA.fixture_completo_reserva && TABLA_DATA.fixture_completo_reserva[dataCat]) || {};
+  const fechas = Object.keys(fc).map(Number).sort((a,b)=>b-a);
+  const out=[];
+  for(const f of fechas){
+    for(const p of fc[f]){
+      if((condicion===null||condicion==='L') && mismoEquipoReserva(p.local, rivalNombre)) out.push({fecha:f, rivalDe:p.visitante, gf:p.gl, gc:p.gv, cond:'L'});
+      else if((condicion===null||condicion==='V') && mismoEquipoReserva(p.visitante, rivalNombre)) out.push({fecha:f, rivalDe:p.local, gf:p.gv, gc:p.gl, cond:'V'});
+      if(out.length>=cant) return out.reverse();
+    }
+  }
+  out.reverse();
+  return out;
+}
 function filaTablaLPFReserva(dataCat, nombreRival){
   const torneoCat = dataCat==='RESERVA_S2' ? 'RESERVA_CLA' : 'RESERVA_APE';
   const zonas = (TABLA_DATA && TABLA_DATA.categorias && TABLA_DATA.categorias[torneoCat] && TABLA_DATA.categorias[torneoCat].zonas) || {};
@@ -8803,7 +8876,45 @@ function matchRivalInfo(nombreCrudo){
   if(!nombreCrudo) return null;
   if(RIVAL_INFO[nombreCrudo]) return RIVAL_INFO[nombreCrudo];
   const n = normNombreOrdenIndependiente(nombreCrudo);
-  return Object.values(RIVAL_INFO).find(v=>normNombreOrdenIndependiente(v.sabadogol)===n) || null;
+  const exacto = Object.values(RIVAL_INFO).find(v=>normNombreOrdenIndependiente(v.sabadogol)===n);
+  if(exacto) return exacto;
+  // Reserva trae nombres que no matchean exacto contra ninguno de los tres
+  // campos de RIVAL_INFO (pensado para los nombres de RIVALS/sabadogol de
+  // 4TA-9NA) -- en dos formas distintas según la fuente: abreviada ("ATL.
+  // TUCUMAN", "UNION (SF)") desde el fixture, o larga con aclaración entre
+  // paréntesis ("CENTRAL CORDOBA (SANTIAGO DEL ESTERO)", "INSTITUTO
+  // (CORDOBA)") desde la tabla de posiciones/rival_alertas -- se prueban
+  // las dos (con y sin lo que está entre paréntesis) contra sabadogol/lpf,
+  // con LCS y un umbral más bajo (0.72 en vez de 0.84 del resto de la app):
+  // un escudo equivocado es un error cosmético, no de datos, vale la pena
+  // arriesgar algún falso positivo a cambio de cubrir más rivales reales sin
+  // mantener un alias a mano por cada uno (confirmado con datos reales,
+  // Javi 2026-09-23).
+  const nSinParen = normNombreOrdenIndependiente(nombreCrudo.replace(/\([^)]*\)/g,''));
+  let mejorScore=0, mejores=[];
+  Object.values(RIVAL_INFO).forEach(v=>{
+    const candidatos = [normNombreOrdenIndependiente(v.sabadogol), normNombreOrdenIndependiente(v.lpf)];
+    const score = Math.max(...candidatos.map(c=>Math.max(lcsRatioStr(n,c), lcsRatioStr(nSinParen,c))));
+    if(score>mejorScore){ mejorScore=score; mejores=[v]; }
+    else if(score===mejorScore) mejores.push(v);
+  });
+  return (mejorScore>=0.72 && mejores.length===1) ? mejores[0] : null;
+}
+// Compara dos nombres crudos de equipo de Reserva (statfutbol trae formas
+// distintas según la página: corta en el fixture, "DEF Y JUSTICIA"; larga en
+// la tabla de posiciones, "DEFENSA Y JUSTICIA") -- mismo criterio que
+// matchRivalInfo (LCS, con y sin paréntesis, umbral 0.72), pero comparando
+// dos nombres crudos entre sí en vez de contra RIVAL_INFO. Lo usa
+// ultimosPartidosRivalReserva para encontrar los partidos del rival del
+// próximo partido dentro del fixture completo de la zona.
+function mismoEquipoReserva(a, b){
+  if(!a || !b) return false;
+  const na = normNombreOrdenIndependiente(a), nb = normNombreOrdenIndependiente(b);
+  if(na===nb) return true;
+  const naSinP = normNombreOrdenIndependiente(a.replace(/\([^)]*\)/g,''));
+  const nbSinP = normNombreOrdenIndependiente(b.replace(/\([^)]*\)/g,''));
+  const score = Math.max(lcsRatioStr(na,nb), lcsRatioStr(naSinP,nb), lcsRatioStr(na,nbSinP), lcsRatioStr(naSinP,nbSinP));
+  return score >= 0.72;
 }
 
 function resultadoLabel(gf, gc){
@@ -8900,14 +9011,10 @@ async function construirParamsPlacaStats(cat){
   const filaRival = isReserva ? filaTablaLPFReserva(dataCat, prox.rival) : filaTablaLPF(cat, info.lpf);
   const filaTigre = isReserva ? filaTablaLPFReserva(dataCat, 'TIGRE') : filaTablaLPF(cat, 'Tigre');
   if(!filaRival || !filaTigre) return null;
-  // Reserva: todavía no tenemos el fixture completo de la zona (solo los
-  // partidos propios de Tigre), así que no hay "últimos resultados del
-  // rival" ni "partido más reciente" para mostrar -- ver el mismo límite en
-  // renderRivalStatsDetalle. dibujarTarjetaRival ya tolera ultimos:[]/
-  // reciente:null (rowsN usa Math.max(...,1)).
-  const modoInfo = isReserva ? {cant:0, label:'NO DISPONIBLE PARA RESERVA'} : leerModoUltimosPlaca(cat, prox.condRival);
-  const ultimos = isReserva ? [] : ultimosPartidosRival(cat, prox.rival, modoInfo.condicion, modoInfo.cant);
-  const reciente = isReserva ? null : partidoMasRecienteRival(cat, prox.rival);
+  const modoInfo = leerModoUltimosPlaca(cat, prox.condRival);
+  const ultimos = isReserva ? ultimosPartidosRivalReserva(dataCat, prox.rival, modoInfo.condicion, modoInfo.cant)
+    : ultimosPartidosRival(cat, prox.rival, modoInfo.condicion, modoInfo.cant);
+  const reciente = isReserva ? partidoMasRecienteRivalReserva(dataCat, prox.rival) : partidoMasRecienteRival(cat, prox.rival);
   const num = (id, def) => parseInt(document.getElementById(id+cat)?.value ?? def) || def;
   const alerta = TABLA_DATA.rival_alertas && TABLA_DATA.rival_alertas[dataCat];
   return {cat, prox, info, ultimos, ultimosLabel: modoInfo.label, reciente, filaRival, filaTigre, alerta,
@@ -9005,9 +9112,13 @@ async function dibujarTarjetaRival({cat, prox, info, ultimos, ultimosLabel, reci
     cargarImagen('escudos/'+info.escudo),
     cargarImagen(document.getElementById('escudoImg')?.src),
     cargarImagen('escudos/LIGA.png'),
-    ...ultimos.map(p=>cargarImagen(ESCUDO_POR_LPF[p.rivalDe] ? 'escudos/'+ESCUDO_POR_LPF[p.rivalDe] : null)),
+    ...ultimos.map(p=>{
+      const esc = ESCUDO_POR_LPF[p.rivalDe] || matchRivalInfo(p.rivalDe)?.escudo;
+      return cargarImagen(esc ? 'escudos/'+esc : null);
+    }),
   ]);
-  const escudoReciente = reciente ? await cargarImagen(ESCUDO_POR_LPF[reciente.rivalDe] ? 'escudos/'+ESCUDO_POR_LPF[reciente.rivalDe] : null) : null;
+  const escudoRecienteFile = reciente ? (ESCUDO_POR_LPF[reciente.rivalDe] || matchRivalInfo(reciente.rivalDe)?.escudo) : null;
+  const escudoReciente = escudoRecienteFile ? await cargarImagen('escudos/'+escudoRecienteFile) : null;
 
   // 16:9 (1280x720) a pedido de Javi, para que ocupe mejor la pantalla en
   // presentaciones. El contenido (tabla + hasta 4 resultados) casi siempre
@@ -9044,7 +9155,7 @@ async function dibujarTarjetaRival({cat, prox, info, ultimos, ultimosLabel, reci
     ctx.drawImage(escudoLiga, W-pad-wLiga+offsetXLiga, pad-12+offsetYLiga, wLiga, hLiga);
   }
 
-  const catLabel = CATEGORIAS_CONFIG[cat]?.label ? CATEGORIAS_CONFIG[cat].label.toUpperCase()+' DIVISIÓN' : cat;
+  const catLabel = catLabelPlaca(cat);
   let y=pad;
   // Separador con más aire (antes " · ") y sin el cartel "PRÓXIMO RIVAL"
   // -- quedaba redundante, el botón que genera esto ya se llama así.
@@ -9844,7 +9955,7 @@ async function dibujarPlacaPortada({cat, prox, info, scale}){
 
   // Breadcrumb club + categoría (con un poco de letter-spacing, si el
   // navegador lo soporta -- si no, cae en el espaciado normal, sin romper)
-  const catLabel = CATEGORIAS_CONFIG[cat]?.label ? CATEGORIAS_CONFIG[cat].label.toUpperCase()+' DIVISIÓN' : cat;
+  const catLabel = catLabelPlaca(cat);
   let y = pad+14;
   ctx.font = "20px 'Barlow', sans-serif"; ctx.fillStyle = TXT2;
   try{ ctx.letterSpacing = '1.5px'; }catch(e){}
@@ -10542,6 +10653,16 @@ async function getPdfjsLib(){
 // pasa a minúsculas) no alcanza acá porque el ORDEN de las palabras es
 // distinto. Ordenando las palabras alfabéticamente antes de comparar, el
 // orden deja de importar.
+// Longest Common Subsequence, como ratio 0-1 -- compartido por los 3
+// matchers de nombre "borrosos" de la app (jugadores de GPS, jugadores de
+// stats, equipos rivales de Reserva), cada uno con su propio umbral según
+// qué tan caro sea un falso positivo ahí.
+function lcsRatioStr(a,b){
+  const dp = Array.from({length:a.length+1}, ()=>new Array(b.length+1).fill(0));
+  for(let i=1;i<=a.length;i++) for(let j=1;j<=b.length;j++)
+    dp[i][j] = a[i-1]===b[j-1] ? dp[i-1][j-1]+1 : Math.max(dp[i-1][j], dp[i][j-1]);
+  return (a.length+b.length) ? 2*dp[a.length][b.length]/(a.length+b.length) : 0;
+}
 function normNombreOrdenIndependiente(s){
   return (s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'')
     .replace(/[^a-z\s]/g,' ').split(/\s+/).filter(Boolean).sort().join(' ');
