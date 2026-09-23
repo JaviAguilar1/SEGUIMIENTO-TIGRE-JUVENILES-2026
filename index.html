@@ -776,7 +776,7 @@ table.gen-table .cat-cell{font-family:'Bebas Neue',sans-serif;font-size:15px;
     <div class="season-pill">TEMPORADA 2026</div>
     <div id="admin-badge">
       <span class="admin-tag" id="role-tag-txt">ADMIN</span>
-      <button id="btn-usuarios" onclick="abrirPanelUsuarios()" title="Usuarios y roles (solo admin)" style="display:none;background:rgba(42,120,214,0.18);border:1px solid rgba(42,120,214,0.4);border-radius:4px;color:#6fa8f5;font-size:9px;padding:2px 6px;cursor:pointer;font-family:Barlow Condensed,sans-serif;letter-spacing:1px;">👥</button>
+      <button id="btn-usuarios" onclick="abrirPanelUsuarios()" title="Usuarios y roles (solo admin)" style="display:none;position:relative;background:rgba(42,120,214,0.18);border:1px solid rgba(42,120,214,0.4);border-radius:4px;color:#6fa8f5;font-size:9px;padding:2px 6px;cursor:pointer;font-family:Barlow Condensed,sans-serif;letter-spacing:1px;">👥<span id="btn-usuarios-badge" title="Cuentas nuevas desde tu última visita" style="display:none;position:absolute;top:-6px;right:-6px;background:#e01830;color:#fff;border-radius:8px;min-width:15px;height:15px;line-height:15px;font-size:9px;font-weight:700;padding:0 3px;box-shadow:0 0 0 1.5px #0a0f1e">0</span></button>
       <button id="btn-cerrar-temporada" onclick="cerrarTemporada()" title="Archivar la temporada activa y arrancar una nueva" style="display:none;background:rgba(240,192,64,0.15);border:1px solid rgba(240,192,64,0.4);border-radius:4px;color:var(--gold2);font-size:9px;padding:2px 6px;cursor:pointer;font-family:Barlow Condensed,sans-serif;letter-spacing:1px;">📦</button>
       <button id="btn-reset" onclick="clearData()" style="display:none;background:rgba(192,21,42,0.2);border:1px solid rgba(192,21,42,0.4);border-radius:4px;color:rgba(255,100,100,0.7);font-size:9px;padding:2px 6px;cursor:pointer;font-family:Barlow Condensed,sans-serif;letter-spacing:1px;">🗑</button>
     </div>
@@ -1151,6 +1151,7 @@ let canEdit      = false;
 let currentRole  = 'viewer';
 let catRole      = 'viewer'; // for category-level access
 let _authListenerUid = null; // uid cuyo listener de rol/stats está activo (ver initFirebase)
+let _profileTakenListenerOn = false; // ver attachBadgeUsuariosListener
 
 // Roles con permiso de edicion y a que categorias alcanza. null = todas
 // (admin). Array = solo esas categorias -- el usuario puede VER cualquier
@@ -1430,7 +1431,7 @@ function initFirebase(){
         // un logout+login sin recargar la página deja el listener de ROL de
         // la cuenta VIEJA escuchando -- si ese rol se edita después desde la
         // consola de Firebase, pisa el rol de la sesión nueva sin avisar.
-        if(_authListenerUid){ db.ref('users/'+_authListenerUid+'/role').off(); db.ref('stats').off(); _authListenerUid=null; }
+        if(_authListenerUid){ db.ref('users/'+_authListenerUid+'/role').off(); db.ref('stats').off(); db.ref('profile_taken').off(); _profileTakenListenerOn=false; _authListenerUid=null; }
         if(user){
           _authListenerUid = user.uid;
           // Última vez que se vio activa esta cuenta (login real o simplemente
@@ -1467,6 +1468,8 @@ function initFirebase(){
             refreshActiveModule();
             sincronizarJugadoresDesdeFutdetail();
             sincronizarPlantelDesdeFutdetail();
+            if(isAdmin) attachBadgeUsuariosListener(user.uid);
+            else if(_profileTakenListenerOn){ db.ref('profile_taken').off(); _profileTakenListenerOn=false; ocultarBadgeUsuarios(); }
           });
           // Real-time data sync — listen for remote changes
           db.ref('stats').on('value', snap=>{
@@ -1563,8 +1566,47 @@ function updateAuthUI(){
 // Panel de solo-admin (botón 👥 en la cabecera, escondido para cualquier
 // otro rol por applyViewMode) -- lista las cuentas de users/, con último
 // acceso y tipo de dispositivo (ver detectarDispositivo/onAuthStateChanged).
+// Aviso de "cuentas nuevas" en el botón 👥: compara los perfiles ya
+// reclamados (profile_taken, se completa solo en cada alta) contra
+// users/{admin}/perfilesVistos (qué perfiles ya revisó este admin -- se
+// actualiza al abrir el panel). No manda nada fuera de la app -- solo se ve
+// si el admin la tiene abierta o la vuelve a abrir.
+function attachBadgeUsuariosListener(adminUid){
+  if(_profileTakenListenerOn) return;
+  _profileTakenListenerOn = true;
+  db.ref('profile_taken').on('value', snap=>{
+    const tomados = snap.val() ? Object.keys(snap.val()) : [];
+    db.ref('users/'+adminUid+'/perfilesVistos').once('value').then(vsnap=>{
+      const vistos = vsnap.val() || {};
+      const nuevos = tomados.filter(slug=>!vistos[slug]);
+      const badge = document.getElementById('btn-usuarios-badge');
+      if(!badge) return;
+      if(nuevos.length){ badge.textContent = nuevos.length; badge.style.display='block'; }
+      else badge.style.display='none';
+    });
+  });
+}
+function ocultarBadgeUsuarios(){
+  const badge = document.getElementById('btn-usuarios-badge');
+  if(badge) badge.style.display='none';
+}
+// Marca TODOS los perfiles ya reclamados como "vistos" por este admin --
+// se llama al abrir el panel de usuarios (ahí es cuando de verdad los mira).
+function marcarPerfilesVistos(){
+  const uid = firebase.auth().currentUser?.uid;
+  if(!uid) return;
+  db.ref('profile_taken').once('value').then(snap=>{
+    const tomados = snap.val() ? Object.keys(snap.val()) : [];
+    if(!tomados.length) return;
+    const update = {};
+    tomados.forEach(slug=>update[slug]=true);
+    db.ref('users/'+uid+'/perfilesVistos').update(update).then(ocultarBadgeUsuarios);
+  });
+}
+
 async function abrirPanelUsuarios(){
   if(!isAdmin || !db) return;
+  marcarPerfilesVistos();
   let m=document.getElementById('panel-usuarios-modal');
   if(m) m.remove();
   m=document.createElement('div');
