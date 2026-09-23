@@ -1468,6 +1468,8 @@ function initFirebase(){
             refreshActiveModule();
             sincronizarJugadoresDesdeFutdetail();
             sincronizarPlantelDesdeFutdetail();
+            sincronizarPlantelDesdeStatfutbol();
+            sincronizarStatsDesdeStatfutbol();
             if(isAdmin) attachBadgeUsuariosListener(user.uid);
             else if(_profileTakenListenerOn){ db.ref('profile_taken').off(); _profileTakenListenerOn=false; ocultarBadgeUsuarios(); }
           });
@@ -6981,7 +6983,7 @@ function renderRosterTable(cat, merged){
     const s=p.stats||{};
     return `<tr data-nombre="${esc((p.nombre||'').toLowerCase())}">
       <td class="rival-name" style="cursor:pointer" onclick="abrirPerfilJugador('${cat}','${esc(p.nombre||'').replace(/'/g,"\\'")}')"
-        title="Ver perfil">${foto}${esc(p.nombre?formatNombreMostrar(p.nombre,cat):'—')}</td>
+        title="Ver perfil">${foto}${esc(p.nombre?formatNombreMostrar(p.nombre,cat):'—')}${p.fuenteRoster==='statfutbol'?' <span title="Todavía sin datos de futdetail para esta categoría -- nombre y stats desde statfutbol, sin posición ni edad" style="color:var(--gold2);font-size:10px">(statfutbol)</span>':''}</td>
       <td>${esc(p.posicion||'—')}</td>
       <td>${p.edad||'—'}</td>
       <td>${s.convocatorias||0}</td>
@@ -7394,6 +7396,46 @@ function sincronizarPlantelDesdeFutdetail(){
   assignPlayerIds();
   refreshActiveModule();
 }
+// Relleno con statfutbol -- SOLO para la categoría que futdetail dejó vacía
+// (nunca pisa lo que futdetail sí trajo, gana igual que en todos lados de
+// la app). statfutbol no publica posición/edad, así que esas quedan en
+// blanco ("—" en la tabla) -- se marca fuenteRoster:'statfutbol' para poder
+// distinguirlo a simple vista. Se corre DESPUÉS de
+// sincronizarPlantelDesdeFutdetail/sincronizarJugadoresDesdeFutdetail (ver
+// los dos call sites) para que futdetail, si trajo algo, ya haya llenado
+// plantelFutdetail/jugadoresStats antes de este chequeo de "sigue vacío".
+function sincronizarPlantelDesdeStatfutbol(){
+  if(!canEdit || !fbReady) return;
+  const sfJugadores = TABLA_DATA && TABLA_DATA.statfutbol_jugadores;
+  if(!sfJugadores) return;
+  Object.keys(sfJugadores).forEach(cat=>{
+    if((plantelFutdetail[cat]||[]).length) return; // futdetail ya trajo esta categoría, no se toca
+    const fuente = sfJugadores[cat]||[];
+    if(!fuente.length) return;
+    const nuevo = fuente.map(j=>({nombre:j.nombre, posicion:null, edad:null, fuenteRoster:'statfutbol'}));
+    plantelFutdetail[cat]=nuevo;
+    db.ref('stats/plantel/'+cat).set(nuevo).catch(e=>console.warn('sincronizarPlantelDesdeStatfutbol:',e));
+  });
+  assignPlayerIds();
+  refreshActiveModule();
+}
+function sincronizarStatsDesdeStatfutbol(){
+  if(!canEdit || !fbReady) return;
+  const sfJugadores = TABLA_DATA && TABLA_DATA.statfutbol_jugadores;
+  if(!sfJugadores) return;
+  Object.keys(sfJugadores).forEach(cat=>{
+    if((jugadoresStats[cat]||[]).length) return; // futdetail ya trajo esta categoría, no se toca
+    const fuente = sfJugadores[cat]||[];
+    if(!fuente.length) return;
+    const nuevo = fuente.map(j=>({
+      jugador:j.nombre, convocatorias:j.pj||0, partidos_titular:0, minutos_jugados:j.min||0,
+      goles:j.gol||0, asistencias:0, tarjeta_amarilla:j.am||0, tarjeta_roja:j.roja||0,
+    }));
+    jugadoresStats[cat]=nuevo;
+    db.ref('stats/jugadores/'+cat).set(nuevo).catch(e=>console.warn('sincronizarStatsDesdeStatfutbol:',e));
+  });
+  refreshActiveModule();
+}
 // La tabla de resultados puede haberse dibujado antes de que esto termine
 // de cargar (es una llamada async aparte) — sincroniza los inputs que
 // hayan quedado vacíos en pantalla con lo que se acaba de completar.
@@ -7420,6 +7462,8 @@ function loadTablaData(){
       sincronizarLinksVaciosEnPantalla();
       sincronizarJugadoresDesdeFutdetail();
       sincronizarPlantelDesdeFutdetail();
+      sincronizarPlantelDesdeStatfutbol();
+      sincronizarStatsDesdeStatfutbol();
       blPlayers = (TABLA_DATA.bl_gps && TABLA_DATA.bl_gps.players) || {};
       catapultPlayers = (TABLA_DATA.catapult_gps && TABLA_DATA.catapult_gps.players) || {};
       // Esfuerzos individuales (sprints con hora real) + periodos por
