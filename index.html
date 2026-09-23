@@ -6768,7 +6768,6 @@ function renderRosterCat(cat, content){
   if(!rosterSortState[cat]) rosterSortState[cat]={key:'minutos_jugados', dir:-1};
   renderRosterTable(cat, merged);
 
-  content.insertAdjacentHTML('beforeend', buildTarjetasJugadoresHTML(cat, merged));
   content.insertAdjacentHTML('beforeend', buildComparativaJugadoresHTML(cat, merged));
   document.querySelectorAll(`#comp-jug-selects-${cat} .comp-jug-select`).forEach(sel=>{
     sel.addEventListener('change',()=>renderComparativaJugadores(cat, merged));
@@ -6807,147 +6806,7 @@ function topSpeedInfo(cat, nombre){
   return catapultTopSpeedInfo(cat, nombre) || blTopSpeedInfo(cat, nombre);
 }
 
-// Tarjeta resumen de un jugador -- pensada para verse de a varias juntas
-// (grilla), a diferencia de la Ficha completa (abrirPerfilJugador, con
-// historial partido a partido y comparativas). Click en la tarjeta abre esa
-// Ficha completa.
-function tarjetaJugadorHTML(cat, p){
-  const s = p.stats||{};
-  const nombre = p.nombre||'—';
-  const iniciales = nombre.split(/[\s,]+/).filter(Boolean).slice(0,2).map(w=>w[0]).join('').toUpperCase()||'?';
-  const golData = golesEfectivos(cat).find(g=>g.name===nombre
-    || normNombreOrdenIndependiente(g.name)===normNombreOrdenIndependiente(nombre));
-  const golesFilas = (golData?.fechas||[]).slice(0,3);
-  const top = topSpeedInfo(cat, nombre);
-  return `<div class="tarjeta-jugador" onclick="abrirPerfilJugador('${cat}','${esc(nombre).replace(/'/g,"\\'")}')"
-    style="cursor:pointer;background:linear-gradient(135deg,var(--surface2),rgba(5,8,15,0.6));border:1px solid var(--border2);border-radius:12px;overflow:hidden">
-    <div style="display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--border2)">
-      <div style="width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,var(--gold),#8a6a10);
-        display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:17px;color:#1a1206;flex-shrink:0">${esc(iniciales)}</div>
-      <div style="min-width:0">
-        <div style="font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:1px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(formatNombreMostrar(nombre,cat))}</div>
-        <div style="font-size:11px;color:var(--muted);margin-top:2px">${esc(p.posicion||'—')} · ${cat}</div>
-      </div>
-    </div>
-    <div style="padding:12px 16px">
-      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:${(golesFilas.length||top)?10:0}px">
-        ${[['Conv.',s.convocatorias],['Titular',s.partidos_titular],['Min.',s.minutos_jugados],['Goles',s.goles]]
-          .map(([l,v])=>`<div style="background:rgba(5,8,15,0.5);border:1px solid var(--border2);border-radius:7px;padding:6px 4px;text-align:center">
-            <div style="font-family:'Bebas Neue',sans-serif;font-size:15px;color:var(--gold2)">${v||0}</div>
-            <div style="font-size:8.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-top:2px">${l}</div>
-          </div>`).join('')}
-      </div>
-      ${golesFilas.length?`<div style="font-size:10.5px;color:var(--text2);margin-bottom:${top?6:0}px">⚽ ${golesFilas.map(esc).join(' · ')}</div>`:''}
-      ${top?`<div style="font-size:10.5px;color:var(--gold2)">⚡ Vel. máx ${top.velmax}km/h${top.fecha?` · F${top.fecha}`:''}</div>`:''}
-      <button onclick="event.stopPropagation();exportarTarjetaJugadorImg('${cat}','${esc(nombre).replace(/'/g,"\\'")}',false)"
-        title="Descargar/compartir tarjeta como imagen"
-        style="margin-top:10px;width:100%;background:rgba(201,162,39,0.1);border:1px solid var(--border2);color:var(--gold2);
-        border-radius:6px;padding:6px;font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:1px;
-        font-weight:700;cursor:pointer">📤 COMPARTIR</button>
-    </div>
-  </div>`;
-}
-
-// Dibuja la tarjeta de un jugador como imagen (canvas), mismo patrón que
-// dibujarTarjetaRival (fuentes/colores fijos porque canvas no lee
-// var(--...), SCALE=3 para que no salga pixelado, toBlob al final).
-async function dibujarTarjetaJugador(cat, nombre){
-  if(document.fonts && document.fonts.ready) await document.fonts.ready;
-  const roster = plantelFutdetail[cat]||[];
-  const jugador = roster.find(p=>p.nombre===nombre);
-  const statsPorNombre={};
-  (jugadoresStats[cat]||[]).forEach(j=>{ statsPorNombre[normNombre(j.jugador)]=j; });
-  const s = statsPorNombre[normNombre(nombre)]||{};
-  const golData = golesEfectivos(cat).find(g=>g.name===nombre
-    || normNombreOrdenIndependiente(g.name)===normNombreOrdenIndependiente(nombre));
-  const golesFilas = (golData?.fechas||[]).slice(0,4);
-  const top = topSpeedInfo(cat, nombre);
-
-  const BG='#111e38', GOLD='#f0c040', GOLD2='#e0bc4a', TXT='#e8edf7', TXT2='#a8c0e8', MUTED='#8aa0cc', BORDER='#3a5090';
-  const W=900, H=700, pad=48, SCALE=3;
-  const canvas=document.createElement('canvas');
-  canvas.width=W*SCALE; canvas.height=H*SCALE;
-  const ctx=canvas.getContext('2d');
-  ctx.scale(SCALE,SCALE);
-  ctx.imageSmoothingEnabled=true; ctx.imageSmoothingQuality='high';
-  ctx.fillStyle=BG; ctx.fillRect(0,0,W,H);
-  ctx.textBaseline='top';
-
-  const escudoTigre = await cargarImagen(document.getElementById('escudoImg')?.src);
-  if(escudoTigre) ctx.drawImage(escudoTigre, pad, pad, 60, 60);
-
-  ctx.font="15px 'Barlow', sans-serif"; ctx.fillStyle=TXT2; ctx.textAlign='right';
-  const catLabel = CATEGORIAS_CONFIG[cat]?.label ? CATEGORIAS_CONFIG[cat].label.toUpperCase()+' DIVISIÓN' : cat;
-  ctx.fillText(catLabel, W-pad, pad+22);
-  ctx.textAlign='left';
-
-  let y = pad+100;
-  const iniciales = nombre.split(/[\s,]+/).filter(Boolean).slice(0,2).map(w=>w[0]).join('').toUpperCase()||'?';
-  const cx=pad+55, cy=y+55, r=55;
-  const grad = ctx.createLinearGradient(cx-r,cy-r,cx+r,cy+r);
-  grad.addColorStop(0,'#c9a227'); grad.addColorStop(1,'#8a6a10');
-  ctx.fillStyle=grad;
-  ctx.beginPath(); ctx.arc(cx,cy,r,0,Math.PI*2); ctx.fill();
-  ctx.fillStyle='#1a1206'; ctx.font="700 40px 'Bebas Neue', sans-serif"; ctx.textAlign='center'; ctx.textBaseline='middle';
-  ctx.fillText(iniciales, cx, cy+2);
-  ctx.textAlign='left'; ctx.textBaseline='top';
-
-  ctx.font="700 44px 'Bebas Neue', sans-serif"; ctx.fillStyle=TXT;
-  ctx.fillText(formatNombreMostrar(nombre,cat).toUpperCase(), pad+130, y+18);
-  ctx.font="18px 'Barlow Condensed', sans-serif"; ctx.fillStyle=MUTED;
-  ctx.fillText(`${jugador?.posicion||'—'} · ${cat}`, pad+130, y+68);
-
-  y += 160;
-  const stats=[['CONV.',s.convocatorias],['TITULAR',s.partidos_titular],['MINUTOS',s.minutos_jugados],['GOLES',s.goles]];
-  const boxW=(W-pad*2-3*16)/4, boxH=100;
-  stats.forEach(([label,val],i)=>{
-    const bx=pad+i*(boxW+16);
-    ctx.strokeStyle=BORDER; ctx.lineWidth=1;
-    ctxRoundRect(ctx,bx,y,boxW,boxH,10); ctx.stroke();
-    ctx.font="700 38px 'Bebas Neue', sans-serif"; ctx.fillStyle=GOLD2; ctx.textAlign='center';
-    ctx.fillText(String(val||0), bx+boxW/2, y+22);
-    ctx.font="13px 'Barlow Condensed', sans-serif"; ctx.fillStyle=MUTED;
-    ctx.fillText(label, bx+boxW/2, y+70);
-    ctx.textAlign='left';
-  });
-
-  y += boxH+50;
-  if(golesFilas.length){
-    ctx.font="700 20px 'Barlow Condensed', sans-serif"; ctx.fillStyle=GOLD;
-    ctx.fillText('⚽ GOLES', pad, y);
-    y+=36;
-    ctx.font="20px 'Barlow Condensed', sans-serif"; ctx.fillStyle=TXT2;
-    golesFilas.forEach(f=>{ ctx.fillText(f, pad, y); y+=32; });
-    y+=20;
-  }
-  if(top){
-    ctx.font="700 20px 'Barlow Condensed', sans-serif"; ctx.fillStyle=GOLD;
-    ctx.fillText('⚡ RENDIMIENTO FÍSICO', pad, y);
-    y+=36;
-    ctx.font="20px 'Barlow Condensed', sans-serif"; ctx.fillStyle=TXT2;
-    ctx.fillText(`Vel. máx ${top.velmax} km/h${top.fecha?` · F${top.fecha}`:''}`, pad, y);
-    y+=32;
-  }
-
-  return new Promise(resolve=>canvas.toBlob(resolve,'image/png'));
-}
-
-async function exportarTarjetaJugadorImg(cat, nombre, compartir){
-  const blob = await dibujarTarjetaJugador(cat, nombre);
-  await descargarOCompartirPlaca(blob, `tarjeta-${slugArchivo(nombre)}-${cat}.png`, compartir);
-}
-
-function buildTarjetasJugadoresHTML(cat, merged){
-  const idSec = 'tarjetas-'+cat;
-  return `${seccionTitulo(idSec, '🃏 TARJETAS DE JUGADORES')}
-    <div id="sec-${idSec}"${seccionEstiloInicial(idSec)}>
-      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;margin-bottom:20px">
-        ${merged.map(p=>tarjetaJugadorHTML(cat,p)).join('')}
-      </div>
-    </div>`;
-}
-
-// Selectores de 2-3 jugadores para comparar (tabla, una fila por métrica)
+// Selectores de 2-3 jugadores para comparar
 function buildComparativaJugadoresHTML(cat, merged){
   const opts='<option value="">— Jugador —</option>'+
     merged.map(p=>`<option value="${esc(p.nombre)}">${esc(formatNombreMostrar(p.nombre,cat))}</option>`).join('');
@@ -6964,6 +6823,14 @@ function buildComparativaJugadoresHTML(cat, merged){
     <div id="comp-jug-result-${cat}" style="margin-bottom:20px"></div>`;
 }
 
+// Cada jugador comparado se muestra con la misma tarjeta que la Ficha
+// individual (calcularFichaJugador/renderFichaCardHTML: radar + números),
+// sin el historial partido a partido (queda un clic más adentro, abriendo
+// la Ficha completa) -- así 2-3 tarjetas entran una al lado de la otra sin
+// quedar eternas. En cada estadística (Convoc./Titular/Minutos/Goles/Amar.,
+// o Roj. en Reserva) se resalta en dorado quién de los elegidos tiene el
+// mejor valor -- mismo criterio que ya usaba la comparativa vieja, pero
+// ahora sobre datos reales (COMET+statfutbol, no el merge simple del roster).
 function renderComparativaJugadores(cat, merged){
   const container=document.getElementById(`comp-jug-result-${cat}`);
   if(!container) return;
@@ -6974,52 +6841,24 @@ function renderComparativaJugadores(cat, merged){
       font-family:'Barlow Condensed',sans-serif;font-size:13px">Elegí 2 o 3 jugadores arriba para comparar</div>`;
     return;
   }
-  const players=nombres.map(n=>merged.find(p=>p.nombre===n)).filter(Boolean);
-  container.innerHTML=`<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px">
-    ${players.map(p=>tarjetaComparativaHTML(cat, p, players)).join('')}
-  </div>`;
-}
-
-// Misma info que la tarjeta de PLANTEL, pero pensada para verse una al lado
-// de la otra: en vez de resaltar solo "mejor valor" con texto dorado (como
-// hacía la tabla vieja), acá cada número que gana la comparación se dibuja
-// con el mismo criterio visual dorado que ya usa el resto de la app.
-function tarjetaComparativaHTML(cat, p, players){
-  const s = p.stats||{};
-  const nombre = p.nombre||'—';
-  const iniciales = nombre.split(/[\s,]+/).filter(Boolean).slice(0,2).map(w=>w[0]).join('').toUpperCase()||'?';
-  const golData = golesEfectivos(cat).find(g=>g.name===nombre
-    || normNombreOrdenIndependiente(g.name)===normNombreOrdenIndependiente(nombre));
-  const golesFilas = (golData?.fechas||[]).slice(0,3);
-  const STAT_KEYS=[
-    ['convocatorias','Conv.'],['partidos_titular','Titular'],['minutos_jugados','Min.'],['goles','Goles'],
-    ['asistencias','Asist.'],['tarjeta_amarilla','Amar.'],['tarjeta_roja','Rojas'],
-  ];
-  const statBoxHTML=([key,label])=>{
-    const val=parseInt(s[key])||0;
-    const max=Math.max(...players.map(o=>parseInt((o.stats||{})[key])||0));
-    const esMejor=max>0 && val===max;
-    return `<div style="background:rgba(5,8,15,0.5);border:1px solid ${esMejor?'var(--gold)':'var(--border2)'};border-radius:7px;padding:6px 4px;text-align:center">
-      <div style="font-family:'Bebas Neue',sans-serif;font-size:15px;color:${esMejor?'var(--gold2)':'var(--text2)'}">${val}</div>
-      <div style="font-size:8.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-top:2px">${label}</div>
-    </div>`;
-  };
-  return `<div style="background:linear-gradient(135deg,var(--surface2),rgba(5,8,15,0.6));border:1px solid var(--border2);border-radius:12px;overflow:hidden">
-    <div style="display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--border2)">
-      <div style="width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,var(--gold),#8a6a10);
-        display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:17px;color:#1a1206;flex-shrink:0">${esc(iniciales)}</div>
-      <div style="min-width:0">
-        <div style="font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:1px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(formatNombreMostrar(nombre,cat))}</div>
-        <div style="font-size:11px;color:var(--muted);margin-top:2px">${esc(p.posicion||'—')} · ${p.edad?p.edad+' años':'—'}</div>
+  const datos = nombres.map(n=>calcularFichaJugador(cat, n));
+  const boxesPorJugador = datos.map(statBoxesDeFicha);
+  const mejoresPorJugador = datos.map(()=>new Set());
+  boxesPorJugador[0].forEach(([key])=>{
+    const max = Math.max(...boxesPorJugador.map(bs=>bs.find(b=>b[0]===key)[2]||0));
+    if(max>0) boxesPorJugador.forEach((bs,i)=>{ if((bs.find(b=>b[0]===key)[2]||0)===max) mejoresPorJugador[i].add(key); });
+  });
+  const canvasId = i=>`radar-comp-${cat}-${i}`;
+  container.innerHTML=`<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px">
+    ${datos.map((d,i)=>`<div style="background:linear-gradient(135deg,var(--surface2),rgba(5,8,15,0.6));border:1px solid var(--border2);border-radius:12px;padding:14px 16px">
+      ${renderFichaCardHTML(d, canvasId(i), {detalle:false, mejores:mejoresPorJugador[i]})}
+      <div style="text-align:center;margin-top:6px">
+        <a href="javascript:void(0)" onclick="abrirPerfilJugador('${cat}','${esc(d.nombre).replace(/'/g,"\\'")}')"
+          style="color:var(--gold2);text-decoration:none;font-size:11px;letter-spacing:.5px;cursor:pointer">Ver ficha completa ▸</a>
       </div>
-    </div>
-    <div style="padding:12px 16px">
-      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:${golesFilas.length?10:0}px">
-        ${STAT_KEYS.map(statBoxHTML).join('')}
-      </div>
-      ${golesFilas.length?`<div style="font-size:10.5px;color:var(--text2)">⚽ ${golesFilas.map(esc).join(' · ')}</div>`:''}
-    </div>
+    </div>`).join('')}
   </div>`;
+  datos.forEach((d,i)=>dibujarRadarFicha(d, canvasId(i)));
 }
 
 function filtrarRosterJugadores(cat){
@@ -9379,7 +9218,7 @@ async function generarPDFCategoria(cat){
 // pero solo se veía adentro de Goleadores) y, si Brian ya cargó datos en
 // BL GPS Performance, un resumen de sus partidos ahí. Se abre haciendo
 // click en el nombre dentro de la tabla de PLANTEL.
-function abrirPerfilJugador(cat, nombre){
+function calcularFichaJugador(cat, nombre){
   // RESERVA: sin GPS ni minutos (no hay COMET ni Catapult), así que la ficha
   // no lleva radar; muestra goles y tarjetas (amarillas/rojas) por fecha,
   // sacadas de statfutbol (statfutbol_partidos). El plantel de Reserva vive
@@ -9627,15 +9466,6 @@ function abrirPerfilJugador(cat, nombre){
   const radarVelMax  = (refVelMax  && velMax!=null)      ? Math.min(100, Math.round(velMax/refVelMax*100))      : 0;
   const radarMts     = (refMts     && mtsProm!=null)     ? Math.min(100, Math.round(mtsProm/refMts*100))       : 0;
   const hayGps = gpsMatches.length>0;
-  const radarHTML = esReserva ? '' : `
-    <div style="position:relative;width:100%;height:240px;margin:6px 0">
-      <canvas id="radar-perfil-jugador" role="img" aria-label="Radar de ${esc(nombreMostrar)}: cada eje es el porcentaje respecto al mejor dato del plantel de ${esc(cat)} en goles, minutos jugados${hayGps?', sprints, velocidad maxima y metros por minuto':''}${hayGps?'':' -- sprints, velocidad maxima y metros por minuto todavia pendientes de carga GPS'}"></canvas>
-    </div>
-    <div style="display:flex;flex-wrap:wrap;justify-content:center;gap:14px;font-size:10.5px;color:var(--muted);margin-bottom:6px">
-      <span style="display:flex;align-items:center;gap:4px"><span style="width:8px;height:8px;border-radius:50%;background:#2a78d6"></span>Dato real</span>
-      ${hayGps?'':'<span style="display:flex;align-items:center;gap:4px"><span style="width:8px;height:8px;border-radius:50%;background:var(--muted)"></span>Pendiente (GPS)</span>'}
-    </div>
-    <div style="font-size:10.5px;color:var(--muted);text-align:center;margin-bottom:14px">Cada eje es el % respecto al mejor dato del plantel de ${esc(cat)} en esa métrica.${hayGps?'':' Sprints, Vel. máxima y Mts/min se completan solos cuando Brian cargue en BL GPS Performance.'}</div>`;
 
   const partidosJugadosHTML = partidosJugados.length
     ? `<div class="table-wrap"><table><thead><tr><th>F</th><th>Rival</th><th>Res.</th><th>Eventos</th></tr></thead><tbody>
@@ -9651,48 +9481,87 @@ function abrirPerfilJugador(cat, nombre){
       </tbody></table></div>`
     : `<div style="color:var(--muted);font-size:12px;padding:6px 0">Sin partidos con citación cargada todavía.</div>`;
 
-  let m=document.getElementById('perfil-jugador-modal');
-  if(m) m.remove();
-  m=document.createElement('div');
-  m.id='perfil-jugador-modal'; m.className='modal-bg';
-  m.innerHTML = `<div class="modal-box" style="width:460px;max-width:92vw;text-align:left;max-height:85vh;overflow:auto">
-    <button class="m-cancel" onclick="document.getElementById('perfil-jugador-modal').remove()" style="float:right">✕</button>
-    <h2 style="text-align:center">${esc(nombreMostrar)}</h2>
-    <p style="text-align:center">${esc(jugador?.posicion||'—')} · ${esc(cat)}</p>
-    ${radarHTML}
-    <div style="display:grid;grid-template-columns:repeat(${esReserva?5:4},1fr);gap:8px;margin:14px 0">
-      ${(esReserva
-        ? [['Convoc.',convocatorias],['Titular',vecesTitular],['Goles',golesFinal],['Amar.',amarillasFinal],['Roj.',rojasFinal]]
-        : [['Convoc.',convocatorias],['Titular',vecesTitular],['Minutos',minutosFinal],['Amar.',amarillasFinal]])
-        .map(([label,val])=>`<div style="background:var(--surface2);border-radius:8px;padding:8px;text-align:center">
-          <div style="font-size:10px;color:var(--muted);text-transform:uppercase">${label}</div>
-          <div style="font-size:18px;font-weight:700;color:var(--gold2)">${val||0}</div></div>`).join('')}
-    </div>
-    <div style="font-size:11px;color:var(--muted);margin-bottom:10px">${esReserva
-      ? 'Convoc./titular: tus citaciones · goles: tu carga, completada con statfutbol · tarjetas: statfutbol, partido por partido.'
-      : `Convoc./titular: tus citaciones · minutos/amarillas: COMET, completado con futdetail donde falte informe. Goles: ver arriba (radar) y en Partidos jugados. Entró de banco: ${vecesEntroDeBanco} · Salió: ${vecesSalio}`}</div>
-    <div class="st"><div class="stbar"></div>🗓️ PARTIDOS JUGADOS</div>
-    ${partidosJugadosHTML}
-  </div>`;
-  document.body.appendChild(m);
+  return {
+    cat, nombre, esReserva, jugador, nombreMostrar,
+    convocatorias, vecesTitular, vecesBanco, vecesEntroDeBanco, vecesSalio,
+    minutosFinal, golesFinal, amarillasFinal, rojasFinal,
+    partidosJugados, partidosJugadosHTML,
+    hayGps, sprintsProm, velMax, mtsProm,
+    radarGoles, radarMinutos, radarSprints, radarVelMax, radarMts,
+  };
+}
 
-  killChart('radar-perfil-jugador');
-  if(!esReserva) new Chart(document.getElementById('radar-perfil-jugador'), {
+// Los "boxes" numéricos de la ficha (Convoc./Titular/Minutos.../Amar...), en
+// el mismo orden para la Ficha individual y para Comparar jugadores -- así
+// resaltar "el mejor" (ver renderFichaCardHTML) usa la misma lista de
+// estadísticas en los dos lugares.
+function statBoxesDeFicha(d){
+  return d.esReserva
+    ? [['convocatorias','Convoc.',d.convocatorias],['titular','Titular',d.vecesTitular],['goles','Goles',d.golesFinal],['amarillas','Amar.',d.amarillasFinal],['rojas','Roj.',d.rojasFinal]]
+    : [['convocatorias','Convoc.',d.convocatorias],['titular','Titular',d.vecesTitular],['minutos','Minutos',d.minutosFinal],['goles','Goles',d.golesFinal],['amarillas','Amar.',d.amarillasFinal]];
+}
+
+// Arma el contenido de una ficha (radar + números) a partir de
+// calcularFichaJugador -- reusado por la Ficha individual (modal, detalle
+// completo) y por Comparar jugadores (tarjetas una al lado de la otra, sin
+// el historial partido a partido para que no quede eterno con 2-3 jugadores
+// juntos -- ese detalle sigue un clic más adentro, abriendo la Ficha).
+// mejores: Set con las keys de statBoxesDeFicha en las que ESTE jugador
+// tiene el mejor valor entre los comparados -- se resaltan en dorado, mismo
+// criterio visual que ya usa el resto de la app.
+function renderFichaCardHTML(d, canvasId, opts){
+  opts = opts||{};
+  const mejores = opts.mejores || new Set();
+  const detalle = opts.detalle!==false;
+  const boxes = statBoxesDeFicha(d);
+  const radarHTML = d.esReserva ? '' : `
+    <div style="position:relative;width:100%;height:240px;margin:6px 0">
+      <canvas id="${canvasId}" role="img" aria-label="Radar de ${esc(d.nombreMostrar)}: cada eje es el porcentaje respecto al mejor dato del plantel de ${esc(d.cat)} en goles, minutos jugados${d.hayGps?', sprints, velocidad maxima y metros por minuto':''}${d.hayGps?'':' -- sprints, velocidad maxima y metros por minuto todavia pendientes de carga GPS'}"></canvas>
+    </div>
+    ${detalle ? `<div style="display:flex;flex-wrap:wrap;justify-content:center;gap:14px;font-size:10.5px;color:var(--muted);margin-bottom:6px">
+      <span style="display:flex;align-items:center;gap:4px"><span style="width:8px;height:8px;border-radius:50%;background:#2a78d6"></span>Dato real</span>
+      ${d.hayGps?'':'<span style="display:flex;align-items:center;gap:4px"><span style="width:8px;height:8px;border-radius:50%;background:var(--muted)"></span>Pendiente (GPS)</span>'}
+    </div>
+    <div style="font-size:10.5px;color:var(--muted);text-align:center;margin-bottom:14px">Cada eje es el % respecto al mejor dato del plantel de ${esc(d.cat)} en esa métrica.${d.hayGps?'':' Sprints, Vel. máxima y Mts/min se completan solos cuando Brian cargue en BL GPS Performance.'}</div>` : ''}`;
+  return `
+    <h2 style="text-align:center">${esc(d.nombreMostrar)}</h2>
+    <p style="text-align:center">${esc(d.jugador?.posicion||'—')} · ${esc(d.cat)}</p>
+    ${radarHTML}
+    <div style="display:grid;grid-template-columns:repeat(${boxes.length},1fr);gap:8px;margin:14px 0">
+      ${boxes.map(([key,label,val])=>{
+        const esMejor = mejores.has(key);
+        return `<div style="background:var(--surface2);border:1px solid ${esMejor?'var(--gold)':'transparent'};border-radius:8px;padding:8px;text-align:center">
+          <div style="font-size:10px;color:var(--muted);text-transform:uppercase">${label}</div>
+          <div style="font-size:18px;font-weight:700;color:${esMejor?'var(--gold2)':'var(--text)'}">${val||0}</div></div>`;
+      }).join('')}
+    </div>
+    ${detalle ? `
+    <div style="font-size:11px;color:var(--muted);margin-bottom:10px">${d.esReserva
+      ? 'Convoc./titular: tus citaciones · goles: tu carga, completada con statfutbol · tarjetas: statfutbol, partido por partido.'
+      : `Convoc./titular: tus citaciones · minutos/amarillas: COMET, completado con futdetail donde falte informe. Goles: ver arriba (radar) y en Partidos jugados. Entró de banco: ${d.vecesEntroDeBanco} · Salió: ${d.vecesSalio}`}</div>
+    <div class="st"><div class="stbar"></div>🗓️ PARTIDOS JUGADOS</div>
+    ${d.partidosJugadosHTML}` : ''}`;
+}
+
+function dibujarRadarFicha(d, canvasId){
+  killChart(canvasId);
+  if(d.esReserva) return;
+  new Chart(document.getElementById(canvasId), {
     type: 'radar',
     data: {
       labels: [
-        ['Goles', `${golesFinal} · ${radarGoles}% del máx.`],
-        ['Minutos jugados', `${minutosFinal}' · ${radarMinutos}% del máx.`],
-        ['Sprints', sprintsProm!=null ? `${fmtGps(sprintsProm)}/partido · ${radarSprints}%` : 'pendiente'],
-        ['Vel. máxima', velMax!=null ? `${fmtGps(velMax)} km/h · ${radarVelMax}%` : 'pendiente'],
-        ['Mts/min', mtsProm!=null ? `${fmtGps(mtsProm)} m/min · ${radarMts}%` : 'pendiente']
+        ['Goles', `${d.golesFinal} · ${d.radarGoles}% del máx.`],
+        ['Minutos jugados', `${d.minutosFinal}' · ${d.radarMinutos}% del máx.`],
+        ['Sprints', d.sprintsProm!=null ? `${fmtGps(d.sprintsProm)}/partido · ${d.radarSprints}%` : 'pendiente'],
+        ['Vel. máxima', d.velMax!=null ? `${fmtGps(d.velMax)} km/h · ${d.radarVelMax}%` : 'pendiente'],
+        ['Mts/min', d.mtsProm!=null ? `${fmtGps(d.mtsProm)} m/min · ${d.radarMts}%` : 'pendiente']
       ],
       datasets: [{
-        label: nombre,
-        data: [radarGoles, radarMinutos, radarSprints, radarVelMax, radarMts],
+        label: d.nombre,
+        data: [d.radarGoles, d.radarMinutos, d.radarSprints, d.radarVelMax, d.radarMts],
         borderColor: '#2a78d6',
         backgroundColor: 'rgba(42,120,214,0.15)',
-        pointBackgroundColor: hayGps ? '#2a78d6' : ['#2a78d6','#2a78d6','#5a7099','#5a7099','#5a7099'],
+        pointBackgroundColor: d.hayGps ? '#2a78d6' : ['#2a78d6','#2a78d6','#5a7099','#5a7099','#5a7099'],
         pointRadius: 5,
         borderWidth: 2
       }]
@@ -9712,6 +9581,20 @@ function abrirPerfilJugador(cat, nombre){
       }
     }
   });
+}
+
+function abrirPerfilJugador(cat, nombre){
+  const d = calcularFichaJugador(cat, nombre);
+  let m=document.getElementById('perfil-jugador-modal');
+  if(m) m.remove();
+  m=document.createElement('div');
+  m.id='perfil-jugador-modal'; m.className='modal-bg';
+  m.innerHTML = `<div class="modal-box" style="width:460px;max-width:92vw;text-align:left;max-height:85vh;overflow:auto">
+    <button class="m-cancel" onclick="document.getElementById('perfil-jugador-modal').remove()" style="float:right">✕</button>
+    ${renderFichaCardHTML(d, 'radar-perfil-jugador', {})}
+  </div>`;
+  document.body.appendChild(m);
+  dibujarRadarFicha(d, 'radar-perfil-jugador');
 }
 
 function exportFichaJugador(cat, nombre){
