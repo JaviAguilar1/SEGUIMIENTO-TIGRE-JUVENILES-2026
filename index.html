@@ -6318,12 +6318,44 @@ function confirmarComet(cat, fecha){
 // procesó (matchData[cat][fecha] tiene titulares), el ícono 📋 de la tabla
 // abre esta ficha en vez de un link. condicionCat ya contempla que las
 // categorías menores (7ma/8va/9na) juegan al revés que las mayores.
+function guardarMinutosGolesRival(cat, fecha){
+  if(!canEditCat(cat) || !matchData[cat]?.[fecha]) return;
+  const inp = document.getElementById(`cit-golrival-input-${cat}-${fecha}`);
+  if(!inp) return;
+  const mins = inp.value.split(',').map(s=>parseInt(s.trim(),10)).filter(n=>!isNaN(n)).sort((a,b)=>a-b);
+  matchData[cat][fecha].minutosGolesRival = mins;
+  saveData();
+  showToast('☁ GUARDADO');
+}
 function abrirCitacionView(cat, fecha){
   const d = matchData[cat]?.[fecha];
   if(!d || !d.titulares?.length) return;
   const cond = condicionCat(cat, fecha);
   const condTxt = cond==='L' ? 'LOCAL' : cond==='V' ? 'VISITANTE' : '';
   const hayWarn = d.titulares.some(p=>p.warn) || d.suplentes.some(p=>p.warn);
+  // Minutos de los goles del RIVAL -- la citación (COMET) solo trae goles/
+  // tarjetas de los jugadores propios (tienen id de plantel), nunca del
+  // rival. Se carga a mano, aparte, y se guarda en matchData (mismo atajo
+  // que titulares/suplentes/segundoTiempo -- entra entero al payload de
+  // saveData(), no hace falta tocarla en otro lado). El resultado ya
+  // cargado (results) da la pista de cuántos goles hay que cargar.
+  const rivalGolCount = results[cat]?.[fecha]?.[1];
+  const minutosGolRival = d.minutosGolesRival || [];
+  const golRivalHTML = canEditCat(cat) ? `
+    <div style="margin:10px 0;padding:10px;background:var(--surface2);border-radius:8px">
+      <div style="font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:1px;color:var(--muted);margin-bottom:6px">
+        ⚽ MINUTOS DE LOS GOLES DE ${esc((d.rival||'RIVAL').toUpperCase())}${rivalGolCount!=null?` (${rivalGolCount} según el resultado)`:''}
+      </div>
+      <div style="display:flex;gap:6px">
+        <input id="cit-golrival-input-${cat}-${fecha}" type="text" value="${esc(minutosGolRival.join(', '))}" placeholder="Ej: 23, 77"
+          style="flex:1;background:rgba(5,8,15,0.5);border:1px solid var(--border2);border-radius:5px;color:var(--text);font-size:12px;padding:6px 8px">
+        <button onclick="guardarMinutosGolesRival('${cat}',${fecha})" title="Guardar"
+          style="background:none;border:1px solid var(--border2);border-radius:5px;color:var(--gold2);font-size:12px;padding:4px 10px;cursor:pointer">💾</button>
+      </div>
+    </div>` : (minutosGolRival.length ? `
+    <div style="font-size:11px;color:var(--muted);font-family:'Barlow Condensed',sans-serif;margin:10px 0">
+      ⚽ Goles de ${esc(d.rival||'rival')}: ${minutosGolRival.map(m=>esc(String(m))+"'").join(' · ')}
+    </div>` : '');
 
   // Informe de COMET de esta misma fecha (Fase 4), si ya se subió — cruza
   // por id de plantel, no por nombre (evita comparar "Nombre Apellido" de
@@ -6465,6 +6497,7 @@ function abrirCitacionView(cat, fecha){
     </div>
     ${d.provisional?`<div style="font-size:11px;color:var(--gold2);font-family:'Barlow Condensed',sans-serif;background:rgba(212,175,55,.12);border:1px solid var(--gold);border-radius:6px;padding:8px 10px;margin:8px 0">⚠️ Provisional — armada con la formación de statfutbol (quién jugó), todavía sin la planilla oficial de citación. Se corrige al subir el PDF.</div>`:''}
     ${hayWarn?`<div style="font-size:11px;color:var(--draw);font-family:'Barlow Condensed',sans-serif;margin:8px 0">⚠️ Los nombres marcados no coinciden con el plantel — puede haber salido incompleto o cruzado al leer el PDF, revisá contra el original si hace falta.</div>`:''}
+    ${golRivalHTML}
     ${d.segundoTiempo?`<div style="font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:1px;color:var(--gold2);margin-top:10px">⏱️ PRIMER TIEMPO · NITO SAN ANDRÉS</div>`:''}
     ${mitadHTML(`${cat}/${fecha}`, d.titulares, d.suplentes)}
     ${d.segundoTiempo?`
