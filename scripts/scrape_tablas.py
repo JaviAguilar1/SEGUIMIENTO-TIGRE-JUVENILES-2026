@@ -1051,6 +1051,152 @@ def fetch_catapult_players(email: str, password: str, plantel_por_cat=None):
     return out
 
 
+def fetch_catapult_players_reserva(email, password, fixture_reserva_por_cat):
+    """Igual que fetch_catapult_players, pero para Reserva -- con SU PROPIA
+    cuenta de Catapult (no la compartida de 4TA-9NA: el club no tiene esas
+    credenciales, las carga el PF de Reserva desde la app, ver
+    gps/catapultReservaAuth en index.html) y SU PROPIO calendario real
+    (Copa Proyeccion -- fixture_reserva_por_cat = {cat: {fecha: {"fecha_iso":
+    "YYYY-MM-DD", ...}}}, mismo shape que resultado["fixture_reserva"]) en
+    vez de CATAPULT_FECHA_CALENDARIO (que es el fixture de la LPF de
+    4TA-9NA, no sirve aca). No hay plantel real de Reserva para cruzar
+    nombres desde este script (esta en Firebase, no en un archivo local) --
+    se usa el nombre tal cual lo entrega Catapult, igual que hace BL GPS
+    Performance; el matching contra el plantel real ya lo hace la app del
+    lado del cliente al mostrarlo (mismo criterio que mismoEquipoReserva/
+    resolverNombreLCS en index.html).
+
+    Devuelve {cat: {nombre: {"pos":..., "match":[...]}}} -- mismo shape que
+    fetch_catapult_players, para mergear directo en catapult_gps.players."""
+    opener, cj = catapult_login(email, password)
+    teams = catapult_get(opener, f"{CATAPULT_API_BASE}/teams")
+    if not teams:
+        raise ValueError("la cuenta de Catapult de Reserva no tiene ningun equipo")
+    # Una cuenta dedicada a Reserva probablemente tiene un solo equipo -- si
+    # tiene varios, se prioriza el que diga "reserva" en el nombre.
+    team = next((t for t in teams if "reserva" in (t.get("name") or "").lower()), teams[0])
+    team_id = team["id"]
+    actividades = catapult_get(opener, f"{CATAPULT_API_BASE}/activities"
+                                f"?page=1&page_size=100&sort=-start_time&deleted=0&team_ids={team_id}")
+
+    out = {}
+    for cat, fixture_cat in (fixture_reserva_por_cat or {}).items():
+        fecha_por_dia = {}
+        for f_str, info in (fixture_cat or {}).items():
+            iso = (info or {}).get("fecha_iso")
+            if iso:
+                fecha_por_dia[iso] = int(f_str)
+        if not fecha_por_dia:
+            continue
+
+        fecha_por_activity_id = {}
+        for a in actividades:
+            if " vs " not in (a.get("name") or ""):
+                continue
+            inicio = a.get("start_time") or ""
+            fnum = fecha_por_dia.get(inicio[:10])
+            if fnum is not None:
+                fecha_por_activity_id[a["id"]] = fnum
+
+        partidos = list(fecha_por_activity_id.keys())
+        if not partidos:
+            print(f"[AVISO] Catapult Reserva {cat}: ninguna actividad de '{team.get('name')}' "
+                  f"coincide con el calendario real de esta categoria")
+            continue
+
+        roster = catapult_get(opener, f"{CATAPULT_API_BASE}/activities/{partidos[0]}/athletes")
+        posiciones = {
+            f"{r.get('first_name', '')} {r.get('last_name', '')}".strip(): r.get("position_name", "")
+            for r in roster
+        }
+
+        filas = catapult_stats_post(opener, cj, partidos)
+        cat_out = out.setdefault(cat, {})
+        for fila in filas:
+            nombre = fila.get("athlete_name")
+            fecha_num = fecha_por_activity_id.get(fila.get("activity_id"))
+            if not nombre or fecha_num is None:
+                continue
+            minutos = round((fila.get("total_duration") or 0) / 60)
+            act_nombre = fila.get("activity_name") or ""
+            rival = act_nombre.split(" vs ")[-1].strip() if " vs " in act_nombre else ""
+            acel_mas3 = fila.get("gen2_acceleration_band8_total_effort_count") or 0
+            m25 = fila.get("velocity_band8_total_distance") or 0
+            metrics = [
+                fila.get("average_distance_session"), fila.get("meterage_per_minute"),
+                fila.get("velocity_band6_total_distance"), fila.get("velocity_band7_total_distance"),
+                m25, fila.get("gen2_velocity_band8_total_effort_count"),
+                fila.get("max_vel"), acel_mas3,
+                fila.get("gen2_acceleration_band1_total_effort_count"),
+                fila.get("gen2_acceleration_band2_total_effort_count"), None,
+                fila.get("max_effort_acceleration"), fila.get("max_effort_deceleration"),
+                round(acel_mas3 / minutos, 2) if minutos else 0,
+                fila.get("high_speed_distance_per_minute"),
+                round(m25 / minutos, 2) if minutos else 0,
+                fila.get("total_player_load"),
+            ]
+            cat_out.setdefault(nombre, {"pos": posiciones.get(nombre, ""), "match": []})
+            registro = {"fecha": f"F{fecha_num}", "opp": rival, "min": minutos, "metrics": metrics}
+            # Mismo criterio que fetch_catapult_players: si Catapult tiene dos
+            # actividades para el mismo partido real, se queda con la mas
+            # completa (mas minutos) en vez de duplicar.
+            previos = cat_out[nombre]["match"]
+            existente = next((r for r in previos if r["fecha"] == registro["fecha"]), None)
+            if existente is None:
+                previos.append(registro)
+            elif registro["min"] > existente["min"]:
+                previos[previos.index(existente)] = registro
+        print(f"[OK] Catapult Reserva {cat}: {len(partidos)} partido(s) matcheado(s), {len(cat_out)} jugador(es)")
+
+    return out
+
+
+def leer_credenciales_catapult_reserva():
+    """Usuario/clave de Catapult que el PF de Reserva cargo desde la app
+    (gps/catapultReservaAuth) -- la UNICA forma de leerlas es con la Admin
+    SDK de Firebase (una clave de cuenta de servicio, no un usuario/clave
+    normal): las reglas de seguridad las dejan sin ningun .read para
+    cualquier cliente logueado, admin incluido (a pedido de Javi,
+    2026-09-23: "no me interesa tenerlas, solo ser funcional a la
+    plataforma") -- la Admin SDK no pasa por esas reglas, por eso hace
+    falta este mecanismo aparte en vez de el login con email/password que
+    ya usa el resto de este script para Firebase (sincronizar_video_kickoffs).
+
+    Hace falta en esta PC:
+      1. pip install firebase-admin
+      2. La clave de cuenta de servicio (Firebase Console -> Configuracion
+         del proyecto -> Cuentas de servicio -> Generar nueva clave
+         privada) guardada como .json, con la ruta puesta en la variable de
+         entorno CATAPULT_RESERVA_ADMIN_KEY.
+    Sin cualquiera de las dos cosas, se omite sin romper el resto (mismo
+    criterio que CATAPULT_USER/FUTDETAIL_USER) -- nunca tira error."""
+    key_path = os.environ.get("CATAPULT_RESERVA_ADMIN_KEY")
+    if not key_path:
+        return None, None
+    if not os.path.exists(key_path):
+        print(f"[AVISO] CATAPULT_RESERVA_ADMIN_KEY apunta a un archivo que no existe ({key_path}), se omite Catapult de Reserva")
+        return None, None
+    try:
+        import firebase_admin
+        from firebase_admin import credentials as fb_credentials, db as fb_admin_db
+    except ImportError:
+        print("[AVISO] falta 'pip install firebase-admin', se omite Catapult de Reserva")
+        return None, None
+    try:
+        if not firebase_admin._apps:
+            cred = fb_credentials.Certificate(key_path)
+            firebase_admin.initialize_app(cred, {"databaseURL": TIGRE_FB_DB_URL})
+        datos = fb_admin_db.reference("gps/catapultReservaAuth").get() or {}
+        estado = datos.get("estado") or {}
+        if not estado.get("activo"):
+            return None, None
+        creds = datos.get("credenciales") or {}
+        return creds.get("usuario"), creds.get("clave")
+    except Exception as e:  # noqa
+        print(f"[ERROR] no se pudo leer gps/catapultReservaAuth: {e}", file=sys.stderr)
+        return None, None
+
+
 def catapult_activity_athletes(opener, activity_id):
     """GET /activities/{id}/athletes -- el roster REAL de quienes jugaron
     esa actividad (con dispositivo puesto), sacado de los datos crudos.
@@ -3394,6 +3540,28 @@ def main():
                 resultado["catapult_efforts"] = catapult_efforts_previos
     else:
         print("[AVISO] CATAPULT_USER/CATAPULT_PASS no configurados, se omite Catapult OpenField")
+
+    # Catapult de RESERVA -- cuenta APARTE de la compartida de arriba (el
+    # club no tiene esas credenciales; las carga el PF de Reserva una sola
+    # vez desde la app, ver gps/catapultReservaAuth) y calendario APARTE
+    # (Copa Proyeccion, resultado["fixture_reserva"], ya calculado mas
+    # arriba en este mismo main()). Se mergea adentro de catapult_gps.players
+    # -- mismo nodo que ya lee catapultPlayersDeCategoria(cat) del lado de
+    # la app para las demas categorias, asi que RESERVA/RESERVA_S2 quedan
+    # andando con exactamente la misma pantalla de RENDIMIENTO GPS sin
+    # tocar ninguna vista (Javi, 2026-09-23).
+    usuario_catapult_reserva, password_catapult_reserva = leer_credenciales_catapult_reserva()
+    if usuario_catapult_reserva and password_catapult_reserva:
+        try:
+            jugadores_reserva = fetch_catapult_players_reserva(
+                usuario_catapult_reserva, password_catapult_reserva, resultado.get("fixture_reserva"))
+            resultado.setdefault("catapult_gps", {}).setdefault("players", {})
+            resultado["catapult_gps"]["players"].update(jugadores_reserva)
+            total_jug_reserva = sum(len(v) for v in jugadores_reserva.values())
+            print(f"[OK] Catapult Reserva: {total_jug_reserva} jugador(es) en {len(jugadores_reserva)} categoria(s)")
+        except Exception as e:  # noqa
+            errores.append(f"Catapult Reserva: {e}")
+            print(f"[ERROR] Catapult Reserva: {e}", file=sys.stderr)
 
     # Sincronizacion automatica de video (arranque de cada tiempo) para
     # "Esfuerzos en video" -- ver detectar_kickoffs_video/

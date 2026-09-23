@@ -4568,8 +4568,20 @@ async function guardarGpsReservaManual(){
 // automático -- se corre después de hidratar gpsReservaManual Y después de
 // loadTablaData (que pisa catapultPlayers entero desde TABLA_DATA), nunca antes.
 function mergeGpsReservaManual(){
+  // No pisa lo que ya haya en catapultPlayers['RESERVA'] (puede venir del
+  // scraper -- fetch_catapult_players_reserva en scrape_tablas.py, una vez
+  // que el PF activa la automatización): se parte de una copia de eso y
+  // solo se agregan fechas de gpsReservaManual que el automático TODAVÍA no
+  // trae, para no perder cargas manuales viejas de antes de activar la
+  // automatización ni, al revés, taparlas con ellas una vez que sí hay
+  // datos reales de Catapult para esa fecha puntual.
+  const automatico = catapultPlayers['RESERVA'] || {};
+  const fechasAutomaticas = new Set();
+  Object.values(automatico).forEach(j=>(j.match||[]).forEach(m=>fechasAutomaticas.add(m.fecha)));
   const out = {};
+  Object.entries(automatico).forEach(([nombre,datos])=>{ out[nombre] = {pos:datos.pos||'', match:[...(datos.match||[])]}; });
   Object.entries(gpsReservaManual||{}).forEach(([fecha, sesion])=>{
+    if(fechasAutomaticas.has('F'+fecha)) return;
     Object.entries((sesion||{}).jugadores||{}).forEach(([nombre, datos])=>{
       out[nombre] = out[nombre] || {pos:datos.pos||'', match:[]};
       out[nombre].match.push({fecha:'F'+fecha, opp:sesion.rival||'', min:datos.min, metrics:datos.metrics});
