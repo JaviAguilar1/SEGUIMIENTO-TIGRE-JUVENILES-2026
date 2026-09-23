@@ -1842,20 +1842,32 @@ function loadData(){
   return new Promise(resolve=>{
     if(!fbReady||!db){resolve();return;}
     showLoading(true);
+    // Antes era un solo db.ref('gps').once('value') -- se separó en dos
+    // pedidos puntuales (sessions/videoSync) para poder sacarle a 'gps' el
+    // permiso de lectura de TODO el nodo: las reglas de Firebase cascadean
+    // hacia abajo (un .read concedido en un nodo padre NO se puede revocar
+    // en un hijo más restringido), así que mientras 'gps' tuviera .read
+    // propio, gps/catapultReservaAuth/credenciales quedaba igual de legible
+    // para cualquier cuenta logueada aunque tuviera su propio .read:false
+    // (confirmado en vivo, Javi 2026-09-23 -- la clave de Catapult de
+    // Reserva se podía leer igual). Pidiendo cada subnodo por separado, la
+    // regla de 'gps' se puede sacar del todo y dejar el permiso puesto nodo
+    // por nodo, sin ningún ancestro que la tape.
     Promise.all([
       db.ref('stats').once('value'),
-      db.ref('gps').once('value'),
+      db.ref('gps/sessions').once('value'),
+      db.ref('gps/videoSync').once('value'),
       db.ref('temporadaActiva').once('value')
-    ]).then(([statsSnap, gpsSnap, temporadaSnap])=>{
+    ]).then(([statsSnap, gpsSessionsSnap, gpsVideoSyncSnap, temporadaSnap])=>{
       if(temporadaSnap.val()) TEMPORADA_ACTIVA = temporadaSnap.val();
       // Load GPS sessions (Object.values funciona con array viejo u objeto nuevo)
-      if(gpsSnap.val()&&gpsSnap.val().sessions) gpsSessions = Object.values(gpsSnap.val().sessions);
+      if(gpsSessionsSnap.val()) gpsSessions = Object.values(gpsSessionsSnap.val());
       // videoSync[cat][fecha] = {kickoff1, kickoff2} -- segundo del video de
       // YouTube (links[cat][fecha].par) donde arranca cada tiempo, cargado a
       // mano una vez por partido (ver wireGpsVideoForm). Con esto +
       // catapultEfforts[cat][fecha].periodos (hora REAL de cada saque) se
       // calcula a que segundo saltar por cada esfuerzo.
-      if(gpsSnap.val()&&gpsSnap.val().videoSync) videoSync = gpsSnap.val().videoSync;
+      if(gpsVideoSyncSnap.val()) videoSync = gpsVideoSyncSnap.val();
       // Continue with stats (reuse snap variable)
       const snap = statsSnap;
       return snap;
@@ -3503,7 +3515,7 @@ function renderStatsSingle(cat, content){
         </div></td>`
       : `<td class="rival-name" style="text-align:center">${esc(rName)||'—'} <span class="cond-badge cond-${rCond}" style="margin-left:4px;font-size:10px">${rCond==='L'?'LOCAL':'VISIT.'}</span></td>`;
 
-    const hasTeamData = !!(matchData[dataCat][r.f]?.titulares?.length);
+    const hasTeamData = !!(matchData[dataCat][r.f]?.titulares?.length || matchData[dataCat][r.f]?.soloImagen);
     // Un botón de solo ícono por tipo de link, misma fila que fecha/rival/
     // resultado. Citaciones abre la ficha ya procesada (sin campo para
     // pegar link a mano, como siempre); el resto abre el link ya cargado.
@@ -3512,12 +3524,18 @@ function renderStatsSingle(cat, content){
     // mostrarla siempre en pantalla -- reusa el mismo .link-input que ya
     // sabe guardar (attachTableEvents), asi que no hizo falta tocar nada
     // del guardado.
+    // Reserva no tiene PDF con capa de texto (las planillas que suben son
+    // fotos/JPEG) -- para quien puede editar, el mismo ícono sin citación
+    // todavía carga sube la foto directo en vez de quedar deshabilitado
+    // (Javi, 2026-09-23: le pasó la carpeta con las fotos reales).
+    const puedeSubirFoto = isReserva && canEdit && !hasTeamData;
     const linkCols = isLink ? resultadosLinks.map(lt=>{
       if(lt.key==='cit'){
         return `<td class="link-cell" style="text-align:center">
-          <button class="link-btn${hasTeamData?'':' empty'}" title="Citaciones"
-            ${hasTeamData?`onclick="abrirCitacionView('${dataCat}',${r.f})"`:'disabled'}
-            style="background:none;border:none;cursor:${hasTeamData?'pointer':'default'};font-size:15px;padding:2px 6px">📋</button>
+          <button class="link-btn${hasTeamData?'':' empty'}" title="${hasTeamData?'Citaciones':(puedeSubirFoto?'Subir foto de la citación':'Citaciones')}"
+            ${hasTeamData?`onclick="abrirCitacionView('${dataCat}',${r.f})"`
+              : (puedeSubirFoto?`onclick="prepararSubidaCitacionReserva('${dataCat}',${r.f},'${esc(rName).replace(/'/g,"\\'")}')"`:'disabled')}
+            style="background:none;border:none;cursor:${(hasTeamData||puedeSubirFoto)?'pointer':'default'};font-size:15px;padding:2px 6px">${puedeSubirFoto?'📷':'📋'}</button>
         </td>`;
       }
       const val = links[dataCat][r.f][lt.key] || '';
@@ -6881,6 +6899,57 @@ function confirmarComet(cat, fecha){
     .catch(e=>{ console.error('savePartidoComet error:',e); showToast('⚠ No se pudo guardar — revisá la consola'); });
 }
 
+// ── CITACIÓN DE RESERVA, SOLO FOTO (sin PDF con texto) ─────────────────
+// Las planillas de Reserva que sube el club son fotos/JPEG (confirmado con
+// la carpeta real, Javi 2026-09-23), no un PDF con capa de texto como
+// 4TA-9NA -- no hay de dónde extraer titulares/suplentes sin OCR (fuera de
+// alcance, mismo criterio que se usó para descartarlo en el resto de la
+// app). En vez de eso, se guarda la foto tal cual en citacionesImg (mismo
+// nodo que ya usan las 6 categorías para la imagen de respaldo de su PDF) y
+// un matchData mínimo con soloImagen:true, solo para que el ícono se
+// habilite y abrirCitacionView la muestre -- sin lista de titulares/
+// suplentes, la ficha queda con la foto arriba y "sin goles/tarjetas/
+// cambios cargados" abajo (mismo texto que ya usa eventosHTML para
+// cualquier fecha sin esos datos).
+function prepararSubidaCitacionReserva(dataCat, fecha, rivalPrellenado){
+  if(!canEdit) return;
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = 'image/*';
+  input.onchange = () => {
+    const file = input.files[0];
+    if(file) guardarCitacionImagenReserva(dataCat, fecha, rivalPrellenado, file);
+  };
+  input.click();
+}
+async function guardarCitacionImagenReserva(dataCat, fecha, rivalPrellenado, file){
+  showToast('📷 Procesando foto…');
+  try{
+    const bitmap = await createImageBitmap(file);
+    const maxW = 1000;
+    const scale = Math.min(1, maxW/bitmap.width);
+    const canvas = document.createElement('canvas');
+    canvas.width = Math.round(bitmap.width*scale);
+    canvas.height = Math.round(bitmap.height*scale);
+    canvas.getContext('2d').drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+    const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
+    await db.ref(`citacionesImg/${dataCat}/${fecha}`).set(dataUrl);
+    if(!matchData[dataCat]) matchData[dataCat] = {};
+    matchData[dataCat][fecha] = {
+      ...(matchData[dataCat][fecha]||{}),
+      titulares: [], suplentes: [],
+      rival: rivalPrellenado || matchData[dataCat][fecha]?.rival || '',
+      soloImagen: true,
+    };
+    saveData();
+    showToast('✓ FOTO DE CITACIÓN CARGADA');
+    refreshActiveModule();
+  }catch(e){
+    console.error('[CITACION IMG RESERVA]', e);
+    showToast('⚠ No se pudo procesar la foto: '+e.message);
+  }
+}
+
 // ── VISTA DE CITACIÓN (solo lectura) ───────────────────────────
 // Reemplaza al viejo campo "pegar un link a mano": si esa fecha ya se
 // procesó (matchData[cat][fecha] tiene titulares), el ícono 📋 de la tabla
@@ -6897,7 +6966,13 @@ function guardarMinutosGolesRival(cat, fecha){
 }
 function abrirCitacionView(cat, fecha){
   const d = matchData[cat]?.[fecha];
-  if(!d || !d.titulares?.length) return;
+  if(!d || !(d.titulares?.length || d.soloImagen)) return;
+  // Firebase no guarda arrays vacíos ([] va y vuelve como undefined) -- una
+  // citación soloImagen (sin titulares/suplentes reales, ver
+  // guardarCitacionImagenReserva) los pierde apenas pasa por un ida y
+  // vuelta al servidor. Se repone acá, en vez de en cada lugar que los lee.
+  d.titulares = d.titulares || [];
+  d.suplentes = d.suplentes || [];
   const cond = condicionCat(cat, fecha);
   const condTxt = cond==='L' ? 'LOCAL' : cond==='V' ? 'VISITANTE' : '';
   const hayWarn = d.titulares.some(p=>p.warn) || d.suplentes.some(p=>p.warn);
