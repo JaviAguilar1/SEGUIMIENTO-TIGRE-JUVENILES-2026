@@ -1,5 +1,5 @@
 {
-  "actualizado": "2026-09-24 14:02",
+  "actualizado": "2026-09-24 18:02",
   "fuente": "ligaprofesional.ar (oficial)",
   "fuente_fixture": "ligaprofesional.ar (oficial)",
   "fuente_reserva": "statfutbol.com.ar",
@@ -3103,13 +3103,13 @@
             "pos": 5,
             "equipo": "ROSARIO CENTRAL",
             "pts": 16,
-            "pj": 9,
+            "pj": 10,
             "pg": 4,
             "pe": 4,
-            "pp": 1,
+            "pp": 2,
             "gf": 13,
-            "gc": 11,
-            "dif": 2
+            "gc": 14,
+            "dif": -1
           },
           {
             "pos": 6,
@@ -3163,13 +3163,13 @@
             "pos": 10,
             "equipo": "INSTITUTO (CORDOBA)",
             "pts": 13,
-            "pj": 9,
+            "pj": 10,
             "pg": 3,
             "pe": 4,
-            "pp": 2,
+            "pp": 3,
             "gf": 12,
-            "gc": 11,
-            "dif": 1
+            "gc": 13,
+            "dif": -1
           },
           {
             "pos": 11,
@@ -3221,6 +3221,18 @@
           },
           {
             "pos": 15,
+            "equipo": "ARGENTINOS JUNIORS",
+            "pts": 10,
+            "pj": 10,
+            "pg": 2,
+            "pe": 4,
+            "pp": 4,
+            "gf": 6,
+            "gc": 10,
+            "dif": -4
+          },
+          {
+            "pos": 16,
             "equipo": "ALDOSIVI (MAR DEL PLATA)",
             "pts": 8,
             "pj": 10,
@@ -3232,7 +3244,7 @@
             "dif": -4
           },
           {
-            "pos": 16,
+            "pos": 17,
             "equipo": "BANFIELD",
             "pts": 8,
             "pj": 10,
@@ -3244,33 +3256,33 @@
             "dif": -7
           },
           {
-            "pos": 17,
-            "equipo": "ARGENTINOS JUNIORS",
-            "pts": 7,
-            "pj": 9,
-            "pg": 1,
-            "pe": 4,
-            "pp": 4,
-            "gf": 4,
-            "gc": 10,
-            "dif": -6
-          },
-          {
             "pos": 18,
             "equipo": "BARRACAS CENTRAL",
             "pts": 6,
-            "pj": 9,
+            "pj": 10,
             "pg": 1,
             "pe": 3,
-            "pp": 5,
+            "pp": 6,
             "gf": 8,
-            "gc": 16,
-            "dif": -8
+            "gc": 19,
+            "dif": -11
           }
         ],
         "Zona B": [
           {
             "pos": 1,
+            "equipo": "ESTUDIANTES (RIO CUARTO - CORDOBA)",
+            "pts": 21,
+            "pj": 10,
+            "pg": 6,
+            "pe": 3,
+            "pp": 1,
+            "gf": 10,
+            "gc": 4,
+            "dif": 6
+          },
+          {
+            "pos": 2,
             "equipo": "INDEPENDIENTE",
             "pts": 20,
             "pj": 9,
@@ -3282,7 +3294,7 @@
             "dif": 14
           },
           {
-            "pos": 2,
+            "pos": 3,
             "equipo": "LANUS",
             "pts": 20,
             "pj": 10,
@@ -3294,7 +3306,7 @@
             "dif": 5
           },
           {
-            "pos": 3,
+            "pos": 4,
             "equipo": "BOCA JUNIORS",
             "pts": 18,
             "pj": 9,
@@ -3304,18 +3316,6 @@
             "gf": 12,
             "gc": 4,
             "dif": 8
-          },
-          {
-            "pos": 4,
-            "equipo": "ESTUDIANTES (RIO CUARTO - CORDOBA)",
-            "pts": 18,
-            "pj": 9,
-            "pg": 5,
-            "pe": 3,
-            "pp": 1,
-            "gf": 8,
-            "gc": 4,
-            "dif": 4
           },
           {
             "pos": 5,
@@ -3331,6 +3331,18 @@
           },
           {
             "pos": 6,
+            "equipo": "RIESTRA",
+            "pts": 17,
+            "pj": 10,
+            "pg": 5,
+            "pe": 2,
+            "pp": 3,
+            "gf": 18,
+            "gc": 10,
+            "dif": 8
+          },
+          {
+            "pos": 7,
             "equipo": "ESTUDIANTES (LP)",
             "pts": 17,
             "pj": 10,
@@ -3342,7 +3354,7 @@
             "dif": 6
           },
           {
-            "pos": 7,
+            "pos": 8,
             "equipo": "ATL. RAFAELA",
             "pts": 16,
             "pj": 10,
@@ -3352,18 +3364,6 @@
             "gf": 11,
             "gc": 11,
             "dif": 0
-          },
-          {
-            "pos": 8,
-            "equipo": "RIESTRA",
-            "pts": 14,
-            "pj": 9,
-            "pg": 4,
-            "pe": 2,
-            "pp": 3,
-            "gf": 15,
-            "gc": 10,
-            "dif": 5
           },
           {
             "pos": 9,
@@ -3391,6 +3391,18 @@
           },
           {
             "pos": 11,
+            "equipo": "NEWELLS OLD BOYS",
+            "pts": 12,
+            "pj": 10,
+            "pg": 3,
+            "pe": 3,
+            "pp": 4,
+            "gf": 12,
+            "gc": 10,
+            "dif": 2
+          },
+          {
+            "pos": 12,
             "equipo": "DEFENSA Y JUSTICIA",
             "pts": 11,
             "pj": 10,
@@ -3402,7 +3414,7 @@
             "dif": 1
           },
           {
-            "pos": 12,
+            "pos": 13,
             "equipo": "CENTRAL CORDOBA (SANTIAGO DEL ESTERO)",
             "pts": 11,
             "pj": 10,
@@ -3414,7 +3426,7 @@
             "dif": -6
           },
           {
-            "pos": 13,
+            "pos": 14,
             "equipo": "SAN MARTIN (SAN JUAN)",
             "pts": 10,
             "pj": 9,
@@ -3424,18 +3436,6 @@
             "gf": 7,
             "gc": 15,
             "dif": -8
-          },
-          {
-            "pos": 14,
-            "equipo": "NEWELLS OLD BOYS",
-            "pts": 9,
-            "pj": 9,
-            "pg": 2,
-            "pe": 3,
-            "pp": 4,
-            "gf": 9,
-            "gc": 10,
-            "dif": -1
           },
           {
             "pos": 15,
@@ -3451,18 +3451,6 @@
           },
           {
             "pos": 16,
-            "equipo": "PLATENSE",
-            "pts": 5,
-            "pj": 9,
-            "pg": 0,
-            "pe": 5,
-            "pp": 4,
-            "gf": 3,
-            "gc": 10,
-            "dif": -7
-          },
-          {
-            "pos": 17,
             "equipo": "COLON",
             "pts": 5,
             "pj": 9,
@@ -3472,6 +3460,18 @@
             "gf": 6,
             "gc": 14,
             "dif": -8
+          },
+          {
+            "pos": 17,
+            "equipo": "PLATENSE",
+            "pts": 5,
+            "pj": 10,
+            "pg": 0,
+            "pe": 5,
+            "pp": 5,
+            "gf": 3,
+            "gc": 12,
+            "dif": -9
           },
           {
             "pos": 18,
@@ -21415,7 +21415,7 @@
       "fecha": 27,
       "rival": "ATL. RAFAELA",
       "goleador": {
-        "nombre": "STRACQUALURSI, DENIS ROBERTO",
+        "nombre": "GAETE, BLAS MANUEL",
         "goles": 5
       },
       "amarillas_riesgo": []
@@ -22083,10 +22083,10 @@
       },
       {
         "nombre": "AMBIELA, MARIO EMILIO",
-        "pj": 22,
-        "min": 1517,
+        "pj": 23,
+        "min": 1592,
         "gol": 8,
-        "am": 5,
+        "am": 6,
         "roja": 0
       },
       {
@@ -22107,8 +22107,8 @@
       },
       {
         "nombre": "CALDERON, ROMAN",
-        "pj": 18,
-        "min": 994,
+        "pj": 19,
+        "min": 1084,
         "gol": 2,
         "am": 4,
         "roja": 0
@@ -22123,8 +22123,8 @@
       },
       {
         "nombre": "COLLADO, LAUTARO DAVID",
-        "pj": 7,
-        "min": 266,
+        "pj": 8,
+        "min": 281,
         "gol": 0,
         "am": 0,
         "roja": 0
@@ -22155,24 +22155,24 @@
       },
       {
         "nombre": "DELGADO, FRANCISCO NEHUEN",
-        "pj": 20,
-        "min": 1376,
+        "pj": 21,
+        "min": 1466,
         "gol": 1,
         "am": 4,
         "roja": 1
       },
       {
         "nombre": "FERNANDEZ, MATIAS JERONIMO",
-        "pj": 19,
-        "min": 1450,
+        "pj": 20,
+        "min": 1512,
         "gol": 2,
-        "am": 6,
+        "am": 7,
         "roja": 0
       },
       {
         "nombre": "GOMEZ, SANTIAGO NAHUEL",
-        "pj": 17,
-        "min": 1182,
+        "pj": 18,
+        "min": 1272,
         "gol": 0,
         "am": 3,
         "roja": 1
@@ -22203,18 +22203,18 @@
       },
       {
         "nombre": "MALLMANN, FELIX",
-        "pj": 20,
-        "min": 1092,
+        "pj": 21,
+        "min": 1120,
         "gol": 3,
         "am": 3,
         "roja": 0
       },
       {
         "nombre": "MARCHETTI, ALEX IVAN",
-        "pj": 15,
-        "min": 1077,
+        "pj": 16,
+        "min": 1167,
         "gol": 0,
-        "am": 1,
+        "am": 2,
         "roja": 0
       },
       {
@@ -22227,10 +22227,10 @@
       },
       {
         "nombre": "MORALEJO, SANTIAGO OSCAR",
-        "pj": 22,
-        "min": 1974,
+        "pj": 23,
+        "min": 2049,
         "gol": 2,
-        "am": 1,
+        "am": 2,
         "roja": 0
       },
       {
@@ -22243,8 +22243,8 @@
       },
       {
         "nombre": "NUÑEZ PERALTA, JONATHAN DARIO",
-        "pj": 9,
-        "min": 342,
+        "pj": 10,
+        "min": 370,
         "gol": 0,
         "am": 2,
         "roja": 0
@@ -22259,8 +22259,8 @@
       },
       {
         "nombre": "PARRA, MATIAS MANUEL",
-        "pj": 3,
-        "min": 106,
+        "pj": 4,
+        "min": 117,
         "gol": 0,
         "am": 0,
         "roja": 0
@@ -22275,24 +22275,24 @@
       },
       {
         "nombre": "ROMERO, AURELIANO BENICIO",
-        "pj": 17,
-        "min": 1364,
+        "pj": 18,
+        "min": 1426,
         "gol": 2,
         "am": 0,
         "roja": 0
       },
       {
         "nombre": "SCHENONE, ELIAS NEHUEN",
-        "pj": 24,
-        "min": 1668,
+        "pj": 25,
+        "min": 1747,
         "gol": 2,
-        "am": 2,
+        "am": 3,
         "roja": 0
       },
       {
         "nombre": "SCUNGIO, SEBASTIAN",
-        "pj": 9,
-        "min": 471,
+        "pj": 10,
+        "min": 561,
         "gol": 0,
         "am": 2,
         "roja": 0
@@ -22315,8 +22315,8 @@
       },
       {
         "nombre": "SOSENA, FAUSTO",
-        "pj": 13,
-        "min": 1158,
+        "pj": 14,
+        "min": 1248,
         "gol": 0,
         "am": 0,
         "roja": 0
@@ -22331,8 +22331,8 @@
       },
       {
         "nombre": "UMERES, AGUSTIN ALEJANDRO",
-        "pj": 21,
-        "min": 1783,
+        "pj": 22,
+        "min": 1798,
         "gol": 1,
         "am": 1,
         "roja": 0
@@ -22881,16 +22881,16 @@
     "9NA": [
       {
         "nombre": "AGORRECA, IGNACIO CARLOS",
-        "pj": 22,
-        "min": 1346,
+        "pj": 23,
+        "min": 1416,
         "gol": 1,
-        "am": 3,
+        "am": 4,
         "roja": 0
       },
       {
         "nombre": "ALVARENGA, ADRIANO MARTIN",
-        "pj": 20,
-        "min": 1210,
+        "pj": 21,
+        "min": 1274,
         "gol": 1,
         "am": 0,
         "roja": 0
@@ -22945,8 +22945,8 @@
       },
       {
         "nombre": "DIAZ OLIVA, SANTIAGO",
-        "pj": 22,
-        "min": 1104,
+        "pj": 23,
+        "min": 1174,
         "gol": 1,
         "am": 1,
         "roja": 0
@@ -22969,8 +22969,8 @@
       },
       {
         "nombre": "DUARTE, GONZALO ISAIAS",
-        "pj": 14,
-        "min": 216,
+        "pj": 15,
+        "min": 286,
         "gol": 0,
         "am": 1,
         "roja": 0
@@ -22985,16 +22985,16 @@
       },
       {
         "nombre": "ENRIQUE, IAN AIRTON",
-        "pj": 10,
-        "min": 474,
+        "pj": 11,
+        "min": 544,
         "gol": 0,
         "am": 3,
         "roja": 0
       },
       {
         "nombre": "GOMEZ ZARRACHO, OCTAVIO",
-        "pj": 14,
-        "min": 794,
+        "pj": 15,
+        "min": 820,
         "gol": 0,
         "am": 2,
         "roja": 2
@@ -23049,10 +23049,10 @@
       },
       {
         "nombre": "MORA, BAUTISTA SEBASTIAN",
-        "pj": 21,
-        "min": 1283,
+        "pj": 22,
+        "min": 1327,
         "gol": 1,
-        "am": 0,
+        "am": 1,
         "roja": 1
       },
       {
@@ -23065,24 +23065,24 @@
       },
       {
         "nombre": "NUÑEZ, TIZIANO ENRIQUE",
-        "pj": 19,
-        "min": 619,
+        "pj": 20,
+        "min": 645,
         "gol": 4,
         "am": 2,
         "roja": 0
       },
       {
         "nombre": "OLOCCO, MIKEAS DIDIER",
-        "pj": 20,
-        "min": 810,
+        "pj": 21,
+        "min": 826,
         "gol": 4,
         "am": 0,
         "roja": 0
       },
       {
         "nombre": "ORTIZ, LEONARDO ARIEL",
-        "pj": 12,
-        "min": 690,
+        "pj": 13,
+        "min": 744,
         "gol": 1,
         "am": 0,
         "roja": 0
@@ -23105,40 +23105,40 @@
       },
       {
         "nombre": "SOTO, MATEO JOSE",
-        "pj": 15,
-        "min": 690,
+        "pj": 16,
+        "min": 696,
         "gol": 0,
         "am": 4,
         "roja": 0
       },
       {
         "nombre": "TORRECILLA, ENZO FRANCISCO",
-        "pj": 14,
-        "min": 856,
+        "pj": 15,
+        "min": 926,
         "gol": 0,
-        "am": 1,
+        "am": 2,
         "roja": 0
       },
       {
         "nombre": "TULIS, FEDERICO ORLANDO",
-        "pj": 16,
-        "min": 1033,
+        "pj": 17,
+        "min": 1103,
         "gol": 1,
-        "am": 3,
+        "am": 4,
         "roja": 1
       },
       {
         "nombre": "VILLALBA BOGADO, GUSTAVO",
-        "pj": 23,
-        "min": 1075,
+        "pj": 24,
+        "min": 1119,
         "gol": 4,
         "am": 4,
         "roja": 0
       },
       {
         "nombre": "ZAPATA, ALEJO SANTINO",
-        "pj": 22,
-        "min": 1352,
+        "pj": 23,
+        "min": 1422,
         "gol": 3,
         "am": 3,
         "roja": 0
@@ -25369,6 +25369,33 @@
           "amarilla": false,
           "roja": false
         }
+      },
+      "26": {
+        "MARCHETTI, ALEX IVAN": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "MORALEJO, SANTIAGO OSCAR": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "FERNANDEZ, MATIAS JERONIMO": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "AMBIELA, MARIO EMILIO": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "SCHENONE, ELIAS NEHUEN": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        }
       }
     },
     "7MA": {
@@ -26770,6 +26797,28 @@
         "VILLALBA BOGADO, GUSTAVO": {
           "goles": 1,
           "amarilla": false,
+          "roja": false
+        }
+      },
+      "26": {
+        "TORRECILLA, ENZO FRANCISCO": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "MORA, BAUTISTA SEBASTIAN": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "AGORRECA, IGNACIO CARLOS": {
+          "goles": 0,
+          "amarilla": true,
+          "roja": false
+        },
+        "TULIS, FEDERICO ORLANDO": {
+          "goles": 0,
+          "amarilla": true,
           "roja": false
         }
       }
@@ -31468,16 +31517,40 @@
           "gv": 1
         },
         {
+          "local": "RIESTRA",
+          "visitante": "BARRACAS CTRAL",
+          "gl": 3,
+          "gv": 0
+        },
+        {
           "local": "GIMNASIA (LP)",
           "visitante": "ESTUDIANTES (LP)",
           "gl": 2,
           "gv": 0
         },
         {
+          "local": "INSTITUTO (C)",
+          "visitante": "ESTUDIANTES (RC)",
+          "gl": 0,
+          "gv": 2
+        },
+        {
           "local": "LANUS",
           "visitante": "BANFIELD",
           "gl": 2,
           "gv": 1
+        },
+        {
+          "local": "NEWELLS",
+          "visitante": "CENTRAL",
+          "gl": 3,
+          "gv": 0
+        },
+        {
+          "local": "ARGENTINOS JRS",
+          "visitante": "PLATENSE",
+          "gl": 2,
+          "gv": 0
         },
         {
           "local": "SAN LORENZO",
@@ -33854,26 +33927,6 @@
   "jugadores_futdetail": {
     "4TA": [
       {
-        "jugador": "Pannoni Lautaro",
-        "convocatorias": 21,
-        "partidos_titular": 17,
-        "minutos_jugados": 1255,
-        "goles": 3,
-        "asistencias": 0,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 2
-      },
-      {
-        "jugador": "Saravia Roman",
-        "convocatorias": 5,
-        "partidos_titular": 5,
-        "minutos_jugados": 450,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 1,
-        "tarjeta_roja": 0
-      },
-      {
         "jugador": "Aguirre Iñaki",
         "convocatorias": 18,
         "partidos_titular": 15,
@@ -33948,6 +34001,26 @@
         "convocatorias": 15,
         "partidos_titular": 14,
         "minutos_jugados": 988,
+        "goles": 0,
+        "asistencias": 0,
+        "tarjeta_amarilla": 1,
+        "tarjeta_roja": 0
+      },
+      {
+        "jugador": "Pannoni Lautaro",
+        "convocatorias": 21,
+        "partidos_titular": 17,
+        "minutos_jugados": 1255,
+        "goles": 3,
+        "asistencias": 0,
+        "tarjeta_amarilla": 0,
+        "tarjeta_roja": 2
+      },
+      {
+        "jugador": "Saravia Roman",
+        "convocatorias": 5,
+        "partidos_titular": 5,
+        "minutos_jugados": 450,
         "goles": 0,
         "asistencias": 0,
         "tarjeta_amarilla": 1,
@@ -34044,16 +34117,6 @@
         "tarjeta_roja": 0
       },
       {
-        "jugador": "Benítez Cristian",
-        "convocatorias": 24,
-        "partidos_titular": 18,
-        "minutos_jugados": 1362,
-        "goles": 3,
-        "asistencias": 0,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
         "jugador": "Medina Tiziano",
         "convocatorias": 7,
         "partidos_titular": 6,
@@ -34079,6 +34142,16 @@
         "partidos_titular": 7,
         "minutos_jugados": 575,
         "goles": 0,
+        "asistencias": 0,
+        "tarjeta_amarilla": 0,
+        "tarjeta_roja": 0
+      },
+      {
+        "jugador": "Benítez Cristian",
+        "convocatorias": 24,
+        "partidos_titular": 18,
+        "minutos_jugados": 1362,
+        "goles": 3,
         "asistencias": 0,
         "tarjeta_amarilla": 0,
         "tarjeta_roja": 0
@@ -34124,16 +34197,6 @@
         "tarjeta_roja": 0
       },
       {
-        "jugador": "Mansilla Nehemias",
-        "convocatorias": 9,
-        "partidos_titular": 0,
-        "minutos_jugados": 103,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
         "jugador": "Figueredo Benjamin",
         "convocatorias": 10,
         "partidos_titular": 5,
@@ -34144,30 +34207,20 @@
         "tarjeta_roja": 0
       },
       {
-        "jugador": "López Facundo",
-        "convocatorias": 14,
-        "partidos_titular": 6,
-        "minutos_jugados": 475,
-        "goles": 1,
+        "jugador": "Mansilla Nehemias",
+        "convocatorias": 9,
+        "partidos_titular": 0,
+        "minutos_jugados": 103,
+        "goles": 0,
         "asistencias": 0,
         "tarjeta_amarilla": 0,
         "tarjeta_roja": 0
       },
       {
-        "jugador": "Benitez Lautaro",
-        "convocatorias": 18,
-        "partidos_titular": 13,
-        "minutos_jugados": 924,
-        "goles": 1,
-        "asistencias": 0,
-        "tarjeta_amarilla": 1,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Copes Tomas",
-        "convocatorias": 20,
-        "partidos_titular": 2,
-        "minutos_jugados": 303,
+        "jugador": "López Facundo",
+        "convocatorias": 14,
+        "partidos_titular": 6,
+        "minutos_jugados": 475,
         "goles": 1,
         "asistencias": 0,
         "tarjeta_amarilla": 0,
@@ -34194,11 +34247,21 @@
         "tarjeta_roja": 0
       },
       {
-        "jugador": "Fares Hamdan",
-        "convocatorias": 4,
-        "partidos_titular": 0,
-        "minutos_jugados": 5,
-        "goles": 0,
+        "jugador": "Benitez Lautaro",
+        "convocatorias": 18,
+        "partidos_titular": 13,
+        "minutos_jugados": 924,
+        "goles": 1,
+        "asistencias": 0,
+        "tarjeta_amarilla": 1,
+        "tarjeta_roja": 0
+      },
+      {
+        "jugador": "Copes Tomas",
+        "convocatorias": 20,
+        "partidos_titular": 2,
+        "minutos_jugados": 303,
+        "goles": 1,
         "asistencias": 0,
         "tarjeta_amarilla": 0,
         "tarjeta_roja": 0
@@ -34212,9 +34275,39 @@
         "asistencias": 0,
         "tarjeta_amarilla": 0,
         "tarjeta_roja": 0
+      },
+      {
+        "jugador": "Fares Hamdan",
+        "convocatorias": 4,
+        "partidos_titular": 0,
+        "minutos_jugados": 5,
+        "goles": 0,
+        "asistencias": 0,
+        "tarjeta_amarilla": 0,
+        "tarjeta_roja": 0
       }
     ],
     "5TA": [
+      {
+        "jugador": "Luque Gonzalo",
+        "convocatorias": 14,
+        "partidos_titular": 10,
+        "minutos_jugados": 361,
+        "goles": 1,
+        "asistencias": 0,
+        "tarjeta_amarilla": 0,
+        "tarjeta_roja": 0
+      },
+      {
+        "jugador": "Wirz Axel",
+        "convocatorias": 22,
+        "partidos_titular": 22,
+        "minutos_jugados": 1420,
+        "goles": 1,
+        "asistencias": 0,
+        "tarjeta_amarilla": 5,
+        "tarjeta_roja": 0
+      },
       {
         "jugador": "Pereyra Manuel",
         "convocatorias": 4,
@@ -34243,26 +34336,6 @@
         "goles": 1,
         "asistencias": 0,
         "tarjeta_amarilla": 1,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Luque Gonzalo",
-        "convocatorias": 14,
-        "partidos_titular": 10,
-        "minutos_jugados": 361,
-        "goles": 1,
-        "asistencias": 0,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Wirz Axel",
-        "convocatorias": 22,
-        "partidos_titular": 22,
-        "minutos_jugados": 1420,
-        "goles": 1,
-        "asistencias": 0,
-        "tarjeta_amarilla": 5,
         "tarjeta_roja": 0
       },
       {
@@ -34386,21 +34459,21 @@
         "tarjeta_roja": 0
       },
       {
-        "jugador": "Crotto Ivo",
-        "convocatorias": 3,
-        "partidos_titular": 0,
-        "minutos_jugados": 40,
-        "goles": 1,
-        "asistencias": 0,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
         "jugador": "Samper Joaquin",
         "convocatorias": 3,
         "partidos_titular": 0,
         "minutos_jugados": 65,
         "goles": 0,
+        "asistencias": 0,
+        "tarjeta_amarilla": 0,
+        "tarjeta_roja": 0
+      },
+      {
+        "jugador": "Crotto Ivo",
+        "convocatorias": 3,
+        "partidos_titular": 0,
+        "minutos_jugados": 40,
+        "goles": 1,
         "asistencias": 0,
         "tarjeta_amarilla": 0,
         "tarjeta_roja": 0
@@ -34416,6 +34489,16 @@
         "tarjeta_roja": 0
       },
       {
+        "jugador": "Perez Joaquin",
+        "convocatorias": 16,
+        "partidos_titular": 5,
+        "minutos_jugados": 523,
+        "goles": 1,
+        "asistencias": 0,
+        "tarjeta_amarilla": 0,
+        "tarjeta_roja": 0
+      },
+      {
         "jugador": "Rodriguez Thiago",
         "convocatorias": 15,
         "partidos_titular": 10,
@@ -34426,11 +34509,21 @@
         "tarjeta_roja": 0
       },
       {
-        "jugador": "Perez Joaquin",
+        "jugador": "Ricaldi Ian",
         "convocatorias": 16,
-        "partidos_titular": 5,
-        "minutos_jugados": 523,
-        "goles": 1,
+        "partidos_titular": 3,
+        "minutos_jugados": 244,
+        "goles": 0,
+        "asistencias": 0,
+        "tarjeta_amarilla": 0,
+        "tarjeta_roja": 0
+      },
+      {
+        "jugador": "Hernandez Emanuel",
+        "convocatorias": 4,
+        "partidos_titular": 0,
+        "minutos_jugados": 50,
+        "goles": 0,
         "asistencias": 0,
         "tarjeta_amarilla": 0,
         "tarjeta_roja": 0
@@ -34496,21 +34589,11 @@
         "tarjeta_roja": 0
       },
       {
-        "jugador": "Ricaldi Ian",
-        "convocatorias": 16,
-        "partidos_titular": 3,
-        "minutos_jugados": 244,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Hernandez Emanuel",
+        "jugador": "Barrios Cristian",
         "convocatorias": 4,
         "partidos_titular": 0,
-        "minutos_jugados": 50,
-        "goles": 0,
+        "minutos_jugados": 0,
+        "goles": 1,
         "asistencias": 0,
         "tarjeta_amarilla": 0,
         "tarjeta_roja": 0
@@ -34531,16 +34614,6 @@
         "partidos_titular": 5,
         "minutos_jugados": 0,
         "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Barrios Cristian",
-        "convocatorias": 4,
-        "partidos_titular": 0,
-        "minutos_jugados": 0,
-        "goles": 1,
         "asistencias": 0,
         "tarjeta_amarilla": 0,
         "tarjeta_roja": 0
@@ -34638,16 +34711,6 @@
         "tarjeta_roja": 0
       },
       {
-        "jugador": "Muchiutti Valentino",
-        "convocatorias": 7,
-        "partidos_titular": 2,
-        "minutos_jugados": 176,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
         "jugador": "Nuñez Jonathan",
         "convocatorias": 13,
         "partidos_titular": 4,
@@ -34658,110 +34721,10 @@
         "tarjeta_roja": 0
       },
       {
-        "jugador": "Fernandez Jerónimo",
-        "convocatorias": 21,
-        "partidos_titular": 17,
-        "minutos_jugados": 1578,
-        "goles": 2,
-        "asistencias": 1,
-        "tarjeta_amarilla": 4,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Lizardia Bautista",
-        "convocatorias": 15,
-        "partidos_titular": 5,
-        "minutos_jugados": 474,
-        "goles": 1,
-        "asistencias": 2,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Cortes Adrian maximiliano",
-        "convocatorias": 24,
-        "partidos_titular": 18,
-        "minutos_jugados": 1316,
-        "goles": 6,
-        "asistencias": 2,
-        "tarjeta_amarilla": 3,
-        "tarjeta_roja": 1
-      },
-      {
-        "jugador": "Umeres Agustin",
-        "convocatorias": 24,
-        "partidos_titular": 23,
-        "minutos_jugados": 1874,
-        "goles": 1,
-        "asistencias": 0,
-        "tarjeta_amarilla": 1,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Marchetti Ivan",
-        "convocatorias": 19,
-        "partidos_titular": 14,
-        "minutos_jugados": 1210,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 2,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Gomez Santiago",
-        "convocatorias": 20,
-        "partidos_titular": 15,
-        "minutos_jugados": 1294,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 4,
-        "tarjeta_roja": 1
-      },
-      {
-        "jugador": "Schenone Elias",
-        "convocatorias": 28,
-        "partidos_titular": 22,
-        "minutos_jugados": 1742,
-        "goles": 3,
-        "asistencias": 2,
-        "tarjeta_amarilla": 2,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Scungio Sebastian",
-        "convocatorias": 14,
-        "partidos_titular": 5,
-        "minutos_jugados": 570,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 2,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Zarza Quimey",
-        "convocatorias": 9,
-        "partidos_titular": 0,
-        "minutos_jugados": 139,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Ortiz Ignacio",
-        "convocatorias": 19,
-        "partidos_titular": 15,
-        "minutos_jugados": 1272,
-        "goles": 1,
-        "asistencias": 0,
-        "tarjeta_amarilla": 5,
-        "tarjeta_roja": 1
-      },
-      {
-        "jugador": "Bruno Lautaro",
-        "convocatorias": 12,
-        "partidos_titular": 7,
-        "minutos_jugados": 545,
+        "jugador": "Muchiutti Valentino",
+        "convocatorias": 7,
+        "partidos_titular": 2,
+        "minutos_jugados": 176,
         "goles": 0,
         "asistencias": 0,
         "tarjeta_amarilla": 0,
@@ -34886,6 +34849,116 @@
         "asistencias": 3,
         "tarjeta_amarilla": 6,
         "tarjeta_roja": 0
+      },
+      {
+        "jugador": "Fernandez Jerónimo",
+        "convocatorias": 21,
+        "partidos_titular": 17,
+        "minutos_jugados": 1578,
+        "goles": 2,
+        "asistencias": 1,
+        "tarjeta_amarilla": 4,
+        "tarjeta_roja": 0
+      },
+      {
+        "jugador": "Lizardia Bautista",
+        "convocatorias": 15,
+        "partidos_titular": 5,
+        "minutos_jugados": 474,
+        "goles": 1,
+        "asistencias": 2,
+        "tarjeta_amarilla": 0,
+        "tarjeta_roja": 0
+      },
+      {
+        "jugador": "Cortes Adrian maximiliano",
+        "convocatorias": 24,
+        "partidos_titular": 18,
+        "minutos_jugados": 1316,
+        "goles": 6,
+        "asistencias": 2,
+        "tarjeta_amarilla": 3,
+        "tarjeta_roja": 1
+      },
+      {
+        "jugador": "Umeres Agustin",
+        "convocatorias": 24,
+        "partidos_titular": 23,
+        "minutos_jugados": 1874,
+        "goles": 1,
+        "asistencias": 0,
+        "tarjeta_amarilla": 1,
+        "tarjeta_roja": 0
+      },
+      {
+        "jugador": "Marchetti Ivan",
+        "convocatorias": 19,
+        "partidos_titular": 14,
+        "minutos_jugados": 1210,
+        "goles": 0,
+        "asistencias": 0,
+        "tarjeta_amarilla": 2,
+        "tarjeta_roja": 0
+      },
+      {
+        "jugador": "Gomez Santiago",
+        "convocatorias": 20,
+        "partidos_titular": 15,
+        "minutos_jugados": 1294,
+        "goles": 0,
+        "asistencias": 0,
+        "tarjeta_amarilla": 4,
+        "tarjeta_roja": 1
+      },
+      {
+        "jugador": "Schenone Elias",
+        "convocatorias": 28,
+        "partidos_titular": 22,
+        "minutos_jugados": 1742,
+        "goles": 3,
+        "asistencias": 2,
+        "tarjeta_amarilla": 2,
+        "tarjeta_roja": 0
+      },
+      {
+        "jugador": "Scungio Sebastian",
+        "convocatorias": 14,
+        "partidos_titular": 5,
+        "minutos_jugados": 570,
+        "goles": 0,
+        "asistencias": 0,
+        "tarjeta_amarilla": 2,
+        "tarjeta_roja": 0
+      },
+      {
+        "jugador": "Zarza Quimey",
+        "convocatorias": 9,
+        "partidos_titular": 0,
+        "minutos_jugados": 139,
+        "goles": 0,
+        "asistencias": 0,
+        "tarjeta_amarilla": 0,
+        "tarjeta_roja": 0
+      },
+      {
+        "jugador": "Ortiz Ignacio",
+        "convocatorias": 19,
+        "partidos_titular": 15,
+        "minutos_jugados": 1272,
+        "goles": 1,
+        "asistencias": 0,
+        "tarjeta_amarilla": 5,
+        "tarjeta_roja": 1
+      },
+      {
+        "jugador": "Bruno Lautaro",
+        "convocatorias": 12,
+        "partidos_titular": 7,
+        "minutos_jugados": 545,
+        "goles": 0,
+        "asistencias": 0,
+        "tarjeta_amarilla": 0,
+        "tarjeta_roja": 0
       }
     ],
     "7MA": [
@@ -34970,36 +35043,6 @@
         "tarjeta_roja": 1
       },
       {
-        "jugador": "Jara Juan",
-        "convocatorias": 13,
-        "partidos_titular": 4,
-        "minutos_jugados": 478,
-        "goles": 1,
-        "asistencias": 0,
-        "tarjeta_amarilla": 4,
-        "tarjeta_roja": 1
-      },
-      {
-        "jugador": "Lamanna Fabrizio",
-        "convocatorias": 31,
-        "partidos_titular": 23,
-        "minutos_jugados": 1526,
-        "goles": 10,
-        "asistencias": 0,
-        "tarjeta_amarilla": 3,
-        "tarjeta_roja": 2
-      },
-      {
-        "jugador": "Astesana Valentino",
-        "convocatorias": 13,
-        "partidos_titular": 9,
-        "minutos_jugados": 437,
-        "goles": 4,
-        "asistencias": 0,
-        "tarjeta_amarilla": 1,
-        "tarjeta_roja": 0
-      },
-      {
         "jugador": "Lopez Sebastian",
         "convocatorias": 33,
         "partidos_titular": 25,
@@ -35050,33 +35093,33 @@
         "tarjeta_roja": 0
       },
       {
-        "jugador": "Lopez Dionel",
-        "convocatorias": 20,
-        "partidos_titular": 17,
-        "minutos_jugados": 898,
-        "goles": 2,
-        "asistencias": 0,
-        "tarjeta_amarilla": 2,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Gallardo Dylan",
-        "convocatorias": 4,
-        "partidos_titular": 2,
-        "minutos_jugados": 155,
+        "jugador": "Jara Juan",
+        "convocatorias": 13,
+        "partidos_titular": 4,
+        "minutos_jugados": 478,
         "goles": 1,
         "asistencias": 0,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
+        "tarjeta_amarilla": 4,
+        "tarjeta_roja": 1
       },
       {
-        "jugador": "Insaurralde Ihan",
-        "convocatorias": 25,
-        "partidos_titular": 17,
-        "minutos_jugados": 1399,
-        "goles": 0,
+        "jugador": "Lamanna Fabrizio",
+        "convocatorias": 31,
+        "partidos_titular": 23,
+        "minutos_jugados": 1526,
+        "goles": 10,
         "asistencias": 0,
-        "tarjeta_amarilla": 6,
+        "tarjeta_amarilla": 3,
+        "tarjeta_roja": 2
+      },
+      {
+        "jugador": "Astesana Valentino",
+        "convocatorias": 13,
+        "partidos_titular": 9,
+        "minutos_jugados": 437,
+        "goles": 4,
+        "asistencias": 0,
+        "tarjeta_amarilla": 1,
         "tarjeta_roja": 0
       },
       {
@@ -35130,43 +35173,33 @@
         "tarjeta_roja": 0
       },
       {
-        "jugador": "Barrios Bautista",
-        "convocatorias": 25,
-        "partidos_titular": 10,
-        "minutos_jugados": 1015,
+        "jugador": "Lopez Dionel",
+        "convocatorias": 20,
+        "partidos_titular": 17,
+        "minutos_jugados": 898,
         "goles": 2,
         "asistencias": 0,
-        "tarjeta_amarilla": 1,
+        "tarjeta_amarilla": 2,
         "tarjeta_roja": 0
       },
       {
-        "jugador": "Baltazar Alejandro Emanuel",
-        "convocatorias": 31,
-        "partidos_titular": 18,
-        "minutos_jugados": 1573,
-        "goles": 9,
-        "asistencias": 1,
-        "tarjeta_amarilla": 7,
-        "tarjeta_roja": 1
-      },
-      {
-        "jugador": "Trejo Nicolas",
-        "convocatorias": 24,
-        "partidos_titular": 11,
-        "minutos_jugados": 839,
-        "goles": 0,
+        "jugador": "Gallardo Dylan",
+        "convocatorias": 4,
+        "partidos_titular": 2,
+        "minutos_jugados": 155,
+        "goles": 1,
         "asistencias": 0,
         "tarjeta_amarilla": 0,
         "tarjeta_roja": 0
       },
       {
-        "jugador": "Guglielmo Lisandro",
-        "convocatorias": 1,
-        "partidos_titular": 0,
-        "minutos_jugados": 35,
+        "jugador": "Insaurralde Ihan",
+        "convocatorias": 25,
+        "partidos_titular": 17,
+        "minutos_jugados": 1399,
         "goles": 0,
         "asistencias": 0,
-        "tarjeta_amarilla": 0,
+        "tarjeta_amarilla": 6,
         "tarjeta_roja": 0
       },
       {
@@ -35220,37 +35253,37 @@
         "tarjeta_roja": 0
       },
       {
-        "jugador": "Pucill Mateo",
-        "convocatorias": 27,
-        "partidos_titular": 19,
-        "minutos_jugados": 1027,
-        "goles": 1,
+        "jugador": "Barrios Bautista",
+        "convocatorias": 25,
+        "partidos_titular": 10,
+        "minutos_jugados": 1015,
+        "goles": 2,
         "asistencias": 0,
         "tarjeta_amarilla": 1,
         "tarjeta_roja": 0
       },
       {
-        "jugador": "Lovisi Luciano",
-        "convocatorias": 21,
-        "partidos_titular": 13,
-        "minutos_jugados": 828,
+        "jugador": "Baltazar Alejandro Emanuel",
+        "convocatorias": 31,
+        "partidos_titular": 18,
+        "minutos_jugados": 1573,
+        "goles": 9,
+        "asistencias": 1,
+        "tarjeta_amarilla": 7,
+        "tarjeta_roja": 1
+      },
+      {
+        "jugador": "Trejo Nicolas",
+        "convocatorias": 24,
+        "partidos_titular": 11,
+        "minutos_jugados": 839,
         "goles": 0,
         "asistencias": 0,
-        "tarjeta_amarilla": 3,
+        "tarjeta_amarilla": 0,
         "tarjeta_roja": 0
       },
       {
-        "jugador": "Gagliardo Pedro Tomas",
-        "convocatorias": 21,
-        "partidos_titular": 9,
-        "minutos_jugados": 856,
-        "goles": 1,
-        "asistencias": 0,
-        "tarjeta_amarilla": 2,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Cazal Fernandez Gustavo Alberto",
+        "jugador": "Guglielmo Lisandro",
         "convocatorias": 1,
         "partidos_titular": 0,
         "minutos_jugados": 35,
@@ -35317,6 +35350,46 @@
         "goles": 1,
         "asistencias": 4,
         "tarjeta_amarilla": 1,
+        "tarjeta_roja": 0
+      },
+      {
+        "jugador": "Pucill Mateo",
+        "convocatorias": 27,
+        "partidos_titular": 19,
+        "minutos_jugados": 1027,
+        "goles": 1,
+        "asistencias": 0,
+        "tarjeta_amarilla": 1,
+        "tarjeta_roja": 0
+      },
+      {
+        "jugador": "Lovisi Luciano",
+        "convocatorias": 21,
+        "partidos_titular": 13,
+        "minutos_jugados": 828,
+        "goles": 0,
+        "asistencias": 0,
+        "tarjeta_amarilla": 3,
+        "tarjeta_roja": 0
+      },
+      {
+        "jugador": "Gagliardo Pedro Tomas",
+        "convocatorias": 21,
+        "partidos_titular": 9,
+        "minutos_jugados": 856,
+        "goles": 1,
+        "asistencias": 0,
+        "tarjeta_amarilla": 2,
+        "tarjeta_roja": 0
+      },
+      {
+        "jugador": "Cazal Fernandez Gustavo Alberto",
+        "convocatorias": 1,
+        "partidos_titular": 0,
+        "minutos_jugados": 35,
+        "goles": 0,
+        "asistencias": 0,
+        "tarjeta_amarilla": 0,
         "tarjeta_roja": 0
       },
       {
@@ -35402,36 +35475,6 @@
     ],
     "8VA": [
       {
-        "jugador": "Navarro Valentin",
-        "convocatorias": 15,
-        "partidos_titular": 13,
-        "minutos_jugados": 669,
-        "goles": 0,
-        "asistencias": 1,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Conte Ian",
-        "convocatorias": 13,
-        "partidos_titular": 8,
-        "minutos_jugados": 529,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Reynoso Tomas",
-        "convocatorias": 13,
-        "partidos_titular": 11,
-        "minutos_jugados": 294,
-        "goles": 1,
-        "asistencias": 0,
-        "tarjeta_amarilla": 2,
-        "tarjeta_roja": 0
-      },
-      {
         "jugador": "Tobler Bautista",
         "convocatorias": 25,
         "partidos_titular": 19,
@@ -35459,6 +35502,36 @@
         "goles": 0,
         "asistencias": 0,
         "tarjeta_amarilla": 0,
+        "tarjeta_roja": 0
+      },
+      {
+        "jugador": "Navarro Valentin",
+        "convocatorias": 15,
+        "partidos_titular": 13,
+        "minutos_jugados": 669,
+        "goles": 0,
+        "asistencias": 1,
+        "tarjeta_amarilla": 0,
+        "tarjeta_roja": 0
+      },
+      {
+        "jugador": "Conte Ian",
+        "convocatorias": 13,
+        "partidos_titular": 8,
+        "minutos_jugados": 529,
+        "goles": 0,
+        "asistencias": 0,
+        "tarjeta_amarilla": 0,
+        "tarjeta_roja": 0
+      },
+      {
+        "jugador": "Reynoso Tomas",
+        "convocatorias": 13,
+        "partidos_titular": 11,
+        "minutos_jugados": 294,
+        "goles": 1,
+        "asistencias": 0,
+        "tarjeta_amarilla": 2,
         "tarjeta_roja": 0
       },
       {
@@ -35492,16 +35565,6 @@
         "tarjeta_roja": 1
       },
       {
-        "jugador": "Galeano Joaquin",
-        "convocatorias": 8,
-        "partidos_titular": 7,
-        "minutos_jugados": 395,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 1,
-        "tarjeta_roja": 0
-      },
-      {
         "jugador": "Cocozza Maximo",
         "convocatorias": 16,
         "partidos_titular": 16,
@@ -35522,11 +35585,11 @@
         "tarjeta_roja": 0
       },
       {
-        "jugador": "Aquilue Santiago",
-        "convocatorias": 13,
-        "partidos_titular": 13,
-        "minutos_jugados": 286,
-        "goles": 4,
+        "jugador": "Galeano Joaquin",
+        "convocatorias": 8,
+        "partidos_titular": 7,
+        "minutos_jugados": 395,
+        "goles": 0,
         "asistencias": 0,
         "tarjeta_amarilla": 1,
         "tarjeta_roja": 0
@@ -35539,6 +35602,16 @@
         "goles": 0,
         "asistencias": 0,
         "tarjeta_amarilla": 0,
+        "tarjeta_roja": 0
+      },
+      {
+        "jugador": "Aquilue Santiago",
+        "convocatorias": 13,
+        "partidos_titular": 13,
+        "minutos_jugados": 286,
+        "goles": 4,
+        "asistencias": 0,
+        "tarjeta_amarilla": 1,
         "tarjeta_roja": 0
       },
       {
@@ -35582,6 +35655,16 @@
         "tarjeta_roja": 0
       },
       {
+        "jugador": "Kaye Axel",
+        "convocatorias": 1,
+        "partidos_titular": 1,
+        "minutos_jugados": 45,
+        "goles": 0,
+        "asistencias": 0,
+        "tarjeta_amarilla": 0,
+        "tarjeta_roja": 0
+      },
+      {
         "jugador": "Fernández leis Gabriel",
         "convocatorias": 10,
         "partidos_titular": 10,
@@ -35602,10 +35685,60 @@
         "tarjeta_roja": 0
       },
       {
-        "jugador": "Kaye Axel",
-        "convocatorias": 1,
-        "partidos_titular": 1,
-        "minutos_jugados": 45,
+        "jugador": "Sanchez Mathias",
+        "convocatorias": 8,
+        "partidos_titular": 6,
+        "minutos_jugados": 205,
+        "goles": 0,
+        "asistencias": 0,
+        "tarjeta_amarilla": 0,
+        "tarjeta_roja": 0
+      },
+      {
+        "jugador": "Meza Luca",
+        "convocatorias": 14,
+        "partidos_titular": 10,
+        "minutos_jugados": 430,
+        "goles": 1,
+        "asistencias": 0,
+        "tarjeta_amarilla": 1,
+        "tarjeta_roja": 0
+      },
+      {
+        "jugador": "Bustamante Alan",
+        "convocatorias": 13,
+        "partidos_titular": 13,
+        "minutos_jugados": 545,
+        "goles": 1,
+        "asistencias": 0,
+        "tarjeta_amarilla": 2,
+        "tarjeta_roja": 0
+      },
+      {
+        "jugador": "Reinoso Patricio",
+        "convocatorias": 3,
+        "partidos_titular": 2,
+        "minutos_jugados": 90,
+        "goles": 1,
+        "asistencias": 0,
+        "tarjeta_amarilla": 0,
+        "tarjeta_roja": 0
+      },
+      {
+        "jugador": "Noriega Mateo",
+        "convocatorias": 17,
+        "partidos_titular": 15,
+        "minutos_jugados": 590,
+        "goles": 1,
+        "asistencias": 1,
+        "tarjeta_amarilla": 0,
+        "tarjeta_roja": 0
+      },
+      {
+        "jugador": "Arias Bonilla  Nicolás Geremias",
+        "convocatorias": 5,
+        "partidos_titular": 4,
+        "minutos_jugados": 155,
         "goles": 0,
         "asistencias": 0,
         "tarjeta_amarilla": 0,
@@ -35626,16 +35759,6 @@
         "convocatorias": 11,
         "partidos_titular": 9,
         "minutos_jugados": 185,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Arias Bonilla  Nicolás Geremias",
-        "convocatorias": 5,
-        "partidos_titular": 4,
-        "minutos_jugados": 155,
         "goles": 0,
         "asistencias": 0,
         "tarjeta_amarilla": 0,
@@ -35672,56 +35795,6 @@
         "tarjeta_roja": 0
       },
       {
-        "jugador": "Sanchez Mathias",
-        "convocatorias": 8,
-        "partidos_titular": 6,
-        "minutos_jugados": 205,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Meza Luca",
-        "convocatorias": 14,
-        "partidos_titular": 10,
-        "minutos_jugados": 430,
-        "goles": 1,
-        "asistencias": 0,
-        "tarjeta_amarilla": 1,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Reinoso Patricio",
-        "convocatorias": 3,
-        "partidos_titular": 2,
-        "minutos_jugados": 90,
-        "goles": 1,
-        "asistencias": 0,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Noriega Mateo",
-        "convocatorias": 17,
-        "partidos_titular": 15,
-        "minutos_jugados": 590,
-        "goles": 1,
-        "asistencias": 1,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Bustamante Alan",
-        "convocatorias": 13,
-        "partidos_titular": 13,
-        "minutos_jugados": 545,
-        "goles": 1,
-        "asistencias": 0,
-        "tarjeta_amarilla": 2,
-        "tarjeta_roja": 0
-      },
-      {
         "jugador": "Rios Mateo",
         "convocatorias": 14,
         "partidos_titular": 11,
@@ -35730,26 +35803,6 @@
         "asistencias": 1,
         "tarjeta_amarilla": 4,
         "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Celiz Teo",
-        "convocatorias": 22,
-        "partidos_titular": 16,
-        "minutos_jugados": 585,
-        "goles": 1,
-        "asistencias": 0,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Saragoza Ramiro",
-        "convocatorias": 17,
-        "partidos_titular": 13,
-        "minutos_jugados": 350,
-        "goles": 2,
-        "asistencias": 2,
-        "tarjeta_amarilla": 3,
-        "tarjeta_roja": 1
       },
       {
         "jugador": "Chmea Roque",
@@ -35782,13 +35835,23 @@
         "tarjeta_roja": 0
       },
       {
-        "jugador": "Bin Justin",
-        "convocatorias": 15,
-        "partidos_titular": 12,
-        "minutos_jugados": 345,
+        "jugador": "Celiz Teo",
+        "convocatorias": 22,
+        "partidos_titular": 16,
+        "minutos_jugados": 585,
         "goles": 1,
         "asistencias": 0,
-        "tarjeta_amarilla": 2,
+        "tarjeta_amarilla": 0,
+        "tarjeta_roja": 0
+      },
+      {
+        "jugador": "Saragoza Ramiro",
+        "convocatorias": 17,
+        "partidos_titular": 13,
+        "minutos_jugados": 350,
+        "goles": 2,
+        "asistencias": 2,
+        "tarjeta_amarilla": 3,
         "tarjeta_roja": 1
       },
       {
@@ -35802,20 +35865,20 @@
         "tarjeta_roja": 0
       },
       {
+        "jugador": "Bin Justin",
+        "convocatorias": 15,
+        "partidos_titular": 12,
+        "minutos_jugados": 345,
+        "goles": 1,
+        "asistencias": 0,
+        "tarjeta_amarilla": 2,
+        "tarjeta_roja": 1
+      },
+      {
         "jugador": "Blanco Dylan Alex",
         "convocatorias": 21,
         "partidos_titular": 17,
         "minutos_jugados": 956,
-        "goles": 1,
-        "asistencias": 0,
-        "tarjeta_amarilla": 2,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Inostroza Bastian",
-        "convocatorias": 13,
-        "partidos_titular": 9,
-        "minutos_jugados": 137,
         "goles": 1,
         "asistencias": 0,
         "tarjeta_amarilla": 2,
@@ -35832,13 +35895,13 @@
         "tarjeta_roja": 0
       },
       {
-        "jugador": "Beron Santiago",
-        "convocatorias": 12,
+        "jugador": "Inostroza Bastian",
+        "convocatorias": 13,
         "partidos_titular": 9,
-        "minutos_jugados": 128,
+        "minutos_jugados": 137,
         "goles": 1,
-        "asistencias": 1,
-        "tarjeta_amarilla": 0,
+        "asistencias": 0,
+        "tarjeta_amarilla": 2,
         "tarjeta_roja": 0
       },
       {
@@ -35846,6 +35909,16 @@
         "convocatorias": 16,
         "partidos_titular": 13,
         "minutos_jugados": 493,
+        "goles": 1,
+        "asistencias": 1,
+        "tarjeta_amarilla": 0,
+        "tarjeta_roja": 0
+      },
+      {
+        "jugador": "Beron Santiago",
+        "convocatorias": 12,
+        "partidos_titular": 9,
+        "minutos_jugados": 128,
         "goles": 1,
         "asistencias": 1,
         "tarjeta_amarilla": 0,
@@ -35944,26 +36017,6 @@
         "tarjeta_roja": 0
       },
       {
-        "jugador": "Denis Galli Sebastian",
-        "convocatorias": 7,
-        "partidos_titular": 1,
-        "minutos_jugados": 192,
-        "goles": 1,
-        "asistencias": 0,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Arce Miño  Axel",
-        "convocatorias": 9,
-        "partidos_titular": 2,
-        "minutos_jugados": 273,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
         "jugador": "Vargas Valentino",
         "convocatorias": 7,
         "partidos_titular": 0,
@@ -36004,44 +36057,24 @@
         "tarjeta_roja": 0
       },
       {
-        "jugador": "Lopez Tomas",
-        "convocatorias": 21,
-        "partidos_titular": 18,
-        "minutos_jugados": 1122,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 2,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Maidana Lautaro",
-        "convocatorias": 21,
-        "partidos_titular": 13,
-        "minutos_jugados": 1053,
-        "goles": 2,
-        "asistencias": 1,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Ortiz Leonardo",
-        "convocatorias": 20,
-        "partidos_titular": 18,
-        "minutos_jugados": 1022,
+        "jugador": "Denis Galli Sebastian",
+        "convocatorias": 7,
+        "partidos_titular": 1,
+        "minutos_jugados": 192,
         "goles": 1,
         "asistencias": 0,
         "tarjeta_amarilla": 0,
         "tarjeta_roja": 0
       },
       {
-        "jugador": "Ibañez Bastian",
-        "convocatorias": 22,
-        "partidos_titular": 20,
-        "minutos_jugados": 1294,
+        "jugador": "Arce Miño  Axel",
+        "convocatorias": 9,
+        "partidos_titular": 2,
+        "minutos_jugados": 273,
         "goles": 0,
         "asistencias": 0,
         "tarjeta_amarilla": 0,
-        "tarjeta_roja": 1
+        "tarjeta_roja": 0
       },
       {
         "jugador": "Torrecilla Enzo Francisco",
@@ -36164,20 +36197,50 @@
         "tarjeta_roja": 0
       },
       {
-        "jugador": "Baccaro Santino",
-        "convocatorias": 16,
-        "partidos_titular": 6,
-        "minutos_jugados": 483,
+        "jugador": "Lopez Tomas",
+        "convocatorias": 21,
+        "partidos_titular": 18,
+        "minutos_jugados": 1122,
         "goles": 0,
+        "asistencias": 0,
+        "tarjeta_amarilla": 2,
+        "tarjeta_roja": 0
+      },
+      {
+        "jugador": "Maidana Lautaro",
+        "convocatorias": 21,
+        "partidos_titular": 13,
+        "minutos_jugados": 1053,
+        "goles": 2,
+        "asistencias": 1,
+        "tarjeta_amarilla": 0,
+        "tarjeta_roja": 0
+      },
+      {
+        "jugador": "Ortiz Leonardo",
+        "convocatorias": 20,
+        "partidos_titular": 18,
+        "minutos_jugados": 1022,
+        "goles": 1,
         "asistencias": 0,
         "tarjeta_amarilla": 0,
         "tarjeta_roja": 0
       },
       {
-        "jugador": "Vargas Felipe",
-        "convocatorias": 2,
-        "partidos_titular": 0,
-        "minutos_jugados": 47,
+        "jugador": "Ibañez Bastian",
+        "convocatorias": 22,
+        "partidos_titular": 20,
+        "minutos_jugados": 1294,
+        "goles": 0,
+        "asistencias": 0,
+        "tarjeta_amarilla": 0,
+        "tarjeta_roja": 1
+      },
+      {
+        "jugador": "Baccaro Santino",
+        "convocatorias": 16,
+        "partidos_titular": 6,
+        "minutos_jugados": 483,
         "goles": 0,
         "asistencias": 0,
         "tarjeta_amarilla": 0,
@@ -36204,23 +36267,13 @@
         "tarjeta_roja": 0
       },
       {
-        "jugador": "Baigorria Nicolás Nahuel",
-        "convocatorias": 27,
-        "partidos_titular": 11,
-        "minutos_jugados": 684,
+        "jugador": "Vargas Felipe",
+        "convocatorias": 2,
+        "partidos_titular": 0,
+        "minutos_jugados": 47,
         "goles": 0,
         "asistencias": 0,
-        "tarjeta_amarilla": 1,
-        "tarjeta_roja": 1
-      },
-      {
-        "jugador": "Dos Santos  Bayron",
-        "convocatorias": 18,
-        "partidos_titular": 6,
-        "minutos_jugados": 517,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 3,
+        "tarjeta_amarilla": 0,
         "tarjeta_roja": 0
       },
       {
@@ -36241,6 +36294,26 @@
         "goles": 2,
         "asistencias": 0,
         "tarjeta_amarilla": 1,
+        "tarjeta_roja": 0
+      },
+      {
+        "jugador": "Baigorria Nicolás Nahuel",
+        "convocatorias": 27,
+        "partidos_titular": 11,
+        "minutos_jugados": 684,
+        "goles": 0,
+        "asistencias": 0,
+        "tarjeta_amarilla": 1,
+        "tarjeta_roja": 1
+      },
+      {
+        "jugador": "Dos Santos  Bayron",
+        "convocatorias": 18,
+        "partidos_titular": 6,
+        "minutos_jugados": 517,
+        "goles": 0,
+        "asistencias": 0,
+        "tarjeta_amarilla": 3,
         "tarjeta_roja": 0
       },
       {
@@ -36288,16 +36361,6 @@
   "plantel_futdetail": {
     "4TA": [
       {
-        "nombre": "Ramos Bautista",
-        "posicion": "Arquero (ARQ)",
-        "edad": 20,
-        "altura": 185,
-        "peso": 74.6,
-        "pie": "Derecho",
-        "valoracion": "A",
-        "foto": null
-      },
-      {
         "nombre": "Ruiz Santiago",
         "posicion": "Arquero (ARQ)",
         "edad": 19,
@@ -36314,6 +36377,16 @@
         "altura": null,
         "peso": null,
         "pie": "Izquierdo",
+        "valoracion": "A",
+        "foto": null
+      },
+      {
+        "nombre": "Ramos Bautista",
+        "posicion": "Arquero (ARQ)",
+        "edad": 20,
+        "altura": 185,
+        "peso": 74.6,
+        "pie": "Derecho",
         "valoracion": "A",
         "foto": null
       },
@@ -36338,6 +36411,16 @@
         "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/82.png"
       },
       {
+        "nombre": "González Kevin",
+        "posicion": "Central izquierdo(DEF)",
+        "edad": 19,
+        "altura": 186,
+        "peso": 68.0,
+        "pie": "Izquierdo",
+        "valoracion": "A",
+        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/79.png"
+      },
+      {
         "nombre": "Aguirre Iñaki",
         "posicion": "Central izquierdo(DEF)",
         "edad": 20,
@@ -36346,16 +36429,6 @@
         "pie": "Izquierdo",
         "valoracion": "A",
         "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/47.png"
-      },
-      {
-        "nombre": "Saravia Roman",
-        "posicion": "Central izquierdo(DEF)",
-        "edad": 20,
-        "altura": 183,
-        "peso": 68.5,
-        "pie": "Izquierdo",
-        "valoracion": "A",
-        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/45.png"
       },
       {
         "nombre": "Medina Tiziano",
@@ -36368,24 +36441,14 @@
         "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/78.png"
       },
       {
-        "nombre": "González Kevin",
+        "nombre": "Saravia Roman",
         "posicion": "Central izquierdo(DEF)",
-        "edad": 19,
-        "altura": 186,
-        "peso": 68.0,
+        "edad": 20,
+        "altura": 183,
+        "peso": 68.5,
         "pie": "Izquierdo",
         "valoracion": "A",
-        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/79.png"
-      },
-      {
-        "nombre": "López Facundo",
-        "posicion": "Lateral derecho (DEF)",
-        "edad": 19,
-        "altura": 180,
-        "peso": 70.0,
-        "pie": "Derecho",
-        "valoracion": "A",
-        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/74.png"
+        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/45.png"
       },
       {
         "nombre": "Luna Agustin",
@@ -36408,14 +36471,14 @@
         "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/73.png"
       },
       {
-        "nombre": "González Alex",
-        "posicion": "Lateral izquierdo (DEF)",
+        "nombre": "López Facundo",
+        "posicion": "Lateral derecho (DEF)",
         "edad": 19,
         "altura": 180,
-        "peso": 74.0,
-        "pie": "Izquierdo",
+        "peso": 70.0,
+        "pie": "Derecho",
         "valoracion": "A",
-        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/80.png"
+        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/74.png"
       },
       {
         "nombre": "Benitez Lautaro",
@@ -36428,34 +36491,14 @@
         "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/46.png"
       },
       {
-        "nombre": "Alvaro Navoni",
-        "posicion": "Mediocampista central (VOL)",
-        "edad": 20,
-        "altura": null,
-        "peso": null,
-        "pie": "Derecho",
-        "valoracion": "A",
-        "foto": null
-      },
-      {
-        "nombre": "Cáceres Thomas",
-        "posicion": "Mediocampista central (VOL)",
+        "nombre": "González Alex",
+        "posicion": "Lateral izquierdo (DEF)",
         "edad": 19,
-        "altura": 171,
-        "peso": 71.0,
-        "pie": "Derecho",
+        "altura": 180,
+        "peso": 74.0,
+        "pie": "Izquierdo",
         "valoracion": "A",
-        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/83.png"
-      },
-      {
-        "nombre": "Copes Tomas",
-        "posicion": "Volante mixto (VOL)",
-        "edad": 19,
-        "altura": null,
-        "peso": null,
-        "pie": "Derecho",
-        "valoracion": "A",
-        "foto": null
+        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/80.png"
       },
       {
         "nombre": "González Tobías",
@@ -36488,6 +36531,46 @@
         "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/394.png"
       },
       {
+        "nombre": "Alvaro Navoni",
+        "posicion": "Mediocampista central (VOL)",
+        "edad": 20,
+        "altura": null,
+        "peso": null,
+        "pie": "Derecho",
+        "valoracion": "A",
+        "foto": null
+      },
+      {
+        "nombre": "Cáceres Thomas",
+        "posicion": "Mediocampista central (VOL)",
+        "edad": 19,
+        "altura": 171,
+        "peso": 71.0,
+        "pie": "Derecho",
+        "valoracion": "A",
+        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/83.png"
+      },
+      {
+        "nombre": "Copes Tomas",
+        "posicion": "Volante mixto (VOL)",
+        "edad": 19,
+        "altura": null,
+        "peso": null,
+        "pie": "Derecho",
+        "valoracion": "A",
+        "foto": null
+      },
+      {
+        "nombre": "Fares Hamdan",
+        "posicion": "Volante derecho (VOL)",
+        "edad": 19,
+        "altura": 175,
+        "peso": 70.0,
+        "pie": "Derecho",
+        "valoracion": "A",
+        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/211.png"
+      },
+      {
         "nombre": "Benítez Cristian",
         "posicion": "Volante izquierdo (VOL)",
         "edad": 19,
@@ -36506,16 +36589,6 @@
         "pie": "Derecho",
         "valoracion": "A",
         "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/202.png"
-      },
-      {
-        "nombre": "Fares Hamdan",
-        "posicion": "Volante derecho (VOL)",
-        "edad": 19,
-        "altura": 175,
-        "peso": 70.0,
-        "pie": "Derecho",
-        "valoracion": "A",
-        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/211.png"
       },
       {
         "nombre": "Ordoñez Ignacio",
@@ -36578,6 +36651,16 @@
         "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/206.png"
       },
       {
+        "nombre": "Lezcano Cristian Leonel",
+        "posicion": "Extremo derecho (DEL)",
+        "edad": 19,
+        "altura": 166,
+        "peso": 57.5,
+        "pie": "Derecho",
+        "valoracion": "A",
+        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/479.png"
+      },
+      {
         "nombre": "Hillairet Yair",
         "posicion": "Extremo derecho (DEL)",
         "edad": 20,
@@ -36598,24 +36681,14 @@
         "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/389.png"
       },
       {
-        "nombre": "Lezcano Cristian Leonel",
-        "posicion": "Extremo derecho (DEL)",
-        "edad": 19,
-        "altura": 166,
-        "peso": 57.5,
+        "nombre": "Gonzalez Santino",
+        "posicion": "Centro delantero (DEL)",
+        "edad": 20,
+        "altura": 186,
+        "peso": 84.0,
         "pie": "Derecho",
         "valoracion": "A",
-        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/479.png"
-      },
-      {
-        "nombre": "Figueredo Benjamin",
-        "posicion": "Segundo delantero (DEL)",
-        "edad": 19,
-        "altura": 177,
-        "peso": 67.0,
-        "pie": "Derecho",
-        "valoracion": "A",
-        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/398.png"
+        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/69.png"
       },
       {
         "nombre": "Andrusisen Lautaro",
@@ -36628,16 +36701,6 @@
         "foto": null
       },
       {
-        "nombre": "Gonzalez Santino",
-        "posicion": "Centro delantero (DEL)",
-        "edad": 20,
-        "altura": 186,
-        "peso": 84.0,
-        "pie": "Derecho",
-        "valoracion": "A",
-        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/69.png"
-      },
-      {
         "nombre": "Gómez Luka",
         "posicion": "Segundo delantero (DEL)",
         "edad": 19,
@@ -36646,6 +36709,16 @@
         "pie": "Derecho",
         "valoracion": "A",
         "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/218.png"
+      },
+      {
+        "nombre": "Ferreyra Rodrigo",
+        "posicion": "Centro delantero (DEL)",
+        "edad": 19,
+        "altura": null,
+        "peso": null,
+        "pie": "Derecho",
+        "valoracion": "A",
+        "foto": null
       },
       {
         "nombre": "Mayer Tomas",
@@ -36668,27 +36741,17 @@
         "foto": null
       },
       {
-        "nombre": "Ferreyra Rodrigo",
-        "posicion": "Centro delantero (DEL)",
+        "nombre": "Figueredo Benjamin",
+        "posicion": "Segundo delantero (DEL)",
         "edad": 19,
-        "altura": null,
-        "peso": null,
+        "altura": 177,
+        "peso": 67.0,
         "pie": "Derecho",
         "valoracion": "A",
-        "foto": null
+        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/398.png"
       }
     ],
     "5TA": [
-      {
-        "nombre": "Pereyra Manuel",
-        "posicion": "Arquero (ARQ)",
-        "edad": 18,
-        "altura": 179,
-        "peso": 75.0,
-        "pie": "Derecho",
-        "valoracion": "A",
-        "foto": null
-      },
       {
         "nombre": "Zerda Santiago Lionel",
         "posicion": "Arquero (ARQ)",
@@ -36708,6 +36771,26 @@
         "pie": "Derecho",
         "valoracion": "A",
         "foto": null
+      },
+      {
+        "nombre": "Pereyra Manuel",
+        "posicion": "Arquero (ARQ)",
+        "edad": 18,
+        "altura": 179,
+        "peso": 75.0,
+        "pie": "Derecho",
+        "valoracion": "A",
+        "foto": null
+      },
+      {
+        "nombre": "Moyano Jerónimo",
+        "posicion": "Central derecho (DEF)",
+        "edad": 18,
+        "altura": 184,
+        "peso": 75.0,
+        "pie": "Izquierdo",
+        "valoracion": "A",
+        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/223.png"
       },
       {
         "nombre": "Cordoba Santiago",
@@ -36730,14 +36813,14 @@
         "foto": null
       },
       {
-        "nombre": "Moyano Jerónimo",
-        "posicion": "Central derecho (DEF)",
+        "nombre": "Demonte Tomas",
+        "posicion": "Central izquierdo(DEF)",
         "edad": 18,
-        "altura": 184,
-        "peso": 75.0,
-        "pie": "Izquierdo",
+        "altura": 180,
+        "peso": 72.0,
+        "pie": "Derecho",
         "valoracion": "A",
-        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/223.png"
+        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/122.png"
       },
       {
         "nombre": "Samper Joaquin",
@@ -36760,14 +36843,14 @@
         "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/115.png"
       },
       {
-        "nombre": "Demonte Tomas",
-        "posicion": "Central izquierdo(DEF)",
+        "nombre": "Adamovsky Felipe",
+        "posicion": "Lateral derecho (DEF)",
         "edad": 18,
-        "altura": 180,
-        "peso": 72.0,
+        "altura": 176,
+        "peso": 74.7,
         "pie": "Derecho",
         "valoracion": "A",
-        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/122.png"
+        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/111.png"
       },
       {
         "nombre": "Luque Gonzalo",
@@ -36780,14 +36863,14 @@
         "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/110.png"
       },
       {
-        "nombre": "Adamovsky Felipe",
-        "posicion": "Lateral derecho (DEF)",
+        "nombre": "Canullo Juan",
+        "posicion": "Lateral izquierdo (DEF)",
         "edad": 18,
-        "altura": 176,
-        "peso": 74.7,
+        "altura": 167,
+        "peso": 56.2,
         "pie": "Derecho",
         "valoracion": "A",
-        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/111.png"
+        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/224.png"
       },
       {
         "nombre": "Rodriguez Agustín",
@@ -36810,14 +36893,14 @@
         "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/114.png"
       },
       {
-        "nombre": "Canullo Juan",
-        "posicion": "Lateral izquierdo (DEF)",
+        "nombre": "Llera Mariano",
+        "posicion": "Mediocampista central (VOL)",
         "edad": 18,
-        "altura": 167,
-        "peso": 56.2,
+        "altura": null,
+        "peso": null,
         "pie": "Derecho",
         "valoracion": "A",
-        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/224.png"
+        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/227.png"
       },
       {
         "nombre": "Rodriguez Thiago",
@@ -36840,14 +36923,14 @@
         "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/118.png"
       },
       {
-        "nombre": "Llera Mariano",
-        "posicion": "Mediocampista central (VOL)",
+        "nombre": "Vargas Thiago",
+        "posicion": "Volante derecho (VOL)",
         "edad": 18,
-        "altura": null,
-        "peso": null,
+        "altura": 170,
+        "peso": 70.0,
         "pie": "Derecho",
         "valoracion": "A",
-        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/227.png"
+        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/113.png"
       },
       {
         "nombre": "Barrios Cristian",
@@ -36900,14 +36983,14 @@
         "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/134.png"
       },
       {
-        "nombre": "Vargas Thiago",
-        "posicion": "Volante derecho (VOL)",
+        "nombre": "Gonzalez Lautaro",
+        "posicion": "Enganche (VOL)",
         "edad": 18,
-        "altura": 170,
-        "peso": 70.0,
+        "altura": 181,
+        "peso": 67.0,
         "pie": "Derecho",
         "valoracion": "A",
-        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/113.png"
+        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/230.png"
       },
       {
         "nombre": "Perez Joaquin",
@@ -36928,16 +37011,6 @@
         "pie": "Derecho",
         "valoracion": "A",
         "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/121.png"
-      },
-      {
-        "nombre": "Gonzalez Lautaro",
-        "posicion": "Enganche (VOL)",
-        "edad": 18,
-        "altura": 181,
-        "peso": 67.0,
-        "pie": "Derecho",
-        "valoracion": "A",
-        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/230.png"
       },
       {
         "nombre": "Ricaldi Ian",
@@ -36968,6 +37041,16 @@
         "pie": "Derecho",
         "valoracion": "A",
         "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/112.png"
+      },
+      {
+        "nombre": "Villanueva Román",
+        "posicion": "Centro delantero (DEL)",
+        "edad": 18,
+        "altura": null,
+        "peso": null,
+        "pie": "Derecho",
+        "valoracion": "A",
+        "foto": null
       },
       {
         "nombre": "Miño Roman",
@@ -37006,16 +37089,6 @@
         "altura": null,
         "peso": null,
         "pie": "",
-        "valoracion": "A",
-        "foto": null
-      },
-      {
-        "nombre": "Villanueva Román",
-        "posicion": "Centro delantero (DEL)",
-        "edad": 18,
-        "altura": null,
-        "peso": null,
-        "pie": "Derecho",
         "valoracion": "A",
         "foto": null
       }
@@ -37062,26 +37135,6 @@
         "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/589.png"
       },
       {
-        "nombre": "Ortiz Ignacio",
-        "posicion": "Central derecho (DEF)",
-        "edad": 17,
-        "altura": null,
-        "peso": null,
-        "pie": "Izquierdo",
-        "valoracion": "A",
-        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/594.png"
-      },
-      {
-        "nombre": "Scungio Sebastian",
-        "posicion": "Central derecho (DEF)",
-        "edad": 17,
-        "altura": 194,
-        "peso": 76.8,
-        "pie": "Derecho",
-        "valoracion": "A",
-        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/166.png"
-      },
-      {
         "nombre": "Moralejo Santiago",
         "posicion": "Central derecho (DEF)",
         "edad": 17,
@@ -37102,14 +37155,24 @@
         "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/143.png"
       },
       {
-        "nombre": "Muchiutti Valentino",
-        "posicion": "Central izquierdo(DEF)",
+        "nombre": "Ortiz Ignacio",
+        "posicion": "Central derecho (DEF)",
         "edad": 17,
         "altura": null,
         "peso": null,
         "pie": "Izquierdo",
         "valoracion": "A",
-        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/593.png"
+        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/594.png"
+      },
+      {
+        "nombre": "Scungio Sebastian",
+        "posicion": "Central derecho (DEF)",
+        "edad": 17,
+        "altura": 194,
+        "peso": 76.8,
+        "pie": "Derecho",
+        "valoracion": "A",
+        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/166.png"
       },
       {
         "nombre": "Umeres Agustin",
@@ -37122,14 +37185,14 @@
         "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/592.png"
       },
       {
-        "nombre": "Torres David",
-        "posicion": "Lateral derecho (DEF)",
+        "nombre": "Muchiutti Valentino",
+        "posicion": "Central izquierdo(DEF)",
         "edad": 17,
         "altura": null,
         "peso": null,
-        "pie": "Derecho",
+        "pie": "Izquierdo",
         "valoracion": "A",
-        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/591.png"
+        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/593.png"
       },
       {
         "nombre": "Fernandez Jerónimo",
@@ -37140,6 +37203,16 @@
         "pie": "Derecho",
         "valoracion": "A",
         "foto": null
+      },
+      {
+        "nombre": "Torres David",
+        "posicion": "Lateral derecho (DEF)",
+        "edad": 17,
+        "altura": null,
+        "peso": null,
+        "pie": "Derecho",
+        "valoracion": "A",
+        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/591.png"
       },
       {
         "nombre": "Gomez Santiago",
@@ -37212,6 +37285,16 @@
         "foto": null
       },
       {
+        "nombre": "Cortes Adrian maximiliano",
+        "posicion": "Volante izquierdo (VOL)",
+        "edad": 17,
+        "altura": 173,
+        "peso": 67.0,
+        "pie": "Izquierdo",
+        "valoracion": "A",
+        "foto": null
+      },
+      {
         "nombre": "Calderon Roman",
         "posicion": "Volante izquierdo (VOL)",
         "edad": 17,
@@ -37222,12 +37305,12 @@
         "foto": null
       },
       {
-        "nombre": "Cortes Adrian maximiliano",
-        "posicion": "Volante izquierdo (VOL)",
+        "nombre": "Pomar Santino",
+        "posicion": "Enganche (VOL)",
         "edad": 17,
-        "altura": 173,
-        "peso": 67.0,
-        "pie": "Izquierdo",
+        "altura": null,
+        "peso": null,
+        "pie": "Derecho",
         "valoracion": "A",
         "foto": null
       },
@@ -37282,8 +37365,8 @@
         "foto": null
       },
       {
-        "nombre": "Pomar Santino",
-        "posicion": "Enganche (VOL)",
+        "nombre": "Parra Matias",
+        "posicion": "Extremo izquierdo (DEL)",
         "edad": 17,
         "altura": null,
         "peso": null,
@@ -37292,11 +37375,21 @@
         "foto": null
       },
       {
-        "nombre": "Parra Matias",
-        "posicion": "Extremo izquierdo (DEL)",
+        "nombre": "Dechiara Francesco",
+        "posicion": "Centro delantero (DEL)",
         "edad": 17,
-        "altura": null,
-        "peso": null,
+        "altura": 186,
+        "peso": 80.8,
+        "pie": "Derecho",
+        "valoracion": "A",
+        "foto": null
+      },
+      {
+        "nombre": "Lizardia Bautista",
+        "posicion": "Segundo delantero (DEL)",
+        "edad": 17,
+        "altura": 169,
+        "peso": 65.9,
         "pie": "Derecho",
         "valoracion": "A",
         "foto": null
@@ -37350,49 +37443,9 @@
         "pie": "Derecho",
         "valoracion": "A",
         "foto": null
-      },
-      {
-        "nombre": "Dechiara Francesco",
-        "posicion": "Centro delantero (DEL)",
-        "edad": 17,
-        "altura": 186,
-        "peso": 80.8,
-        "pie": "Derecho",
-        "valoracion": "A",
-        "foto": null
-      },
-      {
-        "nombre": "Lizardia Bautista",
-        "posicion": "Segundo delantero (DEL)",
-        "edad": 17,
-        "altura": 169,
-        "peso": 65.9,
-        "pie": "Derecho",
-        "valoracion": "A",
-        "foto": null
       }
     ],
     "7MA": [
-      {
-        "nombre": "Montoya Francisco",
-        "posicion": "Arquero (ARQ)",
-        "edad": 16,
-        "altura": 183,
-        "peso": 81.8,
-        "pie": "Derecho",
-        "valoracion": "A",
-        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/248.png"
-      },
-      {
-        "nombre": "Castro Matias",
-        "posicion": "Arquero (ARQ)",
-        "edad": 16,
-        "altura": 185,
-        "peso": 72.9,
-        "pie": "Derecho",
-        "valoracion": "A",
-        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/168.png"
-      },
       {
         "nombre": "Martinez Giuliano",
         "posicion": "Arquero (ARQ)",
@@ -37412,6 +37465,26 @@
         "pie": "Derecho",
         "valoracion": "A",
         "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/167.png"
+      },
+      {
+        "nombre": "Montoya Francisco",
+        "posicion": "Arquero (ARQ)",
+        "edad": 16,
+        "altura": 183,
+        "peso": 81.8,
+        "pie": "Derecho",
+        "valoracion": "A",
+        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/248.png"
+      },
+      {
+        "nombre": "Castro Matias",
+        "posicion": "Arquero (ARQ)",
+        "edad": 16,
+        "altura": 185,
+        "peso": 72.9,
+        "pie": "Derecho",
+        "valoracion": "A",
+        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/168.png"
       },
       {
         "nombre": "Pucill Mateo",
@@ -37464,16 +37537,6 @@
         "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/196.png"
       },
       {
-        "nombre": "Levy Thiago",
-        "posicion": "Central izquierdo(DEF)",
-        "edad": 16,
-        "altura": 180,
-        "peso": 65.4,
-        "pie": "",
-        "valoracion": "A",
-        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/175.png"
-      },
-      {
         "nombre": "Gonzalez Santino",
         "posicion": "Central izquierdo(DEF)",
         "edad": 16,
@@ -37484,14 +37547,14 @@
         "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/250.png"
       },
       {
-        "nombre": "Gaitan Valentin",
-        "posicion": "Lateral derecho (DEF)",
+        "nombre": "Levy Thiago",
+        "posicion": "Central izquierdo(DEF)",
         "edad": 16,
         "altura": 180,
-        "peso": 66.5,
-        "pie": "Izquierdo",
+        "peso": 65.4,
+        "pie": "",
         "valoracion": "A",
-        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/194.png"
+        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/175.png"
       },
       {
         "nombre": "Soberon Isaias",
@@ -37534,14 +37597,14 @@
         "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/582.png"
       },
       {
-        "nombre": "Lamanna Fabrizio",
-        "posicion": "Lateral izquierdo (DEF)",
+        "nombre": "Gaitan Valentin",
+        "posicion": "Lateral derecho (DEF)",
         "edad": 16,
-        "altura": 172,
-        "peso": 70.3,
+        "altura": 180,
+        "peso": 66.5,
         "pie": "Izquierdo",
         "valoracion": "A",
-        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/584.png"
+        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/194.png"
       },
       {
         "nombre": "Mancuello Tobias",
@@ -37554,14 +37617,14 @@
         "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/178.png"
       },
       {
-        "nombre": "Core Valentino",
-        "posicion": "Mediocampista central (VOL)",
+        "nombre": "Lamanna Fabrizio",
+        "posicion": "Lateral izquierdo (DEF)",
         "edad": 16,
-        "altura": 178,
-        "peso": 63.9,
-        "pie": "Derecho",
+        "altura": 172,
+        "peso": 70.3,
+        "pie": "Izquierdo",
         "valoracion": "A",
-        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/256.png"
+        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/584.png"
       },
       {
         "nombre": "Almiron Sebastian",
@@ -37584,6 +37647,16 @@
         "foto": null
       },
       {
+        "nombre": "Jara Juan",
+        "posicion": "Mediocampista central (VOL)",
+        "edad": 16,
+        "altura": 170,
+        "peso": 63.0,
+        "pie": "",
+        "valoracion": "A",
+        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/253.png"
+      },
+      {
         "nombre": "Molina Ramiro",
         "posicion": "Mediocampista central (VOL)",
         "edad": 16,
@@ -37594,14 +37667,14 @@
         "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/188.png"
       },
       {
-        "nombre": "Jara Juan",
+        "nombre": "Core Valentino",
         "posicion": "Mediocampista central (VOL)",
         "edad": 16,
-        "altura": 170,
-        "peso": 63.0,
-        "pie": "",
+        "altura": 178,
+        "peso": 63.9,
+        "pie": "Derecho",
         "valoracion": "A",
-        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/253.png"
+        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/256.png"
       },
       {
         "nombre": "Di Sipio Agustin",
@@ -37624,6 +37697,26 @@
         "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/255.png"
       },
       {
+        "nombre": "Herrera Thiago",
+        "posicion": "Enganche (VOL)",
+        "edad": 16,
+        "altura": 175,
+        "peso": 67.8,
+        "pie": "Derecho",
+        "valoracion": "A",
+        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/247.png"
+      },
+      {
+        "nombre": "Mena Sebastian",
+        "posicion": "Enganche (VOL)",
+        "edad": 16,
+        "altura": 175,
+        "peso": 61.6,
+        "pie": "Izquierdo",
+        "valoracion": "A",
+        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/180.png"
+      },
+      {
         "nombre": "Lopez Dionel",
         "posicion": "Enganche (VOL)",
         "edad": 16,
@@ -37644,54 +37737,14 @@
         "foto": null
       },
       {
-        "nombre": "Mena Sebastian",
-        "posicion": "Enganche (VOL)",
-        "edad": 16,
-        "altura": 175,
-        "peso": 61.6,
-        "pie": "Izquierdo",
-        "valoracion": "A",
-        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/180.png"
-      },
-      {
-        "nombre": "Herrera Thiago",
-        "posicion": "Enganche (VOL)",
-        "edad": 16,
-        "altura": 175,
-        "peso": 67.8,
-        "pie": "Derecho",
-        "valoracion": "A",
-        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/247.png"
-      },
-      {
-        "nombre": "Prieto Alexander",
+        "nombre": "Trejo Nicolas",
         "posicion": "Segundo delantero (DEL)",
         "edad": 16,
-        "altura": 172,
-        "peso": 58.0,
+        "altura": 174,
+        "peso": 56.9,
         "pie": "Derecho",
         "valoracion": "A",
-        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/259.png"
-      },
-      {
-        "nombre": "Godoy Gonzalo",
-        "posicion": "Segundo delantero (DEL)",
-        "edad": 16,
-        "altura": 160,
-        "peso": 55.4,
-        "pie": "Derecho",
-        "valoracion": "A",
-        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/633.png"
-      },
-      {
-        "nombre": "Astesana Valentino",
-        "posicion": "Centro delantero (DEL)",
-        "edad": 16,
-        "altura": 180,
-        "peso": 72.0,
-        "pie": "",
-        "valoracion": "A",
-        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/636.png"
+        "foto": null
       },
       {
         "nombre": "Barrios Bautista",
@@ -37702,16 +37755,6 @@
         "pie": "Derecho",
         "valoracion": "A",
         "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/192.png"
-      },
-      {
-        "nombre": "Trejo Nicolas",
-        "posicion": "Segundo delantero (DEL)",
-        "edad": 16,
-        "altura": 174,
-        "peso": 56.9,
-        "pie": "Derecho",
-        "valoracion": "A",
-        "foto": null
       },
       {
         "nombre": "Gagliardo Pedro Tomas",
@@ -37772,29 +37815,39 @@
         "pie": "Derecho",
         "valoracion": "A",
         "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/261.png"
+      },
+      {
+        "nombre": "Godoy Gonzalo",
+        "posicion": "Segundo delantero (DEL)",
+        "edad": 16,
+        "altura": 160,
+        "peso": 55.4,
+        "pie": "Derecho",
+        "valoracion": "A",
+        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/633.png"
+      },
+      {
+        "nombre": "Prieto Alexander",
+        "posicion": "Segundo delantero (DEL)",
+        "edad": 16,
+        "altura": 172,
+        "peso": 58.0,
+        "pie": "Derecho",
+        "valoracion": "A",
+        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/259.png"
+      },
+      {
+        "nombre": "Astesana Valentino",
+        "posicion": "Centro delantero (DEL)",
+        "edad": 16,
+        "altura": 180,
+        "peso": 72.0,
+        "pie": "",
+        "valoracion": "A",
+        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/636.png"
       }
     ],
     "8VA": [
-      {
-        "nombre": "Garcia Bautista",
-        "posicion": "Arquero (ARQ)",
-        "edad": 14,
-        "altura": 176,
-        "peso": 68.0,
-        "pie": "Derecho",
-        "valoracion": "A",
-        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/345.png"
-      },
-      {
-        "nombre": "Arias Nicolas",
-        "posicion": "Arquero (ARQ)",
-        "edad": 15,
-        "altura": null,
-        "peso": null,
-        "pie": "",
-        "valoracion": "A",
-        "foto": null
-      },
       {
         "nombre": "Kaye Axel",
         "posicion": "Arquero (ARQ)",
@@ -37846,14 +37899,24 @@
         "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/347.png"
       },
       {
-        "nombre": "Sanchez Mathias",
-        "posicion": "Central derecho (DEF)",
-        "edad": 15,
-        "altura": 162,
-        "peso": 52.6,
+        "nombre": "Garcia Bautista",
+        "posicion": "Arquero (ARQ)",
+        "edad": 14,
+        "altura": 176,
+        "peso": 68.0,
         "pie": "Derecho",
         "valoracion": "A",
-        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/353.png"
+        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/345.png"
+      },
+      {
+        "nombre": "Arias Nicolas",
+        "posicion": "Arquero (ARQ)",
+        "edad": 15,
+        "altura": null,
+        "peso": null,
+        "pie": "",
+        "valoracion": "A",
+        "foto": null
       },
       {
         "nombre": "Inostroza Bastian",
@@ -37864,6 +37927,16 @@
         "pie": "Derecho",
         "valoracion": "A",
         "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/352.png"
+      },
+      {
+        "nombre": "Sanchez Mathias",
+        "posicion": "Central derecho (DEF)",
+        "edad": 15,
+        "altura": 162,
+        "peso": 52.6,
+        "pie": "Derecho",
+        "valoracion": "A",
+        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/353.png"
       },
       {
         "nombre": "Fino Amadeo Benjamin",
@@ -37926,16 +37999,6 @@
         "foto": null
       },
       {
-        "nombre": "De Olivera Elias",
-        "posicion": "Lateral izquierdo (DEF)",
-        "edad": 15,
-        "altura": 164,
-        "peso": 53.2,
-        "pie": "Izquierdo",
-        "valoracion": "A",
-        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/348.png"
-      },
-      {
         "nombre": "Reinoso Martiniano",
         "posicion": "Lateral izquierdo (DEF)",
         "edad": 15,
@@ -37996,24 +38059,14 @@
         "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/358.png"
       },
       {
-        "nombre": "Rios Mateo",
-        "posicion": "Mediocampista central (VOL)",
+        "nombre": "De Olivera Elias",
+        "posicion": "Lateral izquierdo (DEF)",
         "edad": 15,
-        "altura": 167,
-        "peso": 51.9,
-        "pie": "Derecho",
+        "altura": 164,
+        "peso": 53.2,
+        "pie": "Izquierdo",
         "valoracion": "A",
-        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/364.png"
-      },
-      {
-        "nombre": "Radaelli Manuel",
-        "posicion": "Mediocampista central (VOL)",
-        "edad": 15,
-        "altura": null,
-        "peso": null,
-        "pie": "Derecho",
-        "valoracion": "A",
-        "foto": null
+        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/348.png"
       },
       {
         "nombre": "Fernández leis Gabriel",
@@ -38034,6 +38087,16 @@
         "pie": "Derecho",
         "valoracion": "A",
         "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/367.png"
+      },
+      {
+        "nombre": "Radaelli Manuel",
+        "posicion": "Mediocampista central (VOL)",
+        "edad": 15,
+        "altura": null,
+        "peso": null,
+        "pie": "Derecho",
+        "valoracion": "A",
+        "foto": null
       },
       {
         "nombre": "Gonzalia Bautista",
@@ -38086,34 +38149,14 @@
         "foto": null
       },
       {
-        "nombre": "Beron Santiago",
-        "posicion": "Volante izquierdo (VOL)",
+        "nombre": "Rios Mateo",
+        "posicion": "Mediocampista central (VOL)",
         "edad": 15,
-        "altura": null,
-        "peso": null,
-        "pie": "Izquierdo",
-        "valoracion": "A",
-        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/369.png"
-      },
-      {
-        "nombre": "Maguna Pedro",
-        "posicion": "Interno derecho (VOL)",
-        "edad": 15,
-        "altura": null,
-        "peso": null,
+        "altura": 167,
+        "peso": 51.9,
         "pie": "Derecho",
         "valoracion": "A",
-        "foto": null
-      },
-      {
-        "nombre": "Galeano Joaquin",
-        "posicion": "Volante izquierdo (VOL)",
-        "edad": 15,
-        "altura": null,
-        "peso": null,
-        "pie": "Izquierdo",
-        "valoracion": "A",
-        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/361.png"
+        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/364.png"
       },
       {
         "nombre": "Martinuccio Bautista",
@@ -38144,6 +38187,36 @@
         "pie": "Izquierdo",
         "valoracion": "A",
         "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/371.png"
+      },
+      {
+        "nombre": "Beron Santiago",
+        "posicion": "Volante izquierdo (VOL)",
+        "edad": 15,
+        "altura": null,
+        "peso": null,
+        "pie": "Izquierdo",
+        "valoracion": "A",
+        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/369.png"
+      },
+      {
+        "nombre": "Maguna Pedro",
+        "posicion": "Interno derecho (VOL)",
+        "edad": 15,
+        "altura": null,
+        "peso": null,
+        "pie": "Derecho",
+        "valoracion": "A",
+        "foto": null
+      },
+      {
+        "nombre": "Galeano Joaquin",
+        "posicion": "Volante izquierdo (VOL)",
+        "edad": 15,
+        "altura": null,
+        "peso": null,
+        "pie": "Izquierdo",
+        "valoracion": "A",
+        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/361.png"
       },
       {
         "nombre": "Aquilue Santiago",
@@ -38178,26 +38251,6 @@
       {
         "nombre": "Ruiz Ullua David",
         "posicion": "Extremo izquierdo (DEL)",
-        "edad": 15,
-        "altura": null,
-        "peso": null,
-        "pie": "Derecho",
-        "valoracion": "A",
-        "foto": null
-      },
-      {
-        "nombre": "Cocozza Maximo",
-        "posicion": "Segundo delantero (DEL)",
-        "edad": 15,
-        "altura": 170,
-        "peso": 55.3,
-        "pie": "Derecho",
-        "valoracion": "A",
-        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/377.png"
-      },
-      {
-        "nombre": "Saragoza Ramiro",
-        "posicion": "Centro delantero (DEL)",
         "edad": 15,
         "altura": null,
         "peso": null,
@@ -38254,19 +38307,29 @@
         "pie": "Derecho",
         "valoracion": "A",
         "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/379.png"
-      }
-    ],
-    "9NA": [
+      },
       {
-        "nombre": "Baccaro Santino",
-        "posicion": "Arquero (ARQ)",
-        "edad": 14,
-        "altura": 178,
-        "peso": 62.5,
+        "nombre": "Cocozza Maximo",
+        "posicion": "Segundo delantero (DEL)",
+        "edad": 15,
+        "altura": 170,
+        "peso": 55.3,
+        "pie": "Derecho",
+        "valoracion": "A",
+        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/377.png"
+      },
+      {
+        "nombre": "Saragoza Ramiro",
+        "posicion": "Centro delantero (DEL)",
+        "edad": 15,
+        "altura": null,
+        "peso": null,
         "pie": "Derecho",
         "valoracion": "A",
         "foto": null
-      },
+      }
+    ],
+    "9NA": [
       {
         "nombre": "Peludero Mateo",
         "posicion": "Arquero (ARQ)",
@@ -38308,11 +38371,11 @@
         "foto": null
       },
       {
-        "nombre": "Mora Bautista",
-        "posicion": "Central derecho (DEF)",
+        "nombre": "Baccaro Santino",
+        "posicion": "Arquero (ARQ)",
         "edad": 14,
-        "altura": 175,
-        "peso": 63.3,
+        "altura": 178,
+        "peso": 62.5,
         "pie": "Derecho",
         "valoracion": "A",
         "foto": null
@@ -38368,6 +38431,26 @@
         "foto": null
       },
       {
+        "nombre": "Mora Bautista",
+        "posicion": "Central derecho (DEF)",
+        "edad": 14,
+        "altura": 175,
+        "peso": 63.3,
+        "pie": "Derecho",
+        "valoracion": "A",
+        "foto": null
+      },
+      {
+        "nombre": "Soto Mateo",
+        "posicion": "Lateral derecho (DEF)",
+        "edad": 14,
+        "altura": null,
+        "peso": null,
+        "pie": "Derecho",
+        "valoracion": "A",
+        "foto": null
+      },
+      {
         "nombre": "Alvarenga Martin Adriano",
         "posicion": "Lateral derecho (DEF)",
         "edad": 14,
@@ -38388,26 +38471,6 @@
         "foto": null
       },
       {
-        "nombre": "Soto Mateo",
-        "posicion": "Lateral derecho (DEF)",
-        "edad": 14,
-        "altura": null,
-        "peso": null,
-        "pie": "Derecho",
-        "valoracion": "A",
-        "foto": null
-      },
-      {
-        "nombre": "Sanchez Benjamin",
-        "posicion": "Lateral izquierdo (DEF)",
-        "edad": 14,
-        "altura": 164,
-        "peso": 50.7,
-        "pie": "Izquierdo",
-        "valoracion": "A",
-        "foto": null
-      },
-      {
         "nombre": "Tulis Federico",
         "posicion": "Lateral izquierdo (DEF)",
         "edad": 14,
@@ -38418,12 +38481,12 @@
         "foto": null
       },
       {
-        "nombre": "Agorreca Ignacio",
-        "posicion": "Mediocampista central (VOL)",
+        "nombre": "Sanchez Benjamin",
+        "posicion": "Lateral izquierdo (DEF)",
         "edad": 14,
-        "altura": 170,
-        "peso": 54.6,
-        "pie": "Derecho",
+        "altura": 164,
+        "peso": 50.7,
+        "pie": "Izquierdo",
         "valoracion": "A",
         "foto": null
       },
@@ -38448,22 +38511,22 @@
         "foto": null
       },
       {
-        "nombre": "Baigorria Nicolás Nahuel",
-        "posicion": "Mediocampista central (VOL)",
-        "edad": 14,
-        "altura": 173,
-        "peso": 49.8,
-        "pie": "",
-        "valoracion": "A",
-        "foto": null
-      },
-      {
         "nombre": "Diaz Oliva Santiago",
         "posicion": "Mediocampista central (VOL)",
         "edad": 14,
         "altura": 156,
         "peso": 42.7,
         "pie": "Derecho",
+        "valoracion": "A",
+        "foto": null
+      },
+      {
+        "nombre": "Baigorria Nicolás Nahuel",
+        "posicion": "Mediocampista central (VOL)",
+        "edad": 14,
+        "altura": 173,
+        "peso": 49.8,
+        "pie": "",
         "valoracion": "A",
         "foto": null
       },
@@ -38478,31 +38541,11 @@
         "foto": null
       },
       {
-        "nombre": "Villalba Bogado Gustavo",
-        "posicion": "Enganche (VOL)",
+        "nombre": "Agorreca Ignacio",
+        "posicion": "Mediocampista central (VOL)",
         "edad": 14,
-        "altura": 173,
-        "peso": 59.7,
-        "pie": "",
-        "valoracion": "A",
-        "foto": null
-      },
-      {
-        "nombre": "Diaz Francisco Roman",
-        "posicion": "Enganche (VOL)",
-        "edad": 14,
-        "altura": 159,
-        "peso": 52.0,
-        "pie": "Izquierdo",
-        "valoracion": "A",
-        "foto": null
-      },
-      {
-        "nombre": "Dominic Tomassi Benjamin",
-        "posicion": "Enganche (VOL)",
-        "edad": 14,
-        "altura": null,
-        "peso": null,
+        "altura": 170,
+        "peso": 54.6,
         "pie": "Derecho",
         "valoracion": "A",
         "foto": null
@@ -38548,8 +38591,28 @@
         "foto": null
       },
       {
-        "nombre": "Duarte Gonzalo Isaias",
-        "posicion": "Extremo izquierdo (DEL)",
+        "nombre": "Villalba Bogado Gustavo",
+        "posicion": "Enganche (VOL)",
+        "edad": 14,
+        "altura": 173,
+        "peso": 59.7,
+        "pie": "",
+        "valoracion": "A",
+        "foto": null
+      },
+      {
+        "nombre": "Diaz Francisco Roman",
+        "posicion": "Enganche (VOL)",
+        "edad": 14,
+        "altura": 159,
+        "peso": 52.0,
+        "pie": "Izquierdo",
+        "valoracion": "A",
+        "foto": null
+      },
+      {
+        "nombre": "Dominic Tomassi Benjamin",
+        "posicion": "Enganche (VOL)",
         "edad": 14,
         "altura": null,
         "peso": null,
@@ -38563,6 +38626,16 @@
         "edad": 14,
         "altura": 170,
         "peso": 53.6,
+        "pie": "Derecho",
+        "valoracion": "A",
+        "foto": null
+      },
+      {
+        "nombre": "Duarte Gonzalo Isaias",
+        "posicion": "Extremo izquierdo (DEL)",
+        "edad": 14,
+        "altura": null,
+        "peso": null,
         "pie": "Derecho",
         "valoracion": "A",
         "foto": null
@@ -38628,12 +38701,12 @@
         "foto": null
       },
       {
-        "nombre": "Denis Galli Sebastian",
+        "nombre": "Nuñez Tiziano",
         "posicion": "Centro delantero (DEL)",
         "edad": 14,
-        "altura": 172,
-        "peso": 57.5,
-        "pie": "",
+        "altura": null,
+        "peso": null,
+        "pie": "Izquierdo",
         "valoracion": "A",
         "foto": null
       },
@@ -38648,22 +38721,22 @@
         "foto": null
       },
       {
-        "nombre": "Nuñez Tiziano",
-        "posicion": "Centro delantero (DEL)",
-        "edad": 14,
-        "altura": null,
-        "peso": null,
-        "pie": "Izquierdo",
-        "valoracion": "A",
-        "foto": null
-      },
-      {
         "nombre": "Marquez  Marcos Bautista",
         "posicion": "Centro delantero (DEL)",
         "edad": 14,
         "altura": null,
         "peso": null,
         "pie": "Derecho",
+        "valoracion": "A",
+        "foto": null
+      },
+      {
+        "nombre": "Denis Galli Sebastian",
+        "posicion": "Centro delantero (DEL)",
+        "edad": 14,
+        "altura": 172,
+        "peso": 57.5,
+        "pie": "",
         "valoracion": "A",
         "foto": null
       }
@@ -48136,30 +48209,6 @@
               ]
             },
             {
-              "fecha": "F24",
-              "opp": "Platense",
-              "min": 83,
-              "metrics": [
-                8648.99414,
-                104.41841,
-                248.22,
-                115.63,
-                31.84,
-                3,
-                25.98251,
-                11,
-                34,
-                48,
-                null,
-                4.27054,
-                -5.00439,
-                0.13,
-                10.09366555260664,
-                0.38,
-                810.43192
-              ]
-            },
-            {
               "fecha": "F25",
               "opp": "Sarmiento",
               "min": 62,
@@ -48546,30 +48595,6 @@
                 24.07751716783217,
                 1.91,
                 1163.53839
-              ]
-            },
-            {
-              "fecha": "F24",
-              "opp": "Platense",
-              "min": 56,
-              "metrics": [
-                5095.79976,
-                91.75449,
-                340.23999,
-                226.86,
-                227.71001,
-                9,
-                30.39375,
-                22,
-                22,
-                19,
-                null,
-                4.15515,
-                -5.30549,
-                0.39,
-                19.008654838787123,
-                4.07,
-                465.7099
               ]
             },
             {
@@ -49236,30 +49261,6 @@
               ]
             },
             {
-              "fecha": "F24",
-              "opp": "Platense",
-              "min": 83,
-              "metrics": [
-                8398.70972,
-                101.03751,
-                395.03999,
-                235.84,
-                53.78,
-                3,
-                27.21752,
-                15,
-                22,
-                58,
-                null,
-                4.05834,
-                -4.55818,
-                0.18,
-                14.04998091220416,
-                0.65,
-                867.90201
-              ]
-            },
-            {
               "fecha": "F25",
               "opp": "Sarmiento",
               "min": 63,
@@ -49458,35 +49459,6 @@
             }
           ]
         },
-        "Mateo Pucill": {
-          "pos": "",
-          "match": [
-            {
-              "fecha": "F25",
-              "opp": "Sarmiento",
-              "min": 25,
-              "metrics": [
-                2431.78198,
-                98.45205,
-                112.46,
-                65.15,
-                9.4,
-                0,
-                25.31908,
-                0,
-                1,
-                2,
-                null,
-                2.93987,
-                -4.53351,
-                0.0,
-                11.746074587890769,
-                0.38,
-                221.98335
-              ]
-            }
-          ]
-        },
         "Nicolás Trejo": {
           "pos": "",
           "match": [
@@ -49642,30 +49614,6 @@
                 31.134738137428627,
                 1.03,
                 429.97531
-              ]
-            },
-            {
-              "fecha": "F24",
-              "opp": "Platense",
-              "min": 75,
-              "metrics": [
-                8376.86475,
-                112.09407,
-                475.26999,
-                296.7,
-                88.57,
-                6,
-                29.32552,
-                4,
-                11,
-                30,
-                null,
-                4.58818,
-                -5.31493,
-                0.05,
-                19.265584588210107,
-                1.18,
-                876.36163
               ]
             },
             {
@@ -50041,30 +49989,6 @@
                 9.217465473749161,
                 0.93,
                 575.99376
-              ]
-            },
-            {
-              "fecha": "F24",
-              "opp": "Platense",
-              "min": 74,
-              "metrics": [
-                5281.54028,
-                72.02559,
-                132.94,
-                82.1,
-                32.01,
-                2,
-                29.92527,
-                6,
-                3,
-                14,
-                null,
-                5.62668,
-                -4.58176,
-                0.08,
-                6.03735305866881,
-                0.43,
-                725.54636
               ]
             },
             {
@@ -50726,30 +50650,6 @@
               ]
             },
             {
-              "fecha": "F24",
-              "opp": "Platense",
-              "min": 18,
-              "metrics": [
-                2362.64478,
-                129.40444,
-                247.47,
-                59.95,
-                0,
-                0,
-                24.00378,
-                0,
-                4,
-                8,
-                null,
-                3.61018,
-                -4.51936,
-                0.0,
-                32.76621048499731,
-                0.0,
-                292.63019
-              ]
-            },
-            {
               "fecha": "F25",
               "opp": "Sarmiento",
               "min": 33,
@@ -50771,30 +50671,6 @@
                 22.29372049949214,
                 1.73,
                 372.24417
-              ]
-            },
-            {
-              "fecha": "F26",
-              "opp": "Belgrano",
-              "min": 25,
-              "metrics": [
-                3142.0415,
-                131.66817,
-                271.29001,
-                140.58,
-                64.48,
-                3,
-                29.18331,
-                3,
-                3,
-                10,
-                null,
-                4.42862,
-                -4.4037,
-                0.12,
-                29.31282367165984,
-                2.58,
-                344.40891
               ]
             },
             {
@@ -51016,30 +50892,6 @@
                 16.61404320185286,
                 0.06,
                 571.6264
-              ]
-            },
-            {
-              "fecha": "F24",
-              "opp": "Platense",
-              "min": 23,
-              "metrics": [
-                3013.09326,
-                128.69867,
-                231.88,
-                228.92999,
-                108.73,
-                7,
-                28.37954,
-                0,
-                9,
-                7,
-                null,
-                3.96682,
-                -5.18707,
-                0.0,
-                35.23107722535452,
-                4.73,
-                340.37418
               ]
             },
             {
@@ -51432,30 +51284,6 @@
               ]
             },
             {
-              "fecha": "F24",
-              "opp": "Platense",
-              "min": 62,
-              "metrics": [
-                6398.45288,
-                103.25442,
-                293.68,
-                200.36,
-                149.55,
-                7,
-                29.38279,
-                3,
-                11,
-                21,
-                null,
-                4.28754,
-                -5.31697,
-                0.05,
-                16.806138345969817,
-                2.41,
-                652.94176
-              ]
-            },
-            {
               "fecha": "F25",
               "opp": "Sarmiento",
               "min": 74,
@@ -51477,30 +51305,6 @@
                 18.857018482743623,
                 2.6,
                 803.57117
-              ]
-            },
-            {
-              "fecha": "F26",
-              "opp": "Belgrano",
-              "min": 73,
-              "metrics": [
-                6924.43311,
-                94.58962,
-                272.75,
-                211.3,
-                48.97,
-                4,
-                28.05862,
-                0,
-                7,
-                13,
-                null,
-                3.9951,
-                -5.96972,
-                0.0,
-                12.490676866334269,
-                0.67,
-                656.17027
               ]
             },
             {
@@ -51674,30 +51478,6 @@
                 20.84081628593949,
                 0.3,
                 507.28842
-              ]
-            },
-            {
-              "fecha": "F24",
-              "opp": "Platense",
-              "min": 98,
-              "metrics": [
-                10839.61475,
-                110.8912,
-                435.17,
-                212.34,
-                23.36,
-                1,
-                28.43849,
-                1,
-                4,
-                31,
-                null,
-                4.0031,
-                -5.41915,
-                0.01,
-                14.629565319693095,
-                0.24,
-                1101.6405
               ]
             },
             {
@@ -51919,30 +51699,6 @@
                 15.665697881514811,
                 3.18,
                 670.70741
-              ]
-            },
-            {
-              "fecha": "F26",
-              "opp": "Belgrano",
-              "min": 49,
-              "metrics": [
-                4882.08008,
-                99.22927,
-                259.92999,
-                209.52,
-                51.87,
-                2,
-                28.6379,
-                2,
-                6,
-                18,
-                null,
-                4.5454,
-                -5.45186,
-                0.04,
-                16.082520121951216,
-                1.06,
-                461.27963
               ]
             },
             {
@@ -52236,78 +51992,6 @@
                 10.720147502514248,
                 0.84,
                 515.8324
-              ]
-            },
-            {
-              "fecha": "F24",
-              "opp": "Platense",
-              "min": 18,
-              "metrics": [
-                1818.16602,
-                100.52892,
-                89.03,
-                57.88,
-                19.69,
-                2,
-                27.15946,
-                0,
-                4,
-                3,
-                null,
-                3.89259,
-                -5.02211,
-                0.0,
-                14.536105274798183,
-                1.09,
-                187.23145
-              ]
-            },
-            {
-              "fecha": "F25",
-              "opp": "Sarmiento",
-              "min": 33,
-              "metrics": [
-                3345.03711,
-                104.77142,
-                176.67999,
-                132.72,
-                90.14,
-                4,
-                30.54198,
-                2,
-                1,
-                8,
-                null,
-                4.28502,
-                -4.33878,
-                0.06,
-                19.043024614519755,
-                2.73,
-                363.44513
-              ]
-            },
-            {
-              "fecha": "F26",
-              "opp": "Belgrano",
-              "min": 49,
-              "metrics": [
-                5493.14404,
-                111.64927,
-                232.22,
-                138.63,
-                91.13,
-                5,
-                28.11687,
-                2,
-                4,
-                11,
-                null,
-                4.12644,
-                -5.49168,
-                0.04,
-                16.560162601626015,
-                1.86,
-                575.52002
               ]
             },
             {
@@ -52628,30 +52312,6 @@
               ]
             },
             {
-              "fecha": "F24",
-              "opp": "Platense",
-              "min": 98,
-              "metrics": [
-                9714.58398,
-                99.38193,
-                401.75,
-                247.69,
-                46.14,
-                3,
-                27.01244,
-                0,
-                7,
-                23,
-                null,
-                3.94785,
-                -4.9213,
-                0.0,
-                13.609514271099746,
-                0.47,
-                1021.49579
-              ]
-            },
-            {
               "fecha": "F25",
               "opp": "Sarmiento",
               "min": 68,
@@ -52846,30 +52506,6 @@
                 22.641060125712404,
                 5.23,
                 638.98683
-              ]
-            },
-            {
-              "fecha": "F24",
-              "opp": "Platense",
-              "min": 98,
-              "metrics": [
-                10084.95947,
-                103.17094,
-                555.34,
-                335.17999,
-                122.29,
-                6,
-                30.27888,
-                9,
-                18,
-                52,
-                null,
-                4.2746,
-                -5.53827,
-                0.09,
-                16.18690547314578,
-                1.25,
-                1077.84082
               ]
             },
             {
@@ -68142,8 +67778,8 @@
               "opp": "Sarmiento",
               "min": 78,
               "metrics": [
-                7688.04736,
-                98.98773,
+                7687.06201,
+                98.97505,
                 295.01999,
                 114.45,
                 1.82,
@@ -68158,7 +67794,7 @@
                 0.64,
                 11.066780987124464,
                 0.02,
-                1149.88037
+                1150.05261
               ]
             },
             {
@@ -68363,9 +67999,9 @@
               "opp": "Platense",
               "min": 75,
               "metrics": [
-                7807.34741,
-                103.63736,
-                463.46999,
+                7803.48877,
+                103.58613,
+                460.75999,
                 377.63,
                 90.83,
                 5,
@@ -68377,9 +68013,9 @@
                 4.42733,
                 -5.77471,
                 0.43,
-                18.322964336283185,
+                18.24982274336283,
                 1.21,
-                913.7847
+                913.10242
               ]
             },
             {
@@ -68387,8 +68023,8 @@
               "opp": "Sarmiento",
               "min": 78,
               "metrics": [
-                8157.00562,
-                105.02582,
+                8159.31519,
+                105.05556,
                 556.45999,
                 451.02002,
                 93.47,
@@ -68403,7 +68039,7 @@
                 0.31,
                 20.97489296137339,
                 1.2,
-                952.56351
+                952.75778
               ]
             },
             {
@@ -68714,10 +68350,10 @@
               "opp": "Platense",
               "min": 75,
               "metrics": [
-                7986.35034,
-                106.0135,
+                7980.8186,
+                105.94007,
                 324.85001,
-                310.86,
+                304.67,
                 90.35,
                 5,
                 27.12414,
@@ -68728,9 +68364,9 @@
                 3.74462,
                 -6.18531,
                 0.33,
-                15.931991415929204,
+                15.849823274336284,
                 1.2,
-                879.02982
+                878.86127
               ]
             },
             {
@@ -68738,8 +68374,8 @@
               "opp": "Sarmiento",
               "min": 78,
               "metrics": [
-                7428.11499,
-                95.64097,
+                7428.55273,
+                95.6466,
                 371.26999,
                 296.34,
                 135.49,
@@ -68754,7 +68390,7 @@
                 0.14,
                 15.294849527896993,
                 1.74,
-                808.88055
+                808.78195
               ]
             },
             {
@@ -68837,30 +68473,6 @@
                 12.436830350527906,
                 0.68,
                 672.01877
-              ]
-            },
-            {
-              "fecha": "F25",
-              "opp": "Sarmiento",
-              "min": 13,
-              "metrics": [
-                1160.41797,
-                90.85759,
-                42.65,
-                12.48,
-                5.38,
-                0,
-                25.17178,
-                0,
-                0,
-                9,
-                null,
-                2.42219,
-                -2.59541,
-                0.0,
-                10.06123156313783,
-                0.41,
-                151.40266
               ]
             }
           ]
@@ -68967,54 +68579,6 @@
                 14.512199366821443,
                 1.08,
                 724.7363
-              ]
-            },
-            {
-              "fecha": "F24",
-              "opp": "Platense",
-              "min": 68,
-              "metrics": [
-                6390.85938,
-                94.44131,
-                247.15,
-                178.83,
-                26.84,
-                2,
-                26.13988,
-                23,
-                28,
-                48,
-                null,
-                4.30013,
-                -5.39029,
-                0.34,
-                11.959923107425478,
-                0.39,
-                636.02481
-              ]
-            },
-            {
-              "fecha": "F25",
-              "opp": "Sarmiento",
-              "min": 78,
-              "metrics": [
-                6476.44189,
-                83.38766,
-                311.02,
-                174.18999,
-                57.14,
-                4,
-                27.09252,
-                19,
-                23,
-                56,
-                null,
-                4.2969,
-                -4.98131,
-                0.24,
-                11.390085708154505,
-                0.73,
-                685.06961
               ]
             },
             {
@@ -69195,10 +68759,10 @@
               "opp": "Platense",
               "min": 68,
               "metrics": [
-                6803.52856,
-                100.53956,
-                217.45,
-                160.48,
+                6800.06445,
+                100.48837,
+                214.97,
+                159.22,
                 24.43,
                 1,
                 28.05061,
@@ -69209,9 +68773,9 @@
                 4.01,
                 -6.11419,
                 0.22,
-                11.709295676824597,
+                11.62920144524544,
                 0.36,
-                749.59869
+                748.96774
               ]
             },
             {
@@ -69219,8 +68783,8 @@
               "opp": "Sarmiento",
               "min": 78,
               "metrics": [
-                6745.53809,
-                86.85242,
+                6742.24561,
+                86.81003,
                 265.56001,
                 107.18,
                 21.03,
@@ -69235,7 +68799,7 @@
                 0.12,
                 9.325493562231758,
                 0.27,
-                707.71948
+                707.45551
               ]
             }
           ]
@@ -69313,54 +68877,6 @@
                 12.289062816821444,
                 0.6,
                 169.45915
-              ]
-            },
-            {
-              "fecha": "F24",
-              "opp": "Platense",
-              "min": 12,
-              "metrics": [
-                978.12903,
-                84.61446,
-                19.24,
-                26.07,
-                4.04,
-                0,
-                25.53702,
-                4,
-                5,
-                5,
-                null,
-                3.73542,
-                -4.9639,
-                0.33,
-                6.831763814858744,
-                0.34,
-                104.8603
-              ]
-            },
-            {
-              "fecha": "F25",
-              "opp": "Sarmiento",
-              "min": 12,
-              "metrics": [
-                1053.93445,
-                86.21846,
-                36.26,
-                26.91,
-                12.75,
-                1,
-                25.89882,
-                1,
-                1,
-                8,
-                null,
-                3.09237,
-                -3.3468,
-                0.08,
-                10.55416431052589,
-                1.06,
-                116.67916
               ]
             },
             {
@@ -69661,8 +69177,8 @@
               "opp": "Platense",
               "min": 68,
               "metrics": [
-                7273.12109,
-                107.47899,
+                7270.52856,
+                107.44068,
                 426.62999,
                 259.2,
                 52.2,
@@ -69677,31 +69193,7 @@
                 0.31,
                 16.529735851101297,
                 0.77,
-                783.047
-              ]
-            },
-            {
-              "fecha": "F25",
-              "opp": "Sarmiento",
-              "min": 78,
-              "metrics": [
-                8138.6355,
-                104.7893,
-                374.91,
-                130.82,
-                25.98,
-                1,
-                28.41948,
-                23,
-                26,
-                81,
-                null,
-                3.88622,
-                -4.52471,
-                0.29,
-                13.355665107296137,
-                0.33,
-                854.57639
+                782.79984
               ]
             },
             {
@@ -70161,8 +69653,8 @@
               "opp": "Platense",
               "min": 75,
               "metrics": [
-                8473.40674,
-                112.47885,
+                8469.22925,
+                112.4234,
                 358.29001,
                 129.82,
                 11.03,
@@ -70175,9 +69667,9 @@
                 4.29162,
                 -4.19417,
                 0.17,
-                15.08827460176991,
+                15.028141858407079,
                 0.15,
-                861.47668
+                861.18463
               ]
             },
             {
@@ -70185,8 +69677,8 @@
               "opp": "Sarmiento",
               "min": 78,
               "metrics": [
-                8526.69043,
-                109.78571,
+                8526.02832,
+                109.77719,
                 428.85001,
                 248.75999,
                 16.96,
@@ -70201,7 +69693,7 @@
                 0.23,
                 15.759785407725321,
                 0.22,
-                903.09366
+                903.04526
               ]
             },
             {
@@ -70327,30 +69819,6 @@
                 20.59940138735614,
                 1.02,
                 242.09595
-              ]
-            },
-            {
-              "fecha": "F24",
-              "opp": "Platense",
-              "min": 30,
-              "metrics": [
-                3426.62598,
-                115.52242,
-                90.64,
-                62.25,
-                26.59,
-                1,
-                25.84654,
-                7,
-                12,
-                23,
-                null,
-                3.42026,
-                -3.85446,
-                0.23,
-                13.857253159080566,
-                0.89,
-                402.77103
               ]
             }
           ]
@@ -70583,30 +70051,6 @@
                 0.0,
                 260.84454
               ]
-            },
-            {
-              "fecha": "F24",
-              "opp": "Platense",
-              "min": 11,
-              "metrics": [
-                1065.83142,
-                98.50871,
-                51.15,
-                7.27,
-                0,
-                0,
-                21.57872,
-                2,
-                7,
-                12,
-                null,
-                3.50576,
-                -4.71903,
-                0.18,
-                9.165782533571797,
-                0.0,
-                141.94615
-              ]
             }
           ]
         },
@@ -70690,10 +70134,10 @@
               "opp": "Platense",
               "min": 75,
               "metrics": [
-                7999.13403,
-                106.1832,
+                7994.07666,
+                106.11606,
                 395.43001,
-                270.66,
+                264.51,
                 70.45,
                 3,
                 27.69122,
@@ -70704,9 +70148,9 @@
                 4.46461,
                 -5.08412,
                 0.23,
-                16.41079672566372,
+                16.329159557522125,
                 0.94,
-                961.62726
+                961.07751
               ]
             },
             {
@@ -70714,8 +70158,8 @@
               "opp": "Sarmiento",
               "min": 78,
               "metrics": [
-                8178.63818,
-                105.30435,
+                8178.42969,
+                105.30167,
                 440.06,
                 327.78,
                 147.29,
@@ -70730,7 +70174,7 @@
                 0.18,
                 18.613519184549354,
                 1.89,
-                883.3143
+                883.28842
               ]
             },
             {
@@ -71133,30 +70577,6 @@
               ]
             },
             {
-              "fecha": "F25",
-              "opp": "Sarmiento",
-              "min": 26,
-              "metrics": [
-                2329.0166,
-                91.16357,
-                112.46,
-                66.38,
-                15.03,
-                1,
-                25.65998,
-                8,
-                7,
-                18,
-                null,
-                3.86907,
-                -4.68761,
-                0.31,
-                12.464528189217607,
-                0.58,
-                219.60999
-              ]
-            },
-            {
               "fecha": "F26",
               "opp": "Belgrano",
               "min": 24,
@@ -71279,54 +70699,6 @@
                 14.349180054644808,
                 0.0,
                 431.27197
-              ]
-            },
-            {
-              "fecha": "F24",
-              "opp": "Platense",
-              "min": 48,
-              "metrics": [
-                5477.50684,
-                114.90429,
-                231.07,
-                62.86,
-                0,
-                0,
-                24.63528,
-                6,
-                12,
-                38,
-                null,
-                3.50478,
-                -4.22708,
-                0.12,
-                13.921914824435968,
-                0.0,
-                604.07384
-              ]
-            },
-            {
-              "fecha": "F25",
-              "opp": "Sarmiento",
-              "min": 25,
-              "metrics": [
-                2462.13013,
-                99.52759,
-                139.25999,
-                0.5,
-                0,
-                0,
-                20.89503,
-                3,
-                6,
-                20,
-                null,
-                3.49197,
-                -3.75519,
-                0.12,
-                11.472822074063242,
-                0.0,
-                242.30403
               ]
             },
             {
@@ -71500,30 +70872,6 @@
                 15.711887730451366,
                 0.99,
                 875.09097
-              ]
-            },
-            {
-              "fecha": "F24",
-              "opp": "Platense",
-              "min": 10,
-              "metrics": [
-                1119.03613,
-                110.0006,
-                71.8,
-                73.39,
-                9.35,
-                1,
-                25.55428,
-                0,
-                2,
-                9,
-                null,
-                2.8388,
-                -4.41366,
-                0.0,
-                20.492432798735035,
-                0.93,
-                138.42505
               ]
             },
             {
@@ -71776,10 +71124,10 @@
               "opp": "Platense",
               "min": 57,
               "metrics": [
-                5500.5415,
-                96.49452,
-                203.54,
-                136.38,
+                5496.11621,
+                96.41689,
+                200.43,
+                132.98,
                 38.59,
                 2,
                 26.71069,
@@ -71790,9 +71138,9 @@
                 4.26237,
                 -4.62121,
                 0.23,
-                11.42330025553912,
+                11.309097075626717,
                 0.68,
-                686.61334
+                685.90747
               ]
             },
             {
@@ -71800,8 +71148,8 @@
               "opp": "Sarmiento",
               "min": 56,
               "metrics": [
-                5279.67371,
-                94.41786,
+                5279.9342,
+                94.42252,
                 257.68,
                 131.64,
                 16.44,
@@ -71816,7 +71164,7 @@
                 0.2,
                 12.512928118172686,
                 0.29,
-                673.02087
+                673.45547
               ]
             },
             {
@@ -71945,36 +71293,12 @@
               ]
             },
             {
-              "fecha": "F24",
-              "opp": "Platense",
-              "min": 21,
-              "metrics": [
-                1825.927,
-                86.12999,
-                45.87,
-                24.34,
-                0,
-                0,
-                21.79328,
-                3,
-                4,
-                11,
-                null,
-                3.35733,
-                -3.84369,
-                0.14,
-                5.539702136304678,
-                0.0,
-                217.5146
-              ]
-            },
-            {
               "fecha": "F25",
               "opp": "Sarmiento",
               "min": 57,
               "metrics": [
-                5794.1167,
-                101.42489,
+                5794.72803,
+                101.43559,
                 254.56001,
                 118.99,
                 3.96,
@@ -71989,7 +71313,7 @@
                 0.26,
                 11.540043878715032,
                 0.07,
-                739.25336
+                739.26929
               ]
             },
             {
@@ -194399,6 +193723,1934 @@
               "vel": 24.95,
               "dist": 21.33,
               "tipo": "hsr"
+            }
+          ]
+        }
+      },
+      "F26": {
+        "opp": "Belgrano",
+        "periodos": [
+          {
+            "name": "Primer tiempo",
+            "start": 1789819477,
+            "end": 1789822406
+          },
+          {
+            "name": "Segundo tiempo",
+            "start": 1789823388,
+            "end": 1789826340
+          }
+        ],
+        "jugadores": {
+          "Sebastian Almiron": [
+            {
+              "start": 1789821221.79,
+              "dur": 4.2,
+              "vel": 23.04,
+              "dist": 24.45,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789821749.59,
+              "dur": 3.3,
+              "vel": 21.53,
+              "dist": 18.12,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789821884.29,
+              "dur": 4.2,
+              "vel": 22.07,
+              "dist": 22.99,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789824134.79,
+              "dur": 1.5,
+              "vel": 21.71,
+              "dist": 8.15,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789824165.09,
+              "dur": 3.3,
+              "vel": 25.88,
+              "dist": 21.63,
+              "tipo": "sprint"
+            }
+          ],
+          "Alejandro Baltazar": [
+            {
+              "start": 1789819505.01,
+              "dur": 2.6,
+              "vel": 21.92,
+              "dist": 14.51,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789819620.11,
+              "dur": 3.0,
+              "vel": 26.42,
+              "dist": 20.21,
+              "tipo": "sprint"
+            },
+            {
+              "start": 1789819654.81,
+              "dur": 3.2,
+              "vel": 22.79,
+              "dist": 18.81,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789819660.41,
+              "dur": 6.1,
+              "vel": 24.37,
+              "dist": 37.98,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789819892.61,
+              "dur": 3.5,
+              "vel": 28.76,
+              "dist": 24.36,
+              "tipo": "sprint"
+            },
+            {
+              "start": 1789819972.91,
+              "dur": 2.7,
+              "vel": 25.38,
+              "dist": 17.83,
+              "tipo": "sprint"
+            },
+            {
+              "start": 1789820059.21,
+              "dur": 4.6,
+              "vel": 27.43,
+              "dist": 30.11,
+              "tipo": "sprint"
+            },
+            {
+              "start": 1789820101.31,
+              "dur": 1.3,
+              "vel": 21.06,
+              "dist": 6.8,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789820109.91,
+              "dur": 3.6,
+              "vel": 29.12,
+              "dist": 26.49,
+              "tipo": "sprint"
+            },
+            {
+              "start": 1789820297.61,
+              "dur": 4.1,
+              "vel": 21.53,
+              "dist": 23,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789820318.51,
+              "dur": 1.5,
+              "vel": 21.67,
+              "dist": 8.25,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789820404.21,
+              "dur": 4.1,
+              "vel": 23.47,
+              "dist": 23.74,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789820535.81,
+              "dur": 2.3,
+              "vel": 25.34,
+              "dist": 14.66,
+              "tipo": "sprint"
+            },
+            {
+              "start": 1789820563.61,
+              "dur": 2.6,
+              "vel": 22.5,
+              "dist": 14.61,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789820658.91,
+              "dur": 8.3,
+              "vel": 24.91,
+              "dist": 51.23,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789820728.51,
+              "dur": 3.4,
+              "vel": 23.0,
+              "dist": 20.15,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789820871.61,
+              "dur": 1.9,
+              "vel": 24.34,
+              "dist": 11.43,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789821283.51,
+              "dur": 2.5,
+              "vel": 23.26,
+              "dist": 14.21,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789821825.41,
+              "dur": 5.1,
+              "vel": 24.08,
+              "dist": 31.15,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789822366.81,
+              "dur": 4.6,
+              "vel": 28.76,
+              "dist": 33.43,
+              "tipo": "sprint"
+            }
+          ],
+          "Agustin Di Sipio": [
+            {
+              "start": 1789819827.97,
+              "dur": 3.1,
+              "vel": 23.83,
+              "dist": 18.22,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789819935.87,
+              "dur": 2.2,
+              "vel": 23.0,
+              "dist": 12.69,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789820005.87,
+              "dur": 4.8,
+              "vel": 21.78,
+              "dist": 25.26,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789820554.07,
+              "dur": 1.3,
+              "vel": 22.72,
+              "dist": 6.64,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789820636.87,
+              "dur": 1.7,
+              "vel": 22.28,
+              "dist": 9.35,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789820659.97,
+              "dur": 3.5,
+              "vel": 27.14,
+              "dist": 24,
+              "tipo": "sprint"
+            },
+            {
+              "start": 1789821067.07,
+              "dur": 2.8,
+              "vel": 23.0,
+              "dist": 16.27,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789821705.97,
+              "dur": 1.6,
+              "vel": 26.57,
+              "dist": 10.22,
+              "tipo": "sprint"
+            },
+            {
+              "start": 1789821749.47,
+              "dur": 3.6,
+              "vel": 27.04,
+              "dist": 23.69,
+              "tipo": "sprint"
+            },
+            {
+              "start": 1789821965.37,
+              "dur": 2.5,
+              "vel": 24.44,
+              "dist": 14.99,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789822218.87,
+              "dur": 0.9,
+              "vel": 21.71,
+              "dist": 4.45,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789822319.07,
+              "dur": 2.3,
+              "vel": 22.36,
+              "dist": 12.67,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789823563.67,
+              "dur": 2.3,
+              "vel": 23.54,
+              "dist": 13.34,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789823883.97,
+              "dur": 2.7,
+              "vel": 25.81,
+              "dist": 17.72,
+              "tipo": "sprint"
+            },
+            {
+              "start": 1789824162.47,
+              "dur": 1.4,
+              "vel": 21.28,
+              "dist": 7.24,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789824334.77,
+              "dur": 1.9,
+              "vel": 23.76,
+              "dist": 10.83,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789824501.07,
+              "dur": 2.1,
+              "vel": 22.64,
+              "dist": 12,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789824538.07,
+              "dur": 1.5,
+              "vel": 24.41,
+              "dist": 8.56,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789825066.47,
+              "dur": 2.8,
+              "vel": 26.24,
+              "dist": 18.41,
+              "tipo": "sprint"
+            },
+            {
+              "start": 1789825303.67,
+              "dur": 2.8,
+              "vel": 21.82,
+              "dist": 15.88,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789825604.07,
+              "dur": 4.4,
+              "vel": 24.59,
+              "dist": 27.03,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789825689.17,
+              "dur": 3.5,
+              "vel": 25.24,
+              "dist": 22.98,
+              "tipo": "sprint"
+            },
+            {
+              "start": 1789825952.17,
+              "dur": 4.0,
+              "vel": 24.95,
+              "dist": 24.37,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789826158.07,
+              "dur": 1.9,
+              "vel": 21.28,
+              "dist": 10.32,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789826242.07,
+              "dur": 5.8,
+              "vel": 30.85,
+              "dist": 43.39,
+              "tipo": "sprint"
+            }
+          ],
+          "Tiago Fredes": [
+            {
+              "start": 1789823437.38,
+              "dur": 3.3,
+              "vel": 25.27,
+              "dist": 14.7,
+              "tipo": "sprint"
+            },
+            {
+              "start": 1789823713.28,
+              "dur": 3.4,
+              "vel": 22.03,
+              "dist": 13.1,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789823881.88,
+              "dur": 5.9,
+              "vel": 23.22,
+              "dist": 29.36,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789824102.28,
+              "dur": 4.0,
+              "vel": 24.91,
+              "dist": 18.24,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789824142.68,
+              "dur": 4.5,
+              "vel": 22.82,
+              "dist": 20.13,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789824224.58,
+              "dur": 5.4,
+              "vel": 23.11,
+              "dist": 25.51,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789824277.58,
+              "dur": 2.7,
+              "vel": 23.15,
+              "dist": 9.6,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789824672.58,
+              "dur": 4.1,
+              "vel": 23.72,
+              "dist": 18.19,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789824698.28,
+              "dur": 2.5,
+              "vel": 21.49,
+              "dist": 7.93,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789825240.58,
+              "dur": 4.1,
+              "vel": 21.42,
+              "dist": 17,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789825269.08,
+              "dur": 3.0,
+              "vel": 23.87,
+              "dist": 11.49,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789825285.08,
+              "dur": 3.0,
+              "vel": 25.02,
+              "dist": 12.8,
+              "tipo": "sprint"
+            },
+            {
+              "start": 1789825302.38,
+              "dur": 10.4,
+              "vel": 23.26,
+              "dist": 56.35,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789825450.78,
+              "dur": 5.9,
+              "vel": 28.62,
+              "dist": 34.56,
+              "tipo": "sprint"
+            },
+            {
+              "start": 1789825457.88,
+              "dur": 4.4,
+              "vel": 22.28,
+              "dist": 18.64,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789825608.98,
+              "dur": 4.7,
+              "vel": 27.72,
+              "dist": 25.54,
+              "tipo": "sprint"
+            },
+            {
+              "start": 1789825978.48,
+              "dur": 3.1,
+              "vel": 22.03,
+              "dist": 11.47,
+              "tipo": "hsr"
+            }
+          ],
+          "Valentin Gaitan": [
+            {
+              "start": 1789819478.72,
+              "dur": 2.9,
+              "vel": 24.05,
+              "dist": 16.99,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789819497.72,
+              "dur": 1.4,
+              "vel": 22.03,
+              "dist": 7.4,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789819500.42,
+              "dur": 1.2,
+              "vel": 21.31,
+              "dist": 6.1,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789819582.92,
+              "dur": 2.1,
+              "vel": 21.74,
+              "dist": 11.57,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789819597.02,
+              "dur": 1.7,
+              "vel": 21.17,
+              "dist": 9.06,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789819782.92,
+              "dur": 1.9,
+              "vel": 22.18,
+              "dist": 10.71,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789819827.92,
+              "dur": 3.4,
+              "vel": 27.29,
+              "dist": 23.58,
+              "tipo": "sprint"
+            },
+            {
+              "start": 1789819872.02,
+              "dur": 1.8,
+              "vel": 23.26,
+              "dist": 10.21,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789820108.12,
+              "dur": 6.2,
+              "vel": 26.24,
+              "dist": 42.82,
+              "tipo": "sprint"
+            },
+            {
+              "start": 1789820299.62,
+              "dur": 2.0,
+              "vel": 22.25,
+              "dist": 10.87,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789820360.12,
+              "dur": 1.7,
+              "vel": 22.21,
+              "dist": 9.28,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789820460.12,
+              "dur": 5.6,
+              "vel": 25.56,
+              "dist": 37.76,
+              "tipo": "sprint"
+            },
+            {
+              "start": 1789820530.32,
+              "dur": 1.4,
+              "vel": 23.33,
+              "dist": 7.67,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789820559.32,
+              "dur": 4.9,
+              "vel": 24.01,
+              "dist": 28.45,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789820629.42,
+              "dur": 1.5,
+              "vel": 21.42,
+              "dist": 8.02,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789820637.12,
+              "dur": 5.2,
+              "vel": 29.56,
+              "dist": 39.38,
+              "tipo": "sprint"
+            },
+            {
+              "start": 1789820652.82,
+              "dur": 1.2,
+              "vel": 25.24,
+              "dist": 7.43,
+              "tipo": "sprint"
+            },
+            {
+              "start": 1789820698.02,
+              "dur": 2.1,
+              "vel": 21.67,
+              "dist": 11.51,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789820871.12,
+              "dur": 2.0,
+              "vel": 22.54,
+              "dist": 11.24,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789820886.22,
+              "dur": 1.9,
+              "vel": 25.81,
+              "dist": 12.18,
+              "tipo": "sprint"
+            },
+            {
+              "start": 1789820941.02,
+              "dur": 1.8,
+              "vel": 23.4,
+              "dist": 10.36,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789821067.52,
+              "dur": 4.7,
+              "vel": 24.52,
+              "dist": 29.02,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789821116.92,
+              "dur": 2.9,
+              "vel": 24.26,
+              "dist": 17.53,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789821218.52,
+              "dur": 5.5,
+              "vel": 31.14,
+              "dist": 42.3,
+              "tipo": "sprint"
+            },
+            {
+              "start": 1789821643.62,
+              "dur": 1.9,
+              "vel": 26.06,
+              "dist": 12.22,
+              "tipo": "sprint"
+            },
+            {
+              "start": 1789821860.62,
+              "dur": 5.0,
+              "vel": 24.34,
+              "dist": 29.95,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789821890.22,
+              "dur": 4.4,
+              "vel": 25.31,
+              "dist": 29.22,
+              "tipo": "sprint"
+            },
+            {
+              "start": 1789822174.22,
+              "dur": 2.9,
+              "vel": 26.1,
+              "dist": 19.3,
+              "tipo": "sprint"
+            },
+            {
+              "start": 1789822297.02,
+              "dur": 6.3,
+              "vel": 23.98,
+              "dist": 38.23,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789822353.12,
+              "dur": 3.4,
+              "vel": 24.52,
+              "dist": 19.65,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789822370.32,
+              "dur": 2.8,
+              "vel": 22.61,
+              "dist": 15.81,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789823424.92,
+              "dur": 3.0,
+              "vel": 27.29,
+              "dist": 20.42,
+              "tipo": "sprint"
+            },
+            {
+              "start": 1789823478.02,
+              "dur": 2.4,
+              "vel": 24.44,
+              "dist": 14.69,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789823501.72,
+              "dur": 1.8,
+              "vel": 25.49,
+              "dist": 11.48,
+              "tipo": "sprint"
+            },
+            {
+              "start": 1789823610.42,
+              "dur": 2.1,
+              "vel": 26.03,
+              "dist": 13.77,
+              "tipo": "sprint"
+            },
+            {
+              "start": 1789823625.62,
+              "dur": 3.5,
+              "vel": 24.84,
+              "dist": 21.45,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789823631.62,
+              "dur": 1.8,
+              "vel": 23.15,
+              "dist": 10.41,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789823716.42,
+              "dur": 3.3,
+              "vel": 22.9,
+              "dist": 19.37,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789824099.32,
+              "dur": 1.3,
+              "vel": 21.1,
+              "dist": 6.99,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789824116.62,
+              "dur": 2.9,
+              "vel": 23.04,
+              "dist": 16.94,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789824147.72,
+              "dur": 4.8,
+              "vel": 23.15,
+              "dist": 25.98,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789824164.42,
+              "dur": 7.2,
+              "vel": 28.19,
+              "dist": 50.83,
+              "tipo": "sprint"
+            },
+            {
+              "start": 1789824275.72,
+              "dur": 5.6,
+              "vel": 28.19,
+              "dist": 40.94,
+              "tipo": "sprint"
+            },
+            {
+              "start": 1789824396.42,
+              "dur": 2.8,
+              "vel": 28.44,
+              "dist": 19.57,
+              "tipo": "sprint"
+            },
+            {
+              "start": 1789824511.72,
+              "dur": 1.7,
+              "vel": 25.63,
+              "dist": 10.67,
+              "tipo": "sprint"
+            },
+            {
+              "start": 1789824589.12,
+              "dur": 2.1,
+              "vel": 25.09,
+              "dist": 13.56,
+              "tipo": "sprint"
+            },
+            {
+              "start": 1789824670.12,
+              "dur": 1.9,
+              "vel": 24.59,
+              "dist": 10.83,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789824674.82,
+              "dur": 4.4,
+              "vel": 25.78,
+              "dist": 29.59,
+              "tipo": "sprint"
+            },
+            {
+              "start": 1789824699.92,
+              "dur": 2.4,
+              "vel": 26.24,
+              "dist": 15.72,
+              "tipo": "sprint"
+            },
+            {
+              "start": 1789824836.32,
+              "dur": 3.4,
+              "vel": 21.38,
+              "dist": 17.42,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789824858.92,
+              "dur": 6.6,
+              "vel": 23.47,
+              "dist": 39.45,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789824896.52,
+              "dur": 1.2,
+              "vel": 21.28,
+              "dist": 6.15,
+              "tipo": "hsr"
+            }
+          ],
+          "Santino Gonzalez": [
+            {
+              "start": 1789824998.53,
+              "dur": 1.8,
+              "vel": 21.92,
+              "dist": 9.58,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789825384.13,
+              "dur": 6.0,
+              "vel": 21.13,
+              "dist": 32.17,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789825828.33,
+              "dur": 3.1,
+              "vel": 23.4,
+              "dist": 18.47,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789825953.63,
+              "dur": 3.0,
+              "vel": 22.18,
+              "dist": 17.13,
+              "tipo": "hsr"
+            }
+          ],
+          "Thiago Herrera": [
+            {
+              "start": 1789819971.32,
+              "dur": 2.6,
+              "vel": 26.68,
+              "dist": 17.06,
+              "tipo": "sprint"
+            },
+            {
+              "start": 1789820014.02,
+              "dur": 1.5,
+              "vel": 22.07,
+              "dist": 8.07,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789820275.72,
+              "dur": 1.6,
+              "vel": 23.94,
+              "dist": 8.9,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789820456.72,
+              "dur": 3.5,
+              "vel": 22.86,
+              "dist": 20.42,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789820659.12,
+              "dur": 7.2,
+              "vel": 26.03,
+              "dist": 46.94,
+              "tipo": "sprint"
+            },
+            {
+              "start": 1789820872.72,
+              "dur": 1.8,
+              "vel": 23.47,
+              "dist": 10.48,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789821115.52,
+              "dur": 3.3,
+              "vel": 21.74,
+              "dist": 18.38,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789821220.82,
+              "dur": 6.5,
+              "vel": 24.23,
+              "dist": 38.65,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789822167.82,
+              "dur": 2.5,
+              "vel": 23.47,
+              "dist": 14.64,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789822174.42,
+              "dur": 3.3,
+              "vel": 24.37,
+              "dist": 19.56,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789822234.82,
+              "dur": 1.3,
+              "vel": 22.25,
+              "dist": 6.75,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789823423.62,
+              "dur": 2.2,
+              "vel": 21.35,
+              "dist": 11.94,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789823560.02,
+              "dur": 2.1,
+              "vel": 26.14,
+              "dist": 13.73,
+              "tipo": "sprint"
+            },
+            {
+              "start": 1789824139.52,
+              "dur": 5.5,
+              "vel": 25.56,
+              "dist": 36.56,
+              "tipo": "sprint"
+            },
+            {
+              "start": 1789824225.92,
+              "dur": 3.3,
+              "vel": 28.04,
+              "dist": 22.81,
+              "tipo": "sprint"
+            },
+            {
+              "start": 1789824476.62,
+              "dur": 1.4,
+              "vel": 21.74,
+              "dist": 7.56,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789824537.52,
+              "dur": 4.7,
+              "vel": 21.46,
+              "dist": 25.43,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789824674.12,
+              "dur": 3.2,
+              "vel": 22.57,
+              "dist": 18.46,
+              "tipo": "hsr"
+            }
+          ],
+          "Fabricio Lamanna": [
+            {
+              "start": 1789819684.57,
+              "dur": 2.3,
+              "vel": 24.88,
+              "dist": 13.97,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789819776.27,
+              "dur": 2.1,
+              "vel": 22.93,
+              "dist": 11.83,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789819890.77,
+              "dur": 2.7,
+              "vel": 27.58,
+              "dist": 18.6,
+              "tipo": "sprint"
+            },
+            {
+              "start": 1789819935.17,
+              "dur": 3.0,
+              "vel": 23.36,
+              "dist": 17.79,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789820012.07,
+              "dur": 2.6,
+              "vel": 22.18,
+              "dist": 14.64,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789820458.07,
+              "dur": 2.4,
+              "vel": 21.42,
+              "dist": 12.98,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789820544.77,
+              "dur": 8.1,
+              "vel": 22.64,
+              "dist": 45.9,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789820935.17,
+              "dur": 2.2,
+              "vel": 21.78,
+              "dist": 12.16,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789821628.47,
+              "dur": 2.0,
+              "vel": 26.53,
+              "dist": 12.84,
+              "tipo": "sprint"
+            },
+            {
+              "start": 1789821709.47,
+              "dur": 1.8,
+              "vel": 23.11,
+              "dist": 10.05,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789821861.57,
+              "dur": 3.7,
+              "vel": 22.54,
+              "dist": 21.11,
+              "tipo": "hsr"
+            }
+          ],
+          "Thiago Levy": [
+            {
+              "start": 1789819548.61,
+              "dur": 1.9,
+              "vel": 21.1,
+              "dist": 10.36,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789820458.71,
+              "dur": 6.4,
+              "vel": 21.28,
+              "dist": 35.16,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789820771.81,
+              "dur": 4.1,
+              "vel": 23.83,
+              "dist": 24.35,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789821004.51,
+              "dur": 2.4,
+              "vel": 24.73,
+              "dist": 14.49,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789821067.31,
+              "dur": 4.5,
+              "vel": 23.11,
+              "dist": 26.44,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789821163.81,
+              "dur": 2.1,
+              "vel": 22.82,
+              "dist": 11.78,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789821641.91,
+              "dur": 3.6,
+              "vel": 23.51,
+              "dist": 20.32,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789821890.71,
+              "dur": 4.4,
+              "vel": 21.49,
+              "dist": 23.77,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789822030.81,
+              "dur": 5.2,
+              "vel": 22.18,
+              "dist": 29.9,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789822281.81,
+              "dur": 7.4,
+              "vel": 22.9,
+              "dist": 43.4,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789822349.71,
+              "dur": 2.8,
+              "vel": 21.28,
+              "dist": 15.14,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789823609.71,
+              "dur": 3.3,
+              "vel": 23.47,
+              "dist": 19.33,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789823688.71,
+              "dur": 4.0,
+              "vel": 27.07,
+              "dist": 27.22,
+              "tipo": "sprint"
+            },
+            {
+              "start": 1789823821.91,
+              "dur": 2.5,
+              "vel": 23.8,
+              "dist": 14.58,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789824119.91,
+              "dur": 4.3,
+              "vel": 24.98,
+              "dist": 26.14,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789824169.41,
+              "dur": 2.5,
+              "vel": 24.59,
+              "dist": 14.95,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789824322.41,
+              "dur": 4.6,
+              "vel": 21.53,
+              "dist": 24.26,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789824334.51,
+              "dur": 5.4,
+              "vel": 23.44,
+              "dist": 31.46,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789824430.91,
+              "dur": 4.5,
+              "vel": 23.87,
+              "dist": 26.44,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789824863.51,
+              "dur": 2.5,
+              "vel": 22.97,
+              "dist": 14.21,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789824981.11,
+              "dur": 5.3,
+              "vel": 23.58,
+              "dist": 30.64,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789825081.51,
+              "dur": 4.4,
+              "vel": 24.73,
+              "dist": 26.88,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789825127.41,
+              "dur": 2.2,
+              "vel": 24.52,
+              "dist": 13.02,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789825172.31,
+              "dur": 5.8,
+              "vel": 22.07,
+              "dist": 33.76,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789825191.51,
+              "dur": 2.7,
+              "vel": 22.03,
+              "dist": 15.11,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789825279.51,
+              "dur": 0.9,
+              "vel": 21.24,
+              "dist": 4.3,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789825344.11,
+              "dur": 2.0,
+              "vel": 24.55,
+              "dist": 11.77,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789825478.01,
+              "dur": 2.8,
+              "vel": 24.05,
+              "dist": 17.03,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789825566.01,
+              "dur": 2.1,
+              "vel": 23.04,
+              "dist": 11.98,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789825866.21,
+              "dur": 3.4,
+              "vel": 24.12,
+              "dist": 20.44,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789826080.51,
+              "dur": 4.9,
+              "vel": 23.26,
+              "dist": 29.05,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789826185.81,
+              "dur": 3.3,
+              "vel": 24.01,
+              "dist": 19.52,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789826190.31,
+              "dur": 2.6,
+              "vel": 24.62,
+              "dist": 15.94,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789826241.31,
+              "dur": 8.9,
+              "vel": 21.71,
+              "dist": 49.19,
+              "tipo": "hsr"
+            }
+          ],
+          "Sebastian Lopez": [
+            {
+              "start": 1789824979.18,
+              "dur": 5.5,
+              "vel": 22.39,
+              "dist": 30.99,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789825080.88,
+              "dur": 2.9,
+              "vel": 21.64,
+              "dist": 16.24,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789825210.88,
+              "dur": 6.4,
+              "vel": 22.32,
+              "dist": 35.76,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789825275.18,
+              "dur": 3.0,
+              "vel": 27.61,
+              "dist": 20.57,
+              "tipo": "sprint"
+            },
+            {
+              "start": 1789825309.58,
+              "dur": 2.9,
+              "vel": 22.79,
+              "dist": 16.53,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789825454.38,
+              "dur": 4.6,
+              "vel": 25.6,
+              "dist": 29.23,
+              "tipo": "sprint"
+            },
+            {
+              "start": 1789825610.38,
+              "dur": 3.4,
+              "vel": 21.31,
+              "dist": 18.82,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789825633.88,
+              "dur": 4.3,
+              "vel": 22.18,
+              "dist": 24.6,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789825742.58,
+              "dur": 2.8,
+              "vel": 21.1,
+              "dist": 15.17,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789825746.98,
+              "dur": 3.8,
+              "vel": 21.71,
+              "dist": 21.64,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789825827.68,
+              "dur": 3.9,
+              "vel": 23.4,
+              "dist": 22.35,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789825950.68,
+              "dur": 3.7,
+              "vel": 26.96,
+              "dist": 24.97,
+              "tipo": "sprint"
+            },
+            {
+              "start": 1789826079.48,
+              "dur": 5.1,
+              "vel": 29.2,
+              "dist": 37.59,
+              "tipo": "sprint"
+            },
+            {
+              "start": 1789826210.68,
+              "dur": 2.8,
+              "vel": 22.39,
+              "dist": 15.82,
+              "tipo": "hsr"
+            }
+          ],
+          "Tobias Mancuello": [
+            {
+              "start": 1789823432.08,
+              "dur": 4.8,
+              "vel": 26.93,
+              "dist": 32.11,
+              "tipo": "sprint"
+            },
+            {
+              "start": 1789823447.98,
+              "dur": 5.4,
+              "vel": 26.57,
+              "dist": 35.57,
+              "tipo": "sprint"
+            },
+            {
+              "start": 1789823554.28,
+              "dur": 2.8,
+              "vel": 22.68,
+              "dist": 15.66,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789823608.28,
+              "dur": 2.2,
+              "vel": 27.32,
+              "dist": 14.84,
+              "tipo": "sprint"
+            },
+            {
+              "start": 1789823650.48,
+              "dur": 1.8,
+              "vel": 22.14,
+              "dist": 10.03,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789824168.78,
+              "dur": 2.3,
+              "vel": 21.56,
+              "dist": 12.72,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789824980.58,
+              "dur": 4.8,
+              "vel": 22.39,
+              "dist": 27.31,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789825027.38,
+              "dur": 2.1,
+              "vel": 21.64,
+              "dist": 11.36,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789825044.08,
+              "dur": 2.0,
+              "vel": 21.2,
+              "dist": 10.92,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789825392.98,
+              "dur": 3.3,
+              "vel": 26.14,
+              "dist": 21.87,
+              "tipo": "sprint"
+            },
+            {
+              "start": 1789825740.18,
+              "dur": 1.8,
+              "vel": 24.98,
+              "dist": 10.56,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789825950.88,
+              "dur": 4.3,
+              "vel": 21.78,
+              "dist": 24.08,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789826072.28,
+              "dur": 2.2,
+              "vel": 23.18,
+              "dist": 12.51,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789826239.58,
+              "dur": 7.8,
+              "vel": 28.12,
+              "dist": 55.87,
+              "tipo": "sprint"
+            }
+          ],
+          "Tomas Marini": [
+            {
+              "start": 1789819607.38,
+              "dur": 3.4,
+              "vel": 23.08,
+              "dist": 19.45,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789819925.98,
+              "dur": 1.8,
+              "vel": 23.87,
+              "dist": 10.54,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789820161.58,
+              "dur": 6.1,
+              "vel": 21.85,
+              "dist": 34.35,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789820298.18,
+              "dur": 4.4,
+              "vel": 22.64,
+              "dist": 24.92,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789820652.38,
+              "dur": 2.8,
+              "vel": 22.57,
+              "dist": 15.33,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789820659.68,
+              "dur": 4.3,
+              "vel": 21.06,
+              "dist": 23.72,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789821069.28,
+              "dur": 3.0,
+              "vel": 27.07,
+              "dist": 20.4,
+              "tipo": "sprint"
+            },
+            {
+              "start": 1789821889.88,
+              "dur": 4.5,
+              "vel": 29.12,
+              "dist": 32.35,
+              "tipo": "sprint"
+            },
+            {
+              "start": 1789822174.08,
+              "dur": 2.6,
+              "vel": 21.56,
+              "dist": 14.47,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789822353.38,
+              "dur": 3.4,
+              "vel": 24.34,
+              "dist": 20.08,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789823609.98,
+              "dur": 3.6,
+              "vel": 24.95,
+              "dist": 22.57,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789823657.88,
+              "dur": 2.9,
+              "vel": 21.82,
+              "dist": 16.03,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789823688.68,
+              "dur": 4.1,
+              "vel": 24.59,
+              "dist": 25.04,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789823947.38,
+              "dur": 1.8,
+              "vel": 22.25,
+              "dist": 9.91,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789824169.38,
+              "dur": 2.8,
+              "vel": 21.13,
+              "dist": 15.22,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789824335.18,
+              "dur": 3.8,
+              "vel": 23.62,
+              "dist": 22.48,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789825778.38,
+              "dur": 2.3,
+              "vel": 24.55,
+              "dist": 13.54,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789825929.58,
+              "dur": 3.1,
+              "vel": 23.11,
+              "dist": 18.13,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789826081.08,
+              "dur": 4.4,
+              "vel": 26.03,
+              "dist": 29.56,
+              "tipo": "sprint"
+            },
+            {
+              "start": 1789826244.08,
+              "dur": 5.7,
+              "vel": 23.22,
+              "dist": 33.8,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789826293.78,
+              "dur": 5.5,
+              "vel": 25.78,
+              "dist": 37.08,
+              "tipo": "sprint"
+            },
+            {
+              "start": 1789826336.68,
+              "dur": 1.3,
+              "vel": 22.21,
+              "dist": 7.01,
+              "tipo": "hsr"
+            }
+          ],
+          "Ramiro Molina": [
+            {
+              "start": 1789819620.98,
+              "dur": 3.0,
+              "vel": 24.3,
+              "dist": 18.05,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789819781.08,
+              "dur": 2.4,
+              "vel": 21.2,
+              "dist": 13.12,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789820296.88,
+              "dur": 6.0,
+              "vel": 29.34,
+              "dist": 43.43,
+              "tipo": "sprint"
+            },
+            {
+              "start": 1789820451.48,
+              "dur": 3.4,
+              "vel": 30.24,
+              "dist": 25.09,
+              "tipo": "sprint"
+            },
+            {
+              "start": 1789820560.58,
+              "dur": 1.7,
+              "vel": 25.38,
+              "dist": 10.9,
+              "tipo": "sprint"
+            },
+            {
+              "start": 1789820638.28,
+              "dur": 3.3,
+              "vel": 26.82,
+              "dist": 22.36,
+              "tipo": "sprint"
+            },
+            {
+              "start": 1789820659.18,
+              "dur": 5.3,
+              "vel": 24.91,
+              "dist": 32.29,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789821068.08,
+              "dur": 3.5,
+              "vel": 27.97,
+              "dist": 24.54,
+              "tipo": "sprint"
+            },
+            {
+              "start": 1789821223.78,
+              "dur": 3.0,
+              "vel": 23.36,
+              "dist": 17.43,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789821314.38,
+              "dur": 1.8,
+              "vel": 22.46,
+              "dist": 9.93,
+              "tipo": "hsr"
+            }
+          ],
+          "Santino Sodero": [
+            {
+              "start": 1789820111.94,
+              "dur": 2.8,
+              "vel": 23.0,
+              "dist": 16.06,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789820207.54,
+              "dur": 3.0,
+              "vel": 29.77,
+              "dist": 24.29,
+              "tipo": "sprint"
+            },
+            {
+              "start": 1789820452.84,
+              "dur": 3.5,
+              "vel": 21.96,
+              "dist": 19.59,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789820503.14,
+              "dur": 1.1,
+              "vel": 21.24,
+              "dist": 5.42,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789820660.04,
+              "dur": 4.7,
+              "vel": 23.26,
+              "dist": 27.25,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789821118.24,
+              "dur": 5.0,
+              "vel": 30.6,
+              "dist": 34.56,
+              "tipo": "sprint"
+            },
+            {
+              "start": 1789821221.24,
+              "dur": 7.0,
+              "vel": 27.97,
+              "dist": 49.3,
+              "tipo": "sprint"
+            },
+            {
+              "start": 1789821884.94,
+              "dur": 3.8,
+              "vel": 27.97,
+              "dist": 25.78,
+              "tipo": "sprint"
+            },
+            {
+              "start": 1789822297.84,
+              "dur": 3.8,
+              "vel": 28.8,
+              "dist": 26.91,
+              "tipo": "sprint"
+            },
+            {
+              "start": 1789823433.64,
+              "dur": 1.5,
+              "vel": 22.14,
+              "dist": 7.58,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789823436.54,
+              "dur": 1.9,
+              "vel": 23.26,
+              "dist": 10.34,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789823498.54,
+              "dur": 1.6,
+              "vel": 25.13,
+              "dist": 9.55,
+              "tipo": "sprint"
+            },
+            {
+              "start": 1789823883.24,
+              "dur": 1.6,
+              "vel": 21.46,
+              "dist": 7.47,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789823914.64,
+              "dur": 3.6,
+              "vel": 28.55,
+              "dist": 24.71,
+              "tipo": "sprint"
+            },
+            {
+              "start": 1789824278.34,
+              "dur": 1.4,
+              "vel": 21.78,
+              "dist": 7.53,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789824561.54,
+              "dur": 2.2,
+              "vel": 23.76,
+              "dist": 11.91,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789824901.24,
+              "dur": 3.0,
+              "vel": 22.32,
+              "dist": 17.51,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789824927.94,
+              "dur": 3.5,
+              "vel": 29.34,
+              "dist": 22.07,
+              "tipo": "sprint"
+            },
+            {
+              "start": 1789825029.14,
+              "dur": 1.5,
+              "vel": 21.89,
+              "dist": 7.43,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789825307.64,
+              "dur": 5.3,
+              "vel": 22.97,
+              "dist": 32.03,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789826128.94,
+              "dur": 1.1,
+              "vel": 21.6,
+              "dist": 5.68,
+              "tipo": "hsr"
+            },
+            {
+              "start": 1789826255.44,
+              "dur": 1.6,
+              "vel": 27.86,
+              "dist": 10.48,
+              "tipo": "sprint"
+            },
+            {
+              "start": 1789826260.74,
+              "dur": 1.0,
+              "vel": 25.74,
+              "dist": 5.49,
+              "tipo": "sprint"
             }
           ]
         }
