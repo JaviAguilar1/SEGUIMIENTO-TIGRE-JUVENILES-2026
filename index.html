@@ -2318,7 +2318,7 @@ function updateCitUploadButton(cat){
     style="background:rgba(201,162,39,0.15);border:1px solid var(--border2);color:var(--gold2);
     border-radius:6px;padding:8px 14px;font-family:'Barlow Condensed',sans-serif;font-size:13px;
     letter-spacing:1px;font-weight:700;cursor:pointer;white-space:nowrap">⬆ SUBIR PLANILLAS (PDF, podés elegir varios)</button>
-  <input type="file" id="cit-pdf-global" accept=".pdf" multiple style="display:none"
+  <input type="file" id="cit-pdf-global" accept=".pdf,image/*" multiple style="display:none"
     onchange="subirPlanillasLote(this.files, this)">`;
 }
 function setStatsCat(cat){
@@ -6091,8 +6091,14 @@ async function sniffPlanillaPdf(file){
 // citación -- los dos modales comparten estilo pero son overlays de pantalla
 // completa, así que no pueden mostrarse a la vez.
 async function subirPlanillasLote(fileList, inputEl){
-  const files = Array.from(fileList||[]);
+  const todos = Array.from(fileList||[]);
   if(inputEl) inputEl.value='';
+  // Las imágenes son citaciones de RESERVA (foto/placa, sin capa de texto que
+  // leer): se les pide la fecha y se guardan como foto (ver
+  // guardarCitacionImagenReserva). Los PDF siguen el camino de siempre.
+  const imagenes = todos.filter(f=>f.type.startsWith('image/'));
+  const files = todos.filter(f=>!f.type.startsWith('image/'));
+  if(imagenes.length) abrirConfirmCitacionImagenes(imagenes);
   if(!files.length) return;
   showToast(`☁ LEYENDO ${files.length} PDF…`);
   const citParsed = [], cometParsed = [], noReconocido = [];
@@ -6112,6 +6118,45 @@ async function subirPlanillasLote(fileList, inputEl){
   const abrirCitacion = () => { if(citParsed.length) abrirConfirmCitacionLote(citParsed); };
   if(cometParsed.length) abrirConfirmCometLote(cometParsed, abrirCitacion);
   else abrirCitacion();
+}
+
+function abrirConfirmCitacionImagenes(imagenes){
+  let m=document.getElementById('citacion-img-modal');
+  if(m) m.remove();
+  m=document.createElement('div');
+  m.id='citacion-img-modal'; m.className='modal-bg';
+  const rows = imagenes.map((f,i)=>`<div class="cit-img-row" data-idx="${i}" style="padding:8px 0;border-bottom:1px solid rgba(26,45,90,0.4);display:flex;align-items:center;gap:8px">
+      <input type="number" class="cit-img-fecha" min="1" max="35" placeholder="F#"
+        style="width:56px;background:rgba(5,8,15,0.8);border:1px solid #1a2d5a;border-radius:4px;color:#d8e4ff;padding:4px 6px;font-size:13px">
+      <select class="cit-img-sem" style="background:rgba(5,8,15,0.8);border:1px solid #1a2d5a;border-radius:4px;color:#d8e4ff;padding:4px 6px;font-size:12px">
+        <option value="RESERVA"${reservaSemestre===1?' selected':''}>Reserva 1er sem.</option>
+        <option value="RESERVA_S2"${reservaSemestre!==1?' selected':''}>Reserva 2do sem.</option>
+      </select>
+      <span style="flex:1;font-size:12px;word-break:break-all">${esc(f.name)}</span>
+    </div>`).join('');
+  m.innerHTML = `<div class="modal-box" style="width:460px;text-align:left;max-height:80vh;overflow:auto">
+    <h2 style="text-align:center">CITACIÓN DE RESERVA</h2>
+    <p style="text-align:center;font-size:12px;color:var(--muted)">${imagenes.length} imagen(es) — indicá la fecha de cada una</p>
+    ${rows}
+    <button class="m-btn" onclick="confirmarCitacionImagenes()">✓ GUARDAR</button>
+    <button class="m-cancel" onclick="document.getElementById('citacion-img-modal').remove()">Cancelar</button>
+  </div>`;
+  document.body.appendChild(m);
+  m._imgs = imagenes;
+}
+async function confirmarCitacionImagenes(){
+  const m=document.getElementById('citacion-img-modal');
+  if(!m || !m._imgs) return;
+  const aGuardar=[];
+  for(const row of m.querySelectorAll('.cit-img-row')){
+    const f = parseInt(row.querySelector('.cit-img-fecha').value);
+    if(!f || f<1 || f>35){ showToast('⚠ Falta indicar la fecha'); return; }
+    aGuardar.push({file:m._imgs[Number(row.dataset.idx)], fecha:f, dataCat:row.querySelector('.cit-img-sem').value});
+  }
+  m.remove();
+  for(const {file, fecha, dataCat} of aGuardar){
+    await guardarCitacionImagenReserva(dataCat, fecha, rivalDeFechaReserva(dataCat, fecha), file);
+  }
 }
 
 function avisoCitLoteTexto(catsFound, fecha){
