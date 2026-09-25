@@ -1,5 +1,5 @@
 {
-  "actualizado": "2026-09-24 18:02",
+  "actualizado": "2026-09-24 22:02",
   "fuente": "ligaprofesional.ar (oficial)",
   "fuente_fixture": "ligaprofesional.ar (oficial)",
   "fuente_reserva": "statfutbol.com.ar",
@@ -3053,6 +3053,18 @@
         "Zona A": [
           {
             "pos": 1,
+            "equipo": "GIMNASIA Y ESGRIMA (MENDOZA)",
+            "pts": 18,
+            "pj": 10,
+            "pg": 6,
+            "pe": 0,
+            "pp": 4,
+            "gf": 13,
+            "gc": 11,
+            "dif": 2
+          },
+          {
+            "pos": 2,
             "equipo": "RIVER PLATE",
             "pts": 17,
             "pj": 9,
@@ -3064,7 +3076,7 @@
             "dif": 9
           },
           {
-            "pos": 2,
+            "pos": 3,
             "equipo": "SARMIENTO (JUNIN)",
             "pts": 17,
             "pj": 10,
@@ -3076,7 +3088,7 @@
             "dif": 5
           },
           {
-            "pos": 3,
+            "pos": 4,
             "equipo": "VELEZ SARSFIELD",
             "pts": 16,
             "pj": 10,
@@ -3088,7 +3100,7 @@
             "dif": 7
           },
           {
-            "pos": 4,
+            "pos": 5,
             "equipo": "GIMNASIA Y ESGRIMA (LP)",
             "pts": 16,
             "pj": 10,
@@ -3100,7 +3112,7 @@
             "dif": 6
           },
           {
-            "pos": 5,
+            "pos": 6,
             "equipo": "ROSARIO CENTRAL",
             "pts": 16,
             "pj": 10,
@@ -3110,18 +3122,6 @@
             "gf": 13,
             "gc": 14,
             "dif": -1
-          },
-          {
-            "pos": 6,
-            "equipo": "GIMNASIA Y ESGRIMA (MENDOZA)",
-            "pts": 15,
-            "pj": 9,
-            "pg": 5,
-            "pe": 0,
-            "pp": 4,
-            "gf": 12,
-            "gc": 11,
-            "dif": 1
           },
           {
             "pos": 7,
@@ -3173,18 +3173,6 @@
           },
           {
             "pos": 11,
-            "equipo": "RACING CLUB",
-            "pts": 11,
-            "pj": 9,
-            "pg": 2,
-            "pe": 5,
-            "pp": 2,
-            "gf": 14,
-            "gc": 14,
-            "dif": 0
-          },
-          {
-            "pos": 12,
             "equipo": "SAN LORENZO",
             "pts": 11,
             "pj": 10,
@@ -3194,6 +3182,18 @@
             "gf": 9,
             "gc": 9,
             "dif": 0
+          },
+          {
+            "pos": 12,
+            "equipo": "RACING CLUB",
+            "pts": 11,
+            "pj": 10,
+            "pg": 2,
+            "pe": 5,
+            "pp": 3,
+            "gf": 15,
+            "gc": 16,
+            "dif": -1
           },
           {
             "pos": 13,
@@ -3271,6 +3271,18 @@
         "Zona B": [
           {
             "pos": 1,
+            "equipo": "INDEPENDIENTE",
+            "pts": 23,
+            "pj": 10,
+            "pg": 7,
+            "pe": 2,
+            "pp": 1,
+            "gf": 23,
+            "gc": 8,
+            "dif": 15
+          },
+          {
+            "pos": 2,
             "equipo": "ESTUDIANTES (RIO CUARTO - CORDOBA)",
             "pts": 21,
             "pj": 10,
@@ -3280,18 +3292,6 @@
             "gf": 10,
             "gc": 4,
             "dif": 6
-          },
-          {
-            "pos": 2,
-            "equipo": "INDEPENDIENTE",
-            "pts": 20,
-            "pj": 9,
-            "pg": 6,
-            "pe": 2,
-            "pp": 1,
-            "gf": 21,
-            "gc": 7,
-            "dif": 14
           },
           {
             "pos": 3,
@@ -3441,13 +3441,13 @@
             "pos": 15,
             "equipo": "INDEPENDIENTE RIVADAVIA (MENDOZA)",
             "pts": 8,
-            "pj": 9,
+            "pj": 10,
             "pg": 2,
             "pe": 2,
-            "pp": 5,
+            "pp": 6,
             "gf": 9,
-            "gc": 16,
-            "dif": -7
+            "gc": 17,
+            "dif": -8
           },
           {
             "pos": 16,
@@ -31529,6 +31529,18 @@
           "gv": 0
         },
         {
+          "local": "IND.RIVADAVIA (M)",
+          "visitante": "GIMNASIA (M)",
+          "gl": 0,
+          "gv": 1
+        },
+        {
+          "local": "RACING CLUB",
+          "visitante": "INDEPENDIENTE",
+          "gl": 1,
+          "gv": 2
+        },
+        {
           "local": "INSTITUTO (C)",
           "visitante": "ESTUDIANTES (RC)",
           "gl": 0,
@@ -33927,6 +33939,36 @@
   "jugadores_futdetail": {
     "4TA": [
       {
+        "jugador": "Saravia Roman",
+        "convocatorias": 5,
+        "partidos_titular": 5,
+        "minutos_jugados": 450,
+        "goles": 0,
+        "asistencias": 0,
+        "tarjeta_amarilla": 1,
+        "tarjeta_roja": 0
+      },
+      {
+        "jugador": "Pannoni Lautaro",
+        "convocatorias": 21,
+        "partidos_titular": 17,
+        "minutos_jugados": 1255,
+        "goles": 3,
+        "asistencias": 0,
+        "tarjeta_amarilla": 0,
+        "tarjeta_roja": 2
+      },
+      {
+        "jugador": "Andrusisen Lautaro",
+        "convocatorias": 9,
+        "partidos_titular": 9,
+        "minutos_jugados": 677,
+        "goles": 3,
+        "asistencias": 0,
+        "tarjeta_amarilla": 0,
+        "tarjeta_roja": 0
+      },
+      {
         "jugador": "Aguirre Iñaki",
         "convocatorias": 18,
         "partidos_titular": 15,
@@ -33957,11 +33999,11 @@
         "tarjeta_roja": 0
       },
       {
-        "jugador": "Andrusisen Lautaro",
-        "convocatorias": 9,
-        "partidos_titular": 9,
-        "minutos_jugados": 677,
-        "goles": 3,
+        "jugador": "Pereyra Manuel",
+        "convocatorias": 7,
+        "partidos_titular": 7,
+        "minutos_jugados": 450,
+        "goles": 0,
         "asistencias": 0,
         "tarjeta_amarilla": 0,
         "tarjeta_roja": 0
@@ -33987,40 +34029,10 @@
         "tarjeta_roja": 0
       },
       {
-        "jugador": "Pereyra Manuel",
-        "convocatorias": 7,
-        "partidos_titular": 7,
-        "minutos_jugados": 450,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
         "jugador": "Cáceres Thomas",
         "convocatorias": 15,
         "partidos_titular": 14,
         "minutos_jugados": 988,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 1,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Pannoni Lautaro",
-        "convocatorias": 21,
-        "partidos_titular": 17,
-        "minutos_jugados": 1255,
-        "goles": 3,
-        "asistencias": 0,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 2
-      },
-      {
-        "jugador": "Saravia Roman",
-        "convocatorias": 5,
-        "partidos_titular": 5,
-        "minutos_jugados": 450,
         "goles": 0,
         "asistencias": 0,
         "tarjeta_amarilla": 1,
@@ -34117,6 +34129,16 @@
         "tarjeta_roja": 0
       },
       {
+        "jugador": "Benítez Cristian",
+        "convocatorias": 24,
+        "partidos_titular": 18,
+        "minutos_jugados": 1362,
+        "goles": 3,
+        "asistencias": 0,
+        "tarjeta_amarilla": 0,
+        "tarjeta_roja": 0
+      },
+      {
         "jugador": "Medina Tiziano",
         "convocatorias": 7,
         "partidos_titular": 6,
@@ -34147,16 +34169,6 @@
         "tarjeta_roja": 0
       },
       {
-        "jugador": "Benítez Cristian",
-        "convocatorias": 24,
-        "partidos_titular": 18,
-        "minutos_jugados": 1362,
-        "goles": 3,
-        "asistencias": 0,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
         "jugador": "Hillairet Yair",
         "convocatorias": 8,
         "partidos_titular": 0,
@@ -34177,16 +34189,6 @@
         "tarjeta_roja": 0
       },
       {
-        "jugador": "Zalazar Benjamín",
-        "convocatorias": 1,
-        "partidos_titular": 0,
-        "minutos_jugados": 20,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
         "jugador": "Ferreyra Rodrigo",
         "convocatorias": 12,
         "partidos_titular": 5,
@@ -34197,11 +34199,11 @@
         "tarjeta_roja": 0
       },
       {
-        "jugador": "Figueredo Benjamin",
-        "convocatorias": 10,
-        "partidos_titular": 5,
-        "minutos_jugados": 330,
-        "goles": 1,
+        "jugador": "Zalazar Benjamín",
+        "convocatorias": 1,
+        "partidos_titular": 0,
+        "minutos_jugados": 20,
+        "goles": 0,
         "asistencias": 0,
         "tarjeta_amarilla": 0,
         "tarjeta_roja": 0
@@ -34217,10 +34219,40 @@
         "tarjeta_roja": 0
       },
       {
+        "jugador": "Figueredo Benjamin",
+        "convocatorias": 10,
+        "partidos_titular": 5,
+        "minutos_jugados": 330,
+        "goles": 1,
+        "asistencias": 0,
+        "tarjeta_amarilla": 0,
+        "tarjeta_roja": 0
+      },
+      {
         "jugador": "López Facundo",
         "convocatorias": 14,
         "partidos_titular": 6,
         "minutos_jugados": 475,
+        "goles": 1,
+        "asistencias": 0,
+        "tarjeta_amarilla": 0,
+        "tarjeta_roja": 0
+      },
+      {
+        "jugador": "Benitez Lautaro",
+        "convocatorias": 18,
+        "partidos_titular": 13,
+        "minutos_jugados": 924,
+        "goles": 1,
+        "asistencias": 0,
+        "tarjeta_amarilla": 1,
+        "tarjeta_roja": 0
+      },
+      {
+        "jugador": "Copes Tomas",
+        "convocatorias": 20,
+        "partidos_titular": 2,
+        "minutos_jugados": 303,
         "goles": 1,
         "asistencias": 0,
         "tarjeta_amarilla": 0,
@@ -34247,21 +34279,11 @@
         "tarjeta_roja": 0
       },
       {
-        "jugador": "Benitez Lautaro",
-        "convocatorias": 18,
-        "partidos_titular": 13,
-        "minutos_jugados": 924,
-        "goles": 1,
-        "asistencias": 0,
-        "tarjeta_amarilla": 1,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Copes Tomas",
-        "convocatorias": 20,
-        "partidos_titular": 2,
-        "minutos_jugados": 303,
-        "goles": 1,
+        "jugador": "Fares Hamdan",
+        "convocatorias": 4,
+        "partidos_titular": 0,
+        "minutos_jugados": 5,
+        "goles": 0,
         "asistencias": 0,
         "tarjeta_amarilla": 0,
         "tarjeta_roja": 0
@@ -34272,16 +34294,6 @@
         "partidos_titular": 1,
         "minutos_jugados": 105,
         "goles": 2,
-        "asistencias": 0,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Fares Hamdan",
-        "convocatorias": 4,
-        "partidos_titular": 0,
-        "minutos_jugados": 5,
-        "goles": 0,
         "asistencias": 0,
         "tarjeta_amarilla": 0,
         "tarjeta_roja": 0
@@ -34489,6 +34501,16 @@
         "tarjeta_roja": 0
       },
       {
+        "jugador": "Rodriguez Thiago",
+        "convocatorias": 15,
+        "partidos_titular": 10,
+        "minutos_jugados": 791,
+        "goles": 2,
+        "asistencias": 0,
+        "tarjeta_amarilla": 2,
+        "tarjeta_roja": 0
+      },
+      {
         "jugador": "Perez Joaquin",
         "convocatorias": 16,
         "partidos_titular": 5,
@@ -34499,13 +34521,23 @@
         "tarjeta_roja": 0
       },
       {
-        "jugador": "Rodriguez Thiago",
-        "convocatorias": 15,
-        "partidos_titular": 10,
-        "minutos_jugados": 791,
-        "goles": 2,
+        "jugador": "Petry Uriel",
+        "convocatorias": 16,
+        "partidos_titular": 0,
+        "minutos_jugados": 13,
+        "goles": 0,
         "asistencias": 0,
-        "tarjeta_amarilla": 2,
+        "tarjeta_amarilla": 0,
+        "tarjeta_roja": 0
+      },
+      {
+        "jugador": "Sosena Fausto",
+        "convocatorias": 1,
+        "partidos_titular": 0,
+        "minutos_jugados": 0,
+        "goles": 0,
+        "asistencias": 0,
+        "tarjeta_amarilla": 0,
         "tarjeta_roja": 0
       },
       {
@@ -34566,26 +34598,6 @@
         "goles": 0,
         "asistencias": 0,
         "tarjeta_amarilla": 1,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Petry Uriel",
-        "convocatorias": 16,
-        "partidos_titular": 0,
-        "minutos_jugados": 13,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Sosena Fausto",
-        "convocatorias": 1,
-        "partidos_titular": 0,
-        "minutos_jugados": 0,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 0,
         "tarjeta_roja": 0
       },
       {
@@ -34983,6 +34995,16 @@
         "tarjeta_roja": 0
       },
       {
+        "jugador": "Inostroza Bastian",
+        "convocatorias": 1,
+        "partidos_titular": 0,
+        "minutos_jugados": 45,
+        "goles": 0,
+        "asistencias": 0,
+        "tarjeta_amarilla": 0,
+        "tarjeta_roja": 0
+      },
+      {
         "jugador": "Cabrera Luca",
         "convocatorias": 1,
         "partidos_titular": 0,
@@ -35003,16 +35025,6 @@
         "tarjeta_roja": 0
       },
       {
-        "jugador": "Inostroza Bastian",
-        "convocatorias": 1,
-        "partidos_titular": 0,
-        "minutos_jugados": 45,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
         "jugador": "Martinez Giuliano",
         "convocatorias": 11,
         "partidos_titular": 4,
@@ -35020,16 +35032,6 @@
         "goles": 0,
         "asistencias": 0,
         "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Fredes Tiago",
-        "convocatorias": 21,
-        "partidos_titular": 19,
-        "minutos_jugados": 1561,
-        "goles": 14,
-        "asistencias": 7,
-        "tarjeta_amarilla": 3,
         "tarjeta_roja": 0
       },
       {
@@ -35043,163 +35045,13 @@
         "tarjeta_roja": 1
       },
       {
-        "jugador": "Lopez Sebastian",
-        "convocatorias": 33,
-        "partidos_titular": 25,
-        "minutos_jugados": 2020,
-        "goles": 1,
-        "asistencias": 1,
-        "tarjeta_amarilla": 10,
-        "tarjeta_roja": 4
-      },
-      {
-        "jugador": "Mancuello Tobias",
-        "convocatorias": 31,
+        "jugador": "Fredes Tiago",
+        "convocatorias": 21,
         "partidos_titular": 19,
-        "minutos_jugados": 1905,
-        "goles": 1,
-        "asistencias": 0,
-        "tarjeta_amarilla": 4,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Sodero Santino",
-        "convocatorias": 31,
-        "partidos_titular": 29,
-        "minutos_jugados": 2040,
-        "goles": 15,
-        "asistencias": 4,
-        "tarjeta_amarilla": 2,
-        "tarjeta_roja": 1
-      },
-      {
-        "jugador": "Dominguez Bautista",
-        "convocatorias": 31,
-        "partidos_titular": 28,
-        "minutos_jugados": 2279,
-        "goles": 1,
-        "asistencias": 0,
-        "tarjeta_amarilla": 6,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Puchi Santino",
-        "convocatorias": 8,
-        "partidos_titular": 6,
-        "minutos_jugados": 435,
-        "goles": 0,
-        "asistencias": 2,
-        "tarjeta_amarilla": 2,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Jara Juan",
-        "convocatorias": 13,
-        "partidos_titular": 4,
-        "minutos_jugados": 478,
-        "goles": 1,
-        "asistencias": 0,
-        "tarjeta_amarilla": 4,
-        "tarjeta_roja": 1
-      },
-      {
-        "jugador": "Lamanna Fabrizio",
-        "convocatorias": 31,
-        "partidos_titular": 23,
-        "minutos_jugados": 1526,
-        "goles": 10,
-        "asistencias": 0,
+        "minutos_jugados": 1561,
+        "goles": 14,
+        "asistencias": 7,
         "tarjeta_amarilla": 3,
-        "tarjeta_roja": 2
-      },
-      {
-        "jugador": "Astesana Valentino",
-        "convocatorias": 13,
-        "partidos_titular": 9,
-        "minutos_jugados": 437,
-        "goles": 4,
-        "asistencias": 0,
-        "tarjeta_amarilla": 1,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Conte Maximiliano",
-        "convocatorias": 2,
-        "partidos_titular": 0,
-        "minutos_jugados": 70,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Mena Sebastian",
-        "convocatorias": 35,
-        "partidos_titular": 10,
-        "minutos_jugados": 1467,
-        "goles": 3,
-        "asistencias": 3,
-        "tarjeta_amarilla": 2,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Molina Ramiro",
-        "convocatorias": 30,
-        "partidos_titular": 15,
-        "minutos_jugados": 1173,
-        "goles": 1,
-        "asistencias": 3,
-        "tarjeta_amarilla": 4,
-        "tarjeta_roja": 2
-      },
-      {
-        "jugador": "Herrera Thiago",
-        "convocatorias": 34,
-        "partidos_titular": 26,
-        "minutos_jugados": 1863,
-        "goles": 8,
-        "asistencias": 2,
-        "tarjeta_amarilla": 3,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Core Valentino",
-        "convocatorias": 8,
-        "partidos_titular": 3,
-        "minutos_jugados": 249,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Lopez Dionel",
-        "convocatorias": 20,
-        "partidos_titular": 17,
-        "minutos_jugados": 898,
-        "goles": 2,
-        "asistencias": 0,
-        "tarjeta_amarilla": 2,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Gallardo Dylan",
-        "convocatorias": 4,
-        "partidos_titular": 2,
-        "minutos_jugados": 155,
-        "goles": 1,
-        "asistencias": 0,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Insaurralde Ihan",
-        "convocatorias": 25,
-        "partidos_titular": 17,
-        "minutos_jugados": 1399,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 6,
         "tarjeta_roja": 0
       },
       {
@@ -35393,13 +35245,163 @@
         "tarjeta_roja": 0
       },
       {
-        "jugador": "Reyes Jose",
-        "convocatorias": 1,
+        "jugador": "Lopez Sebastian",
+        "convocatorias": 33,
+        "partidos_titular": 25,
+        "minutos_jugados": 2020,
+        "goles": 1,
+        "asistencias": 1,
+        "tarjeta_amarilla": 10,
+        "tarjeta_roja": 4
+      },
+      {
+        "jugador": "Mancuello Tobias",
+        "convocatorias": 31,
+        "partidos_titular": 19,
+        "minutos_jugados": 1905,
+        "goles": 1,
+        "asistencias": 0,
+        "tarjeta_amarilla": 4,
+        "tarjeta_roja": 0
+      },
+      {
+        "jugador": "Sodero Santino",
+        "convocatorias": 31,
+        "partidos_titular": 29,
+        "minutos_jugados": 2040,
+        "goles": 15,
+        "asistencias": 4,
+        "tarjeta_amarilla": 2,
+        "tarjeta_roja": 1
+      },
+      {
+        "jugador": "Dominguez Bautista",
+        "convocatorias": 31,
+        "partidos_titular": 28,
+        "minutos_jugados": 2279,
+        "goles": 1,
+        "asistencias": 0,
+        "tarjeta_amarilla": 6,
+        "tarjeta_roja": 0
+      },
+      {
+        "jugador": "Puchi Santino",
+        "convocatorias": 8,
+        "partidos_titular": 6,
+        "minutos_jugados": 435,
+        "goles": 0,
+        "asistencias": 2,
+        "tarjeta_amarilla": 2,
+        "tarjeta_roja": 0
+      },
+      {
+        "jugador": "Jara Juan",
+        "convocatorias": 13,
+        "partidos_titular": 4,
+        "minutos_jugados": 478,
+        "goles": 1,
+        "asistencias": 0,
+        "tarjeta_amarilla": 4,
+        "tarjeta_roja": 1
+      },
+      {
+        "jugador": "Lamanna Fabrizio",
+        "convocatorias": 31,
+        "partidos_titular": 23,
+        "minutos_jugados": 1526,
+        "goles": 10,
+        "asistencias": 0,
+        "tarjeta_amarilla": 3,
+        "tarjeta_roja": 2
+      },
+      {
+        "jugador": "Astesana Valentino",
+        "convocatorias": 13,
+        "partidos_titular": 9,
+        "minutos_jugados": 437,
+        "goles": 4,
+        "asistencias": 0,
+        "tarjeta_amarilla": 1,
+        "tarjeta_roja": 0
+      },
+      {
+        "jugador": "Conte Maximiliano",
+        "convocatorias": 2,
         "partidos_titular": 0,
-        "minutos_jugados": 32,
+        "minutos_jugados": 70,
         "goles": 0,
         "asistencias": 0,
         "tarjeta_amarilla": 0,
+        "tarjeta_roja": 0
+      },
+      {
+        "jugador": "Mena Sebastian",
+        "convocatorias": 35,
+        "partidos_titular": 10,
+        "minutos_jugados": 1467,
+        "goles": 3,
+        "asistencias": 3,
+        "tarjeta_amarilla": 2,
+        "tarjeta_roja": 0
+      },
+      {
+        "jugador": "Molina Ramiro",
+        "convocatorias": 30,
+        "partidos_titular": 15,
+        "minutos_jugados": 1173,
+        "goles": 1,
+        "asistencias": 3,
+        "tarjeta_amarilla": 4,
+        "tarjeta_roja": 2
+      },
+      {
+        "jugador": "Herrera Thiago",
+        "convocatorias": 34,
+        "partidos_titular": 26,
+        "minutos_jugados": 1863,
+        "goles": 8,
+        "asistencias": 2,
+        "tarjeta_amarilla": 3,
+        "tarjeta_roja": 0
+      },
+      {
+        "jugador": "Core Valentino",
+        "convocatorias": 8,
+        "partidos_titular": 3,
+        "minutos_jugados": 249,
+        "goles": 0,
+        "asistencias": 0,
+        "tarjeta_amarilla": 0,
+        "tarjeta_roja": 0
+      },
+      {
+        "jugador": "Lopez Dionel",
+        "convocatorias": 20,
+        "partidos_titular": 17,
+        "minutos_jugados": 898,
+        "goles": 2,
+        "asistencias": 0,
+        "tarjeta_amarilla": 2,
+        "tarjeta_roja": 0
+      },
+      {
+        "jugador": "Gallardo Dylan",
+        "convocatorias": 4,
+        "partidos_titular": 2,
+        "minutos_jugados": 155,
+        "goles": 1,
+        "asistencias": 0,
+        "tarjeta_amarilla": 0,
+        "tarjeta_roja": 0
+      },
+      {
+        "jugador": "Insaurralde Ihan",
+        "convocatorias": 25,
+        "partidos_titular": 17,
+        "minutos_jugados": 1399,
+        "goles": 0,
+        "asistencias": 0,
+        "tarjeta_amarilla": 6,
         "tarjeta_roja": 0
       },
       {
@@ -35433,10 +35435,30 @@
         "tarjeta_roja": 0
       },
       {
+        "jugador": "Reyes Jose",
+        "convocatorias": 1,
+        "partidos_titular": 0,
+        "minutos_jugados": 32,
+        "goles": 0,
+        "asistencias": 0,
+        "tarjeta_amarilla": 0,
+        "tarjeta_roja": 0
+      },
+      {
         "jugador": "Gonzalia Bautista",
         "convocatorias": 1,
         "partidos_titular": 0,
         "minutos_jugados": 20,
+        "goles": 0,
+        "asistencias": 0,
+        "tarjeta_amarilla": 0,
+        "tarjeta_roja": 0
+      },
+      {
+        "jugador": "Navarro Valentin",
+        "convocatorias": 1,
+        "partidos_titular": 0,
+        "minutos_jugados": 0,
         "goles": 0,
         "asistencias": 0,
         "tarjeta_amarilla": 0,
@@ -35461,49 +35483,9 @@
         "asistencias": 0,
         "tarjeta_amarilla": 0,
         "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Navarro Valentin",
-        "convocatorias": 1,
-        "partidos_titular": 0,
-        "minutos_jugados": 0,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
       }
     ],
     "8VA": [
-      {
-        "jugador": "Tobler Bautista",
-        "convocatorias": 25,
-        "partidos_titular": 19,
-        "minutos_jugados": 1219,
-        "goles": 1,
-        "asistencias": 3,
-        "tarjeta_amarilla": 1,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Merlos Galeano Lautaro Benjamin",
-        "convocatorias": 12,
-        "partidos_titular": 9,
-        "minutos_jugados": 405,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 2,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Fino Amadeo",
-        "convocatorias": 6,
-        "partidos_titular": 6,
-        "minutos_jugados": 344,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
       {
         "jugador": "Navarro Valentin",
         "convocatorias": 15,
@@ -35532,6 +35514,36 @@
         "goles": 1,
         "asistencias": 0,
         "tarjeta_amarilla": 2,
+        "tarjeta_roja": 0
+      },
+      {
+        "jugador": "Tobler Bautista",
+        "convocatorias": 25,
+        "partidos_titular": 19,
+        "minutos_jugados": 1219,
+        "goles": 1,
+        "asistencias": 3,
+        "tarjeta_amarilla": 1,
+        "tarjeta_roja": 0
+      },
+      {
+        "jugador": "Merlos Galeano Lautaro Benjamin",
+        "convocatorias": 12,
+        "partidos_titular": 9,
+        "minutos_jugados": 405,
+        "goles": 0,
+        "asistencias": 0,
+        "tarjeta_amarilla": 2,
+        "tarjeta_roja": 0
+      },
+      {
+        "jugador": "Fino Amadeo",
+        "convocatorias": 6,
+        "partidos_titular": 6,
+        "minutos_jugados": 344,
+        "goles": 0,
+        "asistencias": 0,
+        "tarjeta_amarilla": 0,
         "tarjeta_roja": 0
       },
       {
@@ -35565,6 +35577,16 @@
         "tarjeta_roja": 1
       },
       {
+        "jugador": "Galeano Joaquin",
+        "convocatorias": 8,
+        "partidos_titular": 7,
+        "minutos_jugados": 395,
+        "goles": 0,
+        "asistencias": 0,
+        "tarjeta_amarilla": 1,
+        "tarjeta_roja": 0
+      },
+      {
         "jugador": "Cocozza Maximo",
         "convocatorias": 16,
         "partidos_titular": 16,
@@ -35585,11 +35607,11 @@
         "tarjeta_roja": 0
       },
       {
-        "jugador": "Galeano Joaquin",
-        "convocatorias": 8,
-        "partidos_titular": 7,
-        "minutos_jugados": 395,
-        "goles": 0,
+        "jugador": "Aquilue Santiago",
+        "convocatorias": 13,
+        "partidos_titular": 13,
+        "minutos_jugados": 286,
+        "goles": 4,
         "asistencias": 0,
         "tarjeta_amarilla": 1,
         "tarjeta_roja": 0
@@ -35602,16 +35624,6 @@
         "goles": 0,
         "asistencias": 0,
         "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Aquilue Santiago",
-        "convocatorias": 13,
-        "partidos_titular": 13,
-        "minutos_jugados": 286,
-        "goles": 4,
-        "asistencias": 0,
-        "tarjeta_amarilla": 1,
         "tarjeta_roja": 0
       },
       {
@@ -35655,16 +35667,6 @@
         "tarjeta_roja": 0
       },
       {
-        "jugador": "Kaye Axel",
-        "convocatorias": 1,
-        "partidos_titular": 1,
-        "minutos_jugados": 45,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
         "jugador": "Fernández leis Gabriel",
         "convocatorias": 10,
         "partidos_titular": 10,
@@ -35685,60 +35687,10 @@
         "tarjeta_roja": 0
       },
       {
-        "jugador": "Sanchez Mathias",
-        "convocatorias": 8,
-        "partidos_titular": 6,
-        "minutos_jugados": 205,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Meza Luca",
-        "convocatorias": 14,
-        "partidos_titular": 10,
-        "minutos_jugados": 430,
-        "goles": 1,
-        "asistencias": 0,
-        "tarjeta_amarilla": 1,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Bustamante Alan",
-        "convocatorias": 13,
-        "partidos_titular": 13,
-        "minutos_jugados": 545,
-        "goles": 1,
-        "asistencias": 0,
-        "tarjeta_amarilla": 2,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Reinoso Patricio",
-        "convocatorias": 3,
-        "partidos_titular": 2,
-        "minutos_jugados": 90,
-        "goles": 1,
-        "asistencias": 0,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Noriega Mateo",
-        "convocatorias": 17,
-        "partidos_titular": 15,
-        "minutos_jugados": 590,
-        "goles": 1,
-        "asistencias": 1,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Arias Bonilla  Nicolás Geremias",
-        "convocatorias": 5,
-        "partidos_titular": 4,
-        "minutos_jugados": 155,
+        "jugador": "Kaye Axel",
+        "convocatorias": 1,
+        "partidos_titular": 1,
+        "minutos_jugados": 45,
         "goles": 0,
         "asistencias": 0,
         "tarjeta_amarilla": 0,
@@ -35759,6 +35711,16 @@
         "convocatorias": 11,
         "partidos_titular": 9,
         "minutos_jugados": 185,
+        "goles": 0,
+        "asistencias": 0,
+        "tarjeta_amarilla": 0,
+        "tarjeta_roja": 0
+      },
+      {
+        "jugador": "Arias Bonilla  Nicolás Geremias",
+        "convocatorias": 5,
+        "partidos_titular": 4,
+        "minutos_jugados": 155,
         "goles": 0,
         "asistencias": 0,
         "tarjeta_amarilla": 0,
@@ -35795,6 +35757,56 @@
         "tarjeta_roja": 0
       },
       {
+        "jugador": "Sanchez Mathias",
+        "convocatorias": 8,
+        "partidos_titular": 6,
+        "minutos_jugados": 205,
+        "goles": 0,
+        "asistencias": 0,
+        "tarjeta_amarilla": 0,
+        "tarjeta_roja": 0
+      },
+      {
+        "jugador": "Meza Luca",
+        "convocatorias": 14,
+        "partidos_titular": 10,
+        "minutos_jugados": 430,
+        "goles": 1,
+        "asistencias": 0,
+        "tarjeta_amarilla": 1,
+        "tarjeta_roja": 0
+      },
+      {
+        "jugador": "Reinoso Patricio",
+        "convocatorias": 3,
+        "partidos_titular": 2,
+        "minutos_jugados": 90,
+        "goles": 1,
+        "asistencias": 0,
+        "tarjeta_amarilla": 0,
+        "tarjeta_roja": 0
+      },
+      {
+        "jugador": "Noriega Mateo",
+        "convocatorias": 17,
+        "partidos_titular": 15,
+        "minutos_jugados": 590,
+        "goles": 1,
+        "asistencias": 1,
+        "tarjeta_amarilla": 0,
+        "tarjeta_roja": 0
+      },
+      {
+        "jugador": "Bustamante Alan",
+        "convocatorias": 13,
+        "partidos_titular": 13,
+        "minutos_jugados": 545,
+        "goles": 1,
+        "asistencias": 0,
+        "tarjeta_amarilla": 2,
+        "tarjeta_roja": 0
+      },
+      {
         "jugador": "Rios Mateo",
         "convocatorias": 14,
         "partidos_titular": 11,
@@ -35803,6 +35815,26 @@
         "asistencias": 1,
         "tarjeta_amarilla": 4,
         "tarjeta_roja": 0
+      },
+      {
+        "jugador": "Celiz Teo",
+        "convocatorias": 22,
+        "partidos_titular": 16,
+        "minutos_jugados": 585,
+        "goles": 1,
+        "asistencias": 0,
+        "tarjeta_amarilla": 0,
+        "tarjeta_roja": 0
+      },
+      {
+        "jugador": "Saragoza Ramiro",
+        "convocatorias": 17,
+        "partidos_titular": 13,
+        "minutos_jugados": 350,
+        "goles": 2,
+        "asistencias": 2,
+        "tarjeta_amarilla": 3,
+        "tarjeta_roja": 1
       },
       {
         "jugador": "Chmea Roque",
@@ -35835,23 +35867,13 @@
         "tarjeta_roja": 0
       },
       {
-        "jugador": "Celiz Teo",
-        "convocatorias": 22,
-        "partidos_titular": 16,
-        "minutos_jugados": 585,
+        "jugador": "Bin Justin",
+        "convocatorias": 15,
+        "partidos_titular": 12,
+        "minutos_jugados": 345,
         "goles": 1,
         "asistencias": 0,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Saragoza Ramiro",
-        "convocatorias": 17,
-        "partidos_titular": 13,
-        "minutos_jugados": 350,
-        "goles": 2,
-        "asistencias": 2,
-        "tarjeta_amarilla": 3,
+        "tarjeta_amarilla": 2,
         "tarjeta_roja": 1
       },
       {
@@ -35865,20 +35887,20 @@
         "tarjeta_roja": 0
       },
       {
-        "jugador": "Bin Justin",
-        "convocatorias": 15,
-        "partidos_titular": 12,
-        "minutos_jugados": 345,
-        "goles": 1,
-        "asistencias": 0,
-        "tarjeta_amarilla": 2,
-        "tarjeta_roja": 1
-      },
-      {
         "jugador": "Blanco Dylan Alex",
         "convocatorias": 21,
         "partidos_titular": 17,
         "minutos_jugados": 956,
+        "goles": 1,
+        "asistencias": 0,
+        "tarjeta_amarilla": 2,
+        "tarjeta_roja": 0
+      },
+      {
+        "jugador": "Inostroza Bastian",
+        "convocatorias": 13,
+        "partidos_titular": 9,
+        "minutos_jugados": 137,
         "goles": 1,
         "asistencias": 0,
         "tarjeta_amarilla": 2,
@@ -35895,13 +35917,13 @@
         "tarjeta_roja": 0
       },
       {
-        "jugador": "Inostroza Bastian",
-        "convocatorias": 13,
+        "jugador": "Beron Santiago",
+        "convocatorias": 12,
         "partidos_titular": 9,
-        "minutos_jugados": 137,
+        "minutos_jugados": 128,
         "goles": 1,
-        "asistencias": 0,
-        "tarjeta_amarilla": 2,
+        "asistencias": 1,
+        "tarjeta_amarilla": 0,
         "tarjeta_roja": 0
       },
       {
@@ -35909,16 +35931,6 @@
         "convocatorias": 16,
         "partidos_titular": 13,
         "minutos_jugados": 493,
-        "goles": 1,
-        "asistencias": 1,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Beron Santiago",
-        "convocatorias": 12,
-        "partidos_titular": 9,
-        "minutos_jugados": 128,
         "goles": 1,
         "asistencias": 1,
         "tarjeta_amarilla": 0,
@@ -36017,6 +36029,26 @@
         "tarjeta_roja": 0
       },
       {
+        "jugador": "Arce Miño  Axel",
+        "convocatorias": 9,
+        "partidos_titular": 2,
+        "minutos_jugados": 273,
+        "goles": 0,
+        "asistencias": 0,
+        "tarjeta_amarilla": 0,
+        "tarjeta_roja": 0
+      },
+      {
+        "jugador": "Denis Galli Sebastian",
+        "convocatorias": 7,
+        "partidos_titular": 1,
+        "minutos_jugados": 192,
+        "goles": 1,
+        "asistencias": 0,
+        "tarjeta_amarilla": 0,
+        "tarjeta_roja": 0
+      },
+      {
         "jugador": "Vargas Valentino",
         "convocatorias": 7,
         "partidos_titular": 0,
@@ -36037,16 +36069,6 @@
         "tarjeta_roja": 0
       },
       {
-        "jugador": "Enrique Ian",
-        "convocatorias": 21,
-        "partidos_titular": 15,
-        "minutos_jugados": 1032,
-        "goles": 0,
-        "asistencias": 4,
-        "tarjeta_amarilla": 2,
-        "tarjeta_roja": 0
-      },
-      {
         "jugador": "Bojorge Benjamin",
         "convocatorias": 20,
         "partidos_titular": 3,
@@ -36057,24 +36079,54 @@
         "tarjeta_roja": 0
       },
       {
-        "jugador": "Denis Galli Sebastian",
-        "convocatorias": 7,
-        "partidos_titular": 1,
-        "minutos_jugados": 192,
+        "jugador": "Enrique Ian",
+        "convocatorias": 21,
+        "partidos_titular": 15,
+        "minutos_jugados": 1032,
+        "goles": 0,
+        "asistencias": 4,
+        "tarjeta_amarilla": 2,
+        "tarjeta_roja": 0
+      },
+      {
+        "jugador": "Lopez Tomas",
+        "convocatorias": 21,
+        "partidos_titular": 18,
+        "minutos_jugados": 1122,
+        "goles": 0,
+        "asistencias": 0,
+        "tarjeta_amarilla": 2,
+        "tarjeta_roja": 0
+      },
+      {
+        "jugador": "Maidana Lautaro",
+        "convocatorias": 21,
+        "partidos_titular": 13,
+        "minutos_jugados": 1053,
+        "goles": 2,
+        "asistencias": 1,
+        "tarjeta_amarilla": 0,
+        "tarjeta_roja": 0
+      },
+      {
+        "jugador": "Ortiz Leonardo",
+        "convocatorias": 20,
+        "partidos_titular": 18,
+        "minutos_jugados": 1022,
         "goles": 1,
         "asistencias": 0,
         "tarjeta_amarilla": 0,
         "tarjeta_roja": 0
       },
       {
-        "jugador": "Arce Miño  Axel",
-        "convocatorias": 9,
-        "partidos_titular": 2,
-        "minutos_jugados": 273,
+        "jugador": "Ibañez Bastian",
+        "convocatorias": 22,
+        "partidos_titular": 20,
+        "minutos_jugados": 1294,
         "goles": 0,
         "asistencias": 0,
         "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
+        "tarjeta_roja": 1
       },
       {
         "jugador": "Torrecilla Enzo Francisco",
@@ -36197,50 +36249,20 @@
         "tarjeta_roja": 0
       },
       {
-        "jugador": "Lopez Tomas",
-        "convocatorias": 21,
-        "partidos_titular": 18,
-        "minutos_jugados": 1122,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 2,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Maidana Lautaro",
-        "convocatorias": 21,
-        "partidos_titular": 13,
-        "minutos_jugados": 1053,
-        "goles": 2,
-        "asistencias": 1,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Ortiz Leonardo",
-        "convocatorias": 20,
-        "partidos_titular": 18,
-        "minutos_jugados": 1022,
-        "goles": 1,
-        "asistencias": 0,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Ibañez Bastian",
-        "convocatorias": 22,
-        "partidos_titular": 20,
-        "minutos_jugados": 1294,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 0,
-        "tarjeta_roja": 1
-      },
-      {
         "jugador": "Baccaro Santino",
         "convocatorias": 16,
         "partidos_titular": 6,
         "minutos_jugados": 483,
+        "goles": 0,
+        "asistencias": 0,
+        "tarjeta_amarilla": 0,
+        "tarjeta_roja": 0
+      },
+      {
+        "jugador": "Vargas Felipe",
+        "convocatorias": 2,
+        "partidos_titular": 0,
+        "minutos_jugados": 47,
         "goles": 0,
         "asistencias": 0,
         "tarjeta_amarilla": 0,
@@ -36267,13 +36289,23 @@
         "tarjeta_roja": 0
       },
       {
-        "jugador": "Vargas Felipe",
-        "convocatorias": 2,
-        "partidos_titular": 0,
-        "minutos_jugados": 47,
+        "jugador": "Baigorria Nicolás Nahuel",
+        "convocatorias": 27,
+        "partidos_titular": 11,
+        "minutos_jugados": 684,
         "goles": 0,
         "asistencias": 0,
-        "tarjeta_amarilla": 0,
+        "tarjeta_amarilla": 1,
+        "tarjeta_roja": 1
+      },
+      {
+        "jugador": "Dos Santos  Bayron",
+        "convocatorias": 18,
+        "partidos_titular": 6,
+        "minutos_jugados": 517,
+        "goles": 0,
+        "asistencias": 0,
+        "tarjeta_amarilla": 3,
         "tarjeta_roja": 0
       },
       {
@@ -36294,26 +36326,6 @@
         "goles": 2,
         "asistencias": 0,
         "tarjeta_amarilla": 1,
-        "tarjeta_roja": 0
-      },
-      {
-        "jugador": "Baigorria Nicolás Nahuel",
-        "convocatorias": 27,
-        "partidos_titular": 11,
-        "minutos_jugados": 684,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 1,
-        "tarjeta_roja": 1
-      },
-      {
-        "jugador": "Dos Santos  Bayron",
-        "convocatorias": 18,
-        "partidos_titular": 6,
-        "minutos_jugados": 517,
-        "goles": 0,
-        "asistencias": 0,
-        "tarjeta_amarilla": 3,
         "tarjeta_roja": 0
       },
       {
@@ -36361,6 +36373,16 @@
   "plantel_futdetail": {
     "4TA": [
       {
+        "nombre": "Ramos Bautista",
+        "posicion": "Arquero (ARQ)",
+        "edad": 20,
+        "altura": 185,
+        "peso": 74.6,
+        "pie": "Derecho",
+        "valoracion": "A",
+        "foto": null
+      },
+      {
         "nombre": "Ruiz Santiago",
         "posicion": "Arquero (ARQ)",
         "edad": 19,
@@ -36377,16 +36399,6 @@
         "altura": null,
         "peso": null,
         "pie": "Izquierdo",
-        "valoracion": "A",
-        "foto": null
-      },
-      {
-        "nombre": "Ramos Bautista",
-        "posicion": "Arquero (ARQ)",
-        "edad": 20,
-        "altura": 185,
-        "peso": 74.6,
-        "pie": "Derecho",
         "valoracion": "A",
         "foto": null
       },
@@ -36409,16 +36421,6 @@
         "pie": "Derecho",
         "valoracion": "A",
         "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/82.png"
-      },
-      {
-        "nombre": "González Kevin",
-        "posicion": "Central izquierdo(DEF)",
-        "edad": 19,
-        "altura": 186,
-        "peso": 68.0,
-        "pie": "Izquierdo",
-        "valoracion": "A",
-        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/79.png"
       },
       {
         "nombre": "Aguirre Iñaki",
@@ -36451,6 +36453,26 @@
         "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/45.png"
       },
       {
+        "nombre": "González Kevin",
+        "posicion": "Central izquierdo(DEF)",
+        "edad": 19,
+        "altura": 186,
+        "peso": 68.0,
+        "pie": "Izquierdo",
+        "valoracion": "A",
+        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/79.png"
+      },
+      {
+        "nombre": "López Facundo",
+        "posicion": "Lateral derecho (DEF)",
+        "edad": 19,
+        "altura": 180,
+        "peso": 70.0,
+        "pie": "Derecho",
+        "valoracion": "A",
+        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/74.png"
+      },
+      {
         "nombre": "Luna Agustin",
         "posicion": "Lateral derecho (DEF)",
         "edad": 19,
@@ -36471,26 +36493,6 @@
         "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/73.png"
       },
       {
-        "nombre": "López Facundo",
-        "posicion": "Lateral derecho (DEF)",
-        "edad": 19,
-        "altura": 180,
-        "peso": 70.0,
-        "pie": "Derecho",
-        "valoracion": "A",
-        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/74.png"
-      },
-      {
-        "nombre": "Benitez Lautaro",
-        "posicion": "Lateral izquierdo (DEF)",
-        "edad": 20,
-        "altura": null,
-        "peso": null,
-        "pie": "Izquierdo",
-        "valoracion": "A",
-        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/46.png"
-      },
-      {
         "nombre": "González Alex",
         "posicion": "Lateral izquierdo (DEF)",
         "edad": 19,
@@ -36501,34 +36503,14 @@
         "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/80.png"
       },
       {
-        "nombre": "González Tobías",
-        "posicion": "Volante mixto (VOL)",
-        "edad": 19,
-        "altura": 178,
-        "peso": 62.0,
-        "pie": "Derecho",
-        "valoracion": "A",
-        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/87.png"
-      },
-      {
-        "nombre": "Perez Gaston",
-        "posicion": "Mediocampista central (VOL)",
+        "nombre": "Benitez Lautaro",
+        "posicion": "Lateral izquierdo (DEF)",
         "edad": 20,
         "altura": null,
         "peso": null,
-        "pie": "",
+        "pie": "Izquierdo",
         "valoracion": "A",
-        "foto": null
-      },
-      {
-        "nombre": "Fredes Felipe",
-        "posicion": "Volante mixto (VOL)",
-        "edad": 19,
-        "altura": 172,
-        "peso": 66.0,
-        "pie": "Derecho",
-        "valoracion": "A",
-        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/394.png"
+        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/46.png"
       },
       {
         "nombre": "Alvaro Navoni",
@@ -36559,6 +36541,36 @@
         "pie": "Derecho",
         "valoracion": "A",
         "foto": null
+      },
+      {
+        "nombre": "González Tobías",
+        "posicion": "Volante mixto (VOL)",
+        "edad": 19,
+        "altura": 178,
+        "peso": 62.0,
+        "pie": "Derecho",
+        "valoracion": "A",
+        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/87.png"
+      },
+      {
+        "nombre": "Perez Gaston",
+        "posicion": "Mediocampista central (VOL)",
+        "edad": 20,
+        "altura": null,
+        "peso": null,
+        "pie": "",
+        "valoracion": "A",
+        "foto": null
+      },
+      {
+        "nombre": "Fredes Felipe",
+        "posicion": "Volante mixto (VOL)",
+        "edad": 19,
+        "altura": 172,
+        "peso": 66.0,
+        "pie": "Derecho",
+        "valoracion": "A",
+        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/394.png"
       },
       {
         "nombre": "Fares Hamdan",
@@ -36611,16 +36623,6 @@
         "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/215.png"
       },
       {
-        "nombre": "Afonso Nicolas",
-        "posicion": "Enganche (VOL)",
-        "edad": 19,
-        "altura": 175,
-        "peso": 71.0,
-        "pie": "Derecho",
-        "valoracion": "A",
-        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/396.png"
-      },
-      {
         "nombre": "Pesolilla Roman",
         "posicion": "Enganche (VOL)",
         "edad": 20,
@@ -36629,6 +36631,16 @@
         "pie": "Derecho",
         "valoracion": "A",
         "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/59.png"
+      },
+      {
+        "nombre": "Afonso Nicolas",
+        "posicion": "Enganche (VOL)",
+        "edad": 19,
+        "altura": 175,
+        "peso": 71.0,
+        "pie": "Derecho",
+        "valoracion": "A",
+        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/396.png"
       },
       {
         "nombre": "Pannoni Lautaro",
@@ -36679,6 +36691,16 @@
         "pie": "Derecho",
         "valoracion": "A",
         "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/389.png"
+      },
+      {
+        "nombre": "Figueredo Benjamin",
+        "posicion": "Segundo delantero (DEL)",
+        "edad": 19,
+        "altura": 177,
+        "peso": 67.0,
+        "pie": "Derecho",
+        "valoracion": "A",
+        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/398.png"
       },
       {
         "nombre": "Gonzalez Santino",
@@ -36739,16 +36761,6 @@
         "pie": "Derecho",
         "valoracion": "A",
         "foto": null
-      },
-      {
-        "nombre": "Figueredo Benjamin",
-        "posicion": "Segundo delantero (DEL)",
-        "edad": 19,
-        "altura": 177,
-        "peso": 67.0,
-        "pie": "Derecho",
-        "valoracion": "A",
-        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/398.png"
       }
     ],
     "5TA": [
@@ -36783,16 +36795,6 @@
         "foto": null
       },
       {
-        "nombre": "Moyano Jerónimo",
-        "posicion": "Central derecho (DEF)",
-        "edad": 18,
-        "altura": 184,
-        "peso": 75.0,
-        "pie": "Izquierdo",
-        "valoracion": "A",
-        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/223.png"
-      },
-      {
         "nombre": "Cordoba Santiago",
         "posicion": "Central derecho (DEF)",
         "edad": 18,
@@ -36813,14 +36815,14 @@
         "foto": null
       },
       {
-        "nombre": "Demonte Tomas",
-        "posicion": "Central izquierdo(DEF)",
+        "nombre": "Moyano Jerónimo",
+        "posicion": "Central derecho (DEF)",
         "edad": 18,
-        "altura": 180,
-        "peso": 72.0,
-        "pie": "Derecho",
+        "altura": 184,
+        "peso": 75.0,
+        "pie": "Izquierdo",
         "valoracion": "A",
-        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/122.png"
+        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/223.png"
       },
       {
         "nombre": "Samper Joaquin",
@@ -36843,14 +36845,14 @@
         "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/115.png"
       },
       {
-        "nombre": "Adamovsky Felipe",
-        "posicion": "Lateral derecho (DEF)",
+        "nombre": "Demonte Tomas",
+        "posicion": "Central izquierdo(DEF)",
         "edad": 18,
-        "altura": 176,
-        "peso": 74.7,
+        "altura": 180,
+        "peso": 72.0,
         "pie": "Derecho",
         "valoracion": "A",
-        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/111.png"
+        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/122.png"
       },
       {
         "nombre": "Luque Gonzalo",
@@ -36861,6 +36863,16 @@
         "pie": "Derecho",
         "valoracion": "A",
         "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/110.png"
+      },
+      {
+        "nombre": "Adamovsky Felipe",
+        "posicion": "Lateral derecho (DEF)",
+        "edad": 18,
+        "altura": 176,
+        "peso": 74.7,
+        "pie": "Derecho",
+        "valoracion": "A",
+        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/111.png"
       },
       {
         "nombre": "Canullo Juan",
@@ -36923,16 +36935,6 @@
         "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/118.png"
       },
       {
-        "nombre": "Vargas Thiago",
-        "posicion": "Volante derecho (VOL)",
-        "edad": 18,
-        "altura": 170,
-        "peso": 70.0,
-        "pie": "Derecho",
-        "valoracion": "A",
-        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/113.png"
-      },
-      {
         "nombre": "Barrios Cristian",
         "posicion": "Volante izquierdo (VOL)",
         "edad": 18,
@@ -36983,14 +36985,14 @@
         "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/134.png"
       },
       {
-        "nombre": "Gonzalez Lautaro",
-        "posicion": "Enganche (VOL)",
+        "nombre": "Vargas Thiago",
+        "posicion": "Volante derecho (VOL)",
         "edad": 18,
-        "altura": 181,
-        "peso": 67.0,
+        "altura": 170,
+        "peso": 70.0,
         "pie": "Derecho",
         "valoracion": "A",
-        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/230.png"
+        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/113.png"
       },
       {
         "nombre": "Perez Joaquin",
@@ -37011,6 +37013,16 @@
         "pie": "Derecho",
         "valoracion": "A",
         "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/121.png"
+      },
+      {
+        "nombre": "Gonzalez Lautaro",
+        "posicion": "Enganche (VOL)",
+        "edad": 18,
+        "altura": 181,
+        "peso": 67.0,
+        "pie": "Derecho",
+        "valoracion": "A",
+        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/230.png"
       },
       {
         "nombre": "Ricaldi Ian",
@@ -37043,26 +37055,6 @@
         "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/112.png"
       },
       {
-        "nombre": "Villanueva Román",
-        "posicion": "Centro delantero (DEL)",
-        "edad": 18,
-        "altura": null,
-        "peso": null,
-        "pie": "Derecho",
-        "valoracion": "A",
-        "foto": null
-      },
-      {
-        "nombre": "Miño Roman",
-        "posicion": "Segundo delantero (DEL)",
-        "edad": 18,
-        "altura": 177,
-        "peso": 66.0,
-        "pie": "Derecho",
-        "valoracion": "A",
-        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/125.png"
-      },
-      {
         "nombre": "Galesio Santino",
         "posicion": "Centro delantero (DEL)",
         "edad": 18,
@@ -37091,9 +37083,39 @@
         "pie": "",
         "valoracion": "A",
         "foto": null
+      },
+      {
+        "nombre": "Villanueva Román",
+        "posicion": "Centro delantero (DEL)",
+        "edad": 18,
+        "altura": null,
+        "peso": null,
+        "pie": "Derecho",
+        "valoracion": "A",
+        "foto": null
+      },
+      {
+        "nombre": "Miño Roman",
+        "posicion": "Segundo delantero (DEL)",
+        "edad": 18,
+        "altura": 177,
+        "peso": 66.0,
+        "pie": "Derecho",
+        "valoracion": "A",
+        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/125.png"
       }
     ],
     "6TA": [
+      {
+        "nombre": "Sosena Fausto",
+        "posicion": "Arquero (ARQ)",
+        "edad": 17,
+        "altura": 193,
+        "peso": 82.4,
+        "pie": "Derecho",
+        "valoracion": "A",
+        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/589.png"
+      },
       {
         "nombre": "Camba Rocco",
         "posicion": "Arquero (ARQ)",
@@ -37125,14 +37147,24 @@
         "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/590.png"
       },
       {
-        "nombre": "Sosena Fausto",
-        "posicion": "Arquero (ARQ)",
+        "nombre": "Scungio Sebastian",
+        "posicion": "Central derecho (DEF)",
         "edad": 17,
-        "altura": 193,
-        "peso": 82.4,
+        "altura": 194,
+        "peso": 76.8,
         "pie": "Derecho",
         "valoracion": "A",
-        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/589.png"
+        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/166.png"
+      },
+      {
+        "nombre": "Ortiz Ignacio",
+        "posicion": "Central derecho (DEF)",
+        "edad": 17,
+        "altura": null,
+        "peso": null,
+        "pie": "Izquierdo",
+        "valoracion": "A",
+        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/594.png"
       },
       {
         "nombre": "Moralejo Santiago",
@@ -37153,26 +37185,6 @@
         "pie": "Derecho",
         "valoracion": "A",
         "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/143.png"
-      },
-      {
-        "nombre": "Ortiz Ignacio",
-        "posicion": "Central derecho (DEF)",
-        "edad": 17,
-        "altura": null,
-        "peso": null,
-        "pie": "Izquierdo",
-        "valoracion": "A",
-        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/594.png"
-      },
-      {
-        "nombre": "Scungio Sebastian",
-        "posicion": "Central derecho (DEF)",
-        "edad": 17,
-        "altura": 194,
-        "peso": 76.8,
-        "pie": "Derecho",
-        "valoracion": "A",
-        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/166.png"
       },
       {
         "nombre": "Umeres Agustin",
@@ -37215,6 +37227,16 @@
         "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/591.png"
       },
       {
+        "nombre": "Belmonte Agustín",
+        "posicion": "Lateral izquierdo (DEF)",
+        "edad": 17,
+        "altura": null,
+        "peso": null,
+        "pie": "Izquierdo",
+        "valoracion": "A",
+        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/618.png"
+      },
+      {
         "nombre": "Gomez Santiago",
         "posicion": "Lateral izquierdo (DEF)",
         "edad": 17,
@@ -37235,14 +37257,14 @@
         "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/601.png"
       },
       {
-        "nombre": "Belmonte Agustín",
-        "posicion": "Lateral izquierdo (DEF)",
+        "nombre": "Romero Benicio",
+        "posicion": "Mediocampista central (VOL)",
         "edad": 17,
-        "altura": null,
-        "peso": null,
-        "pie": "Izquierdo",
+        "altura": 180,
+        "peso": 78.1,
+        "pie": "Derecho",
         "valoracion": "A",
-        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/618.png"
+        "foto": null
       },
       {
         "nombre": "Nuñez Jonathan",
@@ -37265,26 +37287,6 @@
         "foto": null
       },
       {
-        "nombre": "Romero Benicio",
-        "posicion": "Mediocampista central (VOL)",
-        "edad": 17,
-        "altura": 180,
-        "peso": 78.1,
-        "pie": "Derecho",
-        "valoracion": "A",
-        "foto": null
-      },
-      {
-        "nombre": "Delgado Francisco",
-        "posicion": "Volante derecho (VOL)",
-        "edad": 17,
-        "altura": 176,
-        "peso": 65.5,
-        "pie": "Derecho",
-        "valoracion": "A",
-        "foto": null
-      },
-      {
         "nombre": "Cortes Adrian maximiliano",
         "posicion": "Volante izquierdo (VOL)",
         "edad": 17,
@@ -37301,6 +37303,26 @@
         "altura": 172,
         "peso": 69.8,
         "pie": "Izquierdo",
+        "valoracion": "A",
+        "foto": null
+      },
+      {
+        "nombre": "Delgado Francisco",
+        "posicion": "Volante derecho (VOL)",
+        "edad": 17,
+        "altura": 176,
+        "peso": 65.5,
+        "pie": "Derecho",
+        "valoracion": "A",
+        "foto": null
+      },
+      {
+        "nombre": "Brandy German",
+        "posicion": "Enganche (VOL)",
+        "edad": 17,
+        "altura": 191,
+        "peso": 69.3,
+        "pie": "Derecho",
         "valoracion": "A",
         "foto": null
       },
@@ -37350,16 +37372,6 @@
         "edad": 17,
         "altura": null,
         "peso": null,
-        "pie": "Derecho",
-        "valoracion": "A",
-        "foto": null
-      },
-      {
-        "nombre": "Brandy German",
-        "posicion": "Enganche (VOL)",
-        "edad": 17,
-        "altura": 191,
-        "peso": 69.3,
         "pie": "Derecho",
         "valoracion": "A",
         "foto": null
@@ -37447,16 +37459,6 @@
     ],
     "7MA": [
       {
-        "nombre": "Martinez Giuliano",
-        "posicion": "Arquero (ARQ)",
-        "edad": 16,
-        "altura": null,
-        "peso": null,
-        "pie": "Derecho",
-        "valoracion": "A",
-        "foto": null
-      },
-      {
         "nombre": "Maturano Benjamin",
         "posicion": "Arquero (ARQ)",
         "edad": 16,
@@ -37485,6 +37487,26 @@
         "pie": "Derecho",
         "valoracion": "A",
         "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/168.png"
+      },
+      {
+        "nombre": "Martinez Giuliano",
+        "posicion": "Arquero (ARQ)",
+        "edad": 16,
+        "altura": null,
+        "peso": null,
+        "pie": "Derecho",
+        "valoracion": "A",
+        "foto": null
+      },
+      {
+        "nombre": "Dominguez Bautista",
+        "posicion": "Central derecho (DEF)",
+        "edad": 16,
+        "altura": 182,
+        "peso": 66.6,
+        "pie": "Derecho",
+        "valoracion": "A",
+        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/196.png"
       },
       {
         "nombre": "Pucill Mateo",
@@ -37527,14 +37549,14 @@
         "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/184.png"
       },
       {
-        "nombre": "Dominguez Bautista",
-        "posicion": "Central derecho (DEF)",
+        "nombre": "Levy Thiago",
+        "posicion": "Central izquierdo(DEF)",
         "edad": 16,
-        "altura": 182,
-        "peso": 66.6,
-        "pie": "Derecho",
+        "altura": 180,
+        "peso": 65.4,
+        "pie": "",
         "valoracion": "A",
-        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/196.png"
+        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/175.png"
       },
       {
         "nombre": "Gonzalez Santino",
@@ -37547,14 +37569,24 @@
         "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/250.png"
       },
       {
-        "nombre": "Levy Thiago",
-        "posicion": "Central izquierdo(DEF)",
+        "nombre": "Lovisi Luciano",
+        "posicion": "Lateral derecho (DEF)",
+        "edad": 16,
+        "altura": 178,
+        "peso": 60.2,
+        "pie": "Derecho",
+        "valoracion": "A",
+        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/582.png"
+      },
+      {
+        "nombre": "Gaitan Valentin",
+        "posicion": "Lateral derecho (DEF)",
         "edad": 16,
         "altura": 180,
-        "peso": 65.4,
-        "pie": "",
+        "peso": 66.5,
+        "pie": "Izquierdo",
         "valoracion": "A",
-        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/175.png"
+        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/194.png"
       },
       {
         "nombre": "Soberon Isaias",
@@ -37587,26 +37619,6 @@
         "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/174.png"
       },
       {
-        "nombre": "Lovisi Luciano",
-        "posicion": "Lateral derecho (DEF)",
-        "edad": 16,
-        "altura": 178,
-        "peso": 60.2,
-        "pie": "Derecho",
-        "valoracion": "A",
-        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/582.png"
-      },
-      {
-        "nombre": "Gaitan Valentin",
-        "posicion": "Lateral derecho (DEF)",
-        "edad": 16,
-        "altura": 180,
-        "peso": 66.5,
-        "pie": "Izquierdo",
-        "valoracion": "A",
-        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/194.png"
-      },
-      {
         "nombre": "Mancuello Tobias",
         "posicion": "Lateral izquierdo (DEF)",
         "edad": 16,
@@ -37625,26 +37637,6 @@
         "pie": "Izquierdo",
         "valoracion": "A",
         "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/584.png"
-      },
-      {
-        "nombre": "Almiron Sebastian",
-        "posicion": "Mediocampista central (VOL)",
-        "edad": 16,
-        "altura": 183,
-        "peso": 67.2,
-        "pie": "Derecho",
-        "valoracion": "A",
-        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/183.png"
-      },
-      {
-        "nombre": "Omann Juan Ignacio",
-        "posicion": "Mediocampista central (VOL)",
-        "edad": 16,
-        "altura": null,
-        "peso": null,
-        "pie": "Derecho",
-        "valoracion": "A",
-        "foto": null
       },
       {
         "nombre": "Jara Juan",
@@ -37677,6 +37669,26 @@
         "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/256.png"
       },
       {
+        "nombre": "Almiron Sebastian",
+        "posicion": "Mediocampista central (VOL)",
+        "edad": 16,
+        "altura": 183,
+        "peso": 67.2,
+        "pie": "Derecho",
+        "valoracion": "A",
+        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/183.png"
+      },
+      {
+        "nombre": "Omann Juan Ignacio",
+        "posicion": "Mediocampista central (VOL)",
+        "edad": 16,
+        "altura": null,
+        "peso": null,
+        "pie": "Derecho",
+        "valoracion": "A",
+        "foto": null
+      },
+      {
         "nombre": "Di Sipio Agustin",
         "posicion": "Interno derecho (VOL)",
         "edad": 16,
@@ -37695,26 +37707,6 @@
         "pie": "Izquierdo",
         "valoracion": "A",
         "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/255.png"
-      },
-      {
-        "nombre": "Herrera Thiago",
-        "posicion": "Enganche (VOL)",
-        "edad": 16,
-        "altura": 175,
-        "peso": 67.8,
-        "pie": "Derecho",
-        "valoracion": "A",
-        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/247.png"
-      },
-      {
-        "nombre": "Mena Sebastian",
-        "posicion": "Enganche (VOL)",
-        "edad": 16,
-        "altura": 175,
-        "peso": 61.6,
-        "pie": "Izquierdo",
-        "valoracion": "A",
-        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/180.png"
       },
       {
         "nombre": "Lopez Dionel",
@@ -37737,64 +37729,24 @@
         "foto": null
       },
       {
-        "nombre": "Trejo Nicolas",
-        "posicion": "Segundo delantero (DEL)",
+        "nombre": "Herrera Thiago",
+        "posicion": "Enganche (VOL)",
         "edad": 16,
-        "altura": 174,
-        "peso": 56.9,
+        "altura": 175,
+        "peso": 67.8,
         "pie": "Derecho",
         "valoracion": "A",
-        "foto": null
+        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/247.png"
       },
       {
-        "nombre": "Barrios Bautista",
-        "posicion": "Centro delantero (DEL)",
+        "nombre": "Mena Sebastian",
+        "posicion": "Enganche (VOL)",
         "edad": 16,
-        "altura": 168,
-        "peso": 68.1,
-        "pie": "Derecho",
-        "valoracion": "A",
-        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/192.png"
-      },
-      {
-        "nombre": "Gagliardo Pedro Tomas",
-        "posicion": "Centro delantero (DEL)",
-        "edad": 16,
-        "altura": 184,
-        "peso": 71.0,
-        "pie": "Derecho",
-        "valoracion": "A",
-        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/634.png"
-      },
-      {
-        "nombre": "Sodero Santino",
-        "posicion": "Centro delantero (DEL)",
-        "edad": 16,
-        "altura": 181,
-        "peso": 71.4,
-        "pie": "Derecho",
-        "valoracion": "A",
-        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/187.png"
-      },
-      {
-        "nombre": "Baltazar Alejandro Emanuel",
-        "posicion": "Centro delantero (DEL)",
-        "edad": 16,
-        "altura": 180,
-        "peso": 72.8,
-        "pie": "Derecho",
-        "valoracion": "A",
-        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/522.png"
-      },
-      {
-        "nombre": "Sala Valentino",
-        "posicion": "Segundo delantero (DEL)",
-        "edad": 16,
-        "altura": 169,
-        "peso": 60.8,
+        "altura": 175,
+        "peso": 61.6,
         "pie": "Izquierdo",
         "valoracion": "A",
-        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/193.png"
+        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/180.png"
       },
       {
         "nombre": "Cazal Fernandez Gustavo Alberto",
@@ -37845,39 +37797,69 @@
         "pie": "",
         "valoracion": "A",
         "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/636.png"
+      },
+      {
+        "nombre": "Trejo Nicolas",
+        "posicion": "Segundo delantero (DEL)",
+        "edad": 16,
+        "altura": 174,
+        "peso": 56.9,
+        "pie": "Derecho",
+        "valoracion": "A",
+        "foto": null
+      },
+      {
+        "nombre": "Barrios Bautista",
+        "posicion": "Centro delantero (DEL)",
+        "edad": 16,
+        "altura": 168,
+        "peso": 68.1,
+        "pie": "Derecho",
+        "valoracion": "A",
+        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/192.png"
+      },
+      {
+        "nombre": "Gagliardo Pedro Tomas",
+        "posicion": "Centro delantero (DEL)",
+        "edad": 16,
+        "altura": 184,
+        "peso": 71.0,
+        "pie": "Derecho",
+        "valoracion": "A",
+        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/634.png"
+      },
+      {
+        "nombre": "Sodero Santino",
+        "posicion": "Centro delantero (DEL)",
+        "edad": 16,
+        "altura": 181,
+        "peso": 71.4,
+        "pie": "Derecho",
+        "valoracion": "A",
+        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/187.png"
+      },
+      {
+        "nombre": "Sala Valentino",
+        "posicion": "Segundo delantero (DEL)",
+        "edad": 16,
+        "altura": 169,
+        "peso": 60.8,
+        "pie": "Izquierdo",
+        "valoracion": "A",
+        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/193.png"
+      },
+      {
+        "nombre": "Baltazar Alejandro Emanuel",
+        "posicion": "Centro delantero (DEL)",
+        "edad": 16,
+        "altura": 180,
+        "peso": 72.8,
+        "pie": "Derecho",
+        "valoracion": "A",
+        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/522.png"
       }
     ],
     "8VA": [
-      {
-        "nombre": "Kaye Axel",
-        "posicion": "Arquero (ARQ)",
-        "edad": 15,
-        "altura": null,
-        "peso": null,
-        "pie": "Izquierdo",
-        "valoracion": "A",
-        "foto": null
-      },
-      {
-        "nombre": "Arias Bonilla  Nicolás Geremias",
-        "posicion": "Arquero (ARQ)",
-        "edad": 15,
-        "altura": null,
-        "peso": null,
-        "pie": "Derecho",
-        "valoracion": "A",
-        "foto": null
-      },
-      {
-        "nombre": "Reinoso Patricio",
-        "posicion": "Arquero (ARQ)",
-        "edad": 15,
-        "altura": 177,
-        "peso": 80.0,
-        "pie": "Derecho",
-        "valoracion": "A",
-        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/344.png"
-      },
       {
         "nombre": "Mosqueda Ernesto Jesús",
         "posicion": "Arquero (ARQ)",
@@ -37919,14 +37901,34 @@
         "foto": null
       },
       {
-        "nombre": "Inostroza Bastian",
-        "posicion": "Central derecho (DEF)",
+        "nombre": "Kaye Axel",
+        "posicion": "Arquero (ARQ)",
         "edad": 15,
-        "altura": 175,
-        "peso": 61.1,
+        "altura": null,
+        "peso": null,
+        "pie": "Izquierdo",
+        "valoracion": "A",
+        "foto": null
+      },
+      {
+        "nombre": "Arias Bonilla  Nicolás Geremias",
+        "posicion": "Arquero (ARQ)",
+        "edad": 15,
+        "altura": null,
+        "peso": null,
         "pie": "Derecho",
         "valoracion": "A",
-        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/352.png"
+        "foto": null
+      },
+      {
+        "nombre": "Reinoso Patricio",
+        "posicion": "Arquero (ARQ)",
+        "edad": 15,
+        "altura": 177,
+        "peso": 80.0,
+        "pie": "Derecho",
+        "valoracion": "A",
+        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/344.png"
       },
       {
         "nombre": "Sanchez Mathias",
@@ -37937,6 +37939,36 @@
         "pie": "Derecho",
         "valoracion": "A",
         "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/353.png"
+      },
+      {
+        "nombre": "Inostroza Bastian",
+        "posicion": "Central derecho (DEF)",
+        "edad": 15,
+        "altura": 175,
+        "peso": 61.1,
+        "pie": "Derecho",
+        "valoracion": "A",
+        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/352.png"
+      },
+      {
+        "nombre": "Merlos Galeano Lautaro Benjamin",
+        "posicion": "Central izquierdo(DEF)",
+        "edad": 15,
+        "altura": 178,
+        "peso": 63.9,
+        "pie": "Izquierdo",
+        "valoracion": "A",
+        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/355.png"
+      },
+      {
+        "nombre": "Simone  Pedro",
+        "posicion": "Central izquierdo(DEF)",
+        "edad": 15,
+        "altura": 183,
+        "peso": null,
+        "pie": "Izquierdo",
+        "valoracion": "A",
+        "foto": null
       },
       {
         "nombre": "Fino Amadeo Benjamin",
@@ -37979,24 +38011,34 @@
         "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/698.png"
       },
       {
-        "nombre": "Merlos Galeano Lautaro Benjamin",
-        "posicion": "Central izquierdo(DEF)",
+        "nombre": "Reyes Jose",
+        "posicion": "Lateral izquierdo (DEF)",
         "edad": 15,
-        "altura": 178,
-        "peso": 63.9,
+        "altura": 170,
+        "peso": 59.2,
         "pie": "Izquierdo",
         "valoracion": "A",
-        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/355.png"
+        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/350.png"
       },
       {
-        "nombre": "Simone  Pedro",
-        "posicion": "Central izquierdo(DEF)",
-        "edad": 15,
-        "altura": 183,
-        "peso": null,
+        "nombre": "Noriega Mateo",
+        "posicion": "Lateral izquierdo (DEF)",
+        "edad": 14,
+        "altura": 165,
+        "peso": 56.5,
         "pie": "Izquierdo",
         "valoracion": "A",
-        "foto": null
+        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/358.png"
+      },
+      {
+        "nombre": "De Olivera Elias",
+        "posicion": "Lateral izquierdo (DEF)",
+        "edad": 15,
+        "altura": 164,
+        "peso": 53.2,
+        "pie": "Izquierdo",
+        "valoracion": "A",
+        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/348.png"
       },
       {
         "nombre": "Reinoso Martiniano",
@@ -38039,86 +38081,6 @@
         "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/357.png"
       },
       {
-        "nombre": "Reyes Jose",
-        "posicion": "Lateral izquierdo (DEF)",
-        "edad": 15,
-        "altura": 170,
-        "peso": 59.2,
-        "pie": "Izquierdo",
-        "valoracion": "A",
-        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/350.png"
-      },
-      {
-        "nombre": "Noriega Mateo",
-        "posicion": "Lateral izquierdo (DEF)",
-        "edad": 14,
-        "altura": 165,
-        "peso": 56.5,
-        "pie": "Izquierdo",
-        "valoracion": "A",
-        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/358.png"
-      },
-      {
-        "nombre": "De Olivera Elias",
-        "posicion": "Lateral izquierdo (DEF)",
-        "edad": 15,
-        "altura": 164,
-        "peso": 53.2,
-        "pie": "Izquierdo",
-        "valoracion": "A",
-        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/348.png"
-      },
-      {
-        "nombre": "Fernández leis Gabriel",
-        "posicion": "Volante mixto (VOL)",
-        "edad": 14,
-        "altura": 166,
-        "peso": null,
-        "pie": "Derecho",
-        "valoracion": "A",
-        "foto": null
-      },
-      {
-        "nombre": "Cabrera Luca",
-        "posicion": "Mediocampista central (VOL)",
-        "edad": 14,
-        "altura": 175,
-        "peso": 57.7,
-        "pie": "Derecho",
-        "valoracion": "A",
-        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/367.png"
-      },
-      {
-        "nombre": "Radaelli Manuel",
-        "posicion": "Mediocampista central (VOL)",
-        "edad": 15,
-        "altura": null,
-        "peso": null,
-        "pie": "Derecho",
-        "valoracion": "A",
-        "foto": null
-      },
-      {
-        "nombre": "Gonzalia Bautista",
-        "posicion": "Mediocampista central (VOL)",
-        "edad": 15,
-        "altura": 166,
-        "peso": 52.8,
-        "pie": "Derecho",
-        "valoracion": "A",
-        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/365.png"
-      },
-      {
-        "nombre": "Gonzalez Leonardo Fabian",
-        "posicion": "Mediocampista central (VOL)",
-        "edad": 15,
-        "altura": null,
-        "peso": null,
-        "pie": "Derecho",
-        "valoracion": "A",
-        "foto": null
-      },
-      {
         "nombre": "Reynoso Tomas",
         "posicion": "Mediocampista central (VOL)",
         "edad": 15,
@@ -38159,24 +38121,54 @@
         "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/364.png"
       },
       {
-        "nombre": "Martinuccio Bautista",
-        "posicion": "Volante izquierdo (VOL)",
-        "edad": 14,
-        "altura": 153,
-        "peso": 43.3,
-        "pie": "Izquierdo",
+        "nombre": "Radaelli Manuel",
+        "posicion": "Mediocampista central (VOL)",
+        "edad": 15,
+        "altura": null,
+        "peso": null,
+        "pie": "Derecho",
         "valoracion": "A",
-        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/370.png"
+        "foto": null
       },
       {
-        "nombre": "Celiz Teo",
-        "posicion": "Volante izquierdo (VOL)",
-        "edad": 15,
-        "altura": 162,
-        "peso": 52.4,
-        "pie": "Izquierdo",
+        "nombre": "Fernández leis Gabriel",
+        "posicion": "Volante mixto (VOL)",
+        "edad": 14,
+        "altura": 166,
+        "peso": null,
+        "pie": "Derecho",
         "valoracion": "A",
-        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/362.png"
+        "foto": null
+      },
+      {
+        "nombre": "Cabrera Luca",
+        "posicion": "Mediocampista central (VOL)",
+        "edad": 14,
+        "altura": 175,
+        "peso": 57.7,
+        "pie": "Derecho",
+        "valoracion": "A",
+        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/367.png"
+      },
+      {
+        "nombre": "Gonzalia Bautista",
+        "posicion": "Mediocampista central (VOL)",
+        "edad": 15,
+        "altura": 166,
+        "peso": 52.8,
+        "pie": "Derecho",
+        "valoracion": "A",
+        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/365.png"
+      },
+      {
+        "nombre": "Gonzalez Leonardo Fabian",
+        "posicion": "Mediocampista central (VOL)",
+        "edad": 15,
+        "altura": null,
+        "peso": null,
+        "pie": "Derecho",
+        "valoracion": "A",
+        "foto": null
       },
       {
         "nombre": "Punos Tiziano",
@@ -38219,6 +38211,36 @@
         "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/361.png"
       },
       {
+        "nombre": "Martinuccio Bautista",
+        "posicion": "Volante izquierdo (VOL)",
+        "edad": 14,
+        "altura": 153,
+        "peso": 43.3,
+        "pie": "Izquierdo",
+        "valoracion": "A",
+        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/370.png"
+      },
+      {
+        "nombre": "Celiz Teo",
+        "posicion": "Volante izquierdo (VOL)",
+        "edad": 15,
+        "altura": 162,
+        "peso": 52.4,
+        "pie": "Izquierdo",
+        "valoracion": "A",
+        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/362.png"
+      },
+      {
+        "nombre": "Conte Ian",
+        "posicion": "Enganche (VOL)",
+        "edad": 15,
+        "altura": 153,
+        "peso": 42.7,
+        "pie": "Derecho",
+        "valoracion": "A",
+        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/374.png"
+      },
+      {
         "nombre": "Aquilue Santiago",
         "posicion": "Enganche (VOL)",
         "edad": 15,
@@ -38239,18 +38261,38 @@
         "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/373.png"
       },
       {
-        "nombre": "Conte Ian",
-        "posicion": "Enganche (VOL)",
-        "edad": 15,
-        "altura": 153,
-        "peso": 42.7,
-        "pie": "Derecho",
-        "valoracion": "A",
-        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/374.png"
-      },
-      {
         "nombre": "Ruiz Ullua David",
         "posicion": "Extremo izquierdo (DEL)",
+        "edad": 15,
+        "altura": null,
+        "peso": null,
+        "pie": "Derecho",
+        "valoracion": "A",
+        "foto": null
+      },
+      {
+        "nombre": "Chmea Roque",
+        "posicion": "Segundo delantero (DEL)",
+        "edad": 14,
+        "altura": 152,
+        "peso": 42.9,
+        "pie": "Derecho",
+        "valoracion": "A",
+        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/379.png"
+      },
+      {
+        "nombre": "Cocozza Maximo",
+        "posicion": "Segundo delantero (DEL)",
+        "edad": 15,
+        "altura": 170,
+        "peso": 55.3,
+        "pie": "Derecho",
+        "valoracion": "A",
+        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/377.png"
+      },
+      {
+        "nombre": "Saragoza Ramiro",
+        "posicion": "Centro delantero (DEL)",
         "edad": 15,
         "altura": null,
         "peso": null,
@@ -38297,49 +38339,9 @@
         "pie": "Derecho",
         "valoracion": "A",
         "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/384.png"
-      },
-      {
-        "nombre": "Chmea Roque",
-        "posicion": "Segundo delantero (DEL)",
-        "edad": 14,
-        "altura": 152,
-        "peso": 42.9,
-        "pie": "Derecho",
-        "valoracion": "A",
-        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/379.png"
-      },
-      {
-        "nombre": "Cocozza Maximo",
-        "posicion": "Segundo delantero (DEL)",
-        "edad": 15,
-        "altura": 170,
-        "peso": 55.3,
-        "pie": "Derecho",
-        "valoracion": "A",
-        "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/377.png"
-      },
-      {
-        "nombre": "Saragoza Ramiro",
-        "posicion": "Centro delantero (DEL)",
-        "edad": 15,
-        "altura": null,
-        "peso": null,
-        "pie": "Derecho",
-        "valoracion": "A",
-        "foto": null
       }
     ],
     "9NA": [
-      {
-        "nombre": "Peludero Mateo",
-        "posicion": "Arquero (ARQ)",
-        "edad": 14,
-        "altura": 175,
-        "peso": 58.4,
-        "pie": "",
-        "valoracion": "A",
-        "foto": null
-      },
       {
         "nombre": "Echevarrieta Bautista",
         "posicion": "Arquero (ARQ)",
@@ -38381,32 +38383,12 @@
         "foto": null
       },
       {
-        "nombre": "Duarte Gaston",
-        "posicion": "Central derecho (DEF)",
+        "nombre": "Peludero Mateo",
+        "posicion": "Arquero (ARQ)",
         "edad": 14,
-        "altura": null,
-        "peso": null,
+        "altura": 175,
+        "peso": 58.4,
         "pie": "",
-        "valoracion": "A",
-        "foto": null
-      },
-      {
-        "nombre": "Cubilla Jonathan",
-        "posicion": "Central derecho (DEF)",
-        "edad": 14,
-        "altura": 179,
-        "peso": 61.5,
-        "pie": "Derecho",
-        "valoracion": "A",
-        "foto": null
-      },
-      {
-        "nombre": "Gomez Zaracho Octavio",
-        "posicion": "Central derecho (DEF)",
-        "edad": 14,
-        "altura": 173,
-        "peso": 71.8,
-        "pie": "Derecho",
         "valoracion": "A",
         "foto": null
       },
@@ -38441,11 +38423,31 @@
         "foto": null
       },
       {
-        "nombre": "Soto Mateo",
-        "posicion": "Lateral derecho (DEF)",
+        "nombre": "Duarte Gaston",
+        "posicion": "Central derecho (DEF)",
         "edad": 14,
         "altura": null,
         "peso": null,
+        "pie": "",
+        "valoracion": "A",
+        "foto": null
+      },
+      {
+        "nombre": "Cubilla Jonathan",
+        "posicion": "Central derecho (DEF)",
+        "edad": 14,
+        "altura": 179,
+        "peso": 61.5,
+        "pie": "Derecho",
+        "valoracion": "A",
+        "foto": null
+      },
+      {
+        "nombre": "Gomez Zaracho Octavio",
+        "posicion": "Central derecho (DEF)",
+        "edad": 14,
+        "altura": 173,
+        "peso": 71.8,
         "pie": "Derecho",
         "valoracion": "A",
         "foto": null
@@ -38471,12 +38473,12 @@
         "foto": null
       },
       {
-        "nombre": "Tulis Federico",
-        "posicion": "Lateral izquierdo (DEF)",
+        "nombre": "Soto Mateo",
+        "posicion": "Lateral derecho (DEF)",
         "edad": 14,
-        "altura": 164,
-        "peso": 51.0,
-        "pie": "Izquierdo",
+        "altura": null,
+        "peso": null,
+        "pie": "Derecho",
         "valoracion": "A",
         "foto": null
       },
@@ -38491,12 +38493,12 @@
         "foto": null
       },
       {
-        "nombre": "Prado Lautaro",
-        "posicion": "Mediocampista central (VOL)",
+        "nombre": "Tulis Federico",
+        "posicion": "Lateral izquierdo (DEF)",
         "edad": 14,
-        "altura": 159,
-        "peso": 46.6,
-        "pie": "Derecho",
+        "altura": 164,
+        "peso": 51.0,
+        "pie": "Izquierdo",
         "valoracion": "A",
         "foto": null
       },
@@ -38511,22 +38513,22 @@
         "foto": null
       },
       {
-        "nombre": "Diaz Oliva Santiago",
-        "posicion": "Mediocampista central (VOL)",
-        "edad": 14,
-        "altura": 156,
-        "peso": 42.7,
-        "pie": "Derecho",
-        "valoracion": "A",
-        "foto": null
-      },
-      {
         "nombre": "Baigorria Nicolás Nahuel",
         "posicion": "Mediocampista central (VOL)",
         "edad": 14,
         "altura": 173,
         "peso": 49.8,
         "pie": "",
+        "valoracion": "A",
+        "foto": null
+      },
+      {
+        "nombre": "Diaz Oliva Santiago",
+        "posicion": "Mediocampista central (VOL)",
+        "edad": 14,
+        "altura": 156,
+        "peso": 42.7,
+        "pie": "Derecho",
         "valoracion": "A",
         "foto": null
       },
@@ -38551,31 +38553,11 @@
         "foto": null
       },
       {
-        "nombre": "Pesolilla Ian",
-        "posicion": "Enganche (VOL)",
+        "nombre": "Prado Lautaro",
+        "posicion": "Mediocampista central (VOL)",
         "edad": 14,
-        "altura": 144,
-        "peso": 39.7,
-        "pie": "",
-        "valoracion": "A",
-        "foto": null
-      },
-      {
-        "nombre": "Gomez Joaquin",
-        "posicion": "Enganche (VOL)",
-        "edad": 14,
-        "altura": 172,
-        "peso": 61.7,
-        "pie": "Derecho",
-        "valoracion": "A",
-        "foto": null
-      },
-      {
-        "nombre": "Capozucca Benjamin",
-        "posicion": "Enganche (VOL)",
-        "edad": 14,
-        "altura": null,
-        "peso": null,
+        "altura": 159,
+        "peso": 46.6,
         "pie": "Derecho",
         "valoracion": "A",
         "foto": null
@@ -38621,11 +38603,31 @@
         "foto": null
       },
       {
-        "nombre": "Holm Ian",
-        "posicion": "Extremo izquierdo (DEL)",
+        "nombre": "Pesolilla Ian",
+        "posicion": "Enganche (VOL)",
         "edad": 14,
-        "altura": 170,
-        "peso": 53.6,
+        "altura": 144,
+        "peso": 39.7,
+        "pie": "",
+        "valoracion": "A",
+        "foto": null
+      },
+      {
+        "nombre": "Gomez Joaquin",
+        "posicion": "Enganche (VOL)",
+        "edad": 14,
+        "altura": 172,
+        "peso": 61.7,
+        "pie": "Derecho",
+        "valoracion": "A",
+        "foto": null
+      },
+      {
+        "nombre": "Capozucca Benjamin",
+        "posicion": "Enganche (VOL)",
+        "edad": 14,
+        "altura": null,
+        "peso": null,
         "pie": "Derecho",
         "valoracion": "A",
         "foto": null
@@ -38641,31 +38643,11 @@
         "foto": null
       },
       {
-        "nombre": "Dos Santos  Bayron",
-        "posicion": "Extremo derecho (DEL)",
-        "edad": 14,
-        "altura": null,
-        "peso": null,
-        "pie": "Derecho",
-        "valoracion": "A",
-        "foto": null
-      },
-      {
-        "nombre": "Ortiz Leonardo",
-        "posicion": "Extremo derecho (DEL)",
+        "nombre": "Holm Ian",
+        "posicion": "Extremo izquierdo (DEL)",
         "edad": 14,
         "altura": 170,
-        "peso": 53.0,
-        "pie": "Izquierdo",
-        "valoracion": "A",
-        "foto": null
-      },
-      {
-        "nombre": "Monzon Ian",
-        "posicion": "Extremo derecho (DEL)",
-        "edad": 14,
-        "altura": null,
-        "peso": null,
+        "peso": 53.6,
         "pie": "Derecho",
         "valoracion": "A",
         "foto": null
@@ -38701,21 +38683,31 @@
         "foto": null
       },
       {
-        "nombre": "Nuñez Tiziano",
-        "posicion": "Centro delantero (DEL)",
+        "nombre": "Ortiz Leonardo",
+        "posicion": "Extremo derecho (DEL)",
         "edad": 14,
-        "altura": null,
-        "peso": null,
+        "altura": 170,
+        "peso": 53.0,
         "pie": "Izquierdo",
         "valoracion": "A",
         "foto": null
       },
       {
-        "nombre": "Olocco Mikeas",
-        "posicion": "Centro delantero (DEL)",
+        "nombre": "Dos Santos  Bayron",
+        "posicion": "Extremo derecho (DEL)",
         "edad": 14,
-        "altura": 170,
-        "peso": 55.9,
+        "altura": null,
+        "peso": null,
+        "pie": "Derecho",
+        "valoracion": "A",
+        "foto": null
+      },
+      {
+        "nombre": "Monzon Ian",
+        "posicion": "Extremo derecho (DEL)",
+        "edad": 14,
+        "altura": null,
+        "peso": null,
         "pie": "Derecho",
         "valoracion": "A",
         "foto": null
@@ -38737,6 +38729,26 @@
         "altura": 172,
         "peso": 57.5,
         "pie": "",
+        "valoracion": "A",
+        "foto": null
+      },
+      {
+        "nombre": "Olocco Mikeas",
+        "posicion": "Centro delantero (DEL)",
+        "edad": 14,
+        "altura": 170,
+        "peso": 55.9,
+        "pie": "Derecho",
+        "valoracion": "A",
+        "foto": null
+      },
+      {
+        "nombre": "Nuñez Tiziano",
+        "posicion": "Centro delantero (DEL)",
+        "edad": 14,
+        "altura": null,
+        "peso": null,
+        "pie": "Izquierdo",
         "valoracion": "A",
         "foto": null
       }
