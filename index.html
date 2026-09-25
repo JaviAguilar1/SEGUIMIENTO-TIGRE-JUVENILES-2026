@@ -1504,6 +1504,14 @@ function chartDef(){ return{responsive:true,maintainAspectRatio:false,animation:
 // ============================================================
 //  FIREBASE + AUTH
 // ============================================================
+// Los cambios de `stats` a veces llegan en ráfaga (ej. cuando corre el scraper
+// de la PC): los datos se cargan en memoria en cada aviso, pero la pantalla se
+// redibuja UNA sola vez cuando la ráfaga termina.
+let _refrescoStatsTimer;
+function refrescarPantallaTrasStats(){
+  clearTimeout(_refrescoStatsTimer);
+  _refrescoStatsTimer = setTimeout(()=>{ refreshActiveModule(); refreshAlerts(); }, 300);
+}
 function initFirebase(){
   return new Promise((resolve,reject)=>{
     if(typeof firebase==='undefined'){reject('no sdk');return;}
@@ -1566,8 +1574,7 @@ function initFirebase(){
           // Real-time data sync — listen for remote changes
           db.ref('stats').on('value', snap=>{
             if(!hidratarStats(snap.val())) return;
-            refreshActiveModule();
-            setTimeout(refreshAlerts, 200);
+            refrescarPantallaTrasStats();
           });
         } else {
           isAdmin=false; canEdit=false; currentRole='viewer'; catRole='viewer';
@@ -7554,7 +7561,7 @@ function abrirCitacionView(cat, fecha){
     <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px">
       <div>
         <div style="font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:1px;color:var(--gold2)">📋 CITACIÓN · F${fecha}</div>
-        <div style="font-family:'Barlow Condensed',sans-serif;font-size:13px;color:var(--text2)">${esc(d.rival||'—')}${condTxt?` · <span class="cond-badge cond-${cond}">${condTxt}</span>`:''}</div>
+        <div style="font-family:'Barlow Condensed',sans-serif;font-size:13px;color:var(--text2)">${esc(rivalBonito(d.rival)||'—')}${condTxt?` · <span class="cond-badge cond-${cond}">${condTxt}</span>`:''}</div>
       </div>
       <button id="cit-view-close" style="background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;line-height:1">✕</button>
     </div>
@@ -7796,8 +7803,15 @@ function golesEfectivos(cat, excluirFechas){
 // primer apellido y el primer nombre ("FERREYRA, RODRIGO TOMAS" -> "Ferreyra,
 // Rodrigo"; "LUNA SEMINO, AGUSTIN" -> "Luna, Agustin"). Las partículas ("Di
 // Sipio", "De la Cruz") se mantienen unidas al apellido.
+// Jugadores que se conocen por su SEGUNDO nombre (clave = nombre completo sin
+// orden ni acentos). Agregar acá los que hagan falta.
+const NOMBRE_USUAL = {
+  'andrusisen jordan lautaro': 'Andrusisen, Lautaro',
+};
 function nombreCortoGoleador(nombre, cat){
   if(!nombre || nombre==='Sin identificar') return nombre;
+  const usual = NOMBRE_USUAL[normNombreOrdenIndependiente(nombre).split(' ').sort().join(' ')] ;
+  if(usual) return usual;
   const n = formatNombreMostrar(nombre, cat);
   const i = n.indexOf(',');
   if(i<0) return n;
@@ -8717,8 +8731,11 @@ initFirebase()
 function startPublicListener(){
   if(!fbReady||!db) return;
   db.ref('stats').on('value', snap=>{
+    // Con sesión iniciada ya hay otro listener de `stats` (initFirebase): este
+    // solo sirve sin login, y no hace falta duplicar el trabajo.
+    if(_authListenerUid) return;
     if(!hidratarStats(snap.val())) return;
-    refreshActiveModule();
+    refrescarPantallaTrasStats();
   });
 }
 
@@ -9446,6 +9463,14 @@ function filaTablaLPFReserva(dataCat, nombreRival){
 // de cada entrada (mismo estilo de nombre que usa statfutbol). Si ninguna
 // de las dos matchea, se degrada igual que ya hacía la app ("todavía no
 // tengo cargado el escudo/equivalencia").
+// Nombre de rival de Reserva "prolijo": statfutbol lo trae en MAYÚSCULAS y
+// abreviado ("DEF Y JUSTICIA"); si viene así se muestra el nombre normal de la
+// LPF ("Defensa y Justicia"). Si ya venía prolijo de una citación, no se toca.
+function rivalBonito(nombre){
+  if(!nombre || nombre!==nombre.toUpperCase()) return nombre;
+  const info = matchRivalInfo(nombre);
+  return info ? info.lpf : nombre;
+}
 function matchRivalInfo(nombreCrudo){
   if(!nombreCrudo) return null;
   if(RIVAL_INFO[nombreCrudo]) return RIVAL_INFO[nombreCrudo];
@@ -10786,7 +10811,7 @@ function calcularFichaJugador(cat, nombre){
     const rivalCanon = esReserva
       ? Object.keys(RIVAL_INFO).find(k=>normRival(k)===normRival(rivalNombre))
       : RIVALS.find(x=>x.f===fecha)?.r;
-    const archivo = rivalCanon ? RIVAL_INFO[rivalCanon]?.escudo : null;
+    const archivo = rivalCanon ? RIVAL_INFO[rivalCanon]?.escudo : (esReserva ? matchRivalInfo(rivalNombre)?.escudo : null);
     return archivo ? `<img src="escudos/${archivo}" style="width:18px;height:18px;object-fit:contain;border-radius:50%;flex-shrink:0" alt="">` : '';
   };
 
@@ -10870,7 +10895,7 @@ function calcularFichaJugador(cat, nombre){
       (partido.rojas||[]).filter(a=>a.id===idJ).forEach(a=>{ eventos.push(`🟥${minSuf(a.minuto)}`); });
     }
     const autoRes = esReserva ? TABLA_DATA?.statfutbol_resultados?.[cat]?.[fecha] : null;
-    partidosJugados.push({fecha, rival:d.rival||'—', cond:condicionCat(cat,fecha),
+    partidosJugados.push({fecha, rival:(esReserva?rivalBonito(d.rival):d.rival)||'—', cond:condicionCat(cat,fecha),
       res:results[cat]?.[fecha] || (autoRes ? [autoRes.gf, autoRes.gc] : null), eventos});
   });
   partidosJugados.sort((a,b)=>a.fecha-b.fecha);

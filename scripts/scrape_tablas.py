@@ -3617,7 +3617,7 @@ def main():
 
     os.makedirs("data", exist_ok=True)
     with open(OUT_PATH, "w", encoding="utf-8") as f:
-        json.dump(resultado, f, ensure_ascii=False, indent=2)
+        json.dump(resultado, f, ensure_ascii=False, separators=(',', ':'))  # sin espacios: pesa 60% menos
     print(f"Escrito {OUT_PATH} ({len(resultado['categorias'])} categorias)")
 
     # Salir con error si alguna fuente fallo -- el commit del dato parcial
