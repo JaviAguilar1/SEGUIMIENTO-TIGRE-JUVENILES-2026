@@ -2313,8 +2313,8 @@ function refreshConfiabilidadBadge(){
   if(!wrap || !isAdmin) { if(wrap) wrap.innerHTML=''; return; }
   loadTablaData().then(()=>{
     if(!document.getElementById('confiabilidad-badge-wrap')) return; // se re-renderizó la pantalla mientras tanto
-    const {partidoMismatches, equipoMismatches, golesMismatches, golesCometMismatches, linkMismatches, recordatorios, citacionWarnings, nombresSupuestos}=calcConfiabilidad();
-    const total=partidoMismatches.length+equipoMismatches.length+golesMismatches.length+golesCometMismatches.length+linkMismatches.length+recordatorios.length+citacionWarnings.length+nombresSupuestos.length;
+    const {partidoMismatches, equipoMismatches, golesMismatches, golesCometMismatches, golesImposibles, linkMismatches, recordatorios, citacionWarnings, nombresSupuestos}=calcConfiabilidad();
+    const total=partidoMismatches.length+equipoMismatches.length+golesMismatches.length+golesCometMismatches.length+golesImposibles.length+linkMismatches.length+recordatorios.length+citacionWarnings.length+nombresSupuestos.length;
     const w=document.getElementById('confiabilidad-badge-wrap');
     if(!w) return;
     w.innerHTML = total>0
@@ -2844,6 +2844,23 @@ function calcConfiabilidad(){
     });
   });
 
+  // Goles imposibles: los goles cargados a mano en una fecha suman MÁS que los
+  // goles del resultado (ej. un gol cargado dos veces). Aplica a todas las
+  // categorías, Reserva incluida. En pantalla ya se corrige solo con statfutbol
+  // (golesEfectivos); acá se avisa para poder arreglar la carga.
+  const golesImposibles=[]; // {cat, fecha, cargados, resultado}
+  [...GENERAL_CATS, 'RESERVA', 'RESERVA_S2'].forEach(cat=>{
+    const porFecha={};
+    (goleadores[cat]||[]).forEach(g=>{ porFecha[g.fecha]=(porFecha[g.fecha]||0)+(g.goals||0); });
+    Object.entries(porFecha).forEach(([f,cargados])=>{
+      const fecha=Number(f);
+      if(fechasExcluidasGoles(cat).has(fecha)) return;
+      const r=results[cat]?.[fecha];
+      const resultado = r ? r[0] : TABLA_DATA?.statfutbol_resultados?.[cat]?.[fecha]?.gf;
+      if(resultado!=null && cargados>resultado) golesImposibles.push({cat, fecha, cargados, resultado});
+    });
+  });
+
   // Nombres de citación que no coincidieron con nadie del plantel al leer el
   // PDF (p.warn, ver parseCitacionPdf) — hoy solo se ven abriendo el modal de
   // cada fecha una por una; acá se juntan todos para poder revisarlos de un
@@ -2878,7 +2895,7 @@ function calcConfiabilidad(){
     });
   });
 
-  return {partidoMismatches, equipoMismatches, golesMismatches, golesCometMismatches, linkMismatches, recordatorios, citacionWarnings, nombresSupuestos};
+  return {partidoMismatches, equipoMismatches, golesMismatches, golesCometMismatches, golesImposibles, linkMismatches, recordatorios, citacionWarnings, nombresSupuestos};
 }
 
 // Botón "REVISAR" único para toda la sección: fuerza traer la tabla LPF de
@@ -2984,8 +3001,8 @@ function renderConfiabilidad(containerId){
   const el=document.getElementById(containerId);
   if(!el) return;
   loadTablaData().then(()=>{
-    const {partidoMismatches, equipoMismatches, golesMismatches, golesCometMismatches, linkMismatches, recordatorios, citacionWarnings, nombresSupuestos}=calcConfiabilidad();
-    const total=partidoMismatches.length+equipoMismatches.length+golesMismatches.length+golesCometMismatches.length+linkMismatches.length+citacionWarnings.length+nombresSupuestos.length;
+    const {partidoMismatches, equipoMismatches, golesMismatches, golesCometMismatches, golesImposibles, linkMismatches, recordatorios, citacionWarnings, nombresSupuestos}=calcConfiabilidad();
+    const total=partidoMismatches.length+equipoMismatches.length+golesMismatches.length+golesCometMismatches.length+golesImposibles.length+linkMismatches.length+citacionWarnings.length+nombresSupuestos.length;
 
     const revisarBtn=`<button onclick="revisarConfiabilidad()"
       style="background:rgba(255,255,255,0.08);border:1px solid var(--border2);color:var(--text);
@@ -3106,6 +3123,16 @@ function renderConfiabilidad(containerId){
         `<b style="color:${CAT_COLORS[m.cat]}">${m.cat} F${m.fecha}</b>`,
         `Carga manual: <b>${m.manual}</b> · COMET: <b>${m.comet}</b>`,
         borrarManualFechaBtn(m.cat, m.fecha)
+      )).join('');
+    }
+
+    if(golesImposibles.length){
+      html+=`<div style="font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:1px;color:var(--muted);margin:14px 0 6px">
+        GOLES IMPOSIBLES · más goles cargados que los del resultado</div>`;
+      html+=golesImposibles.map(m=>row(
+        `<b style="color:${CAT_COLORS[m.cat.replace('_S2','')]}">${m.cat.replace('_S2',' (2° sem.)')} F${m.fecha}</b>`,
+        `Goles cargados a mano: <b>${m.cargados}</b> · resultado: <b>${m.resultado}</b> — revisá si hay un gol duplicado`,
+        irGoleadoresBtn(m.cat.replace('_S2',''))
       )).join('');
     }
 
@@ -7680,11 +7707,26 @@ function golesEfectivos(cat, excluirFechas){
       };
       // La carga manual de la fecha gana; si es mas incompleta que statfutbol,
       // se usa statfutbol para esa fecha (completar lo que falta).
-      if(sfTotal>usados){
+      // Carga manual "imposible" (más goles que el resultado, ej. un gol
+      // cargado dos veces): si statfutbol sí cierra con el resultado, gana.
+      const gfFecha = golesFavor(fecha);
+      const manualImposible = gfFecha!=null && usados>gfFecha && sfTotal>0 && sfTotal<=gfFecha;
+      // statfutbol que suma MÁS que el resultado (ej. un gol en contra que
+      // atribuye al propio jugador) no se usa: no puede haber más goles a
+      // favor que los del resultado.
+      const sfExcede = gfFecha!=null && sfTotal>gfFecha;
+      if((sfTotal>usados && !sfExcede) || manualImposible){
         sfGoles.forEach(([n,e])=>sumar(canonNombre(n), e.goles));
         usados = sfTotal;
       } else {
-        manual.forEach(g=>sumar(rosterPorNombre[normNombreOrdenIndependiente(g.name)] || g.name, g.goals));
+        manual.forEach(g=>{
+          // Nombre exacto del plantel o, si no, por subconjunto de palabras
+          // ("FERREYRA, RODRIGO" vs "FERREYRA, RODRIGO TOMAS"): así el mismo
+          // jugador no se parte en dos filas según la fuente de cada fecha.
+          const a=palabras(g.name);
+          const cand=rosterNombres.filter(m=>{ const b=palabras(m); const [ch,gr]=a.size<=b.size?[a,b]:[b,a]; return ch.size && [...ch].every(w=>gr.has(w)); });
+          sumar(rosterPorNombre[normNombreOrdenIndependiente(g.name)] || (cand.length===1?cand[0]:g.name), g.goals);
+        });
       }
       // Si aun asi no se identificaron todos los goles a favor, el resto va
       // como "Sin identificar" (se resuelve cargandolo a mano).
@@ -10796,7 +10838,10 @@ function calcularFichaJugador(cat, nombre){
           const mins=g.minutos||[];
           for(let i=0;i<(g.goals||0);i++) chips.push(`⚽${mins[i]?minSuf(mins[i]):''}`);
         });
-        pj.eventos.unshift(...chips);
+        // Nunca más chips que los goles efectivos de esa fecha (si la carga
+        // manual tiene un gol duplicado, golesEfectivos ya lo descartó).
+        const nEf = geEntry.fechas.filter(f=>f===`F${pj.fecha}`).length;
+        pj.eventos.unshift(...chips.slice(0, nEf));
       } else {
         const n = geEntry.fechas.filter(f=>f===`F${pj.fecha}`).length;
         if(n) pj.eventos.unshift(...Array(n).fill('⚽'));
