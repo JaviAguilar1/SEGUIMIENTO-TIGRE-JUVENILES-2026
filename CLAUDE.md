@@ -21,6 +21,22 @@ Tigre. Se viene mejorando en fases (ver los archivos de "Pegada" en
 > del 2026-08-29 sobre GPS/PLANTEL). Este bloque es lo vigente; verificar
 > contra el código antes de confiar en las fases históricas.
 
+**Cambios del 2026-09-25 (pedidos de Javi).** Botón "SUBIR PLANILLA"; PLANTEL
+ya no es desplegable; se sacó la carga manual de minutos de goles del rival.
+**Sin conexión:** `sw.js` (v3) guarda también `tablas.json`, y `index.html`
+guarda una copia local (IndexedDB) de `stats`/sesiones GPS cada vez que llegan
+de Firebase; sin red o con Firebase caído >8s se carga esa copia (`cargarDesdeCopiaLocal`),
+con cartel y **solo lectura** (`modoOffline` bloquea `saveData`). **Reserva:**
+ubicación en la tabla con la tabla desplegable, próxima fecha con la fila del
+rival, fixture completo (rival y fecha de `fixture_reserva`, no solo las jugadas),
+placa de próximo rival con día real de Reserva (no sábado), placa nueva de
+RESULTADO (`dibujarPlacaResultadoReserva`, en VIDEOANÁLISIS), nombres de
+statfutbol en "Apellido, Nombre". **OCR de placas JPG/PNG de Reserva**
+(`ocrPlacaReserva`, Tesseract.js en el navegador, ~1 min): detecta las
+pastillas grises por color, lee fecha, 11 titulares (con dorsal) y suplentes, y
+el modal de revisión deja corregir antes de guardar. Convertir a PDF no ayuda
+(sigue sin texto).
+
 **Automatización — la corre la PC del club, NO GitHub.** La tarea programada
 (`C:\Users\Javier\Documents\futdetail_scraper\actualizar_liga.ps1`, cada 4hs)
 corre `scripts/scrape_tablas.py` con TODAS las credenciales (futdetail, BL,

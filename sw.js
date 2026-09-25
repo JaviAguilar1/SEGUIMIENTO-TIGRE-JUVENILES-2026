@@ -2,7 +2,7 @@
 // Cachea el shell de la app para uso offline.
 // Datos dinámicos (Firebase, tablas.json) van siempre a la red.
 
-const CACHE = 'tigre-juveniles-v2';
+const CACHE = 'tigre-juveniles-v3';
 
 // Shell de la app: se precachea en la instalación.
 const APP_SHELL = [
@@ -47,6 +47,23 @@ self.addEventListener('fetch', event => {
 
   // Datos dinámicos: siempre a la red (nunca servir versión cacheada vieja).
   // Firebase Realtime DB, Google APIs de auth y la tabla LPF.
+  // tablas.json: red primero (siempre lo último), pero se guarda una copia
+  // -- sin la query "?v=..." del cache-buster -- para poder abrir la app sin
+  // conexión con los últimos datos que se vieron.
+  if (url.pathname.includes('tablas.json')) {
+    const key = url.origin + url.pathname;
+    event.respondWith(
+      fetch(req).then(res => {
+        if (res && res.status === 200) {
+          const copy = res.clone();
+          caches.open(CACHE).then(cache => cache.put(key, copy));
+        }
+        return res;
+      }).catch(() => caches.match(key).then(c => c || Response.error()))
+    );
+    return;
+  }
+
   const isDynamic =
     url.hostname.includes('firebaseio.com') ||
     url.hostname.includes('firebase') ||

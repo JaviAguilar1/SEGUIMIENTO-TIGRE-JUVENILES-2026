@@ -1057,7 +1057,11 @@ function guardarCorreccionNombre(cat, nombreCrudo, valor){
 // ver nombreEsSupuesto, que marca estos casos para la alerta de Confiabilidad.
 function formatNombreMostrar(nombreCrudo, cat){
   const n = (nombreCrudo||'').trim();
-  if(!n || n.includes(',')) return n;
+  // Ya viene con coma; statfutbol lo trae todo en MAYÚSCULAS ("AFONSO, NICOLAS"):
+  // se pasa a "Afonso, Nicolas" como el resto de la plataforma.
+  if(n.includes(',')) return (n===n.toUpperCase() && n!==n.toLowerCase())
+    ? n.toLowerCase().replace(/(^|[\s'´-])(\p{L})/gu,(m,a,b)=>a+b.toUpperCase()) : n;
+  if(!n) return n;
   const manual = correccionesNombres[cat]?.[n];
   if(manual) return manual;
   const palabras = n.split(/\s+/);
@@ -1173,7 +1177,7 @@ const RIVALS_RESERVA = [
   {f:5, r:'',cond:'L'},{f:6, r:'',cond:'V'},{f:7, r:'',cond:'L'},{f:8, r:'',cond:'V'},
   {f:9, r:'',cond:'L'},{f:10,r:'',cond:'V'},{f:11,r:'',cond:'L'},{f:12,r:'',cond:'V'},
   {f:13,r:'',cond:'L'},{f:14,r:'',cond:'V'},{f:15,r:'',cond:'L'},{f:16,r:'',cond:'V'},
-  {f:17,r:'',cond:'L'},{f:18,r:'INTERZONAL', cond:'N'},
+  {f:17,r:'',cond:'L'},{f:18,r:'',cond:'L'},
 ];
 // RESERVA — 2do semestre (Apertura/Clausura). Mismo patrón que el 1er
 // semestre (18 fechas, L/V alternado + interzonal en F18) -- se deriva de
@@ -1753,6 +1757,7 @@ function guardarNombreUsuario(uid){
 
 // ── Save ─────────────────────────────────────────────────────
 function saveData(){
+  if(modoOffline){ showToast('📴 Sin conexión — no se puede guardar'); return; }
   if(!fbReady||!db||!canEdit) return;
   clearTimeout(saveTimeout);
   saveTimeout=setTimeout(()=>{
@@ -1803,8 +1808,50 @@ function saveData(){
 // uno: cada dato nuevo había que acordarse de sumarlo en los tres, y el
 // público se había quedado sin RESERVA_S2. Devuelve false si el snapshot vino
 // vacío, para que el que llama sepa que no hay nada que redibujar.
+// ── MODO SIN CONEXIÓN (2026-09-25) ─────────────────────────────────────
+// Cada vez que llegan los datos de Firebase se guarda una copia local
+// (IndexedDB). Si la app se abre sin red, se cargan esos datos guardados y se
+// muestra un cartel; las ediciones quedan bloqueadas hasta que vuelva la
+// conexión (no se guardan cambios "en el aire" que se puedan perder).
+let modoOffline = false;
+function offlineDB(){
+  return new Promise((res,rej)=>{
+    const rq = indexedDB.open('tigre-offline',1);
+    rq.onupgradeneeded = ()=>rq.result.createObjectStore('kv');
+    rq.onsuccess = ()=>res(rq.result);
+    rq.onerror = ()=>rej(rq.error);
+  });
+}
+function offlineGuardar(key, val){
+  offlineDB().then(d=>{ d.transaction('kv','readwrite').objectStore('kv').put({val, ts:Date.now()}, key); }).catch(()=>{});
+}
+function offlineLeer(key){
+  return offlineDB().then(d=>new Promise(res=>{
+    const rq = d.transaction('kv').objectStore('kv').get(key);
+    rq.onsuccess = ()=>res(rq.result||null);
+    rq.onerror = ()=>res(null);
+  })).catch(()=>null);
+}
+let _offlineSnapTimer;
+function offlineGuardarStats(p){
+  clearTimeout(_offlineSnapTimer);
+  _offlineSnapTimer = setTimeout(()=>offlineGuardar('stats', p), 3000);
+}
+function mostrarBannerOffline(ts){
+  let b = document.getElementById('offline-banner');
+  if(!b){
+    b = document.createElement('div');
+    b.id = 'offline-banner';
+    b.style.cssText = 'position:fixed;left:0;right:0;bottom:0;z-index:10000;background:#7a5a08;color:#fff;text-align:center;padding:7px 12px;font-family:"Barlow Condensed",sans-serif;font-size:13px;letter-spacing:1px';
+    document.body.appendChild(b);
+  }
+  const f = ts ? new Date(ts).toLocaleString('es-AR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}) : '—';
+  b.textContent = `📴 SIN CONEXIÓN — mostrando datos guardados el ${f} · solo lectura`;
+}
+function ocultarBannerOffline(){ const b=document.getElementById('offline-banner'); if(b) b.remove(); }
 function hidratarStats(p){
   if(!p) return false;
+  if(!modoOffline) offlineGuardarStats(p);
   CATEGORIES.forEach(cat=>{
     const fl=cat==='RESERVA'?RIVALS_RESERVA:RIVALS;
     if(p.results?.[cat]) fl.forEach(r=>{ if(p.results[cat][r.f]){ results[cat][r.f]=p.results[cat][r.f]; resultsAuto.delete(cat+'|'+r.f); } });
@@ -1838,6 +1885,23 @@ function hidratarStats(p){
   return true;
 }
 
+// Sin red: carga el último snapshot guardado (ver MODO SIN CONEXIÓN).
+async function cargarDesdeCopiaLocal(){
+  const guardado = await offlineLeer('stats');
+  if(!guardado) return false;
+  modoOffline = true;
+  hidratarStats(guardado.val);
+  const g = await offlineLeer('gpsSessions');
+  if(g && g.val) gpsSessions = g.val;
+  mostrarBannerOffline(guardado.ts);
+  // Cuando vuelva la conexión los listeners en vivo traen todo de nuevo: se
+  // saca el cartel y se reactivan las ediciones.
+  if(fbReady && db) db.ref('.info/connected').on('value', s=>{
+    if(s.val() && modoOffline){ modoOffline = false; ocultarBannerOffline(); }
+  });
+  else window.addEventListener('online', ()=>location.reload(), {once:true});
+  return true;
+}
 function loadData(){
   return new Promise(resolve=>{
     if(!fbReady||!db){resolve();return;}
@@ -1853,15 +1917,21 @@ function loadData(){
     // Reserva se podía leer igual). Pidiendo cada subnodo por separado, la
     // regla de 'gps' se puede sacar del todo y dejar el permiso puesto nodo
     // por nodo, sin ningún ancestro que la tape.
-    Promise.all([
+    // Sin red, once('value') se queda esperando para siempre: si no hay
+    // conexión (o tarda más de 8s) se cae al último snapshot guardado.
+    const sinRed = new Promise((_,rej)=>{
+      if(!navigator.onLine) rej(new Error('offline'));
+      else setTimeout(()=>rej(new Error('timeout')), 8000);
+    });
+    Promise.race([Promise.all([
       db.ref('stats').once('value'),
       db.ref('gps/sessions').once('value'),
       db.ref('gps/videoSync').once('value'),
       db.ref('temporadaActiva').once('value')
-    ]).then(([statsSnap, gpsSessionsSnap, gpsVideoSyncSnap, temporadaSnap])=>{
+    ]), sinRed]).then(([statsSnap, gpsSessionsSnap, gpsVideoSyncSnap, temporadaSnap])=>{
       if(temporadaSnap.val()) TEMPORADA_ACTIVA = temporadaSnap.val();
       // Load GPS sessions (Object.values funciona con array viejo u objeto nuevo)
-      if(gpsSessionsSnap.val()) gpsSessions = Object.values(gpsSessionsSnap.val());
+      if(gpsSessionsSnap.val()){ gpsSessions = Object.values(gpsSessionsSnap.val()); offlineGuardar('gpsSessions', gpsSessions); }
       // videoSync[cat][fecha] = {kickoff1, kickoff2} -- segundo del video de
       // YouTube (links[cat][fecha].par) donde arranca cada tiempo, cargado a
       // mano una vez por partido (ver wireGpsVideoForm). Con esto +
@@ -1874,7 +1944,11 @@ function loadData(){
     }).then(snap=>{
       hidratarStats(snap.val());
       showLoading(false); resolve();
-    }).catch(e=>{console.warn('load error:',e);showLoading(false);resolve();});
+    }).catch(async e=>{
+      console.warn('load error:',e);
+      await cargarDesdeCopiaLocal();
+      showLoading(false);resolve();
+    });
   });
 }
 
@@ -2317,7 +2391,7 @@ function updateCitUploadButton(cat){
     title="Subís PDF de citación y/o informes de COMET, mezclados o no — el sistema detecta solo de qué tipo es cada uno y a qué categoría corresponde. También sirve para volver a cargar una fecha ya subida"
     style="background:rgba(201,162,39,0.15);border:1px solid var(--border2);color:var(--gold2);
     border-radius:6px;padding:8px 14px;font-family:'Barlow Condensed',sans-serif;font-size:13px;
-    letter-spacing:1px;font-weight:700;cursor:pointer;white-space:nowrap">⬆ SUBIR PLANILLAS (PDF, podés elegir varios)</button>
+    letter-spacing:1px;font-weight:700;cursor:pointer;white-space:nowrap">⬆ SUBIR PLANILLA</button>
   <input type="file" id="cit-pdf-global" accept=".pdf,image/*" multiple style="display:none"
     onchange="subirPlanillasLote(this.files, this)">`;
 }
@@ -3274,7 +3348,13 @@ function renderResumenCategoriaFijo(cat, containerId){
 async function resumenReservaHTML(dataCat){
   await loadTablaData();
   const f = filaTablaLPFReserva(dataCat, 'TIGRE');
-  if(!f) return `<div style="padding:16px;text-align:center;color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-size:13px">Todavía no hay datos de la tabla de Copa Proyección.</div>`;
+  // Igual que resumenCategoriaHTML: tarjeta + chevron que despliega la tabla.
+  const tablaDesplegable = `
+    ${chevronToggleHTML('tablalpf-RESERVA')}
+    <div id="sec-tablalpf-RESERVA"${seccionEstiloInicial('tablalpf-RESERVA')}>
+      <div id="tabla-lpf-RESERVA"></div>
+    </div>`;
+  if(!f) return `<div style="padding:16px;text-align:center;color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-size:13px">Todavía no hay datos de la tabla de Copa Proyección.</div>${tablaDesplegable}`;
   const dgC = f.dif>0?'var(--win)':f.dif<0?'var(--loss)':'var(--muted)';
   const cell=(label,val,color)=>`<div style="text-align:center">
     <div style="font-family:'Bebas Neue',sans-serif;font-size:22px;color:${color||'var(--text)'}">${val}</div>
@@ -3291,14 +3371,16 @@ async function resumenReservaHTML(dataCat){
     ${cell('GF', f.gf, '#60a5fa')}
     ${cell('GC', f.gc, '#f87171')}
     ${cell('DG', (f.dif>0?'+':'')+f.dif, dgC)}
-  </div>`;
+  </div>${tablaDesplegable}`;
 }
 function renderResumenReserva(dataCat, containerId){
   const el=document.getElementById(containerId);
   if(!el) return;
   resumenReservaHTML(dataCat).then(html=>{
     const stillHere=document.getElementById(containerId);
-    if(stillHere) stillHere.innerHTML=html;
+    if(!stillHere) return;
+    stillHere.innerHTML=html;
+    renderTablaReserva('tabla-lpf-RESERVA');
   });
 }
 
@@ -3409,9 +3491,33 @@ function fixtureReservaHTML(dataCat, resultadosTablaHTML){
     const proximaF=fechas.find(f=>!fixture[f].jugado);
     const proximo=proximaF!=null ? {f:proximaF, ...fixture[proximaF]} : null;
     const fechaFmt=iso=>{ if(!iso) return ''; const p=iso.split('-'); return p.length===3 ? `${p[2]}/${p[1]}` : ''; };
+    // El nombre del fixture ("GIMNASIA (LP)") no siempre es el de la tabla
+    // ("GIMNASIA Y ESGRIMA (LA PLATA)"): rival_alertas trae el de la tabla.
+    const alertaProx = proximoRivalInfoReserva(dataCat);
+    const fila = proximo ? filaTablaLPFReserva(dataCat, (alertaProx && alertaProx.fecha===proximo.f) ? alertaProx.rival : proximo.rival) : null;
+    let rivalTablaHTML = '';
+    if(fila){
+      const dif = fila.dif ?? fila.dg;
+      const dgC = dif>0?'var(--win)':dif<0?'var(--loss)':'var(--muted)';
+      const cell=(label,val,color)=>`<div style="text-align:center">
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:16px;color:${color||'var(--text)'}">${val}</div>
+        <div style="font-size:8px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-top:1px">${label}</div>
+      </div>`;
+      rivalTablaHTML = `<div class="stat-grid-9" style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border2);gap:6px">
+        ${cell('POS', fila.pos+'°', 'var(--gold2)')}
+        ${cell('PTS', fila.pts, 'var(--gold2)')}
+        ${cell('PJ', fila.pj)}
+        ${cell('PG', fila.pg, 'var(--win)')}
+        ${cell('PE', fila.pe, 'var(--draw)')}
+        ${cell('PP', fila.pp, 'var(--loss)')}
+        ${cell('GF', fila.gf, '#60a5fa')}
+        ${cell('GC', fila.gc, '#f87171')}
+        ${cell('DG', (dif>0?'+':'')+dif, dgC)}
+      </div>`;
+    }
     proximoHTML = proximo ? `
-      <div style="background:var(--surface2);border:1px solid var(--border2);border-radius:10px;padding:14px 16px;margin-bottom:8px;
-        display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
+      <div style="background:var(--surface2);border:1px solid var(--border2);border-radius:10px;padding:14px 16px;margin-bottom:8px">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
         <div>
           <div style="font-size:11px;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;margin-bottom:4px">Próxima fecha</div>
           <div style="font-size:17px;font-weight:700;color:var(--text)">F${proximo.f} vs ${esc(proximo.rival)}
@@ -3419,6 +3525,8 @@ function fixtureReservaHTML(dataCat, resultadosTablaHTML){
           </div>
         </div>
         ${fechaFmt(proximo.fecha_iso)?`<div style="font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--gold2)">${fechaFmt(proximo.fecha_iso)}</div>`:''}
+      </div>
+      ${rivalTablaHTML}
       </div>` : `<div style="color:var(--muted);font-size:13px;padding:8px 0 12px">Ya se jugaron todas las fechas del fixture.</div>`;
   }
 
@@ -3492,7 +3600,11 @@ function renderStatsSingle(cat, content){
     const ptC=res==='W'?'var(--win)':res==='D'?'var(--draw)':res==='L'?'var(--loss)':'var(--muted)';
 
     // RESERVA: use editable rivalData, other cats use fixed RIVALS
-    const rName = isReserva ? (rivalData[dataCat][r.f]?.rival || autoRes?.rival || '') : r.r;
+    // Reserva: carga a mano > resultado de statfutbol > fixture completo de
+    // statfutbol (cubre las fechas todavía sin jugar). 'INTERZONAL' era el
+    // relleno viejo de F18, no un rival real.
+    const rivalManual = rivalData[dataCat][r.f]?.rival;
+    const rName = isReserva ? ((rivalManual && rivalManual!=='INTERZONAL' ? rivalManual : '') || autoRes?.rival || rivalDeFechaReserva(dataCat, r.f)) : r.r;
     // Localía de RESERVA 100% automática (statfutbol, fixture_reserva del
     // scraper); rivalData solo queda de respaldo si el fixture no la trae.
     const rCond = isReserva
@@ -3557,7 +3669,8 @@ function renderStatsSingle(cat, content){
       ? `<td><button class="btn-equipo${hasTeamData?' active':''}" data-cat="${dataCat}" data-fecha="${r.f}" title="Ver/editar equipo">👥${hasTeamData?' ✓':''}</button></td>`
       : '';
 
-    const fechaCal = isReserva ? '' : fechaCalCompacta(r.f);
+    const isoRes = isReserva ? TABLA_DATA?.fixture_reserva?.[dataCat]?.[r.f]?.fecha_iso : null;
+    const fechaCal = isReserva ? (isoRes ? `${+isoRes.slice(8,10)}/${+isoRes.slice(5,7)}` : '') : fechaCalCompacta(r.f);
     const letraEs = res==='W'?'G':res==='D'?'E':res==='L'?'P':'';
 
     rows+=`<tr data-cat="${dataCat}" data-fecha="${r.f}">
@@ -3680,11 +3793,6 @@ function renderStatsSingle(cat, content){
       <div id="goleadores-${dataCat}"></div>
     </div>
 
-    ${isReserva?`${seccionTitulo('tablalpf-'+cat, '📋 TABLA DE POSICIONES · LPF')}
-    <div id="sec-tablalpf-${cat}"${seccionEstiloInicial('tablalpf-'+cat)}>
-      <div id="tabla-lpf-${cat}"></div>
-    </div>`:''}
-
     <div class="st"><div class="stbar"></div>🗓️ FIXTURE Y RESULTADOS</div>
     <div id="fixture-cat-${dataCat}" style="margin-bottom:20px"></div>
 
@@ -3735,7 +3843,6 @@ function renderStatsSingle(cat, content){
   renderGoleadores(dataCat);
   if(isReserva) {
     renderResumenReserva(dataCat, `resumen-fijo-${dataCat}`);
-    renderTablaReserva(`tabla-lpf-${cat}`);
     renderFixtureReserva(dataCat, `fixture-cat-${dataCat}`, resultadosTablaHTML, wireResultadosEnFixture);
   } else {
     renderResumenCategoriaFijo(cat, `resumen-fijo-${dataCat}`);
@@ -3769,6 +3876,7 @@ function renderVideoanalisisTab(cat, tabEl){
     ${seccionTitulo('va-placas-'+dataCat, `🎬 PLACAS · <span style="color:${CAT_COLORS[cat]}">${cat}</span>`)}
     <div id="sec-va-placas-${dataCat}"${seccionEstiloInicial('va-placas-'+dataCat)}>
       ${conRival ? `<div id="placa-post-block-${cat}" style="margin-bottom:18px"></div>` : ''}
+      ${isReserva ? `<div id="placa-resultado-block-${cat}" style="margin-bottom:18px"></div>` : ''}
       ${conRival ? `<div id="placa-portada-info-${cat}" style="margin-bottom:18px"></div>` : ''}
       ${conRival ? `<div id="placa-stats-block-${cat}" style="margin-bottom:18px"></div>` : ''}
       <div style="margin-bottom:18px">${placaRotuloHTML('🖼️ FASE')}${placaFaseControlesHTML(cat)}</div>
@@ -3783,6 +3891,7 @@ function renderVideoanalisisTab(cat, tabEl){
 
   if(conRival){
     renderPlacaPostPartidoBlock(cat, dataCat);
+    if(isReserva) renderPlacaResultadoReservaBlock(cat, dataCat);
     renderPlacaProximoRivalBlock(cat, dataCat);
     renderPlacaStatsControlesBlock(cat, dataCat);
     renderRivalStatsDetalle(dataCat, cat);
@@ -3996,12 +4105,9 @@ function abrirVideoEmbebido(url, titulo, startSeconds, endSeconds, botonesExtra)
 // PLANTEL: roster + comparar jugadores (ya existentes, mudados acá) +
 // rendimiento físico (Catapult, nuevo).
 function renderPlantelTab(cat, tabEl){
-  if(seccionColapsada['roster-tabla-'+cat]===undefined) seccionColapsada['roster-tabla-'+cat]=false;
   tabEl.innerHTML = `
-    ${seccionTitulo('roster-tabla-'+cat, `📋 TABLA DE PLANTEL · <span style="color:${CAT_COLORS[cat]}">${cat}</span>`)}
-    <div id="sec-roster-tabla-${cat}"${seccionEstiloInicial('roster-tabla-'+cat)}>
-      <div id="roster-content-${cat}"></div>
-    </div>
+    <div class="st"><span style="display:flex;align-items:center;gap:10px"><div class="stbar"></div>📋 PLANTEL · <span style="color:${CAT_COLORS[cat]}">${cat}</span></span></div>
+    <div id="roster-content-${cat}"></div>
   `;
   renderRosterCat(cat, document.getElementById(`roster-content-${cat}`));
 }
@@ -6098,7 +6204,7 @@ async function subirPlanillasLote(fileList, inputEl){
   // guardarCitacionImagenReserva). Los PDF siguen el camino de siempre.
   const imagenes = todos.filter(f=>f.type.startsWith('image/'));
   const files = todos.filter(f=>!f.type.startsWith('image/'));
-  if(imagenes.length) abrirConfirmCitacionImagenes(imagenes);
+  if(imagenes.length) procesarImagenesCitacionReserva(imagenes);
   if(!files.length) return;
   showToast(`☁ LEYENDO ${files.length} PDF…`);
   const citParsed = [], cometParsed = [], noReconocido = [];
@@ -6120,29 +6226,75 @@ async function subirPlanillasLote(fileList, inputEl){
   else abrirCitacion();
 }
 
-function abrirConfirmCitacionImagenes(imagenes){
+// Lee cada placa con OCR y recién después abre el modal de revisión (si el
+// OCR falla, se abre igual, vacío, para cargar la foto a mano como antes).
+async function procesarImagenesCitacionReserva(imagenes, forzar){
+  const items = [];
+  for(let i=0;i<imagenes.length;i++){
+    showToast(`📷 Leyendo placa ${i+1}/${imagenes.length}… (puede tardar un minuto)`);
+    let ocr = null;
+    try{ ocr = await ocrPlacaReserva(imagenes[i]); }
+    catch(e){ console.warn('[OCR placa]', e); showToast('⚠ No se pudo leer la placa automáticamente: '+e.message); }
+    if(forzar){ ocr = ocr || {fecha:null, titulares:[], suplentes:[]}; ocr.fecha = forzar.fecha; }
+    items.push({file:imagenes[i], ocr, dataCat: forzar && forzar.dataCat});
+  }
+  abrirConfirmCitacionImagenes(items);
+}
+function lineasPlacaTexto(arr, esTitular){
+  return arr.map(p=>{
+    const crudo = (esTitular ? p.texto : p.nombre) || '';
+    const j = resolverJugadorPlacaReserva(crudo);
+    const nom = j ? formatNombreMostrar(j.nombre, 'RESERVA') : crudo + ' ?';
+    return `${p.num ?? ''} - ${nom}`;
+  }).join('\n');
+}
+function abrirConfirmCitacionImagenes(items){
   let m=document.getElementById('citacion-img-modal');
   if(m) m.remove();
   m=document.createElement('div');
   m.id='citacion-img-modal'; m.className='modal-bg';
-  const rows = imagenes.map((f,i)=>`<div class="cit-img-row" data-idx="${i}" style="padding:8px 0;border-bottom:1px solid rgba(26,45,90,0.4);display:flex;align-items:center;gap:8px">
-      <input type="number" class="cit-img-fecha" min="1" max="35" placeholder="F#"
-        style="width:56px;background:rgba(5,8,15,0.8);border:1px solid #1a2d5a;border-radius:4px;color:#d8e4ff;padding:4px 6px;font-size:13px">
-      <select class="cit-img-sem" style="background:rgba(5,8,15,0.8);border:1px solid #1a2d5a;border-radius:4px;color:#d8e4ff;padding:4px 6px;font-size:12px">
-        <option value="RESERVA"${reservaSemestre===1?' selected':''}>Reserva 1er sem.</option>
-        <option value="RESERVA_S2"${reservaSemestre!==1?' selected':''}>Reserva 2do sem.</option>
-      </select>
-      <span style="flex:1;font-size:12px;word-break:break-all">${esc(f.name)}</span>
-    </div>`).join('');
-  m.innerHTML = `<div class="modal-box" style="width:460px;text-align:left;max-height:80vh;overflow:auto">
+  const inp = 'background:rgba(5,8,15,0.8);border:1px solid #1a2d5a;border-radius:4px;color:#d8e4ff;padding:4px 6px;font-size:12px';
+  const rows = items.map((it,i)=>{
+    const o = it.ocr;
+    const leido = o && (o.titulares.length || o.suplentes.length);
+    return `<div class="cit-img-row" data-idx="${i}" style="padding:10px 0;border-bottom:1px solid rgba(26,45,90,0.4)">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+        <input type="number" class="cit-img-fecha" min="1" max="35" placeholder="F#" value="${o&&o.fecha?o.fecha:''}" style="width:56px;${inp};font-size:13px">
+        <select class="cit-img-sem" style="${inp}">
+          <option value="RESERVA"${(it.dataCat||(reservaSemestre===1?'RESERVA':'RESERVA_S2'))==='RESERVA'?' selected':''}>Reserva 1er sem.</option>
+          <option value="RESERVA_S2"${(it.dataCat||(reservaSemestre===1?'RESERVA':'RESERVA_S2'))==='RESERVA_S2'?' selected':''}>Reserva 2do sem.</option>
+        </select>
+        <span style="flex:1;font-size:12px;word-break:break-all">${esc(it.file.name)}</span>
+      </div>
+      ${leido ? `<div style="font-size:11px;color:var(--gold2);margin-bottom:4px">Leído automáticamente — revisá (los que tienen "?" no coinciden con nadie del plantel):</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <div style="flex:1;min-width:170px"><div style="font-size:10px;letter-spacing:1px;color:var(--muted)">TITULARES</div>
+          <textarea class="cit-img-tit" rows="12" style="width:100%;${inp}">${esc(lineasPlacaTexto(o.titulares,true))}</textarea></div>
+        <div style="flex:1;min-width:170px"><div style="font-size:10px;letter-spacing:1px;color:var(--muted)">SUPLENTES</div>
+          <textarea class="cit-img-sup" rows="12" style="width:100%;${inp}">${esc(lineasPlacaTexto(o.suplentes,false))}</textarea></div>
+      </div>`
+      : `<div style="font-size:11px;color:var(--muted)">No se pudo leer el texto: se guarda solo la foto.</div>
+        <textarea class="cit-img-tit" style="display:none"></textarea><textarea class="cit-img-sup" style="display:none"></textarea>`}
+    </div>`;
+  }).join('');
+  m.innerHTML = `<div class="modal-box" style="width:520px;text-align:left;max-height:85vh;overflow:auto">
     <h2 style="text-align:center">CITACIÓN DE RESERVA</h2>
-    <p style="text-align:center;font-size:12px;color:var(--muted)">${imagenes.length} imagen(es) — indicá la fecha de cada una</p>
+    <p style="text-align:center;font-size:12px;color:var(--muted)">${items.length} imagen(es) — confirmá fecha, titulares y suplentes (formato: <b>N - Apellido, Nombre</b>)</p>
     ${rows}
     <button class="m-btn" onclick="confirmarCitacionImagenes()">✓ GUARDAR</button>
     <button class="m-cancel" onclick="document.getElementById('citacion-img-modal').remove()">Cancelar</button>
   </div>`;
   document.body.appendChild(m);
-  m._imgs = imagenes;
+  m._imgs = items.map(it=>it.file);
+}
+// "9 - Gonzalez S." -> {num, nombre, id, warn} (cruzado con el plantel de Reserva)
+function parseLineasPlaca(texto){
+  return (texto||'').split('\n').map(l=>l.trim()).filter(Boolean).map(l=>{
+    const m = l.match(/^(\d{1,2})?\s*[-.:]?\s*(.+)$/);
+    const crudo = (m?m[2]:l).replace(/\s*\?+\s*$/,'').trim();
+    const j = resolverJugadorPlacaReserva(crudo);
+    return {num: m&&m[1] ? +m[1] : null, nombre: j ? j.nombre : crudo, id: j ? (j.id ?? null) : null, warn: !j};
+  }).filter(p=>p.nombre);
 }
 async function confirmarCitacionImagenes(){
   const m=document.getElementById('citacion-img-modal');
@@ -6151,11 +6303,13 @@ async function confirmarCitacionImagenes(){
   for(const row of m.querySelectorAll('.cit-img-row')){
     const f = parseInt(row.querySelector('.cit-img-fecha').value);
     if(!f || f<1 || f>35){ showToast('⚠ Falta indicar la fecha'); return; }
-    aGuardar.push({file:m._imgs[Number(row.dataset.idx)], fecha:f, dataCat:row.querySelector('.cit-img-sem').value});
+    aGuardar.push({file:m._imgs[Number(row.dataset.idx)], fecha:f, dataCat:row.querySelector('.cit-img-sem').value,
+      titulares: parseLineasPlaca(row.querySelector('.cit-img-tit').value),
+      suplentes: parseLineasPlaca(row.querySelector('.cit-img-sup').value)});
   }
   m.remove();
-  for(const {file, fecha, dataCat} of aGuardar){
-    await guardarCitacionImagenReserva(dataCat, fecha, rivalDeFechaReserva(dataCat, fecha), file);
+  for(const {file, fecha, dataCat, titulares, suplentes} of aGuardar){
+    await guardarCitacionImagenReserva(dataCat, fecha, rivalDeFechaReserva(dataCat, fecha), file, {titulares, suplentes});
   }
 }
 
@@ -6956,6 +7110,157 @@ function confirmarComet(cat, fecha){
     .catch(e=>{ console.error('savePartidoComet error:',e); showToast('⚠ No se pudo guardar — revisá la consola'); });
 }
 
+// ── OCR de la placa de citación de Reserva (2026-09-25) ────────────────
+// La placa (JPG/PNG) no tiene texto: se lee con Tesseract.js en el navegador
+// (se baja una sola vez, recién cuando se sube una imagen). Se buscan:
+//  - "FECHA N" del encabezado,
+//  - titulares: cada etiqueta "Apellido I." de la cancha + el dorsal más
+//    cercano por encima,
+//  - suplentes: la lista de la derecha, "12. Apellido Nombre".
+// Lo leído SIEMPRE se muestra para revisar/corregir antes de guardar.
+let _tessPromise = null;
+function cargarTesseract(){
+  if(window.Tesseract) return Promise.resolve();
+  if(_tessPromise) return _tessPromise;
+  _tessPromise = new Promise((res,rej)=>{
+    const sc = document.createElement('script');
+    sc.src = 'https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js';
+    sc.onload = res; sc.onerror = ()=>{ _tessPromise=null; rej(new Error('No se pudo cargar el lector de texto (¿sin conexión?)')); };
+    document.head.appendChild(sc);
+  });
+  return _tessPromise;
+}
+// Nombre de la placa -> jugador del plantel de Reserva. Acepta "Apellido I."
+// (inicial) o nombre/apellido completo. Devuelve null si no hay uno solo.
+// "FusterL." / "Minniti L. Y" / "Gonzalez 5." -> "Apellido I." (el OCR pega la
+// inicial, suma basura al final o confunde la S con un 5).
+function limpiarEtiquetaPlaca(t){
+  const m = (t||'').replace(/\s+/g,' ').trim().match(/^(.+?)\s*([A-ZÁÉÍÓÚÑ5])\./);
+  return m ? `${m[1].trim()} ${m[2]==='5'?'S':m[2]}.` : (t||'').trim();
+}
+function resolverJugadorPlacaReserva(texto){
+  const roster = plantelFutdetail['RESERVA']||[];
+  const t = limpiarEtiquetaPlaca((texto||'').replace(/\s*\?+\s*$/,''));
+  const m = t.match(/^(.+?)\s+([A-Za-zÁÉÍÓÚÑáéíóúñ])\.?$/);
+  if(m && !/\s/.test(m[2]) && m[1].length>1){
+    const ape = cometNameWords(m[1]), ini = cometNameWords(m[2])[0];
+    if(ape.length && ini){
+      const cand = roster.filter(p=>{
+        const pw = cometNameWords(p.nombre);
+        return ape.every(w=>pw.includes(w)) && pw.some(w=>!ape.includes(w) && w[0]===ini);
+      });
+      if(cand.length===1) return cand[0];
+      if(cand.length>1) return null;
+    }
+  }
+  return matchPlantel('RESERVA', t);
+}
+async function ocrPlacaReserva(file){
+  await cargarTesseract();
+  const bmp = await createImageBitmap(file);
+  const W = bmp.width, H = bmp.height;
+  // Detección de "pastillas" grises (etiquetas de nombre): componentes
+  // conectados de píxeles claros y sin color, en una copia a media escala.
+  const ds = 0.5, dw = Math.round(W*ds), dh = Math.round(H*ds);
+  const cvS = document.createElement('canvas'); cvS.width = dw; cvS.height = dh;
+  const cS = cvS.getContext('2d', {willReadFrequently:true}); cS.drawImage(bmp, 0, 0, dw, dh);
+  const px = cS.getImageData(0,0,dw,dh).data;
+  const mask = new Uint8Array(dw*dh);
+  for(let i=0;i<dw*dh;i++){
+    const r=px[i*4], g=px[i*4+1], b=px[i*4+2];
+    mask[i] = (r>185 && g>185 && b>185 && Math.max(r,g,b)<249 && Math.max(r,g,b)-Math.min(r,g,b)<40) ? 1 : 0;   // gris claro: las líneas blancas de la cancha (250+) quedan afuera
+  }
+  const blobs = [];
+  const visto = new Uint8Array(dw*dh);
+  for(let i=0;i<dw*dh;i++){
+    if(!mask[i] || visto[i]) continue;
+    let x0=dw,y0=dh,x1=0,y1=0,n=0; const pila=[i]; visto[i]=1;
+    while(pila.length){
+      const p = pila.pop(), x = p%dw, y = (p-x)/dw; n++;
+      if(x<x0)x0=x; if(x>x1)x1=x; if(y<y0)y0=y; if(y>y1)y1=y;
+      if(x>0 && mask[p-1] && !visto[p-1]){ visto[p-1]=1; pila.push(p-1); }
+      if(x<dw-1 && mask[p+1] && !visto[p+1]){ visto[p+1]=1; pila.push(p+1); }
+      if(y>0 && mask[p-dw] && !visto[p-dw]){ visto[p-dw]=1; pila.push(p-dw); }
+      if(y<dh-1 && mask[p+dw] && !visto[p+dw]){ visto[p+dw]=1; pila.push(p+dw); }
+    }
+    const w=(x1-x0+1)/ds, h=(y1-y0+1)/ds;
+    blobs.push({x0:x0/ds, y0:y0/ds, x1:(x1+1)/ds, y1:(y1+1)/ds, w, h, fill:n/((x1-x0+1)*(y1-y0+1))});
+  }
+  const pastillas = blobs.filter(b=>b.fill>0.45 && b.h>H*0.012 && b.h<H*0.045 && b.w>W*0.06);
+  const pitch = pastillas.filter(b=>b.x1 < W*0.66 && b.y0 > H*0.22 && b.w<W*0.2).sort((a,b)=>a.y0-b.y0);
+  const lista = pastillas.filter(b=>b.x0 > W*0.62 && b.w>W*0.15 && b.y0 > H*0.38 && b.y1 < H*0.93).sort((a,b)=>a.y0-b.y0);
+
+  const worker = await Tesseract.createWorker('spa');
+  // Recorta [x0,y0,x1,y1] del original, lo agranda y lo lee como UNA línea.
+  const LETRAS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzÁÉÍÓÚÑáéíóúñ0123456789.,:'´- ";
+  const leer = async (x0,y0,x1,y1,{digitos=false, umbral=null, oscuro=null, k=3, psm='7'}={})=>{
+    x0=Math.max(0,x0); y0=Math.max(0,y0); x1=Math.min(W,x1); y1=Math.min(H,y1);
+    const cv = document.createElement('canvas');
+    cv.width = Math.round((x1-x0)*k); cv.height = Math.round((y1-y0)*k);
+    const c = cv.getContext('2d', {willReadFrequently:true});
+    c.drawImage(bmp, x0, y0, x1-x0, y1-y0, 0, 0, cv.width, cv.height);
+    if(umbral!=null){                       // texto claro sobre fondo oscuro -> negro sobre blanco
+      const id = c.getImageData(0,0,cv.width,cv.height), d = id.data;
+      for(let i=0;i<d.length;i+=4){ const l=0.3*d[i]+0.59*d[i+1]+0.11*d[i+2]; const v = l>umbral?0:255; d[i]=d[i+1]=d[i+2]=v; }
+      c.putImageData(id,0,0);
+    } else if(oscuro!=null){                // texto oscuro sobre fondo claro: se binariza (saca degradés)
+      const id = c.getImageData(0,0,cv.width,cv.height), d = id.data;
+      for(let i=0;i<d.length;i+=4){ const l=0.3*d[i]+0.59*d[i+1]+0.11*d[i+2]; const v = l<oscuro?0:255; d[i]=d[i+1]=d[i+2]=v; }
+      c.putImageData(id,0,0);
+    }
+    await worker.setParameters({tessedit_pageseg_mode:psm, tessedit_char_whitelist: digitos?'0123456789':LETRAS});
+    const r = await worker.recognize(cv);
+    return (r.data.text||'').replace(/\s+/g,' ').trim();
+  };
+  let fecha = null, titulares = [], suplentes = [], hdr = '';
+  try{
+    for(const o of [{k:2},{k:2,oscuro:140},{k:3,oscuro:110}]){
+      hdr = await leer(W*0.05, H*0.15, W*0.95, H*0.24, o);
+      const fm = hdr.match(/FECHA\s*[:.]?\s*(\d{1,2})/i);
+      if(fm){ fecha = parseInt(fm[1]); break; }
+    }
+    // Nombre de una pastilla: prueba varias formas de leerla hasta que salga algo con forma de "Apellido I."
+    const leerPastilla = async (p, soloLetras)=>{
+      let mejor = '';
+      for(const o of [{}, {oscuro:130}, {k:4}, {k:4, oscuro:110}, {k:4, oscuro:150, enc:12}, {psm:'8', oscuro:150}]){
+        const e = o.enc||0;
+        const t = (await leer(p.x0-4+e, p.y0-2+(e?4:0), p.x1+4-e, p.y1+2-(e?4:0), o)).replace(/[\[\]|()_]/g,' ').replace(/\s+/g,' ').trim();
+        if(t.length>mejor.length) mejor = t;
+        if(soloLetras ? /^\S.*\s\S{1,2}\.?$/.test(t) && t.length>=5 : /^\d{1,2}\s*[.,:]?\s*\S.{2,}$/.test(t)) return t;
+      }
+      return mejor;
+    };
+    for(const p of pitch){
+      const texto = await leerPastilla(p, true);
+      const cx = (p.x0+p.x1)/2;
+      const n = await leer(cx-W*0.04, p.y0-H*0.065, cx+W*0.04, p.y0-H*0.02, {digitos:true, umbral:190, k:4});
+      const num = /^\d{1,2}$/.test(n) && +n>=1 && +n<=11 ? +n : null;
+      titulares.push({num, texto: limpiarEtiquetaPlaca(texto), x:cx/W, y:(p.y0+p.y1)/2/H, caja:[p.x0,p.y0,p.x1,p.y1].map(Math.round)});
+    }
+    for(const p of lista){
+      const t = await leerPastilla(p, false);
+      const m = t.match(/^(\d{1,2})\s*[.,:]?\s*(.+)$/);
+      if(m && m[2].length>2) suplentes.push({num:+m[1], nombre:m[2].trim()});
+    }
+  } finally { await worker.terminate(); }
+  // Dorsales 1-11 sin repetir: si uno salió repetido (ej. "11" leído como "1")
+  // se deja el del arco (el más bajo en la cancha, para el 1) y los demás
+  // quedan vacíos; si falta exactamente uno, se completa solo.
+  const vistos = {};
+  titulares.forEach(t=>{ if(t.num!=null) (vistos[t.num] = vistos[t.num]||[]).push(t); });
+  Object.entries(vistos).forEach(([n,arr])=>{
+    if(arr.length<2) return;
+    arr.sort((a,b)=>b.y-a.y);
+    arr.slice(1).forEach(t=>{ t.num = null; });
+  });
+  const usados = new Set(titulares.map(t=>t.num).filter(n=>n!=null));
+  const faltan = [1,2,3,4,5,6,7,8,9,10,11].filter(n=>!usados.has(n));
+  const sinNum = titulares.filter(t=>t.num==null);
+  if(sinNum.length===1 && faltan.length===1) sinNum[0].num = faltan[0];
+  titulares.sort((a,b)=>(a.num??99)-(b.num??99));
+  return {fecha, titulares, suplentes};
+}
+
 // ── CITACIÓN DE RESERVA, SOLO FOTO (sin PDF con texto) ─────────────────
 // Las planillas de Reserva que sube el club son fotos/JPEG (confirmado con
 // la carpeta real, Javi 2026-09-23), no un PDF con capa de texto como
@@ -6975,11 +7280,11 @@ function prepararSubidaCitacionReserva(dataCat, fecha, rivalPrellenado){
   input.accept = 'image/*';
   input.onchange = () => {
     const file = input.files[0];
-    if(file) guardarCitacionImagenReserva(dataCat, fecha, rivalPrellenado, file);
+    if(file) procesarImagenesCitacionReserva([file], {fecha, dataCat});
   };
   input.click();
 }
-async function guardarCitacionImagenReserva(dataCat, fecha, rivalPrellenado, file){
+async function guardarCitacionImagenReserva(dataCat, fecha, rivalPrellenado, file, leido){
   showToast('📷 Procesando foto…');
   try{
     const bitmap = await createImageBitmap(file);
@@ -6994,9 +7299,9 @@ async function guardarCitacionImagenReserva(dataCat, fecha, rivalPrellenado, fil
     if(!matchData[dataCat]) matchData[dataCat] = {};
     matchData[dataCat][fecha] = {
       ...(matchData[dataCat][fecha]||{}),
-      titulares: [], suplentes: [],
+      titulares: leido?.titulares || [], suplentes: leido?.suplentes || [],
       rival: rivalPrellenado || matchData[dataCat][fecha]?.rival || '',
-      soloImagen: true,
+      soloImagen: !(leido?.titulares?.length),
     };
     saveData();
     showToast('✓ FOTO DE CITACIÓN CARGADA');
@@ -7012,15 +7317,6 @@ async function guardarCitacionImagenReserva(dataCat, fecha, rivalPrellenado, fil
 // procesó (matchData[cat][fecha] tiene titulares), el ícono 📋 de la tabla
 // abre esta ficha en vez de un link. condicionCat ya contempla que las
 // categorías menores (7ma/8va/9na) juegan al revés que las mayores.
-function guardarMinutosGolesRival(cat, fecha){
-  if(!canEditCat(cat) || !matchData[cat]?.[fecha]) return;
-  const inp = document.getElementById(`cit-golrival-input-${cat}-${fecha}`);
-  if(!inp) return;
-  const mins = inp.value.split(',').map(s=>parseInt(s.trim(),10)).filter(n=>!isNaN(n)).sort((a,b)=>a-b);
-  matchData[cat][fecha].minutosGolesRival = mins;
-  saveData();
-  showToast('☁ GUARDADO');
-}
 function abrirCitacionView(cat, fecha){
   const d = matchData[cat]?.[fecha];
   if(!d || !(d.titulares?.length || d.soloImagen)) return;
@@ -7039,23 +7335,13 @@ function abrirCitacionView(cat, fecha){
   // que titulares/suplentes/segundoTiempo -- entra entero al payload de
   // saveData(), no hace falta tocarla en otro lado). El resultado ya
   // cargado (results) da la pista de cuántos goles hay que cargar.
-  const rivalGolCount = results[cat]?.[fecha]?.[1];
   const minutosGolRival = d.minutosGolesRival || [];
-  const golRivalHTML = canEditCat(cat) ? `
-    <div style="margin:10px 0;padding:10px;background:var(--surface2);border-radius:8px">
-      <div style="font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:1px;color:var(--muted);margin-bottom:6px">
-        ⚽ MINUTOS DE LOS GOLES DE ${esc((d.rival||'RIVAL').toUpperCase())}${rivalGolCount!=null?` (${rivalGolCount} según el resultado)`:''}
-      </div>
-      <div style="display:flex;gap:6px">
-        <input id="cit-golrival-input-${cat}-${fecha}" type="text" value="${esc(minutosGolRival.join(', '))}" placeholder="Ej: 23, 77"
-          style="flex:1;background:rgba(5,8,15,0.5);border:1px solid var(--border2);border-radius:5px;color:var(--text);font-size:12px;padding:6px 8px">
-        <button onclick="guardarMinutosGolesRival('${cat}',${fecha})" title="Guardar"
-          style="background:none;border:1px solid var(--border2);border-radius:5px;color:var(--gold2);font-size:12px;padding:4px 10px;cursor:pointer">💾</button>
-      </div>
-    </div>` : (minutosGolRival.length ? `
+  // Ya no se carga a mano (2026-09-25): solo se muestra si el informe de
+  // COMET los trajo.
+  const golRivalHTML = minutosGolRival.length ? `
     <div style="font-size:11px;color:var(--muted);font-family:'Barlow Condensed',sans-serif;margin:10px 0">
       ⚽ Goles de ${esc(d.rival||'rival')}: ${minutosGolRival.map(m=>esc(String(m))+"'").join(' · ')}
-    </div>` : '');
+    </div>` : '';
 
   // Informe de COMET de esta misma fecha (Fase 4), si ya se subió — cruza
   // por id de plantel, no por nombre (evita comparar "Nombre Apellido" de
@@ -8265,7 +8551,10 @@ function renderTablaReserva(containerId){
 
 initFirebase()
   .then(()=>loadData())
-  .catch(e=>{ console.warn('Firebase error:',e); showOfflineBanner(); })
+  .catch(async e=>{
+    console.warn('Firebase error:',e);
+    if(!(await cargarDesdeCopiaLocal())) showOfflineBanner();
+  })
   .finally(()=>{
     buildStatsModule();
     applyViewMode();
@@ -8960,10 +9249,12 @@ function formatFechaReserva(dataCat, fecha){
 function proximoRivalInfoReserva(dataCat){
   const alerta = TABLA_DATA && TABLA_DATA.rival_alertas && TABLA_DATA.rival_alertas[dataCat];
   if(!alerta) return null;
-  const lista = dataCat==='RESERVA_S2' ? RIVALS_RESERVA_S2 : RIVALS_RESERVA;
-  const entry = lista.find(e=>e.f===alerta.fecha);
-  const condTigre = entry ? entry.cond : 'L';
-  return {fecha:alerta.fecha, rival:alerta.rival, condTigre, condRival: condTigre==='L'?'V':'L'};
+  // La localía real sale del fixture de statfutbol; el L/V alternado de
+  // RIVALS_RESERVA es solo un relleno y no coincide con el calendario real.
+  const condFix = TABLA_DATA.fixture_reserva && TABLA_DATA.fixture_reserva[dataCat] && TABLA_DATA.fixture_reserva[dataCat][alerta.fecha];
+  const entry = (dataCat==='RESERVA_S2' ? RIVALS_RESERVA_S2 : RIVALS_RESERVA).find(e=>e.f===alerta.fecha);
+  const condTigre = (condFix && condFix.cond) || (entry ? entry.cond : 'L');
+  return {fecha:alerta.fecha, rival:alerta.rival, condTigre, condRival: condTigre==='L'?'V':'L', fechaTexto: formatFechaReserva(dataCat, alerta.fecha)};
 }
 // Fila de la tabla de posiciones de Copa Proyección (RESERVA_APE/RESERVA_CLA,
 // dos zonas cada una) para un rival -- se busca en las dos zonas porque no
@@ -9663,6 +9954,109 @@ async function renderPlacaPostPartidoBlock(cat, dataCat){
   actualizarPlacaPostPreview(cat);
 }
 
+// ── Placa de RESULTADO de Reserva (2026-09-25) ─────────────────────────
+// Marcador final del partido: escudo local + resultado + escudo visitante,
+// con el orden según la localía real del fixture de statfutbol.
+function paramsPlacaResultadoReserva(cat){
+  const sel = document.getElementById(`placa-res-fecha-${cat}`);
+  if(!sel) return null;
+  const dataCat = placaDataCat[cat] || cat;
+  const fecha = parseInt(sel.value);
+  const rival = rivalDeFechaReserva(dataCat, fecha);
+  const info = matchRivalInfo(rival);
+  const res = results[dataCat]?.[fecha];
+  if(!info || !res) return null;
+  const cond = TABLA_DATA?.fixture_reserva?.[dataCat]?.[fecha]?.cond || 'L';
+  return {fecha, info, gf:res[0], gc:res[1], cond, fechaTexto: formatFechaReserva(dataCat, fecha)};
+}
+async function renderPlacaResultadoReservaBlock(cat, dataCat){
+  const el = document.getElementById(`placa-resultado-block-${cat}`);
+  if(!el) return;
+  await loadTablaData();
+  const jugadas = RIVALS_RESERVA.filter(r=>results[dataCat]?.[r.f]).map(r=>({f:r.f, r:rivalDeFechaReserva(dataCat, r.f)})).sort((a,b)=>b.f-a.f);
+  if(!jugadas.length){
+    el.innerHTML = placaRotuloHTML('🖼️ RESULTADO') + `<div style="padding:0 0 14px;font-size:14px;color:var(--text2)">Todavía no hay partidos jugados.</div>`;
+    return;
+  }
+  const onCh = `actualizarPlacaResultadoReservaPreview('${cat}')`;
+  el.innerHTML = placaRotuloHTML('🖼️ RESULTADO') + bloquePlacaConPreview(`
+    <select id="placa-res-fecha-${cat}" onchange="${onCh}" style="background:var(--surface2);border:1px solid var(--border2);
+      color:var(--text);border-radius:6px;padding:8px 10px;font-family:'Barlow Condensed',sans-serif;font-size:14px;outline:none;margin-bottom:10px">
+      ${jugadas.map(r=>`<option value="${r.f}">Fecha ${r.f} · ${esc(r.r)}</option>`).join('')}</select>
+    <div style="display:flex;gap:8px">
+      <button onclick="generarPlacaResultadoReserva('${cat}')" style="${PLACA_BTN_STYLE}">⬇ PLACA RESULTADO</button>
+      ${botonCompartirPlacaHTML(`generarPlacaResultadoReserva('${cat}', true)`)}
+    </div>`, `placa-res-preview-${cat}`);
+  actualizarPlacaResultadoReservaPreview(cat);
+}
+function actualizarPlacaResultadoReservaPreview(cat){
+  actualizarPlacaPreviewGenerica('res-'+cat, `placa-res-preview-${cat}`, async()=>paramsPlacaResultadoReserva(cat), dibujarPlacaResultadoReserva);
+}
+async function generarPlacaResultadoReserva(cat, compartir){
+  const p = paramsPlacaResultadoReserva(cat);
+  if(!p){ alert('Falta el resultado o el escudo/equivalencia del rival.'); return; }
+  const blob = await dibujarPlacaResultadoReserva(p);
+  await descargarOCompartirPlaca(blob, `placa-resultado-reserva-F${p.fecha}-${slugArchivo(p.info.lpf)}.png`, compartir);
+}
+async function dibujarPlacaResultadoReserva({fecha, info, gf, gc, cond, fechaTexto, scale}){
+  if(document.fonts && document.fonts.ready) await document.fonts.ready;
+  const BG='#111e38', RED='#c0152a', GOLD='#f0c040', WHITE='#ffffff', TXT2='#a8c0e8';
+  const W=1280, H=720, pad=60, SCALE=scale||3;
+  const [escudoTigre, escudoRival, escudoLiga] = await Promise.all([
+    cargarImagen(document.getElementById('escudoImg')?.src),
+    cargarImagen('escudos/'+info.escudo),
+    cargarImagen('escudos/LIGA.png'),
+  ]);
+  const canvas = document.createElement('canvas');
+  canvas.width = W*SCALE; canvas.height = H*SCALE;
+  const ctx = canvas.getContext('2d');
+  ctx.scale(SCALE, SCALE);
+  ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high';
+  ctx.fillStyle = BG; ctx.fillRect(0, 0, W, H);
+  ctx.fillStyle = RED; ctx.fillRect(0, 0, 24, H);
+  ctx.textBaseline = 'top';
+  if(escudoLiga) ctx.drawImage(escudoLiga, pad+24, pad-8, 60, 60);
+  ctx.font = "20px 'Barlow', sans-serif"; ctx.fillStyle = TXT2;
+  try{ ctx.letterSpacing = '1.5px'; }catch(e){}
+  ctx.fillText('CLUB ATLÉTICO TIGRE   ·   RESERVA', pad+24+80, pad+14);
+  try{ ctx.letterSpacing = '0px'; }catch(e){}
+  ctx.font = "700 64px 'Barlow Condensed', sans-serif"; ctx.fillStyle = WHITE;
+  ctx.fillText('Torneo Proyección', pad+24, pad+90);
+  ctx.font = "26px 'Barlow', sans-serif"; ctx.fillStyle = TXT2;
+  ctx.fillText(`Fecha ${fecha}${fechaTexto?'   ·   '+fechaTexto:''}`, pad+24, pad+168);
+  ctx.fillStyle = RED; ctx.fillRect(pad+24, pad+212, 170, 5);
+
+  // Local a la izquierda, visitante a la derecha
+  const tigreLocal = cond!=='V';
+  const izq = tigreLocal ? {img:escudoTigre, nombre:'TIGRE', g:gf} : {img:escudoRival, nombre:info.lpf.toUpperCase(), g:gc};
+  const der = tigreLocal ? {img:escudoRival, nombre:info.lpf.toUpperCase(), g:gc} : {img:escudoTigre, nombre:'TIGRE', g:gf};
+  const box=220, cy=470, cxIzq=W/2-330, cxDer=W/2+330;
+  const lado=(t,cx)=>{
+    if(t.img){
+      const s=Math.min(box/t.img.naturalWidth, box/t.img.naturalHeight);
+      const w=t.img.naturalWidth*s, h=t.img.naturalHeight*s;
+      ctx.drawImage(t.img, cx-w/2, cy-h/2, w, h);
+    }
+    ctx.textAlign='center';
+    let fs=34; ctx.font=`700 ${fs}px 'Barlow Condensed', sans-serif`;
+    while(ctx.measureText(t.nombre).width>280 && fs>18){ fs-=2; ctx.font=`700 ${fs}px 'Barlow Condensed', sans-serif`; }
+    ctx.fillStyle=WHITE; ctx.fillText(t.nombre, cx, cy+box/2+22);
+    ctx.textAlign='left';
+  };
+  lado(izq, cxIzq); lado(der, cxDer);
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.font = "700 190px 'Barlow Condensed', sans-serif"; ctx.fillStyle = WHITE;
+  ctx.fillText(`${izq.g}  -  ${der.g}`, W/2, cy);
+  ctx.textAlign='left'; ctx.textBaseline='top';
+  const r = gf>gc?'VICTORIA':gf<gc?'DERROTA':'EMPATE';
+  ctx.textAlign='right'; ctx.font = "700 24px 'Barlow Condensed', sans-serif"; ctx.fillStyle = GOLD;
+  try{ ctx.letterSpacing = '2px'; }catch(e){}
+  ctx.fillText(`${r}  ·  ${tigreLocal?'LOCAL':'VISITANTE'}`, W-pad, pad+14);
+  try{ ctx.letterSpacing = '0px'; }catch(e){}
+  ctx.textAlign='left';
+  return new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+}
+
 async function renderPlacaProximoRivalBlock(cat, dataCat){
   const el = document.getElementById(`placa-portada-info-${cat}`);
   if(!el) return;
@@ -10107,7 +10501,7 @@ async function dibujarPlacaPortada({cat, prox, info, scale}){
   ctx.fillText(`Fecha ${prox.fecha}`, pad+24, y);
   const anchoFecha = ctx.measureText(`Fecha ${prox.fecha}`).width;
   ctx.font = "26px 'Barlow', sans-serif"; ctx.fillStyle = TXT2;
-  ctx.fillText(`   ·   ${formatFechaCalendario(prox.fecha)}`, pad+24+anchoFecha, y);
+  ctx.fillText(`   ·   ${prox.fechaTexto || formatFechaCalendario(prox.fecha)}`, pad+24+anchoFecha, y);
   y += 46;
 
   // Condición de Tigre esa fecha ("LOCAL vs"/"VISITANTE vs"), a pedido de Javi.
