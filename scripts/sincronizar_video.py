@@ -52,8 +52,15 @@ def main():
         return 1
 
     try:
-        with open(RUTA_TABLAS, encoding="utf-8") as f:
-            efforts = json.load(f).get("catapult_efforts") or {}
+        # Los esfuerzos viven en su propio archivo (data/catapult_efforts.json);
+        # si todavia no existe, se busca en la clave vieja de tablas.json.
+        ruta_efforts = os.path.join(os.path.dirname(RUTA_TABLAS), "catapult_efforts.json")
+        if os.path.exists(ruta_efforts):
+            with open(ruta_efforts, encoding="utf-8") as f:
+                efforts = json.load(f) or {}
+        else:
+            with open(RUTA_TABLAS, encoding="utf-8") as f:
+                efforts = json.load(f).get("catapult_efforts") or {}
     except Exception as e:
         print("[ERROR] No se pudo leer data/tablas.json: %s" % e)
         return 1

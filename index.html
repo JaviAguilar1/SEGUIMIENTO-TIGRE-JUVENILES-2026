@@ -1256,6 +1256,21 @@ let catapultPlayers = {};
 // "Nombre Apellido" tal cual los da Catapult, igual que catapultPlayers --
 // (ver wireGpsVideoForm, dentro de PLANTEL → RENDIMIENTO GPS → 🎥 ESFUERZOS EN VIDEO).
 let catapultEfforts = {};
+// Los esfuerzos pesan ~1,7 MB y solo los usa la pestaña de esfuerzos en video:
+// viven en data/catapult_efforts.json y se bajan recién al abrir RENDIMIENTO
+// GPS (una sola vez). Si ese archivo no está, se usa la clave vieja de
+// tablas.json (catapultEfforts se llena en loadTablaData).
+let _effortsPromise = null, _effortsListos = false;
+function cargarCatapultEfforts(){
+  if(_effortsListos) return Promise.resolve(catapultEfforts);
+  if(_effortsPromise) return _effortsPromise;
+  _effortsPromise = fetch('data/catapult_efforts.json?v='+Date.now())
+    .then(r=>{ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
+    .then(j=>{ catapultEfforts = j || {}; })
+    .catch(e=>{ console.warn('catapult_efforts.json:', e); })   // queda lo que haya traído tablas.json
+    .then(()=>{ _effortsListos = true; return catapultEfforts; });
+  return _effortsPromise;
+}
 
 // videoSync[cat][fecha] = {kickoff1, kickoff2} (segundos dentro del video
 // de YouTube donde arranca cada tiempo) -- lo único que sigue siendo carga
@@ -4374,6 +4389,11 @@ function renderRendimientoGpsTab(tabEl, cat){
         Todavía no hay datos de Catapult cargados para ${cat} (se actualiza solo, cada 4hs, en cuanto se suba un partido nuevo ahí).
       </div>`;
     if(cat==='RESERVA') renderGpsReservaAutoPanel();
+    return;
+  }
+  if(!_effortsListos){
+    tabEl.innerHTML = panelReserva + `<div style="text-align:center;padding:20px;color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-size:13px">Cargando datos de Catapult…</div>`;
+    cargarCatapultEfforts().then(()=>{ if(tabEl.isConnected) renderRendimientoGpsTab(tabEl, cat); });
     return;
   }
   tabEl.innerHTML = panelReserva + `
@@ -8611,7 +8631,7 @@ function loadTablaData(){
       // video" -- pipeline aparte de catapultPlayers (que solo trae
       // totales de sesion), ver fetch_catapult_efforts en scrape_tablas.py.
       // Piloto solo 4TA por ahora (2026-09-05).
-      catapultEfforts = TABLA_DATA.catapult_efforts || {};
+      if(!_effortsListos) catapultEfforts = TABLA_DATA.catapult_efforts || {};   // (clave vieja; lo normal es data/catapult_efforts.json)
       return TABLA_DATA;
     })
     .catch(e=>{ console.warn('tablas.json:',e); TABLA_DATA={categorias:{}}; return TABLA_DATA; });

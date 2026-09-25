@@ -2,7 +2,7 @@
 // Cachea el shell de la app para uso offline.
 // Datos dinámicos (Firebase, tablas.json) van siempre a la red.
 
-const CACHE = 'tigre-juveniles-v3';
+const CACHE = 'tigre-juveniles-v4';
 
 // Shell de la app: se precachea en la instalación.
 const APP_SHELL = [
@@ -50,7 +50,7 @@ self.addEventListener('fetch', event => {
   // tablas.json: red primero (siempre lo último), pero se guarda una copia
   // -- sin la query "?v=..." del cache-buster -- para poder abrir la app sin
   // conexión con los últimos datos que se vieron.
-  if (url.pathname.includes('tablas.json')) {
+  if (url.pathname.includes('tablas.json') || url.pathname.includes('catapult_efforts.json')) {
     const key = url.origin + url.pathname;
     event.respondWith(
       fetch(req).then(res => {

@@ -76,6 +76,24 @@ RESERVA_TORNEOS = {
 }
 
 OUT_PATH = "data/tablas.json"
+# Los esfuerzos de Catapult (sprints/HSR con hora real) pesan ~1,7 MB y solo los
+# usa la pestaña de esfuerzos en video: van en su propio archivo para que la app
+# no lo baje al abrir (se pide recien al entrar a RENDIMIENTO GPS).
+EFFORTS_PATH = "data/catapult_efforts.json"
+
+
+def leer_efforts_guardados():
+    """Esfuerzos de la corrida anterior: del archivo propio y, si todavia no
+    existe (migracion), de la clave vieja dentro de tablas.json."""
+    for ruta, sacar in ((EFFORTS_PATH, lambda d: d), (OUT_PATH, lambda d: d.get("catapult_efforts"))):
+        try:
+            with open(ruta, "r", encoding="utf-8") as f:
+                datos = sacar(json.load(f))
+            if datos:
+                return datos
+        except Exception:  # noqa
+            pass
+    return {}
 
 HEADERS = {
     "User-Agent": "Mozilla/5.0 (compatible; TigreJuvenilesBot/1.0; +github-actions)"
@@ -3140,12 +3158,7 @@ def main():
     # no existe el archivo (primera corrida) o esta corrupto, arranca
     # vacio sin romper nada -- es solo una optimizacion, no una fuente de
     # verdad.
-    catapult_efforts_previos = {}
-    try:
-        with open(OUT_PATH, "r", encoding="utf-8") as f:
-            catapult_efforts_previos = json.load(f).get("catapult_efforts") or {}
-    except Exception:  # noqa
-        pass
+    catapult_efforts_previos = leer_efforts_guardados()
     # De paso que se pide cada pagina de la LPF para la tabla de posiciones,
     # se saca tambien el fixture completo (mismo HTML, sin pedido aparte) --
     # ver parse_lpf_fixture_completo. Reemplaza a la vieja fuente sabadogol.
@@ -3616,6 +3629,12 @@ def main():
         resultado["errores"] = errores
 
     os.makedirs("data", exist_ok=True)
+    # Los esfuerzos van a su propio archivo (ver EFFORTS_PATH); si esta corrida
+    # no los trajo, el archivo anterior queda como esta.
+    efforts_para_guardar = resultado.pop("catapult_efforts", None)
+    if efforts_para_guardar:
+        with open(EFFORTS_PATH, "w", encoding="utf-8") as f:
+            json.dump(efforts_para_guardar, f, ensure_ascii=False, separators=(',', ':'))
     with open(OUT_PATH, "w", encoding="utf-8") as f:
         json.dump(resultado, f, ensure_ascii=False, separators=(',', ':'))  # sin espacios: pesa 60% menos
     print(f"Escrito {OUT_PATH} ({len(resultado['categorias'])} categorias)")
