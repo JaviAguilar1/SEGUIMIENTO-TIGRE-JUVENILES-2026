@@ -2174,7 +2174,13 @@ function toggleEmailMode(){
 // mode: 'signup' llena wall-perfil-signup con los perfiles LIBRES; 'login'
 // llena wall-usuario-select con los perfiles YA CREADOS (profile_taken es de
 // lectura pública, no hace falta estar logueado).
-function populatePerfilSelect(mode){
+// `intento`: con conexión lenta (celular) Firebase puede tardar en conectar,
+// o la lectura puede fallar una vez -- antes eso caía directo a "Todavía no
+// hay cuentas creadas" aunque la cuenta SÍ existiera, empujando a la persona
+// a "Ingresar con email" (que pide una dirección inventada que nadie conoce).
+// Ahora reintenta cada 500ms durante 5s antes de rendirse.
+function populatePerfilSelect(mode, intento){
+  intento = intento || 0;
   const selId = mode==='signup' ? 'wall-perfil-signup' : 'wall-usuario-select';
   const sel=document.getElementById(selId);
   if(!sel) return;
@@ -2186,10 +2192,17 @@ function populatePerfilSelect(mode){
       ? opts.map(p=>`<option value="${p.slug}">${esc(p.usuario)}</option>`).join('')
       : `<option value="">${mode==='signup' ? 'Ya están todos los usuarios creados' : 'Todavía no hay cuentas creadas'}</option>`;
   };
+  const reintentarOrendirse=()=>{
+    if(intento<10) setTimeout(()=>populatePerfilSelect(mode, intento+1), 500);
+    else build(new Set());
+  };
   if(fbReady && db){
     db.ref('profile_taken').once('value')
       .then(snap=>build(new Set(snap.val() ? Object.keys(snap.val()) : [])))
-      .catch(()=>build(new Set()));
+      .catch(reintentarOrendirse);
+  } else if(intento<10){
+    sel.innerHTML = '<option value="">Cargando…</option>';
+    setTimeout(()=>populatePerfilSelect(mode, intento+1), 500);
   } else {
     build(new Set());
   }
