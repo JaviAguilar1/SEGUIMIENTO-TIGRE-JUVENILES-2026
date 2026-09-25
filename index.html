@@ -1326,6 +1326,28 @@ function fechaSinJugar(cat, fecha){
     && TABLA_DATA.fixture_completo[cat][fecha];
   return Array.isArray(ronda) && ronda.length > 0 && ronda.every(p => !p.gl && !p.gv);
 }
+// REGLA (Javi, 2026-09-25): un informe de COMET subido es válido ANTE TODO --
+// pisa a la carga manual, statfutbol, la LPF y futdetail en esa fecha.
+// ¿El informe de COMET está cargado en TODAS las fechas jugadas de la categoría?
+function cometCubreTodoCat(cat){
+  const jugadas = Object.keys(results[cat]||{}).filter(f=>results[cat][f]).map(Number);
+  return jugadas.length>0 && jugadas.every(f=>(partidos[cat]||{})[f]);
+}
+// Tarjetas de un jugador por fecha: COMET donde hay informe, statfutbol donde no.
+function tarjetasEfectivasJugador(cat, nombre, id, tipo){   // tipo: 'amarilla' | 'roja'
+  const w = cometNameWords(nombre);
+  const mismo = o=>{ const ow=cometNameWords(o); return ow.length>0 && w.length>0 && (ow.every(x=>w.includes(x)) || w.every(x=>ow.includes(x))); };
+  const sfPartidos = (TABLA_DATA&&TABLA_DATA.statfutbol_partidos&&TABLA_DATA.statfutbol_partidos[cat])||{};
+  const fechas = new Set([...Object.keys(partidos[cat]||{}), ...Object.keys(sfPartidos)]);
+  let n = 0;
+  fechas.forEach(f=>{
+    const partido = (partidos[cat]||{})[f];
+    if(partido && id!=null){ n += (partido[tipo==='amarilla'?'amarillas':'rojas']||[]).filter(a=>a.id===id).length; return; }
+    const ev = Object.entries(sfPartidos[f]||{}).find(([nom])=>mismo(nom));
+    if(ev && ev[1][tipo]) n++;
+  });
+  return n;
+}
 function autoResultado(cat, fecha){
   const p = (partidos[cat]||{})[fecha];  // informe de COMET, subido a mano
   // Lo cargado a mano gana siempre (regla de prioridad de fuentes). Además un
@@ -1355,6 +1377,13 @@ function autocompletarResultados(){
     cats.forEach(cat=>{
       if(!results[cat]) results[cat]={};
       fl.forEach(r=>{
+        // COMET manda sobre todo, incluso sobre lo tipeado a mano.
+        const pc = (partidos[cat]||{})[r.f];
+        if(pc && pc.golesTigre!=null && pc.golesRival!=null){
+          const c=results[cat][r.f];
+          if(!c || c[0]!==pc.golesTigre || c[1]!==pc.golesRival){ results[cat][r.f]=[pc.golesTigre, pc.golesRival]; resultsAuto.add(cat+'|'+r.f); }
+          return;
+        }
         if(results[cat][r.f]) return;  // ya hay dato manual -> no tocar
         const a = autoResultado(cat, r.f);
         if(a){ results[cat][r.f]=a; resultsAuto.add(cat+'|'+r.f); }
@@ -2713,6 +2742,9 @@ function calcConfiabilidad(){
 
   const golesMismatches=[]; // {cat, jugador, mio, fut, key, soloEn}
   CONFIABILIDAD_CATS.forEach(cat=>{
+    // Si COMET cubre todas las fechas jugadas, sus goles son los válidos: una
+    // diferencia contra futdetail es un dato viejo de futdetail, no un error.
+    if(cometCubreTodoCat(cat)) return;
     const misGoles={}, nombreOriginal={};
     const normComparable=normComparableNombre;
     const keyDe=nombre=>keyDeJugador(cat, nombre);
@@ -2854,7 +2886,7 @@ function calcConfiabilidad(){
     (goleadores[cat]||[]).forEach(g=>{ porFecha[g.fecha]=(porFecha[g.fecha]||0)+(g.goals||0); });
     Object.entries(porFecha).forEach(([f,cargados])=>{
       const fecha=Number(f);
-      if(fechasExcluidasGoles(cat).has(fecha)) return;
+      if(fechasExcluidasGoles(cat).has(fecha) || (partidos[cat]||{})[fecha]) return;   // con COMET manda COMET
       const r=results[cat]?.[fecha];
       const resultado = r ? r[0] : TABLA_DATA?.statfutbol_resultados?.[cat]?.[fecha]?.gf;
       if(resultado!=null && cargados>resultado) golesImposibles.push({cat, fecha, cargados, resultado});
@@ -3630,7 +3662,7 @@ function renderStatsSingle(cat, content){
     // Reserva: carga a mano > resultado de statfutbol > fixture completo de
     // statfutbol (cubre las fechas todavía sin jugar). 'INTERZONAL' era el
     // relleno viejo de F18, no un rival real.
-    const rivalManual = rivalData[dataCat][r.f]?.rival;
+    const rivalManual = isReserva ? rivalData[dataCat][r.f]?.rival : null;
     const rName = isReserva ? ((rivalManual && rivalManual!=='INTERZONAL' ? rivalManual : '') || autoRes?.rival || rivalDeFechaReserva(dataCat, r.f)) : r.r;
     // Localía de RESERVA 100% automática (statfutbol, fixture_reserva del
     // scraper); rivalData solo queda de respaldo si el fixture no la trae.
@@ -7846,7 +7878,19 @@ function renderRosterCat(cat, content){
     return;
   }
 
-  const merged=roster.map(p=>({...p, stats:statsPorNombre[normNombre(p.nombre)]||{}}));
+  // Categorías con informes de COMET: goles y tarjetas salen de COMET (fecha
+  // por fecha, con statfutbol solo donde no hay informe), no de futdetail.
+  const conComet = Object.keys(partidos[cat]||{}).length>0;
+  const geLista = conComet ? golesEfectivos(cat) : [];
+  const merged=roster.map(p=>{
+    const base = statsPorNombre[normNombre(p.nombre)]||{};
+    if(!conComet) return {...p, stats:base};
+    const w = cometNameWords(p.nombre);
+    const ge = geLista.find(g=>{ const gw=cometNameWords(g.name); return gw.length>0 && w.length>0 && (gw.every(x=>w.includes(x)) || w.every(x=>gw.includes(x))); });
+    return {...p, stats:{...base, goles: ge?ge.goals:0,
+      tarjeta_amarilla: tarjetasEfectivasJugador(cat, p.nombre, p.id!=null?p.id:null, 'amarilla'),
+      tarjeta_roja: tarjetasEfectivasJugador(cat, p.nombre, p.id!=null?p.id:null, 'roja')}};
+  });
   if(!rosterSortState[cat]) rosterSortState[cat]={key:'minutos_jugados', dir:-1};
   renderRosterTable(cat, merged);
 
@@ -10812,7 +10856,8 @@ function calcularFichaJugador(cat, nombre){
   const cometCubreTodo = fechasJugadas.length > 0 &&
     fechasJugadas.every(f=>(partidos[cat]||{})[f]);
   const minSf = sfJ ? (parseInt(sfJ.min)||0) : 0;
-  const convocatorias = Math.max(vecesTitular+vecesBanco, sfJ?(parseInt(sfJ.pj)||0):0);
+  const convocatorias = (cometCubreTodo && vecesTitular+vecesBanco>0) ? vecesTitular+vecesBanco
+    : Math.max(vecesTitular+vecesBanco, sfJ?(parseInt(sfJ.pj)||0):0);
   const minutosFinal = (cometCubreTodo && minCometSum) ? minCometSum
     : (minSf || (parseInt(s.minutos_jugados)||0) || minCometSum);
   const geEntry = golesEfectivos(cat).find(g=>sonMismoJugador(g.name));
