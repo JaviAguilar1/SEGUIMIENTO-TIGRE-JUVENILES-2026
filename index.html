@@ -1312,6 +1312,17 @@ function getResult(gf,gc){ if(gf===null||gc===null)return null; return gf>gc?'W'
 // ensucia tus datos). `resultsAuto` marca cuales son auto para: (a) no
 // persistirlos en saveData, (b) poder recalcularlos en cada render.
 let resultsAuto = new Set();
+// Fechas con informe de COMET: el resultado del informe manda y solo el admin
+// puede cambiarlo. Si el admin lo cambia a propósito queda marcado acá
+// (resultadosForzados[cat][fecha]=true, se guarda en Firebase) y COMET no lo pisa.
+let resultadosForzados = {};
+// Lo que había tipeado a mano antes de que COMET lo pisara en pantalla: no se
+// muestra, pero se conserva al guardar (nunca se borra un dato cargado).
+const resultsPisadoPorComet = new Map();
+function fechaConComet(cat, fecha){
+  const p=(partidos[cat]||{})[fecha];
+  return !!(p && p.golesTigre!=null && p.golesRival!=null);
+}
 // La LPF publica la fecha ANTES de que se juegue, con TODOS los partidos en
 // 0-0. Mirando solo el partido de Tigre ese "0-0 de relleno" es idéntico a un
 // empate real; mirando la fecha entera se distingue solo, porque que los 9
@@ -1379,9 +1390,12 @@ function autocompletarResultados(){
       fl.forEach(r=>{
         // COMET manda sobre todo, incluso sobre lo tipeado a mano.
         const pc = (partidos[cat]||{})[r.f];
-        if(pc && pc.golesTigre!=null && pc.golesRival!=null){
+        if(pc && pc.golesTigre!=null && pc.golesRival!=null && !resultadosForzados[cat]?.[r.f]){
           const c=results[cat][r.f];
-          if(!c || c[0]!==pc.golesTigre || c[1]!==pc.golesRival){ results[cat][r.f]=[pc.golesTigre, pc.golesRival]; resultsAuto.add(cat+'|'+r.f); }
+          if(!c || c[0]!==pc.golesTigre || c[1]!==pc.golesRival){
+            if(c) resultsPisadoPorComet.set(cat+'|'+r.f, c);
+            results[cat][r.f]=[pc.golesTigre, pc.golesRival]; resultsAuto.add(cat+'|'+r.f);
+          }
           return;
         }
         if(results[cat][r.f]) return;  // ya hay dato manual -> no tocar
@@ -1567,8 +1581,11 @@ function initFirebase(){
 
 function applyViewMode(){
   document.querySelectorAll('.score-input,.link-input,.gol-input,.gol-fecha-input').forEach(el=>{
-    el.disabled=!canEdit;
-    el.style.opacity=canEdit?'1':'0.6';
+    // Con informe de COMET el resultado solo lo cambia el admin.
+    const bloqueadoComet = el.classList.contains('score-input') && !isAdmin && fechaConComet(el.dataset.cat, parseInt(el.dataset.fecha));
+    el.disabled=!canEdit || bloqueadoComet;
+    el.title = bloqueadoComet ? 'Resultado del informe de COMET: solo el admin puede cambiarlo' : '';
+    el.style.opacity=(canEdit && !bloqueadoComet)?'1':'0.6';
   });
   document.querySelectorAll('.btn-add-gol,.btn-del-gol').forEach(el=>{
     el.style.display=canEdit?'':'none';
@@ -1796,7 +1813,7 @@ function saveData(){
     // guardado normal (cargar un resultado, un link, un gol) BORRARÍA todo
     // lo subido de COMET, porque saveData() hace un .set() del nodo entero,
     // no un merge parcial. Mismo motivo para aliasJugadoresComet.
-    const payload={results:{},links:{},goleadores:{},rivalData:rivalData,matchData:matchData,gymData:gymData,jugadores:{},plantel:{},chequeoSemanal:chequeoSemanal,aliasJugadores:aliasJugadores,aliasJugadoresComet:aliasJugadoresComet,recordatoriosOmitidos:recordatoriosOmitidos,golesMismatchOmitidos:golesMismatchOmitidos,partidos:partidos,jugadoresArchivados:jugadoresArchivados,jugadoresManual:jugadoresManual,gpsMetricCfg:gpsMetricCfg,gpsPosOverride:gpsPosOverride,correccionesNombres:correccionesNombres};
+    const payload={results:{},links:{},goleadores:{},rivalData:rivalData,matchData:matchData,gymData:gymData,jugadores:{},plantel:{},chequeoSemanal:chequeoSemanal,aliasJugadores:aliasJugadores,aliasJugadoresComet:aliasJugadoresComet,recordatoriosOmitidos:recordatoriosOmitidos,golesMismatchOmitidos:golesMismatchOmitidos,partidos:partidos,jugadoresArchivados:jugadoresArchivados,jugadoresManual:jugadoresManual,gpsMetricCfg:gpsMetricCfg,gpsPosOverride:gpsPosOverride,correccionesNombres:correccionesNombres,resultadosForzados:resultadosForzados};
     CATEGORIES.forEach(cat=>{
       payload.results[cat]={};
       payload.links[cat]={};
@@ -1806,7 +1823,7 @@ function saveData(){
       const fl=cat==='RESERVA'?RIVALS_RESERVA:RIVALS;
       fl.forEach(r=>{
         // Lo autocompletado (resultsAuto) NO se persiste -- solo la carga manual.
-        payload.results[cat][r.f]=resultsAuto.has(cat+'|'+r.f)?null:(results[cat][r.f]||null);
+        payload.results[cat][r.f]=resultsAuto.has(cat+'|'+r.f)?(resultsPisadoPorComet.get(cat+'|'+r.f)||null):(results[cat][r.f]||null);
         payload.links[cat][r.f]=links[cat][r.f]||{};
       });
     });
@@ -1911,6 +1928,7 @@ function hidratarStats(p){
   if(p.gpsMetricCfg) gpsMetricCfg = p.gpsMetricCfg;
   if(p.gpsPosOverride) gpsPosOverride = p.gpsPosOverride;
   if(p.correccionesNombres) correccionesNombres = p.correccionesNombres;
+  if(p.resultadosForzados) resultadosForzados = p.resultadosForzados;
   return true;
 }
 
@@ -3736,10 +3754,10 @@ function renderStatsSingle(cat, content){
       <td class="fecha-num" style="white-space:nowrap">F${r.f}${fechaCal?` - (${fechaCal})`:''}</td>${rivalCell}
       <td><div class="score-cell">
         <input class="score-input" type="number" min="0" max="99" value="${gf}"
-          data-cat="${dataCat}" data-fecha="${r.f}" data-side="0" placeholder="—" ${canEdit?'':'disabled'}>
+          data-cat="${dataCat}" data-fecha="${r.f}" data-side="0" placeholder="—" ${canEdit&&(isAdmin||!fechaConComet(dataCat,r.f))?'':'disabled'} ${fechaConComet(dataCat,r.f)?'title="Resultado del informe de COMET: solo el admin puede cambiarlo"':''}>
         <span class="score-sep">-</span>
         <input class="score-input" type="number" min="0" max="99" value="${gc}"
-          data-cat="${dataCat}" data-fecha="${r.f}" data-side="1" placeholder="—" ${canEdit?'':'disabled'}>
+          data-cat="${dataCat}" data-fecha="${r.f}" data-side="1" placeholder="—" ${canEdit&&(isAdmin||!fechaConComet(dataCat,r.f))?'':'disabled'} ${fechaConComet(dataCat,r.f)?'title="Resultado del informe de COMET: solo el admin puede cambiarlo"':''}>
         ${res?`<span class="result-inline" style="margin-left:8px;font-weight:700;color:${ptC}">${letraEs} (${pts})</span>`:''}
       </div></td>
       ${linkCols}${equipoBtn}</tr>${showEquipo?`
@@ -7579,6 +7597,11 @@ function attachTableEvents(cat, tbodyId){
     if(e.target.classList.contains('score-input')){
       const f=parseInt(e.target.dataset.fecha),s=parseInt(e.target.dataset.side);
       const v=e.target.value===''?null:parseInt(e.target.value);
+      if(fechaConComet(cat,f)){
+        // Solo el admin llega acá (los demás tienen el campo bloqueado).
+        if(!isAdmin) return;
+        (resultadosForzados[cat]=resultadosForzados[cat]||{})[f]=true;
+      }
       resultsAuto.delete(cat+'|'+f);  // el usuario lo edito a mano -> pasa a ser manual (se guarda)
       if(!results[cat][f])results[cat][f]=[null,null];
       results[cat][f][s]=v;
