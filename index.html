@@ -8744,12 +8744,12 @@ initFirebase()
     buildStatsModule();
     applyViewMode();
     startPublicListener(); // load stats for everyone, auth or not
+    populatePerfilSelect(loginMode==='signup'?'signup':'login'); // la lista de ingreso se armó antes de conectar a Firebase: se vuelve a llenar
   });
 
 // Real-time listener for stats — works even without login (public read)
 // This ensures data is always visible regardless of auth state
 function startPublicListener(){
-  .then(()=>{ populatePerfilSelect(loginMode==='signup'?'signup':'login'); }) // la lista de ingreso se armó antes de conectar a Firebase: se vuelve a llenar
   if(!fbReady||!db) return;
   db.ref('stats').on('value', snap=>{
     // Con sesión iniciada ya hay otro listener de `stats` (initFirebase): este
