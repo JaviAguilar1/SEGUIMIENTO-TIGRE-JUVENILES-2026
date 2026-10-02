@@ -4844,6 +4844,8 @@ function gpsCruceFormHTML(cat){
         style="flex:1;padding:8px;border-radius:8px;border:1px solid var(--border2);background:rgba(5,8,15,0.5);color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-weight:700;letter-spacing:1px;font-size:12px;cursor:pointer;">INFORME DE PARTIDO</button>
       ${catapultEfforts[cat]?`<button type="button" id="gps-mode-video" class="cat-subtab-btn" onclick="gpsSetMode('video')"
         style="flex:1;padding:8px;border-radius:8px;border:1px solid var(--border2);background:rgba(5,8,15,0.5);color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-weight:700;letter-spacing:1px;font-size:12px;cursor:pointer;">🎥 ESFUERZOS EN VIDEO</button>`:''}
+      ${catapultEfforts[cat]?`<button type="button" id="gps-mode-heat" class="cat-subtab-btn" onclick="gpsSetMode('heat')"
+        style="flex:1;padding:8px;border-radius:8px;border:1px solid var(--border2);background:rgba(5,8,15,0.5);color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-weight:700;letter-spacing:1px;font-size:12px;cursor:pointer;">🔥 MAPAS DE CALOR</button>`:''}
     </div>
     <div id="gps-cruce-body"></div>`;
 }
@@ -4902,7 +4904,7 @@ function wireGpsPerfilForm(){ renderGpsPerfil(); }
 let gpsMode = 'cmp';
 function gpsSetMode(m){
   gpsMode = m;
-  ['cmp','rank','perfil','porfecha','informe','video'].forEach(x=>{
+  ['cmp','rank','perfil','porfecha','informe','video','heat'].forEach(x=>{
     const btn = document.getElementById('gps-mode-'+x);
     if(!btn) return; // 'video' no siempre está (solo si hay catapultEfforts para esta cat)
     const on = x===m;
@@ -4923,11 +4925,154 @@ function gpsSetMode(m){
   } else if(m==='video'){
     body.innerHTML = gpsVideoFormHTML(gpsCruceCat);
     wireGpsVideoForm();
+  } else if(m==='heat'){
+    body.innerHTML = gpsHeatFormHTML();
+    wireGpsHeatForm();
   } else {
     body.innerHTML = gpsCmpRankFormHTML(gpsCruceCat);
   }
 }
 function wireGpsCruceForm(){ gpsSetMode(gpsMode); }
+
+// ============================================================
+//  MAPAS DE CALOR — dónde pasó el tiempo cada jugador (o todo el equipo)
+//  en un partido. Los datos salen de data/catapult_heatmaps.json
+//  (fetch_catapult_heatmaps en scrape_tablas.py): por jugador y tiempo, una
+//  grilla de celdas de 4 m con los segundos en cada una. Solo lectura, no
+//  toca Firebase ni las otras pestañas de GPS.
+// ============================================================
+let catapultHeatmaps = {};
+let _heatPromise = null, _heatListos = false;
+function cargarCatapultHeatmaps(){
+  if(_heatListos) return Promise.resolve(catapultHeatmaps);
+  if(_heatPromise) return _heatPromise;
+  _heatPromise = fetch('data/catapult_heatmaps.json?v='+Date.now())
+    .then(r=>{ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
+    .then(j=>{ catapultHeatmaps = j || {}; _heatListos = true; })
+    .catch(e=>{ console.warn('catapult_heatmaps.json:', e); _heatPromise = null; })
+    .then(()=>catapultHeatmaps);
+  return _heatPromise;
+}
+
+let gpsHeatFecha = null;
+let gpsHeatJugador = '';      // '' = todo el equipo (suma de todos los que jugaron)
+let gpsHeatTiempo = 'ambos';  // '1' | '2' | 'ambos' (2T girado 180°)
+
+function gpsHeatFechasDe(cat){
+  const d = catapultHeatmaps[cat] || {};
+  return Object.keys(d).filter(f=>Object.keys(d[f].jug||{}).length)
+    .sort((a,b)=>parseInt(b.slice(1))-parseInt(a.slice(1)));
+}
+
+function gpsHeatFormHTML(){
+  return `<div id="gps-heat-wrap" style="color:var(--muted);font-size:12px;padding:12px 0">Cargando mapas de calor…</div>`;
+}
+function wireGpsHeatForm(){
+  const wrap = document.getElementById('gps-heat-wrap');
+  cargarCatapultHeatmaps().then(()=>{ if(wrap && wrap.isConnected) gpsHeatRender(); });
+}
+
+// Suma las grillas del jugador (o de todos) para el tiempo elegido. En 'ambos'
+// el 2T se gira 180° (índice i -> n-1-i) para que los dos tiempos queden con la
+// misma dirección de ataque: los equipos cambian de arco en el entretiempo.
+function gpsHeatGrilla(dia, jugador, tiempo){
+  const n = dia.nx*dia.ny, out = new Array(n).fill(0);
+  (jugador ? [jugador] : Object.keys(dia.jug)).forEach(nm=>{
+    const j = dia.jug[nm]; if(!j) return;
+    if(tiempo!=='2' && j.t1) j.t1.forEach((v,i)=>{ out[i]+=v; });
+    if(tiempo!=='1' && j.t2) j.t2.forEach((v,i)=>{ out[tiempo==='ambos' ? n-1-i : i]+=v; });
+  });
+  return out;
+}
+
+function gpsHeatColor(t){
+  const stops = [[0,[40,80,255]],[.25,[0,200,255]],[.5,[60,220,80]],[.75,[255,220,0]],[1,[255,40,30]]];
+  for(let i=1;i<stops.length;i++){
+    if(t<=stops[i][0]){
+      const [t0,c0]=stops[i-1], [t1,c1]=stops[i], k=(t-t0)/(t1-t0);
+      return c0.map((v,j)=>Math.round(v+(c1[j]-v)*k));
+    }
+  }
+  return stops[stops.length-1][1];
+}
+
+function gpsHeatCancha(ctx, L, W, s){
+  ctx.strokeStyle = 'rgba(255,255,255,.45)'; ctx.lineWidth = 1.5;
+  ctx.strokeRect(1, 1, L*s-2, W*s-2);
+  ctx.beginPath(); ctx.moveTo(L*s/2, 0); ctx.lineTo(L*s/2, W*s); ctx.stroke();
+  ctx.beginPath(); ctx.arc(L*s/2, W*s/2, 9.15*s, 0, Math.PI*2); ctx.stroke();
+  [[16.5,40.3],[5.5,18.3]].forEach(([prof,anch])=>{
+    ctx.strokeRect(1, (W-anch)/2*s, prof*s, anch*s);
+    ctx.strokeRect((L-prof)*s-1, (W-anch)/2*s, prof*s, anch*s);
+  });
+}
+
+function gpsHeatDibujar(cvs, dia, grilla){
+  const cw = cvs.width, ch = cvs.height, s = cw/dia.largo, cell = dia.celda*s;
+  const ctx = cvs.getContext('2d');
+  ctx.fillStyle = '#0d1f14'; ctx.fillRect(0, 0, cw, ch);
+  // 1) acumula opacidad con un degradado radial por celda; 2) la pinta con la paleta.
+  const ac = document.createElement('canvas'); ac.width = cw; ac.height = ch;
+  const a = ac.getContext('2d');
+  const vals = grilla.filter(v=>v>0).sort((x,y)=>x-y);
+  const vmax = vals.length ? (vals[Math.floor(vals.length*0.95)] || vals[vals.length-1]) : 1;
+  const r = cell*1.6;
+  grilla.forEach((v,i)=>{
+    if(v<=0) return;
+    const cx = ((i%dia.nx)+.5)*cell, cy = (Math.floor(i/dia.nx)+.5)*cell;
+    const g = a.createRadialGradient(cx, cy, 0, cx, cy, r);
+    g.addColorStop(0, `rgba(0,0,0,${Math.min(1, v/vmax)*0.85})`);
+    g.addColorStop(1, 'rgba(0,0,0,0)');
+    a.fillStyle = g; a.fillRect(cx-r, cy-r, 2*r, 2*r);
+  });
+  const img = a.getImageData(0, 0, cw, ch), d = img.data;
+  for(let p=0;p<d.length;p+=4){
+    const al = d[p+3]; if(al<20){ d[p+3]=0; continue; }   // sin velo azul donde casi no estuvo
+    const c = gpsHeatColor(al/255);
+    d[p]=c[0]; d[p+1]=c[1]; d[p+2]=c[2]; d[p+3]=Math.min(230, 50+al*0.8);
+  }
+  a.putImageData(img, 0, 0);
+  ctx.drawImage(ac, 0, 0);
+  gpsHeatCancha(ctx, dia.largo, dia.ancho, s);
+}
+
+function gpsHeatRender(){
+  const wrap = document.getElementById('gps-heat-wrap'); if(!wrap) return;
+  const cat = gpsCruceCat;
+  const fechas = gpsHeatFechasDe(cat);
+  if(!fechas.length){
+    wrap.innerHTML = `<div style="color:var(--muted);font-size:12px;padding:12px 0">Todavía no hay mapas de calor para ${esc(cat)}. Se generan solos después de cada partido (los baja la tarea programada de la PC).</div>`;
+    return;
+  }
+  if(!gpsHeatFecha || !fechas.includes(gpsHeatFecha)) gpsHeatFecha = fechas[0];
+  const dia = catapultHeatmaps[cat][gpsHeatFecha];
+  if(gpsHeatJugador && !dia.jug[gpsHeatJugador]) gpsHeatJugador = '';
+  const sel = 'width:100%;background:rgba(5,8,15,.8);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:13px;padding:8px 10px;';
+  const lbl = 'font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;display:block;margin-bottom:4px';
+  const fechaOpts = fechas.map(f=>`<option value="${f}"${f===gpsHeatFecha?' selected':''}>${f}${catapultHeatmaps[cat][f].opp?' · vs '+esc(catapultHeatmaps[cat][f].opp):''}</option>`).join('');
+  const jugOpts = Object.keys(dia.jug).sort().map(n=>`<option value="${esc(n)}"${n===gpsHeatJugador?' selected':''}>${esc(formatNombreMostrar(n,cat))}</option>`).join('');
+  const pill = (v,txt)=>{ const on = gpsHeatTiempo===v; return `<button type="button" onclick="gpsHeatTiempo='${v}';gpsHeatRender()" style="flex:1;padding:8px;border-radius:8px;border:1px solid ${on?'var(--gold)':'var(--border2)'};background:${on?'linear-gradient(135deg,#3a2a08,#1a1206)':'rgba(5,8,15,0.5)'};color:${on?'var(--gold)':'var(--muted)'};font-family:'Barlow Condensed',sans-serif;font-weight:700;letter-spacing:1px;font-size:12px;cursor:pointer;">${txt}</button>`; };
+  wrap.innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+      <div><label style="${lbl}">Partido</label>
+        <select onchange="gpsHeatFecha=this.value;gpsHeatJugador='';gpsHeatRender()" style="${sel}">${fechaOpts}</select></div>
+      <div><label style="${lbl}">Jugador</label>
+        <select onchange="gpsHeatJugador=this.value;gpsHeatRender()" style="${sel}"><option value="">— Todo el equipo —</option>${jugOpts}</select></div>
+    </div>
+    <div style="display:flex;gap:8px;margin-bottom:12px">${pill('1','1ER TIEMPO')}${pill('2','2DO TIEMPO')}${pill('ambos','AMBOS')}</div>
+    <canvas id="gps-heat-cvs" style="width:100%;max-width:760px;display:block;border-radius:8px;border:1px solid var(--border)"></canvas>
+    <div id="gps-heat-info" style="color:var(--muted);font-size:11px;margin-top:8px"></div>`;
+  const cvs = document.getElementById('gps-heat-cvs');
+  cvs.width = 760; cvs.height = Math.round(760*dia.ancho/dia.largo);
+  const grilla = gpsHeatGrilla(dia, gpsHeatJugador, gpsHeatTiempo);
+  gpsHeatDibujar(cvs, dia, grilla);
+  const seg = grilla.reduce((x,y)=>x+y, 0);
+  const quien = gpsHeatJugador ? '' : ` · suma de ${Object.keys(dia.jug).length} jugadores`;
+  document.getElementById('gps-heat-info').textContent =
+    `${Math.round(seg/60)} min con posición${quien}. Rojo = más tiempo en esa zona. `
+    + (gpsHeatTiempo==='ambos' ? 'El 2T está girado 180° para que ambos tiempos tengan la misma dirección de ataque. ' : '')
+    + (dia.aprox ? '⚠ Partido de visitante: Catapult no tiene esa cancha mapeada, así que el tamaño y la orientación están ESTIMADOS con el GPS (aproximado; las líneas no son exactas).' : '');
+}
 
 // ============================================================
 //  ESFUERZOS EN VIDEO — "clic en la métrica destacada -> ver el momento
