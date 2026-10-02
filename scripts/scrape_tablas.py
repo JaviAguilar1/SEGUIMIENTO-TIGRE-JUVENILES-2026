@@ -3801,9 +3801,9 @@ def main():
                 resultado["catapult_efforts"] = catapult_efforts_previos
 
         # Mapas de calor (posicion X,Y a 10 Hz -> grilla por jugador y tiempo,
-        # ver fetch_catapult_heatmaps). Piloto 4TA (2026-10-02). Sumar
+        # ver fetch_catapult_heatmaps). 4TA/5TA/6TA (Javi, 2026-10-02). Sumar
         # categorias es agregar el nombre a esta lista.
-        CATAPULT_HEATMAPS_CATS = ["4TA"]
+        CATAPULT_HEATMAPS_CATS = ["4TA", "5TA", "6TA"]
         heatmaps_previos = leer_heatmaps_guardados()
         try:
             heatmaps = fetch_catapult_heatmaps(
