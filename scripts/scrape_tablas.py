@@ -2664,6 +2664,90 @@ def fetch_statfutbol_equipos(catnum):
     return [(v, n.strip()) for v, n in opts]
 
 
+# Sufijos de ciudad que la LPF le pone, como ultima palabra, SOLO al equipo
+# "menos obvio" cuando dos clubes comparten nombre base en la misma
+# categoria (ej. "Estudiantes" y "Estudiantes RC", "Gimnasia LP" y
+# "Gimnasia MZA") -- confirmado en la tabla real de posiciones. statfutbol,
+# en cambio, le pone el codigo de ciudad entre parentesis a LOS DOS
+# (STATFUTBOL_CITY_CODES ya sabe traducirlo), asi que matchear el nombre
+# LPF sin sufijo ("Estudiantes") da ambiguo por las suyas: puede ser
+# "ESTUDIANTES (LP)" o "ESTUDIANTES (RC)" para statfutbol_match_equipo. Se
+# resuelve en dos pasadas (_mapa_lpf_a_statfutbol): primero los que la LPF
+# ya desambigua por sufijo (matchean solos, sin ambiguedad), y lo que le
+# queda al id ya usado se descarta del pool antes de resolver por
+# eliminacion al que la LPF deja sin sufijo.
+_LPF_SUFIJOS_CIUDAD = {"RC", "LP", "MZA", "SJ", "SF", "SDE"}
+
+
+def _mapa_lpf_a_statfutbol(lpf_equipos, equipos_sf):
+    """Nombre LPF (tal cual lo trae parse_tabla) -> id de statfutbol. Ver
+    nota de _LPF_SUFIJOS_CIUDAD. Si un nombre no matchea de forma unica (ni
+    siquiera por eliminacion), se omite -- mejor faltar un dato que
+    inventarlo mal."""
+    usados, out, pendientes = set(), {}, []
+    for nombre in lpf_equipos:
+        partes = nombre.split()
+        m = None
+        if len(partes) > 1 and partes[-1].upper() in _LPF_SUFIJOS_CIUDAD:
+            nombre_sf = f"{' '.join(partes[:-1])} ({partes[-1]})"
+            m = statfutbol_match_equipo(nombre_sf, equipos_sf)
+        if m:
+            out[m[0]] = nombre
+            usados.add(m[0])
+        else:
+            pendientes.append(nombre)
+    for nombre in pendientes:
+        libres = [(eid, en) for eid, en in equipos_sf if eid not in usados]
+        m = statfutbol_match_equipo(nombre, libres)
+        if m:
+            out[m[0]] = nombre
+            usados.add(m[0])
+    return out
+
+
+def completar_fixture_con_statfutbol(catnum, fixture_lpf, lpf_equipos):
+    """Completa fixture_lpf (ya armado con parse_lpf_fixture_completo) con las
+    fechas que a la LPF le falten, usando statfutbol.com.ar de respaldo --
+    ver la nota de parse_lpf_fixture_completo: a veces un pedido puntual
+    devuelve un panel de fecha menos. NUNCA pisa una fecha que la LPF ya
+    trajo, solo completa huecos.
+
+    Traduce nombres en dos pasos:
+    1. nombre de la LPF -> id de statfutbol (_mapa_lpf_a_statfutbol).
+    2. nombre abreviado del fixture de statfutbol -> id de statfutbol (mismo
+       uso que ya hace fetch_statfutbol_fixture para ubicar a Tigre, via
+       statfutbol_match_equipo).
+    Cruzando los dos por id se llega de nombre-LPF a nombre-LPF sin inventar
+    una tabla de equivalencias nueva. Si un equipo no matchea de forma unica
+    en cualquiera de los dos pasos, ese partido se omite -- mejor faltar un
+    dato que inventarlo mal.
+    """
+    faltantes = set(range(1, 36)) - set(fixture_lpf.keys())
+    if not faltantes:
+        return {}
+
+    equipos_sf = fetch_statfutbol_equipos(catnum)
+    id_a_lpf = _mapa_lpf_a_statfutbol(lpf_equipos, equipos_sf)
+
+    fixture_sf = fetch_statfutbol_fixture(catnum)
+    out = {}
+    for p in fixture_sf:
+        if p["jornada"] not in faltantes or not p["jugado"] or p["gf_local"] is None:
+            continue
+        m_local = statfutbol_match_equipo(p["local"], equipos_sf)
+        m_visita = statfutbol_match_equipo(p["visita"], equipos_sf)
+        if not m_local or not m_visita:
+            continue
+        nombre_local, nombre_visita = id_a_lpf.get(m_local[0]), id_a_lpf.get(m_visita[0])
+        if not nombre_local or not nombre_visita:
+            continue
+        out.setdefault(p["jornada"], []).append({
+            "local": nombre_local, "visitante": nombre_visita,
+            "gl": p["gf_local"], "gv": p["gf_visita"],
+        })
+    return out
+
+
 def parse_statfutbol_plantel(html):
     """Filas de la tabla de plantel de statfutbol (acumulado de temporada por
     jugador, ya calculado por ellos). Columnas, confirmadas en la pagina real
@@ -3189,6 +3273,25 @@ def main():
             errores.append(f"fixture {cat}: {e}")
             print(f"[ERROR] fixture {cat}: {e}", file=sys.stderr)
 
+    # Respaldo de statfutbol para fechas que a la pagina de la LPF le falten
+    # en este pedido puntual (ver nota de parse_lpf_fixture_completo) -- solo
+    # completa huecos, nunca pisa una fecha que la LPF ya trajo bien.
+    for cat, catnum in STATFUTBOL_CATNUM.items():
+        fc = resultado["fixture_completo"].get(cat)
+        lpf_equipos = [f["equipo"] for f in resultado["categorias"].get(cat, [])]
+        if fc is None or not lpf_equipos:
+            continue
+        try:
+            extra = completar_fixture_con_statfutbol(catnum, fc, lpf_equipos)
+        except Exception as e:  # noqa
+            errores.append(f"fixture_completo respaldo statfutbol {cat}: {e}")
+            print(f"[ERROR] fixture_completo respaldo statfutbol {cat}: {e}", file=sys.stderr)
+            continue
+        if extra:
+            fc.update(extra)
+            resultado["fixture"][cat] = fixture_tigre_desde_completo(fc)
+            print(f"[OK] fixture_completo {cat}: +{len(extra)} fecha(s) de respaldo via statfutbol")
+
     # Reserva (Proyeccion): tabla de posiciones desde statfutbol.com.ar (ver
     # fetch_statfutbol_reserva_zona). Cada zona es una URL separada, asi que
     # puede faltar una sola sin perder la otra ni afectar a las juveniles.
@@ -3628,6 +3731,39 @@ def main():
     # todo perfecto.
     if errores:
         resultado["errores"] = errores
+
+    # No perder datos de una corrida anterior que esta corrida no pudo traer
+    # -- ej. catapult_gps/bl_gps cuando corre sin esas credenciales (GitHub
+    # Actions a mano), o una categoria puntual que fallo por un error
+    # transitorio. Se parte del JSON ya guardado y resultado pisa encima
+    # solo lo que esta corrida si consiguio:
+    # - claves por categoria (CLAVES_POR_CATEGORIA): merge categoria a
+    #   categoria, asi una categoria que fallo ahora conserva su dato viejo
+    #   sin tapar a las que si salieron bien en esta misma corrida.
+    # - el resto de las claves: gana resultado si esta corrida la trajo (aun
+    #   parcial/vacia), si no gana lo que ya habia (ej. catapult_gps entero).
+    anterior = {}
+    if os.path.exists(OUT_PATH):
+        try:
+            with open(OUT_PATH, "r", encoding="utf-8") as f:
+                anterior = json.load(f)
+        except Exception as e:  # noqa -- JSON previo corrupto no debe frenar el guardado
+            print(f"[AVISO] no se pudo leer {OUT_PATH} anterior para mergear: {e}", file=sys.stderr)
+    # "errores"/"avisos" son siempre del estado de ESTA corrida -- si ya se
+    # resolvieron, no tienen que seguir apareciendo solo porque la corrida
+    # anterior los tuvo.
+    anterior.pop("errores", None)
+    anterior.pop("avisos", None)
+    CLAVES_POR_CATEGORIA = [
+        "categorias", "fixture", "fixture_completo", "tigre_parenlapelota",
+        "rival_alertas", "statfutbol_jugadores", "statfutbol_partidos",
+        "statfutbol_resultados", "fixture_reserva", "fixture_completo_reserva",
+        "fixture_futdetail", "jugadores_futdetail", "plantel_futdetail",
+    ]
+    for clave in CLAVES_POR_CATEGORIA:
+        if isinstance(anterior.get(clave), dict):
+            resultado[clave] = {**anterior[clave], **resultado.get(clave, {})}
+    resultado = {**anterior, **resultado}
 
     os.makedirs("data", exist_ok=True)
     # Los esfuerzos van a su propio archivo (ver EFFORTS_PATH); si esta corrida
