@@ -9378,13 +9378,14 @@ function fixtureCompletoCat(cat){
 // no la de Tigre), de más reciente a más viejo. `condicion=null` trae los
 // últimos partidos SIN filtrar por local/visitante (corridos, mezclados) --
 // cada resultado igual trae su `cond` ('L'/'V') para poder etiquetarlo.
-function ultimosPartidosRival(cat, rivalNombre, condicion, cant){
+function ultimosPartidosRival(cat, rivalNombre, condicion, cant, excluirFecha){
   const info = RIVAL_INFO[rivalNombre];
   if(!info) return [];
   const fc = fixtureCompletoCat(cat);
   const fechas = Object.keys(fc).map(Number).sort((a,b)=>b-a);
   const out=[];
   for(const f of fechas){
+    if(f===excluirFecha) continue;
     for(const p of fc[f]){
       if((condicion===null||condicion==='L') && p.local===info.lpf) out.push({fecha:f, rivalDe:p.visitante, gf:p.gl, gc:p.gv, cond:'L'});
       else if((condicion===null||condicion==='V') && p.visitante===info.lpf) out.push({fecha:f, rivalDe:p.local, gf:p.gv, gc:p.gl, cond:'V'});
@@ -9482,11 +9483,12 @@ function proximoRivalInfoReserva(dataCat){
 // zona, no solo los de Tigre; ver fixture_completo_reserva en
 // scrape_tablas.py, agregado 2026-09-23) y matcheando el nombre del rival
 // con mismoEquipoReserva en vez de exigir igualdad exacta contra RIVAL_INFO.
-function ultimosPartidosRivalReserva(dataCat, rivalNombre, condicion, cant){
+function ultimosPartidosRivalReserva(dataCat, rivalNombre, condicion, cant, excluirFecha){
   const fc = (TABLA_DATA && TABLA_DATA.fixture_completo_reserva && TABLA_DATA.fixture_completo_reserva[dataCat]) || {};
   const fechas = Object.keys(fc).map(Number).sort((a,b)=>b-a);
   const out=[];
   for(const f of fechas){
+    if(f===excluirFecha) continue;
     for(const p of fc[f]){
       if((condicion===null||condicion==='L') && mismoEquipoReserva(p.local, rivalNombre)) out.push({fecha:f, rivalDe:p.visitante, gf:p.gl, gc:p.gv, cond:'L'});
       else if((condicion===null||condicion==='V') && mismoEquipoReserva(p.visitante, rivalNombre)) out.push({fecha:f, rivalDe:p.local, gf:p.gv, gc:p.gl, cond:'V'});
@@ -9660,9 +9662,9 @@ async function construirParamsPlacaStats(cat){
   const filaTigre = isReserva ? filaTablaLPFReserva(dataCat, 'TIGRE') : filaTablaLPF(cat, 'Tigre');
   if(!filaRival || !filaTigre) return null;
   const modoInfo = leerModoUltimosPlaca(cat, prox.condRival);
-  const ultimos = isReserva ? ultimosPartidosRivalReserva(dataCat, prox.rival, modoInfo.condicion, modoInfo.cant)
-    : ultimosPartidosRival(cat, prox.rival, modoInfo.condicion, modoInfo.cant);
   const reciente = isReserva ? partidoMasRecienteRivalReserva(dataCat, prox.rival) : partidoMasRecienteRival(cat, prox.rival);
+  const ultimos = isReserva ? ultimosPartidosRivalReserva(dataCat, prox.rival, modoInfo.condicion, modoInfo.cant, reciente?.fecha)
+    : ultimosPartidosRival(cat, prox.rival, modoInfo.condicion, modoInfo.cant, reciente?.fecha);
   const num = (id, def) => parseInt(document.getElementById(id+cat)?.value ?? def) || def;
   const alerta = TABLA_DATA.rival_alertas && TABLA_DATA.rival_alertas[dataCat];
   return {cat, prox, info, ultimos, ultimosLabel: modoInfo.label, reciente, filaRival, filaTigre, alerta,
@@ -9717,8 +9719,8 @@ async function generarEstadisticasRival(cat, compartir){
     const filaTigre = filaTablaLPF(cat, 'Tigre');
     if(!filaRival || !filaTigre){ alert('Todavía no tengo la tabla de posiciones de '+cat+' descargada. Probá "🔄 Actualizar datos".'); return; }
     const modoInfo = leerModoUltimosPlaca(cat, prox.condRival);
-    const ultimos = ultimosPartidosRival(cat, prox.rival, modoInfo.condicion, modoInfo.cant);
     const reciente = partidoMasRecienteRival(cat, prox.rival);
+    const ultimos = ultimosPartidosRival(cat, prox.rival, modoInfo.condicion, modoInfo.cant, reciente?.fecha);
     const num = (id, def) => parseInt(document.getElementById(id+cat)?.value ?? def) || def;
     const escalaLiga = num('placa-stats-escala-liga-', 100)/100;
     const offsetXLiga = num('placa-stats-x-liga-', 0);
