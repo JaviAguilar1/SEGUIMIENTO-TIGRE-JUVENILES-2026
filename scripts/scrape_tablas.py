@@ -2657,6 +2657,24 @@ def fetch_statfutbol_fixture(catnum):
     return out
 
 
+def fixture_completo_desde_statfutbol(catnum):
+    """Mismo shape que parse_lpf_fixture_completo pero con datos de
+    statfutbol -- respaldo cuando la pagina de la LPF no responde o cambia
+    de estructura (a pedido de Javi, 2026-10-09: si la liga no tiene datos,
+    no podemos quedar sin actualizar, para eso esta statfutbol de respaldo).
+    """
+    fixture = fetch_statfutbol_fixture(catnum)
+    out = {}
+    for p in fixture:
+        if not p["jugado"] or p["gf_local"] is None:
+            continue
+        out.setdefault(p["jornada"], []).append({
+            "local": p["local"], "visitante": p["visita"],
+            "gl": p["gf_local"], "gv": p["gf_visita"],
+        })
+    return out
+
+
 def fetch_statfutbol_equipos(catnum):
     """Lista (id, nombre) del selector 'Elija un equipo' de PLANTELES."""
     html = fetch(f"{STATFUTBOL_BASE}afaplanteles{catnum}2026.php")
@@ -3105,6 +3123,23 @@ def fetch_statfutbol_reserva_zona(path: str):
     return filas
 
 
+def fetch_statfutbol_posiciones(catnum):
+    """Tabla de posiciones de 4TA-9NA desde statfutbol.com.ar -- respaldo de
+    la LPF oficial (parse_tabla) cuando ligaprofesional.ar no responde o
+    cambia de estructura, para que esa categoria no se quede sin actualizar
+    (a pedido de Javi, 2026-10-09: "si la liga no tiene datos, para eso
+    tenemos a statfutbol de respaldo"). Mismas 10 columnas, mismo parser que
+    ya usa fetch_statfutbol_reserva_zona."""
+    html = fetch(f"{STATFUTBOL_BASE}afaposiciones{catnum}2026Resolucion.php")
+    m = re.search(r"<table\b[^>]*>(.*?)</table>", html, re.IGNORECASE | re.DOTALL)
+    if not m:
+        raise ValueError("no se encontro ninguna <table> en la pagina de posiciones")
+    filas = _filas_desde_tabla_html(m.group(1))
+    if not filas:
+        raise ValueError("se encontro la tabla pero no se pudo parsear ninguna fila")
+    return filas
+
+
 def fetch_statfutbol_reserva_fixture(fixture_path):
     """Fixture completo de un torneo de Reserva (Apertura o Clausura),
     zonas A y B juntas en la misma pagina (trae una columna de zona de mas
@@ -3250,6 +3285,8 @@ def main():
     resultado["fixture"] = {}
     resultado["fixture_completo"] = {}
     for cat, url in FUENTES.items():
+        catnum = STATFUTBOL_CATNUM.get(cat)
+        html = None
         try:
             html = fetch(url)
             filas = parse_tabla(html)
@@ -3258,9 +3295,20 @@ def main():
         except Exception as e:  # noqa
             errores.append(f"{cat}: {e}")
             print(f"[ERROR] {cat}: {e}", file=sys.stderr)
-            continue  # sin el HTML no se puede sacar el fixture tampoco
+            # Respaldo: la LPF no respondio o cambio de estructura -- la
+            # tabla de posiciones de statfutbol tiene el mismo shape, asi
+            # que la categoria no se queda sin actualizar (Javi, 2026-10-09).
+            try:
+                filas = fetch_statfutbol_posiciones(catnum)
+                resultado["categorias"][cat] = filas
+                print(f"[OK] {cat} (respaldo statfutbol): {len(filas)} equipos")
+            except Exception as e2:  # noqa
+                errores.append(f"{cat} respaldo statfutbol: {e2}")
+                print(f"[ERROR] {cat} respaldo statfutbol: {e2}", file=sys.stderr)
 
         try:
+            if html is None:
+                raise ValueError("no hay HTML de la LPF para sacar el fixture")
             fc = parse_lpf_fixture_completo(html)
             resultado["fixture_completo"][cat] = fc
             print(f"[OK] fixture_completo {cat}: {len(fc)} fechas")
@@ -3272,6 +3320,19 @@ def main():
         except Exception as e:  # noqa
             errores.append(f"fixture {cat}: {e}")
             print(f"[ERROR] fixture {cat}: {e}", file=sys.stderr)
+            # Mismo respaldo que arriba: statfutbol tambien tiene el
+            # fixture completo de la categoria, independiente de la LPF.
+            try:
+                fc = fixture_completo_desde_statfutbol(catnum)
+                resultado["fixture_completo"][cat] = fc
+                partidos_tigre = fixture_tigre_desde_completo(fc)
+                if not partidos_tigre:
+                    raise ValueError("no se encontro ningun partido de Tigre")
+                resultado["fixture"][cat] = partidos_tigre
+                print(f"[OK] fixture {cat} (respaldo statfutbol): {len(partidos_tigre)} fechas")
+            except Exception as e2:  # noqa
+                errores.append(f"fixture {cat} respaldo statfutbol: {e2}")
+                print(f"[ERROR] fixture {cat} respaldo statfutbol: {e2}", file=sys.stderr)
 
     # Respaldo de statfutbol para fechas que a la pagina de la LPF le falten
     # en este pedido puntual (ver nota de parse_lpf_fixture_completo) -- solo
