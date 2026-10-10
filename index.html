@@ -1965,6 +1965,10 @@ function hidratarStats(p){
   if(p.gpsPosOverride) gpsPosOverride = p.gpsPosOverride;
   if(p.correccionesNombres) correccionesNombres = p.correccionesNombres;
   if(p.resultadosForzados) resultadosForzados = p.resultadosForzados;
+  // Firebase acaba de pisar links[cat][fecha] entero con lo guardado (vacío
+  // si nunca se cargó nada a mano) -- si tablas.json ya está, reponer el
+  // autocompletado de futdetail que este mismo pisado puede haber borrado.
+  if(TABLA_DATA) completarLinksDesdeFutdetail(TABLA_DATA);
   return true;
 }
 
