@@ -3004,7 +3004,13 @@ function calcConfiabilidad(){
 // Botón "REVISAR" único para toda la sección: fuerza traer la tabla LPF de
 // nuevo (por si se actualizó) y recalcula todo — filas resueltas desaparecen.
 function revisarConfiabilidad(){
+  // TABLA_DATA solo no alcanza: loadTablaData() cachea la descarga en
+  // _tablaPromise y, si no se resetea también, devuelve ese promise ya
+  // resuelto en vez de volver a pedir tablas.json -- la fila desaparecía
+  // "en falso" (TABLA_DATA en null = nada para comparar) y volvía igual
+  // al recargar la página.
   TABLA_DATA=null;
+  _tablaPromise=null;
   showToast('🔄 REVISANDO...');
   renderConfiabilidad('gen-confiabilidad');
 }
