@@ -1291,6 +1291,24 @@ function guardarVideoSync(cat, fecha, kickoff1, kickoff2){
     .catch(e=>console.warn('videoSync save error:',e));
 }
 
+// Guarda UN SOLO kickoff (1T o 2T) sin pisar el otro -- lo usa la
+// calibración "por esfuerzo conocido" (ver gpsVideoMarcarEsfuerzoConocido),
+// que calibra un tiempo a la vez. update() en vez de set() a propósito: si
+// el otro tiempo ya estaba calibrado, no se pierde.
+function guardarVideoSyncKickoff(cat, fecha, cual, valor){
+  if(!db) return;
+  const campo = cual===1 ? 'kickoff1' : 'kickoff2';
+  db.ref(`gps/videoSync/${cat}/${fecha}`).update({[campo]: Number(valor)})
+    .then(()=>{
+      videoSync[cat]=videoSync[cat]||{};
+      videoSync[cat][fecha]=videoSync[cat][fecha]||{};
+      videoSync[cat][fecha][campo]=Number(valor);
+      showToast('☁ GUARDADO');
+      refreshActiveModule();
+    })
+    .catch(e=>console.warn('videoSync save error:',e));
+}
+
 CATEGORIES.forEach(cat => {
   results[cat]    = {};
   links[cat]      = {};
@@ -5242,6 +5260,16 @@ function wireGpsVideoForm(){
             <input id="gps-video-k2" type="number" step="0.1" value="${sync?sync.kickoff2:''}" style="width:100%;background:rgba(5,8,15,.8);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:13px;padding:8px 10px;"></div>
           <button type="button" onclick="gpsVideoRecalibrando=false;guardarVideoSync('${cat}','${fechaKey}',document.getElementById('gps-video-k1').value,document.getElementById('gps-video-k2').value)"
             style="background:var(--red);border:none;border-radius:6px;color:#fff;font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:1px;padding:10px 18px;cursor:pointer;">GUARDAR</button>
+        </div>
+        <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--border)">
+          <div style="margin-bottom:8px">¿No sabés dónde arranca cada tiempo (partido de visitante, cronómetro de OpenField sin marcar en vivo)? No hace falta saberlo: marcá CUALQUIER jugada que reconozcas en el video y el sistema calcula el arranque solo.</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button type="button" onclick="gpsVideoCalibEsfuerzosAbrir('${cat}','${fechaKey}',1)"
+              style="background:rgba(5,8,15,0.5);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-family:'Barlow Condensed',sans-serif;font-weight:700;letter-spacing:1px;font-size:12px;padding:8px 14px;cursor:pointer;">🏃 Calibrar 1T con una jugada</button>
+            <button type="button" onclick="gpsVideoCalibEsfuerzosAbrir('${cat}','${fechaKey}',2)"
+              style="background:rgba(5,8,15,0.5);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-family:'Barlow Condensed',sans-serif;font-weight:700;letter-spacing:1px;font-size:12px;padding:8px 14px;cursor:pointer;">🏃 Calibrar 2T con una jugada</button>
+          </div>
+          <div id="gps-video-calib-esfuerzos" style="margin-top:10px"></div>
         </div>
       </div>` : `<div style="color:var(--muted);font-size:12px;padding:12px 0">Falta calibrar el video de ${esc(fechaKey)} — pedile a un editor que cargue el segundo de arranque de cada tiempo.</div>`;
     return;
@@ -9721,21 +9749,24 @@ async function generarEstadisticasRival(cat, compartir){
   if(btn) btn.disabled=true;
   try{
     await loadTablaData();
-    const prox = proximoRivalInfo(cat);
+    const isReserva = cat === 'RESERVA';
+    const dataCat = placaDataCat[cat] || cat;
+    const prox = isReserva ? proximoRivalInfoReserva(dataCat) : proximoRivalInfo(cat);
     if(!prox){ alert('No encontré ningún partido pendiente en el fixture de '+cat+'.'); return; }
-    const info = RIVAL_INFO[prox.rival];
+    const info = isReserva ? matchRivalInfo(prox.rival) : RIVAL_INFO[prox.rival];
     if(!info){ alert('Todavía no tengo cargado el escudo/equivalencia de "'+prox.rival+'".'); return; }
-    const filaRival = filaTablaLPF(cat, info.lpf);
-    const filaTigre = filaTablaLPF(cat, 'Tigre');
+    const filaRival = isReserva ? filaTablaLPFReserva(dataCat, prox.rival) : filaTablaLPF(cat, info.lpf);
+    const filaTigre = isReserva ? filaTablaLPFReserva(dataCat, 'TIGRE') : filaTablaLPF(cat, 'Tigre');
     if(!filaRival || !filaTigre){ alert('Todavía no tengo la tabla de posiciones de '+cat+' descargada. Probá "🔄 Actualizar datos".'); return; }
     const modoInfo = leerModoUltimosPlaca(cat, prox.condRival);
-    const reciente = partidoMasRecienteRival(cat, prox.rival);
-    const ultimos = ultimosPartidosRival(cat, prox.rival, modoInfo.condicion, modoInfo.cant, reciente?.fecha);
+    const reciente = isReserva ? partidoMasRecienteRivalReserva(dataCat, prox.rival) : partidoMasRecienteRival(cat, prox.rival);
+    const ultimos = isReserva ? ultimosPartidosRivalReserva(dataCat, prox.rival, modoInfo.condicion, modoInfo.cant, reciente?.fecha)
+      : ultimosPartidosRival(cat, prox.rival, modoInfo.condicion, modoInfo.cant, reciente?.fecha);
     const num = (id, def) => parseInt(document.getElementById(id+cat)?.value ?? def) || def;
     const escalaLiga = num('placa-stats-escala-liga-', 100)/100;
     const offsetXLiga = num('placa-stats-x-liga-', 0);
     const offsetYLiga = num('placa-stats-y-liga-', 0);
-    const alerta = TABLA_DATA.rival_alertas && TABLA_DATA.rival_alertas[cat];
+    const alerta = TABLA_DATA.rival_alertas && TABLA_DATA.rival_alertas[dataCat];
     const incluirGoleador = chk('placa-stats-incluir-goleador-'+cat);
     const incluirAmarillas = chk('placa-stats-incluir-amarillas-'+cat);
     const blob = await dibujarTarjetaRival({cat, prox, info, ultimos, ultimosLabel: modoInfo.label, reciente, filaRival, filaTigre, alerta, incluirGoleador, incluirAmarillas, escalaLiga, offsetXLiga, offsetYLiga});
