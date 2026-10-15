@@ -69,7 +69,7 @@ def main():
         id_token = login(email, password)
         backup[NODO_OBLIGATORIO] = fetch_nodo(NODO_OBLIGATORIO, id_token)
     except Exception as e:  # noqa
-        detalle = e.read().decode("utf-8", errors="replace")[:300] if hasattr(e, "read") else ""
+        detalle = " ".join(e.read().decode("utf-8", errors="replace").split())[:300] if hasattr(e, "read") else ""
         # "::error::" lo muestra GitHub como anotacion del run (visible sin abrir el log).
         print(f"::error::Backup: login o lectura de '{NODO_OBLIGATORIO}' fallo: {e} {detalle}")
         sys.exit(1)
