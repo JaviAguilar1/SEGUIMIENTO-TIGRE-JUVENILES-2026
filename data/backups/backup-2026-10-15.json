@@ -1,5 +1,535 @@
 {
-  "generado": "2026-10-15T09:38:50.100987+00:00",
+  "generado": "2026-10-15T09:54:14.685372+00:00",
+  "gps/catapultReservaAuth/estado": null,
+  "gps/reservaManual": null,
+  "gps/sessions": null,
+  "gps/videoSync": {
+    "4TA": {
+      "F10": {
+        "fuente": "corte",
+        "kickoff1": 3.0,
+        "kickoff2": 2779.3
+      },
+      "F11": {
+        "kickoff1": 3.0,
+        "kickoff2": 2715.0
+      },
+      "F12": {
+        "fuente": "corte",
+        "kickoff1": 3.0,
+        "kickoff2": 2781.3
+      },
+      "F13": {
+        "kickoff1": 3.0,
+        "kickoff2": 2791.0
+      },
+      "F14": {
+        "kickoff1": 24.5,
+        "kickoff2": 2723.1
+      },
+      "F15": {
+        "fuente": "corte",
+        "kickoff1": 3.0,
+        "kickoff2": 2823.5
+      },
+      "F17": {
+        "fuente": "corte",
+        "kickoff1": 3.0,
+        "kickoff2": 2727.4
+      },
+      "F18": {
+        "fuente": "corte",
+        "kickoff1": 3.0,
+        "kickoff2": 2730.6
+      },
+      "F22": {
+        "fuente": "corte",
+        "kickoff1": 3.0,
+        "kickoff2": 2719.1
+      },
+      "F23": {
+        "kickoff1": 3.0,
+        "kickoff2": 2713.0
+      },
+      "F24": {
+        "kickoff1": 4.0,
+        "kickoff2": 2711.0
+      },
+      "F25": {
+        "kickoff1": 3.7,
+        "kickoff2": 3749
+      },
+      "F26": {
+        "kickoff1": -4,
+        "kickoff2": 2713.6
+      },
+      "F27": {
+        "kickoff1": 3.8,
+        "kickoff2": 3811.8
+      },
+      "F28": {
+        "kickoff1": 4.0,
+        "kickoff2": 2727.0
+      },
+      "F29": {
+        "kickoff1": 4.5,
+        "kickoff2": 3886.8
+      },
+      "F3": {
+        "fuente": "corte",
+        "kickoff1": 3.0,
+        "kickoff2": 2775.3
+      },
+      "F5": {
+        "kickoff1": 3.0,
+        "kickoff2": 2730.0
+      },
+      "F6": {
+        "fuente": "corte",
+        "kickoff1": 3.0,
+        "kickoff2": 2793.0
+      },
+      "F7": {
+        "kickoff1": 5.0,
+        "kickoff2": 2770.0
+      },
+      "F8": {
+        "fuente": "corte",
+        "kickoff1": 3.0,
+        "kickoff2": 2724.4
+      },
+      "F9": {
+        "kickoff1": 3.2,
+        "kickoff2": 2705
+      }
+    },
+    "5TA": {
+      "F10": {
+        "fuente": "corte",
+        "kickoff1": 3.0,
+        "kickoff2": 2782.4
+      },
+      "F11": {
+        "kickoff1": 3.0,
+        "kickoff2": 2790.0
+      },
+      "F13": {
+        "kickoff1": 3.0,
+        "kickoff2": 2766.0
+      },
+      "F14": {
+        "fuente": "corte",
+        "kickoff1": 3.0,
+        "kickoff2": 2707.2
+      },
+      "F15": {
+        "kickoff1": 4,
+        "kickoff2": 2710.5
+      },
+      "F17": {
+        "fuente": "corte",
+        "kickoff1": 3.0,
+        "kickoff2": 2808.9
+      },
+      "F18": {
+        "fuente": "corte",
+        "kickoff1": 3.0,
+        "kickoff2": 2793.2
+      },
+      "F20": {
+        "fuente": "corte",
+        "kickoff1": 3.0,
+        "kickoff2": 2712.1
+      },
+      "F22": {
+        "kickoff1": 4.1,
+        "kickoff2": 2710.4
+      },
+      "F23": {
+        "fuente": "corte",
+        "kickoff1": 3.0,
+        "kickoff2": 2709.8
+      },
+      "F24": {
+        "kickoff1": 4.0,
+        "kickoff2": 2713.0
+      },
+      "F25": {
+        "kickoff1": 3.4,
+        "kickoff2": 3937.4
+      },
+      "F26": {
+        "kickoff1": 9.3,
+        "kickoff2": 2792.2
+      },
+      "F28": {
+        "kickoff1": 0.0,
+        "kickoff2": 2690.0
+      },
+      "F3": {
+        "fuente": "corte",
+        "kickoff1": 3.0,
+        "kickoff2": 2710.2
+      },
+      "F6": {
+        "fuente": "corte",
+        "kickoff1": 3.0,
+        "kickoff2": 2746.6
+      },
+      "F7": {
+        "kickoff1": 4.0,
+        "kickoff2": 2738.0
+      },
+      "F8": {
+        "fuente": "corte",
+        "kickoff1": 3.0,
+        "kickoff2": 2725.9
+      },
+      "F9": {
+        "kickoff1": 1.9,
+        "kickoff2": 2759.6
+      }
+    },
+    "6TA": {
+      "F1": {
+        "kickoff1": 2.0,
+        "kickoff2": 2701.0
+      },
+      "F11": {
+        "kickoff1": 3.0,
+        "kickoff2": 2755.0
+      },
+      "F12": {
+        "fuente": "corte",
+        "kickoff1": 2.0,
+        "kickoff2": 2719.1
+      },
+      "F13": {
+        "fuente": "corte",
+        "kickoff1": 2.0,
+        "kickoff2": 2770.6
+      },
+      "F14": {
+        "fuente": "corte",
+        "kickoff1": 2.0,
+        "kickoff2": 2725.7
+      },
+      "F15": {
+        "fuente": "corte",
+        "kickoff1": 2.0,
+        "kickoff2": 2712.0
+      },
+      "F17": {
+        "fuente": "corte",
+        "kickoff1": 2.0,
+        "kickoff2": 2727.8
+      },
+      "F18": {
+        "fuente": "corte",
+        "kickoff1": 2.0,
+        "kickoff2": 2695.4
+      },
+      "F24": {
+        "kickoff1": 1.0,
+        "kickoff2": 2796.0
+      },
+      "F26": {
+        "kickoff1": 8.3,
+        "kickoff2": 2738.8
+      },
+      "F28": {
+        "fuente": "corte",
+        "kickoff1": 2.0,
+        "kickoff2": 2705.6
+      },
+      "F3": {
+        "fuente": "corte",
+        "kickoff1": 2.0,
+        "kickoff2": 2749.2
+      },
+      "F5": {
+        "kickoff1": 0.0,
+        "kickoff2": 2726.0
+      },
+      "F6": {
+        "fuente": "corte",
+        "kickoff1": 2.0,
+        "kickoff2": 2712.9
+      },
+      "F7": {
+        "kickoff1": 5.0,
+        "kickoff2": 2765.0
+      },
+      "F8": {
+        "fuente": "corte",
+        "kickoff1": 2.0,
+        "kickoff2": 2742.6
+      },
+      "F9": {
+        "fuente": "corte",
+        "kickoff1": 2.0,
+        "kickoff2": 2703.7
+      }
+    },
+    "7MA": {
+      "F22": {
+        "fuente": "corte",
+        "kickoff1": 3.0,
+        "kickoff2": 2727.3
+      },
+      "F25": {
+        "kickoff1": -4.46,
+        "kickoff2": 3493.4
+      },
+      "F26": {
+        "kickoff1": 77.5,
+        "kickoff2": 3990.6
+      }
+    },
+    "8VA": {
+      "F12": {
+        "kickoff1": 52.4,
+        "kickoff2": 3294.8
+      },
+      "F27": {
+        "kickoff1": 45.8,
+        "kickoff2": 3641.7
+      }
+    },
+    "9NA": {
+      "F13": {
+        "fuente": "corte",
+        "kickoff1": 6.4,
+        "kickoff2": 2228.4
+      },
+      "F24": {
+        "kickoff1": 6.4,
+        "kickoff2": 2264.9
+      }
+    }
+  },
+  "gps/videoSyncFallos": {
+    "4TA": {
+      "F14": {
+        "intentos": 4,
+        "link": "https://youtu.be/K-akUsFm5Zg",
+        "via": "metadata+ocr+corte"
+      },
+      "F16": {
+        "intentos": 5,
+        "link": "https://youtu.be/h32o6MBirpo",
+        "via": "metadata+ocr+corte-cat"
+      },
+      "F25": {
+        "intentos": 3,
+        "link": "https://youtu.be/DTusLRU4J54"
+      },
+      "F29": {
+        "intentos": 1,
+        "link": "https://youtu.be/JukNKqLHzf4",
+        "via": "metadata+ocr+corte-cat"
+      },
+      "F4": {
+        "intentos": 5,
+        "link": "https://youtu.be/x0DEhrQnlwE",
+        "via": "metadata+ocr+corte-cat"
+      }
+    },
+    "5TA": {
+      "F16": {
+        "intentos": 5,
+        "link": "https://youtu.be/Vja5pBjpX8A",
+        "via": "metadata+ocr+corte-cat"
+      },
+      "F22": {
+        "intentos": 4,
+        "link": "https://youtu.be/5T5Fxbc9nio",
+        "via": "metadata+ocr+corte"
+      },
+      "F25": {
+        "intentos": 3,
+        "link": "https://youtu.be/6AZLJdwX7yQ"
+      },
+      "F27": {
+        "intentos": 3,
+        "link": "https://youtu.be/rZ1WQZU1ibY",
+        "via": "metadata+ocr+corte-cat"
+      },
+      "F29": {
+        "intentos": 3,
+        "link": "https://youtu.be/4U9G9LBtPcs",
+        "via": "metadata+ocr+corte-cat"
+      }
+    },
+    "6TA": {
+      "F10": {
+        "intentos": 5,
+        "link": "https://youtu.be/h4vD9Fr-Wwo",
+        "via": "metadata+ocr+corte-cat"
+      },
+      "F16": {
+        "intentos": 5,
+        "link": "https://youtu.be/yy7hEBn8rsc",
+        "via": "metadata+ocr+corte-cat"
+      },
+      "F2": {
+        "intentos": 5,
+        "link": "https://youtu.be/YW2L-gzP76I",
+        "via": "metadata+ocr+corte-cat"
+      },
+      "F27": {
+        "intentos": 3,
+        "link": "https://youtu.be/LfR8y00FtSw",
+        "via": "metadata+ocr+corte-cat"
+      },
+      "F29": {
+        "intentos": 3,
+        "link": "https://youtu.be/6V8HINJxz60",
+        "via": "metadata+ocr+corte-cat"
+      },
+      "F4": {
+        "intentos": 5,
+        "link": "https://youtu.be/OOI5QK-Um6A",
+        "via": "metadata+ocr+corte-cat"
+      }
+    },
+    "7MA": {
+      "F10": {
+        "intentos": 4,
+        "link": "https://youtu.be/zgag5izkXB4",
+        "via": "metadata+ocr+corte"
+      },
+      "F11": {
+        "intentos": 4,
+        "link": "https://youtu.be/EINPWdIRE0g",
+        "via": "metadata+ocr+corte"
+      },
+      "F12": {
+        "intentos": 4,
+        "link": "https://youtu.be/O0hrR-AbPKI",
+        "via": "metadata+ocr+corte"
+      },
+      "F14": {
+        "intentos": 4,
+        "link": "https://youtu.be/B8rvcjA5Pac",
+        "via": "metadata+ocr+corte"
+      },
+      "F18": {
+        "intentos": 4,
+        "link": "https://youtu.be/3kOXS1W7sM4",
+        "via": "metadata+ocr+corte"
+      },
+      "F2": {
+        "intentos": 4,
+        "link": "https://youtu.be/Uhkq-DMjdVA",
+        "via": "metadata+ocr+corte"
+      },
+      "F20": {
+        "intentos": 5,
+        "link": "https://youtu.be/ump1ajrHQDA",
+        "via": "metadata+ocr+corte-cat"
+      },
+      "F21": {
+        "intentos": 4,
+        "link": "https://youtu.be/gLkd2SIY8nQ",
+        "via": "metadata+ocr+corte"
+      },
+      "F25": {
+        "intentos": 4,
+        "link": "https://youtu.be/__VQhDk2V9Q",
+        "via": "metadata+ocr+corte"
+      },
+      "F4": {
+        "intentos": 4,
+        "link": "https://youtu.be/lyeGkKAmxjg",
+        "via": "metadata+ocr+corte"
+      },
+      "F5": {
+        "intentos": 4,
+        "link": "https://youtu.be/zFvfjNBdGMQ?si=vWsaXVpp7ZH2FrGM",
+        "via": "metadata+ocr+corte"
+      }
+    },
+    "8VA": {
+      "F10": {
+        "intentos": 4,
+        "link": "https://youtu.be/5TxhH0iyI4s",
+        "via": "metadata+ocr+corte"
+      },
+      "F11": {
+        "intentos": 4,
+        "link": "https://youtu.be/-Dei7FX-bEE",
+        "via": "metadata+ocr+corte"
+      },
+      "F12": {
+        "intentos": 4,
+        "link": "https://youtu.be/hedwhqIHDiQ",
+        "via": "metadata+ocr+corte"
+      },
+      "F18": {
+        "intentos": 4,
+        "link": "https://youtu.be/Ba2kVbEZa6U",
+        "via": "metadata+ocr+corte"
+      },
+      "F6": {
+        "intentos": 4,
+        "link": "https://youtu.be/kcmRVy7P1ck",
+        "via": "metadata+ocr+corte"
+      },
+      "F8": {
+        "intentos": 4,
+        "link": "https://youtu.be/AMuZ4J__wwY",
+        "via": "metadata+ocr+corte"
+      }
+    },
+    "9NA": {
+      "F11": {
+        "intentos": 5,
+        "link": "https://youtu.be/ISZEc24y76w?si=hIVy6ZdQQ673pUHb",
+        "via": "metadata+ocr+corte-cat"
+      },
+      "F12": {
+        "intentos": 4,
+        "link": "https://youtu.be/7y2CyVk1t0A",
+        "via": "metadata+ocr+corte"
+      },
+      "F14": {
+        "intentos": 4,
+        "link": "https://youtu.be/BJjDrPWeufw",
+        "via": "metadata+ocr+corte"
+      },
+      "F15": {
+        "intentos": 4,
+        "link": "https://youtu.be/iB4eqPQoBF8",
+        "via": "metadata+ocr+corte"
+      },
+      "F16": {
+        "intentos": 4,
+        "link": "https://youtu.be/qmWZ1xKCD0U",
+        "via": "metadata+ocr+corte"
+      },
+      "F18": {
+        "intentos": 4,
+        "link": "https://youtu.be/b4-ubM-3u1s",
+        "via": "metadata+ocr+corte"
+      },
+      "F20": {
+        "intentos": 5,
+        "link": "https://youtu.be/85KPxHaYymM",
+        "via": "metadata+ocr+corte-cat"
+      },
+      "F21": {
+        "intentos": 5,
+        "link": "https://youtu.be/IgDkUUKAzX8",
+        "via": "metadata+ocr+corte-cat"
+      },
+      "F24": {
+        "intentos": 4,
+        "link": "https://youtu.be/upGa_emTbqs",
+        "via": "metadata+ocr+corte"
+      }
+    }
+  },
   "stats": {
     "aliasJugadoresComet": {
       "6TA": {
