@@ -77,7 +77,8 @@ def main():
         try:
             backup[nodo] = fetch_nodo(nodo, id_token)
         except Exception as e:  # noqa
-            print(f"[WARN] no se pudo respaldar '{nodo}': {e}", file=sys.stderr)
+            detalle = " ".join(e.read().decode("utf-8", errors="replace").split())[:200] if hasattr(e, "read") else ""
+            print(f"::warning::Backup: no se pudo respaldar '{nodo}': {e} {detalle}")
 
     hoy = datetime.date.today().isoformat()
     destino = os.path.join(CARPETA_BACKUPS, f"backup-{hoy}.json")
