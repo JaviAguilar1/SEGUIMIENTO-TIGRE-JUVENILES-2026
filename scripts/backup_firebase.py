@@ -9,7 +9,7 @@ Firebase Realtime Database. Si alguien borra algo por error, o hay un
 problema con la cuenta de Firebase, no hay ninguna copia de respaldo aparte
 -- este script la crea sin intervencion manual.
 
-Que respalda: "stats", "gps", "temporadas_cerradas" y "temporadaActiva".
+Que respalda: "stats", "temporadaActiva" y cada hijo legible de "gps".
 Desde el muro de login (2026-08-27) NINGUN nodo se puede leer sin sesion,
 asi que el script se loguea con los secrets FIREBASE_BACKUP_EMAIL /
 FIREBASE_BACKUP_PASS (API REST de Firebase Auth, mismo apiKey publico de la
@@ -34,7 +34,13 @@ FB_API_KEY = "AIzaSyCw7zfTu06EfT9PNvwcUQq5yGZiy5AGDPE"  # publico, ver FB_CONFIG
 # Desde el muro de login (27/8) todo pide sesion. "stats" es obligatorio;
 # el resto se intenta y, si falla, avisa pero no corta el backup.
 NODO_OBLIGATORIO = "stats"
-NODOS_EXTRA = ["gps", "temporadas_cerradas", "temporadaActiva"]
+# "gps" no tiene regla de lectura en la raiz (solo en cada hijo), asi que
+# se lee hijo por hijo. "credenciales" de Catapult nunca se lee (regla false).
+NODOS_EXTRA = [
+    "temporadaActiva",
+    "gps/sessions", "gps/videoSync", "gps/videoSyncFallos",
+    "gps/reservaManual", "gps/catapultReservaAuth/estado",
+]
 CARPETA_BACKUPS = os.path.join(os.path.dirname(__file__), "..", "data", "backups")
 BACKUPS_A_CONSERVAR = 30
 
