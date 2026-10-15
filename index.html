@@ -10936,6 +10936,30 @@ async function generarPDFCategoria(cat){
 // pero solo se veía adentro de Goleadores) y, si Brian ya cargó datos en
 // BL GPS Performance, un resumen de sus partidos ahí. Se abre haciendo
 // click en el nombre dentro de la tabla de PLANTEL.
+// Tabla fecha por fecha de la Ficha (también la usan las otras categorías y
+// el PDF). Columnas: fecha, rival, resultado, estado, minutos, eventos.
+const FICHA_ESTADO_COLOR = {
+  'Titular':'var(--win)', 'Entró':'var(--gold2)', 'No ingresó':'var(--muted)', 'Suplente':'var(--text)',
+  'No citado':'var(--muted)', 'Revisar citación':'var(--loss)', 'Sin citación':'var(--loss)', 'Jugó (sin citación)':'var(--loss)', 'Por jugar':'var(--muted)',
+};
+function filasFichaHTML(filas){
+  if(!filas.length) return `<div style="color:var(--muted);font-size:12px;padding:6px 0">Sin fechas todavía.</div>`;
+  return `<div class="table-wrap"><table style="font-size:11.5px"><thead><tr><th>F</th><th>Rival</th><th>Res.</th><th>Estado</th><th>Min</th><th>Eventos</th></tr></thead><tbody>
+    ${filas.map(pj=>{
+      const condTxt = pj.cond==='L'?'L':pj.cond==='V'?'V':'';
+      const r = pj.res;
+      const resTxt = (r && r[0]!=null && r[1]!=null) ? `${r[0]}-${r[1]}` : '—';
+      const resColor = (r && r[0]!=null) ? (getResult(r[0],r[1])==='W'?'var(--win)':getResult(r[0],r[1])==='D'?'var(--draw)':'var(--loss)') : 'var(--muted)';
+      const apagada = !pj.citado && !pj.eventos.length;
+      return `<tr${apagada?' style="opacity:0.55"':''}><td>F${pj.fecha}</td><td style="display:flex;align-items:center;gap:6px">${pj.escudo||''}${esc(pj.rival)}${condTxt?` <span class="cond-badge cond-${pj.cond}" style="font-size:9px">${condTxt}</span>`:''}</td>
+        <td style="color:${resColor};font-weight:700">${resTxt}</td>
+        <td style="color:${FICHA_ESTADO_COLOR[pj.estado]||'var(--text)'};font-weight:600;white-space:nowrap">${esc(pj.estado)}</td>
+        <td>${pj.min!=null?pj.min+"'":'—'}</td>
+        <td style="font-size:11px">${pj.eventos.join(' ')||'—'}</td></tr>`;
+    }).join('')}
+  </tbody></table></div>`;
+}
+
 function calcularFichaJugador(cat, nombre){
   // RESERVA: sin GPS ni minutos (no hay COMET ni Catapult), así que la ficha
   // no lleva radar; muestra goles y tarjetas (amarillas/rojas) por fecha,
@@ -11010,6 +11034,7 @@ function calcularFichaJugador(cat, nombre){
   let minCometSum=0, golCometSum=0;
   const partidosJugados=[]; // {fecha, rival, cond, res:[gf,gc], eventos:[..chips]}
   Object.entries(matchData[cat]||{}).forEach(([fechaStr,d])=>{
+    if(!d) return; // Firebase devuelve array con huecos (null) si las fechas son correlativas
     const fecha=parseInt(fechaStr,10);
     const enTit=(d.titulares||[]).find(esMismoJugador);
     const enSup=(d.suplentes||[]).find(esMismoJugador);
@@ -11018,6 +11043,11 @@ function calcularFichaJugador(cat, nombre){
     if(!enTit && !enSup) return;
     const partido=(partidos[cat]||{})[fecha];
     const eventos=[];
+    // Estado de la fecha (Ficha completa, 2026-10-15): de la citación sale
+    // Titular/Suplente; con COMET se sabe además si el suplente entró y los
+    // minutos exactos de esa fecha.
+    let estado = enTit ? 'Titular' : 'Suplente';
+    let minFecha = null;
     // Sin informe COMET de esa fecha (Reserva siempre, 7MA-9NA siempre, o una
     // fecha suelta de 4/5/6 sin COMET cargado): las tarjetas por fecha salen de
     // statfutbol. Excluyente con el bloque COMET de abajo -> no hay doble conteo.
@@ -11037,10 +11067,17 @@ function calcularFichaJugador(cat, nombre){
       const supComet=(partido.suplentes||[]).find(x=>x.id===idJ);
       if(titComet){
         if(titComet.minutoSalida!=null) vecesSalio++;
-        minCometSum += titComet.minutoSalida!=null ? titComet.minutoSalida : DURACION_PARTIDO;
+        minFecha = titComet.minutoSalida!=null ? titComet.minutoSalida : DURACION_PARTIDO;
+        minCometSum += minFecha;
+        estado = 'Titular';
       } else if(supComet && supComet.minutoEntrada!=null){
         vecesEntroDeBanco++;
-        minCometSum += DURACION_PARTIDO-supComet.minutoEntrada;
+        minFecha = DURACION_PARTIDO-supComet.minutoEntrada;
+        minCometSum += minFecha;
+        estado = 'Entró';
+      } else if(enSup){
+        minFecha = 0;
+        estado = 'No ingresó';
       }
       // Autogol no suma a golCometSum (gol en contra, no es un gol a favor
       // del jugador) pero sigue apareciendo en la línea de tiempo de la
@@ -11053,8 +11090,40 @@ function calcularFichaJugador(cat, nombre){
       (partido.rojas||[]).filter(a=>a.id===idJ).forEach(a=>{ eventos.push(`🟥${minSuf(a.minuto)}`); });
     }
     const autoRes = esReserva ? TABLA_DATA?.statfutbol_resultados?.[cat]?.[fecha] : null;
-    partidosJugados.push({fecha, rival:(esReserva?rivalBonito(d.rival):d.rival)||'—', cond:condicionCat(cat,fecha),
-      res:results[cat]?.[fecha] || (autoRes ? [autoRes.gf, autoRes.gc] : null), eventos});
+    const rivalTxt=(esReserva?rivalBonito(d.rival):d.rival)||'—';
+    partidosJugados.push({fecha, rival:rivalTxt, cond:condicionCat(cat,fecha),
+      res:results[cat]?.[fecha] || (autoRes ? [autoRes.gf, autoRes.gc] : null), eventos,
+      estado, min:minFecha, citado:true, escudo:escudoDeFecha(fecha, rivalTxt)});
+  });
+  // El resto de las fechas de la categoría (no citado, sin citación cargada
+  // o por jugar), para que la ficha muestre la temporada entera fecha por
+  // fecha y no solo las citaciones. Las tarjetas de esas fechas salen de
+  // statfutbol (no hay COMET con id si no estaba citado).
+  const fechasCitadas = new Set(partidosJugados.map(p=>p.fecha));
+  const sfResCat = TABLA_DATA?.statfutbol_resultados?.[cat] || {};
+  const fechasCat = new Set([
+    ...(esReserva ? Object.keys(rivalData[cat]||{}) : (RIVALS||[]).map(x=>x.f)),
+    ...Object.keys(matchData[cat]||{}), ...Object.keys(results[cat]||{}), ...Object.keys(sfResCat),
+  ].map(f=>parseInt(f,10)).filter(f=>f>0));
+  fechasCat.forEach(fecha=>{
+    if(fechasCitadas.has(fecha)) return;
+    const autoRes = sfResCat[fecha];
+    const rM = results[cat]?.[fecha];
+    const res = (rM && rM[0]!=null && rM[1]!=null) ? rM : (autoRes ? [autoRes.gf, autoRes.gc] : null);
+    const rivalTxt = esReserva
+      ? (rivalBonito(rivalData[cat]?.[fecha]?.rival || autoRes?.rival || '') || '—')
+      : ((RIVALS||[]).find(x=>x.f===fecha)?.r || autoRes?.rival || '—');
+    const eventos=[];
+    const sfP = (TABLA_DATA?.statfutbol_partidos?.[cat]||{})[fecha];
+    const ev = sfP ? Object.entries(sfP).find(([n])=>sonMismoJugador(n)) : null;
+    if(ev && ev[1].amarilla) eventos.push('🟨');
+    if(ev && ev[1].roja) eventos.push('🟥');
+    const hayCitacion = !!(matchData[cat]||{})[fecha];
+    // Con evento en statfutbol pero sin figurar en la citación cargada: casi
+    // siempre es el nombre escrito distinto -- se marca para revisar.
+    const estado = !res ? 'Por jugar' : hayCitacion ? (ev ? 'Revisar citación' : 'No citado') : (ev ? 'Jugó (sin citación)' : 'Sin citación');
+    partidosJugados.push({fecha, rival:rivalTxt, cond:condicionCat(cat,fecha), res, eventos,
+      estado, min:null, citado:false, escudo:escudoDeFecha(fecha, rivalTxt)});
   });
   partidosJugados.sort((a,b)=>a.fecha-b.fecha);
   // Minutos: gana COMET (más preciso, partido a partido), pero como no
@@ -11104,8 +11173,17 @@ function calcularFichaJugador(cat, nombre){
   const cometCubreTodo = fechasJugadas.length > 0 &&
     fechasJugadas.every(f=>(partidos[cat]||{})[f]);
   const minSf = sfJ ? (parseInt(sfJ.min)||0) : 0;
-  const convocatorias = (cometCubreTodo && vecesTitular+vecesBanco>0) ? vecesTitular+vecesBanco
-    : Math.max(vecesTitular+vecesBanco, sfJ?(parseInt(sfJ.pj)||0):0);
+  // Partidos jugados: titular o entró desde el banco (COMET). Sin COMET no se
+  // sabe si un suplente entró, así que se toma también el PJ de statfutbol
+  // (nunca mostrar de menos). Convocado >= jugó, por eso convocatorias
+  // nunca queda por debajo de PJ.
+  const pjCitas = partidosJugados.filter(p=>p.estado==='Titular'||p.estado==='Entró').length;
+  const pjFinal = Math.max(pjCitas, sfJ?(parseInt(sfJ.pj)||0):0);
+  const convocatorias = (cometCubreTodo && vecesTitular+vecesBanco>0) ? Math.max(vecesTitular+vecesBanco, pjCitas)
+    : Math.max(vecesTitular+vecesBanco, pjFinal);
+  const fechasSinCitacion = partidosJugados.filter(p=>['Sin citación','Jugó (sin citación)','Revisar citación'].includes(p.estado)).length;
+  // Asistencias: solo futdetail (acumulado de temporada; puede incluir amistosos).
+  const asistenciasFinal = parseInt(s.asistencias)||0;
   const minutosFinal = (cometCubreTodo && minCometSum) ? minCometSum
     : (minSf || (parseInt(s.minutos_jugados)||0) || minCometSum);
   const geEntry = golesEfectivos(cat).find(g=>sonMismoJugador(g.name));
@@ -11189,24 +11267,12 @@ function calcularFichaJugador(cat, nombre){
   const radarMts     = (refMts     && mtsProm!=null)     ? Math.min(100, Math.round(mtsProm/refMts*100))       : 0;
   const hayGps = gpsMatches.length>0;
 
-  const partidosJugadosHTML = partidosJugados.length
-    ? `<div class="table-wrap"><table><thead><tr><th>F</th><th>Rival</th><th>Res.</th><th>Eventos</th></tr></thead><tbody>
-        ${partidosJugados.map(pj=>{
-          const condTxt = pj.cond==='L'?'L':pj.cond==='V'?'V':'';
-          const r = pj.res;
-          const resTxt = (r && r[0]!=null && r[1]!=null) ? `${r[0]}-${r[1]}` : '—';
-          const resColor = r ? (getResult(r[0],r[1])==='W'?'var(--win)':getResult(r[0],r[1])==='D'?'var(--draw)':'var(--loss)') : 'var(--muted)';
-          return `<tr><td>F${pj.fecha}</td><td style="display:flex;align-items:center;gap:6px">${escudoDeFecha(pj.fecha, pj.rival)}${esc(pj.rival)}${condTxt?` <span class="cond-badge cond-${pj.cond}" style="font-size:9px">${condTxt}</span>`:''}</td>
-            <td style="color:${resColor};font-weight:700">${resTxt}</td>
-            <td style="font-size:11px">${pj.eventos.join(' ')||'—'}</td></tr>`;
-        }).join('')}
-      </tbody></table></div>`
-    : `<div style="color:var(--muted);font-size:12px;padding:6px 0">Sin partidos con citación cargada todavía.</div>`;
+  const partidosJugadosHTML = filasFichaHTML(partidosJugados);
 
   return {
     cat, nombre, esReserva, jugador, nombreMostrar,
-    convocatorias, vecesTitular, vecesBanco, vecesEntroDeBanco, vecesSalio,
-    minutosFinal, golesFinal, amarillasFinal, rojasFinal,
+    convocatorias, pjFinal, vecesTitular, vecesBanco, vecesEntroDeBanco, vecesSalio,
+    minutosFinal, golesFinal, asistenciasFinal, amarillasFinal, rojasFinal, fechasSinCitacion,
     partidosJugados, partidosJugadosHTML,
     hayGps, sprintsProm, velMax, mtsProm,
     radarGoles, radarMinutos, radarSprints, radarVelMax, radarMts,
@@ -11277,8 +11343,9 @@ function tablaMultiCategoriaHTML(d, otras){
 // estadísticas en los dos lugares.
 function statBoxesDeFicha(d){
   return d.esReserva
-    ? [['convocatorias','Convoc.',d.convocatorias],['titular','Titular',d.vecesTitular],['goles','Goles',d.golesFinal],['amarillas','Amar.',d.amarillasFinal],['rojas','Roj.',d.rojasFinal]]
-    : [['convocatorias','Convoc.',d.convocatorias],['titular','Titular',d.vecesTitular],['minutos','Minutos',d.minutosFinal],['goles','Goles',d.golesFinal],['amarillas','Amar.',d.amarillasFinal]];
+    ? [['convocatorias','Convoc.',d.convocatorias],['pj','Jugó',d.pjFinal],['titular','Titular',d.vecesTitular],['goles','Goles',d.golesFinal],['amarillas','Amar.',d.amarillasFinal],['rojas','Roj.',d.rojasFinal]]
+    : [['convocatorias','Convoc.',d.convocatorias],['pj','Jugó',d.pjFinal],['titular','Titular',d.vecesTitular],['minutos','Minutos',d.minutosFinal],
+       ['goles','Goles',d.golesFinal],['asistencias','Asist.',d.asistenciasFinal],['amarillas','Amar.',d.amarillasFinal],['rojas','Roj.',d.rojasFinal]];
 }
 
 // Arma el contenido de una ficha (radar + números) a partir de
@@ -11289,6 +11356,12 @@ function statBoxesDeFicha(d){
 // mejores: Set con las keys de statBoxesDeFicha en las que ESTE jugador
 // tiene el mejor valor entre los comparados -- se resaltan en dorado, mismo
 // criterio visual que ya usa el resto de la app.
+function fichaDatosPersonales(d){
+  const j = d.jugador||{};
+  const num = v => parseFloat(v) ? String(parseFloat(v)) : '';
+  return [j.edad?`${j.edad} años`:'', num(j.altura)?`${num(j.altura)} cm`:'', num(j.peso)?`${num(j.peso)} kg`:'', j.pie?`Pie ${String(j.pie).toLowerCase()}`:'']
+    .filter(Boolean).join(' · ');
+}
 function renderFichaCardHTML(d, canvasId, opts){
   opts = opts||{};
   const mejores = opts.mejores || new Set();
@@ -11305,10 +11378,12 @@ function renderFichaCardHTML(d, canvasId, opts){
     </div>
     <div style="font-size:10.5px;color:var(--muted);text-align:center;margin-bottom:14px">Cada eje es el % respecto al mejor dato del plantel de ${esc(d.cat)} en esa métrica.${d.hayGps?'':' Sprints, Vel. máxima y Mts/min se completan solos cuando Brian cargue en BL GPS Performance.'}</div>` : ''}`;
   return `
+    ${d.jugador?.foto ? `<img src="${esc(d.jugador.foto)}" alt="" style="display:block;width:72px;height:72px;object-fit:cover;border-radius:50%;margin:0 auto 6px;background:var(--surface2)" onerror="this.remove()">` : ''}
     <h2 style="text-align:center">${esc(d.nombreMostrar)}</h2>
     <p style="text-align:center">${esc(d.jugador?.posicion||'—')} · ${esc(d.cat)}</p>
+    ${fichaDatosPersonales(d) ? `<p style="text-align:center;font-size:11.5px;color:var(--muted);margin-top:-4px">${esc(fichaDatosPersonales(d))}</p>` : ''}
     ${radarHTML}
-    <div style="display:grid;grid-template-columns:repeat(${boxes.length},1fr);gap:8px;margin:14px 0">
+    <div style="display:grid;grid-template-columns:repeat(${Math.min(4,boxes.length)},1fr);gap:8px;margin:14px 0">
       ${boxes.map(([key,label,val])=>{
         const esMejor = mejores.has(key);
         return `<div style="background:var(--surface2);border:1px solid ${esMejor?'var(--gold)':'transparent'};border-radius:8px;padding:8px;text-align:center">
@@ -11319,10 +11394,14 @@ function renderFichaCardHTML(d, canvasId, opts){
     ${otrasCategorias.length ? tablaMultiCategoriaHTML(d, otrasCategorias) : ''}
     ${detalle ? `
     <div style="font-size:11px;color:var(--muted);margin-bottom:10px">${d.esReserva
-      ? 'Convoc./titular: tus citaciones · goles: tu carga, completada con statfutbol · tarjetas: statfutbol, partido por partido.'
-      : `Convoc./titular: tus citaciones · minutos/amarillas: COMET, completado con futdetail donde falte informe. Goles: ver arriba (radar) y en Partidos jugados. Entró de banco: ${d.vecesEntroDeBanco} · Salió: ${d.vecesSalio}`}</div>
-    <div class="st"><div class="stbar"></div>🗓️ PARTIDOS JUGADOS</div>
-    ${d.partidosJugadosHTML}` : ''}`;
+      ? 'Convoc./titular: tus citaciones · jugó: citaciones o statfutbol · goles: tu carga, completada con statfutbol · tarjetas: statfutbol, partido por partido.'
+      : `Convoc./titular: tus citaciones · jugó/minutos/tarjetas: COMET, completado con statfutbol donde falte informe · asistencias: futdetail (puede incluir amistosos). Entró de banco: ${d.vecesEntroDeBanco} · Salió: ${d.vecesSalio}`}${d.fechasSinCitacion ? ` · <b style="color:var(--loss)">${d.fechasSinCitacion} fecha(s) sin citación cargada o para revisar</b>` : ''}</div>
+    <div class="st"><div class="stbar"></div>🗓️ FECHA POR FECHA — ${esc(d.cat==='RESERVA_S2'?'RESERVA (2° sem.)':d.cat)}</div>
+    ${d.partidosJugadosHTML}
+    ${otrasCategorias.map(o=>{
+      const filas = o.partidosJugados.filter(p=>p.citado||p.eventos.length);
+      return filas.length ? `<div class="st"><div class="stbar"></div>🗓️ ${esc(o.cat==='RESERVA_S2'?'RESERVA (2° sem.)':o.cat)}</div>${filasFichaHTML(filas)}` : '';
+    }).join('')}` : ''}`;
 }
 
 function dibujarRadarFicha(d, canvasId){
@@ -11380,32 +11459,27 @@ function abrirPerfilJugador(cat, nombre){
 }
 
 function exportFichaJugador(cat, nombre){
-  const roster=plantelFutdetail[cat]||[];
-  const jugador=roster.find(p=>p.nombre===nombre);
-  const statsPorNombre={};
-  (jugadoresStats[cat]||[]).forEach(j=>{ statsPorNombre[normNombre(j.jugador)]=j; });
-  const s=statsPorNombre[normNombre(nombre)]||{};
-
+  // Mismos números que la Ficha en pantalla (calcularFichaJugador), no el
+  // acumulado crudo de futdetail -- ese incluye amistosos y no coincidía.
+  const d = calcularFichaJugador(cat, nombre);
   const filas=[
-    ['Categoría', cat],
-    ['Posición', jugador?.posicion || '—'],
-    ['Edad', jugador?.edad || '—'],
-    ['Convocatorias', s.convocatorias||0],
-    ['Partidos titular', s.partidos_titular||0],
-    ['Minutos jugados', s.minutos_jugados||0],
-    ['Goles', s.goles||0],
-    ['Asistencias', s.asistencias||0],
-    ['Tarjetas amarillas', s.tarjeta_amarilla||0],
-    ['Tarjetas rojas', s.tarjeta_roja||0],
+    ['Categoría', cat==='RESERVA_S2'?'RESERVA (2° sem.)':cat],
+    ['Posición', d.jugador?.posicion || '—'],
+    ['Datos', fichaDatosPersonales(d) || '—'],
+    ...statBoxesDeFicha(d).map(([,label,val])=>[label, val||0]),
   ];
   const rows=filas.map(([label,val])=>
     `<tr><td style="font-weight:700;color:#555">${esc(label)}</td><td style="font-weight:700">${esc(String(val))}</td></tr>`
   ).join('');
-
-  const nombreMostrar = formatNombreMostrar(nombre, cat);
-  const sectionsHTML=`<div class="section-title">${esc(nombreMostrar)}</div>
-    <table><tbody>${rows}</tbody></table>`;
-  abrirVentanaPDF(`Ficha — ${nombreMostrar}`, sectionsHTML);
+  const filasFecha = d.partidosJugados.filter(p=>p.estado!=='Por jugar').map(p=>{
+    const r=p.res; const resTxt=(r&&r[0]!=null&&r[1]!=null)?`${r[0]}-${r[1]}`:'—';
+    return `<tr><td>F${p.fecha}</td><td>${esc(p.rival)}</td><td>${resTxt}</td><td>${esc(p.estado)}</td><td>${p.min!=null?p.min+"'":'—'}</td><td>${esc(p.eventos.join(' ')||'—')}</td></tr>`;
+  }).join('');
+  const sectionsHTML=`<div class="section-title">${esc(d.nombreMostrar)}</div>
+    <table><tbody>${rows}</tbody></table>
+    <div class="section-title">Fecha por fecha</div>
+    <table><thead><tr><th>F</th><th>Rival</th><th>Res.</th><th>Estado</th><th>Min</th><th>Eventos</th></tr></thead><tbody>${filasFecha}</tbody></table>`;
+  abrirVentanaPDF(`Ficha — ${d.nombreMostrar}`, sectionsHTML);
 }
 
 // ── Modo 3: exportar vista GENERAL (checkboxes de secciones; Confiabilidad
