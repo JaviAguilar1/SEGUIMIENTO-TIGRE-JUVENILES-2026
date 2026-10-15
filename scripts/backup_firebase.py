@@ -63,13 +63,15 @@ def main():
     email = os.environ.get("FIREBASE_BACKUP_EMAIL")
     password = os.environ.get("FIREBASE_BACKUP_PASS")
     if not email or not password:
-        print("[ERROR] faltan FIREBASE_BACKUP_EMAIL/PASS en los secrets del repo.", file=sys.stderr)
+        print("::error::Backup: faltan FIREBASE_BACKUP_EMAIL/PASS en los secrets del repo.")
         sys.exit(1)
     try:
         id_token = login(email, password)
         backup[NODO_OBLIGATORIO] = fetch_nodo(NODO_OBLIGATORIO, id_token)
     except Exception as e:  # noqa
-        print(f"[ERROR] login o lectura de '{NODO_OBLIGATORIO}' fallo: {e}", file=sys.stderr)
+        detalle = e.read().decode("utf-8", errors="replace")[:300] if hasattr(e, "read") else ""
+        # "::error::" lo muestra GitHub como anotacion del run (visible sin abrir el log).
+        print(f"::error::Backup: login o lectura de '{NODO_OBLIGATORIO}' fallo: {e} {detalle}")
         sys.exit(1)
     for nodo in NODOS_EXTRA:
         try:
