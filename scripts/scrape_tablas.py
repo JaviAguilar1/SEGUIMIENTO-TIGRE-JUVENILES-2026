@@ -2502,44 +2502,6 @@ def sincronizar_citaciones_provisionales(email, password):
         print(f"[OK] Citaciones provisionales: {total} fecha(s) completadas desde statfutbol")
 
 
-# ── parenlapelota.com.ar (segunda fuente publica para 4TA-9NA) ──────────
-# Next.js con render en el servidor -- la tabla de posiciones ya viene
-# armada en el HTML de la respuesta, sin JS ni login (confirmado con un
-# curl plano). Se usa solo como cruce extra para la fila de Tigre en
-# Confiabilidad (equipoMismatches en index.html) -- no reemplaza a la LPF
-# oficial, asi que solo se guarda la fila de Tigre de cada categoria, no
-# la tabla completa (36 equipos no aportan nada mas por ahora).
-PARENLAPELOTA_SLUGS = {
-    "4TA": "cuarta", "5TA": "quinta", "6TA": "sexta",
-    "7MA": "septima", "8VA": "octava", "9NA": "novena",
-}
-
-
-def fetch_parenlapelota_tigre(slug: str):
-    html = fetch(f"https://parenlapelota.com.ar/lpf/{slug}")
-    idx = html.find(">Tigre<")
-    if idx == -1:
-        raise ValueError("No se encontro la fila de Tigre en la tabla")
-    # La celda del equipo trae escudo (img) + nombre en markup anidado, asi
-    # que se busca por el texto "Tigre" y se aisla el <tr> que lo contiene,
-    # en vez de asumir una estructura fija de columnas de entrada.
-    tr_start = html.rfind("<tr", 0, idx)
-    tr_end = html.find("</tr>", idx)
-    if tr_start == -1 or tr_end == -1:
-        raise ValueError("No se pudo aislar la fila de Tigre")
-    celdas = re.findall(r"<t[dh]\b[^>]*>(.*?)</t[dh]>", html[tr_start:tr_end], re.IGNORECASE | re.DOTALL)
-    celdas = [re.sub(r"<[^>]+>", "", c).replace("&nbsp;", " ").strip() for c in celdas]
-    if len(celdas) < 10:
-        raise ValueError(f"Fila de Tigre con menos celdas de las esperadas: {celdas}")
-    # Orden real de columnas en parenlapelota (distinto al de la LPF oficial):
-    # Pos | Equipo | PJ | G | E | P | GF | GC | DG | PTS -- confirmado con
-    # una fila real (Cuarta 2026: 18 Tigre 22 10 4 8 33 23 +10 34).
-    return {
-        "pj": int(celdas[2]), "pg": int(celdas[3]), "pe": int(celdas[4]), "pp": int(celdas[5]),
-        "gf": int(celdas[6]), "gc": int(celdas[7]),
-    }
-
-
 # ── statfutbol.com.ar (alertas del proximo rival) ────────────────────────
 # Fuente publica, HTML servido plano (confirmado con curl, sin JS). Se usa
 # SOLO para el proximo partido de cada categoria (no toda la temporada):
@@ -3368,18 +3330,6 @@ def main():
             resultado["categorias"][cat] = {"zonas": zonas}
             print(f"[OK] {cat}: {', '.join(f'{z} ({len(f)} equipos)' for z, f in zonas.items())}")
 
-    # Segunda fuente publica para el cruce de Confiabilidad (fila de Tigre:
-    # PJ/PG/PE/PP/GF/GC). No necesita credenciales, siempre se intenta.
-    resultado["tigre_parenlapelota"] = {}
-    for cat, slug in PARENLAPELOTA_SLUGS.items():
-        try:
-            fila = fetch_parenlapelota_tigre(slug)
-            resultado["tigre_parenlapelota"][cat] = fila
-            print(f"[OK] parenlapelota {cat}: PJ {fila['pj']}")
-        except Exception as e:  # noqa
-            errores.append(f"parenlapelota {cat}: {e}")
-            print(f"[ERROR] parenlapelota {cat}: {e}", file=sys.stderr)
-
     # Alertas del proximo rival (statfutbol.com.ar): goleador del plantel +
     # jugadores en riesgo de suspension por 5ta amarilla. Fuente publica, no
     # necesita credenciales. Si calcular_alerta_rival no encuentra proximo
@@ -3815,8 +3765,10 @@ def main():
     # anterior los tuvo.
     anterior.pop("errores", None)
     anterior.pop("avisos", None)
+    # Paren la Pelota ya no es fuente (2026-10-15): borrar el dato viejo.
+    anterior.pop("tigre_parenlapelota", None)
     CLAVES_POR_CATEGORIA = [
-        "categorias", "fixture", "fixture_completo", "tigre_parenlapelota",
+        "categorias", "fixture", "fixture_completo",
         "rival_alertas", "statfutbol_jugadores", "statfutbol_partidos",
         "statfutbol_resultados", "fixture_reserva", "fixture_completo_reserva",
         "fixture_futdetail", "jugadores_futdetail", "plantel_futdetail",
