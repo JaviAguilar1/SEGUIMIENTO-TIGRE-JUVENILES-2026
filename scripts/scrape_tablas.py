@@ -2270,6 +2270,46 @@ def _video_kickoffs_ok(r):
     return 0 <= k1 <= 600 and 2100 <= dk <= 3600
 
 
+_RITMO_CTX = {}
+
+
+def _sync_por_ritmo(cat, fecha_num, link, dia):
+    """Calibracion por ritmo de una fecha (None si no encastra firme o falta
+    algo). Usa la velocidad de Catapult (CATAPULT_USER/PASS); sin eso, los
+    esfuerzos guardados."""
+    try:
+        import sync_ritmo as sr
+        v = sr.curva_video(link, yt_dlp, imageio_ffmpeg.get_ffmpeg_exe())
+        carreras = []
+        usuario, clave = os.environ.get("CATAPULT_USER"), os.environ.get("CATAPULT_PASS")
+        if usuario and clave:
+            if "opener" not in _RITMO_CTX:
+                _RITMO_CTX["opener"], _ = catapult_login(usuario, clave)
+                teams = catapult_get(_RITMO_CTX["opener"], f"{CATAPULT_API_BASE}/teams")
+                _RITMO_CTX["team"] = {CATAPULT_TEAMS.get(t.get("name")): t["id"] for t in teams}
+                _RITMO_CTX["acts"] = {}
+            if cat not in _RITMO_CTX["acts"]:
+                tid, lista = _RITMO_CTX["team"].get(cat), []
+                for pagina in range(1, 8):
+                    if not tid:
+                        break
+                    parte = catapult_get(_RITMO_CTX["opener"], f"{CATAPULT_API_BASE}/activities?page={pagina}"
+                                         f"&page_size=100&sort=-start_time&deleted=0&team_ids={tid}") or []
+                    lista += parte
+                    if len(parte) < 100:
+                        break
+                _RITMO_CTX["acts"][cat] = _catapult_actividades_partido(lista, cat)
+            aids = [a for a, f in _RITMO_CTX["acts"][cat].items() if f == fecha_num]
+            carreras = sr.carreras_desde_api(sys.modules[__name__], _RITMO_CTX["opener"], aids)
+        if not carreras:
+            carreras = sr.carreras_desde_efforts(dia)
+        u0, g = sr.curva_gps(carreras)
+        return sr.calcular(u0, g, v, dia.get("periodos")) if g else None
+    except Exception as e:  # noqa -- nunca frena el resto del scraper
+        print(f"[AVISO] Sync por ritmo {cat} F{fecha_num}: {e}", file=sys.stderr)
+        return None
+
+
 def sincronizar_video_kickoffs(email, password, catapult_efforts):
     """Para cada fecha con esfuerzos de Catapult (catapult_efforts) que ya
     tenga un link de video cargado y todavia NO tenga calibracion
@@ -2354,6 +2394,22 @@ def sincronizar_video_kickoffs(email, password, catapult_efforts):
             # Si el OCR ya se rindio con esta fecha y lo unico nuevo es otra
             # via, no se repite su barrido (son minutos de PC por fecha para
             # volver a fallar igual): se prueba directo la via nueva.
+            # Via por "ritmo" (scripts/sync_ritmo.py): no depende de la hora de
+            # arranque de Catapult ni de la del video. APAGADA por defecto hasta
+            # validarla en la corrida automatica: se prende con RITMO_AUTO=1.
+            # Solo llega aca una fecha SIN calibrar (las calibradas se saltean
+            # arriba), asi que nunca pisa nada.
+            if os.environ.get("RITMO_AUTO") == "1":
+                r_ritmo = _sync_por_ritmo(cat, int(fecha_num), link, fechas.get(fecha_key) or {})
+                if r_ritmo:
+                    try:
+                        _tigre_fb_put(f"gps/videoSync/{cat}/{fecha_key}", r_ritmo, token(force=True))
+                        detectadas += 1
+                        print(f"[OK] Video sincronizado por ritmo: {cat} {fecha_key} "
+                              f"({len(r_ritmo['tramos'])} tramo(s))")
+                        continue
+                    except Exception as e:  # noqa
+                        print(f"[ERROR] Sync por ritmo {cat} {fecha_key}: no se pudo guardar: {e}", file=sys.stderr)
             resultado, no_disponible = detectar_kickoffs_auto(
                 link, (fechas.get(fecha_key) or {}).get("periodos"), offset(),
                 tipicos(cat), saltear_ocr=(se_rindio and "ocr" not in nuevas), cat=cat)
