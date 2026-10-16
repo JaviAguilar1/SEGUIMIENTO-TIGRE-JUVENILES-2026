@@ -1618,7 +1618,9 @@ function initFirebase(){
             // Sin rol = cuenta pendiente de aprobación del admin: no ve datos
             // (las reglas de Firebase tampoco la dejan leer).
             if(!snap.val()){ mostrarCuentaPendiente(); return; }
-            ocultarCuentaPendiente();
+            // Recién aprobada con la app abierta: la carga inicial (stats, GPS,
+            // videoSync) falló por falta de rol, así que se recarga entera.
+            if(document.getElementById('cuenta-pendiente')){ location.reload(); return; }
             if(!_statsListenerOn){
               _statsListenerOn = true;
               db.ref('stats').on('value', s2=>{
