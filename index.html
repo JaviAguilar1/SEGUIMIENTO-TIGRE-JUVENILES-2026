@@ -1560,6 +1560,16 @@ function refrescarPantallaTrasStats(){
   _refrescoStatsTimer = setTimeout(()=>{ refreshActiveModule(); refreshAlerts(); }, 300);
 }
 let _statsListenerOn = false;
+function cargarGpsTrasLogin(){
+  Promise.all([db.ref('gps/sessions').once('value'), db.ref('gps/videoSync').once('value'), db.ref('temporadaActiva').once('value')])
+    .then(([ses, vs, temp])=>{
+      if(ses.val()){ gpsSessions = Object.values(ses.val()); offlineGuardar('gpsSessions', gpsSessions); }
+      if(vs.val()) videoSync = vs.val();
+      if(temp.val()) TEMPORADA_ACTIVA = temp.val();
+      refreshActiveModule();
+    })
+    .catch(e=>console.warn('GPS tras login:', e));
+}
 function mostrarCuentaPendiente(){
   if(document.getElementById('cuenta-pendiente')) return;
   const d=document.createElement('div');
@@ -1627,6 +1637,11 @@ function initFirebase(){
                 if(!hidratarStats(s2.val())) return;
                 refrescarPantallaTrasStats();
               });
+              // loadData() corre al abrir la app, ANTES de que la persona se
+              // loguee: sin sesión, Firebase le niega GPS y video sync y quedan
+              // vacíos ("Falta calibrar el video"). Se vuelven a pedir acá,
+              // recién con la cuenta logueada y con rol.
+              cargarGpsTrasLogin();
             }
             currentRole = snap.val();
             isAdmin     = currentRole==='admin';
