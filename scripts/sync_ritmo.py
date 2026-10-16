@@ -272,5 +272,7 @@ def calcular(u0, g, v, periodos=None):
     for cual, patron in ((1, "rimer"), (2, "egundo")):
         p = next((p for p in (periodos or []) if patron in (p.get("name") or "")), None)
         if p and p.get("start"):
-            out[f"kickoff{cual}"] = round(p["start"] + offset_en(tramos, p["start"]), 1)
+            # +60 s: si Catapult marco el arranque un poco antes del corte real,
+            # que el kickoff viejo use el tramo de ese tiempo y no el anterior.
+            out[f"kickoff{cual}"] = round(p["start"] + offset_en(tramos, p["start"] + 60), 1)
     return out

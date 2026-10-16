@@ -119,6 +119,9 @@ def main():
         if not sync:
             print("  no encastra el video, no se puede pasar a segundos de video")
             continue
+        for t in sync["tramos"]:
+            hora = lambda x: "abierto" if x is None else time.strftime('%H:%M:%S', time.gmtime(x - 3 * 3600))
+            print(f"  tramo {hora(t['desde'])} -> {hora(t['hasta'])}  offset {t['offset']}  ({t['ventanas']} ventanas)")
         m0, mov = sr.curva_gps(sr.carreras_desde_api(st, cata.opener, aids, BANDAS_MOVIMIENTO))
         d = detectar(m0, mov)
         if not d:
