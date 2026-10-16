@@ -70,8 +70,17 @@ class Catapult:
     def actividades(self, cat, fecha_num):
         if cat not in self.acts:
             tid = self.team.get(cat)
-            lista = st.catapult_get(self.opener, f"{st.CATAPULT_API_BASE}/activities?page=1&page_size=100"
-                                                 f"&sort=-start_time&deleted=0&team_ids={tid}") if tid else []
+            # Varias paginas: con 100 solas (las mas nuevas) quedaban afuera los
+            # partidos del arranque de la temporada (F3-F9 de 4TA, 2026-10-16).
+            lista = []
+            for pagina in range(1, 8):
+                if not tid:
+                    break
+                parte = st.catapult_get(self.opener, f"{st.CATAPULT_API_BASE}/activities?page={pagina}"
+                                                     f"&page_size=100&sort=-start_time&deleted=0&team_ids={tid}") or []
+                lista += parte
+                if len(parte) < 100:
+                    break
             self.acts[cat] = st._catapult_actividades_partido(lista, cat)
         return [aid for aid, f in self.acts[cat].items() if f == fecha_num]
 
@@ -135,6 +144,8 @@ def main():
                 if cata:
                     carreras = sr.carreras_desde_api(st, cata.opener, cata.actividades(cat, int(fk[1:])))
                 if not carreras:
+                    if cata:
+                        print("   (Catapult no devolvio la actividad de esta fecha: se usa la senal liviana)")
                     carreras = sr.carreras_desde_efforts(dia)
                 u0, g = sr.curva_gps(carreras)
                 nuevo = sr.calcular(u0, g, v, dia.get("periodos")) if g else None
