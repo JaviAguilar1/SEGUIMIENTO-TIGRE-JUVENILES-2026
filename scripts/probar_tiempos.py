@@ -129,9 +129,13 @@ def main():
             continue
 
         def linea(nombre, unix, ref=None):
-            seg = unix + sr.offset_en(sync["tramos"], unix)
+            # el corte entre tramos puede caer segundos despues del saque:
+            # el saque se busca dentro de su tiempo (+60 s), los finales -60 s
+            dentro = 60 if nombre.startswith("Saque") else -60 if nombre.startswith(("Fin", "Final")) else 0
+            seg = unix + sr.offset_en(sync["tramos"], unix + dentro)
+            sg, a = ("-" if seg < 0 else ""), int(abs(seg))
             txt = (f"  {nombre:24} {time.strftime('%H:%M:%S', time.gmtime(unix - 3 * 3600))}  video "
-                   f"{int(seg // 60)}:{int(seg % 60):02d}  https://youtu.be/{vid}?t={max(0, int(seg) - 5)}")
+                   f"{sg}{a // 60}:{a % 60:02d}  https://youtu.be/{vid}?t={max(0, int(seg) - 5)}")
             if ref:
                 txt += f"   (Catapult: {unix - ref:+.0f}s)"
             print(txt)
