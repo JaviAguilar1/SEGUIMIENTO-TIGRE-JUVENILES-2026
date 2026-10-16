@@ -1,0 +1,91 @@
+{
+  "rules": {
+    "stats": {
+      ".read": "auth != null && root.child('users').child(auth.uid).child('role').exists()",
+      ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'videoanalista_reserva' || root.child('users').child(auth.uid).child('role').val() === 'videoanalista_menores')"
+    },
+    "plantel": {
+      ".read": "auth != null && root.child('users').child(auth.uid).child('role').exists()",
+      ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'videoanalista_reserva' || root.child('users').child(auth.uid).child('role').val() === 'videoanalista_menores')"
+    },
+    "rendimiento": {
+      ".read": "auth != null && root.child('users').child(auth.uid).child('role').exists()",
+      ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'videoanalista_reserva' || root.child('users').child(auth.uid).child('role').val() === 'videoanalista_menores')"
+    },
+    "gps": {
+      "sessions": {
+        ".read": "auth != null && root.child('users').child(auth.uid).child('role').exists()",
+        ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'videoanalista_reserva' || root.child('users').child(auth.uid).child('role').val() === 'videoanalista_menores')"
+      },
+      "videoSync": {
+        ".read": "auth != null && root.child('users').child(auth.uid).child('role').exists()",
+        ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'videoanalista_reserva' || root.child('users').child(auth.uid).child('role').val() === 'videoanalista_menores')"
+      },
+      "videoSyncFallos": {
+        ".read": "auth != null && root.child('users').child(auth.uid).child('role').exists()",
+        ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'videoanalista_reserva' || root.child('users').child(auth.uid).child('role').val() === 'videoanalista_menores')"
+      },
+      "reservaManual": {
+        ".read": "auth != null && root.child('users').child(auth.uid).child('role').exists()",
+        ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'videoanalista_reserva')"
+      },
+      "catapultReservaAuth": {
+        "credenciales": {
+          ".read": false,
+          ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'videoanalista_reserva')"
+        },
+        "estado": {
+          ".read": "auth != null && root.child('users').child(auth.uid).child('role').exists()",
+          ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'videoanalista_reserva')"
+        }
+      }
+    },
+    "citacionesImg": {
+      ".read": "auth != null && root.child('users').child(auth.uid).child('role').exists()",
+      ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'videoanalista_reserva' || root.child('users').child(auth.uid).child('role').val() === 'videoanalista_menores')"
+    },
+    "temporadaActiva": {
+      ".read": "auth != null && root.child('users').child(auth.uid).child('role').exists()",
+      ".write": "auth != null && root.child('users').child(auth.uid).child('role').val() === 'admin'"
+    },
+    "temporadas_cerradas": {
+      ".read": "auth != null && root.child('users').child(auth.uid).child('role').exists()",
+      ".write": "auth != null && root.child('users').child(auth.uid).child('role').val() === 'admin'"
+    },
+    "users": {
+      ".read": "auth != null && root.child('users').child(auth.uid).child('role').val() === 'admin'",
+      ".write": "auth != null && root.child('users').child(auth.uid).child('role').val() === 'admin'",
+      "$uid": {
+        ".read": "auth != null && auth.uid === $uid",
+        "rolSolicitado": {
+          ".write": "auth != null && auth.uid === $uid && !data.exists()"
+        },
+        "perfil": {
+          ".write": "auth != null && auth.uid === $uid && !data.exists()"
+        },
+        "nombre": {
+          ".write": "auth != null && auth.uid === $uid"
+        },
+        "mustChangePassword": {
+          ".write": "auth != null && auth.uid === $uid && !newData.exists()"
+        },
+        "lastLogin": {
+          ".write": "auth != null && auth.uid === $uid"
+        },
+        "lastDevice": {
+          ".write": "auth != null && auth.uid === $uid"
+        },
+        "email": {
+          ".write": "auth != null && auth.uid === $uid"
+        }
+      }
+    },
+    "profile_taken": {
+      ".read": true,
+      ".write": "auth != null && root.child('users').child(auth.uid).child('role').val() === 'admin'",
+      "$perfil": {
+        ".write": "auth != null && !data.exists() && newData.val() === auth.uid"
+      }
+    }
+  }
+}

@@ -1559,6 +1559,21 @@ function refrescarPantallaTrasStats(){
   clearTimeout(_refrescoStatsTimer);
   _refrescoStatsTimer = setTimeout(()=>{ refreshActiveModule(); refreshAlerts(); }, 300);
 }
+let _statsListenerOn = false;
+function mostrarCuentaPendiente(){
+  if(document.getElementById('cuenta-pendiente')) return;
+  const d=document.createElement('div');
+  d.id='cuenta-pendiente';
+  d.style.cssText='position:fixed;inset:0;z-index:99999;background:var(--bg,#05080f);display:flex;align-items:center;justify-content:center;padding:16px';
+  d.innerHTML=`<div class="modal-box" style="max-width:380px;text-align:center">
+    <h2>⏳ CUENTA PENDIENTE</h2>
+    <p style="font-size:13px;margin:12px 0">Tu cuenta se creó bien. Cuando el administrador la apruebe, la plataforma se abre sola.</p>
+    <button class="m-cancel" onclick="doLogout()">SALIR</button>
+  </div>`;
+  document.body.appendChild(d);
+}
+function ocultarCuentaPendiente(){ document.getElementById('cuenta-pendiente')?.remove(); }
+
 function initFirebase(){
   return new Promise((resolve,reject)=>{
     if(typeof firebase==='undefined'){reject('no sdk');return;}
@@ -1573,7 +1588,7 @@ function initFirebase(){
         // un logout+login sin recargar la página deja el listener de ROL de
         // la cuenta VIEJA escuchando -- si ese rol se edita después desde la
         // consola de Firebase, pisa el rol de la sesión nueva sin avisar.
-        if(_authListenerUid){ db.ref('users/'+_authListenerUid+'/role').off(); db.ref('stats').off(); db.ref('profile_taken').off(); _profileTakenListenerOn=false; _authListenerUid=null; }
+        if(_authListenerUid){ db.ref('users/'+_authListenerUid+'/role').off(); db.ref('stats').off(); _statsListenerOn=false; ocultarCuentaPendiente(); db.ref('profile_taken').off(); _profileTakenListenerOn=false; _authListenerUid=null; }
         if(user){
           _authListenerUid = user.uid;
           // Última vez que se vio activa esta cuenta (login real o simplemente
@@ -1600,7 +1615,18 @@ function initFirebase(){
           });
           // Real-time role listener
           db.ref('users/'+user.uid+'/role').on('value', snap=>{
-            currentRole = snap.val() || 'viewer';
+            // Sin rol = cuenta pendiente de aprobación del admin: no ve datos
+            // (las reglas de Firebase tampoco la dejan leer).
+            if(!snap.val()){ mostrarCuentaPendiente(); return; }
+            ocultarCuentaPendiente();
+            if(!_statsListenerOn){
+              _statsListenerOn = true;
+              db.ref('stats').on('value', s2=>{
+                if(!hidratarStats(s2.val())) return;
+                refrescarPantallaTrasStats();
+              });
+            }
+            currentRole = snap.val();
             isAdmin     = currentRole==='admin';
             canEdit     = canEditCat(currentCategoria); // recalculado por categoria en cada render (ver renderStatsCat)
             catRole     = currentRole; // store for cat filtering
@@ -1618,11 +1644,8 @@ function initFirebase(){
             else if(_gpsReservaAutoListenerOn){ db.ref('gps/catapultReservaAuth/estado/activo').off(); _gpsReservaAutoListenerOn=false; }
             attachGpsReservaManualListener();
           });
-          // Real-time data sync — listen for remote changes
-          db.ref('stats').on('value', snap=>{
-            if(!hidratarStats(snap.val())) return;
-            refrescarPantallaTrasStats();
-          });
+          // Real-time data sync (stats): se engancha en el listener de rol de
+          // arriba, recién cuando la cuenta tiene rol (aprobada).
         } else {
           isAdmin=false; canEdit=false; currentRole='viewer'; catRole='viewer';
           applyViewMode(); updateAuthUI();
@@ -1805,7 +1828,10 @@ async function abrirPanelUsuarios(){
     const data = snap.val()||{};
     const filas = Object.entries(data).map(([uid,u])=>({
       uid, nombre:u.nombre||'', role:u.role||'', lastLogin:u.lastLogin||null, lastDevice:u.lastDevice||'', email:u.email||'',
+      rolSolicitado:u.rolSolicitado||'', perfil:u.perfil||'',
     }));
+    // Pendientes de aprobación primero (sin rol), así no se pierden abajo.
+    filas.sort((a,b)=>(a.role?1:0)-(b.role?1:0));
     // Más recientes primero; las que nunca entraron (sin lastLogin, ej. una
     // cuenta recién creada) quedan al final en vez de mezcladas en el medio.
     filas.sort((a,b)=>{
@@ -1830,7 +1856,7 @@ async function abrirPanelUsuarios(){
               style="background:none;border:1px solid var(--border2);border-radius:5px;color:var(--gold2);font-size:11px;padding:3px 6px;cursor:pointer">💾</button>
           </div>
         </td>
-        <td style="padding:6px 8px;border-bottom:1px solid var(--border2);white-space:nowrap">${esc(roleLabel(f.role))}</td>
+        <td style="padding:6px 8px;border-bottom:1px solid var(--border2);white-space:nowrap">${celdaRolUsuario(f)}</td>
         <td style="padding:6px 8px;border-bottom:1px solid var(--border2);white-space:nowrap">${fmtFecha(f.lastLogin)}</td>
         <td style="padding:6px 8px;border-bottom:1px solid var(--border2)">${f.lastDevice?esc(f.lastDevice):'—'}</td>
       </tr>`).join('');
@@ -1846,6 +1872,45 @@ async function abrirPanelUsuarios(){
     const body=document.getElementById('panel-usuarios-body');
     if(body) body.innerHTML = `<div style="color:var(--red2);font-size:12px">No se pudo cargar (${esc(e.message)}).</div>`;
   }
+}
+// Roles que el admin puede asignar desde el panel (los de PERFILES + solo
+// lectura). 'admin' no se ofrece a propósito.
+function rolesAsignables(){
+  return [...new Set([...PERFILES.map(p=>p.role), 'viewer'])];
+}
+function celdaRolUsuario(f){
+  const yo = firebase.auth().currentUser?.uid;
+  if(f.uid===yo || f.role==='admin') return esc(roleLabel(f.role));
+  const sel = f.role || f.rolSolicitado || 'viewer';
+  const opts = rolesAsignables().map(r=>`<option value="${esc(r)}"${r===sel?' selected':''}>${esc(r==='viewer'?'SOLO LECTURA':roleLabel(r))}</option>`).join('');
+  const btn = 'background:none;border:1px solid var(--border2);border-radius:5px;font-size:11px;padding:3px 6px;cursor:pointer';
+  const select = `<select id="pu-rol-${f.uid}" style="background:rgba(5,8,15,0.5);border:1px solid var(--border2);border-radius:5px;color:var(--text);font-size:11px;padding:3px">${opts}</select>`;
+  if(!f.role) return `<div style="color:var(--gold2);font-size:10px;margin-bottom:3px">⏳ PENDIENTE${f.perfil?' · '+esc(perfilPorSlug(f.perfil)?.usuario||f.perfil):''}</div>
+    <div style="display:flex;gap:4px;align-items:center">${select}
+      <button onclick="aprobarUsuario('${f.uid}')" title="Aprobar" style="${btn};color:var(--win)">✓</button>
+      <button onclick="rechazarUsuario('${f.uid}','${esc(f.perfil)}')" title="Rechazar" style="${btn};color:var(--loss)">✕</button></div>`;
+  return `<div style="display:flex;gap:4px;align-items:center">${select}
+    <button onclick="aprobarUsuario('${f.uid}')" title="Guardar rol" style="${btn};color:var(--gold2)">💾</button></div>`;
+}
+function aprobarUsuario(uid){
+  if(!isAdmin || !db) return;
+  const rol = document.getElementById('pu-rol-'+uid)?.value;
+  if(!rol || rol==='admin') return;
+  db.ref('users/'+uid).update({role:rol, rolSolicitado:null})
+    .then(()=>{ showToast('✓ ROL GUARDADO'); abrirPanelUsuarios(); })
+    .catch(e=>showToast('⚠ '+e.message));
+}
+// Rechazar: la cuenta queda sin rol (no ve nada) y el perfil vuelve a estar
+// libre para que lo cree la persona correcta. La cuenta de Firebase Auth no
+// se puede borrar desde la app; si hace falta, se borra en la consola.
+function rechazarUsuario(uid, slug){
+  if(!isAdmin || !db) return;
+  if(!confirm('¿Rechazar esta cuenta? No va a poder ver nada.\n\nPara que el perfil se pueda volver a crear, después borrá esa cuenta en Firebase → Authentication.')) return;
+  const upd = {['users/'+uid+'/rolSolicitado']:null, ['users/'+uid+'/perfil']:null, ['users/'+uid+'/rechazado']:true};
+  if(slug) upd['profile_taken/'+slug] = null;
+  db.ref().update(upd)
+    .then(()=>{ showToast('✓ CUENTA RECHAZADA'); abrirPanelUsuarios(); })
+    .catch(e=>showToast('⚠ '+e.message));
 }
 function guardarNombreUsuario(uid){
   if(!isAdmin || !db) return;
@@ -2262,7 +2327,11 @@ function doWallSubmit(){
     firebase.auth().createUserWithEmailAndPassword(email, pass)
       .then(cred=>{
         const uid=cred.user.uid;
-        return db.ref().update({['users/'+uid+'/role']:perfil.role, ['users/'+uid+'/nombre']:perfil.usuario, ['profile_taken/'+slug]:uid});
+        // La cuenta queda PENDIENTE: el rol lo pone solo el admin al aprobarla
+        // (panel de Usuarios). Acá se guarda el rol que corresponde al perfil
+        // elegido como "solicitado", para que el admin lo apruebe con un clic.
+        return db.ref().update({['users/'+uid+'/rolSolicitado']:perfil.role, ['users/'+uid+'/perfil']:slug,
+          ['users/'+uid+'/nombre']:perfil.usuario, ['profile_taken/'+slug]:uid});
       })
       .then(()=>{ cerrarLoginWall(); })
       .catch(e=>{

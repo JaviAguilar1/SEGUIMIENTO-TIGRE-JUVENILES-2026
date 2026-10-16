@@ -69,6 +69,15 @@ Fuentes que YA NO se usan: sabadogol y Paren la Pelota. No volver a agregarlas.
   ven su grupo (`VIEW_SCOPES`).
 - Coordinador, director y `viewer`: solo miran.
 
+**Alta de cuentas (desde 2026-10-16):** la persona elige su perfil en "Crear
+cuenta" y queda PENDIENTE (`users/uid/rolSolicitado` + `perfil`, sin `role`).
+No ve nada hasta que el admin la aprueba en el panel 👥 (✓ asigna el rol, ✕
+rechaza y libera el perfil). Solo el admin escribe `role`.
+
+**Reglas de Firebase:** copia en `firebase.rules.json` (lo que manda es lo
+pegado en la consola: Realtime Database → Reglas). Leer datos exige tener rol.
+Si se cambian, actualizar los dos lados.
+
 ## Ficha del jugador
 
 `calcularFichaJugador` → `renderFichaCardHTML` (modal y Comparar) y
