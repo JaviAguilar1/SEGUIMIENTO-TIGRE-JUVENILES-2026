@@ -221,6 +221,28 @@ def buscar_corte(u0, g, v, ini, fin, off_a, off_b, lado=120, paso=5):
     return mejor
 
 
+PAUSA_MIN = 360      # s sin nadie corriendo fuerte: es el entretiempo, no una pausa de juego
+
+
+def corte_en_pausa(u0, g, ini, fin):
+    """Si entre los dos tramos hay una pausa larga del GPS (entretiempo), el
+    corte va justo donde termina: el video recortado empalma ahi, y asi el
+    saque del 2T usa el corrimiento del 2T. None si no hay pausa larga."""
+    a, b = max(0, int(ini) - u0), min(len(g), int(fin) - u0)
+    mejor_ini, mejor_len, ini_racha = None, 0, None
+    for t in range(a, b + 1):
+        vacio = t < b and g[t] == 0
+        if vacio and ini_racha is None:
+            ini_racha = t
+        elif not vacio and ini_racha is not None:
+            if t - ini_racha > mejor_len:
+                mejor_ini, mejor_len = ini_racha, t - ini_racha
+            ini_racha = None
+    if mejor_ini is None or mejor_len < PAUSA_MIN:
+        return None
+    return u0 + mejor_ini + mejor_len
+
+
 def tramos_desde_ventanas(u0, g, v, vent):
     """Agrupa las ventanas buenas en tramos de corrimiento parejo."""
     buenas = sorted([x for x in vent if x[2] >= CORR_MIN and x[3] >= VENTAJA_MIN])
@@ -248,8 +270,10 @@ def tramos_desde_ventanas(u0, g, v, vent):
     # bordes: se busca el segundo exacto del corte entre dos tramos; el
     # primero y el ultimo quedan abiertos
     for i in range(len(tramos) - 1):
-        corte = buscar_corte(u0, g, v, tramos[i]["hasta"], tramos[i + 1]["desde"],
-                             tramos[i]["offset"], tramos[i + 1]["offset"])
+        corte = corte_en_pausa(u0, g, tramos[i]["hasta"], tramos[i + 1]["desde"])
+        if corte is None:
+            corte = buscar_corte(u0, g, v, tramos[i]["hasta"], tramos[i + 1]["desde"],
+                                 tramos[i]["offset"], tramos[i + 1]["offset"])
         tramos[i]["hasta"], tramos[i + 1]["desde"] = corte, corte
     tramos[0]["desde"], tramos[-1]["hasta"] = None, None
     return tramos
