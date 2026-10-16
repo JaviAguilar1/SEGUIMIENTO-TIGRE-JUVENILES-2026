@@ -1281,10 +1281,10 @@ let videoSync = {};
 
 function guardarVideoSync(cat, fecha, kickoff1, kickoff2){
   if(!db) return;
-  db.ref(`gps/videoSync/${cat}/${fecha}`).set({kickoff1:Number(kickoff1), kickoff2:Number(kickoff2)})
+  db.ref(`gps/videoSync/${cat}/${fecha}`).set({kickoff1:Number(kickoff1), kickoff2:Number(kickoff2), fuente:'manual'})
     .then(()=>{
       videoSync[cat]=videoSync[cat]||{};
-      videoSync[cat][fecha]={kickoff1:Number(kickoff1), kickoff2:Number(kickoff2)};
+      videoSync[cat][fecha]={kickoff1:Number(kickoff1), kickoff2:Number(kickoff2), fuente:'manual'};
       showToast('☁ GUARDADO');
       refreshActiveModule();
     })
@@ -1298,11 +1298,15 @@ function guardarVideoSync(cat, fecha, kickoff1, kickoff2){
 function guardarVideoSyncKickoff(cat, fecha, cual, valor){
   if(!db) return;
   const campo = cual===1 ? 'kickoff1' : 'kickoff2';
-  db.ref(`gps/videoSync/${cat}/${fecha}`).update({[campo]: Number(valor)})
+  // Lo calibrado a mano manda: se sacan los 'tramos' del método por ritmo
+  // (si los había) para que gpsVideoSeg use kickoff1/kickoff2.
+  db.ref(`gps/videoSync/${cat}/${fecha}`).update({[campo]: Number(valor), tramos:null, fuente:'manual'})
     .then(()=>{
       videoSync[cat]=videoSync[cat]||{};
       videoSync[cat][fecha]=videoSync[cat][fecha]||{};
       videoSync[cat][fecha][campo]=Number(valor);
+      delete videoSync[cat][fecha].tramos;
+      videoSync[cat][fecha].fuente='manual';
       showToast('☁ GUARDADO');
       refreshActiveModule();
     })
@@ -5081,6 +5085,15 @@ let gpsColMinJug = 3;    // mínimo de jugadores distintos para que un momento c
 function gpsVideoSeg(cat, fechaKey, startUnix){
   const dia = catapultEfforts[cat]?.[fechaKey];
   const sync = videoSync[cat]?.[fechaKey];
+  // Calibración por "ritmo" (scripts/sync_ritmo.py): tramos de video con su
+  // propio corrimiento, sin depender de la hora de arranque de Catapult.
+  // segundo_video = hora_unix + offset del tramo que contiene ese momento.
+  const tramos = sync?.tramos ? Object.values(sync.tramos).filter(t=>t && t.offset!=null) : [];
+  if(tramos.length){
+    const t = tramos.find(t=>(t.desde==null || startUnix>=t.desde) && (t.hasta==null || startUnix<t.hasta))
+      || tramos.reduce((a,b)=>Math.abs((a.desde??a.hasta)-startUnix) < Math.abs((b.desde??b.hasta)-startUnix) ? a : b);
+    return startUnix + Number(t.offset);
+  }
   if(!dia?.periodos?.length || !sync) return null;
   const p1 = dia.periodos.find(p=>/rimer/i.test(p.name||''));
   const p2 = dia.periodos.find(p=>/egundo/i.test(p.name||''));

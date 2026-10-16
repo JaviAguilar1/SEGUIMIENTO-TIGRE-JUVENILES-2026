@@ -78,6 +78,15 @@ rechaza y libera el perfil). Solo el admin escribe `role`.
 pegado en la consola: Realtime Database → Reglas). Leer datos exige tener rol.
 Si se cambian, actualizar los dos lados.
 
+## Esfuerzos en video (sincronización)
+
+`gps/videoSync/{cat}/{fecha}`: `tramos` [{desde, hasta, offset}] → segundo
+del video = hora unix + offset (método por "ritmo", `scripts/sync_ritmo.py`,
+no depende de la hora de arranque de Catapult ni de la del video). Si no hay
+`tramos`, vale la fórmula vieja con `kickoff1/kickoff2`. Lo calibrado a mano
+(`fuente: 'manual'`) manda y borra los tramos. Revisión sin guardar:
+`scripts/revisar_sync_ritmo.py`.
+
 ## Ficha del jugador
 
 `calcularFichaJugador` → `renderFichaCardHTML` (modal y Comparar) y
