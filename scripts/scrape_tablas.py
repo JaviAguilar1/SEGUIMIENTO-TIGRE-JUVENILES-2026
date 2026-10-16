@@ -2271,6 +2271,8 @@ def _video_kickoffs_ok(r):
 
 
 _RITMO_CTX = {}
+_RITMO_SALTO_MAX = 1800  # s: un salto mayor entre tramos se considera dudoso (no se guarda solo)
+_RITMO_AVISOS = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data", "ritmo_avisos.json")
 
 
 def _sync_por_ritmo(cat, fecha_num, link, dia):
@@ -2304,10 +2306,33 @@ def _sync_por_ritmo(cat, fecha_num, link, dia):
         if not carreras:
             carreras = sr.carreras_desde_efforts(dia)
         u0, g = sr.curva_gps(carreras)
-        return sr.calcular(u0, g, v, dia.get("periodos")) if g else None
+        r = sr.calcular(u0, g, v, dia.get("periodos")) if g else None
+        if not r:
+            return None, "no_encastra", "sin tramos firmes"
+        tr = r["tramos"]
+        saltos = [abs(tr[i + 1]["offset"] - tr[i]["offset"]) for i in range(len(tr) - 1)]
+        if saltos and max(saltos) > _RITMO_SALTO_MAX:
+            return None, "dudosa", f"salto de {max(saltos)} s entre tramos"
+        return r, "ok", ""
     except Exception as e:  # noqa -- nunca frena el resto del scraper
         print(f"[AVISO] Sync por ritmo {cat} F{fecha_num}: {e}", file=sys.stderr)
-        return None
+        msg = str(e)
+        if _video_no_disponible(e) or "403" in msg or "forbidden" in msg.lower():
+            return None, "no_disponible", msg[:120]
+        if "404" in msg or "not found" in msg.lower():
+            return None, "link_roto", msg[:120]
+        return None, "error", msg[:120]
+
+
+def _ritmo_registrar_aviso(avisos, cat, fecha_key, motivo, detalle, link):
+    """Deja constancia (data/ritmo_avisos.json) de las fechas que el sync por
+    ritmo no pudo resolver solo: no encastra, dudosa, link roto o error. Las
+    que son 403 pasajero no se registran: se reintentan solas en la corrida
+    siguiente."""
+    avisos.setdefault(cat, {})[fecha_key] = {
+        "motivo": motivo, "detalle": detalle, "link": link,
+        "fecha": datetime.datetime.now().strftime("%Y-%m-%d %H:%M")}
+    print(f"[AVISO] Sync por ritmo {cat} {fecha_key}: {motivo} ({detalle}) -- queda para revisar a mano", file=sys.stderr)
 
 
 def sincronizar_video_kickoffs(email, password, catapult_efforts):
@@ -2363,11 +2388,18 @@ def sincronizar_video_kickoffs(email, password, catapult_efforts):
     MAX_INTENTOS = 3  # los de visitante sin cartel no van a leer nunca -> dejar de reintentarlos
 
     detectadas = 0
+    try:
+        with open(_RITMO_AVISOS, encoding="utf-8") as f:
+            ritmo_avisos = json.load(f)
+    except (OSError, ValueError):
+        ritmo_avisos = {}
+    avisos_antes = json.dumps(ritmo_avisos, sort_keys=True)
     for cat, fechas in catapult_efforts.items():
         for fecha_key in fechas:
             fecha_num = fecha_key.lstrip("F")
             try:
                 if _tigre_fb_get(f"gps/videoSync/{cat}/{fecha_key}", token()):
+                    ritmo_avisos.get(cat, {}).pop(fecha_key, None)  # ya calibrada (a mano o sola)
                     continue
                 link = _tigre_fb_get(f"stats/links/{cat}/{fecha_num}/par", token())
             except Exception:
@@ -2389,7 +2421,8 @@ def sincronizar_video_kickoffs(email, password, catapult_efforts):
             mismo_link = prev.get("link") == link
             nuevas = _video_vias_nuevas(prev.get("via")) if mismo_link else set()
             se_rindio = mismo_link and prev.get("intentos", 0) >= MAX_INTENTOS
-            if se_rindio and not nuevas:
+            ritmo_on = os.environ.get("RITMO_AUTO") == "1"
+            if se_rindio and not nuevas and not ritmo_on:
                 continue
             # Si el OCR ya se rindio con esta fecha y lo unico nuevo es otra
             # via, no se repite su barrido (son minutos de PC por fecha para
@@ -2399,17 +2432,36 @@ def sincronizar_video_kickoffs(email, password, catapult_efforts):
             # validarla en la corrida automatica: se prende con RITMO_AUTO=1.
             # Solo llega aca una fecha SIN calibrar (las calibradas se saltean
             # arriba), asi que nunca pisa nada.
-            if os.environ.get("RITMO_AUTO") == "1":
-                r_ritmo = _sync_por_ritmo(cat, int(fecha_num), link, fechas.get(fecha_key) or {})
+            if ritmo_on:
+                av = (ritmo_avisos.get(cat) or {}).get(fecha_key) or {}
+                if av.get("link") == link and av.get("motivo") in ("no_encastra", "dudosa", "link_roto"):
+                    continue  # ya se vio con este mismo video y quedo para revisar a mano
+                r_ritmo, motivo, detalle = _sync_por_ritmo(cat, int(fecha_num), link, fechas.get(fecha_key) or {})
                 if r_ritmo:
                     try:
                         _tigre_fb_put(f"gps/videoSync/{cat}/{fecha_key}", r_ritmo, token(force=True))
                         detectadas += 1
                         print(f"[OK] Video sincronizado por ritmo: {cat} {fecha_key} "
                               f"({len(r_ritmo['tramos'])} tramo(s))")
+                        ritmo_avisos.get(cat, {}).pop(fecha_key, None)
                         continue
                     except Exception as e:  # noqa
                         print(f"[ERROR] Sync por ritmo {cat} {fecha_key}: no se pudo guardar: {e}", file=sys.stderr)
+                elif motivo == "no_disponible":
+                    # 403 / video no disponible: bloqueo pasajero de YouTube. Se
+                    # reintenta solo en la corrida siguiente (la fecha sigue sin
+                    # calibrar); no pasa por el OCR viejo ni gasta un intento.
+                    print(f"[AVISO] Sync por ritmo {cat} {fecha_key}: video no disponible, se reintenta en la proxima corrida")
+                    continue
+                elif motivo in ("dudosa", "link_roto"):
+                    # No se guarda sola ni se prueba el OCR: queda para revisar a ojo
+                    # (o para corregir el link en la app).
+                    _ritmo_registrar_aviso(ritmo_avisos, cat, fecha_key, motivo, detalle, link)
+                    continue
+                else:  # no_encastra / error: se registra y sigue la via vieja como antes
+                    _ritmo_registrar_aviso(ritmo_avisos, cat, fecha_key, motivo, detalle, link)
+                if se_rindio and not nuevas:
+                    continue
             resultado, no_disponible = detectar_kickoffs_auto(
                 link, (fechas.get(fecha_key) or {}).get("periodos"), offset(),
                 tipicos(cat), saltear_ocr=(se_rindio and "ocr" not in nuevas), cat=cat)
@@ -2445,6 +2497,11 @@ def sincronizar_video_kickoffs(email, password, catapult_efforts):
                     _tigre_fb_put(f"gps/videoSyncFallos/{cat}/{fecha_key}", None, token())
                 except Exception:
                     pass
+    ritmo_avisos = {c: f for c, f in ritmo_avisos.items() if f}
+    if json.dumps(ritmo_avisos, sort_keys=True) != avisos_antes:
+        os.makedirs(os.path.dirname(_RITMO_AVISOS), exist_ok=True)
+        with open(_RITMO_AVISOS, "w", encoding="utf-8") as f:
+            json.dump(ritmo_avisos, f, ensure_ascii=False, indent=1, sort_keys=True)
     if detectadas:
         print(f"[OK] Sincronizacion de video: {detectadas} fecha(s) calibradas solas")
 
