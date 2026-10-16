@@ -250,6 +250,26 @@ def consenso(ventanas):
     return statistics.median(grupo), len(grupo)
 
 
+def refinar(u0, g, v, lista, est, margen=30, suav=1):
+    """Segunda pasada fina: une todas las ventanas que coincidieron y busca el
+    mejor corrimiento solo a +-margen s del consenso, casi sin suavizar."""
+    buenas = [x for x in lista if abs(x[1] - est) <= 8]
+    if not buenas:
+        return None, 0.0
+    a = max(0, min(x[0] for x in buenas) - VENTANA // 2 - u0)
+    b = min(len(g), max(x[0] for x in buenas) + VENTANA // 2 - u0)
+    gs, vs = suavizar(g[a:b], suav), suavizar(v, suav)
+    mejor = (None, -2.0)
+    for off in range(int(est) - margen, int(est) + margen + 1):
+        j = u0 + a + off
+        if j < 0 or j + len(gs) > len(vs):
+            continue
+        c = correlaciones(gs, vs[j:j + len(gs)])
+        if c and c[0] > mejor[1]:
+            mejor = (off, c[0])
+    return mejor
+
+
 # ── Main ──────────────────────────────────────────────────────────────────
 def main():
     efforts = cargar_json(os.path.join(RAIZ, "data", "catapult_efforts.json"))
@@ -311,6 +331,14 @@ def main():
                 if est is not None and verdad is not None:
                     linea += f"  | guardado: {verdad:.1f} -> diferencia {est - verdad:+.1f}s"
                 print(linea)
+                if est is not None:
+                    for suav in (1, 3):
+                        fino, cf = refinar(u0, g, v, lista, est, suav=suav)
+                        if fino is not None:
+                            txt = f"     afinado (suavizado {suav}s): offset {fino}  corr {cf:.2f}"
+                            if verdad is not None:
+                                txt += f"  -> diferencia {fino - verdad:+.1f}s"
+                            print(txt)
                 resumen.append((cat, fk, tiempo, nombre, est, verdad, n, len(lista)))
 
     print("\n=========== RESUMEN ===========")
