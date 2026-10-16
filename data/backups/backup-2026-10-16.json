@@ -1,5 +1,5 @@
 {
-  "generado": "2026-10-16T03:36:13.587334+00:00",
+  "generado": "2026-10-16T10:42:15.712328+00:00",
   "gps/catapultReservaAuth/estado": null,
   "gps/reservaManual": null,
   "gps/sessions": null,
@@ -51412,20 +51412,189 @@
       ],
       "RESERVA": [
         {
+          "altura": "0.00",
+          "edad": "20",
+          "id": "fuster-luka",
+          "nombre": "Fuster Luka",
+          "peso": "0.00",
+          "pie": "DERECHO",
+          "posicion": "Arquero (ARQ)",
+          "valoracion": "A"
+        },
+        {
+          "altura": "1.86",
+          "edad": "20",
+          "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/39.png",
+          "id": "mazieres-bautista",
+          "nombre": "Mazieres Bautista",
+          "peso": "73.40",
+          "pie": "DERECHO",
+          "posicion": "Arquero (ARQ)",
+          "valoracion": "A"
+        },
+        {
+          "altura": "0.00",
+          "edad": "19",
+          "id": "yniguez-sergio",
+          "nombre": "Yñiguez Sergio",
+          "peso": "0.00",
+          "pie": "DERECHO",
+          "posicion": "Central derecho (DEF)",
+          "valoracion": "A"
+        },
+        {
+          "altura": "1.80",
+          "edad": "21",
+          "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/20.png",
+          "id": "minniti-luciano",
+          "nombre": "Minniti Luciano",
+          "peso": "79.60",
+          "pie": "DERECHO",
+          "posicion": "Central derecho (DEF)",
+          "valoracion": "A"
+        },
+        {
+          "altura": "0.00",
+          "edad": "22",
+          "id": "fernandez-tomas",
+          "nombre": "Fernandez Tomás",
+          "peso": "0.00",
+          "pie": "DERECHO",
+          "posicion": "Central derecho (DEF)",
+          "valoracion": "A"
+        },
+        {
+          "altura": "1.85",
+          "edad": "21",
+          "id": "ramponi-jeremias",
+          "nombre": "Ramponi Jeremias",
+          "peso": "86.20",
+          "pie": "DERECHO",
+          "posicion": "Central derecho (DEF)",
+          "valoracion": "A"
+        },
+        {
+          "altura": "1.82",
+          "edad": "20",
+          "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/41.png",
+          "id": "peluffo-ignacio",
+          "nombre": "Peluffo Ignacio",
+          "peso": "73.00",
+          "pie": "DERECHO",
+          "posicion": "Lateral derecho (DEF)",
+          "valoracion": "A"
+        },
+        {
+          "altura": "1.67",
+          "edad": "20",
+          "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/15.png",
+          "id": "sanchez-thiago",
+          "nombre": "Sanchez Thiago",
+          "peso": "66.70",
+          "pie": "DERECHO",
+          "posicion": "Lateral izquierdo (DEF)",
+          "valoracion": "A"
+        },
+        {
+          "altura": "1.79",
+          "edad": "20",
+          "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/42.png",
+          "id": "carracedo-lucian",
+          "nombre": "Carracedo Lucian",
+          "peso": "71.50",
+          "pie": "DERECHO",
+          "posicion": "Mediocampista central (VOL)",
+          "valoracion": "A"
+        },
+        {
+          "altura": "0.00",
+          "edad": "19",
+          "id": "fredes-felipe-2",
+          "nombre": "Fredes Felipe",
+          "peso": "0.00",
+          "pie": "DERECHO",
+          "posicion": "Mediocampista central (VOL)",
+          "valoracion": "A"
+        },
+        {
+          "altura": "1.73",
+          "edad": "20",
+          "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/49.png",
+          "id": "perez-gaston-2",
+          "nombre": "Perez Gaston",
+          "peso": "73.40",
+          "pie": "DERECHO",
+          "posicion": "Mediocampista central (VOL)",
+          "valoracion": "A"
+        },
+        {
+          "altura": "1.72",
+          "edad": "20",
+          "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/64.png",
+          "id": "paternoster-jose",
+          "nombre": "Paternoster Jose",
+          "peso": "68.30",
+          "pie": "IZQUIERDO",
+          "posicion": "Volante izquierdo (VOL)",
+          "valoracion": "A"
+        },
+        {
+          "altura": "0.00",
+          "edad": "19",
+          "id": "alfonso-nicolas",
+          "nombre": "Alfonso Nicolas",
+          "peso": "0.00",
+          "posicion": "Enganche (VOL)",
+          "valoracion": "A"
+        },
+        {
+          "altura": "1.76",
+          "edad": "20",
+          "foto": "https://futdetail.com.ar/futdetail_web_tigre/imagenes/63.png",
+          "id": "andrusisen-lautaro-2",
+          "nombre": "Andrusisen Lautaro",
+          "peso": "77.00",
+          "pie": "DERECHO",
+          "posicion": "Segundo delantero (DEL)",
+          "valoracion": "A"
+        },
+        {
+          "altura": "0.00",
+          "edad": "19",
+          "id": "figueredo-benjamin-2",
+          "nombre": "Figueredo Benjamin",
+          "peso": "0.00",
+          "pie": "DERECHO",
+          "posicion": "Segundo delantero (DEL)",
+          "valoracion": "A"
+        },
+        {
+          "altura": "0.00",
+          "edad": "22",
+          "id": "airala-thiago",
+          "nombre": "Airala Thiago",
+          "peso": "0.00",
+          "pie": "DERECHO",
+          "posicion": "Segundo delantero (DEL)",
+          "valoracion": "A"
+        },
+        {
+          "altura": "0.00",
+          "edad": "19",
+          "id": "lezcano-alan-2",
+          "nombre": "Lezcano Alan",
+          "peso": "0.00",
+          "pie": "DERECHO",
+          "posicion": "Segundo delantero (DEL)",
+          "valoracion": "A"
+        },
+        {
           "fuenteRoster": "statfutbol",
           "nombre": "AFONSO, NICOLAS"
         },
         {
           "fuenteRoster": "statfutbol",
-          "nombre": "AIRALA ZARATE, THIAGO LEONEL"
-        },
-        {
-          "fuenteRoster": "statfutbol",
           "nombre": "AMBIELA, MARIO EMILIO"
-        },
-        {
-          "fuenteRoster": "statfutbol",
-          "nombre": "ANDRUSISEN, JORDAN LAUTARO"
         },
         {
           "fuenteRoster": "statfutbol",
@@ -51445,10 +51614,6 @@
         },
         {
           "fuenteRoster": "statfutbol",
-          "nombre": "CARRACEDO, LUCIAN"
-        },
-        {
-          "fuenteRoster": "statfutbol",
           "nombre": "CORDOBA, FABRICIO SANTIAGO"
         },
         {
@@ -51457,27 +51622,11 @@
         },
         {
           "fuenteRoster": "statfutbol",
-          "nombre": "FERNANDEZ, TOMAS JULIAN"
-        },
-        {
-          "fuenteRoster": "statfutbol",
           "nombre": "FEVERSANI, BAUTISTA"
         },
         {
           "fuenteRoster": "statfutbol",
-          "nombre": "FIGUEREDO, BENJAMIN"
-        },
-        {
-          "fuenteRoster": "statfutbol",
-          "nombre": "FREDES, FELIPE BENJAMIN"
-        },
-        {
-          "fuenteRoster": "statfutbol",
           "nombre": "FREDES, TIAGO"
-        },
-        {
-          "fuenteRoster": "statfutbol",
-          "nombre": "FUSTER, LUKA"
         },
         {
           "fuenteRoster": "statfutbol",
@@ -51502,10 +51651,6 @@
         {
           "fuenteRoster": "statfutbol",
           "nombre": "LESZCZUK, BRANDON DANIEL"
-        },
-        {
-          "fuenteRoster": "statfutbol",
-          "nombre": "LEZCANO, ALAN SEBASTIAN"
         },
         {
           "fuenteRoster": "statfutbol",
@@ -51541,10 +51686,6 @@
         },
         {
           "fuenteRoster": "statfutbol",
-          "nombre": "MINNITI, LUCIANO SALVADOR"
-        },
-        {
-          "fuenteRoster": "statfutbol",
           "nombre": "MIÑO, ESTEBAN ROMAN"
         },
         {
@@ -51565,19 +51706,7 @@
         },
         {
           "fuenteRoster": "statfutbol",
-          "nombre": "PATERNOSTER, JOSE IGNACIO"
-        },
-        {
-          "fuenteRoster": "statfutbol",
-          "nombre": "PELUFFO, IGNACIO"
-        },
-        {
-          "fuenteRoster": "statfutbol",
           "nombre": "PEREYRA SALERNO, MANUEL"
-        },
-        {
-          "fuenteRoster": "statfutbol",
-          "nombre": "PEREZ, GASTON IGNACIO"
         },
         {
           "fuenteRoster": "statfutbol",
@@ -51594,10 +51723,6 @@
         {
           "fuenteRoster": "statfutbol",
           "nombre": "RUIZ, SANTIAGO AGUSTIN"
-        },
-        {
-          "fuenteRoster": "statfutbol",
-          "nombre": "SANCHEZ, THIAGO VALENTIN"
         },
         {
           "fuenteRoster": "statfutbol",
