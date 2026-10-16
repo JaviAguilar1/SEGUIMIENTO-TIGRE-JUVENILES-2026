@@ -293,26 +293,30 @@ def main():
             vent = alinear(u0, g, v)
             print(f"  GPS: {nombre} -- {len(tramos)} tramos, {len(vent)} ventanas ({time.time() - t0:.0f}s)")
             errores = []
+            por_tiempo = {}
             for centro, off, corr, ventaja in vent:
                 verdad, tiempo = offset_verdad(dia, sync, centro) if sync else (None, None)
                 err = f"{off - verdad:+7.1f}s" if verdad is not None else "   s/d"
                 if verdad is not None and corr >= CORR_MIN:
                     errores.append(abs(off - verdad))
+                if tiempo:
+                    por_tiempo.setdefault(tiempo, ([], verdad))[0].append((centro, off, corr, ventaja))
                 print(f"    ventana {time.strftime('%H:%M', time.localtime(centro))}"
                       f"  offset {off:9.0f}  corr {corr:4.2f}  ventaja {ventaja:4.2f}"
                       f"  {('T' + str(tiempo)) if tiempo else '  '} error {err}")
-            est, n = consenso(vent)
-            verdad1, _ = offset_verdad(dia, sync, periodo(dia["periodos"], 1)["start"]) if sync and periodo(dia["periodos"], 1) else (None, None)
-            linea = f"  => consenso: offset {est} ({n} ventanas)"
-            if est is not None and verdad1 is not None:
-                linea += f"  | calibracion guardada 1T: {verdad1:.1f}  -> diferencia {est - verdad1:+.1f}s"
-            print(linea)
-            resumen.append((cat, fk, nombre, est, verdad1, n))
+            for tiempo in sorted(por_tiempo):
+                lista, verdad = por_tiempo[tiempo]
+                est, n = consenso(lista)
+                linea = f"  => {tiempo}T consenso: offset {est} ({n} de {len(lista)} ventanas de acuerdo)"
+                if est is not None and verdad is not None:
+                    linea += f"  | guardado: {verdad:.1f} -> diferencia {est - verdad:+.1f}s"
+                print(linea)
+                resumen.append((cat, fk, tiempo, nombre, est, verdad, n, len(lista)))
 
     print("\n=========== RESUMEN ===========")
-    for cat, fk, nombre, est, verdad, n in resumen:
+    for cat, fk, tiempo, nombre, est, verdad, n, total in resumen:
         dif = f"{est - verdad:+.1f}s" if (est is not None and verdad is not None) else "s/d"
-        print(f"{cat} {fk:4} | {nombre:28} | diferencia vs calibracion: {dif:>8} | ventanas de acuerdo: {n}")
+        print(f"{cat} {fk:4} {tiempo}T | {nombre:28} | diferencia vs guardado: {dif:>8} | ventanas de acuerdo: {n}/{total}")
     print("\nCopia todo este texto y pasaselo a Claude.")
 
 
