@@ -2324,6 +2324,30 @@ def _sync_por_ritmo(cat, fecha_num, link, dia):
         return None, "error", msg[:120]
 
 
+def _eventos_por_gps(cat, fecha_num, tramos, tok):
+    """Tiempos y goles (scripts/tiempos.py) para gps/videoSync/.../eventos.
+    None si falta algo. Los goles de confianza baja no se guardan (con un VEO
+    solo, sin COMET, no son confiables). Se prende con EVENTOS_AUTO=1."""
+    try:
+        import tiempos as tp
+        if "opener" not in _RITMO_CTX:
+            return None   # sin credenciales de Catapult
+        aids = [a for a, f in _RITMO_CTX["acts"].get(cat, {}).items() if f == fecha_num]
+        res = _tigre_fb_get(f"stats/results/{cat}/{fecha_num}", tok)
+        com = _tigre_fb_get(f"stats/partidos/{cat}/{fecha_num}", tok) or {}
+        riv = (_tigre_fb_get(f"stats/matchData/{cat}/{fecha_num}", tok) or {}).get("minutosGolesRival") or []
+        mins = [int(g["minuto"]) for g in com.get("goles") or [] if g and g.get("minuto") and not g.get("autogol")]
+        ev = tp.eventos_partido(sys.modules[__name__], _RITMO_CTX["opener"], aids, tramos,
+                                resultado=tuple(res[:2]) if isinstance(res, list) and len(res) >= 2 else None,
+                                minutos_tigre=mins or None, minutos_rival=riv or None)
+        if ev and ev.get("goles"):
+            ev["goles"] = [g for g in ev["goles"] if g.get("conf") != "baja"]
+        return ev
+    except Exception as e:  # noqa -- nunca frena el resto del scraper
+        print(f"[AVISO] Tiempos/goles {cat} F{fecha_num}: {e}", file=sys.stderr)
+        return None
+
+
 def _ritmo_registrar_aviso(avisos, cat, fecha_key, motivo, detalle, link):
     """Deja constancia (data/ritmo_avisos.json) de las fechas que el sync por
     ritmo no pudo resolver solo: no encastra, dudosa, link roto o error. Las
@@ -2438,6 +2462,10 @@ def sincronizar_video_kickoffs(email, password, catapult_efforts):
                     continue  # ya se vio con este mismo video y quedo para revisar a mano
                 r_ritmo, motivo, detalle = _sync_por_ritmo(cat, int(fecha_num), link, fechas.get(fecha_key) or {})
                 if r_ritmo:
+                    if os.environ.get("EVENTOS_AUTO") == "1":
+                        ev = _eventos_por_gps(cat, int(fecha_num), r_ritmo["tramos"], token())
+                        if ev:
+                            r_ritmo["eventos"] = ev
                     try:
                         _tigre_fb_put(f"gps/videoSync/{cat}/{fecha_key}", r_ritmo, token(force=True))
                         detectadas += 1
