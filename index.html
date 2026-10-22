@@ -5395,6 +5395,35 @@ function gpsVideoFormHTML(cat){
     <div id="gps-video-body"></div>`;
 }
 
+// Momentos del partido detectados con el GPS (scripts/tiempos.py, se guardan en
+// gps/videoSync/{cat}/{fecha}/eventos): saques, entretiempo, final y goles.
+// Los goles ya vienen filtrados (solo confianza alta/media); "~" = media.
+function gpsAbrirVideoMomento(cat, fechaKey, seg, titulo){
+  const url = links[cat]?.[parseInt(fechaKey.replace('F',''),10)]?.par;
+  if(!url || seg==null) return;
+  abrirVideoEmbebido(url, `${titulo} · ${fechaKey}`, Math.max(0, seg-5), null);
+}
+function gpsMomentosHTML(cat, fechaKey, ev){
+  if(!ev) return '';
+  const fmt = s => { s=Math.round(s); const a=Math.abs(s); return (s<0?'-':'')+Math.floor(a/60)+':'+String(a%60).padStart(2,'0'); };
+  const btn = (seg, label, titulo, destacado) => seg==null ? '' :
+    `<button type="button" onclick="gpsAbrirVideoMomento('${cat}','${fechaKey}',${Number(seg)},'${titulo}')"
+      style="background:${destacado?'rgba(240,192,64,.14)':'var(--surface2)'};border:1px solid ${destacado?'var(--gold)':'var(--border)'};border-radius:6px;color:var(--text);font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:12px;letter-spacing:.5px;padding:6px 10px;cursor:pointer">▶ ${label} <span style="color:var(--muted);font-weight:400">${fmt(seg)}</span></button>`;
+  const fijos = [['saque1','Saque 1T'],['fin1','Entretiempo'],['saque2','Saque 2T'],['final','Final']]
+    .map(([k,l])=>btn(ev[k]?.video, l, l, false)).join('');
+  const goles = Object.values(ev.goles||{}).filter(g=>g && g.video!=null).sort((a,b)=>a.video-b.video)
+    .map(g=>{
+      const quien = g.equipo==='tigre' ? 'Gol Tigre' : 'Gol rival';
+      const min = g.minuto!=null ? ` ${g.minuto}'` : '';
+      return btn(g.video, `⚽ ${quien}${min}${g.conf==='media'?' ~':''}`, quien+min, true);
+    }).join('');
+  if(!fijos && !goles) return '';
+  return `<div style="margin-bottom:12px">
+      <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Momentos del partido (detectados con el GPS)</div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px">${fijos}${goles}</div>
+    </div>`;
+}
+
 function wireGpsVideoForm(){
   _cargarYTApi();  // precarga la API de YouTube para que el 1er clic arranque sin demora
   const cat = gpsCruceCat, fechaKey = gpsVideoFecha;
@@ -5451,7 +5480,8 @@ function wireGpsVideoForm(){
     </div>`:'';
   const vistaBtn = (v,label) => `<button type="button" onclick="gpsVideoVista='${v}';wireGpsVideoForm();"
       style="flex:1;background:${gpsVideoVista===v?'var(--gold)':'var(--surface2)'};color:${gpsVideoVista===v?'#1a1205':'var(--text)'};border:1px solid ${gpsVideoVista===v?'var(--gold)':'var(--border)'};border-radius:6px;font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:1px;padding:8px 10px;cursor:pointer">${label}</button>`;
-  const vistaHTML = `<div style="display:flex;gap:8px;margin-bottom:12px">${vistaBtn('individual','👤 INDIVIDUAL')}${vistaBtn('colectivo','👥 COLECTIVO')}</div>`;
+  const vistaHTML = `<div style="display:flex;gap:8px;margin-bottom:12px">${vistaBtn('individual','👤 INDIVIDUAL')}${vistaBtn('colectivo','👥 COLECTIVO')}</div>`
+    + gpsMomentosHTML(cat, fechaKey, sync.eventos);
 
   if(gpsVideoVista==='colectivo'){
     // Un momento colectivo cuenta a cada jugador solo dentro de UN tipo
