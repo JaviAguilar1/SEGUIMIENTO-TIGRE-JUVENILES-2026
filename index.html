@@ -1695,7 +1695,9 @@ function applyViewMode(){
   const usuariosBtn=document.getElementById('btn-usuarios');
   if(usuariosBtn) usuariosBtn.style.display=isAdmin?'':'none';
   const gpsReservaAutoBtn=document.getElementById('btn-gps-reserva-auto');
-  if(gpsReservaAutoBtn) gpsReservaAutoBtn.style.display=isAdmin?'':'none';
+  // El 🛰️ solo aparece cuando el PF de Reserva ya activó la automatización
+  // (lo muestra attachBadgeGpsReservaListener); antes se veía siempre.
+  if(gpsReservaAutoBtn && !isAdmin) gpsReservaAutoBtn.style.display='none';
 
   // Filter categories for category-specific roles.
   // cat_XXX -> su categoria + GENERAL; ea_mayores/ea_menores -> sus 3
@@ -1798,6 +1800,8 @@ function attachBadgeGpsReservaListener(adminUid){
   _gpsReservaAutoListenerOn = true;
   db.ref('gps/catapultReservaAuth/estado/activo').on('value', snap=>{
     const badge = document.getElementById('btn-gps-reserva-auto-badge');
+    const btn = document.getElementById('btn-gps-reserva-auto');
+    if(btn) btn.style.display = snap.val() ? '' : 'none';
     if(!badge) return;
     if(!snap.val()){ badge.style.display='none'; return; }
     db.ref('users/'+adminUid+'/gpsReservaAutoVisto').once('value').then(vsnap=>{
