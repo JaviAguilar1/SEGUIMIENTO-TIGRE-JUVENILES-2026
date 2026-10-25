@@ -4123,6 +4123,7 @@ function renderVideoanalisisTab(cat, tabEl){
       ${isReserva ? `<div id="placa-resultado-block-${cat}" style="margin-bottom:18px"></div>` : ''}
       ${conRival ? `<div id="placa-portada-info-${cat}" style="margin-bottom:18px"></div>` : ''}
       ${conRival ? `<div id="placa-stats-block-${cat}" style="margin-bottom:18px"></div>` : ''}
+      ${isReserva ? `<div id="placa-analisis-block-${cat}" style="margin-bottom:18px"></div>` : ''}
       <div style="margin-bottom:18px">${placaRotuloHTML('🖼️ FASE')}${placaFaseControlesHTML(cat)}</div>
       <div>${placaRotuloHTML('🖼️ CIERRE')}${placaCierreControlesHTML(cat)}</div>
     </div>
@@ -4138,6 +4139,7 @@ function renderVideoanalisisTab(cat, tabEl){
     if(isReserva) renderPlacaResultadoReservaBlock(cat, dataCat);
     renderPlacaProximoRivalBlock(cat, dataCat);
     renderPlacaStatsControlesBlock(cat, dataCat);
+    if(isReserva) renderPlacaAnalisisReservaBlock(cat);
     renderRivalStatsDetalle(dataCat, cat);
   } else {
     const el = document.getElementById(`rival-stats-detalle-${dataCat}`);
@@ -10620,6 +10622,222 @@ async function renderPlacaStatsControlesBlock(cat, dataCat){
     </div>
   `, `placa-stats-preview-${cat}`);
   actualizarPlacaStatsPreview(cat);
+}
+
+// ── Placa de ANÁLISIS COMPLETO del rival (solo Reserva, 2026-10-25) ───────
+// Junta en una sola imagen lo que ya tenemos (tabla de la zona, fixture
+// completo de la zona, rival_alertas, partido previo del otro torneo) más el
+// horario, que no está en ninguna fuente automática (Sofascore lo publica
+// pero su API está bloqueada): se escribe a mano en la caja "Horario".
+function estadisticasRivalReserva(dataCat, rival, condRival){
+  const fc = (TABLA_DATA && TABLA_DATA.fixture_completo_reserva && TABLA_DATA.fixture_completo_reserva[dataCat]) || {};
+  const partidos = [];
+  Object.keys(fc).map(Number).sort((a,b)=>a-b).forEach(f=>{
+    (fc[f]||[]).forEach(p=>{
+      if(mismoEquipoReserva(p.local, rival)) partidos.push({fecha:f, cond:'L', gf:p.gl, gc:p.gv, rivalDe:p.visitante});
+      else if(mismoEquipoReserva(p.visitante, rival)) partidos.push({fecha:f, cond:'V', gf:p.gv, gc:p.gl, rivalDe:p.local});
+    });
+  });
+  const suma = lista => lista.reduce((a,p)=>{
+    a.pj++; a.gf+=p.gf; a.gc+=p.gc;
+    if(p.gf>p.gc) a.pg++; else if(p.gf<p.gc) a.pp++; else a.pe++;
+    if(p.gc===0) a.vallas++;
+    if(p.gf===0) a.sinGol++;
+    return a;
+  }, {pj:0,pg:0,pe:0,pp:0,gf:0,gc:0,vallas:0,sinGol:0});
+  return {total:suma(partidos), enCond:suma(partidos.filter(p=>p.cond===condRival)), forma:partidos.slice(-5)};
+}
+// Partido ya jugado contra este rival en el OTRO torneo del año (Apertura/Clausura).
+function enfrentamientoPrevioReserva(dataCat, rival){
+  const otro = dataCat==='RESERVA_S2' ? 'RESERVA' : 'RESERVA_S2';
+  const fx = (TABLA_DATA && TABLA_DATA.fixture_reserva && TABLA_DATA.fixture_reserva[otro]) || {};
+  const f = Object.keys(fx).map(Number).find(n=>fx[n] && fx[n].jugado && mismoEquipoReserva(fx[n].rival, rival));
+  return f ? {torneo: otro==='RESERVA' ? 'Apertura' : 'Clausura', fecha:f, cond:fx[f].cond, gf:fx[f].gf, gc:fx[f].gc} : null;
+}
+async function paramsPlacaAnalisisReserva(cat){
+  await loadTablaData();
+  const dataCat = placaDataCat[cat] || cat;
+  const prox = proximoRivalInfoReserva(dataCat);
+  const info = prox && matchRivalInfo(prox.rival);
+  const filaRival = prox && filaTablaLPFReserva(dataCat, prox.rival);
+  const filaTigre = filaTablaLPFReserva(dataCat, 'TIGRE');
+  if(!prox || !info || !filaRival || !filaTigre) return null;
+  return {cat, prox, info, filaRival, filaTigre,
+    est: estadisticasRivalReserva(dataCat, prox.rival, prox.condRival),
+    previo: enfrentamientoPrevioReserva(dataCat, prox.rival),
+    alerta: TABLA_DATA.rival_alertas && TABLA_DATA.rival_alertas[dataCat],
+    hora: (document.getElementById('placa-analisis-hora-'+cat)?.value || '').trim()};
+}
+function actualizarPlacaAnalisisPreview(cat){
+  actualizarPlacaPreviewGenerica('analisis-'+cat, `placa-analisis-preview-${cat}`, ()=>paramsPlacaAnalisisReserva(cat), dibujarPlacaAnalisisReserva);
+}
+async function generarPlacaAnalisisReserva(cat, compartir){
+  const p = await paramsPlacaAnalisisReserva(cat);
+  if(!p){ alert('Falta el próximo rival, su escudo o la tabla de posiciones de Reserva. Probá "🔄 Actualizar datos".'); return; }
+  const blob = await dibujarPlacaAnalisisReserva(p);
+  await descargarOCompartirPlaca(blob, `analisis-rival-${cat}-F${p.prox.fecha}-${slugArchivo(p.prox.rival)}.png`, compartir);
+}
+async function renderPlacaAnalisisReservaBlock(cat){
+  const el = document.getElementById(`placa-analisis-block-${cat}`);
+  if(!el) return;
+  el.innerHTML = placaRotuloHTML('🖼️ ANÁLISIS COMPLETO DEL RIVAL') + bloquePlacaConPreview(`
+    <div style="font-size:10px;color:var(--muted);letter-spacing:1px;margin-bottom:4px">HORARIO (opcional, ej. 15:00)</div>
+    <input id="placa-analisis-hora-${cat}" type="text" maxlength="8" placeholder="15:00" oninput="actualizarPlacaAnalisisPreview('${cat}')"
+      style="background:var(--surface2);border:1px solid var(--border2);color:var(--text);border-radius:6px;padding:8px 10px;
+      font-family:'Barlow Condensed',sans-serif;font-size:14px;outline:none;width:90px;margin-bottom:10px">
+    <div style="display:flex;gap:8px;margin-top:6px">
+      <button onclick="generarPlacaAnalisisReserva('${cat}')" style="${PLACA_BTN_STYLE}">⬇ ANÁLISIS DEL RIVAL</button>
+      ${botonCompartirPlacaHTML(`generarPlacaAnalisisReserva('${cat}', true)`)}
+    </div>`, `placa-analisis-preview-${cat}`);
+  actualizarPlacaAnalisisPreview(cat);
+}
+async function dibujarPlacaAnalisisReserva({cat, prox, info, filaRival, filaTigre, est, previo, alerta, hora, scale}){
+  if(document.fonts && document.fonts.ready) await document.fonts.ready;
+  const BG='#111e38', SURF='#0d1528', SURF2='#0a0f1e', RED='#c0152a', GOLD='#f0c040', TXT='#d8e4ff', TXT2='#a8c0e8',
+        MUTED='#8aa0cc', WIN='#22c55e', DRAW='#f59e0b', LOSS='#ef4444', BORDER='#3a5090', WHITE='#ffffff';
+  const W=1280, H=720, pad=48, SCALE=scale||3;
+  const [escudoRival, escudoTigre, escudoLiga] = await Promise.all([
+    cargarImagen('escudos/'+info.escudo),
+    cargarImagen(document.getElementById('escudoImg')?.src),
+    cargarImagen('escudos/LIGA.png'),
+  ]);
+  const canvas = document.createElement('canvas');
+  canvas.width = W*SCALE; canvas.height = H*SCALE;
+  const ctx = canvas.getContext('2d');
+  ctx.scale(SCALE, SCALE);
+  ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high';
+  ctx.fillStyle = BG; ctx.fillRect(0, 0, W, H);
+  ctx.textBaseline = 'top';
+  const fit = (t, maxW) => { while(t.length>3 && ctx.measureText(t).width>maxW) t=t.slice(0,-1); return t; };
+  const rotulo = (txt, x, y) => {
+    ctx.fillStyle=RED; ctx.fillRect(x,y,4,18);
+    ctx.font="700 14px 'Barlow Condensed', sans-serif"; ctx.fillStyle=GOLD;
+    try{ ctx.letterSpacing='1px'; }catch(e){}
+    ctx.fillText(txt, x+14, y+2);
+    try{ ctx.letterSpacing='0px'; }catch(e){}
+  };
+  if(escudoLiga) ctx.drawImage(escudoLiga, W-pad-75, pad-12, 75, 75);
+
+  ctx.font="15px 'Barlow', sans-serif"; ctx.fillStyle=TXT2;
+  ctx.fillText(`ANÁLISIS DE RIVAL   ·   ${prox.rival}   ·   ${catLabelPlaca(cat)}`, pad, pad+5);
+  ctx.font="700 46px 'Barlow Condensed', sans-serif"; ctx.fillStyle=WHITE;
+  ctx.fillText('Análisis completo', pad, pad+34);
+  ctx.font="20px 'Barlow', sans-serif"; ctx.fillStyle=TXT2;
+  const sub = `Fecha ${prox.fecha}${prox.fechaTexto?'   ·   '+prox.fechaTexto:''}${hora?'   ·   '+hora+' hs':''}   ·   `;
+  ctx.fillText(sub, pad, pad+92);
+  const subW = ctx.measureText(sub).width;
+  ctx.font="700 20px 'Barlow Condensed', sans-serif"; ctx.fillStyle=GOLD;
+  ctx.fillText(prox.condTigre==='L' ? 'TIGRE LOCAL' : 'TIGRE VISITANTE', pad+subW, pad+92);
+
+  // ── Columna izquierda: frente a frente ──
+  const lx=pad, lw=560;
+  let y=176;
+  rotulo('FRENTE A FRENTE', lx, y); y+=36;
+  const crest=56;
+  if(escudoTigre) ctx.drawImage(escudoTigre, lx+8, y, crest, crest);
+  if(escudoRival) ctx.drawImage(escudoRival, lx+lw-crest-8, y, crest, crest);
+  ctx.font="700 26px 'Barlow Condensed', sans-serif"; ctx.fillStyle=WHITE;
+  ctx.textAlign='left'; ctx.fillText('TIGRE', lx+8+crest+14, y+14);
+  ctx.textAlign='right'; ctx.fillText(fit(info.lpf.toUpperCase(), 190), lx+lw-crest-22, y+14);
+  ctx.textAlign='left';
+  y+=crest+16;
+  // [etiqueta, valor Tigre, valor rival, "menor es mejor"]
+  const filas = [
+    ['POSICIÓN', filaTigre.pos+'°', filaRival.pos+'°', filaTigre.pos, filaRival.pos, true],
+    ['PUNTOS', filaTigre.pts, filaRival.pts, filaTigre.pts, filaRival.pts, false],
+    ['PARTIDOS JUGADOS', filaTigre.pj, filaRival.pj, 0, 0, false],
+    ['GANADOS', filaTigre.pg, filaRival.pg, filaTigre.pg, filaRival.pg, false],
+    ['EMPATADOS', filaTigre.pe, filaRival.pe, 0, 0, false],
+    ['PERDIDOS', filaTigre.pp, filaRival.pp, filaTigre.pp, filaRival.pp, true],
+    ['GOLES A FAVOR', filaTigre.gf, filaRival.gf, filaTigre.gf, filaRival.gf, false],
+    ['GOLES EN CONTRA', filaTigre.gc, filaRival.gc, filaTigre.gc, filaRival.gc, true],
+    ['DIFERENCIA', (filaTigre.dif>=0?'+':'')+filaTigre.dif, (filaRival.dif>=0?'+':'')+filaRival.dif, filaTigre.dif, filaRival.dif, false],
+  ];
+  const rh=36;
+  filas.forEach((f,i)=>{
+    ctx.fillStyle = i%2 ? SURF2 : SURF; ctx.fillRect(lx, y, lw, rh);
+    const [label, vT, vR, nT, nR, menorMejor] = f;
+    const mejorT = nT!==nR && (menorMejor ? nT<nR : nT>nR), mejorR = nT!==nR && !mejorT;
+    ctx.font="700 20px 'Barlow Condensed', sans-serif";
+    ctx.textAlign='left';  ctx.fillStyle = mejorT ? WIN : TXT; ctx.fillText(String(vT), lx+16, y+8);
+    ctx.textAlign='right'; ctx.fillStyle = mejorR ? WIN : TXT; ctx.fillText(String(vR), lx+lw-16, y+8);
+    ctx.textAlign='center'; ctx.font="13px 'Barlow', sans-serif"; ctx.fillStyle=MUTED;
+    try{ ctx.letterSpacing='1px'; }catch(e){}
+    ctx.fillText(label, lx+lw/2, y+11);
+    try{ ctx.letterSpacing='0px'; }catch(e){}
+    ctx.textAlign='left';
+    y+=rh;
+  });
+
+  // ── Columna derecha: el rival en detalle ──
+  const rx=pad+lw+60, rw=W-pad-rx;
+  y=176;
+  const nombreRival = info.lpf;
+  rotulo(`FORMA DE ${nombreRival.toUpperCase()} · ÚLTIMOS ${est.forma.length||5}`, rx, y); y+=34;
+  const gap=10, chipW=(rw-gap*4)/5, chipH=80;
+  if(!est.forma.length){
+    ctx.font="15px 'Barlow', sans-serif"; ctx.fillStyle=MUTED; ctx.fillText('Sin partidos registrados todavía.', rx, y+6);
+  }
+  est.forma.forEach((p,i)=>{
+    const r = resultadoLabel(p.gf, p.gc);
+    const cx = rx+i*(chipW+gap);
+    ctxRoundRect(ctx, cx, y, chipW, chipH, 8); ctx.fillStyle=SURF; ctx.fill(); ctx.strokeStyle=BORDER; ctx.lineWidth=1; ctx.stroke();
+    ctx.fillStyle=r.color; ctx.fillRect(cx, y+8, 4, chipH-16);
+    ctx.textAlign='center';
+    ctx.font="700 30px 'Barlow Condensed', sans-serif"; ctx.fillStyle=r.color;
+    ctx.fillText(p.gf>p.gc?'G':p.gf<p.gc?'P':'E', cx+chipW/2, y+8);
+    ctx.font="700 18px 'Barlow', sans-serif"; ctx.fillStyle=WHITE;
+    ctx.fillText(`${p.gf}-${p.gc}`, cx+chipW/2, y+44);
+    ctx.font="11px 'Barlow', sans-serif"; ctx.fillStyle=MUTED;
+    ctx.fillText(fit(`${p.cond==='L'?'L':'V'} · ${nombreRivalPlaca(p.rivalDe)}`, chipW-12), cx+chipW/2, y+68);
+    ctx.textAlign='left';
+  });
+  y+=chipH+12;
+
+  const condTxt = prox.condRival==='L' ? 'LOCAL' : 'VISITANTE';
+  rotulo(`${nombreRival.toUpperCase()} COMO ${condTxt} · EN LA TEMPORADA`, rx, y); y+=32;
+  const e=est.enCond;
+  ctxRoundRect(ctx, rx, y, rw, 50, 8); ctx.fillStyle=SURF; ctx.fill(); ctx.strokeStyle=BORDER; ctx.stroke();
+  ctx.font="700 20px 'Barlow Condensed', sans-serif"; ctx.fillStyle=e.pj?TXT:MUTED;
+  ctx.fillText(e.pj ? `${e.pj} PJ   ·   ${e.pg} G   ${e.pe} E   ${e.pp} P   ·   GF ${e.gf}   GC ${e.gc}` : 'Sin partidos en esa condición', rx+16, y+14);
+  y+=50+12;
+
+  rotulo('PROMEDIOS DEL RIVAL', rx, y); y+=32;
+  const t=est.total, prom = n => t.pj ? (n/t.pj).toFixed(1) : '-';
+  const stats=[[prom(t.gf),'GOLES A FAVOR / PARTIDO'],[prom(t.gc),'GOLES EN CONTRA / PARTIDO'],[String(t.vallas),'VALLAS INVICTAS'],[String(t.sinGol),'PARTIDOS SIN MARCAR']];
+  const sw=(rw-gap*3)/4;
+  stats.forEach((s,i)=>{
+    const sx=rx+i*(sw+gap);
+    ctxRoundRect(ctx, sx, y, sw, 60, 8); ctx.fillStyle=SURF; ctx.fill(); ctx.strokeStyle=BORDER; ctx.stroke();
+    ctx.textAlign='center';
+    ctx.font="700 30px 'Barlow Condensed', sans-serif"; ctx.fillStyle=WHITE; ctx.fillText(s[0], sx+sw/2, y+8);
+    ctx.font="10px 'Barlow', sans-serif"; ctx.fillStyle=MUTED; ctx.fillText(fit(s[1], sw-8), sx+sw/2, y+40);
+    ctx.textAlign='left';
+  });
+  y+=60+12;
+
+  if(previo){
+    rotulo(`ENFRENTAMIENTO PREVIO · ${previo.torneo.toUpperCase()} · FECHA ${previo.fecha}`, rx, y); y+=32;
+    const r = resultadoLabel(previo.gf, previo.gc);
+    ctxRoundRect(ctx, rx, y, rw, 50, 8); ctx.fillStyle=SURF; ctx.fill(); ctx.strokeStyle=BORDER; ctx.stroke();
+    ctx.font="700 20px 'Barlow Condensed', sans-serif"; ctx.fillStyle=TXT;
+    ctx.fillText(`Tigre ${previo.cond==='L'?'(local)':'(visitante)'}   ${previo.gf} - ${previo.gc}   ${nombreRival}`, rx+16, y+14);
+    ctx.textAlign='right'; ctx.fillStyle=r.color; ctx.fillText(r.texto, rx+rw-16, y+14); ctx.textAlign='left';
+    y+=50+12;
+  }
+
+  if(alerta){
+    rotulo('GOLEADOR Y SUSPENDIDOS', rx, y); y+=32;
+    ctxRoundRect(ctx, rx, y, rw, 50, 8); ctx.fillStyle=SURF; ctx.fill(); ctx.strokeStyle=BORDER; ctx.stroke();
+    ctx.font="700 18px 'Barlow Condensed', sans-serif"; ctx.fillStyle=TXT;
+    const g = alerta.goleador ? `${alerta.goleador.nombre.split(',')[0]} · ${alerta.goleador.goles} goles` : 'Sin goleador';
+    ctx.fillText(g, rx+16, y+15);
+    const sus = (alerta.amarillas_riesgo||[]).map(s=>s.nombre.split(',')[0]);
+    ctx.textAlign='right'; ctx.fillStyle = sus.length ? LOSS : WIN;
+    ctx.fillText(fit(sus.length ? 'Suspendidos: '+sus.join(', ') : 'Sin suspendidos', rw/2-20), rx+rw-16, y+15);
+    ctx.textAlign='left';
+  }
+  return new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
 }
 
 // Lee fecha+sliders del panel "post partido" de una categoría. Se usa tanto
