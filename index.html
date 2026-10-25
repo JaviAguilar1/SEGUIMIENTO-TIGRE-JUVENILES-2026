@@ -1037,6 +1037,9 @@ let golesMismatchOmitidos = {};
 // Suspendidos del rival confirmados a mano (prensa/AFA) por cuando statfutbol todavia
 // no publico las tarjetas: {dataCat:{fecha, suspendidos:[{nombre,motivo,fuente}]}}.
 let rivalAlertasManual = {};
+// Datos de Sofascore de los últimos partidos del próximo rival (cargados a mano:
+// Sofascore no deja bajarlos solo). {dataCat:{fecha, rival, nota, partidos:[...]}}.
+let sofascoreRival = {};
 // correccionesNombres[cat][nombreCrudo] = "Apellido, Nombre" -- corrección manual
 // para mostrar (ver formatNombreMostrar), nunca toca el dato crudo de origen
 // (Catapult, futdetail, etc). Se carga desde Confiabilidad, para nombres que
@@ -2073,6 +2076,7 @@ function hidratarStats(p){
   if(p.recordatoriosOmitidos) recordatoriosOmitidos = p.recordatoriosOmitidos;
   if(p.golesMismatchOmitidos) golesMismatchOmitidos = p.golesMismatchOmitidos;
   rivalAlertasManual = p.rivalAlertasManual || {};
+  sofascoreRival = p.sofascoreRival || {};
   if(p.gpsMetricCfg) gpsMetricCfg = p.gpsMetricCfg;
   if(p.gpsPosOverride) gpsPosOverride = p.gpsPosOverride;
   if(p.correccionesNombres) correccionesNombres = p.correccionesNombres;
@@ -4135,6 +4139,7 @@ function renderVideoanalisisTab(cat, tabEl){
       ${isReserva ? `<div id="placa-resultado-block-${cat}" style="margin-bottom:18px"></div>` : ''}
       ${conRival ? `<div id="placa-portada-info-${cat}" style="margin-bottom:18px"></div>` : ''}
       ${conRival ? `<div id="placa-stats-block-${cat}" style="margin-bottom:18px"></div>` : ''}
+      ${isReserva ? `<div id="placa-sofascore-block-${cat}" style="margin-bottom:18px"></div>` : ''}
       <div style="margin-bottom:18px">${placaRotuloHTML('🖼️ FASE')}${placaFaseControlesHTML(cat)}</div>
       <div>${placaRotuloHTML('🖼️ CIERRE')}${placaCierreControlesHTML(cat)}</div>
     </div>
@@ -4150,6 +4155,7 @@ function renderVideoanalisisTab(cat, tabEl){
     if(isReserva) renderPlacaResultadoReservaBlock(cat, dataCat);
     renderPlacaProximoRivalBlock(cat, dataCat);
     renderPlacaStatsControlesBlock(cat, dataCat);
+    if(isReserva) renderPlacaSofascoreBlock(cat);
     renderRivalStatsDetalle(dataCat, cat);
   } else {
     const el = document.getElementById(`rival-stats-detalle-${dataCat}`);
@@ -10649,6 +10655,158 @@ async function renderPlacaStatsControlesBlock(cat, dataCat){
     </div>
   `, `placa-stats-preview-${cat}`);
   actualizarPlacaStatsPreview(cat);
+}
+
+// ── Placa SOFASCORE: últimos partidos del rival (solo Reserva, 2026-10-25) ──
+// Sistema, posesión, xG y tiros de cada partido, sacados a mano de Sofascore
+// (stats/sofascoreRival). Solo se muestra si los datos son del próximo rival
+// (misma fecha), así no queda una placa vieja cuando cambia el rival.
+function paramsPlacaSofascore(cat){
+  const dataCat = placaDataCat[cat] || cat;
+  const prox = proximoRivalInfoReserva(dataCat);
+  const datos = sofascoreRival && sofascoreRival[dataCat];
+  const info = prox && matchRivalInfo(prox.rival);
+  if(!prox || !info || !datos || datos.fecha!==prox.fecha || !(datos.partidos||[]).length) return null;
+  return {cat, prox, info, partidos: datos.partidos, nota: datos.nota||''};
+}
+function actualizarPlacaSofascorePreview(cat){
+  actualizarPlacaPreviewGenerica('sofascore-'+cat, `placa-sofascore-preview-${cat}`, async()=>paramsPlacaSofascore(cat), dibujarPlacaSofascore);
+}
+async function generarPlacaSofascore(cat, compartir){
+  const p = paramsPlacaSofascore(cat);
+  if(!p){ alert('Todavía no hay datos de Sofascore cargados para el próximo rival.'); return; }
+  const blob = await dibujarPlacaSofascore(p);
+  await descargarOCompartirPlaca(blob, `sofascore-${cat}-F${p.prox.fecha}-${slugArchivo(p.prox.rival)}.png`, compartir);
+}
+async function renderPlacaSofascoreBlock(cat){
+  const el = document.getElementById(`placa-sofascore-block-${cat}`);
+  if(!el) return;
+  await loadTablaData();
+  if(!paramsPlacaSofascore(cat)){
+    el.innerHTML = placaRotuloHTML('🖼️ SOFASCORE · ÚLTIMOS PARTIDOS DEL RIVAL') +
+      `<div style="padding:0 0 14px;font-size:14px;color:var(--text2)">Todavía no hay datos de Sofascore cargados para el próximo rival.</div>`;
+    return;
+  }
+  el.innerHTML = placaRotuloHTML('🖼️ SOFASCORE · ÚLTIMOS PARTIDOS DEL RIVAL') + bloquePlacaConPreview(`
+    <div style="font-size:12px;color:var(--text2);margin-bottom:10px;max-width:280px">Sistema, posesión, xG y tiros de los últimos partidos del rival, según Sofascore.</div>
+    <div style="display:flex;gap:8px">
+      <button onclick="generarPlacaSofascore('${cat}')" style="${PLACA_BTN_STYLE}">⬇ PLACA SOFASCORE</button>
+      ${botonCompartirPlacaHTML(`generarPlacaSofascore('${cat}', true)`)}
+    </div>`, `placa-sofascore-preview-${cat}`);
+  actualizarPlacaSofascorePreview(cat);
+}
+async function dibujarPlacaSofascore({cat, prox, info, partidos, nota, scale}){
+  if(document.fonts && document.fonts.ready) await document.fonts.ready;
+  const BG='#111e38', SURF='#0d1528', SURF2='#0a0f1e', RED='#c0152a', GOLD='#f0c040', TXT='#d8e4ff', TXT2='#a8c0e8',
+        MUTED='#8aa0cc', WIN='#22c55e', LOSS='#ef4444', BORDER='#3a5090', WHITE='#ffffff', BLUE='#4a7bd1';
+  const W=1280, H=720, pad=48, SCALE=scale||3;
+  const [escudoRival, escudoLiga, ...escudos] = await Promise.all([
+    cargarImagen('escudos/'+info.escudo),
+    cargarImagen('escudos/LIGA.png'),
+    ...partidos.map(p=>{ const i=matchRivalInfo(p.rival); return cargarImagen(i ? 'escudos/'+i.escudo : null); }),
+  ]);
+  const canvas = document.createElement('canvas');
+  canvas.width = W*SCALE; canvas.height = H*SCALE;
+  const ctx = canvas.getContext('2d');
+  ctx.scale(SCALE, SCALE);
+  ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high';
+  ctx.fillStyle = BG; ctx.fillRect(0, 0, W, H);
+  ctx.textBaseline = 'top';
+  const fit = (t, maxW) => { if(ctx.measureText(t).width<=maxW) return t; while(t.length>3 && ctx.measureText(t+'…').width>maxW) t=t.slice(0,-1); return t+'…'; };
+  const f1 = n => (Math.round(n*100)/100).toFixed(2).replace('.',',');
+
+  if(escudoLiga) ctx.drawImage(escudoLiga, W-pad-75, pad-12, 75, 75);
+  ctx.font="15px 'Barlow', sans-serif"; ctx.fillStyle=TXT2;
+  ctx.fillText(`ANÁLISIS DE RIVAL   ·   ${prox.rival}   ·   ${catLabelPlaca(cat)}`, pad, pad+5);
+  if(escudoRival) ctx.drawImage(escudoRival, pad, pad+36, 52, 52);
+  ctx.font="700 46px 'Barlow Condensed', sans-serif"; ctx.fillStyle=WHITE;
+  ctx.fillText(`${info.lpf} · últimos partidos`, pad+66, pad+34);
+  ctx.font="17px 'Barlow', sans-serif"; ctx.fillStyle=TXT2;
+  ctx.fillText(`Datos de Sofascore  ·  en xG y tiros: número grande = ${info.lpf}, número chico = rival`, pad+66, pad+90);
+
+  // Columnas
+  const X = {fecha:pad+16, rival:pad+96, res:470, sis:575, pos:690, xg:900, tiros:1050};
+  let y = 168;
+  ctx.fillStyle=RED; ctx.fillRect(pad, y, W-2*pad, 40);
+  ctx.font="700 13px 'Barlow', sans-serif"; ctx.fillStyle=WHITE;
+  try{ ctx.letterSpacing='1px'; }catch(e){}
+  [['FECHA',X.fecha],['RIVAL',X.rival],['RESULTADO',X.res],['SISTEMA',X.sis],['POSESIÓN',X.pos],['xG',X.xg],['TIROS (AL ARCO)',X.tiros]]
+    .forEach(([t,x])=>ctx.fillText(t, x, y+13));
+  try{ ctx.letterSpacing='0px'; }catch(e){}
+  y += 40;
+
+  const rh = Math.min(70, Math.floor(330/partidos.length));
+  partidos.forEach((p,i)=>{
+    ctx.fillStyle = i%2 ? SURF2 : SURF; ctx.fillRect(pad, y, W-2*pad, rh);
+    const cy = y + rh/2;
+    ctx.textBaseline='middle';
+    ctx.font="700 22px 'Barlow Condensed', sans-serif"; ctx.fillStyle=WHITE;
+    ctx.fillText(`F${p.fecha}`, X.fecha, cy-8);
+    ctx.font="12px 'Barlow', sans-serif"; ctx.fillStyle=MUTED;
+    ctx.fillText(p.cond==='L' ? 'LOCAL' : 'VISITANTE', X.fecha, cy+12);
+    let tx = X.rival;
+    if(escudos[i]){ ctx.drawImage(escudos[i], tx, cy-17, 34, 34); tx += 44; }
+    ctx.font="700 18px 'Barlow', sans-serif"; ctx.fillStyle=TXT;
+    ctx.fillText(fit(nombreRivalPlaca(p.rival), X.res-tx-16), tx, cy);
+    const r = resultadoLabel(p.gf, p.gc);
+    ctxRoundRect(ctx, X.res, cy-16, 86, 32, 6); ctx.fillStyle=r.color; ctx.fill();
+    ctx.font="700 18px 'Barlow Condensed', sans-serif"; ctx.fillStyle='#0a0a0a'; ctx.textAlign='center';
+    ctx.fillText(`${p.gf>p.gc?'G':p.gf<p.gc?'P':'E'}  ${p.gf}-${p.gc}`, X.res+43, cy+1); ctx.textAlign='left';
+    ctx.font="700 24px 'Barlow Condensed', sans-serif"; ctx.fillStyle=GOLD;
+    ctx.fillText(p.sistema ? p.sistema+(p.sinStats?' *':'') : '—', X.sis, cy);
+    if(p.sinStats){
+      ctx.font="italic 15px 'Barlow', sans-serif"; ctx.fillStyle=MUTED;
+      ctx.fillText('Sin estadísticas en Sofascore', X.pos, cy);
+    }else{
+      const bw=140;
+      ctxRoundRect(ctx, X.pos, cy-7, bw, 14, 7); ctx.fillStyle='#24345c'; ctx.fill();
+      ctxRoundRect(ctx, X.pos, cy-7, Math.max(14, bw*p.posesion/100), 14, 7); ctx.fillStyle=BLUE; ctx.fill();
+      ctx.font="700 18px 'Barlow Condensed', sans-serif"; ctx.fillStyle=WHITE;
+      ctx.fillText(`${p.posesion}%`, X.pos+bw+10, cy);
+      ctx.font="700 22px 'Barlow Condensed', sans-serif"; ctx.fillStyle = p.xg>p.xgRival ? WIN : p.xg<p.xgRival ? LOSS : WHITE;
+      const xgTxt=f1(p.xg); ctx.fillText(xgTxt, X.xg, cy);
+      const w1=ctx.measureText(xgTxt).width;
+      ctx.font="18px 'Barlow Condensed', sans-serif"; ctx.fillStyle=TXT2;
+      ctx.fillText(`  ·  ${f1(p.xgRival)}`, X.xg+w1, cy);
+      ctx.font="700 22px 'Barlow Condensed', sans-serif"; ctx.fillStyle=WHITE;
+      const tTxt=`${p.tiros} (${p.tirosArco})`; ctx.fillText(tTxt, X.tiros, cy);
+      const w2=ctx.measureText(tTxt).width;
+      ctx.font="18px 'Barlow Condensed', sans-serif"; ctx.fillStyle=TXT2;
+      ctx.fillText(`  ·  ${p.tirosRival} (${p.tirosArcoRival})`, X.tiros+w2, cy);
+    }
+    ctx.textBaseline='top';
+    y += rh;
+  });
+
+  // Resumen
+  const con = partidos.filter(p=>!p.sinStats);
+  const conteo = {}; partidos.forEach(p=>{ if(p.sistema) conteo[p.sistema]=(conteo[p.sistema]||0)+1; });
+  const [sisTop, sisN] = Object.entries(conteo).sort((a,b)=>b[1]-a[1])[0] || ['—',0];
+  const prom = k => con.length ? con.reduce((a,p)=>a+p[k],0)/con.length : 0;
+  const golesCon = con.reduce((a,p)=>a+p.gf,0), xgCon = con.reduce((a,p)=>a+p.xg,0);
+  const golesRival = con.reduce((a,p)=>a+p.gc,0), xgRivalCon = con.reduce((a,p)=>a+p.xgRival,0);
+  const cajas = [
+    [sisTop, `SISTEMA MÁS USADO (${sisN} DE ${partidos.length})`],
+    [`${Math.round(prom('posesion'))}%`, 'POSESIÓN PROMEDIO'],
+    [`${golesCon} goles`, `CON ${xgCon.toFixed(1).replace('.',',')} DE xG A FAVOR`],
+    [`${golesRival} recibidos`, `CON ${xgRivalCon.toFixed(1).replace('.',',')} DE xG EN CONTRA`],
+  ];
+  y += 22;
+  const gap=12, cw=(W-2*pad-gap*3)/4, ch=82;
+  cajas.forEach((c,i)=>{
+    const cx = pad + i*(cw+gap);
+    ctxRoundRect(ctx, cx, y, cw, ch, 10); ctx.fillStyle=SURF; ctx.fill(); ctx.strokeStyle=BORDER; ctx.lineWidth=1; ctx.stroke();
+    ctx.textAlign='center';
+    ctx.font="700 32px 'Barlow Condensed', sans-serif"; ctx.fillStyle = i===0 ? GOLD : WHITE;
+    ctx.fillText(c[0], cx+cw/2, y+12);
+    ctx.font="12px 'Barlow', sans-serif"; ctx.fillStyle=MUTED;
+    ctx.fillText(fit(c[1], cw-16), cx+cw/2, y+54);
+    ctx.textAlign='left';
+  });
+  y += ch + 14;
+  ctx.font="13px 'Barlow', sans-serif"; ctx.fillStyle=MUTED;
+  ctx.fillText(fit('Fuente: Sofascore.' + (nota ? ' ' + nota : ''), W-2*pad), pad, Math.min(y, H-30));
+  return new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
 }
 
 // Lee fecha+sliders del panel "post partido" de una categoría. Se usa tanto
