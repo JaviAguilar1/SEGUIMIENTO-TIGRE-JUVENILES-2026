@@ -1034,6 +1034,9 @@ let recordatoriosOmitidos = {};
 // mismo criterio que recordatoriosOmitidos, para no tener que agregar una
 // excepción a mano en el código cada vez que aparece un caso así.
 let golesMismatchOmitidos = {};
+// Suspendidos del rival confirmados a mano (prensa/AFA) por cuando statfutbol todavia
+// no publico las tarjetas: {dataCat:{fecha, suspendidos:[{nombre,motivo,fuente}]}}.
+let rivalAlertasManual = {};
 // correccionesNombres[cat][nombreCrudo] = "Apellido, Nombre" -- corrección manual
 // para mostrar (ver formatNombreMostrar), nunca toca el dato crudo de origen
 // (Catapult, futdetail, etc). Se carga desde Confiabilidad, para nombres que
@@ -2069,6 +2072,7 @@ function hidratarStats(p){
   if(p.aliasJugadoresComet) aliasJugadoresComet = p.aliasJugadoresComet;
   if(p.recordatoriosOmitidos) recordatoriosOmitidos = p.recordatoriosOmitidos;
   if(p.golesMismatchOmitidos) golesMismatchOmitidos = p.golesMismatchOmitidos;
+  rivalAlertasManual = p.rivalAlertasManual || {};
   if(p.gpsMetricCfg) gpsMetricCfg = p.gpsMetricCfg;
   if(p.gpsPosOverride) gpsPosOverride = p.gpsPosOverride;
   if(p.correccionesNombres) correccionesNombres = p.correccionesNombres;
@@ -3992,7 +3996,7 @@ function renderStatsSingle(cat, content){
   // para 4TA-9NA (ver calcular_alerta_rival_reserva en scrape_tablas.py),
   // acá como un bloque simple en vez de la placa/panel completo de
   // "Análisis de Rival" (eso queda para más adelante si hace falta).
-  const reservaAlerta = isReserva ? (TABLA_DATA?.rival_alertas?.[dataCat] || null) : null;
+  const reservaAlerta = isReserva ? (alertaRival(dataCat) || null) : null;
   const reservaAlertaHTML = reservaAlerta ? `
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-bottom:14px">
       <div style="background:var(--surface2);border:1px solid var(--border2);border-radius:10px;padding:14px 16px">
@@ -4197,7 +4201,7 @@ async function renderRivalStatsDetalle(dataCat, cat){
     : (RIVAL_INFO[prox.rival] ? filaTablaLPF(cat, RIVAL_INFO[prox.rival].lpf) : null);
   const cantUltimos = rivalStatsCantUltimos[dataCat] || 10;
   const ultimos = isReserva ? ultimosPartidosRivalReserva(dataCat, prox.rival, null, cantUltimos) : ultimosPartidosRival(cat, prox.rival, null, cantUltimos);
-  const alerta = TABLA_DATA.rival_alertas && TABLA_DATA.rival_alertas[dataCat];
+  const alerta = alertaRival(dataCat);
 
   let html = `<div style="font-family:'Barlow Condensed',sans-serif">
     <div style="margin-bottom:16px">
@@ -9771,6 +9775,17 @@ function rivalBonito(nombre){
 // Nombre del rival para las placas: mismo estilo que ya usan 4TA-9NA
 // (clave de RIVAL_INFO, ej. "VÉLEZ SARSFIELD"); si es crudo de statfutbol
 // ("VELEZ", "ALDOSIVI (MDP)") se lo lleva a esa misma clave.
+// rival_alertas del scraper + los suspendidos confirmados a mano para la MISMA
+// fecha (si statfutbol todavia no publico las tarjetas). Con un dato manual ya
+// no se muestra "sin confirmar".
+function alertaRival(dataCat){
+  const base = TABLA_DATA && TABLA_DATA.rival_alertas && TABLA_DATA.rival_alertas[dataCat];
+  const man = rivalAlertasManual && rivalAlertasManual[dataCat];
+  if(!base || !man || man.fecha!==base.fecha || !(man.suspendidos||[]).length) return base;
+  const yaEstan = new Set((base.amarillas_riesgo||[]).map(a=>normNombreOrdenIndependiente(a.nombre)));
+  const extra = man.suspendidos.filter(a=>!yaEstan.has(normNombreOrdenIndependiente(a.nombre)));
+  return {...base, amarillas_riesgo:[...(base.amarillas_riesgo||[]), ...extra], sintesis_pendiente:false};
+}
 function nombreRivalPlaca(n){
   return NOMBRE_POR_LPF[n] || NOMBRE_POR_LPF[matchRivalInfo(n)?.lpf] || n;
 }
@@ -9935,7 +9950,7 @@ async function construirParamsPlacaStats(cat){
   const ultimos = isReserva ? ultimosPartidosRivalReserva(dataCat, prox.rival, modoInfo.condicion, modoInfo.cant, reciente?.fecha)
     : ultimosPartidosRival(cat, prox.rival, modoInfo.condicion, modoInfo.cant, reciente?.fecha);
   const num = (id, def) => parseInt(document.getElementById(id+cat)?.value ?? def) || def;
-  const alerta = TABLA_DATA.rival_alertas && TABLA_DATA.rival_alertas[dataCat];
+  const alerta = alertaRival(dataCat);
   return {cat, prox, info, ultimos, ultimosLabel: modoInfo.label, reciente, filaRival, filaTigre, alerta,
     incluirGoleador: chk('placa-stats-incluir-goleador-'+cat),
     incluirAmarillas: chk('placa-stats-incluir-amarillas-'+cat),
@@ -9997,7 +10012,7 @@ async function generarEstadisticasRival(cat, compartir){
     const escalaLiga = num('placa-stats-escala-liga-', 100)/100;
     const offsetXLiga = num('placa-stats-x-liga-', 0);
     const offsetYLiga = num('placa-stats-y-liga-', 0);
-    const alerta = TABLA_DATA.rival_alertas && TABLA_DATA.rival_alertas[dataCat];
+    const alerta = alertaRival(dataCat);
     const incluirGoleador = chk('placa-stats-incluir-goleador-'+cat);
     const incluirAmarillas = chk('placa-stats-incluir-amarillas-'+cat);
     const blob = await dibujarTarjetaRival({cat, prox, info, ultimos, ultimosLabel: modoInfo.label, reciente, filaRival, filaTigre, alerta, incluirGoleador, incluirAmarillas, escalaLiga, offsetXLiga, offsetYLiga});
@@ -10679,7 +10694,7 @@ async function paramsPlacaAnalisisReserva(cat){
   return {cat, prox, info, filaRival, filaTigre,
     est: estadisticasRivalReserva(dataCat, prox.rival, prox.condRival),
     previo: enfrentamientoPrevioReserva(dataCat, prox.rival),
-    alerta: TABLA_DATA.rival_alertas && TABLA_DATA.rival_alertas[dataCat],
+    alerta: alertaRival(dataCat),
     hora: (document.getElementById('placa-analisis-hora-'+cat)?.value || '').trim(),
     susp: (document.getElementById('placa-analisis-susp-'+cat)?.value || '').trim()};
 }
