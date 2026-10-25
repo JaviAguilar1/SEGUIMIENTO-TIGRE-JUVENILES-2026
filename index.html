@@ -9758,7 +9758,9 @@ function rivalBonito(nombre){
 function matchRivalInfo(nombreCrudo){
   if(!nombreCrudo) return null;
   if(RIVAL_INFO[nombreCrudo]) return RIVAL_INFO[nombreCrudo];
-  const n = normNombreOrdenIndependiente(nombreCrudo);
+  // "RACING CLUB" (statfutbol) == "Racing": "club" no distingue a ningún rival.
+  const sinClub = s => s.split(' ').filter(w=>w!=='club').join(' ');
+  const n = sinClub(normNombreOrdenIndependiente(nombreCrudo));
   const exacto = Object.values(RIVAL_INFO).find(v=>normNombreOrdenIndependiente(v.sabadogol)===n);
   if(exacto) return exacto;
   // Reserva trae nombres que no matchean exacto contra ninguno de los tres
@@ -9773,7 +9775,7 @@ function matchRivalInfo(nombreCrudo){
   // arriesgar algún falso positivo a cambio de cubrir más rivales reales sin
   // mantener un alias a mano por cada uno (confirmado con datos reales,
   // Javi 2026-09-23).
-  const nSinParen = normNombreOrdenIndependiente(nombreCrudo.replace(/\([^)]*\)/g,''));
+  const nSinParen = sinClub(normNombreOrdenIndependiente(nombreCrudo.replace(/\([^)]*\)/g,'')));
   let mejorScore=0, mejores=[];
   Object.values(RIVAL_INFO).forEach(v=>{
     const candidatos = [normNombreOrdenIndependiente(v.sabadogol), normNombreOrdenIndependiente(v.lpf)];
@@ -9792,10 +9794,11 @@ function matchRivalInfo(nombreCrudo){
 // próximo partido dentro del fixture completo de la zona.
 function mismoEquipoReserva(a, b){
   if(!a || !b) return false;
-  const na = normNombreOrdenIndependiente(a), nb = normNombreOrdenIndependiente(b);
+  const sinClub = s => s.split(' ').filter(w=>w!=='club').join(' ');
+  const na = sinClub(normNombreOrdenIndependiente(a)), nb = sinClub(normNombreOrdenIndependiente(b));
   if(na===nb) return true;
-  const naSinP = normNombreOrdenIndependiente(a.replace(/\([^)]*\)/g,''));
-  const nbSinP = normNombreOrdenIndependiente(b.replace(/\([^)]*\)/g,''));
+  const naSinP = sinClub(normNombreOrdenIndependiente(a.replace(/\([^)]*\)/g,'')));
+  const nbSinP = sinClub(normNombreOrdenIndependiente(b.replace(/\([^)]*\)/g,'')));
   const score = Math.max(lcsRatioStr(na,nb), lcsRatioStr(naSinP,nb), lcsRatioStr(na,nbSinP), lcsRatioStr(naSinP,nbSinP));
   return score >= 0.72;
 }
