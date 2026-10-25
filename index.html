@@ -8166,7 +8166,7 @@ function renderGoleadores(cat){
   wrap.innerHTML=`<div class="goleadores-grid">
     <div class="goleadores-card">
       <div class="gc-header">
-        <h3>⚽ GOLEADORES ${cat}</h3>
+        <h3>⚽ GOLEADORES ${cat==='RESERVA_S2'?'RESERVA (2° SEM.)':cat==='RESERVA'?'RESERVA (1° SEM.)':cat}</h3>
         <span style="font-family:Bebas Neue,sans-serif;font-size:20px;color:rgba(255,255,255,0.7)" title="Goles a favor">${sorted.reduce((t,g)=>t+g.goals,0)}</span>
       </div>
       <div class="gc-body">${rowsHTML}</div>
