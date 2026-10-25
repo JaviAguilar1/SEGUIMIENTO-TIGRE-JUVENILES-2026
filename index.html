@@ -4228,7 +4228,7 @@ async function renderRivalStatsDetalle(dataCat, cat){
   const filasUltimos = (ultimos && ultimos.length) ? ultimos.slice().reverse().map(u=>{
     const r = resultadoLabel(u.gf, u.gc);
     return `<div style="display:flex;justify-content:space-between;padding:6px 0;font-size:15px">
-      <span>F${u.fecha} vs ${esc(u.rivalDe)} <span style="color:var(--muted);font-size:12px">· ${u.cond==='L'?'LOCAL':'VISIT.'}</span></span>
+      <span>F${u.fecha} vs ${esc(rivalBonito(u.rivalDe))} <span style="color:var(--muted);font-size:12px">· ${u.cond==='L'?'LOCAL':'VISIT.'}</span></span>
       <span style="color:${r.color};font-weight:700">${u.gf}-${u.gc} ${r.texto}</span>
     </div>`;
   }).join('') : `<div style="color:var(--muted);font-size:14px;padding:4px 0">Sin partidos registrados todavía.</div>`;
@@ -9755,9 +9755,25 @@ function rivalBonito(nombre){
   const info = matchRivalInfo(nombre);
   return info ? info.lpf : nombre;
 }
+// Nombre del rival para las placas: mismo estilo que ya usan 4TA-9NA
+// (clave de RIVAL_INFO, ej. "VÉLEZ SARSFIELD"); si es crudo de statfutbol
+// ("VELEZ", "ALDOSIVI (MDP)") se lo lleva a esa misma clave.
+function nombreRivalPlaca(n){
+  return NOMBRE_POR_LPF[n] || NOMBRE_POR_LPF[matchRivalInfo(n)?.lpf] || n;
+}
+// Nombres de statfutbol que el match por parecido resolvía mal o no resolvía
+// (ej. "ESTUDIANTES (RIO CUARTO - CORDOBA)" caía en Estudiantes LP, "GIMNASIA
+// Y ESGRIMA (LP)" en Gimnasia Mendoza, "CENTRAL" no daba nada).
+const ALIAS_RIVAL_RESERVA = {
+  'CENTRAL':'ROSARIO CENTRAL', 'NEWELLS OLD BOYS':'NEWELLS', 'FERROCARRIL OESTE':'FERRO',
+  'ESTUDIANTES (RC)':'ESTUDIANTES RC', 'ESTUDIANTES (RIO CUARTO - CORDOBA)':'ESTUDIANTES RC',
+  'GIMNASIA Y ESGRIMA (LP)':'GIMNASIA LP', 'GIMNASIA Y ESGRIMA (MENDOZA)':'GIMNASIA MENDOZA',
+};
 function matchRivalInfo(nombreCrudo){
   if(!nombreCrudo) return null;
   if(RIVAL_INFO[nombreCrudo]) return RIVAL_INFO[nombreCrudo];
+  const alias = ALIAS_RIVAL_RESERVA[nombreCrudo.trim().toUpperCase()];
+  if(alias) return RIVAL_INFO[alias];
   // "RACING CLUB" (statfutbol) == "Racing": "club" no distingue a ningún rival.
   const sinClub = s => s.split(' ').filter(w=>w!=='club').join(' ');
   const n = sinClub(normNombreOrdenIndependiente(nombreCrudo));
@@ -9797,6 +9813,10 @@ function mismoEquipoReserva(a, b){
   const sinClub = s => s.split(' ').filter(w=>w!=='club').join(' ');
   const na = sinClub(normNombreOrdenIndependiente(a)), nb = sinClub(normNombreOrdenIndependiente(b));
   if(na===nb) return true;
+  // Si los dos se resuelven a un club conocido, manda eso (evita confundir
+  // "ESTUDIANTES (RC)" con "ESTUDIANTES (LP)" por parecido de texto).
+  const ia = matchRivalInfo(a), ib = matchRivalInfo(b);
+  if(ia && ib) return ia===ib;
   const naSinP = sinClub(normNombreOrdenIndependiente(a.replace(/\([^)]*\)/g,'')));
   const nbSinP = sinClub(normNombreOrdenIndependiente(b.replace(/\([^)]*\)/g,'')));
   const score = Math.max(lcsRatioStr(na,nb), lcsRatioStr(naSinP,nb), lcsRatioStr(na,nbSinP), lcsRatioStr(naSinP,nbSinP));
@@ -10119,7 +10139,7 @@ async function dibujarTarjetaRival({cat, prox, info, ultimos, ultimosLabel, reci
     // Un rival con nombre largo podía correrse encima del resultado, que
     // se dibuja en una posición fija (leftX+colW-170) -- se trunca con "…"
     // si no entra en el espacio disponible antes de esa marca.
-    const filaLabelFull=`Fecha ${p.fecha} vs ${NOMBRE_POR_LPF[p.rivalDe]||p.rivalDe} · ${p.cond==='L'?'LOCAL':'VISIT.'}`;
+    const filaLabelFull=`Fecha ${p.fecha} vs ${nombreRivalPlaca(p.rivalDe)} · ${p.cond==='L'?'LOCAL':'VISIT.'}`;
     const filaLabelMaxW=(leftX+colW-170-10)-tx;
     let filaLabel=filaLabelFull;
     if(ctx.measureText(filaLabelFull).width > filaLabelMaxW){
@@ -10150,7 +10170,7 @@ async function dibujarTarjetaRival({cat, prox, info, ultimos, ultimosLabel, reci
     let tx=rightX+18;
     if(escudoReciente){ ctx.drawImage(escudoReciente, tx, cy-2, 26, 26); tx+=34; }
     ctx.font="15px 'Barlow', sans-serif"; ctx.fillStyle=TXT2;
-    ctx.fillText('vs '+(NOMBRE_POR_LPF[reciente.rivalDe]||reciente.rivalDe), tx, cy+5);
+    ctx.fillText('vs '+nombreRivalPlaca(reciente.rivalDe), tx, cy+5);
     cy+=42;
     ctx.font="700 36px 'Barlow Condensed', sans-serif"; ctx.fillStyle=WHITE;
     ctx.fillText(`${reciente.gf} - ${reciente.gc}`, rightX+18, cy);
