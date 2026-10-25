@@ -2859,7 +2859,9 @@ function calcConfiabilidad(){
   // fecha gana. statfutbol se muestra aparte, solo como referencia externa
   // (no participa de la prioridad, no dispara el aviso por sí solo).
   const partidoMismatches=[]; // {cat, fecha, mio, verdad, fuenteVerdad, sf, rival}
-  CONFIABILIDAD_CATS.forEach(cat=>{
+  // Resultado por resultado se revisa en las 6 juveniles (no solo las 3 con
+  // COMET): en 7MA y 9NA hubo resultados cargados en 0-0 que nadie vio.
+  GENERAL_CATS.forEach(cat=>{
     const fixtureLiga=(TABLA_DATA&&TABLA_DATA.fixture&&TABLA_DATA.fixture[cat])||{};
     const fixtureFut=(TABLA_DATA&&TABLA_DATA.fixture_futdetail&&TABLA_DATA.fixture_futdetail[cat])||{};
     const sfResultados=(TABLA_DATA&&TABLA_DATA.statfutbol_resultados&&TABLA_DATA.statfutbol_resultados[cat])||{};
