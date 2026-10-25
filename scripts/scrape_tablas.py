@@ -2911,10 +2911,10 @@ def fetch_statfutbol_plantel(catnum, team_id):
 def fetch_statfutbol_sintesis_tarjetas(sintesis_url, id_partido, team_id_objetivo, equipos):
     """Devuelve {nombre: {'amarilla': bool, 'roja': bool}} para los
     jugadores del equipo team_id_objetivo en ese partido puntual. Devuelve
-    {} (sin marcar error) si la sintesis todavia no esta publicada del lado
-    de statfutbol -- pasa seguido con el partido mas reciente, la tabla
-    viene vacia (sin nombre de equipo ni jugadores), no es un cambio de
-    formato.
+    None si la sintesis todavia no esta publicada del lado de statfutbol --
+    pasa seguido con el partido mas reciente, la tabla viene vacia (sin
+    nombre de equipo ni jugadores), no es un cambio de formato -- y {} si
+    esta publicada pero ese equipo no tuvo tarjetas.
 
     sintesis_url es la URL completa (antes era "catnum" y se armaba aca
     mismo "sintesispartido{catnum}2026.php" -- se movio a parametro para
@@ -2926,7 +2926,7 @@ def fetch_statfutbol_sintesis_tarjetas(sintesis_url, id_partido, team_id_objetiv
     idx = html.find('<th class="encabezado-equipo"')
     idx2 = html.find("</table>", idx)
     if idx < 0 or idx2 < 0:
-        return {}
+        return None
     bloque = html[idx:idx2]
     # "1 gol" (singular) vs "2 goles" (plural) -- statfutbol usa las dos. El
     # nombre del equipo puede traer su propio parentesis (ej. "GODOY CRUZ
@@ -2936,7 +2936,7 @@ def fetch_statfutbol_sintesis_tarjetas(sintesis_url, id_partido, team_id_objetiv
     nombres_equipo = re.findall(r'encabezado-equipo">.*?;(.+?)\s*\(\d+ gol(?:es)?\)\s*</th>', bloque)
     tds = re.findall(r'<td class="jugadores-equipo"[^>]*>(.*?)</td>', bloque, re.DOTALL)
     if len(nombres_equipo) != 2 or len(tds) != 2:
-        return {}
+        return None
     lado = None
     for i, ne in enumerate(nombres_equipo):
         m = statfutbol_match_equipo(ne, equipos)
@@ -3010,7 +3010,7 @@ def fetch_statfutbol_sintesis_completa(sintesis_url, id_partido, team_id_objetiv
 AMARILLAS_SUSPENSION = 5
 
 
-def calcular_riesgo_suspension(sintesis_url, team_id, team_nombre, equipos, fixture):
+def calcular_riesgo_suspension(sintesis_url, team_id, team_nombre, equipos, fixture, estado=None):
     """Recorre TODOS los partidos jugados por team_id en la temporada, en
     orden cronologico, y arma el conteo VIGENTE de amarillas por jugador --
     no el acumulado bruto, sino el que queda despues de reiniciar en cero
@@ -3042,6 +3042,11 @@ def calcular_riesgo_suspension(sintesis_url, team_id, team_nombre, equipos, fixt
         try:
             eventos = fetch_statfutbol_sintesis_tarjetas(sintesis_url, p["id_partido"], team_id, equipos)
         except Exception:  # noqa -- un partido puntual con la pagina rota no debe tirar abajo toda la temporada
+            eventos = None
+        if eventos is None:
+            # sintesis sin publicar: no se sabe si hubo tarjetas, no es lo mismo que "no hubo"
+            if es_ultimo and estado is not None:
+                estado["sintesis_pendiente"] = True
             eventos = {}
         for nombre, ev in eventos.items():
             if ev["amarilla"]:
@@ -3092,14 +3097,16 @@ def calcular_alerta_rival(cat, catnum):
         raise ValueError(f"Plantel vacio para {team_nombre!r}")
     goleador = max(plantel, key=lambda j: j["gol"])
 
+    estado_riesgo = {}
     riesgo = calcular_riesgo_suspension(f"{STATFUTBOL_BASE}sintesispartido{catnum}2026.php",
-                                         team_id, team_nombre, equipos, fixture)
+                                         team_id, team_nombre, equipos, fixture, estado_riesgo)
 
     return {
         "fecha": proximo["jornada"],
         "rival": team_nombre,
         "goleador": {"nombre": goleador["nombre"], "goles": goleador["gol"]} if goleador["gol"] > 0 else None,
         "amarillas_riesgo": riesgo,
+        "sintesis_pendiente": bool(estado_riesgo.get("sintesis_pendiente")),
     }
 
 
@@ -3353,13 +3360,15 @@ def calcular_alerta_rival_reserva(torneo_cfg):
         raise ValueError(f"Plantel vacio para {team_nombre!r} (Reserva)")
     goleador = max(plantel, key=lambda j: j["gol"])
 
-    riesgo = calcular_riesgo_suspension(STATFUTBOL_BASE + torneo_cfg["sintesis"], team_id, team_nombre, equipos, fixture)
+    estado_riesgo = {}
+    riesgo = calcular_riesgo_suspension(STATFUTBOL_BASE + torneo_cfg["sintesis"], team_id, team_nombre, equipos, fixture, estado_riesgo)
 
     return {
         "fecha": proximo["jornada"],
         "rival": team_nombre,
         "goleador": {"nombre": goleador["nombre"], "goles": goleador["gol"]} if goleador["gol"] > 0 else None,
         "amarillas_riesgo": riesgo,
+        "sintesis_pendiente": bool(estado_riesgo.get("sintesis_pendiente")),
     }
 
 

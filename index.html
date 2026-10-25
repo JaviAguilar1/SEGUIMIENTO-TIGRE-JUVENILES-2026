@@ -4007,7 +4007,9 @@ function renderStatsSingle(cat, content){
         <div style="font-size:12px;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;margin-bottom:6px">🟨 5ta amarilla / expulsión</div>
         ${reservaAlerta.amarillas_riesgo?.length
           ? `<div style="font-size:14px;color:var(--draw)">${reservaAlerta.amarillas_riesgo.map(a=>esc(a.nombre)+' ('+(a.motivo==='roja'?'Roja':a.amarillas)+')').join('<br>')}</div>`
-          : `<div style="font-size:14px;color:var(--win)">Ningún jugador llegó a la 5ta amarilla ni fue expulsado en el partido previo.</div>`}
+          : (reservaAlerta.sintesis_pendiente
+            ? `<div style="font-size:14px;color:var(--draw)">Sin confirmar: statfutbol todavía no publicó las tarjetas del último partido del rival.</div>`
+            : `<div style="font-size:14px;color:var(--win)">Ningún jugador llegó a la 5ta amarilla ni fue expulsado en el partido previo.</div>`)}
       </div>
     </div>` : '';
 
@@ -4251,6 +4253,9 @@ async function renderRivalStatsDetalle(dataCat, cat){
     amarillasBg = 'var(--surface2)'; amarillasBorder = 'var(--border2)';
   } else if(alerta.amarillas_riesgo && alerta.amarillas_riesgo.length){
     amarillasHTML = `<div style="font-size:15px;color:var(--draw)">${alerta.amarillas_riesgo.map(a=>esc(a.nombre)+' ('+(a.motivo==='roja'?'Roja':a.amarillas)+')').join('<br>')}</div>`;
+    amarillasBg = 'rgba(245,158,11,0.12)'; amarillasBorder = 'rgba(245,158,11,0.45)';
+  } else if(alerta.sintesis_pendiente){
+    amarillasHTML = `<div style="font-size:14px;color:var(--draw)">Sin confirmar: statfutbol todavía no publicó las tarjetas del último partido del rival.</div>`;
     amarillasBg = 'rgba(245,158,11,0.12)'; amarillasBorder = 'rgba(245,158,11,0.45)';
   } else {
     amarillasHTML = `<div style="font-size:15px;color:var(--win)">Ningún jugador llegó a la 5ta amarilla ni fue expulsado en el partido previo.</div>`;
@@ -10240,6 +10245,9 @@ async function dibujarTarjetaRival({cat, prox, info, ultimos, ultimosLabel, reci
           ctx.fillText(a.nombre.split(',')[0]+' ('+(a.motivo==='roja'?'Roja':a.amarillas)+')', ex, cy);
           cy+=16;
         });
+      } else if(alerta.sintesis_pendiente){
+        ctx.font="11px 'Barlow', sans-serif"; ctx.fillStyle=DRAW;
+        ctx.fillText('Sin confirmar (tarjetas sin publicar).', ex, cy);
       } else {
         ctx.font="11px 'Barlow', sans-serif"; ctx.fillStyle=WIN;
         ctx.fillText('Sin jugadores suspendidos.', ex, cy);
@@ -10670,7 +10678,8 @@ async function paramsPlacaAnalisisReserva(cat){
     est: estadisticasRivalReserva(dataCat, prox.rival, prox.condRival),
     previo: enfrentamientoPrevioReserva(dataCat, prox.rival),
     alerta: TABLA_DATA.rival_alertas && TABLA_DATA.rival_alertas[dataCat],
-    hora: (document.getElementById('placa-analisis-hora-'+cat)?.value || '').trim()};
+    hora: (document.getElementById('placa-analisis-hora-'+cat)?.value || '').trim(),
+    susp: (document.getElementById('placa-analisis-susp-'+cat)?.value || '').trim()};
 }
 function actualizarPlacaAnalisisPreview(cat){
   actualizarPlacaPreviewGenerica('analisis-'+cat, `placa-analisis-preview-${cat}`, ()=>paramsPlacaAnalisisReserva(cat), dibujarPlacaAnalisisReserva);
@@ -10685,17 +10694,21 @@ async function renderPlacaAnalisisReservaBlock(cat){
   const el = document.getElementById(`placa-analisis-block-${cat}`);
   if(!el) return;
   el.innerHTML = placaRotuloHTML('🖼️ ANÁLISIS COMPLETO DEL RIVAL') + bloquePlacaConPreview(`
-    <div style="font-size:10px;color:var(--muted);letter-spacing:1px;margin-bottom:4px">HORARIO (opcional, ej. 15:00)</div>
-    <input id="placa-analisis-hora-${cat}" type="text" maxlength="8" placeholder="15:00" oninput="actualizarPlacaAnalisisPreview('${cat}')"
+    <div style="font-size:10px;color:var(--muted);letter-spacing:1px;margin-bottom:4px">HORA DEL PARTIDO (cambiala si no es esa; vacío = no se muestra)</div>
+    <input id="placa-analisis-hora-${cat}" type="text" maxlength="8" value="15:00" oninput="actualizarPlacaAnalisisPreview('${cat}')"
       style="background:var(--surface2);border:1px solid var(--border2);color:var(--text);border-radius:6px;padding:8px 10px;
       font-family:'Barlow Condensed',sans-serif;font-size:14px;outline:none;width:90px;margin-bottom:10px">
+    <div style="font-size:10px;color:var(--muted);letter-spacing:1px;margin-bottom:4px">SUSPENDIDOS DEL RIVAL (a mano, opcional; ej. Pérez, Gómez)</div>
+    <input id="placa-analisis-susp-${cat}" type="text" maxlength="60" placeholder="si lo dejás vacío, usa lo de statfutbol" oninput="actualizarPlacaAnalisisPreview('${cat}')"
+      style="background:var(--surface2);border:1px solid var(--border2);color:var(--text);border-radius:6px;padding:8px 10px;
+      font-family:'Barlow Condensed',sans-serif;font-size:14px;outline:none;width:100%;max-width:280px;margin-bottom:10px">
     <div style="display:flex;gap:8px;margin-top:6px">
       <button onclick="generarPlacaAnalisisReserva('${cat}')" style="${PLACA_BTN_STYLE}">⬇ ANÁLISIS DEL RIVAL</button>
       ${botonCompartirPlacaHTML(`generarPlacaAnalisisReserva('${cat}', true)`)}
     </div>`, `placa-analisis-preview-${cat}`);
   actualizarPlacaAnalisisPreview(cat);
 }
-async function dibujarPlacaAnalisisReserva({cat, prox, info, filaRival, filaTigre, est, previo, alerta, hora, scale}){
+async function dibujarPlacaAnalisisReserva({cat, prox, info, filaRival, filaTigre, est, previo, alerta, hora, susp, scale}){
   if(document.fonts && document.fonts.ready) await document.fonts.ready;
   const BG='#111e38', SURF='#0d1528', SURF2='#0a0f1e', RED='#c0152a', GOLD='#f0c040', TXT='#d8e4ff', TXT2='#a8c0e8',
         MUTED='#8aa0cc', WIN='#22c55e', DRAW='#f59e0b', LOSS='#ef4444', BORDER='#3a5090', WHITE='#ffffff';
@@ -10830,15 +10843,17 @@ async function dibujarPlacaAnalisisReserva({cat, prox, info, filaRival, filaTigr
     y+=50+12;
   }
 
-  if(alerta){
+  if(alerta || susp){
+    alerta = alerta || {};
     rotulo('GOLEADOR Y SUSPENDIDOS', rx, y); y+=32;
     ctxRoundRect(ctx, rx, y, rw, 50, 8); ctx.fillStyle=SURF; ctx.fill(); ctx.strokeStyle=BORDER; ctx.stroke();
     ctx.font="700 18px 'Barlow Condensed', sans-serif"; ctx.fillStyle=TXT;
     const g = alerta.goleador ? `${alerta.goleador.nombre.split(',')[0]} · ${alerta.goleador.goles} goles` : 'Sin goleador';
     ctx.fillText(g, rx+16, y+15);
-    const sus = (alerta.amarillas_riesgo||[]).map(s=>s.nombre.split(',')[0]);
-    ctx.textAlign='right'; ctx.fillStyle = sus.length ? LOSS : WIN;
-    ctx.fillText(fit(sus.length ? 'Suspendidos: '+sus.join(', ') : 'Sin suspendidos', rw/2-20), rx+rw-16, y+15);
+    const sus = susp ? [susp] : (alerta.amarillas_riesgo||[]).map(s=>s.nombre.split(',')[0]);
+    const sinConfirmar = !sus.length && alerta.sintesis_pendiente;
+    ctx.textAlign='right'; ctx.fillStyle = sus.length ? LOSS : sinConfirmar ? DRAW : WIN;
+    ctx.fillText(fit(sus.length ? 'Suspendidos: '+sus.join(', ') : sinConfirmar ? 'Suspendidos: sin confirmar' : 'Sin suspendidos', rw/2-20), rx+rw-16, y+15);
     ctx.textAlign='left';
   }
   return new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
