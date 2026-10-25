@@ -12064,7 +12064,10 @@ function amarillasEnAlerta(cat){
   // dos fuentes. Un jugador que no esté en el plantel actual no entra (no va a
   // sumar más amarillas y no afecta al equipo hoy) -- mismo criterio de antes.
   const sfPartidos = (TABLA_DATA && TABLA_DATA.statfutbol_partidos && TABLA_DATA.statfutbol_partidos[cat]) || {};
-  const rosterNombres = (plantelFutdetail[cat]||[]).map(p=>p.nombre);
+  // Reserva no tiene plantel de futdetail: sin este respaldo (los nombres de
+  // statfutbol_jugadores) ningún jugador entraba y la alerta nunca saltaba.
+  let rosterNombres = (plantelFutdetail[cat]||[]).map(p=>p.nombre);
+  if(!rosterNombres.length) rosterNombres = ((TABLA_DATA && TABLA_DATA.statfutbol_jugadores && TABLA_DATA.statfutbol_jugadores[cat]) || []).map(j=>j.nombre);
   const palabras = n=>new Set(normNombreOrdenIndependiente(n).split(' ').filter(Boolean));
   const canon = n=>{ const a=palabras(n||''); const m=rosterNombres.filter(r=>{ const b=palabras(r); const [ch,gr]=a.size<=b.size?[a,b]:[b,a]; return ch.size && [...ch].every(w=>gr.has(w)); }); return m.length===1?m[0]:null; };
   const nombreDe = (id, nombre)=> (id ? plantelNombreDeId(cat, id) : null) || canon(nombre);
