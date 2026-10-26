@@ -1236,6 +1236,10 @@ const VIEW_SCOPES = {
   ea_menores: ['7MA','8VA','9NA'],
 };
 function categoriasPropias(){
+  // 4ta y Reserva trabajan como un solo grupo (desde 2026-10-26): el DT/PF/AC
+  // de cualquiera de las dos ve las dos categorías + la solapa RES+4TA.
+  if(currentRole==='cat_4TA') return ['4TA','RESERVA','RES4TA'];
+  if(currentRole==='cat_RESERVA') return ['RESERVA','4TA','RES4TA'];
   if(currentRole && currentRole.startsWith('cat_')) return [currentRole.replace('cat_','').toUpperCase()];
   if(Object.prototype.hasOwnProperty.call(VIEW_SCOPES, currentRole)) return VIEW_SCOPES[currentRole];
   return null; // sin restricción (admin/director/coordinador/videoanalista_*)
@@ -2495,8 +2499,8 @@ function renderTablaDataStatus(){
 
 // Desplegable único para elegir GENERAL o una categoría dentro de ESTADÍSTICAS
 function buildStatsCatSelect(){
-  const opts=['GENERAL',...CATEGORIES].map(cat=>
-    `<option value="${cat}">${cat==='GENERAL'?'⬡ GENERAL':cat}</option>`).join('');
+  const opts=['GENERAL',...CATEGORIES,'RES4TA'].map(cat=>
+    `<option value="${cat}">${cat==='GENERAL'?'⬡ GENERAL':cat==='RES4TA'?'🤝 RES+4TA':cat}</option>`).join('');
   document.getElementById('stats-subtabs').innerHTML=`
     <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
       <select id="stats-cat-select" style="background:var(--surface2);border:1px solid var(--border2);
@@ -2517,7 +2521,7 @@ function buildStatsCatSelect(){
     </div>`;
   document.getElementById('stats-cat-select').addEventListener('change',e=>{
     const cat=e.target.value;
-    if(cat!=='GENERAL') currentCategoria=cat;
+    if(cat!=='GENERAL' && cat!=='RES4TA') currentCategoria=cat;
     renderStatsCat(cat);
   });
   wireBuscadorGlobalJugador();
@@ -2627,7 +2631,9 @@ function updatePdfExportButton(cat){
   const btnStyle=`background:rgba(192,21,42,0.2);border:1px solid var(--border2);color:var(--gold2);
     border-radius:6px;padding:8px 14px;font-family:'Barlow Condensed',sans-serif;font-size:13px;
     letter-spacing:1px;font-weight:700;cursor:pointer;white-space:nowrap`;
-  if(cat==='GENERAL'){
+  if(cat==='RES4TA'){
+    wrap.innerHTML='';
+  } else if(cat==='GENERAL'){
     wrap.innerHTML=`<button onclick="abrirExportGeneral()" style="${btnStyle}">⬇ EXPORTAR GENERAL</button>`;
   } else {
     wrap.innerHTML=`<button onclick="abrirExportCategoria('${cat}')" style="${btnStyle}">⬇ EXPORTAR PDF</button>`;
@@ -2709,6 +2715,7 @@ function renderStatsCat(cat){
   updatePdfExportButton(cat);
   updateCitUploadButton(cat);
   if(cat==='GENERAL') renderStatsGeneral(content);
+  else if(cat==='RES4TA') renderStatsRes4ta(content);
   else renderStatsSingle(cat, content);
 }
 
@@ -2785,6 +2792,188 @@ function renderStatsGeneral(content){
     if(topWrap) renderTopGoleadores(topWrap);
   }
   renderTablaGeneral('gen-tabla-general');
+}
+
+// ============================================================
+//  RES+4TA (2026-10-26): 4ta y Reserva trabajan como un solo grupo. Vista
+//  aparte (no toca las categorías ni sus tablas): calendario unificado +
+//  estadística de citaciones por jugador. Período: desde el 2° semestre de
+//  Reserva (el 1° no tiene citaciones), igual para las dos divisiones.
+//  "Jugó" y minutos solo existen en 4TA (COMET); en Reserva hay citado/titular.
+// ============================================================
+const RES4TA_DESDE = '2026-07-16';
+let res4taFiltro = 'todos';            // todos | ambas | solo4 | soloR
+let res4taOrden = {k:'tot', dir:-1};
+
+function res4taIso(dataCat, f){
+  if(dataCat==='RESERVA_S2') return TABLA_DATA?.fixture_reserva?.RESERVA_S2?.[f]?.fecha_iso || null;
+  const c = FECHA_CALENDARIO[f];
+  return c ? `2026-${String(c.mes+1).padStart(2,'0')}-${String(c.dia).padStart(2,'0')}` : null;
+}
+function res4taPartidos(){
+  const out=[];
+  const arma=(dataCat, div, lista)=>lista.forEach(r=>{
+    const iso=res4taIso(dataCat, r.f);
+    if(!iso || iso<RES4TA_DESDE) return;
+    const cit=matchData[dataCat]?.[r.f];
+    const nCit=cit ? (cit.titulares||[]).length+(cit.suplentes||[]).length : 0;
+    out.push({div, dataCat, f:r.f, iso, nCit,
+      rival: dataCat==='RESERVA_S2' ? rivalBonito(rivalDeFechaReserva(dataCat, r.f)) : r.r,
+      cond: condicionCat(dataCat, r.f), res: results[dataCat]?.[r.f] || null});
+  });
+  arma('4TA','4TA',RIVALS);
+  arma('RESERVA_S2','RES',RIVALS_RESERVA_S2);
+  out.sort((a,b)=>a.iso<b.iso?-1:a.iso>b.iso?1:(a.div<b.div?-1:1));
+  return out;
+}
+function res4taJugadores(){
+  const jug={};
+  const vacio=()=>({cit:0,tit:0,jugo:0,min:0});
+  // Misma persona aunque el nombre venga en otro orden o con segundo
+  // apellido de más (mismo criterio de subconjunto de palabras que el resto).
+  const claveDe=nombre=>{
+    const key=normNombreOrdenIndependiente(nombre);
+    if(jug[key]) return key;
+    const w=key.split(' ');
+    if(w.length>=2){
+      for(const k of Object.keys(jug)){
+        const kw=k.split(' ');
+        if(kw.length>=2 && (w.every(x=>kw.includes(x)) || kw.every(x=>w.includes(x)))) return k;
+      }
+    }
+    return key;
+  };
+  [['4TA','4TA'],['RESERVA_S2','RES']].forEach(([dataCat, div])=>{
+    Object.entries(matchData[dataCat]||{}).forEach(([fs,d])=>{
+      if(!d) return; // huecos null de Firebase
+      const f=parseInt(fs,10);
+      const iso=res4taIso(dataCat, f);
+      if(!iso || iso<RES4TA_DESDE) return;
+      const partido=(partidos[dataCat]||{})[f];
+      const cuenta=(p, esTit)=>{
+        if(!p || !p.nombre) return;
+        const key=claveDe(p.nombre);
+        const j=jug[key] || (jug[key]={nombres:{}, '4TA':vacio(), RES:vacio()});
+        if(!j.nombres[div]) j.nombres[div]=p.nombre;
+        const s=j[div];
+        s.cit++; if(esTit) s.tit++;
+        if(partido && p.id!=null){
+          const t=(partido.titulares||[]).find(x=>x.id===p.id);
+          const sp=(partido.suplentes||[]).find(x=>x.id===p.id);
+          if(t){ s.jugo++; s.min += t.minutoSalida!=null ? t.minutoSalida : 90; }
+          else if(sp && sp.minutoEntrada!=null){ s.jugo++; s.min += 90-sp.minutoEntrada; }
+        }
+      };
+      (d.titulares||[]).forEach(p=>cuenta(p,true));
+      (d.suplentes||[]).forEach(p=>cuenta(p,false));
+    });
+  });
+  return Object.values(jug).map(j=>{
+    const a=j['4TA'], r=j.RES;
+    const cond = a.cit&&r.cit ? 'ambas' : a.cit ? 'solo4' : 'soloR';
+    const catPerfil = a.cit ? '4TA' : 'RESERVA';
+    const nom = j.nombres['4TA'] || j.nombres.RES;
+    return {nombreRaw:nom, nombre:formatNombreMostrar(nom, a.cit?'4TA':'RESERVA_S2'), catPerfil, cond, a, r,
+      tot:a.cit+r.cit, ttot:a.tit+r.tit};
+  });
+}
+function res4taSet(k, v){
+  if(k==='filtro') res4taFiltro=v;
+  else if(res4taOrden.k===v) res4taOrden.dir*=-1;
+  else res4taOrden={k:v, dir:v==='nombre'?1:-1};
+  renderStatsCat('RES4TA');
+}
+function renderStatsRes4ta(content){
+  // abiertas la primera vez (el resto de la app arranca todo colapsado)
+  ['res4ta-cal','res4ta-jug'].forEach(s=>{ if(seccionColapsada[s]===undefined) seccionColapsada[s]=false; });
+  const partidosL=res4taPartidos();
+  const jugs=res4taJugadores();
+  const cuenta=c=>jugs.filter(j=>j.cond===c).length;
+  const hoy=new Date().toISOString().slice(0,10);
+  const proximo=partidosL.find(p=>!p.res && p.iso>=hoy);
+
+  const tarjeta=(n, txt, color)=>`<div style="flex:1;min-width:110px;background:var(--surface2);border:1px solid var(--border2);border-radius:8px;padding:10px 12px;text-align:center">
+    <div style="font-family:'Bebas Neue',sans-serif;font-size:28px;color:${color}">${n}</div>
+    <div style="font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:1px;color:var(--muted)">${txt}</div></div>`;
+
+  const filasCal=partidosL.map(p=>{
+    const [y,m,d]=p.iso.split('-');
+    const dia=new Date(+y,+m-1,+d).toLocaleDateString('es-AR',{weekday:'short'});
+    const res=p.res;
+    const x=res?getResult(res[0],res[1]):null;
+    const col=x==='W'?'var(--win)':x==='D'?'var(--draw)':x==='L'?'var(--loss)':'var(--muted)';
+    const colDiv=p.div==='4TA'?CAT_COLORS['4TA']:CAT_COLORS['RESERVA'];
+    const resta=p===proximo?'background:rgba(201,162,39,0.12)':'';
+    return `<tr style="${resta}">
+      <td style="white-space:nowrap">${esc(dia)} ${+d}/${+m}</td>
+      <td><span style="color:${colDiv};font-weight:700">${p.div}</span> <span style="color:var(--muted);font-size:11px">F${p.f}</span></td>
+      <td style="text-align:left">${esc(p.rival||'—')}</td>
+      <td>${p.cond||'—'}</td>
+      <td style="color:${col};font-weight:700">${res?`${res[0]} - ${res[1]}`:'—'}</td>
+      <td>${p.nCit?`<button type="button" onclick="abrirCitacionView('${p.dataCat}',${p.f})" title="Ver citación"
+        style="background:none;border:none;cursor:pointer;color:var(--gold2);font-size:12px;font-family:'Barlow Condensed',sans-serif">📋 ${p.nCit}</button>`:'<span style="color:var(--muted)">—</span>'}</td>
+    </tr>`;
+  }).join('');
+
+  const filtroBtn=(v, txt)=>`<button type="button" onclick="res4taSet('filtro','${v}')"
+    style="padding:6px 12px;border-radius:6px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:700;letter-spacing:1px;font-size:12px;
+    border:1px solid ${res4taFiltro===v?'var(--gold)':'var(--border2)'};
+    background:${res4taFiltro===v?'rgba(201,162,39,0.18)':'transparent'};color:${res4taFiltro===v?'var(--gold2)':'var(--muted)'}">${txt}</button>`;
+
+  const {k, dir}=res4taOrden;
+  const valor=j=>({nombre:j.nombre.toLowerCase(), cond:j.cond, c4:j.a.cit, t4:j.a.tit, j4:j.a.jugo, m4:j.a.min,
+    cr:j.r.cit, tr:j.r.tit, tot:j.tot, ttot:j.ttot})[k];
+  const lista=jugs.filter(j=>res4taFiltro==='todos'||j.cond===res4taFiltro)
+    .sort((p,q)=>{ const a=valor(p), b=valor(q); return (a<b?-1:a>b?1:0)*dir || q.tot-p.tot || p.nombre.localeCompare(q.nombre); });
+  const etiqueta={ambas:['4TA + RES','var(--gold2)'], solo4:['Solo 4TA',CAT_COLORS['4TA']], soloR:['Solo RES',CAT_COLORS['RESERVA']]};
+  const th=(kk, txt, extra)=>`<th onclick="res4taSet('orden','${kk}')" style="cursor:pointer;white-space:nowrap;${extra||''}">${txt}${k===kk?(dir<0?' ▼':' ▲'):''}</th>`;
+  const celda=v=>v?v:'<span style="color:var(--muted)">·</span>';
+  const filasJug=lista.map((j,i)=>{
+    const [lbl,c]=etiqueta[j.cond];
+    const nomAttr=esc(j.nombreRaw).replace(/'/g,"\\'");
+    return `<tr>
+      <td style="color:var(--muted)">${i+1}</td>
+      <td style="text-align:left"><a href="#" onclick="irAJugadorGlobal('${j.catPerfil}','${nomAttr}');return false" style="color:var(--text);text-decoration:none">${esc(j.nombre)}</a></td>
+      <td style="color:${c};font-weight:700;white-space:nowrap">${lbl}</td>
+      <td>${celda(j.a.cit)}</td><td>${celda(j.a.tit)}</td><td>${j.a.cit?celda(j.a.jugo):''}</td><td>${j.a.cit&&j.a.min?j.a.min+"'":''}</td>
+      <td>${celda(j.r.cit)}</td><td>${celda(j.r.tit)}</td>
+      <td style="color:var(--gold2);font-weight:700">${j.tot}</td><td>${j.ttot}</td>
+    </tr>`;
+  }).join('');
+
+  content.innerHTML=`
+    <div class="st"><div class="stbar"></div>🤝 RESERVA + 4TA — GRUPO ÚNICO</div>
+    <div style="font-family:'Barlow Condensed',sans-serif;font-size:12px;color:var(--muted);margin:0 12px 10px">
+      Desde el 16/7 (2° semestre de Reserva). Se cuenta por citación (titulares + suplentes); "Jugó" y minutos salen de COMET, que solo existe en 4TA.</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin:0 12px 14px">
+      ${tarjeta(jugs.length,'JUGADORES CITADOS','var(--text)')}
+      ${tarjeta(cuenta('ambas'),'EN LAS DOS','var(--gold2)')}
+      ${tarjeta(cuenta('solo4'),'SOLO 4TA',CAT_COLORS['4TA'])}
+      ${tarjeta(cuenta('soloR'),'SOLO RESERVA',CAT_COLORS['RESERVA'])}
+    </div>
+
+    ${seccionTitulo('res4ta-cal', '📅 CALENDARIO UNIFICADO')}
+    <div id="sec-res4ta-cal"${seccionEstiloInicial('res4ta-cal')}>
+      <div class="table-wrap"><table style="font-size:12px;text-align:center">
+        <thead><tr><th>Fecha</th><th>Div.</th><th style="text-align:left">Rival</th><th>L/V</th><th>Res.</th><th>Citados</th></tr></thead>
+        <tbody>${filasCal||'<tr><td colspan="6" style="color:var(--muted)">Sin partidos</td></tr>'}</tbody></table></div>
+    </div>
+
+    ${seccionTitulo('res4ta-jug', '👥 CITACIONES POR JUGADOR')}
+    <div id="sec-res4ta-jug"${seccionEstiloInicial('res4ta-jug')}>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin:0 12px 10px">
+        ${filtroBtn('todos','TODOS ('+jugs.length+')')}${filtroBtn('ambas','EN LAS DOS ('+cuenta('ambas')+')')}
+        ${filtroBtn('solo4','SOLO 4TA ('+cuenta('solo4')+')')}${filtroBtn('soloR','SOLO RESERVA ('+cuenta('soloR')+')')}
+      </div>
+      <div class="table-wrap"><table style="font-size:12px;text-align:center">
+        <thead><tr>
+          <th>#</th>${th('nombre','Jugador','text-align:left')}${th('cond','Dónde jugó')}
+          ${th('c4','4TA Cit.')}${th('t4','Tit.')}${th('j4','Jugó')}${th('m4','Min.')}
+          ${th('cr','RES Cit.')}${th('tr','Tit.')}
+          ${th('tot','TOTAL Cit.')}${th('ttot','Tit.')}
+        </tr></thead>
+        <tbody>${filasJug||'<tr><td colspan="11" style="color:var(--muted)">Sin jugadores</td></tr>'}</tbody></table></div>
+    </div>`;
 }
 
 // Suma la tabla de posiciones LPF de 4TA a 9NA por equipo, en una sola tabla combinada.
