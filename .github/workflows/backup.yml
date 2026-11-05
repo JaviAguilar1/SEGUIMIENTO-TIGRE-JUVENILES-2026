@@ -1,10 +1,9 @@
 name: Backup diario de Firebase
 
-# Corre solo, sin intervencion manual.
+# El cron automatico se desactivo el 2026-11-05 a pedido de Javi: no queda
+# ninguna automatizacion de este proyecto corriendo sola. El workflow queda
+# solo para forzar un backup a mano ("Run workflow").
 on:
-  schedule:
-    # Una vez por dia, 6am UTC (3am Argentina) -- horario de poco uso.
-    - cron: "0 6 * * *"
   workflow_dispatch: {}   # boton "Run workflow" por si queres forzar un backup
 
 permissions:
